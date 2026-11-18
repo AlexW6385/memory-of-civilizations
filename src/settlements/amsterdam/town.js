@@ -1,15 +1,35 @@
 // The canal houses (docs/settlements/amsterdam.md §5); the life of the Dam (§5.6): greengrocers' stalls, the
 // porters at the Weigh House among the bales and casks, the fishwives at their benches, the carters walking
 // beside their horses and sledges, burghers in conversation, boats at the Damrak's head.
-import { RADIUS, GROUND, WATER, WAAG, DAMRAK, VOC, lots } from './layout.js';
+import { RADIUS, GROUND, WATER, WAAG, DAMRAK, VOC, HALL, lots } from './layout.js';
 import { SLEDGES, BOATS } from './plan.js';
+import { profile, routes } from '../../styles/dutch/upper.js';
 export const ARRIVAL = [20, -210];
 const base = (id, elements) => ({ id, style: 'dutch', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' } });
 /** Is this lot built open (a furnished ground floor you can walk into)? The Dam's south row, and one house in four near the Dam (one in three beyond 190 m); of the warehouses (spout gables) one in two. */
 export const isOpen = (l) => (l.front === 'n' && l.rect[1] === -203) || l.seed % (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 230) < 190 ? 4 : 3) === 0;
+/**
+ * The open houses whose upper floors are open too (docs §5.20): the eleven nearest the arrival that the stair fits in
+ * (the Dam's south row, but not the lot at the Town Hall's corner, whose stoop lies in the hall's 2 m gap and is blocked by its plinth, then the houses round the Damrak and the first canal rows) — merchants', an inn, craftsmen's, lodgings,
+ * counting houses and warehouses.
+ */
+let UPPER = null;
+export function upperSet() {
+  if (!UPPER) {
+    const dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVAL[0], (l.rect[1] + l.rect[3]) / 2 - ARRIVAL[1]);
+    UPPER = new Set(lots().filter((l) => isOpen(l) && profile(l).ok && !(l.rect[0] <= HALL[2] + 0.5 && l.rect[1] - HALL[3] < 3)).sort((a, b) => dist(a) - dist(b)).slice(0, 11));
+  }
+  return UPPER;
+}
+/** The walk check's routes: from the street up to the first floor's back chamber, and on up to the attic and its loft (y0: the street). */
+export function upperWalks() {
+  const out = [];
+  for (const l of upperSet()) { const r = routes(l); if (r) for (const q of [r.first, r.top]) out.push(Object.assign(q, { y0: GROUND })); }
+  return out;
+}
 export async function houses() {
-  const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: isOpen(l) }))));
+  const all = lots(), plans = [], up = upperSet();
+  for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: isOpen(l), upper: up.has(l) }))));
   plans.push(...houseLights());
   return plans;
 }

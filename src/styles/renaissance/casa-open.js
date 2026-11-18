@@ -12,7 +12,7 @@ const CLOTHS = ['cloth_red', 'cloth_blue', 'cloth_green', 'cloth_ochre', 'cloth_
 /** The door's place along a front of length L. */
 export const doorAt = (L) => L / 2;
 
-export function openGround(bag, col, el, { wall, y, gh, f, rand, foot, stairs = false }) {
+export function openGround(bag, col, el, { wall, y, gh, f, rand, foot, stairs = false, upper = false }) {
   const [x0, z0, x1, z1] = el.rect, T = 0.4, fy = y + 0.15, along = f === 'n' || f === 's';
   const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0, du = doorAt(L), dw = 1.4, top = y + gh;
   // a frame: u along the front (0…L), v in from the front (0…D)
@@ -34,7 +34,7 @@ export function openGround(bag, col, el, { wall, y, gh, f, rand, foot, stairs = 
   // walls: back and sides whole, the front either side of the door and over it; the stone's own colour inside
   B(wall, 0, D - T, L, D, foot - 0.6, top, true); B(wall, 0, T, T, D - T, foot - 0.6, top, true); B(wall, L - T, T, L, D - T, foot - 0.6, top, true);
   B(wall, 0, 0, du - dw / 2, T, foot - 0.6, top, true); B(wall, du + dw / 2, 0, L, T, foot - 0.6, top, true); B(wall, du - dw / 2, 0, du + dw / 2, T, y + 2.4, top);
-  col.rect(el.rect, top, top + 0.4);
+  if (!upper) col.rect(el.rect, top, top + 0.4);
   // the step, the floor, the plastered ceiling on its beams
   B('limestone_yellow', du - 0.9, -0.5, du + 0.9, 0.02, fy - 0.12, fy + 0.02);
   { const a = P(du - 0.9, -0.5), b = P(du + 0.9, 0); col.floor([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], fy + 0.02); }
@@ -45,7 +45,7 @@ export function openGround(bag, col, el, { wall, y, gh, f, rand, foot, stairs = 
     B('plaster_white', T, sv1, L - T, D - T, top - 0.05, top - 0.02); B('plaster_white', su1, T, L - T, sv1, top - 0.05, top - 0.02);
     for (let v = T + 0.5; v < D - T; v += 0.85) B(W, v > sv0 - 0.1 && v < sv1 + 0.1 ? su1 : T, v - 0.08, L - T, v + 0.08, top - 0.26, top - 0.05);
     for (let k = 0; k < N; k++) { const hh = (k + 1) * (gh - 0.05) / N; B(TM, T, sv0 + k * 0.25, su1, sv0 + (k + 1) * 0.25, fy, fy + hh); const a = P(T, sv0 + k * 0.25), b = P(su1, sv0 + (k + 1) * 0.25); col.floor([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], fy + hh); }
-    B(W, su1, sv0, su1 + 0.05, sv1, fy + 0.9, fy + 1.0);
+    if (!upper) B(W, su1, sv0, su1 + 0.05, sv1, fy + 0.9, fy + 1.0);
   } else {
     B('plaster_white', T, T, L - T, D - T, top - 0.05, top - 0.02);
     for (let v = T + 0.5; v < D - T; v += 0.85) B(W, T, v - 0.08, L - T, v + 0.08, top - 0.26, top - 0.05);
@@ -123,11 +123,11 @@ export function openGround(bag, col, el, { wall, y, gh, f, rand, foot, stairs = 
     B('hide_brown', fu - 1.9, fv - 0.3, fu - 1.1, fv + 0.3, fy + 0.9, fy + 1.3); B(IR, fu - 1.1, fv - 0.04, fu - 0.9, fv + 0.04, fy + 1.0, fy + 1.06);
     B(TM, L * 0.3 - 0.3, D * 0.4 - 0.3, L * 0.3 + 0.3, D * 0.4 + 0.3, fy, fy + 0.6, true); B(IR, L * 0.3 - 0.4, D * 0.4 - 0.12, L * 0.3 + 0.4, D * 0.4 + 0.12, fy + 0.6, fy + 0.78);
     for (let k = 0; k < 6; k++) B(IR, ub + 0.4 + k * 0.4, D - T - 0.06, ub + 0.43 + k * 0.4, D - T, fy + 1.0 + (k % 2) * 0.2, fy + 1.9);
-    barrel(L * 0.5, T + 0.6, 0.35);
+    barrel(L * 0.74, T + 0.6, 0.35);
   } else if (use === 'goldsmith') {
     // the workbench under the window, a small furnace, a strongbox, a showcase of cups
-    B(W, L * 0.25, T + 0.2, L * 0.75, T + 0.9, fy + 0.85, fy + 0.92, true); for (const u of [L * 0.25 + 0.1, L * 0.75 - 0.1]) B(W, u - 0.05, T + 0.25, u + 0.05, T + 0.85, fy, fy + 0.85);
-    for (let k = 0; k < 4; k++) h('gilt_bronze', L * 0.3 + k * 0.3, T + 0.55, 0.05, 0.1, 0.92);
+    B(W, L * 0.25, T + 1.2, L * 0.75, T + 1.9, fy + 0.85, fy + 0.92, true); for (const u of [L * 0.25 + 0.1, L * 0.75 - 0.1]) B(W, u - 0.05, T + 1.25, u + 0.05, T + 1.85, fy, fy + 0.85);
+    for (let k = 0; k < 4; k++) h('gilt_bronze', L * 0.3 + k * 0.3, T + 1.55, 0.05, 0.1, 0.92);
     B('brick', L - T - 1.0, D - T - 0.9, L - T - 0.1, D - T - 0.1, fy, fy + 0.8, true); B('brick', L - T - 0.8, D - T - 0.7, L - T - 0.3, D - T - 0.3, fy + 0.8, fy + 1.4);
     B(IR, ub, D - T - 0.7, ub + 0.9, D - T - 0.1, fy, fy + 0.6, true); B(IR, ub - 0.02, D - T - 0.72, ub + 0.92, D - T - 0.6, fy + 0.6, fy + 0.66);
     counter(L * 0.3, L * 0.7, D * 0.5); for (let k = 0; k < 5; k++) h('gilt_bronze', L * 0.3 + 0.3 + k * 0.25, D * 0.5, 0.06, 0.16, 1.05); B('cloth_red', L * 0.3, D * 0.5 - 0.3, L * 0.7, D * 0.5 + 0.3, fy + 1.05, fy + 1.06);

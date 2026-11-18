@@ -12,6 +12,7 @@ import { canalInterior } from './interior.js';
 import { frontDress } from './dress.js';
 import { wallHoles } from './reveal.js';
 import { volute, urn, obelisk, jit } from './gables.js';
+import { profile, upperFloors, cutOut } from './upper.js';
 
 const ST = 'sandstone_dressed';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -131,7 +132,7 @@ export function canalHouse(el, { bag, col }) {
   // annex (aanbouw) in a yard behind the main block, with the privy in the yard's other corner (docs §5.1)
   const rb = rng((el.seed || 1) * 7 + 13), annex = !warehouse && D >= 11 && rb() < 0.55, Dm = annex ? D - 3.4 : D;
   const main = ((r, k) => ({ s: [r[0], r[1] + k, r[2], r[3]], n: [r[0], r[1], r[2], r[3] - k], e: [r[0] + k, r[1], r[2], r[3]], w: [r[0], r[1], r[2] - k, r[3]] })[f])(el.rect, D - Dm);
-  const open = !!el.open, hallWins = [];
+  const open = !!el.open, hallWins = [], prof = open && el.upper ? profile(el) : null, upperOn = !!prof?.ok, upHoles = [];
   const use = warehouse ? 'store' : ((q) => q < 0.45 ? 'zaal' : q < 0.75 ? 'kitchen' : 'office')(rng((el.seed || 1) * 19 + 7)());
   if (!open) col.rect(main, y - 0.6, y + H);
   A(ST, -0.02, w + 0.02, base - 0.16, base, 0, 0.06);                            // the water table over the basement
@@ -183,7 +184,13 @@ export function canalHouse(el, { bag, col }) {
   for (let i = 0; i < bays; i++) {
     const u = (i + 0.5) * bw;
     if (warehouse && i === Math.floor(bays / 2)) {
-      for (let k = open ? 1 : 0; k < n; k++) { const v0 = k ? floors[k] + 0.25 : 0.2, hh = k ? st - 0.6 : g + base - 0.6; A(ST, u - 0.75, u + 0.75, v0 + hh, v0 + hh + 0.2, 0, 0.05); for (const s of [-1, 1]) { A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, Math.min(u, u + s * 0.68), Math.max(u, u + s * 0.68), v0, v0 + hh, 0, 0.06); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.3, v0 + hh * 0.3 + 0.05, 0.06, 0.08); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.75, v0 + hh * 0.75 + 0.05, 0.06, 0.08); } A('wood_dark', u - 0.02, u + 0.02, v0, v0 + hh, 0.06, 0.08); }
+      for (let k = open ? 1 : 0; k < n; k++) { const v0 = k ? floors[k] + 0.25 : 0.2, hh = k ? st - 0.6 : g + base - 0.6; A(ST, u - 0.75, u + 0.75, v0 + hh, v0 + hh + 0.2, 0, 0.05);
+        if (upperOn && k) {                                                              // a floor of the store: the loading door cut through the wall, its leaves folded back on it, the iron bar across
+          upHoles.push({ u0: u - 0.7, u1: u + 0.7, v0, v1: v0 + hh });
+          for (const s of [-1, 1]) { const a = u + s * 0.75, c = u + s * 1.4; A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, Math.min(a, c), Math.max(a, c), v0, v0 + hh, 0, 0.05); A('wood_dark', Math.min(a, c), Math.max(a, c), v0 + hh * 0.3, v0 + hh * 0.3 + 0.07, 0.05, 0.065); A('wood_dark', Math.min(a, c), Math.max(a, c), v0 + hh * 0.75, v0 + hh * 0.75 + 0.07, 0.05, 0.065);
+            A('iron', u + s * 0.66 - 0.025, u + s * 0.66 + 0.025, v0, v0 + 0.95, -0.28, -0.22); }
+          A('iron', u - 0.68, u + 0.68, v0 + 0.9, v0 + 0.95, -0.28, -0.22); continue; }
+        for (const s of [-1, 1]) { A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, Math.min(u, u + s * 0.68), Math.max(u, u + s * 0.68), v0, v0 + hh, 0, 0.06); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.3, v0 + hh * 0.3 + 0.05, 0.06, 0.08); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.75, v0 + hh * 0.75 + 0.05, 0.06, 0.08); } A('wood_dark', u - 0.02, u + 0.02, v0, v0 + hh, 0.06, 0.08); }
       if (open) { doorU = u; doorLeaf = 'shutter_brown'; A(ST, u - 0.95, u + 0.95, base + 2.45, base + 2.72, 0, 0.1); A(ST, u - 0.78, u - 0.75, base, base + 2.45, 0, 0.06); A(ST, u + 0.75, u + 0.78, base, base + 2.45, 0, 0.06); stoop(u); }
       continue;
     }
@@ -211,12 +218,14 @@ export function canalHouse(el, { bag, col }) {
   for (let s = 1; s < n; s++) for (let i = 0; i < bays; i++) {
     if (warehouse && i === Math.floor(bays / 2)) continue;
     const top = s === n - 1, hh = top ? st - 1.05 : st - 0.85;
-    crossWindow(bag, F, y, (i + 0.5) * bw, floors[s] + 0.5, ww * (warehouse ? 0.8 : 1), hh, { frame, shutter, shut: warehouse ? 'closed' : shutMode(), set: SET });
+    const sm = warehouse ? 'closed' : shutMode(), wwu = ww * (warehouse ? 0.8 : 1);
+    if (upperOn && warehouse) upHoles.push({ u0: (i + 0.5) * bw - wwu / 2, u1: (i + 0.5) * bw + wwu / 2, v0: floors[s] + 0.5, v1: floors[s] + 0.5 + hh });
+    crossWindow(bag, F, y, (i + 0.5) * bw, floors[s] + 0.5, wwu, hh, { frame, shutter, shut: upperOn ? (sm === 'closed' ? 'open' : sm) : sm, set: upperOn && warehouse ? -0.2 : SET, open: upperOn });
   }
   frontDress(bag, F, y, { w, base, bays, bw, door, warehouse, open, seed: el.seed || 1 });
   // the gable stone in the pier of the first floor beside the door's bay (gable stones stood about 4 m up: docs §5.9)
   if (stoneAt >= 0 && n > 1) { const pu = (stoneAt === 0 ? 1 : stoneAt) * bw; gableStone(bag, F, y, pu, floors[1] + 0.5 + (st - 0.85) * 0.62 + 0.14, Math.min(0.56, bw - ww - 0.36), rng((el.seed || 1) * 31 + 3)); }
-  if (open && doorU !== null) canalInterior(bag, col, F, y, { w, Dm, base, g, H, mat, du: doorU, dw: 0.75, dh: 2.45, wins: hallWins, ww, leaf: doorLeaf, use, upper: holes.filter((h) => h.v0 > floors[1]) });
+  if (open && doorU !== null) canalInterior(bag, col, F, y, { w, Dm, base, g, H, mat, du: doorU, dw: 0.75, dh: 2.45, wins: hallWins, ww, leaf: doorLeaf, use, upper: holes.filter((h) => h.v0 > floors[1]), up: upperOn ? { p: prof, floors, st } : null });
   // iron wall anchors at each floor, holding the front to the beams
   for (let s = 1; s < n; s++) for (const u of [0.32, w - 0.32]) { const v = floors[s] - 0.15; A('iron', u - 0.03, u + 0.03, v - 0.32, v + 0.32, 0, 0.04); A('iron', u - 0.16, u + 0.16, v - 0.03, v + 0.03, 0, 0.05); }
 
@@ -225,7 +234,15 @@ export function canalHouse(el, { bag, col }) {
   const roofHw = (v) => eave - (w / 2 - 0.45) * Math.min(1, v / rh);
   const cover = (v) => roofHw(v) + 0.12;
   const G = H;                                                                                           // the gable stands on the eaves line
-  const brick = (pts) => Pz(mat, pts, -0.45, 0), stone = (pts, d1 = 0.06) => Pz(ST, pts, -0.5, d1);
+  // an open house with its upper floors: the hatch and the attic window are cut through the gable's brick (docs §5.20)
+  const gcut = []; let hatchInfo = null, winInfo = null;
+  if (upperOn) {
+    const nk = kind === 'step' ? w / 2 / (w > 7.2 ? 5 : 4) : kind === 'neck' ? w * 0.21 : w * 0.2;
+    const hv = G + gh * (kind === 'spout' ? 0.15 : 0.5), hh = Math.min(1.5, gh * 0.28), hwid = Math.min(0.55, nk - 0.15);
+    hatchInfo = { u0: uc - hwid, u1: uc + hwid, v0: hv, v1: hv + hh }; gcut.push(hatchInfo);
+    if (kind !== 'spout') { const wa = Math.min(1.0, nk * 2 - 0.5 > 0.7 ? 1.0 : 0.8); winInfo = { u0: uc - wa / 2, u1: uc + wa / 2, v0: G + 0.4, v1: G + 0.4 + Math.min(1.7, gh * 0.3) }; gcut.push(winInfo); }
+  }
+  const brick = (pts) => { for (const q of (gcut.length ? cutOut(pts, gcut) : [pts])) Pz(mat, q, -0.45, 0); }, stone = (pts, d1 = 0.06) => Pz(ST, pts, -0.5, d1);
   let crownV = gh, neck = w * 0.2;
   if (kind === 'step') {
     const ns = w > 7.2 ? 5 : 4;
@@ -287,11 +304,14 @@ export function canalHouse(el, { bag, col }) {
     crownV = gh + 0.2;
   }
   // the attic: a window low in the gable, the loading hatch above it, the hoisting beam and its hook at the top
-  if (kind !== 'spout') crossWindow(bag, F, y, uc, G + 0.4, Math.min(1.0, neck * 2 - 0.5 > 0.7 ? 1.0 : 0.8), Math.min(1.7, gh * 0.3), { frame, shutter, shut: 'none' });
+  if (kind !== 'spout') crossWindow(bag, F, y, uc, G + 0.4, Math.min(1.0, neck * 2 - 0.5 > 0.7 ? 1.0 : 0.8), Math.min(1.7, gh * 0.3), { frame, shutter, shut: 'none', open: upperOn, set: upperOn ? -0.2 : 0 });
   { const hv = G + gh * (kind === 'spout' ? 0.15 : 0.5), hh = Math.min(1.5, gh * 0.28), hwid = Math.min(0.55, neck - 0.15); A(ST, uc - hwid - 0.1, uc + hwid + 0.1, hv + hh, hv + hh + 0.16, 0, 0.06);
-    for (const s of [-1, 1]) A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, Math.min(uc, uc + s * hwid), Math.max(uc, uc + s * hwid), hv, hv + hh, 0, 0.06); A('wood_dark', uc - 0.02, uc + 0.02, hv, hv + hh, 0.06, 0.08); }
+    const lf = shutter === 'lacquer_red' ? 'shutter_brown' : shutter;
+    if (upperOn) for (const s of [-1, 1]) A(lf, Math.min(uc + s * hwid, uc + s * hwid * 1.9), Math.max(uc + s * hwid, uc + s * hwid * 1.9), hv, hv + hh, 0, 0.045);      // the hatch stands open, its leaves folded back on the gable
+    else { for (const s of [-1, 1]) A(lf, Math.min(uc, uc + s * hwid), Math.max(uc, uc + s * hwid), hv, hv + hh, 0, 0.06); A('wood_dark', uc - 0.02, uc + 0.02, hv, hv + hh, 0.06, 0.08); } }
   { const bv = G + Math.min(gh - 0.35, crownV - 0.6); A('timber', uc - 0.09, uc + 0.09, bv - 0.18, bv, -0.4, 1.15); A('timber', uc - 0.12, uc + 0.12, bv - 0.24, bv + 0.06, 1.05, 1.2);
     A('iron', uc - 0.015, uc + 0.015, bv - 0.62, bv - 0.24, 1.1, 1.13); bag.add('iron', prism(F, y, ngon(uc, bv - 0.7, 0.08, 6), 1.09, 1.14)); }
+  if (upperOn) upperFloors(bag, col, F, y, { w, Dm, n, st, base, H, floors, mat, left: prof.left, p: prof, seed: el.seed || 1, holes: [...holes.filter((h) => h.v0 > floors[1]), ...upHoles], gable: { kind, gh, rh, hatch: hatchInfo, win: winInfo } });
   // the roof, running back from the gable, and a plain brick gable at the back
   { const [x0, z0, x1, z1] = main, along = f === 'n' || f === 's', wood = rb() < 0.3;
     bag.add('roof_tile', frustum([x0 + 0.2, z0 + 0.2, x1 - 0.2, z1 - 0.2], y + H, y + H + rh, along ? w / 2 - 0.25 : 0, along ? w / 2 - 0.25 : 0, along ? 0 : w / 2 - 0.25, along ? 0 : w / 2 - 0.25));

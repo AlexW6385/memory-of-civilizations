@@ -10,6 +10,7 @@ import { wallHoles } from './reveal.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import { fbox, vprism, sideprism } from './facade.js';
 import { kitchenFit, officeFit, storeFit } from './rooms.js';
+import { groundStair, flights, SA } from './upper.js';
 
 const ST = 'sandstone_dressed', OAK = 'wood_dark', PL = 'plaster_white';
 /** Sutherland–Hodgman: the convex polygon pts ([[u, d]…]) clipped to the box [u0, u1] × [d0, d1]. */
@@ -48,7 +49,9 @@ export function canalInterior(bag, col, F, y, o) {
   const dP = -Math.max(3.4, Math.min(5.8, Dm * 0.47)), pT = 0.15;            // the partition between the hall and the room behind
   // ---- the shell: the basement and the upper floors solid, the party walls, the back wall, the front with its door and windows
   W(mat, 0, w, -0.6, b, -Dm, 0); col.floor((() => { const p = F.at(iu0, dF), q = F.at(iu1, dB); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; })(), y + fl);
-  if (o.upper?.length) {                                                       // the upper floors: the body solid, the front layer cut through at each window (their reveals)
+  const up = o.up ?? null;                                                     // an open house with its upper floors (upper.js builds them)
+  if (up) { /* the walls above are upper.js's */ }
+  else if (o.upper?.length) {                                                  // the upper floors: the body solid, the front layer cut through at each window (their reveals)
     W(mat, 0, w, top, H, -Dm, dF); C(0, w, dF, 0, top, H);
     wallHoles((ua, ub, va, vb) => A(mat, ua, ub, va, vb, dF, 0), 0, w, top, H, o.upper);
   } else W(mat, 0, w, top, H, -Dm, 0);
@@ -82,7 +85,12 @@ export function canalInterior(bag, col, F, y, o) {
   }
   A(ST, du - dw, du + dw, b - 0.06, b + 0.035, dF - lin, 0.02);
 
-  if (use === 'store') { storeFit({ A, C, lat, bag, F, y, b, fl, top, iu0, iu1, lin, dF, dB, du, dw, w }); return; }
+  if (use === 'store') {
+    const hole = up ? (() => { const f = flights(up.p)[0], q = f.strip === 'a' ? SA : [1.17, 2.22]; const us = [sU(q[0]), sU(q[1])].sort((x, z) => x - z); return [us[0], us[1], Math.min(f.dBot, f.dTop), Math.max(f.dBot, f.dTop)]; })() : null;
+    storeFit({ A, C, lat, bag, F, y, b, fl, top, iu0, iu1, lin, dF, dB, du, dw, w, hole });
+    if (up) groundStair(bag, col, F, y, { p: up.p, w, Dm, base: b, H, floors: up.floors, left });
+    return;
+  }
   // ---- the floors: the hall's marble on the diagonal, the room's broad boards; the partition with its door
   const zone = (d0, d1) => [Math.min(d0, d1), Math.max(d0, d1)];
   { const [d0, d1] = zone(dP, dF - lin), a = 0.42, R = Math.SQRT1_2;
@@ -103,11 +111,12 @@ export function canalInterior(bag, col, F, y, o) {
   A(OAK, pdu + pw, pdu + pw + 0.04, fl + 0.01, b + ph - 0.02, dP - pT - 0.03, dP - pT - 0.03 - pw * 2 + 0.06);
 
   // ---- the ceiling: boards on the beams (moerbalken) that span from party wall to party wall; the stairwell open
-  const stairD = [dP + 0.05, dP + 2.9], stairU = [sU(0.025), sU(0.86)];
+  const stairD = up ? [dP + 0.3, dP + 2.9] : [dP + 0.05, dP + 2.9], stairU = up ? [sU(SA[0]), sU(SA[1])] : [sU(0.025), sU(0.86)];
   const boards = (d0, d1) => A('timber', iu0 + lin, iu1 - lin, top - 0.05, top, d0, d1);
   boards(dB + lin, dP - pT); boards(stairD[1], dF - lin);
   if (left) A('timber', stairU[1], iu1 - lin, top - 0.05, top, dP, stairD[1]); else A('timber', iu0 + lin, stairU[1], top - 0.05, top, dP, stairD[1]);
-  A('opening', Math.min(...stairU), Math.max(...stairU), top - 0.04, top - 0.01, dP, stairD[1]);
+  if (up) A('timber', Math.min(...stairU), Math.max(...stairU), top - 0.05, top, dP, stairD[0]);       // (the trap begins where the flight ends)
+  else A('opening', Math.min(...stairU), Math.max(...stairU), top - 0.04, top - 0.01, dP, stairD[1]);
   for (const [d0, d1] of [[dB + lin, dP - pT], [dP, dF - lin]]) {
     const n = Math.max(2, Math.round((d1 - d0) / 1.15));
     for (let k = 0; k < n; k++) { const d = d0 + (k + 0.5) * (d1 - d0) / n; A(OAK, iu0 + lin, iu1 - lin, top - 0.3, top - 0.05, d - 0.11, d + 0.11); }
@@ -153,7 +162,8 @@ export function canalInterior(bag, col, F, y, o) {
   };
 
   // ---- the hall: the stair, the cupboard with its garniture of Delftware, paintings, a wall map, the brass chandelier
-  { const n = 15, rise = (top - fl) / n, [d0, d1] = stairD, run = (d1 - d0) / n, [ua, ub] = [Math.min(...stairU), Math.max(...stairU)];
+  if (up) groundStair(bag, col, F, y, { p: up.p, w, Dm, base: b, H, floors: up.floors, left });
+  else { const n = 15, rise = (top - fl) / n, [d0, d1] = stairD, run = (d1 - d0) / n, [ua, ub] = [Math.min(...stairU), Math.max(...stairU)];
     for (let k = 0; k < n; k++) { const d = d1 - (k + 1) * run; A(OAK, ua + 0.05, ub - 0.05, fl + (k + 1) * rise - 0.04, fl + (k + 1) * rise, d - 0.03, d + run + 0.02); }
     for (const [u0, u1] of [[ua, ua + 0.05], [ub - 0.05, ub]]) bag.add(OAK, sideprism(F, y, [[d1, fl], [d1 + 0.25, fl], [d0 + 0.12, top - 0.05], [d0 - 0.12, top - 0.05]], u0, u1));
     const nu = left ? ub - 0.03 : ua + 0.03;

@@ -5,16 +5,18 @@
 
 import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, lots } from './layout.js';
+import { enterable, upper } from './town.js';
 
 const TILE = 150, NEAR = 220 - 50 * Math.SQRT2 + (TILE / 2) * Math.SQRT2;
 const OFF = 0.7;
 
 export function streetPlans() {
-  const A = ARRIVALS['florence'], by = new Map(), all = lots();
+  const A = ARRIVALS['florence'], by = new Map(), all = lots(), open = enterable(all);
   let n = 0;
   all.forEach((l, i) => {
     const [x0, z0, x1, z1] = l.rect, f = l.front, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     if (Math.hypot(cx - A[0], cz - A[2]) < 22 || (l.seed * 7 + i) % 6 !== 0) return;
+    if (open.has(l) && upper(l)) return;   // (the way to a door that is walked up from is kept clear)
     // the wall's foot at the lot's low end along the street, OFF out into the street
     const horiz = f === 'n' || f === 's', rot = horiz ? 0 : Math.PI / 2;
     const at = f === 's' ? [x0 + 1.1, z1 + OFF] : f === 'n' ? [x0 + 1.1, z0 - OFF] : f === 'e' ? [x1 + OFF, z0 + 1.1] : [x0 - OFF, z0 + 1.1];

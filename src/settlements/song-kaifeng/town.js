@@ -18,6 +18,7 @@ import { interiorElements, interiorLife, furnishedLots } from './interiors.js';
 import { SEDANS, OXCARTS, BARROWS, DRAY } from './doors.js';
 import { doorOf } from './houses.js';
 import { isOuter, outerLife } from './outer.js';
+import { upperOf } from './upper.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [160, -130], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -46,9 +47,10 @@ function scroll() {
     const dr = doorOf(l), doorU = ((dr.at[0] - F.a[0]) * (F.b[0] - F.a[0]) + (dr.at[1] - F.a[1]) * (F.b[1] - F.a[1])) / w;
     S.push({ t: 'caimen', a: F.a, b: F.b, out: F.out, y: 0.04, h: i === 0 ? 8.6 : 7.2 + rand() * 0.8, boxes: i === 0 ? 3 : 1, lamps: i === 0, seed: i, doorU, rect: [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)] });
     // the customers at the door, the host under the gate
-    const mid = [(F.a[0] + F.b[0]) / 2 + F.out[0] * 0.6, (F.a[1] + F.b[1]) / 2 + F.out[1] * 0.6];
+    const n0 = L.length, mid = [(F.a[0] + F.b[0]) / 2 + F.out[0] * 0.6, (F.a[1] + F.b[1]) / 2 + F.out[1] * 0.6];
     person(mid, 0, faceTo(F.out), { pose: 'talk', dress: 'robe', cloth: 'cloth_white', hat: 'cap' });
     if (rand() < 0.8) person([mid[0] + F.out[0] * 1.3 + F.out[1] * 0.6, mid[1] + F.out[1] * 1.3 + F.out[0] * 0.6], 0, faceTo([-F.out[0], -F.out[1]]), { pose: 'stand' });
+    if (upperOf(l)) L.length = n0;     // (an opened house keeps its door lane clear)
   });
   // ---- the upper balconies: on the two-storey shops near the bridge a man or woman stands or leans at the rail, looking at the street (the scroll shows the balconies full of onlookers)
   for (const l of lots()) {
@@ -57,13 +59,14 @@ function scroll() {
     if (d > 280) continue;
     const [x0, z0, x1, z1] = l.foot, f = l.front, Ln = (f === 'n' || f === 's') ? x1 - x0 : z1 - z0;
     if (Ln < 4.2) continue;
-    const r2 = rng(l.seed * 7 + 3), n = (r2() < (d < 160 ? 0.85 : 0.5) ? 1 : 0) + (Ln > 7 && r2() < 0.5 ? 1 : 0);
+    const n0 = L.length, r2 = rng(l.seed * 7 + 3), n = (r2() < (d < 160 ? 0.85 : 0.5) ? 1 : 0) + (Ln > 7 && r2() < 0.5 ? 1 : 0);
     const yF = 0.28 + (l.kind === 'wine' ? 3.5 : 3.25) + 0.04;
     for (let k = 0; k < n; k++) {
       const t = 0.9 + r2() * (Ln - 1.8), o = 0.28, at = f === 's' ? [x0 + t, z1 + o] : f === 'n' ? [x1 - t, z0 - o] : f === 'e' ? [x1 + o, z0 + t] : [x0 - o, z1 - t];
       const out = FR[f], ang = (r2() - 0.5) * 0.9, dir = [out[0] * Math.cos(ang) - out[1] * Math.sin(ang), out[0] * Math.sin(ang) + out[1] * Math.cos(ang)];
       person(at, yF, faceTo(dir), { pose: r2() < 0.5 ? 'talk' : 'stand', dress: 'robe', hat: r2() < 0.5 ? 'none' : 'cap' });
     }
+    if (upperOf(l)) L.length = n0;     // (an opened balcony stays free to step onto)
   }
   // ---- the bridge's approaches: hawkers' stalls along the river edge of the two bank streets (the scroll's market at the bridgehead), a vendor behind each, customers before
   {
@@ -368,7 +371,7 @@ export async function town() {
     groups.get(k).push(l);
   }
   const furnished = furnishedLots();
-  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, groupOuter(all.slice(i, i + 120).map((l) => (isOuter(l) ? { t: 'kf_outer', y: 0, ...l, door: doorOf(l) } : l.det < 0 ? { t: 'kf_far_wall', y: 0, ...l, door: doorOf(l) } : { t: l.det === 0 && !l.shop && hotDist((l.foot[0] + l.foot[2]) / 2, (l.foot[1] + l.foot[3]) / 2) > 150 ? 'kf_mid_wall' : 'house_song', y: 0, ...l, trade: tradeOf(l) ?? l.trade, furnished: furnished.has(l) }))), 'kaifeng-site'));
+  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, groupOuter(all.slice(i, i + 120).map((l) => (isOuter(l) ? { t: 'kf_outer', y: 0, ...l, door: doorOf(l) } : l.det < 0 ? { t: 'kf_far_wall', y: 0, ...l, door: doorOf(l) } : { t: l.det === 0 && !l.shop && hotDist((l.foot[0] + l.foot[2]) / 2, (l.foot[1] + l.foot[3]) / 2) > 150 ? 'kf_mid_wall' : 'house_song', y: 0, ...l, trade: tradeOf(l) ?? l.trade, furnished: furnished.has(l), up: upperOf(l) }))), 'kaifeng-site'));
   plans.push(waterside(), ...scroll(), ...landing());
   // the shops' signs on their poles and goods in the street; the rooms of the shops, wine shops and tea shops furnished, their people
   plans.push(base('song-kaifeng-shops', shopElements(), 'life'));

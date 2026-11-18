@@ -139,15 +139,22 @@ export function officeFit(c) {
  * stacks of sacks of grain, barrels and corded bales, a counting desk with its ledger and a hand balance by the door.
  */
 export function storeFit(c) {
-  const { A, C, lat, bag, F, y, b, fl, top, iu0, iu1, lin, dF, dB, du, dw, w } = c;
+  const { A, C, lat, bag, F, y, b, fl, top, iu0, iu1, lin, dF, dB, du, dw, w, hole } = c;
   const at3 = (u, v, d) => { const [x, z] = F.at(u, d); return [x, y + v, z]; };
   const S = (m, pts, u0, u1) => bag.add(m, sideprism(F, y, pts, Math.min(u0, u1), Math.max(u0, u1)));
   const kd = rng(Math.round(w * 100) + Math.round(du * 10) + 3);
   // the floor of planks laid on sleepers, the ceiling of boards on beams
   A('timber', iu0 + lin, iu1 - lin, b, fl, dB + lin, dF - lin);
   for (let d = dB + 0.4; d < dF - 0.3; d += 0.42) A('planks_grey', iu0 + lin, iu1 - lin, fl, fl + 0.006, d, d + 0.012);
-  A('timber', iu0 + lin, iu1 - lin, top - 0.05, top, dB + lin, dF - lin);
-  { const n = Math.max(3, Math.round((dF - dB) / 1.1)); for (let k = 0; k < n; k++) { const d = dB + (k + 0.5) * (dF - dB) / n; A(OAK, iu0 + lin, iu1 - lin, top - 0.32, top - 0.05, d - 0.12, d + 0.12); } }
+  // (with a flight up through it, the ceiling is cut round the trap of the stair: upper.js)
+  const hu0 = hole ? hole[0] : 0, hu1 = hole ? hole[1] : 0, hd0 = hole ? hole[2] : 0, hd1 = hole ? hole[3] : 0;
+  if (hole) {
+    A('timber', iu0 + lin, hu0, top - 0.05, top, dB + lin, dF - lin); A('timber', hu1, iu1 - lin, top - 0.05, top, dB + lin, dF - lin);
+    A('timber', hu0, hu1, top - 0.05, top, dB + lin, hd0); A('timber', hu0, hu1, top - 0.05, top, hd1, dF - lin);
+  } else A('timber', iu0 + lin, iu1 - lin, top - 0.05, top, dB + lin, dF - lin);
+  { const n = Math.max(3, Math.round((dF - dB) / 1.1)); for (let k = 0; k < n; k++) { const d = dB + (k + 0.5) * (dF - dB) / n;
+    if (hole && d + 0.12 > hd0 && d - 0.12 < hd1) { A(OAK, iu0 + lin, hu0, top - 0.32, top - 0.05, d - 0.12, d + 0.12); A(OAK, hu1, iu1 - lin, top - 0.32, top - 0.05, d - 0.12, d + 0.12); }
+    else A(OAK, iu0 + lin, iu1 - lin, top - 0.32, top - 0.05, d - 0.12, d + 0.12); } }
   A(OAK, du - 0.14, du + 0.14, top - 0.5, top - 0.05, dB + lin, dF - lin);                                         // the summer beam over the aisle
   // the hoist's trap in the ceiling by the front, its rope and hook with a bale on it
   { const hd = dF - 1.9, hu0 = du - 0.55, hu1 = du + 0.55;
@@ -160,11 +167,12 @@ export function storeFit(c) {
     const [bx, by, bz] = at3(du, fl + 1.1, hd); bag.add('rope_fibre', rod([x, vv - 1.35, z], [bx, by, bz], 0.02, 6));
     C(du - 0.45, du + 0.45, hd - 0.33, hd + 0.33, fl, fl + 1.15); }
   // the goods along both sides of the aisle, from behind the door's leaves to the back wall
-  const aisle = 0.95, zones = [[iu0 + lin + 0.02, du - aisle], [du + aisle, iu1 - lin - 0.02]].filter(([a, c2]) => c2 - a > 0.8);
+  const aisle = hole ? 1.2 : 0.95, zones = [[iu0 + lin + 0.02, du - aisle], [du + aisle, iu1 - lin - 0.02]].filter(([a, c2]) => c2 - a > 0.8);
   for (const [za, zb] of zones) {
     const zw = zb - za;
     for (let d = dF - 1.9; d - 1.0 > dB + lin + 0.2; d -= 1.12) {
       const kind = kd(), d0 = d - 1.0, d1 = d - 0.02;
+      if (hole && zb > hu0 - 0.1 && za < hu1 + 0.1 && d1 > hd0 - 0.3 && d0 < hd1 + 1.9) continue;
       if (kind < 0.12) continue;
       if (kind < 0.45) {                                                                                           // sacks of grain, in tiers
         const nn = Math.max(1, Math.floor(zw / 0.82)), sw = zw / nn, tiers = 2 + (kd() < 0.5 ? 1 : 0);
