@@ -7,6 +7,7 @@ import { shopPoint, frontKind } from '../../styles/gothic/houses.js';
 import { openSet } from './town.js';
 import { lots as allLots } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
+import { upperWalks } from './court-houses.js';
 
 const g = RIVER.ground;
 export const city = {
@@ -154,5 +155,7 @@ export const river = {
   elements: [NORTH_ARM, SOUTH_ARM].map((a) => ({ t: 'water_rect', rect: [-(RADIUS - 72), a[1] + 2, RADIUS - 72, a[3] - 2], y: RIVER.level })),
 };
 void ISLAND;
-export const chapel = { ...chapelPlan, origin: CHAPEL.origin, base: g, district: undefined, view: [CHAPEL.origin[0] - 20, CHAPEL.origin[1] - 12, CHAPEL.origin[0] + 38, CHAPEL.origin[1] + 12] };
+// the ways up in the court's houses (docs/settlements/paris.md §5e) are walked as routes of the chapel's plan, in its local frame (yaw 0)
+const houseWalks = upperWalks().map((r) => { const w = r.map(([x, z]) => [x - CHAPEL.origin[0], z - CHAPEL.origin[1]]); w.y0 = 0; return w; });
+export const chapel = { ...chapelPlan, walks: [...(chapelPlan.walks || []), ...houseWalks], origin: CHAPEL.origin, base: g, district: undefined, view: [CHAPEL.origin[0] - 20, CHAPEL.origin[1] - 12, CHAPEL.origin[0] + 38, CHAPEL.origin[1] + 12] };
 export default chapel;
