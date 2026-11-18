@@ -52,13 +52,13 @@ function jar(ctx, x, z, Y, r, h, mat = 'terracotta') {
 }
 function sacks(ctx, x, z, Y, n) {
   const { bag, col } = ctx;
-  for (let k = 0; k < n; k++) { const sx = x + (k % 2) * 0.55 - 0.27 + (hs(x, z, 10 + k) - 0.5) * 0.08, sy = Y + Math.floor(k / 2) * 0.3; bag.add('sacking', box(sx - 0.26, sy, z - 0.18, sx + 0.26, sy + 0.3 + hs(sx, z, 11) * 0.05, z + 0.18)); }
+  for (let k = 0; k < n; k++) { const sx = x + (k % 2) * 0.55 - 0.27 + (hs(x, z, 10 + k) - 0.5) * 0.08, sy = Y + Math.floor(k / 2) * 0.3; bag.add('cloth_brown', box(sx - 0.26, sy, z - 0.18, sx + 0.26, sy + 0.3 + hs(sx, z, 11) * 0.05, z + 0.18)); }
   col.rect([x - 0.55, z - 0.2, x + 0.55, z + 0.2], Y, Y + 0.3 * Math.ceil(n / 2));
 }
 /** A stack of cloth bales. */
 function bales(ctx, x, z, Y, n) {
   const { bag, col } = ctx;
-  for (let k = 0; k < n; k++) { const bx = x + (hs(x, z, 20 + k) - 0.5) * 0.06, by = Y + k * 0.42; bag.add(pickCloth(x, z, 21 + k), box(bx - 0.4, by, z - 0.28, bx + 0.4, by + 0.4, z + 0.28)); bag.add('sacking', box(bx - 0.41, by + 0.17, z - 0.06, bx + 0.41, by + 0.21, z + 0.06)); }
+  for (let k = 0; k < n; k++) { const bx = x + (hs(x, z, 20 + k) - 0.5) * 0.06, by = Y + k * 0.42; bag.add(pickCloth(x, z, 21 + k), box(bx - 0.4, by, z - 0.28, bx + 0.4, by + 0.4, z + 0.28)); bag.add('cloth_brown', box(bx - 0.41, by + 0.17, z - 0.06, bx + 0.41, by + 0.21, z + 0.06)); }
   col.rect([x - 0.42, z - 0.3, x + 0.42, z + 0.3], Y, Y + 0.42 * n);
 }
 /** A low table with a bronze tray or papers; its legs. */
@@ -119,7 +119,7 @@ const uses = {
     for (let k = 0; k < n; k++) {
       const x = c.x0 + 0.3 + 1.0 + k * 2.15, z = c.z0 + 0.55;
       pallet(ctx, x, z, Y, 1.9, 0.85, 'x', pickCloth(x, z, 70) === 'cloth_white' ? 'cloth_brown' : pickCloth(x, z, 70));
-      bag.add('sacking', box(x + 0.5, Y + 0.13, z + 0.45, x + 0.9, Y + 0.33 + hs(x, z, 71) * 0.06, z + 0.85));
+      bag.add('cloth_brown', box(x + 0.5, Y + 0.13, z + 0.45, x + 0.9, Y + 0.33 + hs(x, z, 71) * 0.06, z + 0.85));
     }
     for (let k = 0; k < 4; k++) { const x = c.x0 + 0.3 + k * 0.17 + hs(c.x0, k, 72) * 0.03, h = 1.45 + hs(x, c.z0, 73) * 0.2; bag.add('timber', box(x - 0.02, Y, c.z0 + 0.05, x + 0.02, Y + h, c.z0 + 0.09)); }
     jar(ctx, c.x1 - 0.5, c.z0 + 0.4, Y, 0.28, 0.8); jar(ctx, c.x1 - 1.15, c.z0 + 0.35, Y, 0.2, 0.55);
@@ -147,7 +147,7 @@ const uses = {
     bales(ctx, c.x0 + 0.7, c.z0 + 0.45, Y, 3); bales(ctx, c.x0 + 1.7, c.z0 + 0.45, Y, 2); bales(ctx, c.x0 + 2.7, c.z0 + 0.45, Y, 3);
     sacks(ctx, c.x1 - 1.0, c.z0 + 0.35, Y, 4);
     for (let k = 0; k < 3; k++) { const x = c.x0 + 3.7 + k * 0.6; jar(ctx, x, c.z0 + 0.4, Y, 0.24, 0.95); }
-    bag.add('sacking', lathe([[0.2, 0], [0.26, 0.04], [0.26, 0.2], [0.2, 0.24], [0.1, 0.2], [0.1, 0.04]], 12, null, c.x0 + 0.55, Y, c.zl - 0.1));
+    bag.add('cloth_brown', lathe([[0.2, 0], [0.26, 0.04], [0.26, 0.2], [0.2, 0.24], [0.1, 0.2], [0.1, 0.04]], 12, null, c.x0 + 0.55, Y, c.zl - 0.1));
     ctx.col.circle(c.x0 + 0.55, c.zl - 0.1, 0.27, Y, Y + 0.24);
   },
   /** A craftsman's loft: the stores and wares of his trade (the trade's name in the plan) with a bed beside. */
