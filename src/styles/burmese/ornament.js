@@ -46,22 +46,28 @@ export function kuduNiche(F, u, y, v, dir, w = 0.8, h = 1.1, mat = 'lacquer_blac
  * One of the 80 stone reliefs of the corridors: a slab of volcanic stone, 0.74 m wide and 1.07 high, in a frame of two pilasters, a sill and a stepped pointed cap, a seated Buddha cut in it.
  * The wall face is at v; the panel stands out toward `dir`; y0 the slab's foot.
  */
-export function reliefPanel(F, u, y0, v, dir, k = 0) {
+export function reliefPanel(F, u, y0, v, dir, k = 0, figure = true) {
   const hw = 0.37, t = 0.05, P = (a, b) => (dir > 0 ? [v + a, v + b] : [v - b, v - a]);
   const put = (mat, a0, ya, b0, a1, yb, b1) => { const [p, q] = P(b0, b1); F.b(mat, a0, ya, p, a1, yb, q, false); };
   put(CREAM, u - hw - 0.14, y0 - 0.12, 0, u + hw + 0.14, y0, 0.16);                           // the sill
   for (const sg of [-1, 1]) put(CREAM, sg < 0 ? u - hw - 0.14 : u + hw, y0, 0, sg < 0 ? u - hw : u + hw + 0.14, y0 + 1.25, 0.13);   // the pilasters
   put('sandstone_relief', u - hw, y0, 0, u + hw, y0 + 1.07, t);                                // the slab
-  // the seated Buddha: the lap, the body, the head, the halo
+  if (figure) reliefFigure(F, u, y0, v, dir, k);
+  // the stepped pointed cap
+  put(CREAM, u - hw - 0.14, y0 + 1.25, 0, u + hw + 0.14, y0 + 1.37, 0.16);
+  put(CREAM, u - 0.3, y0 + 1.37, 0.01, u + 0.3, y0 + 1.47, 0.14);
+  put(CREAM, u - 0.14, y0 + 1.47, 0.02, u + 0.14, y0 + 1.58, 0.12);
+}
+
+/** The first form of a relief's seated Buddha (stacked plates), drawn beyond the modelled scenes' distance. */
+export function reliefFigure(F, u, y0, v, dir, k = 0) {
+  const t = 0.05, P = (a, b) => (dir > 0 ? [v + a, v + b] : [v - b, v - a]);
+  const put = (mat, a0, ya, b0, a1, yb, b1) => { const [p, q] = P(b0, b1); F.b(mat, a0, ya, p, a1, yb, q, false); };
   put('sandstone_dressed', u - 0.24, y0 + 0.1, t, u + 0.24, y0 + 0.36, t + 0.035);
   put('sandstone_dressed', u - 0.15, y0 + 0.36, t, u + 0.15, y0 + 0.66, t + 0.035);
   put('sandstone_dressed', u - 0.075, y0 + 0.66, t, u + 0.075, y0 + 0.82, t + 0.035);
   put('sandstone_dressed', u - 0.03, y0 + 0.82, t, u + 0.03, y0 + 0.9, t + 0.035);
   put('sandstone_dressed', u - 0.2, y0 + 0.58, t, u + 0.2, y0 + 0.62 + (k % 2) * 0.04, t + 0.02);
-  // the stepped pointed cap
-  put(CREAM, u - hw - 0.14, y0 + 1.25, 0, u + hw + 0.14, y0 + 1.37, 0.16);
-  put(CREAM, u - 0.3, y0 + 1.37, 0.01, u + 0.3, y0 + 1.47, 0.14);
-  put(CREAM, u - 0.14, y0 + 1.47, 0.02, u + 0.14, y0 + 1.58, 0.12);
 }
 
 /** The small stone images of a corridor wall: a row of little niches with a seated figure each, between u0 and u1 at height y, the wall face at v. */
@@ -102,9 +108,10 @@ export function doorLeaves(F, u, w, y0, y1, v0, v1) {
  * robe with the sash across the chest, the neck's rings, the face (brow, half-closed eyes, nose, lips, the long ears), the curled hair, the ushnisha and its flame, the arched halo of rays and the hands
  * of the pose: 'dhamma' (both hands before the chest: the first sermon, Kakusandha and Kassapa), 'hang' (both arms down, palms out: Konagamana), 'abhaya' (the right hand raised: Gautama).
  */
-export function buddha(F, u, v, H, throne = 2.4, pose = 'abhaya') {
+export function buddha(F, u, v, H, throne = 2.4, pose = 'abhaya', part = 'all') {
   const B = F.base ?? 0, k = (H - throne) / 9.75, by0 = B + throne;
   // the throne
+  if (part !== 'figure') {
   F.b('lacquer_red', u - 2.3, B, v - 1.5, u + 2.3, B + 0.55, v + 1.6, false);
   F.b(GILT, u - 2.34, B + 0.55, v - 1.54, u + 2.34, B + 0.65, v + 1.64, false);
   F.b('lacquer_red', u - 2.0, B + 0.65, v - 1.2, u + 2.0, B + 1.85, v + 1.3, false);
@@ -113,6 +120,9 @@ export function buddha(F, u, v, H, throne = 2.4, pose = 'abhaya') {
   F.b(GILT, u - 2.1, B + 1.85, v - 1.3, u + 2.1, B + 2.0, v + 1.4, false);
   F.b('lacquer_red', u - 1.9, B + 2.0, v - 1.1, u + 1.9, by0, v + 1.2, false);
   for (let i = 0; i < 9; i++) pyramid(F.bag, GILT, u - 1.8 + i * 0.45, B + 2.0, v + 1.18, 0.15, 0.28);
+  F.col.rect(F.R(u - 2.3, v - 1.5, u + 2.3, v + 1.6), B, B + H);
+  }
+  if (part === 'throne') return;
   // the lotus pedestal
   const [px, pz] = F.pt(u, v + 0.05), by = by0 + 0.34 * k, W = (prof, mat, seg = 16, mod = null, y = by) => F.bag.add(mat, lathe(prof.map(([r, h]) => [r * k, h * k]), seg, mod, px, y, pz));
   F.bag.add(GILT, lathe([[1.5, 0], [1.55, 0.1], [1.3, 0.24], [1.15, 0.3], [1.0, 0.34]].map(([r, h]) => [r * k, h * k]), 28, (th, i) => (i >= 1 && i <= 3 ? 1 + 0.07 * Math.cos(th * 14) : 1), px, by0, pz));
@@ -154,7 +164,6 @@ export function buddha(F, u, v, H, throne = 2.4, pose = 'abhaya') {
     gold(-1.7, 3.0, 0.05, -1.3, 5.75, 0.55); gold(-1.75, 2.85, 0.05, -1.15, 3.4, 0.7);
     gold(1.3, 4.3, 0.05, 1.7, 5.75, 0.55); gold(1.0, 4.4, 0.55, 1.5, 6.1, 1.0); gold(0.85, 6.0, 0.95, 1.65, 7.0, 1.12);
   }
-  F.col.rect(F.R(u - 2.3, v - 1.5, u + 2.3, v + 1.6), B, B + H);
 }
 
 export { lathe };

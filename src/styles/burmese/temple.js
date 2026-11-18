@@ -5,6 +5,7 @@ import { box, lathe, frustum } from '../../core/geom.js';
 import { rng, Fr, sideFrame, archWall, vault, miniStupa, hti } from './kit.js';
 import { archOrders, gableTier, pointedNiche, fineStupa, wob } from './flame.js';
 import { offering } from './detail.js';
+import { orn } from './orn.js';
 import { buddha, pyramid, plaqueBand, plaqueRow, kuduNiche, reliefPanel, imageRow, grille, doorLeaves } from './ornament.js';
 export { buddha };
 
@@ -167,8 +168,10 @@ export function ananda(el, ctx) {
 
   }
   // the Buddhas: Kakusandha north, Konagamana east, Kassapa south, Gautama west
+  const SEED = { n: 3, e: 5, s: 7, w: 11 };
   const POSE = { n: 'dhamma', s: 'dhamma', e: 'hang', w: 'abhaya' };   // Kakusandha and Kassapa: the first sermon; Konagamana: arms down; Gautama: the raised hand
-  for (const s of SIDES) { buddha(S[s], 0, 11.5, 9.5, 2.4, POSE[s]); }
+  for (const s of SIDES) { buddha(S[s], 0, 11.5, 9.5, 2.4, POSE[s], 'throne'); orn({ kind: 'buddha', c, f, side: s, pose: POSE[s], seed: SEED[s] }, ctx); }
+  orn({ kind: 'donors', c, f, side: 'w' }, ctx);   // King Kyanzittha and Shin Arahan kneeling at Gautama's feet
   // ── the porches: a vaulted hall under a stepped gable, a stupa on the front ──
   for (const s of SIDES) {
     const F = S[s], yp = f + 11;
@@ -183,6 +186,8 @@ export function ananda(el, ctx) {
       imageRow(G, a, b, f + 2.9, wl, -1);
       G.b(GLAZE, a, f + 3.45, wl - 0.07, b, f + 3.65, wl, false);
     }
+    for (const sg of [-1, 1]) { orn({ kind: 'lion', c, f, side: s, u: sg * 6.6, v: 44.9, s: 0.85 }, ctx); orn({ kind: 'guard', c, f, side: s, u: sg * 4.4, v: 44.7, s: 1 }, ctx); }
+    for (const sg of [-1, 1]) { F.col.rect(F.R(sg * 6.6 - 0.8, 44.05, sg * 6.6 + 0.8, 45.75), f, f + 0.7 + 1.5); F.col.rect(F.R(sg * 4.4 - 0.6, 44.0, sg * 4.4 + 0.6, 45.3), f, f + 0.9); }   // the guardians' plinths (docs §14)
     // the portal's arch orders, the outermost with its flame edge (the flame pediment over the door)
     archOrders(F, 0, 2.5, f + 4.3, 3.5, f, 43.5, 1, [
       { t: 0.3, d: 0.08, mat: 'stucco_ochre' }, { t: 0.28, d: 0.16, mat: WHITE }, { t: 0.55, d: 0.24, mat: 'stucco_ochre', flame: 0.5, lean: 0.3, n: 16 },
