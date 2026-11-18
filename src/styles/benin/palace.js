@@ -5,6 +5,8 @@ import { fromTriangles, quad } from '../../core/geom.js';
 import { courses, crest, rng, wallMat, B, clayWall, gable, lean, hip, pillar, plaque, head, bird, snake, altar, box, frustum, lathe, rod } from './kit.js';
 import { orientedBox } from '../../core/build.js';
 import { frame } from '../greek/agora.js';
+import { lodAt } from './relief.js';
+import { pythonCast, leopardRound } from './cast.js';
 import { pot, pots, stool, bed, chest, hearth, mortar, wood, wear, claySeat, hung } from './props.js';
 
 const SHINGLE = 'roof_bark';
@@ -158,6 +160,13 @@ function hall(el, ctx) {
   }
   for (const s of [-1, 1]) { B(ctx, 'ivory', [cx + s * 2.6 - 0.07, dz0 + 1.4, cx + s * 2.6 + 0.07, dz0 + 1.54], Y + 0.9, Y + 2.8); head(ctx, cx + s * 2.0, Y + 0.9, dz0 + 1.3, 0, 40 + s, false); }
   for (const s of [-1, 1]) altar(ctx, [cx + s * 16 - 2.6, z0 + 0.7, cx + s * 16 + 2.6, z0 + 2.2], 's', 90 + s, 5);
+  // the leopard aquamanile pair by the throne (the Art Institute's pair "may have stood either side of the throne"): vessels of cast brass on carved stands of dark wood
+  for (const s of [-1, 1]) {
+    const ax = cx + s * 1.35, az = dz0 + 1.2, ay = Y + 0.9;
+    bag.add('wood_dark', lathe([[0.001, 0], [0.3, 0], [0.3, 0.05], [0.2, 0.1], [0.14, 0.2], [0.17, 0.32], [0.26, 0.38], [0.3, 0.4], [0.001, 0.4]], 12, null, ax, ay, az));
+    leopardRound(ctx, ax, ay + 0.4, az, s * 0.2, 0.3, true, Math.max(1, lodAt(ctx, ax, az)), 1);
+    col.circle(ax, az, 0.3, ay, ay + 0.9);
+  }
   // the furnishings of the great gallery: leopard skins on the dais, the cast leopards at its steps, the stools of the chiefs in two rows,
   // mats in the aisle, benches of clay under the side walls
   if (el.near !== false) {
@@ -236,49 +245,8 @@ function audience(el, ctx) {
  * paws, a round head with a short muzzle, ears, eyes and fangs, the neck ruff, the spots as rings of gilt on bronze. Not a copy of any piece.
  */
 function leopard(ctx, x, y, z, s = 1) {
-  const { bag, col } = ctx, rot = s > 0 ? 0.25 : -0.25, g = (m, b) => { b.rotateY(rot); b.translate(x, y, z); bag.add(m, b); };
-  const YC = 0.64, RY = 1.15;
-  const prof = [[-0.66, 0.001], [-0.6, 0.12], [-0.44, 0.2], [-0.15, 0.225], [0.2, 0.235], [0.45, 0.24], [0.6, 0.2], [0.7, 0.12], [0.74, 0.001]];
-  const rAt = (zz) => { for (let i = 0; i < prof.length - 1; i++) { const [z0, r0] = prof[i], [z1, r1] = prof[i + 1]; if (zz >= z0 && zz <= z1) return r0 + (r1 - r0) * (zz - z0) / (z1 - z0); } return 0.1; };
-  // the body: a lathe about the long axis, turned to lie along z, a little deeper than wide
-  const body = lathe(prof.map(([zz, r]) => [r, zz]), 14); body.rotateX(Math.PI / 2); body.scale(1, RY, 1); body.translate(0, YC, 0); g('bronze', body);
-  // the legs: tapering from the paw to the belly, the hind ones heavier at the thigh, a paw with a rise of toes
-  for (const [lx, lz, hind] of [[-0.14, 0.47, 0], [0.14, 0.47, 0], [-0.15, -0.4, 1], [0.15, -0.4, 1]]) {
-    g('bronze', lathe([[0.05, 0.05], [0.058, 0.1], [0.07, 0.28], [hind ? 0.125 : 0.1, 0.5], [0.001, 0.52]], 8, null, lx, 0, lz));
-    g('bronze', lathe([[0.001, 0], [0.085, 0.0], [0.095, 0.03], [0.075, 0.075], [0.05, 0.09], [0.001, 0.09]], 8, null, lx, 0, lz + 0.03));
-    for (const t of [-1, 0, 1]) g('iron', box(lx + t * 0.03 - 0.004, 0.0, lz + 0.1, lx + t * 0.03 + 0.004, 0.04, lz + 0.125));
-  }
-  // the neck, the head (a round skull, a short muzzle), the lower jaw open a little, fangs of ivory, the nose, the eyes, the ears
-  g('bronze', rod([0, YC + 0.06, 0.55], [0, YC + 0.2, 0.84], 0.155, 10));
-  g('bronze', lathe([[0.001, -0.14], [0.11, -0.1], [0.16, 0], [0.14, 0.09], [0.07, 0.14], [0.001, 0.15]], 10, null, 0, YC + 0.2, 0.9));
-  g('bronze', box(-0.075, YC + 0.17, 0.96, 0.075, YC + 0.27, 1.12));
-  g('bronze', box(-0.065, YC + 0.1, 0.94, 0.065, YC + 0.15, 1.08));
-  g('iron', box(-0.035, YC + 0.255, 1.115, 0.035, YC + 0.285, 1.14));
-  for (const t of [-1, 1]) {
-    g('ivory', rod([t * 0.045, YC + 0.165, 1.07], [t * 0.045, YC + 0.1, 1.085], 0.011, 5));
-    g('ivory', rod([t * 0.04, YC + 0.15, 1.06], [t * 0.04, YC + 0.2, 1.075], 0.009, 5));
-    g('ivory', lathe([[0.001, 0], [0.022, 0.0], [0.022, 0.012], [0.001, 0.02]], 6, null, t * 0.095, YC + 0.3, 1.0));
-    g('iron', lathe([[0.001, 0], [0.011, 0.0], [0.011, 0.016], [0.001, 0.02]], 5, null, t * 0.095, YC + 0.3, 1.005));
-    g('bronze', lathe([[0.06, 0], [0.05, 0.06], [0.001, 0.12]], 6, null, t * 0.095, YC + 0.34, 0.83));
-    for (const q of [0.0, 0.03, 0.06]) g('iron', box(t * (0.085 + q) - 0.005, YC + 0.215 + q * 0.5, 1.07, t * (0.085 + q) + 0.005, YC + 0.225 + q * 0.5, 1.09));
-  }
-  // the ruff at the neck: tufts hanging in a collar
-  for (let i = 0; i < 9; i++) { const a = -1.3 + i * 0.325; g('bronze', rod([Math.sin(a) * 0.17, YC + 0.12 + Math.cos(a) * 0.02, 0.66 + Math.cos(a) * 0.12], [Math.sin(a) * 0.2, YC - 0.05, 0.7 + Math.cos(a) * 0.14], 0.028, 5)); }
-  // the tail: from the rump out and up in a curve, ending in three prongs
-  const tail = [[0, YC + 0.02, -0.66], [0, YC - 0.08, -0.86], [0, YC - 0.12, -1.06], [0, YC - 0.02, -1.24], [0, YC + 0.14, -1.3], [0, YC + 0.28, -1.24]];
-  for (let i = 0; i < tail.length - 1; i++) g('bronze', rod(tail[i], tail[i + 1], 0.04 - i * 0.003, 6));
-  for (const t of [-1, 0, 1]) g('bronze', rod(tail[tail.length - 1], [t * 0.08, tail[tail.length - 1][1] + 0.1, tail[tail.length - 1][2] + 0.04], 0.017, 5));
-  // the spots: rings of gilt set on the flanks in staggered rows, an inner disc of bronze to make the ring
-  for (const sg of [-1, 1]) {
-    for (const [phi, row] of [[-28, 0], [8, 1], [42, 0], [68, 1]]) {
-      const ph = phi * Math.PI / 180;
-      for (let zz = -0.5 + row * 0.07; zz < 0.62; zz += 0.14) {
-        const r = rAt(zz) - 0.002, px = sg * r * Math.cos(ph), py = YC + RY * r * Math.sin(ph), nx = Math.cos(ph) * sg, ny = Math.sin(ph) / RY, nl = Math.hypot(nx, ny);
-        g('gilt_bronze', rod([px - nx / nl * 0.004, py - ny / nl * 0.004, zz], [px + nx / nl * 0.011, py + ny / nl * 0.011, zz], 0.032, 7));
-        g('bronze', rod([px + nx / nl * 0.009, py + ny / nl * 0.009, zz], [px + nx / nl * 0.016, py + ny / nl * 0.016, zz], 0.017, 6));
-      }
-    }
-  }
+  const { col } = ctx, lod = lodAt(ctx, x, z);
+  leopardRound(ctx, x, y, z, s > 0 ? 0.25 : -0.25, 1.35, false, Math.max(1, lod));
   col.rect([x - 0.4, z - 0.8, x + 0.4, z + 0.85], y, y + 1.1);
 }
 /**
@@ -367,8 +335,12 @@ function tower(el, ctx) {
         const t = i / n, y = u1 - 0.1 - t * (u1 - u0 - 0.3), hw = hw1 + (hw0 - hw1) * ((u1 - y) / (u1 - u0)), off = Math.sin(t * Math.PI * 3.5) * wob;
         pts.push([cx + dir[0] * (hw + 0.14) + al[0] * off, y, cz + dir[1] * (hw + 0.14) + al[1] * off]);
       }
-      for (let i = 0; i < n; i++) bag.add(SM, rod(pts[i], pts[i + 1], 0.14 * (1 - 0.4 * i / n), 6));
-      const hd = pts[n]; bag.add(SM, lathe([[0.001, 0], [0.2, 0.05], [0.2, 0.3], [0.1, 0.42], [0.001, 0.46]], 6, null, hd[0], hd[1] - 0.4, hd[2]));
+      const plod = lodAt(ctx, cx, cz, 1.8);
+      if (plod > 0) pythonCast(ctx, pts, SM, 0.14, plod);
+      else {
+        for (let i = 0; i < n; i++) bag.add(SM, rod(pts[i], pts[i + 1], 0.14 * (1 - 0.4 * i / n), 6));
+        const hd = pts[n]; bag.add(SM, lathe([[0.001, 0], [0.2, 0.05], [0.2, 0.3], [0.1, 0.42], [0.001, 0.46]], 6, null, hd[0], hd[1] - 0.4, hd[2]));
+      }
       // the heads of cast brass hung over the clay body below the lantern, two to each turret, and a python winding on the body
       for (const sg of [-1, 1]) { const bx = cx + dir[0] * (r + 0.05) + al[0] * sg * r * 0.5, bz = cz + dir[1] * (r + 0.05) + al[1] * sg * r * 0.5; bag.add(SM, rod([bx, bh - 0.1, bz], [bx + dir[0] * 0.4, bh - 0.55, bz + dir[1] * 0.4], 0.12, 6)); bag.add(SM, lathe([[0.001, 0], [0.17, 0.05], [0.17, 0.3], [0.09, 0.42], [0.001, 0.46]], 6, null, bx + dir[0] * 0.4, bh - 1.0, bz + dir[1] * 0.4)); }
       snake(ctx, cx + dir[0] * (r - 0.2), bh - 1.2, cz + dir[1] * (r - 0.2), bh - 2.4, al, dir, r * 0.35, 0.13, SM, 3);
@@ -460,7 +432,7 @@ function pwall(el, ctx) {
       if (!el.frieze) continue;
       const mx = x + ux * step / 2;
       if (mx > el.a[0] + ux * Ln - 3 || inSkip(mx)) continue;
-      const f = el.frieze, nz = f.face === 's' ? 1 : -1, pz = z + uz * step / 2 + nz * (th / 2 + 0.02);
+      const f = el.frieze, nz = f.face === 's' ? 1 : -1, pz = z + uz * step / 2 + nz * (th / 2 + 0.06);
       for (const y of f.ys) plaque(ctx, mx, y, pz, f.face, Math.floor(rng(Math.round(mx * 13))() * 1e6), 0.5, 0.62);
     }
   }
