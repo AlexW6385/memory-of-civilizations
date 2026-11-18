@@ -26,8 +26,8 @@ E.push({ t: 'k_tower', c: [ex0, 0], y: 1.0, w: 9, h: 21, tiers: 4, cella: { half
 E.push({ t: 'k_terrace', rect: CAUSEWAY.outer, y0: LEVEL.moatBed, y1: 1.0 });
 E.push({ t: 'k_terrace', rect: [CAUSEWAY.inner[0] + 6, CAUSEWAY.inner[1], CAUSEWAY.inner[2], CAUSEWAY.inner[3]], y0: 0, y1: 1.2 });
 for (const s of [-1, 1]) {
-  E.push({ t: 'naga_rail', a: [CAUSEWAY.outer[0] + 1, s * 4.3], b: [CAUSEWAY.outer[2] - 2, s * 4.3], y: 1.0, h: 1.0 });
-  E.push({ t: 'naga_rail', a: [CAUSEWAY.inner[0] + 8, s * 4.3], b: [CAUSEWAY.inner[2] - 6, s * 4.3], y: 1.2, h: 0.9 });
+  E.push({ t: 'naga_rail', a: [CAUSEWAY.outer[0] + 1, s * 4.3], b: [CAUSEWAY.outer[2] - 2, s * 4.3], y: 1.0, h: 1.0, ends: false, hoods: true });
+  E.push({ t: 'naga_rail', a: [CAUSEWAY.inner[0] + 8, s * 4.3], b: [CAUSEWAY.inner[2] - 6, s * 4.3], y: 1.2, h: 0.9, ends: false, hoods: true });
 }
 // the giant stone lions guarding the causeway's western steps (§12)
 for (const s of [-1, 1]) E.push({ t: 'k_lion', at: [CAUSEWAY.outer[0] - 2.2, s * 5.2], y: 0, face: 'w', s: 1.15 });
@@ -36,8 +36,8 @@ for (const [x, dir] of [[CAUSEWAY.outer[0] - 4, 'e'], [CAUSEWAY.inner[2] - 6, 'w
 E.push({ t: 'k_terrace', rect: [CX - 99 - 14, -12, CX - 99, 12], y0: 0, y1: 1.4 });
 // its serpent balustrades broken for the steps on its north and south sides; lions on pedestals flank the steps on its three sides
 for (const s of [-1, 1]) {
-  E.push({ t: 'naga_rail', a: [CX - 112, s * 11.6], b: [CX - 108.4, s * 11.6], y: 1.4, h: 0.8 });
-  E.push({ t: 'naga_rail', a: [CX - 103.6, s * 11.6], b: [CX - 100, s * 11.6], y: 1.4, h: 0.8 });
+  E.push({ t: 'naga_rail', a: [CX - 112, s * 11.6], b: [CX - 108.4, s * 11.6], y: 1.4, h: 0.8, ends: false, hoods: true });
+  E.push({ t: 'naga_rail', a: [CX - 103.6, s * 11.6], b: [CX - 100, s * 11.6], y: 1.4, h: 0.8, ends: false, hoods: true });
   E.push({ t: 'stairs', rect: s < 0 ? [CX - 108, -14.4, CX - 104, -12] : [CX - 108, 12, CX - 104, 14.4], y0: 0, y1: 1.4, dir: s < 0 ? 's' : 'n', mat: 'sandstone_khmer' });
   for (const x of [CX - 108.9, CX - 103.1]) E.push({ t: 'k_lion', at: [x, s * 13.3], y: 0, face: s < 0 ? 'n' : 's', s: 1.0 });
   E.push({ t: 'k_lion', at: [CX - 112.3, s * 6.6], y: 1.4, face: 'w', s: 0.9 });
@@ -105,7 +105,7 @@ for (const el of E.slice()) {
   if (el.t === 'k_gallery' && el.reliefMap) E.push({ ...el, t: 'ak_relief' });
   if (el.t === 'k_gallery') E.push({ ...el, t: 'ak_gdress', dress: el.reliefMap ? { win: true, dev: true } : el.devatas ? { pil: true } : el.windows ? { dev: true } : { dev: true } });
   else if (el.t === 'k_tower') E.push({ ...el, t: 'ak_tdress' });
-  else if (el.t === 'naga_rail') E.push({ ...el, t: 'ak_ndress' });
+  else if (el.t === 'naga_rail') { E.push({ ...el, t: 'ak_ndress' }); if (el.hoods) E.push({ ...el, t: 'ak_nhood' }); }
   else if (el.t === 'k_cloister') E.push({ ...el, t: 'ak_cdress' });
 }
 

@@ -8,8 +8,8 @@ const REG = [0.03, 0.67, 1.31];
 const row = (x0, x1, step, fn) => { let i = 0; for (let x = x0; x <= x1 + 1e-6; x += step, i++) fn(x, i); };
 
 /** Two armies meeting in the middle: three registers of foot, chiefs on elephants and horses in the top two, a melee where they meet. */
-function battle(L, { left, right, monkeys }) {
-  const o = [], mid = L / 2, step = 0.31;
+function battle(L, { left, right, monkeys, step = 0.31 }) {
+  const o = [], mid = L / 2;
   const chiefs = [];
   for (let x = 2.4; x < L - 2; x += 4.1) if (Math.abs(x - mid) > 1.5) chiefs.push({ x, reg: chiefs.length % 2 ? 1 : 2, ele: chiefs.length % 3 === 0 });
   for (let r = 0; r < 3; r++) row(0.25 + r * 0.1, L - 0.25, step, (x, i) => {
@@ -65,17 +65,19 @@ function procession(L) {
 
 /** The churning: asuras (left, helmets) and devas (right, crowns) pull the serpent in a rope at mid-height, in two staggered ranks; Mandara, Kurma, Vishnu in the middle; apsaras above, fish and crocodiles below. */
 function churning(L) {
-  const o = [], mid = L / 2, vr = 1.08;
-  const step = 0.42;
-  for (const [rank, vb, s, off] of [[0, 0.45, 1.15, 0]]) row(1.9 + off, L - 1.7, step, (x) => {
+  const o = [], mid = L / 2, vr = 1.08, vb = 0.45;
+  const step = 0.52, solids = [];
+  // the pullers are modelled (sculpt.js: rounded bodies, each its own head), set out here, carved in relief.js
+  let i = 0;
+  row(1.9, L - 1.7, step, (x) => {
     if (Math.abs(x - mid) < 1.1) return;
     const left = x < mid;
-    puller(o, x, vb + (rank ? 0.02 : 0), s, left ? 1 : -1, vr - (rank ? 0.1 : 0), left ? 'helmet' : 'crown');
+    solids.push({ kind: left ? 'asura' : 'deva', x, v: vb, d: left ? 1 : -1, vr: vr - vb, i: i++, k: 1.15 });
   });
-  // the serpent: its rope, thick, the head at the left under five hoods, the tail at the right
-  o.push(bar(0.5, vr, mid - 0.4, vr, 0.14), bar(mid + 0.4, vr, L - 0.5, vr, 0.1));
-  o.push(ROUND(0.55, vr + 0.2, 0.26, 0.3, 10));
-  fanHeads(o, 0.55, vr + 0.4, 1.7, 5);
+  o.solids = solids;
+  // the serpent: a thick scaled rope (modelled), the head at the left under five hoods (modelled), the tail at the right
+  o.ropes = [[0.9, mid - 0.4, vr, 0.085], [mid + 0.4, L - 0.5, vr, 0.07]];
+  o.hood = { u: 0.5, v: vr + 0.3, s: 0.4, heads: 5 };
   proud(o, 0.08, () => { stander(o, 1.15, 0.4, 1.7, 1, { head: 'helmet', arms: 'pray' }); fanHeads(o, 1.15, 1.5, 1.3, 5); monkey(o, L - 1.0, 0.45, 1.8, -1); });
   // Mandara, the serpent wound round it, the turtle, Vishnu, Indra
   o.push(trap(mid, 0.55, 0.2, 0.14, 1.4));
@@ -96,7 +98,7 @@ function churning(L) {
 
 export function composePanel(subject, L) {
   if (subject === 'kurukshetra') return battle(L, { left: 'crown', right: 'bun' });
-  if (subject === 'gods') return battle(L, { left: 'crown', right: 'helmet' });
+  if (subject === 'gods') return battle(L, { left: 'crown', right: 'helmet', step: 0.46 });
   if (subject === 'lanka') return battle(L, { left: 'crown', right: 'helmet', monkeys: true });
   if (subject === 'procession') return procession(L);
   if (subject === 'churning') return churning(L);
