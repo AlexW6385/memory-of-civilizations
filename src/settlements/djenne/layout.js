@@ -50,6 +50,29 @@ export function houses() {
   }
   return HOUSES;
 }
+/** The houses that can be entered (docs §16): deep enough for the vestibule, court and back block. */
+export function enterable(all) {
+  // every house of a width that holds the vestibule, court and back block (6 m and more across, 10 m deep, a front on a lane) in the
+  // old core about the market and the mosque, and beyond it more than half of them, by the house's seed (the rest stay shut shells)
+  const ok = all.filter((h) => (h.front === 'n' || h.front === 's') && h.rect[2] - h.rect[0] >= 6 && h.rect[3] - h.rect[1] >= 10);
+  const d = (h) => Math.hypot((h.rect[0] + h.rect[2]) / 2 - 30, (h.rect[1] + h.rect[3]) / 2);
+  return new Set(ok.filter((h) => d(h) < 105 || h.seed % 100 < 58));
+}
+/**
+ * The two-storey houses whose upper floors are opened (docs §19): the 24 enterable ones nearest the arrival at the market, each with
+ * the kind of household that lives above (merchant, craftsman, marabout, inn, tenement, family), in turn from the nearest.
+ */
+export const ARRIVAL = [95, 30];
+let UPPER_HOMES = null;
+export function upperHomes() {
+  if (UPPER_HOMES) return UPPER_HOMES;
+  const all = houses(), en = enterable(all), kinds = ['family', 'merchant', 'craftsman', 'marabout', 'tenement', 'guest'];
+  const d = (h) => Math.hypot((h.rect[0] + h.rect[2]) / 2 - ARRIVAL[0], (h.rect[1] + h.rect[3]) / 2 - ARRIVAL[1]);
+  const clear = (h) => !all.some((o) => o !== h && o.rect[0] < h.rect[2] - 0.1 && o.rect[2] > h.rect[0] + 0.1 && o.rect[1] < h.rect[3] - 0.1 && o.rect[3] > h.rect[1] + 0.1);   // (not where the old grid's houses overlap the market row's)
+  const near = all.filter((h) => en.has(h) && h.storeys > 1 && clear(h) && d(h) < 90).sort((a, b) => d(a) - d(b)).slice(0, 24);
+  UPPER_HOMES = new Map(near.map((h, i) => [h, kinds[i % kinds.length]]));
+  return UPPER_HOMES;
+}
 export const inHouse = (x, z, m = 0) => houses().some((h) => inRect(h.rect, x, z, m));
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
