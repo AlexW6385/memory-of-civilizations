@@ -52,6 +52,7 @@ for (let i = 0; i < 60; i++) {
   if (rand() < 0.08) continue;
   const a = AXIS + (i + 0.5) / 60 * Math.PI * 2 + (rand() - 0.5) * 0.02, r = 11.6 + (rand() - 0.5) * 0.4, at = [Math.cos(a) * r, Math.sin(a) * r];
   const w = 0.55 + rand() * 0.45, h = 1.6 + rand() * 0.6;
+  if (i === 0 || i === 59) continue;                           // the way in along the axis stays open through the bluestone circle
   stone(at, a + (rand() - 0.5) * 0.3, { h, w0: w, w1: w * (0.7 + rand() * 0.2), d0: 0.45 + rand() * 0.2, d1: 0.38, rough: 0.05, bury: 0.8, cap: rand() < 0.5 ? 'round' : 'peak', facet: true, mat: 'dolerite_spotted' });
 }
 // the bluestone horseshoe: 19 dressed pillars rising toward the south-west, within the trilithons
@@ -64,9 +65,8 @@ for (let k = 0; k < 19; k++) {
 { const at = P(-3.8, 0); E.push({ t: 'standing_stone', at, y: height(at[0], at[1]), yaw: AXIS, lying: true, h: 4.9, w0: 1.0, w1: 1.0, d0: 0.53, d1: 0.5, rough: 0.03, dress: 1, bury: 0.12, mat: 'sandstone_green', seed: 41 }); }
 
 // ── at the entrance: the Slaughter Stone and its partner, standing; the Heel Stone, unshaped and leaning in ──
-// the standing partner of the Slaughter Stone, still upright at the entrance; the Slaughter Stone itself (4.9 m) fallen, lying along the axis on the north-west side of the way in, its upper face pitted by the hollows that hold the rain (§1g)
-{ const at = P(47.4, 2.4); stone(at, AXIS, { h: 4.0, w0: 2.1, w1: 1.9, d0: 0.95, d1: 0.85, rough: 0.06, bury: 1.2, mat: 'granite_rough' }); }
-{ const at = P(47, -3.4); E.push({ t: 'standing_stone', at, y: height(at[0], at[1]), yaw: AXIS + Math.PI / 2, lying: true, h: 4.9, w0: 2.0, w1: 1.9, d0: 0.95, d1: 0.9, rough: 0.05, dress: 1, bury: 0.3, mat: 'granite_rough', tool: { faces: 'inner', lichen: 10 }, seed: 8801 }); }
+// the Slaughter Stone (4.9 m) and its partner standing at the entrance, either side of the way in (§1g)
+for (const v of [-3.2, 2.4]) { const at = P(47 + (v > 0 ? 0.4 : 0), v); stone(at, AXIS, { h: v > 0 ? 4.0 : 4.9, w0: 2.1, w1: 1.9, d0: 0.95, d1: 0.85, rough: 0.06, bury: 1.2, mat: 'granite_rough' }); }
 { const at = P(HEEL.d, 0.6); stone(at, AXIS + 0.25, { h: 4.9, w0: 2.6, w1: 1.4, d0: 2.3, d1: 1.4, rough: 0.16, bury: 1.6, cap: 'peak', lean: [-0.38, 0.05], natural: true, mat: 'rock_boulder', tool: { faces: 'none', lichen: 70 } }); }
 // the Station Stones: small undressed sarsens, two on their mounds
 for (const s of STATIONS) stone(s.at, AXIS + rand() * 0.5, { h: s.n === 91 ? 2.7 : s.n === 93 ? 1.3 : 1.6, w0: s.n === 91 ? 1.6 : 1.1, w1: 0.8, d0: 0.8, d1: 0.6, rough: 0.1, bury: 0.8, cap: 'round', natural: true, mat: 'rock_boulder', tool: { faces: 'none', lichen: 30 } });

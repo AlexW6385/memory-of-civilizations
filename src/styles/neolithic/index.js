@@ -660,7 +660,9 @@ function earthwork(el, { bag }) {
     const pos = [], nr = [];
     for (let i = 0; i < M - 1; i++) for (let j = 0; j < N - 1; j++) {
       const c = R[i][j];
-      if (slope(i, j) < 0.2 + 0.1 * hash(c[0], c[2])) continue;
+      const sl = slope(i, j);
+      if (sl < 0.2 + 0.1 * hash(c[0], c[2])) continue;
+      if (G.patchy && sl < 0.5 && hash(Math.floor(c[0] / 2.2), Math.floor(c[2] / 2.2)) < 0.5) continue;      // the gentle banks: the chalk broken into patches
       for (const [a, b] of [[i, j], [i + 1, j + 1], [i, j + 1], [i, j], [i + 1, j], [i + 1, j + 1]]) { pos.push(...P[a][b]); nr.push(...nor[a][b]); }
     }
     if (!pos.length) continue;

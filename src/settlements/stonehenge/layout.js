@@ -126,5 +126,5 @@ export function ringGrid(c, r0, r1, step = 0.6, n = 360, a0 = 0) {
 export function avenueGrid(s0, s1, t0, t1, ds = 2.5, dt = 0.5) {
   const ax = Math.cos(AXIS), az = Math.sin(AXIS), rows = [];
   for (let s = s0; s <= s1 + 1e-6; s += ds) { const row = []; for (let t = t0; t <= t1 + 1e-6; t += dt) row.push(pt(s * ax - t * az, s * az + t * ax)); rows.push(row); }
-  return { rows, closed: false };
+  return { rows, closed: false, patchy: true };
 }
