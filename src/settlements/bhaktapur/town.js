@@ -3,6 +3,7 @@
 // the potters at their wheels, the market's sellers and buyers, women with water pots and baskets, children, dogs, a cow or two.
 
 import { RADIUS, lots, waysides, PAVED, SQ, POT, KEEP, HOUSE, STALLS, inRect, onStreet, inLot, STREETS, fp, frontRot, NYA } from './layout.js';
+import { openedLots } from './upstairs.js';
 import taumadhi, { POT_WHEELS, POT_KILNS } from './plan.js';
 import './../../styles/newar/index.js';
 
@@ -19,6 +20,7 @@ export function newar(rand) {
 
 export async function town() {
   const rand = rng(1710), L = lots();
+  openedLots();
   const out = [];
   // the streets' brick paving, and the small stupas at some crossings
   out.push(base('bhaktapur-streets', 'newar', [...PAVED.map((rect) => ({ t: 'newar_paving', rect, y: 0.05, th: 0.3, mat: 'cotto_floor' })), ...PAVED.map((rect, i) => ({ t: 'newar_lane', rect, y: 0.05, seed: i + 3 }))]));
@@ -102,7 +104,8 @@ export async function town() {
     if (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) > 105) continue;
     const rot = frontRot(l.front);
     if (l.open) {
-      const kx = l.trade === 'cloth' ? W - 0.55 - 2.2 : l.trade === 'carver' ? W - 0.55 - 1.9 : W / 2 + (rand() - 0.5) * 1.2, kz = l.trade === 'carver' ? 3.3 : l.trade === 'cloth' ? 3.1 : l.trade === 'grain' ? 3.3 : 2.75;
+      let kx = l.trade === 'cloth' ? W - 0.55 - 2.2 : l.trade === 'carver' ? W - 0.55 - 1.9 : W / 2 + (rand() - 0.5) * 1.2, kz = l.trade === 'carver' ? 3.3 : l.trade === 'cloth' ? 3.1 : l.trade === 'grain' ? 3.3 : 2.75;
+      if (l.floors) { kx = W - 0.55 - 1.3; kz = 3.4; }                       // (the walked houses: the keeper stands right of the stair, not in its lane)
       const kp = fp(l, kx, kz); P.push(mkP(man, woman)(kp, 0.1, rot, { pose: l.trade === 'carver' ? 'sit_low' : 'stand' }));
       if (rand() < 0.65) { const cp = fp(l, W / 2 + (rand() - 0.5) * 2, -0.9); P.push(mkP(woman, man)(cp, 0.05, rot + Math.PI, { pose: 'talk' })); }
     } else if (l.pid && rand() < 0.7) {

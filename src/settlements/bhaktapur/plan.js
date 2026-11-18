@@ -2,6 +2,7 @@
 // five pairs of guardians, the Bhairabnath, the Siddhi Lakshmi shikhara, a dabali, a pati, a stone spout, a chaitya and two pipals on the
 // brick-paved square, the stalls of the market, the enterable Newar house on its south side; Pottery Square with its drying ground, wheels and kilns.
 
+import { upRoutes } from './upstairs.js';
 import { lots, SQ, POT, NYATAPOLA, BHAIRAB, SHI, DABALI, PATI, DHARA, CHAITYA, TREES, HOUSE, STALLS } from './layout.js';
 
 const E = [];
@@ -18,7 +19,7 @@ E.push({ t: 'newar_pati', rect: PATI });
 E.push({ t: 'newar_dhara', ...DHARA });
 E.push({ t: 'newar_chaitya', c: CHAITYA.c, s: 1 });
 TREES.forEach(([x, z], i) => E.push({ t: 'newar_tree', at: [x, z], h: 9.5 + i, seed: i * 2 }));
-E.push({ t: 'newar_house', ...HOUSE, open: true, detail: 2, seed: 77, light: true, trade: 'home', shop: false, dx: 4.5, pid: false });
+E.push({ t: 'newar_house', ...HOUSE, open: true, detail: 2, seed: 77, light: true, trade: 'home', shop: false, dx: 4.5, pid: false, floors: true, balcony: true });
 STALLS.forEach(([x, z, yaw, kind], i) => E.push({ t: 'newar_stall', at: [x, z], yaw, kind, seed: i + 5 }));
 
 // Pottery Square: the drying ground, the wheels along its north edge, the kilns behind them (the south-west)
@@ -48,6 +49,8 @@ walks[0].y0 = 0;
 // up the stair of the enterable house to its first floor and about it
 walks.push([[19, 22], [17.5, 25.4], [17.5, 28.2], [20, 29.6], [22, 27], [20, 26.2]]);
 walks[1].y0 = 0;
+// the walked houses (upstairs.js, docs §16): from the street up each ladder-stair to the rooms and the kitchen under the roof
+for (const r of upRoutes()) { r.y0 = 0; walks.push(r); }
 
 export const taumadhi = {
   id: 'bhaktapur-taumadhi',
