@@ -12,7 +12,7 @@ E.push({ t: 'stairs', rect: [-7, COURT[3], 7, tz0 + 0.6], y0: 0, y1: ty, dir: 's
 E.push({ t: 'ziggurat', lit: true, c: ZIG.c, y: ty, stages: ZIG.stages, shrine: ZIG.shrine });
 // the terrace's enclosure (walls of rooms standing on it, back from its sloping face), the Court of Nanna with the
 // Edublalmah, the gate tower, at its entrance, the precinct wall and its north gate
-const w = (a, b, h, th, y, mat) => E.push({ t: 'precinct_wall', a, b, h, th, y, mat });
+const w = (a, b, h, th, y, mat, lit) => E.push({ t: 'precinct_wall', a, b, h, th, y, mat, lit });
 const [ex0, ez0, ex1, ez1] = [tx0 + 2.5, tz0 + 2.5, tx1 - 2.5, tz1 - 2.5];
 w([ex0, ez0], [-9, ez0], 1.2, 1.6, ty, 'brick_buff'); w([9, ez0], [ex1, ez0], 1.2, 1.6, ty, 'brick_buff'); w([ex0, ez1], [ex1, ez1], 3.5, 2.5, ty); w([ex0, ez0], [ex0, ez1], 3.5, 2.5, ty); w([ex1, ez0], [ex1, ez1], 3.5, 2.5, ty);   // (the front of the enclosure a low parapet of pale baked brick: a 3.5 m wall on the 2.5 m terrace hid the lower stage and its three stairways from the court)
 E.push({ t: 'gate_tower', rect: [-8, -146, 8, -134], door: 'n', w: 3, h: 9, dh: 4.2, glaze: true });
@@ -27,8 +27,9 @@ E.push({ t: 'ur_terrace', rect: TERRACE.rect, y: ty });
 // palms flanking the avenue between the north gate and the Edublalmah
 for (const [px, pz, s] of [[-15, -163, 1], [15, -163, 2], [-15, -147, 3], [15, -147, 4]]) E.push({ t: 'ur_palm', at: [px, pz], y: 0, h: 8.5 + (s % 3), seed: 200 + s });
 const [px0, pz0, px1, pz1] = TEMENOS;
-w([px0, pz0], [-7, pz0], 7, 4); w([7, pz0], [px1, pz0], 7, 4); w([px0, pz1], [px1, pz1], 7, 4); w([px0, pz0], [px0, pz1], 7, 4);
-w([px1, pz0], [px1, -26], 7, 4); w([px1, -14], [px1, pz1], 7, 4);
+const tw = (a, b) => w(a, b, 7, 4, undefined, undefined, true);   // the temenos wall: buttresses and recesses (docs/settlements/ur.md §4.1f)
+tw([px0, pz0], [-7, pz0]); tw([7, pz0], [px1, pz0]); tw([px0, pz1], [px1, pz1]); tw([px0, pz0], [px0, pz1]);
+tw([px1, pz0], [px1, -26]); tw([px1, -14], [px1, pz1]);
 // the harbour: the quay along its town side, reed boats (its water is the planet's sea: ground.js, sea)
 const [hx0, hz0, hx1, hz1] = HARBOUR.rect;
 E.push({ t: 'block', walk: true, rect: [hx1 - 1.5, hz0 + 6, hx1 + 1.5, hz1 - 6], y0: HARBOUR.bed, y1: 0.6, mat: 'brick_baked' });

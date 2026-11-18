@@ -9,6 +9,7 @@ import { beamTris } from '../ming/index.js';
 import { stairs } from '../sumerian/index.js';
 import { dressFront, roofLife } from '../sumerian/dress.js';
 import { rng, prism, sideFrame, sideBox } from './util.js';
+import { nearHouse } from './near.js';
 
 const BB = 'brick_baked', MP = 'mud_plaster';
 const DOOR = { w: 1.0, h: 2.1, spring: 1.6, depth: 0.3 };
@@ -133,6 +134,7 @@ export function urHouse(el, ctx) {
   for (const [a, b] of [[[x0, z0], [x1, z0]], [[x0, z1], [x1, z1]], [[x0, z0], [x0, z1]], [[x1, z0], [x1, z1]]]) { const t = []; beamTris(t, [a[0], H, a[1]], [b[0], H, b[1]], 0.15, 0.5); bag.add(up, fromTriangles(t)); }
   if (lod > 0) dressFront(ctx, { rect: el.rect, face: faces[side], dc: du, trade: el.trade, seed: el.seed, foot: base, H, near: lod > 1 });
   if (lod > 1) roofLife(ctx, { wings: Object.values(wings), y: H, seed: el.seed });
+  if (el.near) nearHouse(ctx, { rect: el.rect, f: faces[side], du, H, cls, seed: el.seed, wings: Object.values(wings), court: [x0 + d, z0 + d, x1 - d, z1 - d] });   // the nearest houses, drawn closer (§5.13)
   for (const f of faces) {
     if (rand() < 0.35) continue;
     const l = f === 'n' || f === 's' ? W : D, a = (f === 'n' || f === 's' ? x0 : z0) + (0.35 + rand() * 0.3) * l, y = H + 0.05;

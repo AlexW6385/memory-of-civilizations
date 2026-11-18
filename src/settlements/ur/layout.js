@@ -141,6 +141,7 @@ export function houses() {
   for (const h of HOUSES) {
     const [cx, cz] = mid(h), d = Math.hypot(cx, cz + 120);
     h.lod = d < 200 ? 2 : d < 320 ? 1 : 0;
+    h.near = d < 120;                                   // the houses nearest the arrival are drawn closer (docs/settlements/ur.md §5.13)
     if (!h.trade && !h.chapel && !h.open && h.seed % 7 === 0) h.trade = ['potter', 'weaver', 'baker', 'reeder', 'smith', 'brewer'][h.seed % 6];
   }
   return HOUSES;
