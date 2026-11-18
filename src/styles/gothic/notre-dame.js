@@ -12,6 +12,8 @@ import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/ge
 import { planarWall, archHalf, archRise } from '../byzantine/index.js';
 import './index.js';
 import { archWall, pier, vault, rise, jube, stalls, altar, sideAltar } from './nd-interior.js';
+import { Acc, statue, smallFigure, gargoyle as gargoyleBeast, hash3 } from './nd-sculpture.js';
+import { portalRelief } from './nd-relief.js';
 
 const L = 'limestone', CARVE = 'limestone_carved', LEAD = 'lead';
 const D2R = Math.PI / 180;
@@ -182,23 +184,8 @@ function pinnacle(bag, x, y, z, w, h, m = L) {
   bag.add(m, lathe([[0.06, 0], [0.09, 0.2], [0.001, 0.42]], 6, null, x, y + h + 0.06, z));
 }
 
-/** A gargoyle: a beast's body run out from the wall along d (horizontal unit vector), its jaws open to spout the rain. */
-function gargoyle(bag, x, y, z, d, len = 1.6) {
-  const sx = -d[1], sz = d[0], out = [];
-  const P = (t, s, v) => [x + d[0] * t + sx * s, y + v, z + d[1] * t + sz * s];
-  const sec = (t, hw, v0, v1) => [P(t, -hw, v0), P(t, hw, v0), P(t, hw, v1), P(t, -hw, v1)];
-  const seg = (t0, t1, a, b) => { const A = sec(t0, ...a), B = sec(t1, ...b); hexa(out, [A[0], A[1], B[1], B[0]], [A[3], A[2], B[2], B[3]]); };
-  seg(-0.3, len * 0.55, [0.24, -0.22, 0.24], [0.2, -0.17, 0.2]);                    // the body, from inside the wall
-  seg(len * 0.55, len * 0.8, [0.2, -0.12, 0.22], [0.15, -0.02, 0.24]);               // the neck, raised
-  seg(len * 0.8, len, [0.15, 0.03, 0.24], [0.1, 0.06, 0.2]);                          // the upper jaw
-  seg(len * 0.78, len * 0.97, [0.12, -0.1, -0.01], [0.08, -0.12, -0.05]);             // the lower jaw, dropped
-  for (const s of [-1, 1]) {                                                            // the forelegs gripping the cornice
-    const a = P(len * 0.35, s * 0.18, -0.18), b = P(len * 0.42, s * 0.18, -0.5);
-    hexa(out, [[a[0] - 0.06, a[1], a[2] - 0.06], [a[0] + 0.06, a[1], a[2] - 0.06], [a[0] + 0.06, a[1], a[2] + 0.06], [a[0] - 0.06, a[1], a[2] + 0.06]], [[b[0] - 0.05, b[1], b[2] - 0.05], [b[0] + 0.05, b[1], b[2] - 0.05], [b[0] + 0.05, b[1], b[2] + 0.05], [b[0] - 0.05, b[1], b[2] + 0.05]]);
-    prism(out, [P(len * 0.2, s * 0.2, 0.15), P(len * 0.5, s * 0.42, 0.42), P(len * 0.55, s * 0.2, 0.12)], [-sx * s * 0.04, 0, -sz * s * 0.04]);   // the folded wings
-  }
-  bag.add(L, fromTriangles(out));
-}
+/** A gargoyle: a crouching beast run out from the wall along d (horizontal unit vector), its jaws open to spout the rain (nd-sculpture.js). */
+function gargoyle(bag, x, y, z, d, len = 1.6, full = false) { const a = new Acc(); gargoyleBeast(a, CARVE, x, y, z, d, len, full); a.flush(bag); }
 
 // ── windows, rose ─────────────────────────────────────────────────────────────────────────────
 
@@ -250,7 +237,8 @@ const figure = figureND;
 // the 13th-century portals were painted: the figures' robes in reds, blues, ochres and greens, the tympanum's ground blue
 const PAINT = ['paint_robe', 'paint_blue', 'paint_ochre', 'cloth_red', 'paint_white', 'cloth_green'];
 function portal(bag, col, p0) {
-  const p = p0, figure = (b, x, y, z, h, o = {}) => figureND(b, x, y, z, h, { mat: PAINT[Math.abs(Math.floor(z * 7.3 + y * 3.1 + h * 11)) % PAINT.length], ...o });
+  const p = p0, acc = new Acc(), robeOf = (a, b) => PAINT[Math.floor(hash3(a, b, 77) * PAINT.length)];
+  const ATTR = ['book', 'key', 'scroll', 'sword', 'book', 'staff', 'scroll', 'cross', 'book', 'palm', 'scroll', 'book'];
   const { x, z0, z1, y, W0, N, dw, dd, spring: S, xBack, top, f = 0.75 } = p;
   const zc = (z0 + z1) / 2, wN = W0 - N * dw, xEnd = x + N * dd;
   const o = [x, z0], u = [0, 1], uc = zc - z0;
@@ -271,7 +259,7 @@ function portal(bag, col, p0) {
     bag.add(L, lathe([[0.08, 0], [0.08, S - p.base]], 8, null, x + (k + 1) * dd - 0.02, y + p.base, zcol));
     const zs = zc + s * (W0 - (k + 0.5) * dw), xs = xa - 0.27, hS = p.statue;
     bag.add(L, lathe([[0.001, -0.22], [0.13, -0.22], [0.2, -0.13], [0.25, -0.04], [0.27, 0]], 8, null, xs, y + p.base + 0.26, zs));
-    figure(bag, xs, y + p.base + 0.26, zs, hS, { book: k % 2 === 0, crown: p.crowns && k % 3 === 1 });
+    statue(acc, xs, y + p.base + 0.26, zs, hS, { mat: robeOf(xs, zs), attr: ATTR[(k * 2 + (s > 0 ? 1 : 0) + (p.scheme === 'anne' ? 5 : p.scheme === 'virgin' ? 3 : 0)) % 12], crown: p.crowns && k % 3 === 1, crownMat: 'paint_ochre', face: [-1, 0] });
     const cy = y + p.base + 0.26 + hS + 0.12;
     bag.add(L, box(xs - 0.26, cy, zs - 0.2, xs + 0.24, cy + 0.22, zs + 0.2));
     bag.add(L, frustum([xs - 0.26, zs - 0.2, xs + 0.24, zs + 0.2], cy + 0.22, cy + 0.62, 0.2, 0.2, 0.15, 0.15));
@@ -303,14 +291,14 @@ function portal(bag, col, p0) {
     for (const s of [-1, 1]) for (let i = 0; i < n; i++) {
       const dy = H * (i + 0.15) / (n + 0.2), zz = zc + s * archHalf(a, dy);
       if (dy > H - 0.45) continue;
-      figure(bag, xs, y + S + dy - 0.08, zz, 0.58, { seat: i % 2 === 1, face: [-1, 0] });
+      smallFigure(acc, xs, y + S + dy - 0.08, zz, 0.58, { mat: robeOf(xs + k, zz), seat: i % 2 === 1, face: [-1, 0], crown: p.crowns && i % 3 === 2 });
     }
   }
   // the trumeau, its figure, the doors with their iron hinges
   const xd = xBack - 0.22;
   bag.add(L, box(xEnd - 0.35, y, zc - 0.36, xBack, doorTop, zc + 0.36));
   bag.add(L, lathe([[0.001, -0.3], [0.24, -0.06], [0.3, 0]], 8, null, xEnd - 0.55, y + 1.6, zc));
-  figure(bag, xEnd - 0.55, y + 1.6, zc, p.statue * 1.05, { book: true, crown: p.trumeauCrown });
+  statue(acc, xEnd - 0.55, y + 1.6, zc, p.statue * 1.05, { mat: p.scheme === 'judgement' ? 'paint_white' : p.scheme === 'virgin' ? 'paint_blue' : 'paint_robe', attr: p.scheme === 'virgin' ? 'scepter' : 'book', crown: p.trumeauCrown !== false && p.scheme === 'virgin', beard: p.scheme !== 'virgin', long: true, hair: 'wood_dark', face: [-1, 0] });
   bag.add(L, box(xEnd - 0.84, y + 1.72 + p.statue * 1.05, zc - 0.3, xEnd - 0.28, y + 2.0 + p.statue * 1.05, zc + 0.3));
   // the two leaves stand open, turned in against the jambs of the passage (their iron scrolls on the
   // face that shuts outward, now turned to the passage)
@@ -326,38 +314,13 @@ function portal(bag, col, p0) {
     bag.add('iron', fromTriangles(iron));
     col.rect([xh, zl, xh + lw, zm], y, doorTop);
   }
-  // lintels and tympanum: two bands of figures and the field above with its own
+  // lintels and tympanum: the ledges, and the modelled relief of the registers (nd-relief.js)
   const tA = { r: wN, pointed: f }, TH = archRise(tA), ty = y + S;
   const band = (y0, y1) => { bag.add(L, box(xEnd - 0.3, y0, zc - wN, xEnd + 0.02, y0 + 0.14, zc + wN)); bag.add(L, box(xEnd - 0.32, y1 - 0.14, zc - wN, xEnd + 0.02, y1, zc + wN)); };
   const L1 = doorTop, L2 = doorTop + p.lintel, L3 = L2 + p.lintel * 1.15;
   band(L1, L2); band(L2, Math.min(L3, ty));
-  const row = (y0, h, n, opts = () => ({})) => { for (let i = 0; i < n; i++) { const zz = zc - wN + (i + 0.5) * 2 * wN / n; figure(bag, xEnd - 0.14, y0, zz, h, opts(i, zz)); } };
-  const { scheme } = p;
-  if (scheme === 'judgement') {
-    // the dead rising from their tombs below; the weighing of souls above, the elect to the left, the damned to the right
-    for (let i = 0; i < 7; i++) { const zz = zc - wN + (i + 0.5) * 2 * wN / 7; bag.add(L, box(xEnd - 0.34, L1 + 0.14, zz - 0.3, xEnd - 0.04, L1 + 0.42, zz + 0.3)); }
-    row(L1 + 0.3, p.lintel - 0.5, 9);
-    row(L2 + 0.14, p.lintel * 1.15 - 0.36, 13, (i) => ({ wings: i === 6, seat: false }));
-    figure(bag, xEnd - 0.2, ty + 0.2, zc, TH * 0.62, { seat: true });                      // Christ in judgement
-    for (const s of [-1, 1]) { figure(bag, xEnd - 0.16, ty + 0.15, zc + s * wN * 0.42, TH * 0.44, { wings: true }); figure(bag, xEnd - 0.16, ty + 0.1, zc + s * wN * 0.72, TH * 0.3, { seat: true }); }
-  } else if (scheme === 'virgin') {
-    // prophets and kings by the Ark below; the Virgin's death among the apostles; her coronation above
-    bag.add(L, box(xEnd - 0.36, L1 + 0.14, zc - 0.5, xEnd - 0.04, L1 + 0.6, zc + 0.5));
-    row(L1 + 0.14, p.lintel - 0.3, 6, (i) => ({ crown: i > 2 }));
-    bag.add(L, box(xEnd - 0.4, L2 + 0.35, zc - wN * 0.6, xEnd - 0.06, L2 + 0.6, zc + wN * 0.6));
-    row(L2 + 0.14, p.lintel * 1.15 - 0.34, 12);
-    figure(bag, xEnd - 0.2, ty + 0.15, zc - wN * 0.2, TH * 0.55, { seat: true });
-    figure(bag, xEnd - 0.2, ty + 0.15, zc + wN * 0.2, TH * 0.55, { seat: true });
-    figure(bag, xEnd - 0.16, ty + TH * 0.4, zc, TH * 0.3, { wings: true });
-    for (const s of [-1, 1]) figure(bag, xEnd - 0.16, ty + 0.1, zc + s * wN * 0.68, TH * 0.36, { wings: true });
-  } else {
-    // Saint Anne: the lives of Anne and Joachim and of Mary below; the Virgin in majesty under her canopy above
-    row(L1 + 0.14, p.lintel - 0.3, 10);
-    row(L2 + 0.14, p.lintel * 1.15 - 0.34, 11);
-    figure(bag, xEnd - 0.2, ty + 0.15, zc, TH * 0.6, { seat: true, crown: true });
-    bag.add(L, box(xEnd - 0.4, ty + TH * 0.68, zc - 0.55, xEnd - 0.04, ty + TH * 0.76, zc + 0.55));
-    for (const s of [-1, 1]) { figure(bag, xEnd - 0.16, ty + 0.15, zc + s * wN * 0.38, TH * 0.42, { wings: true }); figure(bag, xEnd - 0.16, ty + 0.1, zc + s * wN * 0.7, TH * 0.32, { crown: s > 0 }); }
-  }
+  portalRelief(acc, { X: xEnd, zc, wN, L1, lintel: p.lintel, ty, apex: ty + TH, scheme: p.scheme, arch: (dy) => archHalf(tA, dy) });
+  acc.flush(bag);
   // the gable over the outer archivolt: a moulded raking edge on each side with crockets, a corbel under each foot, a ring of
   // tracery in the apex, pinnacles at the feet and a finial (inferred: the portals' gables as restored; they stood in 1248)
   { const crown = y + S + archRise({ r: W0, pointed: f }), yb = y + S + 0.6, ya = crown + (p.scheme === 'judgement' ? 2.7 : 2.9), hw = W0 + 0.1, gx = x - 0.17, gb = [], cr = [];
@@ -394,6 +357,7 @@ function notreDame(el, ctx) {
   const ZN = 7, ZT = 13, ZC = 21, ZU0 = 18.6, ZU1 = 23.6, ZCC = 17, ZUC0 = 16.6, ZUC1 = 21;   // walls; nave uprights; the choir's outer wall and uprights
   const EAVE = 34, RIDGE = 44.5, TRIB = 21.8, TRIBR = 23, CHAP = 11.5, CHAPR = 13.8;
   const Z = (v) => cz + v;
+  const sc = new Acc();                                       // the statues of the west front, merged per material
 
   // ── the west front ──
   const BUT = [[-ZF, -17.6], [-7.4, -4.6], [4.6, 7.4], [17.6, ZF]];
@@ -405,7 +369,7 @@ function notreDame(el, ctx) {
     // a statue before the buttress on its corbel, under a gabled canopy (the four of the buttresses)
     const zm = Z((a + b) / 2);
     { const j = 0.0007 * (zm % 7); bag.add(L, lathe([[0.42 + j, 0], [0.4 + j, 0.2], [0.36 + j, 0.32], [0.36 + j, 2.7], [0.44 + j, 2.82], [0.46 + j, 3.0]], 10, null, X0 - 1.75, Y(0), zm)); }
-    figure(bag, X0 - 1.75, Y(3.0), zm, 2.5, { book: a < 0 && a > -10, crown: a > 10 });
+    statue(sc, X0 - 1.75, Y(3.0), zm, 2.5, { mat: PAINT[Math.floor(hash3(zm, 3, 1) * PAINT.length)], attr: a < -10 ? 'sword' : a < 0 ? 'book' : a > 10 ? 'scepter' : 'palm', crown: a > 10, crownMat: 'paint_ochre', face: [-1, 0] });
     bag.add(L, box(X0 - 2.15, Y(5.7), zm - 0.45, X0 - 1.39, Y(5.95), zm + 0.45));
     const g = []; prism(g, [[X0 - 2.15, Y(5.95), zm - 0.45], [X0 - 2.15, Y(5.95), zm + 0.45], [X0 - 2.15, Y(6.9), zm]], [0.76, 0, 0]); bag.add(L, fromTriangles(g));
     // the blind arcade on the buttress's face above
@@ -433,8 +397,9 @@ function notreDame(el, ctx) {
   const NK = 28, kw = 2 * ZF / NK;
   for (let i = 0; i < NK; i++) {
     const zz = Z(-ZF + (i + 0.5) * kw);
-    figure(bag, XK - 0.42, Y(20.2), zz, 3.3, { crown: true });
+    statue(sc, XK - 0.42, Y(20.2), zz, 3.3, { mat: PAINT[Math.floor(hash3(zz, 20, 5) * PAINT.length)], lod: 1, crown: true, crownMat: 'paint_ochre', attr: i % 3 === 0 ? 'scepter' : i % 3 === 1 ? 'scroll' : 'palm', face: [-1, 0] });
   }
+  sc.flush(bag);
   for (let i = 0; i <= NK; i++) { const zz = Z(-ZF + i * kw); bag.add(L, lathe([[0.11, 0], [0.1, 3.0], [0.16, 3.05], [0.16, 3.15]], 8, null, X0 + 0.95, Y(20.2), zz)); }
   bag.add(L, planarWall({ o: [X0 + 0.95, Z(-ZF)], u: [0, 1], th: 0.4, u0: 0, u1: 2 * ZF, y0: Y(23.35), y1: Y(24.45), arcade: true, noEnds: true,
     arches: Array.from({ length: NK }, (_, i) => ({ uc: (i + 0.5) * kw, r: kw / 2 - 0.1, spring: Y(23.35), sill: Y(23.35), pointed: 0.8 })) }));
@@ -523,8 +488,8 @@ function notreDame(el, ctx) {
       const n = Math.round(Ln / 0.9), st = Ln / n;
       bag.add(L, planarWall({ o, u, th: 0.3, u0: 0, u1: Ln, y0: Y(67.8), y1: Y(69.0), arches: Array.from({ length: n }, (_, i) => ({ uc: (i + 0.5) * st, r: st / 2 - 0.1, spring: Y(68.35), sill: Y(67.95), pointed: 0.85 })) }));
     }
-    for (const [cx, czz, dx, dz] of [[TX0, Z(za), -1, -1], [TX0, Z(zb), -1, 1], [TX1, Z(za), 1, -1], [TX1, Z(zb), 1, 1]]) { const l = Math.SQRT1_2; gargoyle(bag, cx - dx * 0.2, Y(67.05), czz - dz * 0.2, [dx * l, dz * l], 1.9); }
-    for (const t of [0.33, 0.67]) { gargoyle(bag, TX0 - 0.1, Y(67.05), Z(za + (zb - za) * t), [-1, 0], 1.5); }
+    for (const [cx, czz, dx, dz] of [[TX0, Z(za), -1, -1], [TX0, Z(zb), -1, 1], [TX1, Z(za), 1, -1], [TX1, Z(zb), 1, 1]]) { const l = Math.SQRT1_2; gargoyle(bag, cx - dx * 0.2, Y(67.05), czz - dz * 0.2, [dx * l, dz * l], 1.9, true); }
+    for (const t of [0.33, 0.67]) { gargoyle(bag, TX0 - 0.1, Y(67.05), Z(za + (zb - za) * t), [-1, 0], 1.5, true); }
   }
 
   // the nave's west gable behind the gallery
