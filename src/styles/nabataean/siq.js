@@ -15,7 +15,8 @@
 
 import { fromTriangles, rod, orientOutward } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
-import { raise } from '../achaemenid/reliefs.js';
+import { Sculpt, tube, add, sub, mul, norm } from './sculpt.js';
+import * as FG from './figures.js';
 
 const R = 'sandstone_rose';
 const SUB = 4;                                                       // mesh columns per 2 m sample (every 0.5 m)
@@ -27,12 +28,6 @@ function vnoise(x, y, k = 0) {
   const a = hash(i, j, k), b = hash(i + 1, j, k), c = hash(i, j + 1, k), d = hash(i + 1, j + 1, k);
   return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
 }
-
-const CAMEL = [[-0.5, 0], [-0.44, 0], [-0.42, 0.35], [-0.3, 0.5], [0.15, 0.5], [0.2, 0.35], [0.18, 0], [0.24, 0], [0.27, 0.38], [0.3, 0.55], [0.4, 0.7],
-  [0.48, 0.85], [0.6, 0.86], [0.6, 0.92], [0.5, 0.97], [0.45, 0.95], [0.36, 0.78], [0.25, 0.7], [0.1, 0.85], [0.0, 0.9], [-0.15, 0.85], [-0.3, 0.72],
-  [-0.45, 0.65], [-0.52, 0.55], [-0.5, 0.4], [-0.48, 0.02]];
-const MAN = [[-0.09, 0], [0.1, 0], [0.07, 0.04], [0.07, 0.3], [0.09, 0.5], [0.12, 0.62], [0.1, 0.65], [0.07, 0.72], [0.07, 0.86], [0.08, 0.93], [0.04, 1.0],
-  [-0.04, 0.99], [-0.06, 0.9], [-0.07, 0.75], [-0.1, 0.5], [-0.11, 0.3], [-0.07, 0.04]];
 
 // ---- the beds: from below the floor to above the rim, each with its colour, how far it has weathered back, and its swell
 const MATS = { rose: 'sandstone_rose', red: 'scoria_red', mauve: 'tuff_red', ochre: 'banco', yellow: 'sandstone_yellow', grey: 'rubble', white: 'sandstone_white' };
@@ -234,62 +229,81 @@ function fallen(bag, col, pts, s, face, kind, at, si, clear) {
  */
 function waterworks(bag, pts, s, face, kind, at, si) {
   const n = pts.length, d0 = (i) => faceD(face, i, 1.0, si);
-  const ribbon = (mat, dA, dB, yA, yB, faces) => {
-    // a solid strip along the wall from d = dA(i) to dB(i), from yA to yB above the floor: its front, top and (if asked) back
-    const T = [], q = (a, b, c, d) => T.push(...a, ...b, ...c, ...a, ...c, ...d);
-    for (let i = 0; i + 1 < n; i++) {
-      const fa = at(i, dA(i), yA), fb = at(i + 1, dA(i + 1), yA), ta = at(i, dA(i), yB), tb = at(i + 1, dA(i + 1), yB);
-      const ba = at(i, dB(i), yB), bb = at(i + 1, dB(i + 1), yB), la = at(i, dB(i), yA), lb = at(i + 1, dB(i + 1), yA);
-      if (s > 0) { q(fa, ta, tb, fb); q(ta, ba, bb, tb); if (faces.back) q(la, lb, bb, ba); }
-      else { q(fa, fb, tb, ta); q(ta, tb, bb, ba); if (faces.back) q(la, ba, bb, lb); }
-    }
-    for (const [i, sg] of [[0, 1], [n - 1, -1]]) {
-      const a = at(i, dA(i), yA), b = at(i, dB(i), yA), c = at(i, dB(i), yB), d = at(i, dA(i), yB);
-      if ((s > 0) === (sg > 0)) q(a, b, c, d); else q(a, d, c, b);
-    }
-    bag.add(mat, fromTriangles(T));
+  // the cross-sections run along the wall: modelled, not boxed (docs §22): [offset from the face line, height above the floor]
+  const run = (mat, prof, mod = 0) => {
+    const rows = [];
+    for (let i = 0; i < n; i++) rows.push(prof.map(([pd, yy]) => at(i, d0(i) + pd, yy + mod * 0.03 * Math.sin(i * 1.7 + pd * 5))));
+    const S = new Sculpt(); S.grid(rows, { wrap: false, face: [0, 1, 0] }); bag.add(mat, S.geometry());
   };
   if (kind === 'cut') {
-    ribbon(R, (i) => d0(i) - 0.55, (i) => d0(i) + 1.2, -0.2, 0.92, {});
-    ribbon(R, (i) => d0(i) - 0.55, (i) => d0(i) - 0.4, 0.92, 1.18, { back: true });
-    ribbon('water', (i) => d0(i) - 0.4, (i) => d0(i) + 0.3, 1.04, 1.04 + 0.001, {});
+    // the channel cut along the foot of the wall: the kerb's battered front and rounded lip, the trough sunk behind it with its sloping sides, a bank up to the wall, the water in it
+    run(R, [[-0.6, -0.25], [-0.57, 0.3], [-0.54, 0.85], [-0.5, 1.02], [-0.44, 1.14], [-0.35, 1.19], [-0.28, 1.14], [-0.24, 1.0], [-0.18, 0.9], [0.0, 0.86], [0.25, 0.88], [0.36, 1.0], [0.45, 1.3], [1.2, 1.3], [1.25, -0.25]], 1);
+    const T = [], q = (a, b, c, d) => T.push(...a, ...b, ...c, ...a, ...c, ...d);
+    for (let i = 0; i + 1 < n; i++) { const a = at(i, d0(i) - 0.26, 1.0), b = at(i + 1, d0(i + 1) - 0.26, 1.0), c = at(i + 1, d0(i + 1) + 0.37, 1.0), d = at(i, d0(i) + 0.37, 1.0); if (s > 0) q(a, d, c, b); else q(a, b, c, d); }
+    bag.add('water', fromTriangles(T));
+    // flat cover stones across the channel every 9 m, so that the way can be crossed
+    for (let i = 4; i + 1 < n; i += 5) { const a = at(i, d0(i) - 0.6, 1.2), b = at(i, d0(i) + 0.5, 1.2), S = new Sculpt(); void S; bag.add(R, orientedBox([a[0], a[2]], [b[0], b[2]], 0.9, 1.12, 1.3)); }
   } else {
-    ribbon(R, (i) => d0(i) - 0.5, (i) => d0(i) + 1.2, -0.2, 0.5, {});
-    for (let i = 0; i + 1 < n; i++) {
-      const a = at(i, d0(i) - 0.22, 0.63), b = at(i + 1, d0(i + 1) - 0.22, 0.63);
-      bag.add('terracotta', rod(a, b, 0.13, 10));
-      const L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), e = [(b[0] - a[0]) / L, (b[1] - a[1]) / L, (b[2] - a[2]) / L];
-      bag.add('terracotta', rod([a[0] - e[0] * 0.07, a[1] - e[1] * 0.07, a[2] - e[2] * 0.07], [a[0] + e[0] * 0.07, a[1] + e[1] * 0.07, a[2] + e[2] * 0.07], 0.165, 10));
+    // the ledge with the rock-cut groove the pipe lies in, then the pipe: sections of fired clay each with its socket and a collar of lime mortar at the joint
+    run(R, [[-0.55, -0.25], [-0.52, 0.3], [-0.5, 0.5], [-0.45, 0.56], [-0.4, 0.58], [-0.36, 0.52], [-0.22, 0.46], [-0.08, 0.52], [-0.04, 0.58], [0.2, 0.6], [1.2, 0.6], [1.25, -0.25]], 1);
+    const P = new Sculpt(), M = new Sculpt(), sec = 2;
+    for (let i = 0; i + 1 < n; i++) for (let k = 0; k < sec; k++) {
+      const t0 = (i + k / sec), t1 = (i + (k + 1) / sec), f = (t) => { const j = Math.min(n - 2, Math.floor(t)), u = t - j; return at(j, d0(j) + (d0(j + 1) - d0(j)) * u - 0.22, 0.63 + 0.004 * Math.sin(t * 3.1)); };
+      const a = f(t0), b = f(t1), e = norm(sub(b, a)), L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+      tube(P, [[...a, 0.112 * (1 + 0.02 * Math.sin(i * 2.3 + k))], [...add(a, mul(e, L * 0.8)), 0.112], [...add(b, mul(e, 0.02)), 0.14]], { seg: 6, sub: 1, cap: [0, 0] });
+      tube(M, [[...add(b, mul(e, -0.05)), 0.15], [...add(b, mul(e, 0.05)), 0.15]], { seg: 6, sub: 1, cap: [0, 0] });
     }
+    bag.add('terracotta', P.geometry()); bag.add('banco', M.geometry());
   }
 }
 
-/** A niche cut for a baetyl: a framed panel of dressed rock on the face, the plain block of the god standing on its ledge. */
+/**
+ * A niche for a baetyl (docs/settlements/petra.md §22): a dressed aedicule standing out of the face, its two pilasters with the
+ * horned Nabataean capitals, the architrave and cornice, the little pediment with its raking cornices and acroteria over a
+ * recess, and in the recess the god's stone, a tapering betyl on its two steps. Built as one piece in the rock's own stone.
+ */
 function niche(bag, side, face, i, si) {
   const { s, pts } = side, [x, z, nx, nz, f] = pts[i], tx = nz * s, tz = -nx * s;
-  const dIn = Math.max(...[1.6, 2.4, 3.2, 4].map((yy) => faceD(face, i, yy, si))) + 0.4, dOut = Math.min(...[1.6, 2.4, 3.2, 4].map((yy) => faceD(face, i, yy, si))) - 0.15;
-  const P = (u, d) => [x + tx * u + nx * d, z + tz * u + nz * d], y = f + 1.7;
-  const slab = (mat, u0, u1, dA, dB, y0, y1) => { const a = P((u0 + u1) / 2, dA), b = P((u0 + u1) / 2, dB); bag.add(mat, orientedBox(a, b, Math.abs(u1 - u0), y0, y1)); };
-  slab(R, -0.95, 0.95, dOut + 0.05, dIn, y, y + 2.1);            // the dressed back panel
-  slab(R, -1.15, -0.85, dOut - 0.18, dIn, y - 0.1, y + 2.1);     // the pilasters
-  slab(R, 0.85, 1.15, dOut - 0.18, dIn, y - 0.1, y + 2.1);
-  slab(R, -1.25, 1.25, dOut - 0.25, dIn, y + 2.1, y + 2.4);      // the lintel and its two crow-steps
-  slab(R, -0.8, 0.8, dOut - 0.2, dIn, y + 2.4, y + 2.6);
-  slab(R, -0.4, 0.4, dOut - 0.15, dIn, y + 2.6, y + 2.8);
-  slab(R, -0.85, 0.85, dOut - 0.3, dIn, y - 0.1, y + 0.12);      // the ledge
-  slab(R, -0.22, 0.22, dOut - 0.12, dOut + 0.1, y + 0.12, y + 1.0);   // the baetyl
+  const ds = [1.6, 2.4, 3.2, 4, 4.8].flatMap((yy) => [-1, 0, 1].map((k) => faceD(face, i + k, yy, si)));
+  const dIn = Math.max(...ds) + 0.4, dOut = Math.min(...ds) - 0.1, wb = -(dIn - dOut) - 0.1, y0 = f + 1.7;
+  // the niche's frame: x to the viewer's right (standing in the Siq, facing the wall), y up, w out of the wall toward the way
+  const S = new Sculpt(([a, b, w]) => { const u = -a * s, d = dOut - w; return [x + tx * u + nx * d, y0 + b, z + tz * u + nz * d]; });
+  S.box(-1.3, -0.15, wb, 1.3, 0.1, 0.55);                                           // the plinth
+  S.box(-0.86, 0.1, wb, 0.86, 2.35, 0.14);                                           // the recess's back
+  for (const q of [-1, 1]) {
+    S.box(Math.min(q * 0.86, q * 1.2), 0.1, wb, Math.max(q * 0.86, q * 1.2), 2.2, 0.48);   // a pilaster
+    S.box(Math.min(q * 0.8, q * 1.28), 2.2, wb, Math.max(q * 0.8, q * 1.28), 2.38, 0.56);  // its capital's block
+    S.box(Math.min(q * 0.98, q * 1.3), 2.38, wb, Math.max(q * 0.98, q * 1.3), 2.5, 0.52);  // the horn on the corner
+    S.box(Math.min(q * 0.9, q * 1.24), 0.1, wb, Math.max(q * 0.9, q * 1.24), 0.3, 0.55);   // its base
+  }
+  S.box(-1.32, 2.5, wb, 1.32, 2.7, 0.58);                                            // the architrave
+  S.box(-1.42, 2.7, wb, 1.42, 2.84, 0.7);                                            // the cornice
+  S.prism([[-1.3, 2.84], [1.3, 2.84], [0, 3.38]], wb, 0.44);                         // the tympanum
+  for (const q of [-1, 1]) S.prism([[q * 1.5, 2.8], [0, 3.46], [0, 3.3], [q * 1.5, 2.66]], wb, 0.7);   // the raking cornices
+  for (const q of [-1, 1]) S.prism([[q * 1.45, 2.84], [q * 1.2, 2.84], [q * 1.3, 3.04]], wb, 0.6);
+  S.prism([[-0.14, 3.42], [0.14, 3.42], [0, 3.7]], wb, 0.58);                        // the acroterion
+  S.box(-0.62, 0.1, 0.0, 0.62, 0.24, 0.42); S.box(-0.46, 0.24, 0.04, 0.46, 0.38, 0.36);   // the two steps of the god's base
+  { const H = 1.2 + 0.1 * hash(Math.round(x), Math.round(z)); S.xf = ([a, b, w]) => { const u = -a * H * s, d = dOut - (0.2 + w * H); return [x + tx * u + nx * d, y0 + 0.38 + b * H, z + tz * u + nz * d]; }; FG.betyl(S, 0); }
+  bag.add(R, S.geometry());
 }
 
-/** The panel of the camel and the man leading it, cut in a dressed field of the south wall over the channel. */
+/**
+ * The relief of the caravan, cut on a dressed field of the south wall over the channel (docs §22): in its frame of mouldings,
+ * a man in his tunic and mantle striding to the right and leading a dromedary with its pack saddle by a rope, modelled as low
+ * relief standing 12–25 cm from the field.
+ */
 function camelPanel(bag, side, face, i, si) {
   const { s, pts } = side, [x, z, nx, nz, f] = pts[i], tx = nz * s, tz = -nx * s;
   const ys = [1.6, 2.4, 3.2, 4.0, 4.6];
-  const dIn = Math.max(...ys.flatMap((yy) => [-2, 0, 2].map((k) => faceD(face, i + k, yy, si)))) + 0.4;
-  const dOut = Math.min(...ys.flatMap((yy) => [-2, 0, 2].map((k) => faceD(face, i + k, yy, si)))) - 0.12;
-  const P = (u, d) => [x + tx * u + nx * d, z + tz * u + nz * d];
-  { const a = P(0, dOut), b = P(0, dIn); bag.add(R, orientedBox(a, b, 4.6, f + 1.45, f + 4.7)); }
-  // the relief faces back toward the line (−n), u along the wall
-  const place = (u, v, w) => { const p = P(u, dOut - w); return [p[0], f + 1.6 + v, p[1]]; };
-  raise(bag, R, CAMEL, 'siq-camel', place, 0.3, 0, 2.7, -s, 0.12, [[0.1, 0.85, -0.15, 0.6], [-0.3, 0.5, -0.3, 0.7]]);
-  raise(bag, R, MAN, 'siq-man', place, -1.3, 0, 1.9, -s, 0.14, [[-0.08, 0.5, 0.08, 0.5]]);
+  const ds = ys.flatMap((yy) => [-2, 0, 2].map((k) => faceD(face, i + k, yy, si)));
+  const dIn = Math.max(...ds) + 0.4, dOut = Math.min(...ds) - 0.12, wb = -(dIn - dOut) - 0.1, y0 = f + 1.45;
+  const W = ([a, b, w]) => { const u = -a * s, d = dOut - w; return [x + tx * u + nx * d, y0 + b, z + tz * u + nz * d]; };
+  const S = new Sculpt(W);
+  S.box(-2.4, 0, wb, 2.4, 0.2, 0.16); S.box(-2.4, 3.06, wb, 2.4, 3.26, 0.16);               // the frame's sill and head
+  S.box(-2.4, 0.2, wb, -2.2, 3.06, 0.16); S.box(2.2, 0.2, wb, 2.4, 3.06, 0.16);              // its sides
+  S.box(-2.2, 0.2, wb, 2.2, 3.06, 0.05);                                                       // the field
+  const put = (fn, px, py, H, flat, shift) => { S.flat = flat; S.shift = shift; S.clip = true; S.xf = ([a, b, w]) => W([px + a * H, py + b * H, 0.05 + w * H]); fn(S, 0); };
+  put(FG.camel, 0.7, 0.55, 2.5, 0.42, 0.11);
+  put(FG.driver, -1.45, 0.45, 1.95, 0.45, 0.07);
+  bag.add(R, S.geometry());
 }

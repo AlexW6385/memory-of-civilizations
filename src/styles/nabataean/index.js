@@ -9,13 +9,15 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import '../qing/index.js';
 import { khazneh, floralCapital } from './khazneh.js';
 import { siqWalls } from './siq.js';
-import { crowTomb, royalTomb } from './tombs.js';
+import { crowTomb } from './tombs.js';
+import { royalTomb } from './royal.js';
 import { colonnadeStreet as street, greatTemple, qasr } from './city.js';
 import { poolGarden } from './garden.js';
 import { triclinium } from './triclinium.js';
 import { house } from './house.js';
 import { yard } from './yard.js';
 import { front, prop, nymph } from './fronts.js';
+import { Sculpt, hash3 } from './sculpt.js';
 
 const R = 'sandstone_rose', A = 'sandstone_rose_ashlar';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -74,10 +76,13 @@ function theatre(el, { bag, col: C }) {
   };
   const stairs = [0, 1, 2, 3, 4, 5, 6].map((j) => a0 - span / 2 + span * (j + 0.5) / 7);
   let r = r0;
+  const prof = [[r0, -0.5], [r0, 0]];
   for (let i = 0; i < rows; i++) {
     const w = passage(i) ? wp : ws, y = i * rh;
-    // the row, solid down to the rock beneath it
-    ring(R, r, r + w, -0.5, y + rh);
+    // the row, cut in the rock: its riser, the rounded edge, the seat, the lowered foot-groove behind it (the section below)
+    prof.push([r, y]);
+    if (passage(i)) prof.push([r, y + rh], [r + w, y + rh]);
+    else prof.push([r, y + rh - 0.05], [r + 0.05, y + rh], [r + w * 0.6, y + rh], [r + w * 0.63, y + rh - 0.07], [r + w, y + rh - 0.07]);
     // (its colliders are chords cut as the drawn row's boxes are: the chord's middle on the row's radius, not its ends)
     for (let k = 0; k < segs; k += 2) { const t0 = a0 - span / 2 + span * k / segs, t1 = a0 - span / 2 + span * Math.min(segs, k + 2) / segs, rm = (r + w / 2) / Math.cos((t1 - t0) / 2); C.segment(at(t0, rm), at(t1, rm), w, -1, y + rh); }
     // the stairways' intermediate steps on the back half of each row (not on the passages)
@@ -85,6 +90,9 @@ function theatre(el, { bag, col: C }) {
     r += w;
   }
   const yTop = rows * rh;
+  // the cavea's cut surface: the profile swept round the arc, its steps crisp, the edges a little weathered
+  { const ta = a0 - span / 2, n = segs * 2, M = new Sculpt(), rowsG = prof.map(([rr, hh], k) => Array.from({ length: n + 1 }, (_, j) => { const t = ta + span * j / n, e = hh > 0 ? 0.012 * (hash3(j, k, 5) - 0.5) : 0; return [cx + Math.cos(t) * (rr + e), hh + (hh > 0 ? 0.01 * (hash3(j, k, 8) - 0.5) : 0), cz + Math.sin(t) * (rr + e)]; }));
+    M.grid(rowsG, { wrap: false, face: [0, 1, 0], facet: true }); bag.add(R, M.geometry()); }
   // the parapet at the back, the rock cut away behind it
   ring(R, r - 0.02, r + 4, -0.5, yTop + rh);
   for (let k = 0; k < segs; k++) { const t0 = a0 - span / 2 + span * k / segs, t1 = a0 - span / 2 + span * (k + 1) / segs, rm = (r + 2) / Math.cos((t1 - t0) / 2); C.segment(at(t0, rm), at(t1, rm), 4, -1, yTop + rh); }

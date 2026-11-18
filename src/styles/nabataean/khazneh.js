@@ -10,7 +10,9 @@
 
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
-import { raise, strip } from '../achaemenid/reliefs.js';
+import { raise } from '../achaemenid/reliefs.js';
+import { Sculpt } from './sculpt.js';
+import * as FG from './figures.js';
 import { acanthusCapital, obeliskBase, dentilsAlong, tholosDress, urnDress, lowerMouldings, aedicule, pavilionMouldings, bedding } from './khazneh-detail.js';
 
 const R = 'sandstone_rose';
@@ -199,6 +201,16 @@ function interior(bag, C, lights, { P, B, Rc }, voids, pu, pv) {
 export function khazneh(el, { bag, col: C, lights }) {
   const [x, z] = el.at, { P, B, Rc } = frame(x, z, el.dir), W = el.w ?? 24.9, H = el.h ?? 38.77, back = el.back ?? 26, top = el.top ?? H + 20;
   const hw = W / 2, pu = 6.6, pv = -3.5;                                                   // the portico's half-width and back wall
+  // the carved figures (figures.js): one Sculpt per material, one geometry each; the detail by the distance from where people stand
+  // (the front step's middle, eye height): full within 15 m, reduced to 40 m, and the old outline plates beyond
+  const SR = new Sculpt(), SL = new Sculpt();
+  const lodAt = (v, y) => { const d = Math.hypot(v - 3.6, y - 2.65); return d < 15 ? 0 : d < 40 ? 1 : 2; };
+  const carve = (S, fn, { u, y, v, H, mir = 1, flat = 1, shift = 0, clip = false }) => {
+    S.flat = flat; S.clip = clip; S.shift = shift;
+    S.xf = ([x, yy, w]) => { const [px, pz] = P(u - x * mir * H, v + w * H); return [px, y + yy * H, pz]; };
+    const lod = Math.max(lodAt(v, y + H * 0.5), el.lod || 0);
+    if (lod < 2 && !(el.skip && el.skip.includes(fn.name))) fn(S, lod);
+  };
   const rock0 = (u0, v0, u1, v1, y0, y1) => { bag.add(R, B(u0, v0, u1, v1, y0, y1)); C.rect(Rc(u0, v0, u1, v1), y0, y1); };
   // above `cliff` (when the cliff over the façade is built round it) the dressed rock stands 3 m back, behind the built face
   const rock = (u0, v0, u1, v1, y0, y1) => {
@@ -238,32 +250,28 @@ export function khazneh(el, { bag, col: C, lights }) {
   bag.add(L, B(-hw - 0.45, -0.3, hw + 0.45, 3.3, 15.4, 16.2));
   lowerMouldings(bag, { L, R }, B, hw);
   // the shadow line under the great cornice and the dark of the frieze's ground, so that the griffins and vases read
-  bag.add(RC, B(-hw + 0.1, 2.9, hw - 0.1, 3.0, 14.42, 15.2));
-  const frieze = (u, v, w) => { const [px, pz] = P(u, 2.88 + w); return [px, 14.45 + v, pz]; };
+  bag.add(RC, B(-hw + 0.1, 2.9, hw - 0.1, 2.93, 14.42, 15.2));
   for (let u = -hw + 1.0, i = 0; u < hw - 0.6; u += 1.55, i++) {
-    if (i % 2 === 0) fig(bag, 'vase', frieze, u, 0.05, 0.85, 1, 0.07);
-    else fig(bag, 'griffin', frieze, u - 0.35, 0.03, 0.85, 1, 0.07);
+    if (i % 2 === 0) { carve(SR, FG.kantharos, { u, y: 14.47, v: 2.93, H: 0.74, flat: 0.5, shift: 0.3 }); const k = i % 4 === 0 ? 1 : -1; carve(SR, (S, l) => FG.vine(S, [[0.2 * k, 0.45, 0.0], [0.5 * k, 0.62, 0.0], [0.8 * k, 0.52, 0.0]], l, 0.03), { u, y: 14.47, v: 2.93, H: 0.74, flat: 0.4 }); }
+    else carve(SR, FG.griffin, { u: u - 0.1, y: 14.47, v: 2.93, H: 0.9, mir: (i % 4 === 1 ? 1 : -1), flat: 0.4, shift: 0.14, clip: true });
   }
   // the pediment over the middle: tympanum, raking cornices, its vine scroll, acroteria
   const pw = 7.9, pr = 3.0, py = 16.2;
   prismUY(bag, P, [[-pw, py], [pw, py], [0, py + pr]], -0.2, 2.9, RC);
   rake(bag, P, -pw - 0.35, py, 0, py + pr + 0.05, 0.42, -0.2, 3.4); rake(bag, P, 0, py + pr + 0.05, pw + 0.35, py, 0.42, -0.2, 3.4);
   dentilsAlong(bag, L, P, prismUY, -pw - 0.35, py, 0, py + pr + 0.05, 0.38, 0.2, 0.22, 2.85, 3.3); dentilsAlong(bag, L, P, prismUY, 0, py + pr + 0.05, pw + 0.35, py, 0.38, 0.2, 0.22, 2.85, 3.3);
-  const tym = (u, v, w) => { const [px, pz] = P(u, 2.9 + w); return [px, py + v, pz]; };
-  for (const s of [-1, 1]) for (let k = 0; k < 6; k++) {
-    const u0 = s * (0.8 + k * 1.05), u1 = s * (1.3 + k * 1.05), v0 = 0.45 + 0.4 * Math.sin(k * 1.7), v1 = 0.45 + 0.4 * Math.sin(k * 1.7 + 1.4);
-    if (Math.abs(u1) > pw * (1 - Math.max(v0, v1) / pr) - 0.2) continue;
-    strip(bag, R, tym, u0, v0, u1, v1, 0.09, 0.07);
+  carve(SR, FG.kantharos, { u: 0, y: py + 0.2, v: 2.9, H: 1.5, flat: 0.45, shift: 0.3 });
+  for (const sg of [-1, 1]) {
+    const path = []; for (let k = 0; k < 11; k++) { const u = 0.9 + k * 0.52, yy = 1.05 + 0.5 * Math.sin(k * 1.25 + 0.4) - 0.3 * k / 10; if (u < pw * (1 - (yy + 0.35) / pr)) path.push([u * sg, yy, 0]); }
+    carve(SR, (S, l) => FG.vine(S, path.map(([x, yy, w]) => [x, yy, w]), l, 0.05), { u: 0, y: py, v: 2.9, H: 1, mir: -1, flat: 0.5 });
   }
-  fig(bag, 'vase', tym, 0, 0.35, 1.2, 1, 0.08);
-  { const [ax, az] = P(0, 1.8); bag.add(R, lathe([[0.55, 0], [0.4, 0.25], [0.65, 0.8], [0.3, 1.2], [0.001, 1.25]], 10, null, ax, py + pr + 0.3, az)); }
-  for (const s of [-1, 1]) { const [ax, az] = P(s * (pw + 0.1), 1.8); bag.add(R, lathe([[0.4, 0], [0.4, 0.7], [0.001, 1.0]], 8, null, ax, py, az)); }
+  carve(SR, FG.palmette, { u: 0, y: py + pr + 0.3, v: 1.8, H: 1.5 });
+  for (const s of [-1, 1]) carve(SR, FG.sphinx, { u: s * (pw + 0.1), y: py, v: 1.8, H: 1.5, mir: -s });
   // ---- between the storeys: the attic behind the pediment, the lions on the cornice over the side bays
   const ya = 19.6;
   bag.add(R, B(-hw, 0, hw, 2.2, 16.2, ya)); C.rect(Rc(-hw, 0, hw, 2.2), 16.2, ya); C.floor(Rc(-hw, 0, hw, 2.2), ya);
   for (const s of [-1, 1]) {
-    const face = (u, v, w) => { const [px, pz] = P(u, 2.2 + w); return [px, 16.2 + v, pz]; };
-    fig(bag, 'lion', face, s * 10.2, 0, 1.6, s, 0.7);
+    carve(SR, FG.lion, { u: s * 10.2, y: 16.2, v: 2.75, H: 2.7, mir: -s });
   }
   // ---- the upper storey: the two pavilions
   const uc = 8.6, ur = 0.42, yt = 28.2;
@@ -271,17 +279,16 @@ export function khazneh(el, { bag, col: C, lights }) {
     const uo = s * hw, ui = s * (hw - 6.2), ue = s * (hw + 0.3);                                  // (ue: into the flank's rock)
     bag.add(RC, B(Math.min(ue, ui), 0, Math.max(ue, ui), 0.18, ya, yt));                      // the dark recess behind the pavilion's columns
     for (const u of [s * (hw - 0.9), s * (hw - 5.3)]) { const [cx, cz] = P(u, 1.5); column(bag, cx, cz, ya, uc, ur, C, true, false); }
-    const back = (u, v, w) => { const [px, pz] = P(u, w); return [px, ya + 0.3 + v, pz]; };
-    fig(bag, 'amazon', back, s * (hw - 3.1), 0, 4.6, -s, 0.35);
-    fig(bag, 'victory', back, s * 4.9, 0, 4.8, -s, 0.3);
+    carve(SR, FG.amazon, { u: s * (hw - 3.1), y: ya + 0.02, v: 0.3, H: 4.6, mir: -s, shift: 0.058 });
+    carve(SR, FG.victory, { u: s * 4.9, y: ya + 0.02, v: 0.3, H: 4.8, mir: -s, shift: 0.07 });
     // the pavilion's entablature and its broken half-pediment, rising toward the middle, the eagle on its peak
     bag.add(L, B(Math.min(ue, ui), -0.2, Math.max(ue, ui), 2.05, yt, yt + 0.8));
     bag.add(L, B(Math.min(ue, ui) - 0.2, -0.2, Math.max(ue, ui) + 0.2, 2.35, yt + 0.8, yt + 1.4));
     const yp = yt + 1.4;
     prismUY(bag, P, [[uo, yp], [ui, yp], [ui, yp + 2.2]], -0.2, 2.0, RC);
     rake(bag, P, s < 0 ? uo - 0.3 : ui, s < 0 ? yp : yp + 2.25, s < 0 ? ui : uo + 0.3, s < 0 ? yp + 2.25 : yp, 0.38, -0.2, 2.45);
-    const ef = (u, v, w) => { const [px, pz] = P(u, 0.5 + w); return [px, yp + 1.95 + v, pz]; };
-    raise(bag, L, O.eagle, 'nab-eagle', ef, ui + s * 1.9, 0, 2.3, 1, 0.3, D.eagle);
+    carve(SL, FG.eagle, { u: ui + s * 1.9, y: yp + 1.95, v: 0.7, H: 2.3, flat: 0.8, shift: 0.1, clip: true });
+    carve(SR, FG.medusa, { u: ui + s * 0.8, y: yp + 0.95, v: 2.0, H: 0.5, flat: 0.55, mir: -s });
     // the base of the obelisk above, running up into the rock
     obeliskBase(bag, L, P, ui - s * 0.1, 0.28, yp + 2.62, 36.9, 1.3, 0.96, 1.0, 0.6);
     pavilionMouldings(bag, { L, R }, P, prismUY, B, s, ue, ui, yt, yp);
@@ -290,13 +297,14 @@ export function khazneh(el, { bag, col: C, lights }) {
   const [tx, tz] = P(0, -0.3), tr = 3.3;
   bag.add(RC, lathe([[2.4, 0], [2.4, uc]], 24, null, tx, ya, tz));
   for (const a of [-90, -55, -20, 20, 55, 90]) { const t = a * Math.PI / 180, [cx, cz] = P(Math.sin(t) * tr, -0.3 + Math.cos(t) * tr); column(bag, cx, cz, ya, uc, ur, C, true, false); }
-  fig(bag, 'goddess', (u, v, w) => { const [px, pz] = P(u, 2.0 + w); return [px, ya + 0.4 + v, pz]; }, 0, 0, 3.6, 1, 0.35);
+  carve(SR, FG.goddess, { u: 0, y: ya + 0.4, v: 2.05, H: 3.7, shift: 0.058 });
   bag.add(L, lathe([[2.3, 0], [tr + 0.5, 0], [tr + 0.5, 0.8], [tr + 0.75, 0.9], [tr + 0.75, 1.4], [0.001, 1.4]], 28, null, tx, yt, tz));
   bag.add(L, lathe([[tr + 0.3, 0], [tr + 0.1, 0.3], [0.9, 4.0], [0.001, 4.0]], 28, null, tx, yt + 1.4, tz));
   acanthusCapital(bag, L, tx, yt + 5.4, tz, 0.62, 1.2);
   tholosDress(bag, { L, RC }, P, tx, tz, ya, yt, tr);
   urnDress(bag, L, tx, tz, yt + 6.6);
   bedding(bag, R, B, hw, 32.55, 37.6);
+  if (el.nofig !== 1 && el.nofig !== 'R') bag.add(R, SR.geometry()); if (el.nofig !== 1 && el.nofig !== 'L') bag.add(L, SL.geometry());
   bag.add(L, lathe([[0.55, 0], [0.38, 0.35], [0.85, 1.1], [1.0, 1.9], [0.8, 2.6], [0.42, 2.95], [0.58, 3.2], [0.001, H - (yt + 6.6) ]], 16, null, tx, yt + 6.6, tz));
   // ---- the portico: the great door under its pediment; the side chambers' doors, round windows above
   for (const s of [-1, 1]) bag.add(L, B(s * 1.5 - (s > 0 ? 0 : 0.5), pv, s * 1.5 + (s > 0 ? 0.5 : 0), pv + 0.3, yb, yb + 7.5));
