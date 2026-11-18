@@ -5,7 +5,8 @@
 import { box, lathe, disc, frustum, fromTriangles, quad } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { minoanColumn } from '../minoan/index.js';
-import { rng, mergeG } from './util.js';
+import { rng, mergeG, hash2 } from './util.js';
+import { place } from '../../core/geom.js';
 import { spiral, bar } from './relief.js';
 
 const PLASTER = 'lime_plaster', SOCLE = 'rubble', ROOF = 'earth_wall', TIM = 'timber', RED = 'paint_minoan_red', BLUE = 'egyptian_blue', OCHRE = 'paint_ochre';
@@ -105,11 +106,27 @@ export function megaron(el, ctx) {
   bag.add('pottery_dark', disc(0.7, y + 0.245, 14, hx, ax));
   for (let i = 0; i < 4; i++) { const a = i * 1.57 + 0.4; bag.add(TIM, box(hx + Math.cos(a) * 0.25 - 0.4, y + 0.25, ax + Math.sin(a) * 0.25 - 0.06, hx + Math.cos(a) * 0.25 + 0.4, y + 0.37, ax + Math.sin(a) * 0.25 + 0.06)); }
   bag.add('flame', lathe([[0.3, 0], [0.2, 0.2], [0.09, 0.45], [0.001, 0.65]], 8, (t) => 1 + 0.2 * Math.sin(t * 3), hx, y + 0.3, ax));
+  {
+    // the hearth's painted plaster rim: a raised lip of alternating red, blue and ochre blocks, a painted frieze of blocks round the platform's side, and three painted bands of the floor about it
+    const RI = [[], [], []], SI = [[], []], NR = 28;
+    for (let i = 0; i < NR; i++) {
+      const a = (i / NR) * Math.PI * 2, w = (Math.PI * 2 * (R - 0.16)) / NR * 0.96;
+      RI[i % 3].push(place(box(-w / 2, 0, -0.09, w / 2, 0.07 + hash2(hx + i, ax, 3) * 0.015, 0.09), hx + Math.cos(a) * (R - 0.16), y + 0.232, ax + Math.sin(a) * (R - 0.16), -a + Math.PI / 2));
+      SI[i % 2].push(place(box(-w * 0.5, 0.03, -0.012, w * 0.5, 0.19, 0.012), hx + Math.cos(a) * (R + 0.002), y, ax + Math.sin(a) * (R + 0.002), -a + Math.PI / 2));
+    }
+    bag.add(RED, mergeG(RI[0])); bag.add(BLUE, mergeG(RI[1])); bag.add(OCHRE, mergeG(RI[2])); bag.add(RED, mergeG(SI[0])); bag.add(BLUE, mergeG(SI[1]));
+    bag.add(OCHRE, disc(R + 0.8, y + 0.014, 28, hx, ax)); bag.add(RED, disc(R + 0.6, y + 0.016, 28, hx, ax)); bag.add('paint_white', disc(R + 0.42, y + 0.018, 28, hx, ax)); bag.add(BLUE, disc(R + 0.28, y + 0.02, 28, hx, ax));
+  }
   lights.push({ at: [hx, y + 0.9, ax], color: '#ffa24d', intensity: 7, distance: 13 });
   for (const dz of [-1.9, 1.9]) minoanColumn(bag, col, x0 + 0.9, ax + dz, y, 4.3, 0.33);
   // ── the four columns round the hearth, under the raised roof ──
   const HC = 5.7, HR = 7.0, cd = 2.15;
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) minoanColumn(bag, col, hx + sx * cd, ax + sz * cd, y, HR - 0.2, 0.38);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    minoanColumn(bag, col, hx + sx * cd, ax + sz * cd, y, HR - 0.2, 0.38);
+    // a round stone base under each shaft, a painted ring on the floor about it
+    bag.add('limestone_yellow', lathe([[0.001, 0], [0.62, 0], [0.62, 0.14], [0.46, 0.22], [0.001, 0.22]], 14, null, hx + sx * cd, y, ax + sz * cd));
+    bag.add(RED, disc(0.8, y + 0.012, 14, hx + sx * cd, ax + sz * cd));
+  }
   // ── ceilings and roofs: the porch and the vestibule lower, the hall's with a raised roof (the clerestory) over the hearth ──
   const lowY = y + 4.7;
   bag.add(TIM, box(x0 - 0.05, lowY - 0.4, el.z0, xH, lowY, el.z1)); bag.add(ROOF, box(x0 - 0.05, lowY, el.z0 - 0.1, xH, lowY + 0.3, el.z1 + 0.1));
@@ -126,7 +143,29 @@ export function megaron(el, ctx) {
   // ── the throne against the right-hand (south) wall, an offering table beside it ──
   const tx = hx, tz = zi1;
   // the throne on a plastered dais of one step: seat, arms and a tall back of limestone, the back painted red with a band of gilded spirals between ivory strips, a footstool before it
-  bag.add(PLASTER, box(tx - 0.95, y, tz - 1.3, tx + 0.95, y + 0.12, tz));
+  // the emplacement: a painted plaster step wider than the dais, a border of blue and red blocks, a white line along the dado
+  bag.add(PLASTER, box(tx - 1.4, y, tz - 1.8, tx + 1.4, y + 0.06, tz));
+  {
+    const bl = [[], []];
+    for (let i = 0; i < 14; i++) { const u = tx - 1.38 + i * 0.2; bl[i % 2].push(box(u, y + 0.061, tz - 1.78, u + 0.18, y + 0.066, tz - 1.7)); }
+    for (let i = 0; i < 8; i++) { const v = tz - 1.7 + i * 0.2; bl[i % 2].push(box(tx - 1.38, y + 0.061, v, tx - 1.3, y + 0.066, v + 0.18), box(tx + 1.3, y + 0.061, v, tx + 1.38, y + 0.066, v + 0.18)); }
+    bag.add(RED, mergeG(bl[0])); bag.add(BLUE, mergeG(bl[1]));
+  }
+  bag.add(PLASTER, box(tx - 0.95, y + 0.06, tz - 1.3, tx + 0.95, y + 0.12, tz));
+  bag.add('paint_white', mergeG([box(xH, y + 0.9, zi0, x1 - th, y + 0.96, zi0 + 0.014), box(xH, y + 0.9, zi1 - 0.014, x1 - th, y + 0.96, zi1), box(x1 - th - 0.014, y + 0.9, zi0, x1 - th, y + 0.96, zi1)]));
+  {
+    // a frieze of dentils, red and blue, under the ochre band on the three walls of the hall
+    const dr = [[], []], n = Math.floor(hallLen / 0.5);
+    for (let i = 0; i < n; i++) { const u = xH + 0.05 + i * 0.5; dr[i % 2].push(box(u, y + 3.55, zi0, u + 0.4, y + 3.95, zi0 + 0.016), box(u, y + 3.55, zi1 - 0.016, u + 0.4, y + 3.95, zi1)); }
+    for (let i = 0; i < Math.floor((zi1 - zi0) / 0.5); i++) { const v = zi0 + 0.05 + i * 0.5; dr[i % 2].push(box(x1 - th - 0.016, y + 3.55, v, x1 - th, y + 3.95, v + 0.4)); }
+    bag.add(RED, mergeG(dr[0])); bag.add(BLUE, mergeG(dr[1]));
+  }
+  {
+    // the porch's floor in a chequer of red and ochre squares
+    const pq = [[], []], pw = xP - x0 - 0.8, pz = zi1 - zi0 - 0.8;
+    for (let i = 0; i < Math.floor(pw / 0.8); i++) for (let j = 0; j < Math.floor(pz / 0.8); j++) { const u = x0 + 0.4 + i * 0.8, v = zi0 + 0.4 + j * 0.8; pq[(i + j) % 2].push(box(u + 0.02, y, v + 0.02, u + 0.78, y + 0.008, v + 0.78)); }
+    bag.add(RED, mergeG(pq[0])); bag.add(OCHRE, mergeG(pq[1]));
+  }
   bag.add('limestone_yellow', mergeG([box(tx - 0.58, y + 0.12, tz - 0.9, tx + 0.58, y + 0.5, tz), box(tx - 0.58, y + 0.5, tz - 0.24, tx + 0.58, y + 1.72, tz), box(tx - 0.46, y + 1.72, tz - 0.24, tx + 0.46, y + 1.84, tz), box(tx - 0.62, y + 0.5, tz - 0.78, tx - 0.5, y + 0.8, tz - 0.24), box(tx + 0.5, y + 0.5, tz - 0.78, tx + 0.62, y + 0.8, tz - 0.24)]));
   bag.add(RED, box(tx - 0.5, y + 0.82, tz - 0.255, tx + 0.5, y + 1.64, tz - 0.24));
   bag.add('ivory', mergeG([box(tx - 0.5, y + 1.0, tz - 0.262, tx + 0.5, y + 1.05, tz - 0.255), box(tx - 0.5, y + 1.4, tz - 0.262, tx + 0.5, y + 1.45, tz - 0.255)]));
