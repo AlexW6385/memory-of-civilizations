@@ -22,6 +22,7 @@ import { westFront } from './front.js';
 import { dome } from './domes.js';
 import { flank } from './flank.js';
 import { venRoom, venFront } from './rooms.js';
+import { sculpt } from './works.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
 /** basilica: { c, s (arm length), w (arm width), h, y } — the Greek cross with its five domes, the west front. */
@@ -35,7 +36,7 @@ function basilica(el, { bag, col, lights }) {
   // the west front: five portals, two tiers of columns, the gold lunettes, the terrace with the horses, the upper register with its gables (front.js)
   const fz = (f[1] + f[3]) / 2, PWf = (f[3] - f[1]) / 5;
   if (IN) { vestibule(bag, col, f, fz, y, y + H * 0.7, 2.0, 4.8); }
-  westFront(bag, col, { fx: f[0], z0: f[1], z1: f[3], y, H });
+  westFront(bag, col, { fx: f[0], z0: f[1], z1: f[3], y, H, noHorses: !!el.noHorses });
   // the sides dressed: the nave's long walls, the transepts' sides and ends, the east wall, the narthex's flanks (flank.js)
   if (IN) {
     const X = (u) => cx + u, Z = (w) => cz + w, h2 = Wd / 2, zt = S * 0.8, line = (a, b) => [a, b];
@@ -53,6 +54,6 @@ function basilica(el, { bag, col, lights }) {
 }
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero, ven_room: venRoom, ven_front: venFront, ven_facade: venFacade },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero, ven_room: venRoom, ven_front: venFront, ven_facade: venFacade, sculpt },
   objects: {},
 });

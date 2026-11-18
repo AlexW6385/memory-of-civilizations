@@ -10,6 +10,8 @@ import { box, lathe, frustum, rod } from '../../core/geom.js';
 import { faceFrame, Local, ext, archOutline, headPts, wrect } from '../renaissance/face.js';
 import { human, blob, limb as slimb } from '../greek/sculpture.js';
 import { porta } from './porta.js';
+import { justice } from './works-b.js';
+import { at } from './stone.js';
 
 const CV = 'limestone_carved';   // Istrian stone, carved: the figures, one block each, unjointed
 const M = 'marble', PINK = 'marble_pink', O = 'opening', I = 'limestone', L = 'lead';
@@ -53,7 +55,7 @@ export function dogesPalace(el, { bag, col }) {
       // the plainer sides: rows of square-headed windows in the white wall, the ground storey of stone
       const uP = f === 'n' ? Lf - 9 : -99;                                                            // the Porta della Carta on the north front, by the basilica
       for (const wy of [3.0, 9.5, 17.0, 21.0]) for (let u = 3; u < Lf - 2; u += 5) if (Math.abs(u - uP) > 3.5) Lc.add(O, ext([[u - 0.7, wy], [u + 0.7, wy], [u + 0.7, wy + 2.4], [u - 0.7, wy + 2.4]], [], -0.03, 0.01));
-      if (f === 'n') porta(Lc, uP);
+      if (f === 'n') porta(Lc, uP, !el.noFigs);
       Lc.emit(bag, FM);
       continue;
     }
@@ -112,9 +114,7 @@ export function dogesPalace(el, { bag, col }) {
         Lc.box(M, uc - 3.2, yw + 0.9, 1.25, uc + 3.2, yw + 1.05, 1.6);
         for (const sg of [-1, 1]) { Lc.box(M, uc + sg * 2.6 - 0.35, yw, 0, uc + sg * 2.6 + 0.35, top + 1.2, 0.6); Lc.add(M, lathe([[0.42, 0], [0.001, 2.2]], 4, null, uc + sg * 2.6, top + 1.2, 0.3)); }
         Lc.add(M, ext([[uc - w / 2 - 0.5, top], [uc + w / 2 + 0.5, top], [uc + 0.3, top + 2.4], [uc, top + 3.0], [uc - 0.3, top + 2.4]], [], 0, 0.3));
-        const fig = human({ pose: 'stand', h: 2.0, drape: 'peplos', arms: { r: [[0.15, 0.62, 0.05], [0.16, 0.95, 0.05]], l: [[-0.15, 0.62, 0.05], [-0.17, 0.55, 0.15]] } });
-        for (const g of fig.stone) { g.translate(uc, top + 3.0, 0.3); Lc.add(CV, g); }
-        Lc.add(M, rod([uc + 0.32, top + 4.9, 0.4], [uc + 0.32, top + 6.0, 0.4], 0.04, 4));    // her sword
+        justice(Lc, at(2.0, uc, top + 3.0, 0.3), 1, CV);
         holesD.push([uc - 3.4, yw - 1.3, uc + 3.4, top + 3.2]);
       }
     });
@@ -133,7 +133,7 @@ export function dogesPalace(el, { bag, col }) {
     for (let i = 0; i <= nG; i++) { const uu = Math.min(Lf - 0.6, Math.max(0.6, i * bay)), r = wrect(FM, uu - 0.7, -1.3, uu + 0.7, 0.1); col.rect(r, y, y + yL); }
   }
   // the carved groups on the corners of the Molo front: Adam and Eve with the tree (south-west), Noah under the vine (south-east)
-  if (fronts.includes('s')) {
+  if (fronts.includes('s') && !el.noFigs) {
     const cg = (cx, cz, dx, dz, kind) => {
       // built facing +z (out along the corner's diagonal), the tree on the corner, a figure either side
       const Lc = new Local(), yb = y + 4.3 + 0.18;

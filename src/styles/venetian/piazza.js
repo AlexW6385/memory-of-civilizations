@@ -187,7 +187,8 @@ export function columnStatue(el, { bag, col }) {
   Lc.add(M, lathe([[0.62, 0], [0.7, 0.4], [0.95, 1.1], [1.15, 1.55], [1.2, 1.7]], 12, (th, j) => (j === 2 || j === 3 ? 1 + 0.1 * Math.cos(th * 8) : 1), x, ys + sh, z));
   Lc.box(M, x - 1.3, ys + sh + 1.7, z - 1.3, x + 1.3, ys + sh + 2.05, z + 1.3);
   const yt = ys + sh + 2.05;
-  if (el.statue === 'lion') {
+  if (el.figs === false) { if (el.statue !== 'lion') Lc.box(M, x - 0.75, yt, z - 0.75, x + 0.75, yt + 0.3, z + 0.75); }
+  else if (el.statue === 'lion') {
     const lion = new Local(); lionOfStMark(lion, 'bronze', 1.1);
     for (const list of lion.m.values()) for (const g of list) { g.rotateY(-Math.PI / 2); g.translate(x - 0.1, yt, z); Lc.add('bronze', g); }
   } else {
