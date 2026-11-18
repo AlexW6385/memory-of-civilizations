@@ -5,7 +5,7 @@
 // Settlements of their own: every landmark's routes, walked in the whole settlement as the viewer
 // builds it (tools/lib/site.mjs: every plan's colliders and roofs, the settlement's ground).
 //
-// usage: node tools/walk-check.mjs [id ...] [--sites]
+// usage: node tools/walk-check.mjs [id ...] [--sites] [--ends]  (--ends prints where each route ends, for posing a camera there)
 //   ids: legacy buildings (src/buildings) or settlements; no ids: all legacy buildings;
 //   --sites: every settlement too
 
@@ -69,6 +69,7 @@ function walkRoutes(plan, cw) {
         t += 1 / 60;
       }
       legs++;
+      if (ok && k === W.length - 1 && argv.includes('--ends')) console.log(`  end ${ri + 1}: ${P.x.toFixed(1)} ${P.y.toFixed(2)} ${P.z.toFixed(1)} from ${W[k - 1][0].toFixed(1)} ${W[k - 1][2].toFixed(1)}`);
       if (!ok) { problems.push(`route ${ri + 1}: stuck before waypoint ${k} (${route[k]}) at (${P.x.toFixed(1)}, ${P.y.toFixed(2)}, ${P.z.toFixed(1)})`); break; }
     }
   }

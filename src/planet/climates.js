@@ -19,7 +19,7 @@ export const OPEN_CLIMATES = {
       exposure: 0.54,
       weather: [
         { id: 'clear', weight: 5, clouds: 0.04, cloudDensity: 0.3, sun: 1.0, fog: 1.0 },
-        { id: 'high-cloud', weight: 2, clouds: 0.22, cloudDensity: 0.25, sun: 0.94, fog: 1.0 },
+        { id: 'high-cloud', weight: 2, clouds: 0.22, cloudDensity: 0.25, sun: 0.94, fog: 1.0, cirrus: 0.9 },
         { id: 'dust', weight: 2, clouds: 0.1, cloudDensity: 0.3, sun: 0.65, fog: 4, fogColor: [0.68, 0.55, 0.4] },
       ],
     },
@@ -35,7 +35,7 @@ export const OPEN_CLIMATES = {
       weather: [
         { id: 'fair', weight: 3, clouds: 0.45, cloudDensity: 0.55, sun: 1.0, fog: 1.2 },
         { id: 'cloudy', weight: 2.5, clouds: 0.7, cloudDensity: 0.65, sun: 0.72, fog: 1.5 },
-        { id: 'downpour', weight: 1.5, clouds: 0.96, cloudDensity: 0.9, sun: 0.28, fog: 2.6, rain: 1 },
+        { id: 'downpour', weight: 1.5, clouds: 0.96, cloudDensity: 0.9, sun: 0.28, fog: 2.6, rain: 1, storm: 0.8 },
         { id: 'steam', weight: 1, clouds: 0.5, cloudDensity: 0.45, sun: 0.65, fog: 4, fogColor: [0.72, 0.75, 0.74] },
       ],
     },

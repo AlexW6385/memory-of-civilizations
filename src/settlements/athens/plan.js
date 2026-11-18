@@ -9,6 +9,7 @@ import parthenonPlan from '../../buildings/parthenon/plan.js';
 import { southSlope, summitSanctuaries } from './slope.js';
 import { summitAltar } from './summit.js';
 import './maidens.js';
+import { houseWalks } from './houses.js';
 import './promachos.js';
 
 const T = ACRO.top, E = [];
@@ -266,6 +267,7 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('acropolis', [-108, -55, 128, 55], T + 0.04, 'open'), room('agora', AGORA, 0, 'open')];
 const walks = [[[-300, 70], [-235, 45], [-175, 18], [-150, 2], [-136, 0], [-100, 0]]];
 walks[0].y0 = height(-300, 70);
+walks.push(...houseWalks());                                   // the stairs and ladders of the houses opened upstairs (docs §17)
 
 export const acropolis = {
   id: 'athens-acropolis',

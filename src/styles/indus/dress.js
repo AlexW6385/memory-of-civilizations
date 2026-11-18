@@ -133,9 +133,9 @@ const K = (F, L, mat, a0, y0, b0, a1, y1, b1) => { const p = L.pt(a0, b0), q = L
 const KL = (F, L, mat, prof, a, b, y = 0, seg = 8) => { const p = L.pt(a, b); F.lathe(mat, prof, p[0], y, p[1], seg); };
 
 /** The rooms by use: 'sleep' | 'store' | 'kitchen' | 'bath' | 'work'. Items stay against the walls, the doorway's line stays clear. */
-export function furnishRoom(F, r, door, kind, rand, lights, lit = false) {
+export function furnishRoom(F, r, door, kind, rand, lights, lit = false, vary = false) {
   const L = local(r, door), { A, B } = L, m = A / 2;
-  const k = (mat, a0, y0, b0, a1, y1, b1) => K(F, L, mat, a0, y0, b0, a1, y1, b1), jl = (mat, a, b, s, y = 0) => KL(F, L, mat, JAR(s), a, b, y);
+  const k = (mat, a0, y0, b0, a1, y1, b1) => K(F, L, mat, a0, y0, b0, a1, y1, b1), jl = (mat, a, b, s, y = 0) => { if (!vary) return KL(F, L, mat, JAR(s), a, b, y); const q = L.pt(a, b), h = (Math.imul(Math.round((q[0] + F.y) * 64) | 0, 73856093) ^ Math.imul(Math.round(q[1] * 64) | 0, 19349663)) >>> 0; return KL(F, L, mat, JAR(s * (1 + ((h % 9) - 4) * 0.012)), a, b, y); };   // (the upper rooms' jars each a little different, from a hash of their own position: no new instanced shapes)
   const wall = B - 0.5;
   if (kind === 'sleep') {
     const a = rand() < 0.5 ? 0.3 : A - 2.1;                                // the bed against a side wall, a rope net on a timber frame

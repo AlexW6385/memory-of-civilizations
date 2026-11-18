@@ -137,6 +137,16 @@ Sources added:
 - [Exterior decoration — tajmahal.gov.in](https://tajmahal.gov.in/the-taj-exteriors.aspx)
 - [Daily life in Agra during the Mughal period](https://dailylifehistory.pages.dev/early-modern/agra/mughal-period)
 
+## 16. Upper floors of the houses (2026-11-18) — what is built and on what ground
+
+Ten of the enterable houses nearest the arrival (the cross street and the axis street's mouth) can be climbed, in the full house only: three shops with their dwelling, three merchants' (grain dealers') houses, two craftsmen's (weaver's, embroiderer's) and two tenements (the family's), each with a jharokha or a loggia (`layout.js` `openUpper`; `styles/mughal/upper.js`; walk-check routes in `walks.js`). No new source was fetched; the ground is §12, §14, §15 and Pelsaert's "simple beds" in §15.
+- **Stair.** [stated] Mughal town houses had a stair to the roof, with the stair head (mumty) over it (§12). [inferred] A straight timber flight along the left wall of each floor to the next, 15 treads of 0.27 m (17 from the ground), the well in each slab over the stair's upper end, a round handrail on slender posts on the open side; the last flight ends in the stair head, a small room with a door on the roof and a dome.
+- **Rooms by use.** [inferred] Sleeping (charpoys with quilts and pillows, bedding folded on a shelf, a chest, a water jar), storage (bales, jars, trunks, a rope with clothes), a guest room (dhurrie, bolsters, tray, hookah, Qur'an stand), a workroom (the worker's mat and cushion, bolts and spools on shelves, garments on a rope, a lamp) and a strongroom (iron-bound chests, a ledger on its stand); over a shop its stock. Pelsaert's poor houses kept their work and beds together (§15). A third storey is open on the houses that have one.
+- **Street.** [inferred] The jharokha's door stands open, two stone steps up to its floor, lattice rails on three sides that cannot be passed; on the shops the loggia's floor is a step up from the room. Upper windows are open reveals with the lattice outside.
+- **Roof.** [inferred] A terrace behind a parapet (now with a collider): a mat with cushions, a tray and hookah on the richer houses, a charpoy to sleep out on in the hot season, water jars on stands by the stair head, dung cakes drying (tenement, craftsman) or the shop's stock (merchant, shop), a washing line with the household's cloth.
+- **Street life** keeps the lanes to these doors free: what would stand in them is moved aside along the front.
+- **Still shut.** All other houses and the plain-fronted ones. No inn is built (the town's lodging is the katras, §11).
+
 ## Sources
 
 - [Interior decoration — tajmahal.gov.in](https://tajmahal.gov.in/the-taj-interiors.aspx)

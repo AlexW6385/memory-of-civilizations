@@ -85,6 +85,70 @@ const DRAW = {
       g.quadraticCurveTo(x0 + Math.cos(a) * L * 0.5, S + Math.sin(a) * L * 0.5, x0 + Math.cos(a) * L + bend, S + Math.sin(a) * L); g.stroke();
     }
   },
+  /** Meadow grass, tall: green blades with a few seed heads. */
+  meadow(g, S, rand) {
+    DRAW.grass(g, S, rand, '#6f8c3e', '#a9b25e');
+    for (let k = 0; k < 14; k++) {
+      const x0 = S * (0.3 + rand() * 0.4), top = S * (0.08 + rand() * 0.3), lean = (rand() - 0.5) * S * 0.2;
+      g.strokeStyle = jitter(rand, '#8a9a4c', 20); g.lineWidth = S * 0.007;
+      g.beginPath(); g.moveTo(x0, S); g.quadraticCurveTo(x0 + lean * 0.2, S * 0.5, x0 + lean, top); g.stroke();
+      g.fillStyle = jitter(rand, '#b2a96a', 20); g.beginPath(); g.ellipse(x0 + lean, top + S * 0.025, S * 0.008, S * 0.04, 0, 0, Math.PI * 2); g.fill();
+    }
+  },
+  /** Steppe and savanna grass: golden blades and heads. */
+  steppe(g, S, rand) {
+    DRAW.grass(g, S, rand, '#b9a45c', '#d9c581');
+    for (let k = 0; k < 16; k++) {
+      const x0 = S * (0.3 + rand() * 0.4), top = S * (0.05 + rand() * 0.3), lean = (rand() - 0.5) * S * 0.25;
+      g.strokeStyle = jitter(rand, '#c6b270', 18); g.lineWidth = S * 0.007;
+      g.beginPath(); g.moveTo(x0, S); g.quadraticCurveTo(x0 + lean * 0.2, S * 0.5, x0 + lean, top); g.stroke();
+      g.fillStyle = jitter(rand, '#e0cf92', 16); g.beginPath(); g.ellipse(x0 + lean, top + S * 0.03, S * 0.01, S * 0.05, 0, 0, Math.PI * 2); g.fill();
+    }
+  },
+  /** Ferns: arching fronds with paired leaflets. */
+  fern(g, S, rand) {
+    for (let f = 0; f < 6; f++) {
+      const a = -Math.PI / 2 + (f - 2.5) * 0.4 + (rand() - 0.5) * 0.2, L = S * (0.55 + rand() * 0.35), x0 = S / 2;
+      const ex = x0 + Math.cos(a) * L, ey = S + Math.sin(a) * L, cx = x0 + Math.cos(a) * L * 0.5 + (a < -Math.PI / 2 ? -1 : 1) * S * 0.04, cy = S + Math.sin(a) * L * 0.7;
+      g.strokeStyle = '#4c6a2c'; g.lineWidth = S * 0.01; g.beginPath(); g.moveTo(x0, S); g.quadraticCurveTo(cx, cy, ex, ey); g.stroke();
+      for (let k = 2; k < 22; k++) {
+        const u = k / 22, px = (1 - u) * (1 - u) * x0 + 2 * u * (1 - u) * cx + u * u * ex, py = (1 - u) * (1 - u) * S + 2 * u * (1 - u) * cy + u * u * ey, ll = S * 0.11 * Math.sin(Math.PI * Math.min(1, u * 1.1));
+        for (const sd of [-1, 1]) leaf(g, px, py, a + sd * 1.15, ll, S * 0.012, jitter(rand, '#4f7a2e', 26));
+      }
+    }
+  },
+  /** Wildflowers in the grass: blades with white, yellow, violet and red heads. */
+  flowers(g, S, rand) {
+    DRAW.grass(g, S, rand, '#6f8c3e', '#9aa650');
+    const cols = ['#f1ece0', '#e8c93a', '#9a6cc2', '#d4503e', '#f1ece0', '#e49bb0'];
+    for (let k = 0; k < 15; k++) {
+      const x0 = S * (0.25 + rand() * 0.5), top = S * (0.08 + rand() * 0.4), lean = (rand() - 0.5) * S * 0.3, col = cols[Math.floor(rand() * cols.length)];
+      g.strokeStyle = '#5b7a36'; g.lineWidth = S * 0.008; g.beginPath(); g.moveTo(x0, S); g.quadraticCurveTo(x0 + lean * 0.2, S * 0.55, x0 + lean, top); g.stroke();
+      g.fillStyle = col;
+      for (let p = 0; p < 5; p++) { const a = p / 5 * Math.PI * 2; g.beginPath(); g.ellipse(x0 + lean + Math.cos(a) * S * 0.022, top + Math.sin(a) * S * 0.022, S * 0.02, S * 0.014, a, 0, Math.PI * 2); g.fill(); }
+      g.fillStyle = '#d9b23a'; g.beginPath(); g.arc(x0 + lean, top, S * 0.011, 0, Math.PI * 2); g.fill();
+    }
+  },
+  /** Heather and moss: dense low sprigs, mauve in flower, with cushions of moss. */
+  heather(g, S, rand) {
+    for (let k = 0; k < 90; k++) {
+      const x0 = S * (0.15 + rand() * 0.7), a = -Math.PI / 2 + (rand() - 0.5) * 1.8, L = S * (0.25 + rand() * 0.4);
+      g.strokeStyle = jitter(rand, '#5a5a38', 20); g.lineWidth = S * 0.01;
+      g.beginPath(); g.moveTo(x0, S); g.lineTo(x0 + Math.cos(a) * L, S + Math.sin(a) * L); g.stroke();
+      const n = 6 + Math.floor(rand() * 5);
+      for (let p = 0; p < n; p++) { const u = 0.5 + rand() * 0.5; g.fillStyle = rand() < 0.55 ? jitter(rand, '#9a6a9a', 28) : jitter(rand, '#566b3a', 22); g.beginPath(); g.arc(x0 + Math.cos(a) * L * u + (rand() - 0.5) * S * 0.04, S + Math.sin(a) * L * u, S * 0.012, 0, Math.PI * 2); g.fill(); }
+    }
+    for (let k = 0; k < 60; k++) { g.fillStyle = jitter(rand, '#4e6b34', 24); g.beginPath(); g.arc(S * (0.1 + rand() * 0.8), S * (0.86 + rand() * 0.14), S * (0.02 + rand() * 0.02), 0, Math.PI * 2); g.fill(); }
+  },
+  /** Rushes: round dark stems with brown flower tufts at the side below the tip. */
+  rush(g, S, rand) {
+    for (let k = 0; k < 28; k++) {
+      const x0 = S * (0.25 + rand() * 0.5), lean = (rand() - 0.5) * S * 0.22, top = S * (0.04 + rand() * 0.3);
+      g.strokeStyle = jitter(rand, '#4f6a3a', 22); g.lineWidth = S * 0.011;
+      g.beginPath(); g.moveTo(x0, S); g.quadraticCurveTo(x0 + lean * 0.25, S * 0.55, x0 + lean, top); g.stroke();
+      if (rand() < 0.4) { g.fillStyle = jitter(rand, '#7a5c38', 18); g.beginPath(); g.ellipse(x0 + lean * 0.9 + S * 0.02, top + S * 0.05, S * 0.018, S * 0.03, 0.3, 0, Math.PI * 2); g.fill(); }
+    }
+  },
   /** Reeds and papyrus: tall strap leaves and stems with feathery heads. */
   reed(g, S, rand) {
     for (let k = 0; k < 34; k++) {

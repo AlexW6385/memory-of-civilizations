@@ -14,13 +14,34 @@ export function makeRooms(H) {
   const pot = (bag, mat, x, y, z, r = 0.16) => bag.add(mat, lathe([[0.001, 0], [r * 0.7, 0], [r, r * 0.7], [r * 0.8, r * 1.5], [r * 0.5, r * 1.7], [r * 0.6, r * 1.9], [r * 0.45, r * 1.9]], 8, null, x, y, z));
   const sack = (bag, mat, x, y, z, s = 1) => bag.add(mat, lathe([[0.001, 0], [0.2 * s, 0.01], [0.26 * s, 0.18 * s], [0.23 * s, 0.42 * s], [0.16 * s, 0.58 * s], [0.06 * s, 0.64 * s], [0.001, 0.62 * s]], 7, null, x, y, z));
 
+
+  /** A hash of a place (0..1): the variation of a piece comes from where it stands. */
+  const hashAt = (x, z) => Math.abs(Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1;
+  /** A low bed on the floor y, its footprint [x0, z0, x1, z1] with its head at the z0 end: a painted frame, a head board, the striped mattress, a bolster and a folded quilt. */
+  const bed = (ctx, r, y) => {
+    const { bag, col } = ctx, [x0, z0, x1, z1] = r, h = hashAt(x0, z0), rug = RUGS[Math.floor(h * 5)], quilt = RUGS[(Math.floor(h * 5) + 2) % 5], bx = (m, a, b, c, d, e, f) => bag.add(m, box(a, y + e, b, c, y + f, d));
+    bx('wood_painted', x0, z0, x1, z1, 0, 0.3); col.rect([x0, z0, x1, z1], y, y + 0.36);
+    bx('timber', x0, z0, x1, z0 + 0.07, 0.3, 0.72);
+    bx(rug, x0 + 0.04, z0 + 0.08, x1 - 0.04, z1 - 0.04, 0.3, 0.355);
+    for (let z = z0 + 0.5; z < z1 - 0.3; z += 0.5) bx(z * 7 % 2 < 1 ? 'cloth_white' : 'cloth_ochre', x0 + 0.04, z, x1 - 0.04, z + 0.1, 0.355, 0.36);
+    bx('cloth_red', x0 + 0.1, z0 + 0.12, x1 - 0.1, z0 + 0.4, 0.355, 0.52);                       // the bolster
+    bx(quilt, x0 + 0.08, z1 - 0.62, x1 - 0.08, z1 - 0.1, 0.355, 0.44); bx('cloth_white', x0 + 0.08, z1 - 0.38, x1 - 0.08, z1 - 0.3, 0.44, 0.445);   // the quilt folded at the foot
+  };
+  /** A painted chest standing on the floor y, its footprint [x0, z0, x1, z1]: iron straps, a lock plate, a red lid. */
+  const chest = (ctx, r, y) => {
+    const { bag, col } = ctx, [x0, z0, x1, z1] = r, bx = (m, a, b, c, d, e, f) => bag.add(m, box(a, y + e, b, c, y + f, d)), zc = (z0 + z1) / 2;
+    bx('wood_painted', x0, z0, x1, z1, 0, 0.5); col.rect(r, y, y + 0.55);
+    bx('lacquer_red', x0 - 0.02, z0 - 0.02, x1 + 0.02, z1 + 0.02, 0.5, 0.56);
+    for (const u of [x0 + 0.12, x1 - 0.12]) bx('iron', u - 0.03, z0 - 0.03, u + 0.03, z1 + 0.03, 0.02, 0.56);
+    bx('gilt_bronze', (x0 + x1) / 2 - 0.05, z1 - 0.005 - 0.03, (x0 + x1) / 2 + 0.05, z1 + 0.025, 0.28, 0.4); bx('iron', zc * 0 + (x0 + x1) / 2 - 0.02, z1 + 0.02, (x0 + x1) / 2 + 0.02, z1 + 0.04, 0.3, 0.36);
+  };
   /**
    * furnish(ctx, R): one room of a house — R = { kind: 'stable' | 'store' | 'living' | 'shrine', rect: [xa, za, xb, zb] (the
    * floor, plumb walls; the door is in the south wall zb), y (the floor), h (the ceiling over it), door (x of the doorway), seed }.
    */
   function furnish(ctx, R) {
     const { bag, col, lights } = ctx, [xa, za, xb, zb] = R.rect, y = R.y, h = R.h, rand = rng(R.seed || 1), L = xb - xa, D = zb - za, dx = R.door;
-    const upper = R.kind === 'living' || R.kind === 'shrine', cx = (xa + xb) / 2;
+    const upper = R.kind === 'living' || R.kind === 'shrine' || R.kind === 'loft', cx = (xa + xb) / 2;
     const B = (mat, x0, z0, x1, z1, ya, yb, solid) => {
       const r = [Math.min(x0, x1), Math.min(z0, z1), Math.max(x0, x1), Math.max(z0, z1)];
       bag.add(mat, box(r[0], y + ya, r[1], r[2], y + yb, r[3]));
@@ -101,7 +122,19 @@ export function makeRooms(H) {
         thangka(bag, { at: [ox, za + 0.02], u: [1, 0], n: [0, 1], y: y + 0.52, w: 0.5, h: 0.62, kind: R.seed % 5 });
       }
       // the benches along the side wall(s) with rugs, a low table before each carrying bowls and a teapot
+      // (in an upper room that is walked: the household's bed on the side wall opposite the stove, and a chest by the door)
+      let bedSide = 0;
+      if (R.open) {
+        for (const s2 of [side < 0 ? 1 : -1, side]) {
+          const bw = s2 < 0 ? xa : xb, b0 = s2 < 0 ? bw : bw - 0.95, b1 = s2 < 0 ? bw + 0.95 : bw, bz1 = Math.min(za + 2.85, zb - 0.45);
+          if (bz1 - (za + 1.05) < 1.6 || lane(b0, b1, bz1) || (s2 === side && Math.abs(b0 + 0.475 - sxm) < 1.4)) continue;
+          bed(ctx, [b0, za + 1.05, b1, bz1], y); bedSide = s2; break;
+        }
+        const cs = dx - xa > xb - dx ? -1 : 1, c0 = cs < 0 ? dx - 1.0 - 0.95 : dx + 1.0, c1 = c0 + 0.95;
+        if (c0 > xa + 0.1 && c1 < xb - 0.1 && !(bedSide && Math.abs((c0 + c1) / 2 - (bedSide < 0 ? xa + 0.475 : xb - 0.475)) < 1.0 && zb - 0.5 < za + 2.9)) chest(ctx, [c0, zb - 0.55, c1, zb - 0.07], y);
+      }
       for (const s2 of L > 5.3 ? [-1, 1] : [side < 0 ? 1 : -1]) {
+        if (s2 === bedSide) continue;
         const bw = s2 < 0 ? xa : xb, b0 = s2 < 0 ? bw : bw - 0.85, b1 = s2 < 0 ? bw + 0.85 : bw, z0b = za + 1.15, z1b = Math.min(za + 2.55, zb - 0.6);
         if (z1b - z0b < 1.2 || (s2 === side && Math.abs(b0 - sxm) < 1.0 && z0b < za + 1.1)) continue;
         if (lane(b0, b1, z1b)) continue;
@@ -119,6 +152,13 @@ export function makeRooms(H) {
       const chx = side < 0 ? sxm + 0.95 : sxm - 0.95;
       if (Math.abs(chx - cxm) > 1.0) { bag.add('timber', lathe([[0.12, 0], [0.11, 0.9], [0.09, 0.92]], 8, null, chx, y + 0.03, za + 0.4)); for (const v of [0.12, 0.45, 0.78]) bag.add('iron', lathe([[0.123, v - 0.02], [0.123, v + 0.02]], 8, null, chx, y + 0.03, za + 0.4)); bag.add('timber', rod([chx, y + 0.9, za + 0.4], [chx, y + 1.45, za + 0.4], 0.018, 5)); col.circle(chx, za + 0.4, 0.14, y, y + 1.4); }
       lamp(sxm, 1.3, za + 1.1, 1.5, 5.5);
+    } else if (R.kind === 'loft') {
+      // the sleeping room on the roof: two beds head to the back wall, a chest at the foot of each, a thangka between, the roof's light through the window
+      const sw = [[xa + 0.12, xa + 1.07], [xb - 1.07, xb - 0.12]];
+      sw.forEach(([b0, b1], i) => { bed(ctx, [b0, za + 0.12, b1, za + 2.0], y); if (!lane(b0, b1, zb)) chest(ctx, [b0 + (i ? 0.0 : 0.0), zb - 0.62, b0 + 0.95, zb - 0.1], y); });
+      thangka(bag, { at: [cx, za + 0.02], u: [1, 0], n: [0, 1], y: y + 0.9, w: 0.62, h: 0.8, kind: R.seed % 5 });
+      B('cloth_red', cx - 0.6, za + 0.5, cx + 0.6, za + 1.5, 0.03, 0.045); B(RUGS[(R.seed + 1) % 5], cx - 0.5, za + 0.6, cx + 0.5, za + 1.4, 0.045, 0.055);
+      lamp(cx, 1.4, za + 1.0, 1.4, 5);
     } else if (R.kind === 'shrine') {
       // the altar against the back wall: the lacquered table, a step with the gilt images, the seven bowls of water, the butter lamps; thangkas on the side walls, a shelf of books, a seat and a low table
       const aw = Math.min(1.5, L / 2 - 0.5);
@@ -152,5 +192,39 @@ export function makeRooms(H) {
       bowl(bag, 'bronze', cx - 0.18, y + 0.34, za + 1.2, 0.05); bag.add('bronze', lathe([[0.001, 0], [0.05, 0], [0.045, 0.12], [0.001, 0.14]], 8, null, cx + 0.2, y + 0.34, za + 1.2));
     }
   }
-  return { furnish };
+
+  /**
+   * work(ctx, R): the room of the household's weaving in a side range, along z — R = { rect: [xa, za, xb, zb] (the floor), y, h, side ('w' | 'e': the wall that has the door, at its
+   * north end), seed }: the ground loom under the window of the outer wall, the weaver's seat, fleece in sacks, yarn hung to dry from a pole, a chest, a basket of spun wool.
+   */
+  function work(ctx, R) {
+    const { bag, col, lights } = ctx, [xa, za, xb, zb] = R.rect, y = R.y, h = R.h, W = xb - xa, L = zb - za, inner = R.side === 'w' ? xb : xa, outer = R.side === 'w' ? xa : xb, sg = R.side === 'w' ? -1 : 1;
+    const B = (mat, x0, z0, x1, z1, ya, yb, solid) => { const r = [Math.min(x0, x1), Math.min(z0, z1), Math.max(x0, x1), Math.max(z0, z1)]; bag.add(mat, box(r[0], y + ya, r[1], r[2], y + yb, r[3])); if (solid) col.rect(r, y + ya, y + yb); };
+    B('planks_grey', xa, za, xb, zb, 0, 0.03);
+    for (let z = za + 0.55; z < zb - 0.3; z += 1.15) B('lacquer_red', xa, z - 0.09, xb, z + 0.09, h - 0.22, h - 0.004);
+    B('lacquer_red', xa, za, xb, za + 0.18, h - 0.3, h - 0.004);
+    // the ground loom along the outer wall, its warp stretched between two beams on short stakes, the cloth woven at the weaver's end in bands
+    const lc = outer - sg * (0.5), l0 = za + 1.3, l1 = l0 + 2.2, hw = 0.3;
+    B('timber', lc - hw - 0.05, l0 - 0.04, lc + hw + 0.05, l0 + 0.04, 0.12, 0.2); B('timber', lc - hw - 0.05, l1 - 0.04, lc + hw + 0.05, l1 + 0.04, 0.12, 0.2);
+    for (const z of [l0, l1]) for (const u of [lc - hw - 0.04, lc + hw + 0.04]) B('timber', u - 0.03, z - 0.03, u + 0.03, z + 0.03, 0, 0.14);
+    B('cloth_white', lc - hw, l0, lc + hw, l1 - 0.75, 0.2, 0.204);
+    const bands = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_red', 'cloth_indigo', 'cloth_ochre'];
+    bands.forEach((m, i) => B(m, lc - hw, l1 - 0.75 + i * 0.107, lc + hw, l1 - 0.75 + (i + 1) * 0.107 - 0.01, 0.2, 0.207));
+    for (const z of [l0 + 0.55, l0 + 0.75]) bag.add('timber', rod([lc - hw - 0.02, y + 0.25, z], [lc + hw + 0.02, y + 0.25, z], 0.012, 4));   // the shed and heddle rods
+    B('cloth_red', lc - 0.3, l1 + 0.2, lc + 0.3, l1 + 0.65, 0, 0.1); B(RUGS[R.seed % 5], lc - 0.28, l1 + 0.22, lc + 0.28, l1 + 0.63, 0.1, 0.13);   // the weaver's seat
+    // fleece and spun wool in sacks at the north end against the outer wall
+    for (let i = 0; i < 3; i++) { const sx = outer - sg * (0.35 + (i % 2) * 0.55), sz = za + 0.38 + (i === 2 ? 0.35 : 0), lv = i === 2 ? 0.45 : 0; if (Math.abs(sx - inner) < 0.5) continue; sack(bag, i % 2 ? 'sacking' : 'cloth_white', sx, y + lv, sz, 0.9); col.circle(sx, sz, 0.27, y, y + 0.6); }
+    // a chest on the door's wall south of the door, a basket of spun yarn
+    const cz0 = za + 1.7; if (W > 2.2) { const c0 = R.side === 'w' ? inner - 0.55 : inner, c1 = c0 + 0.55; chest(ctx, [c0, cz0, c1, cz0 + 0.95], y); }
+    const kx = inner - (R.side === 'w' ? 0.42 : -0.42);
+    bag.add('rope_fibre', lathe([[0.001, 0], [0.2, 0], [0.26, 0.18], [0.24, 0.24], [0.2, 0.2], [0.001, 0.05]], 8, null, kx, y + 0.03, zb - 0.45));
+    for (const [dxo, dzo, m] of [[-0.06, -0.04, 'cloth_ochre'], [0.08, 0.05, 'cloth_red'], [0.0, 0.1, 'cloth_white']]) bag.add(m, lathe([[0.001, 0.2], [0.09, 0.28], [0.1, 0.34], [0.07, 0.4], [0.001, 0.42]], 7, null, kx + dxo, y + 0.03, zb - 0.45 + dzo));
+    col.circle(kx, zb - 0.45, 0.25, y, y + 0.3);
+    // yarn hung to dry from a pole across the south end: skeins dyed red, indigo, ochre, green
+    const py = y + h - 0.62, pz = zb - 0.18;
+    bag.add('timber', rod([xa + 0.02, py, pz], [xb - 0.02, py, pz], 0.025, 5));
+    for (let i = 0; i < 6; i++) { const px = xa + 0.28 + (W - 0.56) * (i + 0.5) / 6; B(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_red', 'cloth_ochre'][i], px - 0.07, pz - 0.03, px + 0.07, pz + 0.03, h - 1.22, h - 0.64); }
+    lights?.push({ at: [(xa + xb) / 2, y + h - 0.6, za + L * 0.45], color: '#ffb46b', intensity: 1.1, distance: 4.5 });
+  }
+  return { furnish, work };
 }

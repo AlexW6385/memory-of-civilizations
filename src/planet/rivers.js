@@ -73,11 +73,14 @@ export function roundDiscs(pts, w) {
 }
 for (const [name, w, pts] of LINES) {
   const P = skirt(pts.map(([la, lo]) => mapEarth(unit(la, lo))), w);
+  let run = 0, first = true;                       // run: metres from the mouth to the segment's start
+  const seed = name.length * 7 + name.charCodeAt(0);
   for (let i = 0; i + 1 < P.length; i++) {
     const a = P[i], b = P[i + 1], ang = angle(a, b);
     if (ang < 1e-9) continue;
     const n = norm(cross(a, b)), t = norm(cross(n, a)), m = norm([a[0] + b[0], a[1] + b[1], a[2] + b[2]]);
-    RIVERS.push({ name, a, n, t, ang, half: w / 2, bank: 26, mid: m, cosCap: Math.cos(ang / 2 + (w / 2 + 60) / R) });
+    RIVERS.push({ name, a, n, t, ang, half: w / 2, bank: 26, mid: m, cosCap: Math.cos(ang / 2 + (w / 2 + 60) / R), s0: run, mouth: first, seed });
+    run += ang * R; first = false;
   }
 }
 
@@ -106,17 +109,44 @@ const NONE = [];
  * The nearest river to direction u: { d (m from its middle line), half, bank, name } or null when
  * none is within its bank. Segments meet at joints; distance past a segment's end is to the end.
  */
-export function riverAt(u) {
+export function riverAt(u, extra = 0) {
   let best = null;
   for (const s of GRID.get(gkey(cellOf(u[0]), cellOf(u[1]), cellOf(u[2]))) || NONE) {
     if (dot(u, s.mid) < s.cosCap) continue;
     const along = Math.atan2(dot(u, s.t), dot(u, s.a));
-    let d;
+    let d, run, side = 1;
     // within the segment: off its line, less a meander (so the river bends between its points)
-    if (along >= 0 && along <= s.ang) d = Math.abs(Math.asin(Math.max(-1, Math.min(1, dot(u, s.n))))) * R;
+    if (along >= 0 && along <= s.ang) { const off = Math.asin(Math.max(-1, Math.min(1, dot(u, s.n)))); d = Math.abs(off) * R; run = s.s0 + along * R; side = off < 0 ? -1 : 1; }
     else d = Math.min(angle(u, s.a), angle(u, [Math.cos(s.ang) * s.a[0] + Math.sin(s.ang) * s.t[0], Math.cos(s.ang) * s.a[1] + Math.sin(s.ang) * s.t[1], Math.cos(s.ang) * s.a[2] + Math.sin(s.ang) * s.t[2]])) * R;
-    if (d > s.half + s.bank) continue;
-    if (!best || d - s.half < best.d - best.half) best = { d, half: s.half, bank: s.bank, name: s.name };
+    if (d > s.half + s.bank + extra) continue;
+    if (!best || d - s.half < best.d - best.half) best = { d, half: s.half, bank: s.bank, name: s.name, s: run ?? s.s0 + along * R, side, mouth: s.mouth && along < s.ang * 0.5, seg: s };
   }
   return best;
+}
+
+const hs = (a, b) => { let h = Math.imul(a | 0, 374761393) ^ Math.imul(b | 0, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+const RAPID_EVERY = 700, RAPID_LEN = 80;
+
+/**
+ * Rapids (0…1) at a place of the river found by riverAt: stretches of RAPID_LEN m, one in every
+ * RAPID_EVERY m of a river's length where its hash says so (more of them with `steep`, 0…1: where
+ * the river runs through high ground), the bed there raised to stones near the surface.
+ */
+export function rapidsAt(rv, steep = 0) {
+  if (rv.s < 0 || rv.mouth) return 0;
+  const k = Math.floor(rv.s / RAPID_EVERY), at = rv.s - k * RAPID_EVERY;
+  if (hs(k, rv.seg.seed) > 0.2 + 0.5 * steep) return 0;
+  return smooth(0, 14, at) * smooth(RAPID_LEN, RAPID_LEN - 14, at);
+}
+
+/**
+ * The river's current at a place (for the water's surface): the unit downstream direction at u
+ * (planet coordinates), its strength 0…1 (full over the water, gone at the banks) and the rapids.
+ */
+export function riverFlowAt(u) {
+  const rv = riverAt(u);
+  if (!rv || rv.d > rv.half + 4) return null;
+  const s = rv.seg, dir = cross(s.n, u), l = Math.hypot(dir[0], dir[1], dir[2]) || 1;   // upstream: the lines run from the mouth up
+  return { dir: [-dir[0] / l, -dir[1] / l, -dir[2] / l], strength: 1 - smooth(rv.half * 0.55, rv.half + 4, rv.d), rapids: rapidsAt(rv, 0) };
 }

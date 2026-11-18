@@ -42,7 +42,23 @@ export const ENV = {
   planetO: uniform(new Vector3(0, PLANET_RADIUS, 0)),
   planetM: uniform(new Matrix3()),
   camAlt: uniform(2),                           // the camera's height above the sea (m)
+  // the sky's cloud layers beyond the cumulus field (src/engine/sky.js, set by the climate from the
+  // weather): high cirrus streaks 0…1, the low grey-to-dark deck of overcast and rain 0…1
+  cirrus: uniform(0.3),
+  deck: uniform(0),
+  cloudDetail: uniform(0),                      // 1 above the low preset: a second shadow sample, finer deck
+  // a thunderstorm (climate.js): its strength 0…1, the lightning's flash now (lights the clouds from
+  // inside and lifts the scene's light), its direction in the scene, and a visible bolt (rain.js)
+  storm: uniform(0),
+  flash: uniform(0),
+  flashDir: uniform(new Vector3(1, 0, 0)),
+  bolt: uniform(0),
+  boltDist: uniform(2000),
+  rainbow: uniform(0),                          // a rainbow opposite a low sun 0…1
 };
+
+/** Thunder waiting to be heard (pushed by the climate at each stroke, drained by audio.js): { delay s, dist km, pan }. */
+export const THUNDER = [];
 
 // set once a frame for all: in the render's shared uniform group, not the per-object one (each
 // object's group is checked and written at each of its draws, several hundred a frame)

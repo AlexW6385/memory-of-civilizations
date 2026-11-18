@@ -3,7 +3,7 @@
 // instanced meshes per species, variant and level of detail, swaying in the wind.
 
 import * as THREE from 'three/webgpu';
-import { uniform, texture, uv, positionLocal, time, sin, cos, vec3, vec4, float, attribute, instanceIndex, hash, mix, normalWorld, max, dot, normalize, faceDirection, cameraViewMatrix } from 'three/tsl';
+import { uniform, texture, uv, positionLocal, time, sin, cos, vec3, vec4, float, attribute, instanceIndex, hash, mix, normalWorld, max, dot, normalize, faceDirection, cameraViewMatrix, length, sign, abs, smoothstep } from 'three/tsl';
 import { SPECIES, VARIANTS, speciesGeometry } from './species.js';
 /** Shapes per species near and at the far level of detail (of the VARIANTS made): each shape of
  *  each species is two draw calls at each level (Suzhou's garden had 130 flora draws, species of a
@@ -13,7 +13,7 @@ import { foliageTexture } from './textures.js';
 import { PHEN, seasonLook } from './phenology.js';
 import { MAX_DENSITY, NEAR_ONLY } from '../../world/flora-rules.js';
 import { material as paletteMaterial } from '../materials.js';
-import { ENV } from '../env.js';
+import { ENV, planetPosition } from '../env.js';
 import { HITCH } from '../hitch.js';
 
 const BIG = 128, SMALL = 16, NEAR_R = 64;
@@ -38,6 +38,24 @@ function swayNode(amount) {
  */
 function staticShadow(m) { m.castShadowPositionNode = positionLocal; m.userData.staticShadow = true; }
 
+/**
+ * The ground cover of the open country follows the season as the ground's grass does (src/planet/
+ * materials.js): straw in autumn, dun in winter, fresh in spring, outside the tropics (the planet
+ * position of the fragment gives the hemisphere and the latitude).
+ */
+const COVER_SEASON = new Set(['meadow', 'steppe', 'fern', 'flowers', 'heather', 'rush']);
+function coverSeason(col) {
+  const pp = planetPosition, up = pp.y.div(length(pp)), hemi = sign(up), sl = abs(up);
+  const temperate = smoothstep(0.42, 0.8, sl);
+  const autumnK = ENV.seasonAutumn.mul(hemi).clamp(0, 1).mul(temperate);
+  const winterK = ENV.seasonWinter.mul(hemi).clamp(0, 1).mul(temperate);
+  const springK = ENV.seasonAutumn.mul(hemi).negate().clamp(0, 1).mul(float(1).sub(ENV.seasonWinter.mul(hemi).abs()).clamp(0, 1)).mul(temperate);
+  const lum = dot(col, vec3(0.33, 0.34, 0.33));
+  let c = mix(col, col.mul(vec3(1.25, 1.02, 0.6)), autumnK.mul(0.65));
+  c = mix(c, vec3(lum).mul(vec3(1.35, 1.1, 0.75)).add(vec3(0.02, 0.014, 0.006)), winterK.mul(0.75));
+  return mix(c, col.mul(vec3(0.9, 1.12, 0.84)), springK.mul(0.4));
+}
+
 const mats = new Map();
 export function foliageMaterial(kind, amount, sp) {
   const P = sp && PHEN[sp];
@@ -57,6 +75,7 @@ export function foliageMaterial(kind, amount, sp) {
     m.opacityNode = t.a.mul(look.keep);
     m.maskShadowNode = look.keep.greaterThan(0.5);
   }
+  if (COVER_SEASON.has(kind)) m.colorNode = coverSeason(m.colorNode);
   m.roughness = 0.8;
   // light through the leaves: a little of the sun's colour on the side away from it
   const back = max(dot(normalWorld, ENV.sunDir).negate(), 0).mul(0.18);

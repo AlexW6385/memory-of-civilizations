@@ -95,3 +95,4 @@ import '../settlements/granada/smoke.js';
 import './catkins.js';
 import './fauna.js';
 import './movers.js';
+import './wild-life.js';

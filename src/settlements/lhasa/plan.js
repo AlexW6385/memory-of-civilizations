@@ -6,6 +6,8 @@
 // its inner pillar under the stairs and the outer pillar across the road outside the south gate.
 
 import { SHOL, hill } from './layout.js';
+import { openWalks } from './upstairs.js';
+import { ground } from './ground.js';
 
 const E = [];
 /** The ground under a block's south face (the lowest of its edge), a little below it. */
@@ -187,6 +189,8 @@ const rooms = [room('shol', SHOL, 0, 'open'), room('below the palace', [sx0 + 2,
   room('white palace roof', [52, -86, 90, -68], 100, 'open'), room('red palace roof', [-36, -88, 6, -70], 117, 'open'), room('tomb of the fifth dalai lama', [HT[0] + 2, HT[1] + 2, HT[2] - 2, HT[3] - 2], YT, 'hall')];
 const walks = [[[-1, 228], [-1, 140], [-1, 58], [-103, 50], [-103, 44], [-137, 44], [-137, 40], [-103, 40], [-103, 36], [-137, 36], [-137, 32], [-103, 32], [-103, 18]]];
 walks[0].y0 = 0;
+// the upper floors of the houses opened (upstairs.js): from the lane through the gate, up the ladder to the main room, into the weaving room, up to the roof and the roof room
+walks.push(...openWalks((x, z) => ground.height(x, z)));
 
 export const potala = {
   id: 'lhasa-potala',

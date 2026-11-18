@@ -32,6 +32,7 @@ import { loadLand } from '../planet/land.js';
 import { BUILT, BUILT_BY_ID, initRelief, surface, groundInFrame, seaInFrame, PLANET_RADIUS as R, BLEND } from '../planet/relief.js';
 import { PlanetTerrain } from '../planet/terrain.js';
 import { OpenFlora } from '../planet/open-flora.js';
+import { Roadside } from '../planet/roadside.js';
 import { toPlanet, toLocal, dirToPlanet, dirToLocal, transportFrame, enuFrame, norm, dot, unit } from '../planet/geo.js';
 import { withFocus } from '../world/regions.js';
 import { MODULES } from '../settlements/grounds.js';
@@ -552,6 +553,9 @@ export class World {
     this.terrain = new PlanetTerrain(this.planet, land);
     this.openFlora = new OpenFlora(this.planet, land);
     this.openFlora.precompile = (o) => this.r.precompile(o);
+    // the country along the roads between a region's settlements (fields, small things, fords and bridges)
+    this.roadside = new Roadside(this.planet, land);
+    this.roadside.precompile = (o) => this.r.precompile(o);
     this.settlements = BUILT.map((S) => new Settlement(S, this));
     this.byId = Object.fromEntries(this.settlements.map((s) => [s.id, s]));
     // the plants of the settlement the visitor is in (src/engine/flora), drawn in its frame
@@ -566,6 +570,14 @@ export class World {
     this.open.terrain = (x, z) => groundInFrame(this.anchor.frame, x, z);
     this.open.water = (x, z, y) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s - 0.3 && y < s + 0.3; };
     this.open.waterLevel = (x, z) => { const s = seaInFrame(this.anchor.frame, x, z); return groundInFrame(this.anchor.frame, x, z) < s ? s : -Infinity; };
+    // fords and bridges over rivers give footing; houses and shrines along the roads are walked round (src/planet/roadside.js)
+    {
+      const rs = this.roadside, ground = this.open.terrain, water = this.open.water, level = this.open.waterLevel, resolve = this.open.resolve.bind(this.open);
+      this.open.terrain = (x, z) => { const d = rs.deck(this.anchor.frame, x, z); return d === -Infinity ? ground(x, z) : Math.max(ground(x, z), d); };
+      this.open.water = (x, z, y) => rs.deck(this.anchor.frame, x, z) === -Infinity && water(x, z, y);
+      this.open.waterLevel = (x, z) => (rs.deck(this.anchor.frame, x, z) === -Infinity ? level(x, z) : -Infinity);
+      this.open.resolve = (x, z, r, y0, y1) => { const q = resolve(x, z, r, y0, y1); return rs.resolve(this.anchor.frame, q[0], q[1], r, y0, y1); };
+    }
     // every building's plan (small modules), to know where its entrance is
     // only the starting settlement's module now (the ten buildings of the old city, src/buildings,
     // are fetched by the settlements that use them); the others' come after the start: fetched by
@@ -936,7 +948,7 @@ export class World {
     if (!this._nextT || now > this._nextT) { this._nextT = now + 120; this.terrain.update(camP); HITCH.since('terrain', t0); t0 = HITCH.mark(); }
     // (the open country's plants not scattered during the start, World.starting: its two workers
     // took cores from the settlement's and the ground's, its meshes compiles from the arrival's)
-    if (!this.starting && (!this._nextF || now > this._nextF)) { this._nextF = now + 300; this.openFlora.update(camP, Math.hypot(camP[0], camP[1], camP[2]) - R); HITCH.since('open flora', t0); }
+    if (!this.starting && (!this._nextF || now > this._nextF)) { this._nextF = now + 300; this.openFlora.update(camP, Math.hypot(camP[0], camP[1], camP[2]) - R); HITCH.since('open flora', t0); this.roadside.scale = this.openFlora.scale; this.roadside.update(camP, Math.hypot(camP[0], camP[1], camP[2]) - R); HITCH.since('roadside', t0); }
     this.camAlt = Math.hypot(camP[0], camP[1], camP[2]) - R;
     ENV.camAlt.value = this.camAlt;
     // the plants: of the settlement whose zone the visitor is in, or the nearest within reach

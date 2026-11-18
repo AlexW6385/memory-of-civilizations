@@ -91,7 +91,7 @@ class Progress {
     this.shown = Math.max(this.shown, p);
     this.bar.style.width = `${(this.shown * 100).toFixed(1)}%`;
     if (this.error) return;
-    // the step in hand, so that a bar that stops says where: "37% · buildings 12/44"; after five
+    // the step in hand, so that a bar that stops says where: "37% · buildings 60% · ground 45%" (a share of the work, not a count of houses: the units are plans); after five
     // seconds without moving, how long it has waited there
     const name = (k) => `${t('ld')[k] || k}${this.details?.[k] ? ' ' + this.details[k] : ''}`;
     // the buildings and the ground come in together: both are shown while either is coming
@@ -212,10 +212,10 @@ async function main() {
     const u = world.here(controls);
     // (a travel's report says when the travel is over: report.over, src/main.js travel)
     const alive = () => !report?.over;
-    const poll = site && report ? setInterval(() => report('build', site.fraction, `${Math.min(site.done | 0, site.expected | 0)}/${site.expected | 0}`), 150) : null;
+    const poll = site && report ? setInterval(() => report('build', site.fraction, `${Math.round(site.fraction * 100)}%`), 150) : null;
     try {
       await Promise.all([
-        (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 0.99, 'merging'); return Promise.all([merged(site), lookAhead()]); }).then(() => { report?.('build', 1); mark('buildings'); }),
+        (site ? site.load() : Promise.resolve()).then(() => { clearInterval(poll); report?.('build', 0.99, t('ld').merge); return Promise.all([merged(site), lookAhead()]); }).then(() => { report?.('build', 1); mark('buildings'); }),
         world.terrain.readyAt(camPlanet, (f) => report?.('land', f, `${Math.round(f * 100)}%`)).then(() => mark('land')),
       ]);
     } finally { clearInterval(poll); }
@@ -251,7 +251,7 @@ async function main() {
   // a settlement built before its arrival view is set (goTo, goNear): its progress shown from the
   // start of the build, not only once arrive() is reached
   const loadSite = async (site, report) => {
-    const poll = report ? setInterval(() => report('build', site.fraction, `${Math.min(site.done | 0, site.expected | 0)}/${site.expected | 0}`), 150) : null;
+    const poll = report ? setInterval(() => report('build', site.fraction, `${Math.round(site.fraction * 100)}%`), 150) : null;
     try { await site.load(); } finally { clearInterval(poll); }
   };
   // a free place to stand near (x, z), once everything there is built: on the ground or a floor,

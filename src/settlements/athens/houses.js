@@ -10,13 +10,15 @@
 // Registered into the greek style as `athens_walk_house` from this folder (the style files are read-only).
 
 import { STYLES } from '../../core/build.js';
-import { box, lathe, rod } from '../../core/geom.js';
+import { box, lathe, rod, frustum } from '../../core/geom.js';
 import '../../styles/greek/ward.js';
 import { frame } from '../../styles/greek/agora.js';
 import { face, fig } from '../../styles/greek/ward.js';
 import { kline, trapeza, krater, lampstand, loom, rangeRoof } from '../../styles/greek/house-interior.js';
 import { furnishShop, TRADES } from '../../styles/greek/shops.js';
 import { vase, kiln } from '../../styles/greek/vessels.js';
+import { storeyOf, storeyPlan, buildStorey, storeyRoute, UH } from './upstairs.js';
+import { lots } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const T = 0.5, TI = 0.4, H = 3.2, UP = 2.3;
@@ -25,21 +27,22 @@ const TONES = ['mud_plaster', 'mud_plaster', 'plaster_white', 'plaster_ochre', '
 export const SIZES = { simon: [13, 14], pastas: [13.6, 15], small: [11.4, 15], workshop: [14, 15] };
 
 /** The cells of a house: { FR, RD, PD, two, front: [{k, u0, u1}], back: [...] } in local u, v (v from the street). */
-export function cfg(kind, L, seed) {
+export function cfg(kind, L, seed, storey = false) {
   const Li = L - 2 * T, mir = (seed & 1) === 1, mirB = (seed & 2) === 2, shop = seed % 3 !== 0;
   let FR = 4.4, RD = 3.2, PD = 0, two = (seed >> 2) % 3 === 0, front, back;
   const mk = (list, mirror) => { const rest = Li - list.reduce((a, c) => a + (c[1] ?? 0), 0) - TI * (list.length - 1); const l = list.map(([k, w]) => [k, w ?? rest]); if (mirror) l.reverse(); let u = T; return l.map(([k, w]) => { const c = { k, u0: u, u1: u + w }; u += w + TI; return c; }); };
   if (kind === 'pastas') { PD = 1.8; front = mk([['andron', 4.6], ['passage', 1.8], [shop ? 'shop' : 'store']], mir); back = mk([['oikos', 5.0], ['thalamos', 3.6], ['kitchen']], mirB); }
   else if (kind === 'small') { FR = 4.2; RD = 3.6; two = false; front = mk([['passage', 1.8], [shop ? 'shop' : 'work']], mir); back = mk([['oikos'], ['thalamos', 3.4]], mirB); }
   else { FR = 4.4; RD = 3.2; front = mk([['craft'], ['passage', 1.8], ['store', 2.4]], mir); back = mk([['oikos', 5.2], ['kitchen', 3.0], ['thalamos']], mirB); }
+  if (storey && kind !== 'small') two = true;
   return { FR, RD, PD, two, up: kind === 'small' ? 'back' : two ? 'front' : null, front, back, shop };
 }
-const geomOf = (kind, L, D, seed) => { const C = cfg(kind, L, seed), vp0 = T + C.FR, vq0 = D - T - C.RD - TI; return { C, vp0, vq0, cv0: vp0 + TI, cv1: vq0 - C.PD }; };
+const geomOf = (kind, L, D, seed, storey = false) => { const C = cfg(kind, L, seed, storey), vp0 = T + C.FR, vq0 = D - T - C.RD - TI; return { C, vp0, vq0, cv0: vp0 + TI, cv1: vq0 - C.PD }; };
 const NAMES = { andron: 'andron', shop: 'shop', store: 'store', work: 'workroom', craft: 'workshop', oikos: 'oikos', thalamos: 'bedchamber', kitchen: 'kitchen' };
 
 /** Rooms (for the plan) of one house lot. */
 export function houseRooms(l) {
-  const F = frame(l.rect, l.front || 'n'), { L, D } = F, { C, vp0, vq0 } = geomOf(l.kind, L, D, l.seed), out = [];
+  const F = frame(l.rect, l.front || 'n'), { L, D } = F, { C, vp0, vq0 } = geomOf(l.kind, L, D, l.seed, storeyOf(l)), out = [];
   for (const c of C.front) if (c.k !== 'passage') out.push({ id: NAMES[c.k], rect: F.R(c.u0, T, c.u1, vp0), y: l.y, kind: 'inner', market: false });
   for (const c of C.back) out.push({ id: NAMES[c.k], rect: F.R(c.u0, vq0 + TI, c.u1, D - T), y: l.y, kind: 'inner' });
   return out;
@@ -105,12 +108,14 @@ function thalamos(ctx, R, y, rand, front, ladder) {
   kline(bag, col, x0 + 0.25, Z(0, 0.85)[0], x0 + 2.05, Z(0, 0.85)[1], y, true, rand);                     // the bed along the back wall
   if (!ladder) chest(bag, col, x0 + 2.55, zw + s * 0.34, y, true);
   const kx = x1 - 0.5, kz = zw + s * 1.4;                                                       // a klismos with a cushion
+  if (ladder !== 'open') {
   bag.add('wood_dark', box(kx - 0.24, y + 0.44, kz - 0.24, kx + 0.24, y + 0.49, kz + 0.24)); bag.add('cloth_ochre', box(kx - 0.22, y + 0.49, kz - 0.22, kx + 0.22, y + 0.53, kz + 0.22));
   bag.add('wood_dark', box(kx - 0.26, y + 0.49, kz - 0.22, kx - 0.21, y + 0.95, kz + 0.22)); for (const [a, b] of [[-0.21, -0.21], [0.21, -0.21], [-0.21, 0.21], [0.21, 0.21]]) bag.add('wood_dark', box(kx + a - 0.02, y, kz + b - 0.02, kx + a + 0.02, y + 0.44, kz + b + 0.02));
+  }
   if (!ladder) col.rect([kx - 0.27, kz - 0.25, kx + 0.25, kz + 0.25], y, y + 0.95);
   bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.12, 0.012], [0.001, 0.012]], 14).rotateZ(-Math.PI / 2).translate(x0 + 0.01, y + 1.5, (z0 + z1) / 2));          // the mirror on the wall
   if (!ladder) pot(bag, 'lekythos', x0 + 2.55, y + 0.69, zw + s * 0.34, { s: 1, dark: false });
-  if (ladder) {
+  if (ladder && ladder !== 'open') {
     const lx = x1 - 0.7, a = zw + s * 0.45, b = zw + s * 0.12;
     for (const dx of [-0.24, 0.24]) bag.add('timber', rod([lx + dx, y, a], [lx + dx, y + H - 0.05, b], 0.03, 5));
     for (let k = 1; k < 9; k++) { const f = k / 9; bag.add('timber', rod([lx - 0.24, y + f * (H - 0.05), a + (b - a) * f], [lx + 0.24, y + f * (H - 0.05), a + (b - a) * f], 0.02, 4)); }
@@ -152,10 +157,21 @@ function craft(ctx, R, y, sculptor, rand, front) {
   void rand;
 }
 
+/** The ground floor's doors in the court wall (u ranges), as walkHouse cuts them. */
+function gapsOf(C, seed) {
+  const mid = (c, w = 1.0) => [(c.u0 + c.u1) / 2 - w / 2, (c.u0 + c.u1) / 2 + w / 2], midGaps = [];
+  for (const c of C.front) {
+    if (c.k === 'passage') midGaps.push([c.u0, c.u1]);
+    else if (c.k === 'andron') midGaps.push((seed & 1) ? [c.u1 - 1.3, c.u1 - 0.3] : [c.u0 + 0.3, c.u0 + 1.3]);
+    else if (c.k === 'shop' || c.k === 'craft' || c.k === 'work') midGaps.push([c.u1 - 1.3, c.u1 - 0.3]);
+    else midGaps.push(mid(c));
+  }
+  return { midGaps };
+}
 /** athens_walk_house: { rect, front 'n'|'s', y, seed, kind: 'pastas'|'small'|'workshop' } */
 function walkHouse(el, ctx) {
   const { bag, col, lights } = ctx, F = frame(el.rect, el.front || 'n'), { L, D } = F, y = el.y ?? 0, seed = el.seed || 1, rand = rng(seed * 3 + 1);
-  const { C, vp0, vq0, cv0, cv1 } = geomOf(el.kind, L, D, seed), tone = TONES[seed % TONES.length], sol = F.out[1] < 0, front = sol ? 'n' : 's';
+  const { C, vp0, vq0, cv0, cv1 } = geomOf(el.kind, L, D, seed, !!el.storey), tone = TONES[seed % TONES.length], sol = F.out[1] < 0, front = sol ? 'n' : 's';
   const rr = (alongU, c, t, lo, hi) => (alongU ? F.R(lo, c - t / 2, hi, c + t / 2) : F.R(c - t / 2, lo, c + t / 2, hi));
   const seg = (alongU, c, t, lo, hi, y0, y1, m, solid = true) => { if (hi - lo < 0.01) return; const r = rr(alongU, c, t, lo, hi); bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); if (solid) col.rect(r, y0, y1); };
   const run = (alongU, c, t, a, b, doors) => {
@@ -164,7 +180,7 @@ function walkHouse(el, ctx) {
       seg(alongU, c, t, u, d0, y - 0.6, y + 0.7, 'rubble'); seg(alongU, c, t, u, d0, y + 0.7, y + H, tone);
       seg(alongU, c, t, d0, d1, y + 2.2, y + H, tone);
       const l = rr(alongU, c, t + 0.04, d0 - 0.1, d1 + 0.1); bag.add('timber', box(l[0], y + 2.08, l[1], l[2], y + 2.22, l[3]));
-      const th = rr(alongU, c, t, d0, d1); bag.add('limestone', box(th[0], y - 0.1, th[1], th[2], y + 0.04, th[3]));
+      const th = rr(alongU, c, t, d0, d1); bag.add('limestone', el.storey ? frustum(th, y - 0.1, y + 0.04, 0, 0, 0, 0, alongU ? { noZn: true, noZp: true } : { noXn: true, noXp: true }) : box(th[0], y - 0.1, th[1], th[2], y + 0.04, th[3]));   // (no faces across the way: a door's sill is not a wall to the walker's top field)
       u = d1;
     }
     seg(alongU, c, t, u, b, y - 0.6, y + 0.7, 'rubble'); seg(alongU, c, t, u, b, y + 0.7, y + H, tone);
@@ -185,6 +201,12 @@ function walkHouse(el, ctx) {
     else midGaps.push(mid(c));
   }
   for (const c of C.back) backGaps.push(mid(c, c.k === 'oikos' ? 1.2 : 1.0));
+  // the upper floor of the houses nearest the arrival (upstairs.js): the plan of its stair or ladder, which the court's furniture keeps clear of
+  const smallPc = (() => { const q = C.front.find((c) => c.k === 'passage'); return q ? (q.u0 + q.u1) / 2 : 0; })(), figU = el.kind === 'small' ? (smallPc < L / 2 ? T + 1.4 : L - T - 1.4) : 0;
+  const S = el.storey ? storeyPlan(el.kind, C, L, D, vq0, midGaps, figU) : null;
+  if (el.storey && !S) throw new Error('athens house: no stair fits');
+  const keep = S && S.side === 'front' ? [Math.min(S.s0, S.pa) - (S.dir < 0 ? 1.6 : 0.4), Math.max(S.s1, S.pa + 1.3) + (S.dir > 0 ? 1.6 : 0.4), cv0 + 2.05] : null;   // u0, u1, v1 of the stair's ground
+  const clearV = (u, v, r) => (keep && u > keep[0] - r && u < keep[1] + r && v < keep[2] + r ? keep[2] + r : v);
   run(true, T / 2, T, 0, L, frontGaps); run(true, D - T / 2, T, 0, L, []);
   run(false, T / 2, T, T, D - T, []); run(false, L - T / 2, T, T, D - T, []);
   run(true, vp0 + TI / 2, TI, T, L - T, midGaps); run(true, vq0 + TI / 2, TI, T, L - T, backGaps);
@@ -196,8 +218,9 @@ function walkHouse(el, ctx) {
     bag.add(tone, box(r[0], y + H, r[1], r[2], y + H + UP - 0.02, r[3])); col.rect(r, y + H, y + H + UP);
     rangeRoof(ctx, r, y, H + UP); };
   const fr = [0, 0, L, vp0 + TI], bk = [0, vq0 - C.PD, L, D];
-  if (C.up === 'front') upper(...fr); else rangeRoof(ctx, F.R(...fr), y, H);
-  if (C.up === 'back') upper(...bk); else rangeRoof(ctx, F.R(...bk), y, H);
+  if (S) { if (S.side === 'back') rangeRoof(ctx, F.R(...fr), y, H); else rangeRoof(ctx, F.R(...bk), y, H); }   // (the opened storey brings its own roof)
+  else { if (C.up === 'front') upper(...fr); else rangeRoof(ctx, F.R(...fr), y, H);
+  if (C.up === 'back') upper(...bk); else rangeRoof(ctx, F.R(...bk), y, H); }
   // the pastas: posts carrying a beam on the court's edge
   if (C.PD) {
     const n = 4, vx = cv1 + 0.2;
@@ -208,27 +231,29 @@ function walkHouse(el, ctx) {
   // the court
   const cw = F.R(T + TI, cv0, L - T - TI, cv1), cuc = (u, v) => F.P(u, v), cmid = [(cv0 + cv1) / 2];
   if (el.kind === 'pastas') {
-    const [ax, az] = cuc(L / 2 + 0.6, cmid[0]), a = [ax - 0.35, az - 0.3, ax + 0.35, az + 0.3];
+    const [ax, az] = cuc(L / 2 + 0.6, clearV(L / 2 + 0.6, cmid[0], 0.5)), a = [ax - 0.35, az - 0.3, ax + 0.35, az + 0.3];
     bag.add('limestone', box(a[0], y, a[1], a[2], y + 0.7, a[3])); bag.add('limestone', box(a[0] - 0.07, y + 0.7, a[1] - 0.07, a[2] + 0.07, y + 0.8, a[3] + 0.07)); bag.add('lacquer_black', box(ax - 0.2, y + 0.8, az - 0.15, ax + 0.2, y + 0.805, az + 0.15)); col.rect([a[0] - 0.07, a[1] - 0.07, a[2] + 0.07, a[3] + 0.07], y, y + 0.8);
-    const [wx, wz] = cuc(L - T - 1.2, cv0 + 0.7); bag.add('limestone', lathe([[0.42, 0], [0.42, 0.62], [0.34, 0.62], [0.34, 0.5], [0.001, 0.5]], 14, null, wx, y, wz)); col.circle(wx, wz, 0.42, y, y + 0.62);
-    const [jx, jz] = cuc(T + 0.7, cv0 + 0.6); pot(bag, 'pithos', jx, y, jz, { s: 1 }); col.circle(jx, jz, 0.36, y, y + 1.1);
+    const [wx, wz] = cuc(L - T - 1.2, clearV(L - T - 1.2, cv0 + 0.7, 0.45)); bag.add('limestone', lathe([[0.42, 0], [0.42, 0.62], [0.34, 0.62], [0.34, 0.5], [0.001, 0.5]], 14, null, wx, y, wz)); col.circle(wx, wz, 0.42, y, y + 0.62);
+    const [jx, jz] = cuc(T + 0.7, clearV(T + 0.7, cv0 + 0.6, 0.4)); pot(bag, 'pithos', jx, y, jz, { s: 1 }); col.circle(jx, jz, 0.36, y, y + 1.1);
   } else if (el.kind === 'small') {
     const pcen = (() => { const q = C.front.find((c) => c.k === 'passage'); return (q.u0 + q.u1) / 2; })(), ou = pcen < L / 2 ? L - T - 1.4 : T + 1.4;
     const [ox, oz] = cuc(ou, cmid[0]);                                                                  // the bread oven and the fig, clear of the passage
     bag.add('mud_plaster', lathe([[0.7, 0], [0.7, 0.35], [0.55, 0.8], [0.25, 1.05], [0.001, 1.08]], 14, null, ox, y, oz)); bag.add('lacquer_black', box(ox - 0.2, y + 0.18, oz + (sol ? 0.55 : -0.7), ox + 0.2, y + 0.5, oz + (sol ? 0.7 : -0.55))); col.circle(ox, oz, 0.72, y, y + 1.1);
     const [fx, fz] = cuc(L - ou, cv1 - 1.0); fig(bag, fx, y, fz, 4.4, rand); col.circle(fx, fz, 0.14, y, y + 3);
-    const [wx, wz] = cuc(L - ou, cv0 + 0.8); bag.add('limestone', lathe([[0.42, 0], [0.42, 0.62], [0.34, 0.62], [0.34, 0.5], [0.001, 0.5]], 14, null, wx, y, wz)); col.circle(wx, wz, 0.42, y, y + 0.62);
+    const [wx, wz] = cuc(L / 2, cv0 + 0.8); bag.add('limestone', lathe([[0.42, 0], [0.42, 0.62], [0.34, 0.62], [0.34, 0.5], [0.001, 0.5]], 14, null, wx, y, wz)); col.circle(wx, wz, 0.42, y, y + 0.62);
   } else {
-    const q = C.front.find((c) => c.k === 'passage'), right = (q.u0 + q.u1) / 2 > L / 2, sd = (u) => (right ? u : L - u), v = (cv0 + cv1) / 2, potter = seed % 2 === 0;
+    const q = C.front.find((c) => c.k === 'passage'), right = (q.u0 + q.u1) / 2 > L / 2, sd = (u) => (right ? u : L - u), v = (cv0 + cv1) / 2, potter = seed % 2 === 0 && !el.storey;   // (the yards of the houses opened upstairs are sculptors': the kiln's stoking channel would shut the way to the stair)
     const [kx, kz] = cuc(sd(T + 3.0), v);
     if (potter) {
       kiln(ctx, kx, y, kz, right ? 0 : Math.PI, { glow: false });                                         // the updraught kiln, its mouth toward the middle of the yard
       for (const k of [0, 1]) { const b = F.R(sd(L - T - 1.0), v - 1.3 + k * 1.6, sd(L - T - 0.1), v - 0.3 + k * 1.6); bag.add('limestone', box(b[0], y, b[1], b[2], y + 0.35, b[3])); bag.add('water', box(b[0] + 0.08, y + 0.3, b[1] + 0.08, b[2] - 0.08, y + 0.32, b[3] - 0.08)); col.rect(b, y, y + 0.35); }   // settling basins
-      const r = F.R(sd(T + 0.3), cv0 + 0.3, sd(T + 2.8), cv0 + 0.75); bag.add('timber', box(r[0], y + 0.5, r[1], r[2], y + 0.55, r[3])); for (const a2 of [r[0] + 0.1, r[2] - 0.15]) for (const b2 of [r[1], r[3] - 0.05]) bag.add('timber', box(a2, y, b2, a2 + 0.05, y + 0.5, b2 + 0.05));
+      const rv0 = keep && Math.max(sd(T + 0.3), sd(T + 2.8)) > keep[0] && Math.min(sd(T + 0.3), sd(T + 2.8)) < keep[1] ? null : cv0 + 0.3, r = rv0 === null ? null : F.R(sd(T + 0.3), rv0, sd(T + 2.8), rv0 + 0.45);
+      if (r) { bag.add('timber', box(r[0], y + 0.5, r[1], r[2], y + 0.55, r[3])); for (const a2 of [r[0] + 0.1, r[2] - 0.15]) for (const b2 of [r[1], r[3] - 0.05]) bag.add('timber', box(a2, y, b2, a2 + 0.05, y + 0.5, b2 + 0.05));
       col.rect(r, y, y + 0.55);
       for (let k = 0; k < 5; k++) pot(bag, k % 2 ? 'oinochoe' : 'hydria', Math.min(r[0], r[2]) + 0.4 + k * 0.42, y + 0.55, (r[1] + r[3]) / 2, { s: 0.8, dark: false });
+      }
     } else {
-      const b = F.R(sd(T + 0.4), cv0 + 0.4, sd(T + 2.6), cv0 + 1.9); bag.add('marble', box(b[0], y, b[1], b[2], y + 1.1, b[3])); col.rect(b, y, y + 1.1);
+      const bv = clearV(sd(T + 1.5), cv0 + 0.4, 0.0), b = F.R(sd(T + 0.4), bv, sd(T + 2.6), bv + 1.5); bag.add('marble', box(b[0], y, b[1], b[2], y + 1.1, b[3])); col.rect(b, y, y + 1.1);
       for (let k = 0; k < 3; k++) { const [hx, hz] = cuc(sd(T + 1.0 + k * 1.1), v + 0.8); bag.add('marble', box(hx - 0.15, y, hz - 0.15, hx + 0.15, y + 1.25, hz + 0.15)); bag.add('marble', lathe([[0.001, 0], [0.12, 0.04], [0.13, 0.2], [0.001, 0.27]], 10, null, hx, y + 1.25, hz)); col.circle(hx, hz, 0.22, y, y + 1.5); }
     }
   }
@@ -238,20 +263,20 @@ function walkHouse(el, ctx) {
     if (c.k === 'andron') andron(ctx, r, y, F.out[1] < 0, rand);
     else if (c.k === 'shop') furnishShop(ctx, F, y, c.u0, c.u1, T, vp0, TRADES[(seed >> 3) % TRADES.length], rand);
     else if (c.k === 'store') store(ctx, r, y, rand, front);
-    else if (c.k === 'craft') craft(ctx, r, y, seed % 2 !== 0, rand, front);
+    else if (c.k === 'craft') craft(ctx, r, y, !!el.storey || seed % 2 !== 0, rand, front);
     else if (c.k === 'work') { furnishShop(ctx, F, y, c.u0, c.u1, T, vp0, TRADES[(seed >> 3) % TRADES.length], rand); }
   }
   for (const c of C.back) {
     const r = F.R(c.u0, vq0 + TI, c.u1, D - T);
     if (c.k === 'oikos') oikos(ctx, r, y, rand, front, el.kind !== 'workshop');
-    else if (c.k === 'thalamos') thalamos(ctx, r, y, rand, front, el.kind === 'small');
+    else if (c.k === 'thalamos') thalamos(ctx, r, y, rand, front, S ? 'open' : el.kind === 'small');
     else if (c.k === 'kitchen') kitchen(ctx, r, y, rand, front === 'n');
   }
   void lights;
   // the dressing of the four faces, the herm and the sign
-  const fh = C.up === 'front' ? H + UP : H;
+  const fh = C.up === 'front' ? H + (S ? UH : UP) : H;
   face(ctx, F, { u0: 0, u1: L, v: 0, s: -1, y, H: fh, rand, tier: 2, wins: 0, spout: true });
-  face(ctx, F, { u0: 0, u1: L, v: D, s: 1, y, H: C.up === 'back' ? H + UP : H, rand, tier: 2, wins: 2, spout: true });
+  face(ctx, F, { u0: 0, u1: L, v: D, s: 1, y, H: C.up === 'back' ? H + (S ? UH : UP) : H, rand, tier: 2, wins: 2, spout: true });
   for (const side of ['e', 'w']) { const G = frame(el.rect, side); face(ctx, G, { u0: 0, u1: G.L, v: 0, s: -1, y, H: H + (C.up ? 0.0 : 0), rand, tier: 2, wins: 1, spout: false }); }
   const door = C.front.find((c) => c.k === 'passage'), [d0, d1] = mid(door, 1.1);
   const P = (a, b, c2, d, y0, y1, m) => { const r = F.R(a, b, c2, d); bag.add(m, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); };
@@ -264,23 +289,25 @@ function walkHouse(el, ctx) {
     P(a - 0.1, -0.12, a + 0.08, 0.06, 0, 2.3, 'timber'); P(b - 0.08, -0.12, b + 0.1, 0.06, 0, 2.3, 'timber'); P(a - 0.14, -0.14, b + 0.14, 0.08, 2.2, 2.38, 'timber');
     P(a + 0.2, -0.5, b - 0.2, -0.44, 2.55, 2.98, 'wood_ochre'); P(a + 0.6, -0.52, b - 0.6, -0.5, 2.65, 2.88, ['paint_blue', 'wall_red', 'paint_ochre', 'pottery_dark'][seed % 4]);
   }
-  if (C.up === 'front') for (const k of [0.22, 0.5, 0.78]) { const u = L * k + (rand() - 0.5) * 0.5; if (Math.abs(u - (d0 + d1) / 2) < 1.0) continue;
+  if (S) { /* real windows and a gallery: upstairs.js */ }
+  else if (C.up === 'front') for (const k of [0.22, 0.5, 0.78]) { const u = L * k + (rand() - 0.5) * 0.5; if (Math.abs(u - (d0 + d1) / 2) < 1.0) continue;
     P(u - 0.4, -0.06, u + 0.4, 0.08, H + 0.7, H + 1.6, 'wood_dark'); P(u - 0.48, -0.1, u + 0.48, 0.0, H + 1.6, H + 1.7, 'timber'); P(u - 0.5, -0.14, u + 0.5, 0.0, H + 0.62, H + 0.7, 'timber');
     if (k === 0.5) P(u + 0.4, -0.5, u + 0.46, 0.0, H + 0.7, H + 1.6, 'shutter_brown'); }
   else if (C.up === 'back') for (const k of [0.3, 0.7]) { const u = L * k; const r = F.R(u - 0.4, D - 0.06, u + 0.4, D + 0.06); bag.add('wood_dark', box(r[0], y + H + 0.7, r[1], r[2], y + H + 1.6, r[3])); }
+  if (S) buildStorey(ctx, F, y, S, { C, L, D, vp0, vq0, cv0, cv1, kind: el.kind, seed, tone, midGaps, pot, chest });
 }
 STYLES.greek.elements.athens_walk_house = walkHouse;
 
 /** The household of a house lot as figure elements (life style): where its people stand. */
 export function houseLife(l) {
-  const F = frame(l.rect, l.front || 'n'), { L, D } = F, { C, vp0, vq0, cv0, cv1 } = geomOf(l.kind, L, D, l.seed), y = l.y, out = [], R = rng(l.seed + 9), sd = () => Math.floor(R() * 1e9);
+  const F = frame(l.rect, l.front || 'n'), { L, D } = F, { C, vp0, vq0, cv0, cv1 } = geomOf(l.kind, L, D, l.seed, storeyOf(l)), y = l.y, out = [], R = rng(l.seed + 9), sd = () => Math.floor(R() * 1e9);
   const faceTo = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
   const at = (u, v) => F.P(u, v), fwd = (u, v) => F.P(u, v - 1), back = (u, v) => F.P(u, v + 1);
   const man = (p, to, o = {}) => out.push({ t: 'figure', at: p, y, rot: faceTo(p, to), seed: sd(), skin: 'skin_medium', dress: 'tunic', legs: 'bare', cloth: ['cloth_brown', 'linen', 'cloth_ochre', 'cloth_grey'][Math.floor(R() * 4)], over: 'belt', hair: 'short', beard: 0.8, hat: 'none', feet: 'bare', pose: 'stand', ...o });
   const woman = (p, to, o = {}) => out.push({ t: 'figure', at: p, y, rot: faceTo(p, to), seed: sd(), skin: 'skin_light', dress: 'robe', cloth: ['cloth_red', 'cloth_indigo', 'cloth_ochre'][Math.floor(R() * 3)], cloth2: 'cloth_white', over: 'shawl', hair: 'bun', hat: 'none', pose: 'stand', ...o });
   for (const c of C.front) {
     if (c.k === 'shop' || c.k === 'work') man(at(c.u0 + 2.6, T + 0.85 + 0.7), at(c.u0 + 2.6, -3), {});
-    if (c.k === 'craft') { const cx = (c.u0 + c.u1) / 2, pot = l.seed % 2 === 0, p = at(cx - (pot ? 0.4 : 0.6), vp0 - (pot ? 2.5 : 2.7)); man(p, at(cx - (pot ? 0.4 : 0.6), vp0 - 1.7), { pose: pot ? 'sit_low' : 'stand', beard: 1 }); }
+    if (c.k === 'craft') { const cx = (c.u0 + c.u1) / 2, pot = l.seed % 2 === 0 && !storeyOf(l), p = at(cx - (pot ? 0.4 : 0.6), vp0 - (pot ? 2.5 : 2.7)); man(p, at(cx - (pot ? 0.4 : 0.6), vp0 - 1.7), { pose: pot ? 'sit_low' : 'stand', beard: 1 }); }
   }
   const ok = C.back.find((c) => c.k === 'oikos'), kc = C.back.find((c) => c.k === 'kitchen');
   if (ok) woman(at(ok.u1 - 1.1 - 0.0, D - T - 1.5), at(ok.u1 - 1.1, D), {});
@@ -290,4 +317,18 @@ export function houseLife(l) {
   return out;
 }
 /** Where the hearth's smoke leaves the roof, for the smoke system. */
-export function houseSmoke(l) { const F = frame(l.rect, l.front || 'n'), { L, D } = F, { C, vq0 } = geomOf(l.kind, L, D, l.seed), c = C.back.find((q) => q.k === 'kitchen') || C.back.find((q) => q.k === 'oikos'), p = F.P((c.u0 + c.u1) / 2, vq0 + TI + 1.6); return [p[0], l.y + (C.up === 'back' ? 3.2 + UP + 1.6 : 4.3), p[1]]; }
+export function houseSmoke(l) { const F = frame(l.rect, l.front || 'n'), { L, D } = F, { C, vq0 } = geomOf(l.kind, L, D, l.seed, storeyOf(l)), c = C.back.find((q) => q.k === 'kitchen') || C.back.find((q) => q.k === 'oikos'), p = F.P((c.u0 + c.u1) / 2, vq0 + TI + 1.6); return [p[0], l.y + (C.up === 'back' ? 3.2 + (storeyOf(l) ? UH : UP) + 1.6 : 4.3), p[1]]; }
+
+/** The walk-check routes (world x, z) from the street to an upper room of each house opened upstairs. */
+export function houseWalks() {
+  const out = [];
+  for (const l of lots()) {
+    if (!storeyOf(l)) continue;
+    const F = frame(l.rect, l.front || 'n'), { L, D } = F, { C, vq0, vp0, cv0 } = geomOf(l.kind, L, D, l.seed, true), g = gapsOf(C, l.seed);
+    const pc = C.front.find((c) => c.k === 'passage'), figU = l.kind === 'small' ? ((pc.u0 + pc.u1) / 2 < L / 2 ? T + 1.4 : L - T - 1.4) : 0;
+    const S = storeyPlan(l.kind, C, L, D, vq0, g.midGaps, figU);
+    const r = storeyRoute(S, C, L, D, vp0, vq0, cv0, l.kind, l.seed).map(([u, v]) => F.P(u, v));
+    r.y0 = l.y; out.push(r);
+  }
+  return out;
+}

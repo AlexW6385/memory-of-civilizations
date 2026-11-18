@@ -4,6 +4,8 @@
 // the great gate; the forecourt (jilaukhana) — and south of it the town of Taj Ganj. Pure data.
 // Coordinates: metres, +x east, +z south; the river on the north (−z).
 
+import { layoutOf } from '../../styles/mughal/townhouse.js';
+
 export const RADIUS = 360;
 export const RIVER_Z = -262;                          // the Yamuna's bank
 export const TERRACE = { rect: [-150, -258, 150, -148], y: 1.5 };
@@ -96,7 +98,23 @@ export function houses() {
     const front = dx > dz ? (cx < sr[0] ? 'e' : 'w') : (cz < sr[1] ? 's' : 'n');
     add(r, front, false);
   }
+  openUpper(HOUSES);
   return HOUSES;
 }
 export const inHouse = (x, z, m = 0) => houses().some((h) => inRect(h.rect, x, z, m));
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+
+/**
+ * The houses whose upper floors a visitor can climb (docs/settlements/mughal-agra.md §16): the enterable ones nearest the arrival (the axis
+ * street's mouth) with a jharokha or a loggia and room for the stair, of four kinds — the shop with its dwelling, the merchant's (the grain
+ * dealer's) house, the craftsman's (weaver's, embroiderer's) and the tenement (the family's) — ten of them, at most four of a kind.
+ */
+export const UP_COUNT = 10;
+function openUpper(H) {
+  const A = [0, 245], quota = { shop: 3, merchant: 3, craft: 2, tenement: 2 }, got = { shop: 0, merchant: 0, craft: 0, tenement: 0 };
+  const kindOf = (h, l) => (l.shop ? 'shop' : l.kind === 'grain' ? 'merchant' : l.kind === 'hearth' ? 'tenement' : 'craft');
+  const cand = H.map((h) => ({ h, l: layoutOf({ t: 'haveli', ...h }) })).filter(({ h, l }) => l.enter && l.variant !== 'plain' && l.D >= 9.5 && l.W >= 8.5 && l.st >= 2)
+    .sort((a, b) => Math.hypot((a.h.rect[0] + a.h.rect[2]) / 2 - A[0], (a.h.rect[1] + a.h.rect[3]) / 2 - A[1]) - Math.hypot((b.h.rect[0] + b.h.rect[2]) / 2 - A[0], (b.h.rect[1] + b.h.rect[3]) / 2 - A[1]));
+  let n = 0;
+  for (const { h, l } of cand) { const k = kindOf(h, l); if (got[k] >= quota[k] || n >= UP_COUNT) continue; h.up = k; got[k]++; n++; }
+}

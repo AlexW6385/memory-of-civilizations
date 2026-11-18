@@ -4,6 +4,7 @@
 // A skirt hangs from the edges so that tiles of different detail meet without cracks.
 
 import { PLANET_RADIUS as R, surface, coverAt, seaHeight } from './relief.js';
+import { riverFlowAt } from './rivers.js';
 
 /** The six faces of the cube: normal n and the in-face axes a, b (a × b = n). */
 export const FACES = [
@@ -36,7 +37,7 @@ export function tileRect(level, i, j) { const size = 2 / (1 << level); return [-
 
 /**
  * Build tile (face, level, i, j) with n cells a side. Returns { position, normal, ground, ground2,
- * ground3, index, minH, maxH, water?: { position, depth, index } }.
+ * ground3, index, minH, maxH, water?: { position, depth, flow, index } }.
  */
 export function buildTile(face, level, i, j, n = 32) {
   const [s0, t0, size] = tileRect(level, i, j);
@@ -112,7 +113,7 @@ const SINK = 20;
 const DRY_ABOVE = 3;
 function buildWater(face, s0, t0, size, m, gAt) {
   const verts = (m + 1) * (m + 1), total = verts + 4 * m;
-  const position = new Float32Array(total * 3), depth = new Float32Array(total);
+  const position = new Float32Array(total * 3), depth = new Float32Array(total), flow = new Float32Array(total * 4);
   const dry = new Uint8Array(verts);
   let v = 0;
   const put = (a, b, drop) => {
@@ -120,6 +121,17 @@ function buildWater(face, s0, t0, size, m, gAt) {
     const r = R - drop + (sh ?? Math.min(0, g.h) - SINK);
     position[v * 3] = u[0] * r; position[v * 3 + 1] = u[1] * r; position[v * 3 + 2] = u[2] * r;
     depth[v] = Math.max(0, (sh ?? 0) - g.h);
+    // a river's current: (east, south, strength, rapids) for the water's surface (materials.js)
+    if (g.n.river > 0 && !drop) {
+      const F = riverFlowAt(u);
+      if (F) {
+        const ex = u[2], ez = -u[0], el = Math.hypot(ex, ez) || 1, e = [ex / el, 0, ez / el];       // east: Y × u
+        const nn = [u[1] * e[2] - u[2] * e[1], u[2] * e[0] - u[0] * e[2], u[0] * e[1] - u[1] * e[0]];   // north: u × east
+        flow[v * 4] = F.dir[0] * e[0] + F.dir[1] * e[1] + F.dir[2] * e[2];
+        flow[v * 4 + 1] = -(F.dir[0] * nn[0] + F.dir[1] * nn[1] + F.dir[2] * nn[2]);
+        flow[v * 4 + 2] = F.strength; flow[v * 4 + 3] = F.rapids;
+      }
+    }
     // (dry too where the ground stands 3 m above the sea: the sea is a sphere round the whole
     // planet, and every tile on land had a sea under its ground, drawn for nothing)
     if (v < verts) dry[v] = sh == null || g.h > sh + DRY_ABOVE ? 1 : 0;
@@ -140,5 +152,5 @@ function buildWater(face, s0, t0, size, m, gAt) {
   const top = ring.map(([a, b]) => id(a, b)), low = ring.map(([a, b]) => put(a, b, 1.5));
   for (let k = 0; k < ring.length; k++) { const k2 = (k + 1) % ring.length; if (dry[top[k]] && dry[top[k2]]) continue; idx.push(top[k], top[k2], low[k2], top[k], low[k2], low[k]); }
   if (!idx.length) return null;
-  return { position, depth, index: new Uint16Array(idx) };
+  return { position, depth, flow, index: new Uint16Array(idx) };
 }

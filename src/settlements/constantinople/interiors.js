@@ -6,6 +6,8 @@ import '../../styles/byzantine/interiors.js';
 import { height, special, EIRENE } from './layout.js';
 import { MESE_STOAS } from './plan.js';
 import { shopFrame, TRADES } from '../../styles/byzantine/interiors.js';
+import { upKind } from '../../styles/constantinople/upper.js';
+import { homeWalks } from '../../styles/constantinople/homes.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const shopsOf = () => {
@@ -22,11 +24,24 @@ const HOUSES = ['home', 'tavern', 'bakery', 'weaver', 'home2', 'home3'];
 /** The outer lanes' working and family houses (layout.js SPECIAL w01…): the same builder, a trade by kind. */
 const OUTER = () => Object.keys(specials()).filter((k) => /^w\d+$/.test(k));
 
+/** The enterable houses, each with the kind of its upper floor (upper.js): merchant's house, tenement, inn, shop with dwelling, craftsman's. */
+export function houseElements() {
+  const S = specials(), kindOf = (k, v, i) => (k === 'home2' ? 'tenement' : upKind(v, i));
+  // (a house whose front lies in the ground, on the slopes of the east and south, keeps its old single room: the way in is not level there)
+  const level = (e) => [e.rect[0] + 3, e.rect[0] + 9, e.rect[0] + 15].every((x) => Math.abs(height(x, e.rect[3] + 2.5) - e.y) < 0.3);
+  const open = (e) => (level(e) ? e : { ...e, up: undefined });
+  return [
+    ...HOUSES.filter((k) => S[k]).map((k, i) => { const variant = k === 'home2' || k === 'home3' ? 'home' : k; return { t: 'cn_home', rect: S[k].rect, y: S[k].y, seed: i + 1, variant, up: kindOf(k, variant, 0) }; }).map(open),
+    ...OUTER().map((k, i) => ({ t: 'cn_home', rect: S[k].rect, y: S[k].y, seed: 100 + i * 37, variant: S[k].kind, up: upKind(S[k].kind, i) })).map(open),
+  ];
+}
+/** The walk-check routes up the houses' stairs. */
+export const houseWalks = () => houseElements().filter((e) => e.up).flatMap((e) => homeWalks(e));
+
 export function interiorPlan() {
   const S = specials(), shops = shopsOf();
   const elements = [
-    ...HOUSES.filter((k) => S[k]).map((k, i) => ({ t: 'cn_home', rect: S[k].rect, y: S[k].y, seed: i + 1, variant: k === 'home2' || k === 'home3' ? 'home' : k })),
-    ...OUTER().map((k, i) => ({ t: 'cn_home', rect: S[k].rect, y: S[k].y, seed: 100 + i * 37, variant: S[k].kind })),
+    ...houseElements(),
     { t: 'byz_chapel', rect: S.chapel.rect, y: S.chapel.y },
     { t: 'byz_bath', rect: S.bath.rect, y: S.bath.y },
     ...shops.map((s) => ({ t: 'byz_shopfit', ...s })),
@@ -62,9 +77,9 @@ export function interiorLife() {
   fig([tc[0] - 2.1, tc[1]], Y0, face([tc[0] - 2.1, tc[1]], tc), { dress: 'robe', over: 'collar', cloth: 'cloth_green', cloth2: 'cloth_white', pose: 'sit' });
   fig([tc[0] + 2.1, tc[1]], Y0, face([tc[0] + 2.1, tc[1]], tc), { dress: 'robe', hat: 'veil', cloth: 'cloth_red', pose: 'sit' });
   fig([hx0 + 10.5, hz1 - 3.4], Y0, Math.PI, { dress: 'robe', hat: 'veil', cloth: 'cloth_ochre' });
-  for (const k of ['home2', 'home3']) if (S[k]) { const [a0, b0, , b1] = S[k].rect, Yh = S[k].y + 0.2, zz = (b0 + b1) / 2; fig([a0 + 7.5, zz + 0.2], Yh, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'talk' }); fig([a0 + 8.6, zz + 0.4], Yh, Math.PI + 0.5, { dress: 'tunic', cloth: pick(CL), pose: 'talk' }); }
+  for (const k of ['home2', 'home3']) if (S[k]) { const [a0, b0, , b1] = S[k].rect, Yh = S[k].y + 0.2, zz = (b0 + b1) / 2; fig([a0 + 2.4, b0 + 9.4], Yh, 0.4, { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'talk' }); fig([a0 + 3.4, b0 + 9.2], Yh, Math.PI + 0.4, { dress: 'tunic', cloth: pick(CL), pose: 'talk' }); }
   if (S.tavern) { const [a0, b0, , b1] = S.tavern.rect, Yt = S.tavern.y + 0.2;
-    fig([a0 + 6.6, b1 - 2.8], Yt, Math.PI, { cloth: 'cloth_white', cloth2: 'cloth_brown', pose: 'stand' });
+    fig([a0 + 6.6, b1 - 3.7], Yt, Math.PI, { cloth: 'cloth_white', cloth2: 'cloth_brown', pose: 'stand' });
     for (const [dx, dz, r] of [[2.8, 2.5, 0], [2.9, 4.2, Math.PI], [6.2, 6.6, 1.6], [6.0, 8.2, -1.6], [2.8, 6.6, 0.4]]) fig([a0 + dx, b0 + dz], Yt, r, { pose: 'sit', dress: rand() < 0.3 ? 'robe' : 'tunic', hat: 'none' }); }
   if (S.bakery) { const [a0, b0] = S.bakery.rect, Yb = S.bakery.y + 0.2; fig([a0 + 4.7, b0 + 3.0], Yb, 0, { dress: 'tunic', legs: 'hose', cloth: 'cloth_white', cloth2: 'cloth_white' }); fig([a0 + 4.0, b0 + 6.4], Yb, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); }
   if (S.weaver) { const [a0, b0] = S.weaver.rect, Yw = S.weaver.y + 0.2; for (const dx of [2.6, 6.2]) fig([a0 + dx, b0 + 3.2], Yw, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'sit' }); fig([a0 + 4.4, b0 + 8.0], Yw, Math.PI, { dress: 'tunic', cloth: pick(CL) }); }
@@ -72,7 +87,7 @@ export function interiorLife() {
   for (const k of OUTER()) {
     const sp = S[k], [a0, b0, , b1] = sp.rect, Yo = sp.y + 0.2, zz = (b0 + b1) / 2, at = { sit: (x, z, r, o = {}) => fig([a0 + x, b0 + z], Yo, r, { pose: 'sit', ...o }), st: (x, z, r, o = {}) => fig([a0 + x, b0 + z], Yo, r, o) };
     if (sp.kind === 'home') { at.st(3.4, zz - b0 + 0.2, 0, { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'sit' }); at.st(5.5 + 2.1, zz - b0 + 0.2, Math.PI, { dress: 'tunic', cloth: pick(CL), pose: 'sit' }); }
-    else if (sp.kind === 'tavern') { at.st(6.6, 14 - 2.8, Math.PI, { cloth: 'cloth_white', cloth2: 'cloth_brown' }); at.sit(2.8, 2.5, 0); at.sit(6.2, 6.6, 1.6); }
+    else if (sp.kind === 'tavern') { at.st(6.6, 14 - 3.7, Math.PI, { cloth: 'cloth_white', cloth2: 'cloth_brown' }); at.sit(2.8, 2.5, 0); at.sit(6.2, 6.6, 1.6); }
     else if (sp.kind === 'bakery') { at.st(4.7, 3.0, 0, { cloth: 'cloth_white', cloth2: 'cloth_white' }); at.st(4.0, 6.4, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); }
     else if (sp.kind === 'weaver') { at.sit(2.6, 3.2, 0, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); at.st(4.4, 8.0, Math.PI, { cloth: pick(CL) }); }
     else if (sp.kind === 'potter') { at.sit(5.6, 4.1, 0, { cloth: 'cloth_brown', cloth2: 'cloth_brown' }); at.st(4.8, zz - b0 + 2.3, 0, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); }

@@ -24,7 +24,7 @@ for (const [x, z] of T.wells) E.push({ t: 'well', kind: 'windlass', mat: 'bluest
     else if (r === 3) E.push({ t: 'basket', n: 2, at: [x, z], y: 0, seed: q });
     else E.push({ t: 'bench', at: [x, z], y: 0, rot, len: 1.6 });
   });
-  for (const [x, z, k] of [[-10, 8.5, 0], [10, -8.8, 1], [-11.8, -3, 2], [11.5, 4, 0]]) {
+  for (const [x, z, k] of [[-9.6, 6.4, 0], [9.0, 7.0, 1], [-11.2, -0.4, 2], [10.3, 4.8, 0]]) {
     if (k === 0) E.push({ t: 'drying_tray', at: [x, z], y: 0, rot: 0.4, seed: 40 + x });
     else if (k === 1) E.push({ t: 'tea_table', at: [x, z], y: 0, rot: 0.3 });
     else E.push({ t: 'chickens', n: 4, kind: 'hen', at: [x, z], y: 0, seed: 7 });
@@ -62,8 +62,33 @@ for (const f of FURNISH) {
   const [x, z] = polar(26.4, f.i * 360 / T.n);
   rooms.push({ id: `${f.kind}-${f.k}-${f.i}`, rect: [x - 0.3, z - 0.3, x + 0.3, z + 0.3], y: T.floors[f.k], kind: 'hall' });
 }
+// the second ring's upper storey (docs §4.8): each room has a place on the map, and a route from the street that climbs one of the court's two stairs
+const U = T.ring2, S = U.stair, RB = U.r0 - U.bal;
+for (let i = 0; i < U.n; i++) {
+  const [x, z] = polar((U.r0 + U.r1 - 0.7) / 2 - 0.2, i * 360 / U.n);
+  rooms.push({ id: `ring2-up-${i}`, rect: [x - 0.3, z - 0.3, x + 0.3, z + 0.3], y: U.floors[1], kind: 'hall' });
+}
 const walks = [[[0, 72], [0, 52], [0, 36], [0, 22], [0, 8], [0, 3]]];
 walks[0].y0 = 0;
+{
+  // up by stair s (+1 in the north-east of the court, entered from the north gate; -1 in the south-west, from the south gate), along the balcony to the door of room i, into the room
+  const route = (s, i) => {
+    const zm = (S.Zn + S.Zs) / 2, W = (X, Z) => [s * X, s * Z], deg = (a) => ((a % 360) + 360) % 360;
+    const r = s > 0 ? [[0, -40], [0, -24], [0, -14.5], [0, -11]] : [[0, 40], [0, 22], [0, 12.5]];
+    r.push(W(S.X0 - 0.9, zm), W(S.X0 + 0.3, zm), W((S.X0 + S.X1) / 2, zm), W(S.X1 - 0.3, zm), W((S.X1 + S.XL) / 2, zm));
+    // the landing opens the balcony at this angle
+    let a = s > 0 ? 312.5 : 132.5;
+    const t = i * 360 / U.n, step = t > a ? 4.5 : -4.5;
+    r.push(polar(RB + 0.8, a));
+    while (Math.abs(t - a) > 4.5) { a += step; r.push(polar(RB + 0.8, a)); }
+    r.push(polar(RB + 0.8, t), polar(U.r0, t), polar((U.r0 + U.r1 - 0.7) / 2 - 0.2, t));
+    void deg;
+    r.y0 = 0;
+    return r;
+  };
+  // bedrooms, the grain floor and a loom: the sitting rooms' tea tables stand close to the door and are not walked to
+  for (const [s, i] of [[1, 30], [1, 33], [1, 35], [1, 37], [1, 39], [-1, 10], [-1, 14], [-1, 17], [-1, 18], [-1, 20]]) walks.push(route(s, i));
+}
 
 export const tulou = {
   id: 'hakka-tulou',
