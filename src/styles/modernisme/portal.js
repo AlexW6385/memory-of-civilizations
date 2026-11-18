@@ -33,7 +33,7 @@ export function makePortals(H) {
 
   // ── the vestibule and the stair hall, in the portal's own frame: x across (0 at the doorway's middle), z inward from the wall's face, y up from the street ──
   const DADO = [['glaze_white', 'glaze_green'], ['tile_turquoise', 'tile_cream'], ['tile_cream', 'glaze_green']];
-  const furnish = (v) => kit(`portal|${v}`, (b) => {
+  const furnish = (v, open = false) => kit(`portal|${v}|${open}`, (b) => {
     const Y0 = 0.12, Z0 = FW, Z1 = VD, Z2 = VD + PW, Z3 = VD + PW + HD, [d1, d2] = DADO[v];
     const bx = (m, x0, x1, z0, z1, y0, y1) => b.box(m, x0, y0, z0, x1, y1, z1);
     const rd = (m, p, q, r, seg = 5) => b.add(m, rod([p[0], p[2], p[1]], [q[0], q[2], q[1]], r, seg));        // (x, z, y)
@@ -50,8 +50,10 @@ export function makePortals(H) {
       bx('limestone', sg > 0 ? lo - 0.005 : lo, sg > 0 ? hi : hi + 0.005, Z0, Z1, Y0, Y0 + 0.14); bx('plaster_white', lo, hi, Z0, Z1, 1.5, 4.12);
       for (let k = 0; k < 4; k++) bx(d2, sg > 0 ? lo - 0.006 : lo, sg > 0 ? hi : hi + 0.006, Z0 + 0.3 + k * 0.7, Z0 + 0.42 + k * 0.7, 0.45, 1.3);                               // (the border tiles' vertical band, between the panels)
     }
-    bx(d1, -HW, HW, Z1 - 0.03, Z1, Y0 + 0.14, 1.34); bx(d2, -HW, HW, Z1 - 0.03, Z1, 1.34, 1.44); bx('wood_painted', -HW, HW, Z1 - 0.07, Z1, 1.44, 1.5); bx('plaster_white', -HW, HW, Z1 - 0.03, Z1, 1.5, 4.12);
-    bx('limestone', -HW, HW, Z1 - 0.035, Z1, Y0, Y0 + 0.14);
+    for (const [xa, xb] of open ? [[-HW, -0.55], [0.55, HW]] : [[-HW, HW]]) {
+    bx(d1, xa, xb, Z1 - 0.03, Z1, Y0 + 0.14, 1.34); bx(d2, xa, xb, Z1 - 0.03, Z1, 1.34, 1.44); bx('wood_painted', xa, xb, Z1 - 0.07, Z1, 1.44, 1.5); bx('plaster_white', xa, xb, Z1 - 0.03, Z1, 1.5, 4.12);
+    bx('limestone', xa, xb, Z1 - 0.035, Z1, Y0, Y0 + 0.14);
+    }
     bx('plaster_white', -HW, HW, Z0, Z1, 4.12, 4.2); bx('limestone', -HW, HW, Z0, Z0 + 0.12, 4.0, 4.12); bx('limestone', -HW, -HW + 0.12, Z0, Z1, 4.0, 4.12); bx('limestone', HW - 0.12, HW, Z0, Z1, 4.0, 4.12); bx('limestone', -HW, HW, Z1 - 0.12, Z1, 4.0, 4.12);
     b.lathe('plaster_white', [[0.001, 4.12], [0.4, 4.12], [0.42, 4.08], [0.3, 4.05], [0.15, 4.04], [0.001, 4.03]], 10, 0, 0, (Z0 + Z1) / 2);
     // the lamp: an iron stem from the rose and a globe of glass
@@ -80,6 +82,12 @@ export function makePortals(H) {
       else { bx('wood_dark', lo, hi, Z0 + 0.02, Z0 + 0.98, Y0, 3.0); for (const [y0, y1] of [[0.3, 1.3], [1.45, 2.85]]) bx(v === 2 ? 'wood_ochre' : 'wood_painted', sg > 0 ? hi : lo - 0.012, sg > 0 ? hi + 0.012 : lo, Z0 + 0.12, Z0 + 0.88, y0, y1);
         if (v === 2) for (let i = 0; i < 4; i++) for (let j = 0; j < 7; j++) bx(IRON, sg > 0 ? hi : lo - 0.01, sg > 0 ? hi + 0.01 : lo, Z0 + 0.15 + i * 0.2, Z0 + 0.19 + i * 0.2, 0.3 + j * 0.4, 0.34 + j * 0.4); }
     }
+    if (open) {
+      // the inner door stands open: a frame of wood in the partition's doorway, a glazed transom over it, the leaves folded back
+      for (const x of [-0.55, 0.5]) bx('wood_painted', x, x + 0.05, Z1, Z2, Y0, 2.7);
+      bx('wood_painted', -0.55, 0.55, Z1, Z2, 2.65, 2.7);
+      for (const sg of [-1, 1]) { bx('wood_painted', sg > 0 ? 0.55 : -0.6, sg > 0 ? 0.6 : -0.55, Z1 - 0.5, Z1, Y0, 2.6); bx('glass_outer', sg > 0 ? 0.56 : -0.59, sg > 0 ? 0.59 : -0.56, Z1 - 0.45, Z1 - 0.05, 0.5, 2.5); }
+    } else {
     // the glazed inner door in its partition (a pair of leaves, wooden frames, glass, iron scrolls) and the stair hall's lining
     bx('wood_painted', -0.55, 0.55, Z1, Z2, Y0, Y0 + 0.4);
     for (const x of [-0.55, -0.03, 0.51]) bx('wood_painted', x, x + 0.04, Z1, Z2, Y0 + 0.4, 2.7);
@@ -100,6 +108,7 @@ export function makePortals(H) {
     b.lathe('lamp_glass', [[0.001, Y0 + 1.04], [0.1, Y0 + 1.1], [0.12, Y0 + 1.28], [0.07, Y0 + 1.42], [0.001, Y0 + 1.44]], 8, -0.2, 0, Z2 + 0.1);
     bx('wood_dark', 0.3, 1.0, Z3 - 0.1, Z3 - 0.03, Y0 + 1.44, Y0 + 3.5);                                                                    // the door at the landing, to the porter's rooms
     bx('plaster_white', -HW, HW, Z2, Z3, 4.12, 4.2);
+    }
   });
   /** The doorway's stone front (seen from afar; one shape a variant, of the stone alone): pillars, the lintel and what stands on it; the elliptical fanlight's plate for the second. */
   const front = (v) => H.proto(`portalf|${v}`, (b, { F }) => {
@@ -126,22 +135,22 @@ export function makePortals(H) {
    * hall's ceiling, the partition with its doorway, the back; the floor's slab and colliders; the kit of the furnishing.
    * ceil: the y the mass above the ceiling ends at on this plot (the roof's level, or the shops' upper mass's foot).
    */
-  function mass(ctx, fr, pc, D, y, ceil, mat, yS, v, lamp = true) {
+  function mass(ctx, fr, pc, D, y, ceil, mat, yS, v, lamp = true, open = false) {
     const { bag, col, lights } = ctx, F = fr.F, FL = yS + 0.12;
     const wr = (s0, s1, t0, t1, y0, y1) => { const p = fr.at(s0, t0), q = fr.at(s1, t1); col.rect([p[0], p[1], q[0], q[1]], y0, y1); };
     const wall = (s0, s1, t0, t1, y0, y1) => { bag.add(mat, F(s0, s1, t0, t1, y0, y1)); wr(s0, s1, t0, t1, y0, y1); };
-    const b0 = y - 1.2, a = pc - HW, c = pc + HW, ZB = VD + PW + HD;
+    const b0 = y - 1.2, a = pc - HW, c = pc + HW, ZB = open ? 9.1 : VD + PW + HD;
     for (const e of [-1, 1]) wall(e > 0 ? pc + OW : a, e > 0 ? c : pc - OW, -FW, 0, b0, ceil);              // the jambs
     wall(pc - OW, pc + OW, -FW, 0, yS + OH, ceil);                                                         // over the doorway
-    wall(a, c, -ZB, -FW, yS + 4.2, ceil);                                                                  // over the vestibule and the hall
+    wall(a, c, open ? -(VD + PW) : -ZB, -FW, yS + 4.2, ceil);                                                                  // over the vestibule and the hall
     for (const e of [-1, 1]) wall(e > 0 ? pc + 0.55 : a, e > 0 ? c : pc - 0.55, -(VD + PW), -VD, b0, yS + 4.2);   // the partition's sides
     wall(pc - 0.55, pc + 0.55, -(VD + PW), -VD, yS + 2.7, yS + 4.2);                                       // …and over its door
-    wr(pc - 0.55, pc + 0.55, -(VD + PW), -VD, FL, yS + 2.7);   // (the door itself shut: glass and iron, no way through)
+    if (!open) wr(pc - 0.55, pc + 0.55, -(VD + PW), -VD, FL, yS + 2.7);   // (the door itself shut: glass and iron, no way through)
     wall(a, c, -D, -ZB, b0, ceil);                                                                         // the back
     // the floor: a slab of cement tile under the vestibule, the hall and the doorway
     bag.add('tile_cream', F(a, c, -ZB, -FW, yS - 0.4, FL)); bag.add('tile_cream', F(pc - OW, pc + OW, -FW, 0.02, yS - 0.4, FL));
     const p = fr.at(a, -(VD)), q = fr.at(c, 0.15); col.floor([p[0], p[1], q[0], q[1]], FL);
-    setKit(bag, fr, furnish(v), pc, yS, 45);
+    setKit(bag, fr, furnish(v, open), pc, yS, 45);
     // the vestibule's potted palm
     const pot = fr.at(pc + 0.9, -(VD - 0.5)); col.rect([pot[0] - 0.28, pot[1] - 0.28, pot[0] + 0.28, pot[1] + 0.28], FL, FL + 1.5);
     if (lights && lamp) { const l = fr.at(pc, -2.0); lights.push({ at: [l[0], yS + 3.2, l[1]], color: '#ffd9a0', intensity: 4, distance: 6 }); }

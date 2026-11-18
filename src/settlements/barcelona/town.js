@@ -3,7 +3,7 @@
 // the Passeig for it (both built with the landmark). The street life of 1910 (§5a): the trams on the
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
-import { blockShops, blockPortals } from '../../styles/modernisme/index.js';
+import { blockShops, blockPortals, blockHouses } from '../../styles/modernisme/index.js';
 import { worksElements, arrivalLife, arrivalStreet } from './arrival.js';
 import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, ARRIVAL, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
@@ -231,12 +231,28 @@ function portalBlock(c) {
 }
 /** The Eixample's block elements (the smoke finds the chimneys from the same plan). */
 export function blockElements() {
-  return blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
+  const els = blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
     t: 'eixample_block', shops: shopCore(b.c), far: isFar(b), portals: portalBlock(b.c), pave: Math.abs(b.c[0] - GRACIA_X) < 60 ? 'tile_grey' : 'flagstone', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
     ...(b.special === 'pedrera' ? { cut: { corner: 3, a: 22, b: 22 } } : {}),
     ...(Math.hypot(b.c[0] - CASA.block[0], b.c[1] - CASA.block[1]) < 1 ? { gaps: [{ side: CASA.side, s0: CASA.s0, s1: CASA.s1 }] } : {}),
     ...(b.special === 'batllo' ? { gaps: [{ side: 1, s0: BATLLO.s0, s1: BATLLO.s1 }] } : {}),
   }));
+  // the houses with their upper floors open (docs/settlements/barcelona.md §13): two in each of the five blocks with vestibules nearest the arrival
+  // and the Passeig's house, the widest on different sides
+  const near = (e) => Math.min(Math.hypot(e.c[0] - ARRIVAL[0], e.c[1] - ARRIVAL[1]), Math.hypot(e.c[0] - CASA.fx, e.c[1] - CASA.z0) * 0.9);
+  const withP = els.filter((q) => q.portals).sort((p, q) => near(p) - near(q));
+  for (const e of [...new Set([...withP.slice(0, 4), ...withP.filter((q) => q.shops)])]) {
+    const hs = blockHouses(e).filter((q) => q.w >= 13.6 && q.w <= 18.5).sort((p, q) => q.w - p.w), pickd = [];
+    for (const q of hs) if (pickd.length < 2 && !pickd.some((o) => o.k === q.k)) pickd.push(q);
+    if (pickd.length) e.open = pickd.map((q) => q.seed);
+  }
+  return els;
+}
+/** The opened houses: [{ block: element, seed, ...numbers }]. */
+export function openHouses() {
+  const out = [];
+  for (const e of blockElements()) if (e.open) for (const h of blockHouses(e)) if (e.open.includes(h.seed)) out.push({ block: e, ...h });
+  return out;
 }
 export async function town() {
   const els = blockElements();
@@ -246,6 +262,8 @@ export async function town() {
   let n = 0;
   for (const g of groups) for (let i = 0; i < g.length; i += 6) plans.push(base(`barcelona-eixample-${n++}`, g.slice(i, i + 6)));
   const rand = rng(1910), lines = tramLines();
+  // (each upstairs plan is shown only within 70 m of its house, as the shops' interiors are: the rooms are seen through the windows from the street)
+  openHouses().forEach((hh, i) => plans.push({ ...base(`barcelona-upstairs-${i}`, [{ t: 'eixample_flats', block: hh.block, seed: hh.seed }]), near: 70, center: [hh.front[0] - hh.n[0] * 9, hh.front[1] - hh.n[1] * 9] }));
   plans.push(base('barcelona-casa', [{ t: 'casa_cafe', fx: CASA.fx, z0: CASA.z0, y: height(CASA.fx - 9, CASA.z0 + 8), h: CASA.h, seed: 1910 }]));
   plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
   // the shops' people, a plan to a few blocks
