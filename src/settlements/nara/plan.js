@@ -14,11 +14,7 @@ E.push({ t: 'ming_gallery', pts: [[-g, cz1], [cx0, cz1], [cx0, cz0], [cx1, cz0],
 E.push({ t: 'nara_hall', rect: [-g + 1, cz1 - 7, g - 1, cz1 + 7], y: 1.0, H: 6.5, bays: [5, 2], k: 1.1, colD: 0.8, plat: 1.0, walls: 'ends', shibi: 2.4, rise: 4.5 });
 // the Great South Gate
 E.push({ t: 'nara_hall', rect: SOUTH_GATE, y: 0.8, H: 8, bays: [5, 2], k: 1.3, colD: 0.95, plat: 0.8, walls: 'ends', shibi: 3, rise: 6 });
-// the guardian kings in the Great South Gate's outer bays, facing each other across the passage:
-// the open-mouthed "a" on the west (the visitor's left), the closed-mouthed "un" on the east (§4)
-E.push({ t: 'obj', kind: 'nio', form: 'a', at: [-12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [1, 0] });
-E.push({ t: 'obj', kind: 'nio', form: 'un', at: [12, (SOUTH_GATE[1] + SOUTH_GATE[3]) / 2], y: 0.8, h: 5.7, dir: [-1, 0] });
-// the guardian kings of the Middle Gate too
+// the guardian kings of the Great South Gate are in lod.js (old form far, modelled form near; §19); the Middle Gate's stand here
 E.push({ t: 'obj', kind: 'nio', form: 'a', at: [-12, (cz1 - 7 + cz1 + 7) / 2], y: 1.0, h: 5.2, dir: [1, 0] });
 E.push({ t: 'obj', kind: 'nio', form: 'un', at: [12, (cz1 - 7 + cz1 + 7) / 2], y: 1.0, h: 5.2, dir: [-1, 0] });
 // steps up to both gates' platforms (each 0.9 m out beyond the posts) on the axis, front and back
@@ -49,8 +45,8 @@ for (const z of [28, 10, -8]) for (const s of [-1, 1]) E.push({ t: 'nara_pole', 
 for (const [r, d] of [[[-80, -112, -47, -38], 'z'], [[47, -112, 80, -38], 'z'], [[-80, 6, -9, 36], 'x'], [[9, 6, 80, 36], 'x'], [[-80, -30, -40, 0], 'x'], [[40, -30, 80, 0], 'x']]) E.push({ t: 'nara_rake', rect: r, y: 0, dir: d });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('court', COURT, 0, 'open'), room('great buddha hall', HALL, 2.2, 'hall')];
-// the octagonal gilt-bronze lantern on the axis before the hall's stairs (§4)
-E.push({ t: 'obj', kind: 'hakkaku_toro', at: [0, -16], y: 0 });
+// the octagonal gilt-bronze lantern on the axis before the hall's stairs (§4); its musicians and lions are the near layer of lod.js
+E.push({ t: 'obj', kind: 'hakkaku_toro', fig: 'none', at: [0, -16], y: 0 });
 const walks = [[[0, 180], [0, 146], [0, 60], [0, 40], [0, -8], [2.8, -12], [2.8, -20]]];
 walks[0].y0 = 0;
 

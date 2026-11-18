@@ -7,10 +7,11 @@ import { withPal } from '../ming/index.js';
 import '../qing/index.js';
 import '../song/index.js';
 import { pagodaJp } from './pagoda.js';
-import { hakkakuToro } from './lantern.js';
+import { hakkakuToro, hakkakuToroFigures } from './lantern.js';
 import { daibutsu } from './daibutsu.js';
-import { bosatsu } from './bosatsu.js';
-import { nio } from './nio.js';
+import { buddhaLevel } from './buddha.js';
+import { bosatsu, bosatsuMid } from './bosatsu.js';
+import { nio, nioMid } from './nio.js';
 import { shika } from './shika.js';
 import { naraAltarSet } from './altar.js';
 import { bugakuStage } from './stage.js';
@@ -21,6 +22,9 @@ import { houseElements } from './house.js';
 
 export const NPAL = { wood: 'timber_red', column: 'timber_red', soffit: 'plaster_white', base: 'granite_block', floor: 'granite_block', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_block', roof: 'tile_grey', doors: 'plank' };
 const withN = (fn) => (el, ctx) => fn({ ...el, pal: { ...NPAL, ...(el.pal || {}) } }, ctx);
+
+/** An old (reduced) form drawn in other materials (el.remap: { from: to, '*': to }): the distance forms of the figures share the town's far materials, so that they add no draws. */
+const remapped = (fn) => (el, ctx) => (el.remap ? fn(el, { ...ctx, bag: { add: (m, g) => ctx.bag.add(el.remap[m] ?? el.remap['*'] ?? m, g) } }) : fn(el, ctx));
 
 registerStyle('nara', {
   trim: () => {}, opening: () => {}, column: () => {},
@@ -36,5 +40,5 @@ registerStyle('nara', {
     ...yardElements,
     ...houseElements,
   },
-  objects: { hakkaku_toro: hakkakuToro, daibutsu, bosatsu, nio, shika },
+  objects: { hakkaku_toro: hakkakuToro, daibutsu: remapped(daibutsu), daibutsu_mid: buddhaLevel('mid'), daibutsu_fine: buddhaLevel('fine'), bosatsu_mid: bosatsuMid, nio_mid: nioMid, hakkaku_toro_figs: hakkakuToroFigures, bosatsu: remapped(bosatsu), nio: remapped(nio), shika },
 });

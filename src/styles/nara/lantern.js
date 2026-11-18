@@ -8,13 +8,17 @@
 import { lathe, fromTriangles } from '../../core/geom.js';
 import { obox } from '../chinese/index.js';
 import { tube, plate } from '../japanese/shape.js';
+import { curve, ell, ring, frame, spline, h01 } from './model.js';
 
 const G = 'gilt_bronze';
 /** A solid of revolution with eight faces, its faces (not its corners) toward the compass. */
 const oct = (profile, x, y, z, seg = 8, mod = null) => { const g = lathe(profile, seg, mod); g.rotateY(Math.PI / seg); g.translate(x, y, z); return g; };
 
-export function hakkakuToro(el, { bag, col }) {
-  const [x, z] = el.at, y0 = el.y ?? 0, out = [], fig = [];
+/** The modelled musicians and lions alone, for the panels (drawn within reach of the lantern, over the lantern without them). */
+export const hakkakuToroFigures = (el, ctx) => hakkakuToro({ ...el, fig: 'only' }, ctx);
+export function hakkakuToro(el, { bag: realBag, col }) {
+  const [x, z] = el.at, y0 = el.y ?? 0, out = [], fig = [], MODEL = el.fig === 'model' || el.fig === 'only', NONE = el.fig === 'none';
+  const bag = el.fig === 'only' ? { add() {} } : realBag;
   // the single base of stone, and the double lotus pedestal: petals turned down, then up
   bag.add('granite_block', oct([[1.32, 0], [1.32, 0.22], [1.2, 0.3], [0.001, 0.3]], x, y0, z));
   const petals = (n, amp) => (th) => 1 + amp * Math.abs(Math.cos(th * n / 2));
@@ -44,7 +48,9 @@ export function hakkakuToro(el, { bag, col }) {
     const f = [c[0] + n[0] * 0.03, c[1] + n[1] * 0.03], P = (s, v, d = 0) => [f[0] + u[0] * s + n[0] * d, yb + v, f[1] + u[1] * s + n[1] * d];
     plate(fig, [P(-0.17, 0.12), P(0.17, 0.12), P(0.2, 0.2), P(0.05, 0.25), P(-0.12, 0.24), P(-0.2, 0.18)], [n[0], 0, n[1]], 0.03);
     const compass = k % 2 === 1;                                                // face k looks toward 45°·(k+1) from east: odd k S, W, N, E
-    if (compass) lion(fig, P, u, n);
+    if (MODEL) { const F = frame([f[0], yb, f[1]], [u[0], 0, u[1]], [0, 1, 0], [n[0], 0, n[1]], 1); for (const g of (compass ? lionM(F) : musicianM(F, k))) realBag.add(G, g); }
+    else if (NONE) { /* the figures come with the near layer */ }
+    else if (compass) lion(fig, P, u, n);
     else bodhisattva(fig, P, u, n, k);
   }
   // a lamp dish inside, the flame
@@ -77,7 +83,7 @@ export function hakkakuToro(el, { bag, col }) {
   for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2, d = [Math.cos(a), Math.sin(a)], s = [-d[1], d[0]], P = (r, v) => [x + d[0] * r, yc + v, z + d[1] * r]; plate(fig, [P(0.1, 0.22), P(0.17, 0.3), P(0.1, 0.38), P(0.04, 0.42), P(0.05, 0.3)], [s[0], 0, s[1]], 0.015); }
   bag.add(G, fromTriangles(out));
   bag.add(G, fromTriangles(fig));
-  col.circle(x, z, 1.0, y0, yc + 0.5);
+  if (!el.fig || NONE) col.circle(x, z, 1.0, y0, yc + 0.5);
 }
 
 /** A musician bodhisattva in relief: robe and scarves, the arms raised to the instrument, the head with its halo. */
@@ -107,4 +113,42 @@ function lion(out, P, u, n) {
   plate(out, Array.from({ length: 10 }, (_, i) => { const a = i / 10 * Math.PI * 2; return P(0.04 + Math.cos(a) * 0.12 * (1 + 0.15 * (i % 2)), 0.86 + Math.sin(a) * 0.12 * (1 + 0.15 * (i % 2)), d - 0.01); }), N, 0.02);   // the mane
   for (const [a, b] of [[[-0.06, 0.32], [-0.1, 0.25]], [[0.0, 0.32], [0.04, 0.25]], [[0.03, 0.7], [0.14, 0.62]], [[0.0, 0.66], [0.1, 0.52]]]) tube(out, P(0, 0, d), u, [a, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 0.02], b], [[0.025, 0.025], [0.022, 0.022], [0.018, 0.018]], 5);   // the legs
   tube(out, P(0, 0, d), u, [[-0.1, 0.36], [-0.16, 0.45], [-0.16, 0.58], [-0.1, 0.62], [-0.08, 0.56]], [[0.02, 0.02], [0.02, 0.02], [0.022, 0.022], [0.025, 0.025], [0.015, 0.015]], 5);   // the tail
+}
+
+/** A musician bodhisattva in relief, modelled: seated-standing on a cloud, the skirt's flare, the bare chest, the head with its halo and knot, the arms to the instrument, scarves streaming. F: the panel's frame (x across, y up, z out). */
+function musicianM(F, k) {
+  const out = [], d = 0.035, e = (c, r, ax) => out.push(ell(F.p(c), r, F.ax, 9, 5));
+  for (const [cx, cy, r] of [[-0.14, 0.14, 0.09], [0, 0.11, 0.12], [0.14, 0.15, 0.09], [-0.05, 0.19, 0.07], [0.07, 0.2, 0.06]]) e([cx, cy, d + 0.015], [r, r * 0.6, 0.035]);   // the cloud
+  out.push(curve([F.p([0, 0.22, d + 0.02]), F.p([0, 0.42, d + 0.03]), F.p([0, 0.62, d + 0.03])], 0.13, 0.07, { n: 10, per: 3, flat: 0.45, up: F.ax[2] }));   // the skirt
+  e([0, 0.73, d + 0.03], [0.072, 0.11, 0.042]); e([0, 0.84, d + 0.03], [0.095, 0.045, 0.045]);                                                         // the chest, the shoulders
+  out.push(curve([F.p([0, 0.87, d + 0.03]), F.p([0, 0.93, d + 0.035])], 0.027, 0.025, { n: 7, per: 1 }));
+  e([0, 1.0, d + 0.04], [0.052, 0.06, 0.05]); e([0, 1.08, d + 0.035], [0.03, 0.03, 0.03]); e([0, 0.985, d + 0.088], [0.012, 0.015, 0.012]);              // the head, the knot, the nose
+  out.push(ring(F.p([0, 1.0, d + 0.012]), 0.105, 0.007, F.ax[2], 18, 4));                                                                            // the halo
+  for (const sx of [-1, 1]) {
+    e([sx * 0.045, 1.0, d + 0.04], [0.008, 0.028, 0.012]);
+    out.push(curve([F.p([sx * 0.085, 0.83, d + 0.03]), F.p([sx * 0.15, 0.7, d + 0.05]), F.p([sx * 0.07, 0.84, d + 0.1])], 0.028, 0.02, { n: 7, per: 3, swell: 0.1 }));   // the arm to the instrument
+    out.push(curve([F.p([sx * 0.09, 0.86, d + 0.02]), F.p([sx * 0.24, 0.72, d + 0.03]), F.p([sx * 0.2 + sx * 0.03 * Math.sin(k), 0.46, d + 0.03]), F.p([sx * 0.27, 0.3, d + 0.025])], 0.04, 0.02, { n: 5, per: 4, flat: 0.2, up: F.ax[2] }));   // the scarf
+  }
+  const kind = ['sho', 'flute', 'shakuhachi', 'cymbals'][(k / 2) % 4];
+  if (kind === 'cymbals') for (const sx of [-1, 1]) out.push(ring(F.p([sx * 0.07, 0.86, d + 0.115]), 0.04, 0.008, F.ax[2], 12, 4));
+  else if (kind === 'sho') for (let i = 0; i < 7; i++) out.push(curve([F.p([-0.04 + i * 0.013, 0.82, d + 0.11]), F.p([-0.04 + i * 0.013, 0.9 + (i % 3) * 0.02, d + 0.11])], 0.007, 0.006, { n: 5, per: 1 }));
+  else if (kind === 'flute') out.push(curve([F.p([-0.16, 0.9, d + 0.11]), F.p([0.08, 0.85, d + 0.11])], 0.011, 0.011, { n: 6, per: 1 }));
+  else out.push(curve([F.p([0.0, 0.93, d + 0.1]), F.p([0.02, 0.7, d + 0.11])], 0.011, 0.011, { n: 6, per: 1 }));
+  return out;
+}
+/** A lion in relief, modelled: rearing on its cloud, the chest, the haunch, four limbs with their joints, the maned head with brow and muzzle, the curled tail. */
+function lionM(F) {
+  const out = [], d = 0.04, e = (c, r) => out.push(ell(F.p(c), r, F.ax, 9, 5));
+  for (const [cx, cy, r] of [[-0.14, 0.13, 0.09], [0, 0.1, 0.12], [0.14, 0.14, 0.09]]) e([cx, cy, d + 0.01], [r, r * 0.6, 0.032]);
+  out.push(curve([F.p([-0.08, 0.3, d + 0.03]), F.p([-0.07, 0.5, d + 0.04]), F.p([0.0, 0.68, d + 0.045]), F.p([0.04, 0.8, d + 0.05])], 0.085, 0.06, { n: 10, per: 3, swell: 0.12, flat: 0.62, up: F.ax[2] }));
+  e([-0.1, 0.38, d + 0.04], [0.085, 0.1, 0.05]);                                                              // the haunch
+  e([0.0, 0.88, d + 0.065], [0.1, 0.1, 0.05]);                                                                // the mane
+  out.push(ring(F.p([0.0, 0.88, d + 0.095]), 0.1, 0.022, F.ax[2], 14, 5));
+  e([0.07, 0.86, d + 0.12], [0.045, 0.035, 0.05]); e([0.1, 0.88, d + 0.15], [0.02, 0.016, 0.02]);               // the muzzle and nose
+  e([0.025, 0.93, d + 0.12], [0.03, 0.012, 0.015]);                                                          // the brow
+  for (const [a, m, b] of [[[-0.06, 0.34], [-0.1, 0.26], [-0.09, 0.2]], [[0.0, 0.34], [0.04, 0.27], [0.05, 0.2]], [[0.03, 0.7], [0.1, 0.66], [0.14, 0.6]], [[0.0, 0.64], [0.07, 0.56], [0.12, 0.5]]])
+    out.push(curve([F.p([a[0], a[1], d + 0.045]), F.p([m[0], m[1], d + 0.05]), F.p([b[0], b[1], d + 0.05])], 0.026, 0.017, { n: 6, per: 3, swell: 0.15 }));
+  out.push(curve([F.p([-0.1, 0.4, d + 0.03]), F.p([-0.17, 0.46, d + 0.03]), F.p([-0.17, 0.58, d + 0.03]), F.p([-0.11, 0.63, d + 0.03]), F.p([-0.08, 0.57, d + 0.03])], 0.022, 0.03, { n: 6, per: 3 }));
+  void h01; void spline;
+  return out;
 }
