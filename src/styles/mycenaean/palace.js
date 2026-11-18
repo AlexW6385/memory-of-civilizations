@@ -4,12 +4,29 @@
 
 import { box, lathe, disc, frustum, fromTriangles, quad } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
-import { minoanColumn } from '../minoan/index.js';
 import { rng, mergeG, hash2 } from './util.js';
 import { place } from '../../core/geom.js';
 import { spiral, bar } from './relief.js';
 
 const PLASTER = 'lime_plaster', SOCLE = 'rubble', ROOF = 'earth_wall', TIM = 'timber', RED = 'paint_minoan_red', BLUE = 'egyptian_blue', OCHRE = 'paint_ochre';
+
+/**
+ * A Mycenaean timber column on a stone base, tapering downward: a fluted shaft (20 flutes) with painted bands under a plastered echinus capital of two painted rings,
+ * and a square abacus. x, z centre, y the floor, h the height to the top of the abacus, r the radius at the shaft's top.
+ */
+function mycColumn(bag, col, x, z, y, h, r = 0.3) {
+  const bh = 0.28, ch = 0.34, ah = 0.16, sh = h - bh - ch - ah, flute = (th, i) => (i === 0 || i === 6 ? 1 : 1 - 0.045 * Math.abs(Math.sin(10 * th)));
+  bag.add('limestone_yellow', lathe([[0.001, 0], [r * 2.0, 0], [r * 2.0, bh * 0.45], [r * 1.5, bh], [0.001, bh]], 20, null, x, y, z));
+  bag.add(TIM, lathe([[r * 0.8, 0], [r * 0.84, sh * 0.15], [r * 0.9, sh * 0.4], [r * 0.97, sh * 0.65], [r * 1.05, sh * 0.85], [r * 1.1, sh * 0.96], [0.001, sh * 0.96]], 60, flute, x, y + bh, z));
+  const b0 = y + bh + sh * 0.9;
+  bag.add(RED, lathe([[r * 1.06, 0], [r * 1.14, 0.03], [r * 1.14, 0.1], [r * 1.07, 0.13]], 20, null, x, b0 - 0.5, z));
+  bag.add(BLUE, lathe([[r * 1.12, 0], [r * 1.19, 0.03], [r * 1.19, sh * 0.1 - 0.02], [r * 1.12, sh * 0.1]], 20, null, x, b0 - 0.2, z));
+  const c0 = y + bh + sh;
+  bag.add(PLASTER, lathe([[r * 1.1, 0], [r * 1.2, 0.04], [r * 1.5, 0.12], [r * 1.78, 0.24], [r * 1.85, ch], [0.001, ch]], 24, null, x, c0, z));
+  bag.add(RED, lathe([[r * 1.19, 0.01], [r * 1.26, 0.04], [r * 1.26, 0.08], [r * 1.19, 0.11]], 20, null, x, c0 + 0.0, z));
+  bag.add(PLASTER, box(x - r * 2.0, c0 + ch, z - r * 2.0, x + r * 2.0, c0 + ch + ah, z + r * 2.0));
+  col.circle(x, z, r * 1.2, y, y + h);
+}
 const fresco = (el, ctx) => STYLES.minoan.elements.fresco(el, ctx);
 
 /** palace_wing: { rect, y, h, faces ('nsew' letters that carry windows and timber ties), seed } — a plastered block on a stone socle, flat roof with a parapet. */
@@ -54,7 +71,7 @@ export function court(el, { bag, col }) {
   col.circle(ax, az, 0.95, y, y + 0.5);
   // the portico on the north side: columns, the beam, the roof sloping from the wall
   const zc = z0 + 2.4;
-  for (let x = x0 + 4; x < x1 - 2; x += 4.4) minoanColumn(bag, col, x, zc, y, 3.7, 0.3);
+  for (let x = x0 + 4; x < x1 - 2; x += 4.4) mycColumn(bag, col, x, zc, y, 3.95, 0.3);
   bag.add(TIM, box(x0 + 0.6, y + 3.7, zc - 0.25, x1 - 0.6, y + 4.1, zc + 0.25));
   bag.add(ROOF, box(x0 + 0.4, y + 4.1, z0, x1 - 0.4, y + 4.35, zc + 0.6));
   // the pavement edge: a kerb of limestone round the court
@@ -66,7 +83,7 @@ export function court(el, { bag, col }) {
 export function propylon(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, zm = (z0 + z1) / 2, H = 4.4;
   for (const [a, b] of [[z0, z0 + 1.0], [z1 - 1.0, z1]]) { bag.add(PLASTER, box(x0, y, a, x1, y + H, b)); col.rect([x0, a, x1, b], y, y + H); }
-  for (const dz of [-1.1, 1.1]) minoanColumn(bag, col, x0 + 0.8, zm + dz, y, H - 0.4, 0.3);
+  for (const dz of [-1.1, 1.1]) mycColumn(bag, col, x0 + 0.8, zm + dz, y, H - 0.15, 0.3);
   bag.add(TIM, box(x0 - 0.1, y + H - 0.4, z0, x1 + 1.0, y + H, z1));
   bag.add(ROOF, box(x0 - 0.2, y + H, z0 - 0.1, x1 + 1.0, y + H + 0.3, z1 + 0.1));
   // the stone threshold and the porch's floor
@@ -118,13 +135,12 @@ export function megaron(el, ctx) {
     bag.add(OCHRE, disc(R + 0.8, y + 0.014, 28, hx, ax)); bag.add(RED, disc(R + 0.6, y + 0.016, 28, hx, ax)); bag.add('paint_white', disc(R + 0.42, y + 0.018, 28, hx, ax)); bag.add(BLUE, disc(R + 0.28, y + 0.02, 28, hx, ax));
   }
   lights.push({ at: [hx, y + 0.9, ax], color: '#ffa24d', intensity: 7, distance: 13 });
-  for (const dz of [-1.9, 1.9]) minoanColumn(bag, col, x0 + 0.9, ax + dz, y, 4.3, 0.33);
+  for (const dz of [-1.9, 1.9]) mycColumn(bag, col, x0 + 0.9, ax + dz, y, 4.55, 0.33);
   // ── the four columns round the hearth, under the raised roof ──
   const HC = 5.7, HR = 7.0, cd = 2.15;
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    minoanColumn(bag, col, hx + sx * cd, ax + sz * cd, y, HR - 0.2, 0.38);
-    // a round stone base under each shaft, a painted ring on the floor about it
-    bag.add('limestone_yellow', lathe([[0.001, 0], [0.62, 0], [0.62, 0.14], [0.46, 0.22], [0.001, 0.22]], 14, null, hx + sx * cd, y, ax + sz * cd));
+    mycColumn(bag, col, hx + sx * cd, ax + sz * cd, y, HR + 0.05, 0.38);
+    // a painted ring on the floor about each base
     bag.add(RED, disc(0.8, y + 0.012, 14, hx + sx * cd, ax + sz * cd));
   }
   // ── ceilings and roofs: the porch and the vestibule lower, the hall's with a raised roof (the clerestory) over the hearth ──
