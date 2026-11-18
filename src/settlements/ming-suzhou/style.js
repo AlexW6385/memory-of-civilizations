@@ -44,7 +44,12 @@ import { hallTrim, tabletText, doorCarving } from './corework.js';
 import { pebbleCourt } from './pebbles.js';
 import { hallLife } from './lifework.js';
 import { taihu, rockery } from './taihu.js';
+import { leakyCtx } from './leaky.js';
 const base = STYLES.ming;
+
+/** The garden's walls and galleries: the shared ones, their leaky windows' tracery replaced by ours (leaky.js). */
+function leakyWall(el, ctx) { const L = leakyCtx(ctx, el, 'wall'); base.elements.ming_wall(el, L.ctx); L.finish(); }
+function leakyGallery(el, ctx) { const L = leakyCtx(ctx, el, 'gallery'); base.elements.ming_gallery(el, L.ctx); L.finish(); }
 
 /** ming_hall, with the fine work of the landmark's halls where the plan asks: `real` (lattice as geometry), `tiles` (cover tiles and rafters). */
 function hall(el, ctx) {
@@ -109,7 +114,7 @@ function drapeTri(a, b, c, H, out, depth) {
   drapeTri(A, m, r, H, out, d); drapeTri(m, B, q, H, out, d); drapeTri(r, q, C, H, out, d); drapeTri(m, q, r, H, out, d);
 }
 
-registerStyle('suzhou-site', { ...base, elements: { ...base.elements, ming_hall: hall, terrace_rail: terraceRail, moon_dress: moonDress, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath, pebble_paving: pebbleCourt(base.elements.pebble_paving), hall_life: hallLife, tablet_text: tabletText, taihu, ming_rockery: rockery } });
+registerStyle('suzhou-site', { ...base, elements: { ...base.elements, ming_hall: hall, terrace_rail: terraceRail, moon_dress: moonDress, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath, pebble_paving: pebbleCourt(base.elements.pebble_paving), hall_life: hallLife, tablet_text: tabletText, taihu, ming_rockery: rockery, ming_wall: leakyWall, ming_gallery: leakyGallery } });
 
 // the houses whose upper floors can be climbed: the canal quarter's style with `house_up` (upstairs.js)
 registerStyle('suzhou-town', { ...base, elements: { ...base.elements, house_up: houseUp } });

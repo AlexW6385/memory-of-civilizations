@@ -256,7 +256,7 @@ export const STONES = [
 ];
 export const SHORE = [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
 const CACHE = new Map();
-const TARGET = [3200, 450, 1500];
+const TARGET = [2300, 400, 1000];
 /** The geometry of stone shape v at a level of detail (0 near, 1 far, 2 middle): { geometry (indexed? no: non-indexed with normals), H, bx, bz, kind }, cached. */
 export function stoneParts(v, lod = 1) {
   const key = `${v}/${lod}`;
