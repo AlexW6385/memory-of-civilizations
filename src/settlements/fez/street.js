@@ -99,7 +99,9 @@ export function streetLife() {
   for (let x = -240; x < 250; x += 26 + rand() * 20) { const side = rand() < 0.5 ? -1 : 1; L.push({ t: 'chickens', kind: 'duck', at: [x, riverZ(x) + side * (RIVER.w / 2 + 2.6)], y: quayY(x, side), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
   void SITES;
   // the way into the Qarawiyyin's west door is kept free of standing figures
-  return L.filter((e) => !(e.at[0] > 116 && e.at[0] < 131 && e.at[1] > -23.8 && e.at[1] < -18.2));
+  // (and the doors of the houses whose upper floors are open: nobody stands in the way up)
+  const gates = H.filter((h) => h.up).map((h) => frame(h.rect, h.door).P(planOf(h).ud, 1.0));
+  return L.filter((e) => !(e.at[0] > 116 && e.at[0] < 131 && e.at[1] > -23.8 && e.at[1] < -18.2) && !gates.some((g) => Math.hypot(e.at[0] - g[0], e.at[1] - g[1]) < (e.t === 'animal' ? 2.6 : 2.1)));
 }
 /** The street life in tiles of 100 m, each shown within 230 m. */
 export function streetPlans() {

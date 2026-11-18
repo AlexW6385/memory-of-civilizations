@@ -98,7 +98,8 @@ export function life() {
     if (!h.open) continue;
     const Q = planOf(h), fr = frame(h.rect, h.door), r = rng(h.seed * 3 + 11), face = (dx, dz) => Math.atan2(-dx, -dz), y = h.y;
     const cu = (Q.cu0 + Q.cu1) / 2, dm = (Q.Dc0 + Q.Dc1) / 2, at = (u, d) => fr.P(u, -d);
-    if (r() < 0.8) woman(at(Q.cu0 + 0.75, Q.Dc0 + 0.85), y, face(...fr.N.map((v) => -v)), { carry: 'pot' });
+    const wu = Q.stair ? cu + (Q.stair.mir ? -1.15 : 1.15) : Q.cu0 + 0.75, wd = Q.stair ? dm : Q.Dc0 + 0.85;   // (in a house with a stair she stands off its way, by the basin)
+    if (r() < 0.8) woman(at(wu, wd), y, face(...fr.N.map((v) => -v)), { carry: 'pot' });
     const sd = Q.Dp - Q.t - Q.Dc1;
     if (sd >= 3.0 && Q.cw >= 4.1) {
       const sr = fr.rect(Q.cu0 + 0.35, Q.cu1 - 0.35, -(Q.Dp - Q.t - 0.05), -Q.Dc1), cz = (sr[1] + sr[3]) / 2;
