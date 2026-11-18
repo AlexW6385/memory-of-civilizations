@@ -2,6 +2,7 @@
 // temple's west wall, in the ambulatory beside the doorway to the pyramid's court, with the offering table before it.
 
 import { box, lathe } from '../../core/geom.js';
+import { ownerPanel } from './carved.js';
 
 /** A false door with its offering table on the west wall of a temple whose front is to the east { rect, th, h, s }: `s` metres
  *  along the wall from its south end (z1), the temple's wall `th` thick. Returns nothing; adds to bag and col. */
@@ -37,7 +38,7 @@ export function falseDoor(bag, col, { rect, th, s }) {
  *  of the Giza tombs — a false door of limestone at 2.6 m from the north end (the slab stela and the chapel are at the south end): the
  *  frame in two orders, the dark door with the rolled mat over it, the lintel with its roll, above it the panel with the owner
  *  at the table of offerings and the columns of the list in blue and green. */
-export function northernNiche(bag, { c, a, b, h, cased }) {
+export function northernNiche(bag, { c, a, b, h, cased, lod }) {
   const [cx, cz] = c, X = cx + a + 0.06 * (cased ? 1 : 0.4), zc = cz - b + 2.6, y0 = 0.15;
   void h;
   const S = (mat, z0, z1, ya, yb, d0, d1) => bag.add(mat, box(X + d0, y0 + ya, zc + z0, X + d1, y0 + yb, zc + z1));
@@ -53,6 +54,7 @@ export function northernNiche(bag, { c, a, b, h, cased }) {
   S('tura_limestone', -0.74, 0.74, 2.35, 2.48, 0.0, 0.15);   // the roll
   // the panel over the door: the owner seated at the table of loaves, the columns of the offering list
   S('plaster_white', -0.36, 0.36, 1.58, 2.15, 0.03, 0.05);
+  if (lod !== undefined) return ownerPanel(bag, { X, zc, y0, lod });          // near the arrival: the owner at his table modelled in low relief (carved.js)
   const R = (mat, z0, z1, ya, yb, d = 0.07) => S(mat, z0, z1, ya, yb, 0.05, d);
   R('paint_robe', 0.2, 0.3, 1.76, 2.0); R('paint_robe', 0.22, 0.29, 2.0, 2.1); R('lacquer_black', 0.2, 0.3, 2.06, 2.12, 0.075);   // the owner, the head, the wig
   R('plaster_white', 0.17, 0.32, 1.7, 1.78); R('timber', 0.18, 0.31, 1.62, 1.7); R('paint_robe', 0.05, 0.2, 1.88, 1.93);            // the kilt, the seat, the arm reaching out
