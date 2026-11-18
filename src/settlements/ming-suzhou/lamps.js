@@ -76,7 +76,7 @@ export function gardenLanterns() {
   // Little Canglang over the water: a pair on its pond front
   { const [rx0, rz0, rx1] = BUILDINGS.xiaocanglang.rect, y = G + BUILDINGS.xiaocanglang.y; for (const x of [rx0 + 2.5, rx1 - 2.5]) add(x, y + 3.4 - 0.3, rz0 - 0.45, 'palace', 0.85); }
   // the great halls: a pair of palace lanterns under the eaves of the front, hung from the middle bay's beam
-  { const [rx0, rz0, rx1] = BUILDINGS.yuanxiang.rect, y = G + BUILDINGS.yuanxiang.y, cx = (rx0 + rx1) / 2; for (const s of [-1, 1]) add(cx + s * 2.4, y + 5.0 - 0.25, rz0 - 0.5, 'palace', 1.15); }
+  { const [rx0, rz0, rx1] = BUILDINGS.yuanxiang.rect, y = G + BUILDINGS.yuanxiang.y, cx = (rx0 + rx1) / 2; for (const s of [-1, 1]) add(cx + s * 5.4, y + 5.0 - 0.25, rz0 - 0.5, 'palace', 1.15); }
   { const [rx0, rz0, rx1] = BUILDINGS.yiyu.rect, y = G + BUILDINGS.yiyu.y, cx = (rx0 + rx1) / 2; for (const s of [-1, 1]) add(cx + s * 2.0, y + 3.8 - 0.25, rz0 - 0.5, 'palace', 1.0); }
   // the residence: the gate hall's street front (the household's lanterns, larger), the courts' fronts of the sedan hall, the main hall and the women's building
   for (const s of [-1, 1]) add(s * 2.6, G + 0.45 + 4.0 - 0.2, 61.15, 'palace', 1.3);
