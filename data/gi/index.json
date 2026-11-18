@@ -290,7 +290,7 @@
  },
  "amsterdam-dam": {
   "site": "amsterdam",
-  "hash": "954376b0f7ecd74e",
+  "hash": "dadfb38b4ae2be2e",
   "rays": 128,
   "probes": 75905,
   "boxes": [
@@ -349,7 +349,7 @@
    }
   ],
   "bytes": 1245922,
-  "seconds": 169,
+  "seconds": 184,
   "baked": "2026-11-18"
  },
  "ananda-temple": {
@@ -2786,7 +2786,7 @@
  },
  "london-westminster": {
   "site": "london",
-  "hash": "07fb95e3f1c9cc51",
+  "hash": "515fc024b04cc0d7",
   "rays": 128,
   "probes": 78390,
   "boxes": [
@@ -2833,8 +2833,8 @@
     ]
    }
   ],
-  "bytes": 1225274,
-  "seconds": 107,
+  "bytes": 1226623,
+  "seconds": 119,
   "baked": "2026-11-18"
  },
  "lu-qufu-temple": {
@@ -5083,7 +5083,7 @@
  },
  "versailles-chateau": {
   "site": "versailles",
-  "hash": "0f2ab895aef7c498",
+  "hash": "c73bbed964698c2e",
   "rays": 128,
   "probes": 76048,
   "boxes": [
@@ -5116,7 +5116,7 @@
    }
   ],
   "bytes": 1255722,
-  "seconds": 152,
+  "seconds": 151,
   "baked": "2026-11-18"
  },
  "vienna-cafe-museum": {
