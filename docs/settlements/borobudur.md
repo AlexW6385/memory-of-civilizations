@@ -81,6 +81,7 @@ The 72 stupas, 32, 24 and 16 on the three round terraces, the top tier's "slight
 
 Sources added:
 - [The Buddha Statues and Chaityas at Borobudur — photodharma (Foucher)](https://photodharma.net/Indonesia/13-Buddhas-and-Chaityas/index.htm)
+- [Borobudur ship — Wikipedia](https://en.wikipedia.org/wiki/Borobudur_ship)
 - [Balustrade: Jataka and Avadana — arisguidetour](https://arisguidetour.blogspot.com/2023/04/balustrade-jataka-and-avadana.html)
 
 ## 13. Fourth pass: the lions, offerings, weathering (2026-11 L3)
@@ -182,6 +183,20 @@ Level: L2, near L3 in the houses; for L3 still missing: the carved detail of the
 Draw count kept by quantising the main panels' heights to 0.2 m, so that panels repeat as instances.
 
 
+## 20. Tenth pass: sculpture and relief seen from two metres (2026-11)
+
+The carved figures near the way up are modelled as volumes (src/styles/javanese/: sculpt.js the sculptor, figures.js, scenes.js, buddha.js, kala.js, lion.js). Detail by distance from where the east stair leads onto each gallery: within 10 m of the first gallery's landing full (level 2), within 26 m reduced (level 1: the same forms with fewer rings and pieces), on the second gallery's landing reduced within 12 m, and the old layered form beyond; the stupas of the round terraces by the stair's arrival on each (full within 11 m, reduced within 26 m). Panels keep their 0.2 m quantised heights; a modelled one differs from its neighbours by a hash of its own place, so that it merges into the monument's mesh and does not become a repeated shape.
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Relief panels, modelled | On the field (raised 4 cm inside its frame) one composition in rotation along the wall, its forms rising up to 8 cm out of it as continuous rounded surfaces: an audience (a lord throned in a pavilion with real depth — stepped platform, posts standing forward, three overhanging tiers of roof, finial, swags — attendants with whisk and parasol, a worshipper, an apsara flying with a garland and a streaming scarf); a procession (an elephant in profile with caparison, fringe, bell, curled trunk, tusk, a mahout and a rider under a parasol, attendants, a tree); a sailing ship with double outriggers (hull with raised stem and stern, planks, booms and floats, tripod mast, slanted ribbed sail, crew, waves); a hermitage (a leaf hut with its ascetic, deer, a disciple, trees); a wishing tree with worshippers. Figures in tribhanga: kain in folds to the ankle with hem band, sash and pleat, belt and jewel, torso and shoulders, collar, necklace, armlets, bracelets, hands with fingers, lotus or whisk or parasol; heads with brow, lidded eyes, nose, lips, chin, ears with long lobes and rings, hair, bun or tiered crown; trees in masses of leaves with fruits | the subjects and the houses, ships, pavilions and dress of the reliefs [stated in outline: skylineaparthistory; arisguide]; the Borobudur ship relief with outriggers and a tripod mast is well known [stated in outline: Wikipedia, Borobudur ship]; the poses and the shapes [inferred from photographs] |
+| Niche and stupa Buddhas | A new Buddha in place of the lathe one: a double lotus of two rows of petals on moulded base; legs in padmasana (thighs, crossing shins, soles and toes, knees); the robe over both shoulders in folds with its edge across the chest, folds fanning over the lap; arms and hands in the mudra of the quarter (fingers and thumb); neck, head with downcast lids, brows, nose, lips, chin, long ears, urna, ushnisha with its jewel, hair in about fifty snail-shell curls; the head turned a little by the niche's place | all seated in padmasana, the mudras by quarter [stated: Foucher, in photodharma, see §12]; the robe, the curls and the hands' forms [inferred from photographs] |
+| Kala heads | On the faces of the eastern gateways of the first two flights (the others reduced): crown boss and nine locks like flames, brows arched and curling over bulging eyes with pupils and lids, cheeks, the broad nose with its wings, the heavy upper lip with nine teeth and two curved fangs (no lower jaw), the hands with four claws beside the jaw, ear scrolls with rings; standing out up to 22 cm | kala at the top of each gate [stated: arisguide, skylineaparthistory]; the forms [inferred] |
+| Lions of the east | The eight lions of the eastern flights rebuilt with thighs and shins, hind paws with toes, forelegs with shoulder and claws, the chest, the mane in three rows of curls round the face, brow, bulging eyes, nose, upper lip with fangs and teeth, open lower jaw with its tongue, the tail curled up the back to a tuft; the head turned by its place | 32 lions at the stairs [stated: arisguide, §13]; the anatomy [inferred] |
+
+Not done: the makaras, the lions of the other three stairs and the other gateways' kalas stay in the old form; the panels' subjects are five compositions in rotation, not the told stories (§1–§4 still record that).
+
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)
@@ -194,4 +209,5 @@ Draw count kept by quantising the main panels' heights to 0.2 m, so that panels 
 - [Architecture of Borobudur — arisguide](https://arisguide.blogspot.com/2023/01/architecture.html)
 - [Borobudur's chattra — Buddhistdoor Global](https://www.buddhistdoor.net/?p=51012)
 - [The Buddha Statues and Chaityas at Borobudur — photodharma](https://photodharma.net/Indonesia/13-Buddhas-and-Chaityas/index.htm)
+- [Borobudur ship — Wikipedia](https://en.wikipedia.org/wiki/Borobudur_ship)
 - [Balustrade: Jataka and Avadana — arisguidetour](https://arisguidetour.blogspot.com/2023/04/balustrade-jataka-and-avadana.html)
