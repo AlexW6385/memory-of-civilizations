@@ -53,7 +53,6 @@ E.push({ t: 'hz_pagoda_upper', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, 
 // the steps up the base on the south, to the way onto the lowest gallery and the doors into the pagoda
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 3, PAGODA.c[1] + 15.3, PAGODA.c[0] + 3, PAGODA.c[1] + 19.3], y0: T1.y, y1: PAGODA.y + 2, dir: 'n', mat: 'granite_block' });
 E.push({ t: 'ming_hall', rect: [-129, -4, -91, 24], y: T2.y, H: 6, front: 's', four: true, roof: 'xieshan', plat: 0.8, eave: 1.8, sweep: 0.9 });
-E.push({ t: 'kaihua_hall', rect: [-129, -4, -91, 24], y: T2.y });
 E.push({ t: 'ming_hall', rect: [-140.5, 58, -131, 94], y: T1.y, H: 4.4, front: 'e', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
 E.push({ t: 'ming_hall', rect: [-89, 58, -79.5, 94], y: T1.y, H: 4.4, front: 'w', roof: 'xieshan', plat: 0.5, eave: 1.3, sweep: 0.7 });
 // ---- Kaihua Temple's enclosure round the pagoda's court: a white wall on a grey-brick dado with a tiled coping, a gate in the
@@ -70,11 +69,7 @@ E.push({ t: 'ming_hall', rect: [-89, 58, -79.5, 94], y: T1.y, H: 4.4, front: 'w'
   E.push({ t: 'court_censer', at: [gc, wz1 - 5.4], y: yT });
   for (const dx of [-8.5, 8.5]) E.push({ t: 'sutra_pillar', at: [gc + dx, wz1 - 6.4], y: yT });
 }
-// the side halls: the luohan along their back walls; the main hall's coffered ceiling and hangings
-E.push({ t: 'luohan_hall', rect: [-140.5, 58, -131, 94], y: T1.y, side: 'w', n: 16 });
-E.push({ t: 'luohan_hall', rect: [-89, 58, -79.5, 94], y: T1.y, side: 'e', n: 16 });
-E.push({ t: 'hall_ceiling', rect: [-129, -4, -91, 24], y: T2.y, H: 6 });
-E.push({ t: 'hall_offerings', rect: [-129, -4, -91, 24], y: T2.y, H: 6 });
+// (the side halls' luohan, the main hall's images, coffered ceiling and offerings: HALLS below, plans of their own shown near)
 // the courts' flagstones, worn along their middle, and the moss at the feet of walls and halls
 E.push({ t: 'court_paving', y: T1.y, seed: 3, rects: [[PAGODA.c[0] - 3, 95.4, PAGODA.c[0] + 3, T1.rect[3] - 1.3], [PAGODA.c[0] - 3, T1.rect[1] + 1.2, PAGODA.c[0] + 3, 58.0], [-130.2, 74.4, -127.7, 77.6], [-92.3, 74.4, -89.9, 77.6]],
   moss: [[T1.rect[0] + 0.8, T1.rect[1] + 1.2, T1.rect[2] - 0.8, T1.rect[1] + 2.4], [T1.rect[0] + 0.8, T1.rect[3] - 3, T1.rect[2] - 0.8, T1.rect[3] - 1.9], [-141.2, 58, -140.7, 94], [-79.2, 58, -78.8, 94]] });
@@ -83,6 +78,12 @@ for (const dx of [-8.5, 8.5]) E.push({ t: 'sutra_pillar', at: [PAGODA.c[0] + dx,
 // ---- the warehouses by the lock
 for (const r of WAREHOUSES) E.push({ t: 'hz_house', rect: r, y: LEVEL.street, front: 's', storeys: 2, shop: false, seed: r[0] });
 
+/** What stands inside the halls, in plans of their own that town.js shows within `near` metres of `center` (the arrival, 130 m and 67 m off, sees the halls shut). */
+export const HALLS = [
+  { id: 'main', center: [-110, 10], near: 100, elements: [{ t: 'kaihua_hall', rect: [-129, -4, -91, 24], y: T2.y }, { t: 'hall_ceiling', rect: [-129, -4, -91, 24], y: T2.y, H: 6 }, { t: 'hall_offerings', rect: [-129, -4, -91, 24], y: T2.y, H: 6 }] },
+  { id: 'luohan-w', center: [-136, 76], near: 55, elements: [{ t: 'luohan_hall', rect: [-140.5, 58, -131, 94], y: T1.y, side: 'w', n: 16 }] },
+  { id: 'luohan-e', center: [-84, 76], near: 55, elements: [{ t: 'luohan_hall', rect: [-89, 58, -79.5, 94], y: T1.y, side: 'e', n: 16 }] },
+];
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('terrace', T1.rect, T1.y, 'open'), room('hall', [-129, -4, -91, 24], T2.y, 'hall'), ...interiorRooms(), ...dwellingRooms()];   // the music zones of the furnished houses (life.js)
 // each storey inside the pagoda, in the corridor's north-west corner (the stair arrives in the south-west one)

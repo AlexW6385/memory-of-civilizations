@@ -13,6 +13,7 @@ import { STYLES } from '../../core/build.js';
 import { lathe, fromTriangles } from '../../core/geom.js';
 import { hexa } from '../../styles/song/kaifeng.js';
 import '../../styles/song/index.js';
+import { folded } from '../../styles/song/hangzhou.js';
 
 function dressUpper(el, { bag }) {
   const [cx, cz] = el.c, from = el.from ?? 2, n = el.tiers.length;
@@ -92,4 +93,4 @@ function dressUpper(el, { bag }) {
   }
 }
 
-STYLES.song.elements.hz_pagoda_upper = dressUpper;
+STYLES.song.elements.hz_pagoda_upper = folded(dressUpper);
