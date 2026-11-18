@@ -13,7 +13,8 @@ import { rng } from './util.js';
 const BB = 'brick_baked', MP = 'mud_plaster';
 const H = 3.4, HC = 2.5, TOP = H + 2.8;          // the first roof (the upper floor), the ceiling's underside above it, the upper roof's top
 const JAR = (s) => [[0.001, 0], [0.1 * s, 0], [0.13 * s, 0.03], [0.24 * s, 0.25 * s], [0.25 * s, 0.42 * s], [0.18 * s, 0.6 * s], [0.09 * s, 0.68 * s], [0.11 * s, 0.74 * s], [0.08 * s, 0.75 * s], [0.07 * s, 0.7 * s], [0.001, 0.68 * s]];
-const BOWL = (r) => [[0.001, 0], [r * 0.45, 0.005], [r, r * 0.45], [r * 0.93, r * 0.47], [r * 0.4, r * 0.12], [0.001, r * 0.1]];
+const BOWL = (r, k = 0.45) => [[0.001, 0], [r * 0.45, 0.005], [r, r * k], [r * 0.93, r * (k + 0.02)], [r * 0.4, r * 0.12], [0.001, r * 0.1]];
+const seg = (a, b) => 7 + Math.floor(hash(a, b, 5) * 7);   // a bowl's segments by its own place: no two shapes alike
 const hash = (a, b, c = 0) => { let h = (Math.imul(Math.round(a * 100) | 0, 73856093) ^ Math.imul(Math.round(b * 100) | 0, 19349663) ^ Math.imul(c | 0, 83492791)) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
 /** The kinds of house and what each keeps upstairs (docs/settlements/ur.md §5.14). */
@@ -157,8 +158,8 @@ function couch(kit, u0, v1, len, seed, y = H) {
   const { B, L, C } = kit, wd = 0.85, v0 = v1 - wd, ch = y + 0.45;
   for (const [u, v] of [[u0, v0], [u0 + len, v0], [u0, v1], [u0 + len, v1]]) B('timber', u - 0.04, v - 0.04, u + 0.04, v + 0.04, y + 0.012, ch);
   for (const q of [[u0 - 0.05, v0 - 0.05, u0 + len + 0.05, v0 + 0.02], [u0 - 0.05, v1 - 0.02, u0 + len + 0.05, v1 + 0.05], [u0 - 0.05, v0 + 0.02, u0 + 0.02, v1 - 0.02], [u0 + len - 0.02, v0 + 0.02, u0 + len + 0.05, v1 - 0.02]]) B('timber', ...q, ch - 0.06, ch);
-  B('linen', u0 + 0.02, v0 + 0.02, u0 + len - 0.02, v1 - 0.02, ch - 0.05, ch + 0.07);
-  const cc = hash(seed, u0) < 0.5 ? 'cloth_red' : 'cloth_ochre', cs = 0.45 + hash(seed, v1) * 0.25;
+  B('cloth_white', u0 + 0.02, v0 + 0.02, u0 + len - 0.02, v1 - 0.02, ch - 0.05, ch + 0.07);
+  const cc = 'cloth_red', cs = 0.45 + hash(seed, v1) * 0.25;
   B(cc, u0 + cs, v0 - 0.01, u0 + len - 0.08, v1 - 0.01, ch + 0.07, ch + 0.085); B(cc, u0 + cs, v0 - 0.025, u0 + len - 0.08, v0 - 0.01, ch - 0.25, ch + 0.085);
   L('linen', [[0.001, 0], [0.09, 0.0], [0.1, 0.06], [0.09, 0.12], [0.001, 0.12]], u0 + 0.2, (v0 + v1) / 2, ch + 0.07, 8);
   C(u0 - 0.05, v0 - 0.05, u0 + len + 0.05, v1 + 0.05, H, ch + 0.07);
@@ -175,8 +176,8 @@ function chest(kit, u0, v0, u1, v1, y = H) {
 /** A sleeping mat on the floor: a reed mat, a linen sheet, a bolster. */
 function sleepMat(kit, u, v, alongU, seed) {
   const { B, L } = kit, a = alongU ? [0.9, 0.4] : [0.4, 0.9];
-  B('reed_mat', u - a[0], v - a[1], u + a[0], v + a[1], H, H + 0.014); B('linen', u - a[0] + 0.05, v - a[1] + 0.05, u + a[0] - 0.05, v + a[1] - 0.05, H + 0.014, H + 0.06);
-  L(hash(seed, u) < 0.5 ? 'cloth_ochre' : 'linen', [[0.001, 0], [0.08, 0], [0.1, 0.05], [0.08, 0.1], [0.001, 0.1]], alongU ? u - a[0] + 0.2 : u, alongU ? v : v - a[1] + 0.2, H + 0.06, 8);
+  B('reed_mat', u - a[0], v - a[1], u + a[0], v + a[1], H, H + 0.014); B('cloth_white', u - a[0] + 0.05, v - a[1] + 0.05, u + a[0] - 0.05, v + a[1] - 0.05, H + 0.014, H + 0.06);
+  L('linen', [[0.001, 0], [0.08, 0], [0.1, 0.05], [0.08, 0.1], [0.001, 0.1]], alongU ? u - a[0] + 0.2 : u, alongU ? v : v - a[1] + 0.2, H + 0.06, 8);
 }
 
 /** A row of great jars along a wall (v fixed), their size by their own place. */
@@ -194,7 +195,7 @@ function sacks(kit, u, v, n, seed) {
   const { L, C } = kit;
   for (let k = 0; k < n; k++) {
     const du = (k % 2) * 0.5 + hash(seed, k) * 0.08, dv = Math.floor(k / 2) * 0.46 * (k % 2 ? -1 : 1), s = 0.95 + hash(u + k, v) * 0.25;
-    L('sacking', [[0.001, 0], [0.22 * s, 0.02], [0.26 * s, 0.25 * s], [0.22 * s, 0.5 * s], [0.08 * s, 0.6 * s], [0.001, 0.6 * s]], u + du, v + dv, H + 0.012, 10);
+    L('linen', [[0.001, 0], [0.22 * s, 0.02], [0.26 * s, 0.25 * s], [0.22 * s, 0.5 * s], [0.08 * s, 0.6 * s], [0.001, 0.6 * s]], u + du, v + dv, H + 0.012, seg(u + du, v + dv));
   }
   C(u - 0.3, v - 0.55, u + 0.85, v + 0.4, H, H + 0.55);
 }
@@ -209,15 +210,15 @@ function ladder(kit, u, vFoot, vTop, yTop) {
 /** The kinds' store and workroom furniture: what stands in the room over the back range's east part, by the house's use. */
 function furnishStore(kit, kind, u0, u1, v1, vin, seed) {
   const { B, L, C, beam, LP } = kit, run = u1 - u0, vb = v1 - 0.45;
-  const bowls = (u, v, y, n) => { for (let k = 0; k < n; k++) L('terracotta', BOWL(0.1 + hash(u + k, v) * 0.05), u + k * 0.3, v, y, 10); };
+  const bowls = (u, v, y, n) => { for (let k = 0; k < n; k++) L('terracotta', BOWL(0.1 + hash(u + k, v) * 0.05, 0.35 + hash(v, u + k) * 0.2), u + k * 0.3, v, y, seg(u + k * 0.3, v)); };
   if (kind === 'weaver') {
     // dyed wool on a pole over two posts, bales of fleece in sacking, baskets of spindles
     const a = u0 + 0.5, b = Math.min(u1 - 0.5, a + 2.4);
     for (const u of [a, b]) { B('timber', u - 0.04, v1 - 0.55, u + 0.04, v1 - 0.47, H, H + 1.95); C(u - 0.06, v1 - 0.57, u + 0.06, v1 - 0.45, H, H + 1.95); }
     beam('timber', LP(a, v1 - 0.51, H + 1.9), LP(b, v1 - 0.51, H + 1.9), 0.02, 0.04);
-    for (let u = a + 0.12, k = 0; u < b - 0.1; u += 0.2 + hash(u, v1) * 0.1, k++) B(['cloth_red', 'cloth_ochre', 'linen', 'cloth_red'][(k + (seed % 3)) % 4], u, v1 - 0.54, u + 0.1, v1 - 0.48, H + 0.95 + hash(u, k) * 0.2, H + 1.9);
+    for (let u = a + 0.12, k = 0; u < b - 0.1; u += 0.2 + hash(u, v1) * 0.1, k++) B(['linen', 'pottery_dark', 'linen', 'mud_plaster'][(k + (seed % 3)) % 4], u, v1 - 0.54, u + 0.1, v1 - 0.48, H + 0.95 + hash(u, k) * 0.2, H + 1.9);
     sacks(kit, u1 - 0.9, v1 - 0.55, 4, seed);
-    L('wicker', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], u0 + 0.4, vin + 1.55, H + 0.012, 12);
+    L('terracotta', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], u0 + 0.4, vin + 1.55, H + 0.012, 12);
   } else if (kind === 'potter') {
     // a rack of planks with bowls and cups set out to dry, great jars, a bin of clay
     const a = u0 + 0.4, b = Math.min(u1 - 1.5, a + 3.0);
@@ -237,7 +238,7 @@ function furnishStore(kit, kind, u0, u1, v1, vin, seed) {
     sacks(kit, u0 + 0.5, v1 - 0.55, 6, seed);
     B('timber', u1 - 1.8, v1 - 0.9, u1 - 0.6, v1 - 0.3, H + 0.3, H + 0.55); for (const u of [u1 - 1.75, u1 - 0.65]) for (const v of [v1 - 0.85, v1 - 0.35]) B('timber', u - 0.04, v - 0.04, u + 0.04, v + 0.04, H, H + 0.3);
     B(MP, u1 - 1.7, v1 - 0.82, u1 - 0.7, v1 - 0.38, H + 0.5, H + 0.52); C(u1 - 1.8, v1 - 0.9, u1 - 0.6, v1 - 0.3, H, H + 0.55);
-    for (let k = 0; k < 3; k++) L('wicker', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], u0 + 0.4 + k * 0.55, vin + 1.55 + (k % 2) * 0.1, H + 0.012, 12);
+    for (let k = 0; k < 3; k++) L('terracotta', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], u0 + 0.4 + k * 0.55, vin + 1.55 + (k % 2) * 0.1, H + 0.012, 12);
   } else if (kind === 'smith') {
     // charcoal in sacks, ingots of copper stacked, stone moulds, the bellows' skin hung up
     sacks(kit, u0 + 0.5, v1 - 0.55, 6, seed);
@@ -256,7 +257,7 @@ function furnishStore(kit, kind, u0, u1, v1, vin, seed) {
     jarRow(kit, u0 + 0.5, Math.min(u1 - 1.6, u0 + 0.5 + 3 * 0.66), v1 - 0.5, 0.66);
     sacks(kit, u1 - 1.1, v1 - 0.55, 4, seed);
     chest(kit, u0 + 0.45, vin + 1.5, u0 + 1.3, vin + 2.0); chest(kit, u0 + 0.5, vin + 1.53, u0 + 1.2, vin + 1.97, H + 0.52);
-    L('wicker', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], u0 + 1.85, vin + 1.6, H + 0.012, 12);
+    L('terracotta', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], u0 + 1.85, vin + 1.6, H + 0.012, 12);
     for (let k = 0; k < 4; k++) B(MP, u0 + 1.78 + (k % 2) * 0.07, vin + 1.55 + (k > 1 ? 0.08 : 0), u0 + 1.9 + (k % 2) * 0.07, vin + 1.67 + (k > 1 ? 0.08 : 0), H + 0.3 + k * 0.02, H + 0.33 + k * 0.02);
   }
 }
@@ -329,7 +330,7 @@ export function upperStorey(ctx, el) {
   couch(kit, ua + 0.35, vBk - 0.08, cLen, seed);
   chest(kit, uAe - 0.85, vBk - 0.6, uAe - 0.05, vBk - 0.12);
   if (uAe - 0.95 - (cEnd + 0.15) >= 1.9) sleepMat(kit, (cEnd + 0.15 + uAe - 0.95) / 2, vBk - 0.5, true, seed);
-  Lat('wicker', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], ua + 0.4, vin + 1.5, H + 0.012, 12);
+  Lat('terracotta', [[0.001, 0], [0.2, 0.01], [0.24, 0.3], [0.22, 0.31], [0.18, 0.04], [0.001, 0.04]], ua + 0.4, vin + 1.5, H + 0.012, 12);
   { const nv = vBk - 1.2; B(MP, ua - 0.0, nv - 0.15, ua + 0.2, nv + 0.15, H + 1.12, H + 1.24); Lat('terracotta', [[0.001, 0], [0.05, 0.005], [0.06, 0.03], [0.03, 0.045], [0.001, 0.04]], ua + 0.1, nv, H + 1.24, 10); B('flame', ua + 0.09, nv - 0.012, ua + 0.11, nv + 0.012, H + 1.28, H + 1.32); }
   // ---- the store, or the family's second room, by the house's use
   if (two) furnishStore(kit, kind, uX + 0.3, U - 0.3, vBk, vin, seed);
@@ -340,11 +341,11 @@ export function upperStorey(ctx, el) {
     for (const [du, dv] of [[-0.34, -0.19], [0.34, -0.19], [-0.34, 0.19], [0.34, 0.19]]) B('timber', tu + du - 0.03, tv + dv - 0.03, tu + du + 0.03, tv + dv + 0.03, H + 0.012, H + 0.42);
     C(tu - 0.4, tv - 0.25, tu + 0.4, tv + 0.25, H, H + 0.46);
     Lat('terracotta', [[0.001, 0], [0.06, 0.01], [0.1, 0.1], [0.09, 0.17], [0.04, 0.22], [0.045, 0.26], [0.001, 0.25]], tu - 0.18, tv, H + 0.46, 10);
-    for (const du of [0.05, 0.2]) Lat('terracotta', BOWL(0.05), tu + du, tv + (du > 0.1 ? 0.1 : -0.08), H + 0.46, 10);
+    for (const du of [0.05, 0.2]) Lat('terracotta', BOWL(0.05, 0.35 + hash(tu, du) * 0.2), tu + du, tv + (du > 0.1 ? 0.1 : -0.08), H + 0.46, seg(tu + du, tv));
     for (const du of [-0.75, 0.75]) { const su = tu + du; B('timber', su - 0.18, tv - 0.15, su + 0.18, tv + 0.15, H + 0.36, H + 0.4); for (const [a, b] of [[-0.14, -0.11], [0.14, -0.11], [-0.14, 0.11], [0.14, 0.11]]) B('timber', su + a - 0.02, tv + b - 0.02, su + a + 0.02, tv + b + 0.02, H + 0.012, H + 0.36); }
     chest(kit, fu1 - 1.0, vF1 - 0.6, fu1 - 0.2, vF1 - 0.1);
     // by the trade: its wares on a plank shelf along the west wall
-    const wares = { weaver: 'cloth_red', potter: 'terracotta', brewer: 'pottery_dark', baker: 'wicker', smith: 'bronze', school: MP, merchant: 'sacking', family: 'terracotta' }[kind] ?? 'terracotta';
+    const wares = { weaver: 'linen', potter: 'terracotta', brewer: 'pottery_dark', baker: 'terracotta', smith: 'bronze', school: MP, merchant: 'linen', family: 'terracotta' }[kind] ?? 'terracotta';
     B('timber', fu0 - 0.0, 0.5, fu0 + 0.3, vF1 - 0.3, H + 0.9, H + 0.94); B('timber', fu0 - 0.0, 0.5, fu0 + 0.05, vF1 - 0.3, H, H + 0.9);
     for (let k = 0; k < 3; k++) B(wares, fu0 + 0.03, 0.62 + k * 0.4 + hash(seed, k) * 0.05, fu0 + 0.22, 0.84 + k * 0.4, H + 0.94, H + 1.1 + hash(k, seed) * 0.12);
     C(fu0 - 0.0, 0.5, fu0 + 0.3, vF1 - 0.3, H, H + 1.0);
@@ -371,7 +372,7 @@ export function upperStorey(ctx, el) {
   col.floor(R(ul - 0.65, vS + 0.1, ul + 0.65, vS + 0.6), TOP);
   }
   // ---- the roof of the rooms: a mat, a bench for sleeping out, a jar in its stand
-  { const ru = ua + 1.0 + hash(seed, 5) * 1.5, rv = vS + 1.4; B('reed_mat', ru - 0.9, rv - 0.4, ru + 0.9, rv + 0.4, TOP, TOP + 0.014); B('linen', ru - 0.85, rv - 0.35, ru + 0.85, rv + 0.35, TOP + 0.014, TOP + 0.06);
-    Lat('terracotta', JAR(1.1), U - 0.85, V - 0.85, TOP, 12); Lat('terracotta', [[0.2, 0], [0.2, 0.08], [0.14, 0.08]], U - 0.85, V - 0.85, TOP, 10); }
+  { const ru = ua + 1.0 + hash(seed, 5) * 1.5, rv = vS + 1.4; B('reed_mat', ru - 0.9, rv - 0.4, ru + 0.9, rv + 0.4, TOP, TOP + 0.014); B('cloth_white', ru - 0.85, rv - 0.35, ru + 0.85, rv + 0.35, TOP + 0.014, TOP + 0.06);
+    Lat('terracotta', JAR(1.1), U - 0.85, V - 0.85, TOP, 12); }
   void rs;
 }
