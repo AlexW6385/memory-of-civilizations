@@ -10,7 +10,7 @@ export const FL = 0.1;                                  // the floor, over the s
 
 /** ctx: { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade (id), seed } — builds the stone storey in place of the solid one. */
 export function openGround(c) {
-  const { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade, lights, lit } = c, rand = rng((c.seed || 1) + 77);
+  const { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade, lights, lit, up } = c, rand = rng((c.seed || 1) + 77);
   const [x0, z0, x1, z1] = rect, T = 0.4, fl = y + FL;
   const P = (u, d) => (f === 's' ? [x0 + u, z1 - d] : f === 'n' ? [x1 - u, z0 + d] : f === 'e' ? [x1 - d, z0 + u] : [x0 + d, z1 - u]);
   const R = (u0, d0, u1, d1) => { const a = P(u0, d0), b = P(u1, d1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
@@ -39,9 +39,13 @@ export function openGround(c) {
   // the door's leaf standing open against its jamb, hinged at the side away from the shop
   { const hu = doorL ? du : du + 1.0; B('wood_dark', hu - 0.03, hu + 0.03, T, T + 0.95, 0, 2.2); }
   // the floor above on its beams and boards; walked on the roof of the room, not in it
-  { const r = R(T, T, L - T, D - T); bag.add('timber', box(r[0], y + st - 0.06, r[1], r[2], y + st - 0.02, r[3])); }
-  for (let d = T + 0.8; d < D - T; d += 1.25) B('wood_dark', T, L - T, d - 0.1, d + 0.1, st - FL - 0.3, st - FL - 0.04);
-  col.rect(R(0, 0, L, D), y + st - 0.1, y + st + 0.3);
+  // (with rooms above, upper.js builds the floor and its stairwell; the beams stop short of the stair's opening)
+  if (!up) { const r = R(T, T, L - T, D - T); bag.add('timber', box(r[0], y + st - 0.06, r[1], r[2], y + st - 0.02, r[3])); }
+  for (let d = T + 0.8; d < D - T; d += 1.25) {
+    if (up && d > up.flights[0].hole.d0 - 0.15 && d < up.flights[0].hole.d1 + 0.15) { const lo = up.side === 'lo', w0 = lo ? 1.5 : T, w1 = lo ? L - T : L - 1.5; B('wood_dark', w0, w1, d - 0.1, d + 0.1, st - FL - 0.3, st - FL - 0.04); }
+    else B('wood_dark', T, L - T, d - 0.1, d + 0.1, st - FL - 0.3, st - FL - 0.04);
+  }
+  if (!up) col.rect(R(0, 0, L, D), y + st - 0.1, y + st + 0.3);
 
   // a hanging lamp over the shop (one light a room, only where asked: the court's lodgings)
   if (lit && lights) { const p = P(L / 2, Math.min(D * 0.38, 2.8)); lights.push({ at: [p[0], fl + 2.35, p[1]], color: '#ffc27a', intensity: 3, distance: 8 }); rodU('iron', [L / 2, Math.min(D * 0.38, 2.8), 2.75], [L / 2, Math.min(D * 0.38, 2.8), 2.45], 0.012); vase('lamp_glass', L / 2, Math.min(D * 0.38, 2.8), 0.08, 0.2, 2.2); }
@@ -108,19 +112,21 @@ export function openGround(c) {
   sh(trade);
 
   // ── the living room: hearth, table and benches, the bed, a chest, shelf, ladder
-  const d0 = PD + 0.5, dE = D - T, hu0 = doorL ? 0.5 : L - 2.0;
+  const d0 = PD + 0.5, dE = D - T, oppLo = up ? up.side !== 'lo' : !doorL, hu0 = up ? (oppLo ? 0.5 : L - 2.0) : (doorL ? 0.5 : L - 2.0);
   B('limestone', hu0, hu0 + 1.5, dE - 0.8, dE, 0, 0.35, true); B('limestone', hu0 + 0.1, hu0 + 1.4, dE - 0.6, dE, 0.35, st - FL - 0.04); B('limestone', hu0 - 0.1, hu0 + 1.6, dE - 0.85, dE - 0.55, 1.5, 1.7);
   vase('iron', hu0 + 0.75, dE - 0.4, 0.2, 0.28, 0.35); rodU('iron', [hu0 + 0.75, dE - 0.4, 1.45], [hu0 + 0.75, dE - 0.4, 0.62], 0.01); B('wood_dark', hu0 + 0.2, hu0 + 0.5, dE - 0.5, dE - 0.2, 0.35, 0.4); B('iron', hu0 + 0.5, hu0 + 1.1, dE - 0.6, dE - 0.4, 0.35, 0.37);
-  const tu = doorL ? L - 2.0 : 1.6;
+  const tu = up ? (oppLo ? 1.6 : L - 2.0) : (doorL ? L - 2.0 : 1.6);
   B('timber', tu - 0.8, tu + 0.8, d0 + 0.5, d0 + 1.2, 0.74, 0.8, true); for (const a of [-0.7, 0.7]) B('wood_dark', tu + a - 0.04, tu + a + 0.04, d0 + 0.55, d0 + 1.15, 0, 0.74); for (const s2 of [-0.1, 1.3]) B('timber', tu - 0.7, tu + 0.7, d0 + s2 + 0.1 - 0.1, d0 + s2 + 0.1 + 0.12, 0.42, 0.46, true);
   vase('pottery_dark', tu - 0.2, d0 + 0.85, 0.08, 0.22, 0.8); B('hide_tan', tu + 0.2, tu + 0.5, d0 + 0.65, d0 + 0.95, 0.8, 0.86);
+  if (!up) {
   const bu = doorL ? L - T * 0.75 - 1.0 : T * 0.75, bsg = doorL ? 1 : 1;
   B('wood_dark', Math.min(bu, bu + (doorL ? 0 : 1.0)) + (doorL ? 0 : 0), Math.min(bu, bu + (doorL ? 0 : 1.0)) + 1.0, dE - 2.1, dE - 0.15, 0.3, 0.46, true); B('linen', Math.min(bu, bu + (doorL ? 0 : 1.0)) + 0.04, Math.min(bu, bu + (doorL ? 0 : 1.0)) + 0.96, dE - 2.05, dE - 0.2, 0.46, 0.58); B('cloth_red', Math.min(bu, bu + (doorL ? 0 : 1.0)) + 0.04, Math.min(bu, bu + (doorL ? 0 : 1.0)) + 0.96, dE - 1.2, dE - 0.2, 0.58, 0.64);
   void bsg;
-  B('wood_dark', doorL ? 2.0 : L - 3.2, doorL ? 3.2 : L - 2.0, PD + 0.3, PD + 0.75, 0, 0.6, true); B('iron', doorL ? 2.0 : L - 3.2, doorL ? 3.2 : L - 2.0, PD + 0.3, PD + 0.75, 0.6, 0.64);
   const lu = doorL ? 0.5 : L - 0.5;
   for (const a of [-0.2, 0.2]) rodU('timber', [lu + a, PD + 1.4, 0], [lu + a, PD + 1.0, st - FL - 0.1], 0.03);
   for (let k = 1; k < 8; k++) rodU('timber', [lu - 0.2, PD + 1.4 - k * 0.057, k * 0.34], [lu + 0.2, PD + 1.4 - k * 0.057, k * 0.34], 0.02);
+  }
+  B('wood_dark', doorL ? 2.0 : L - 3.2, doorL ? 3.2 : L - 2.0, PD + 0.3, PD + 0.75, 0, 0.6, true); B('iron', doorL ? 2.0 : L - 3.2, doorL ? 3.2 : L - 2.0, PD + 0.3, PD + 0.75, 0.6, 0.64);
   { const sw = doorL ? L - T * 0.75 : T * 0.75; B('timber', Math.min(sw, sw + (doorL ? -0.3 : 0.3)), Math.max(sw, sw + (doorL ? -0.3 : 0.3)), dE - 3.3, dE - 2.4, 1.3, 1.34); for (let d = dE - 3.2; d < dE - 2.5; d += 0.2) vase(rand() < 0.5 ? 'terracotta' : 'pottery_dark', sw + (doorL ? -0.15 : 0.15), d, 0.06, 0.2, 1.34); }
   void rand;
 }

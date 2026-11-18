@@ -11,6 +11,7 @@ import { box, rod, fromTriangles, lathe } from '../../core/geom.js';
 import './index.js';
 import { openGround } from './shop-interior.js';
 import { archRise, archHalf } from '../byzantine/index.js';
+import { planUpper, buildUpper, CORE } from './upper.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ST0 = 3.3, ST = 2.75;                         // the stone storey (a shop's opening needs height), the upper storeys
@@ -70,15 +71,15 @@ function paris_house(el, { bag, col, lights }) {
   const trade = TRADES[(el.seed >>> 3) % TRADES.length];
 
   // ── the stone storey and the footing
-  const OPEN = !!el.open && !simple;
+  const OPEN = !!el.open && !simple, UP = OPEN && !!el.upper;       // UP: the upper storeys are rooms (upper.js), not a mass
   if (!OPEN) {
     { const a = map(-0.1, -0.1), b = map(L + 0.1, D + 0.1); bag.add('limestone', box(Math.min(a[0], b[0]), el.foot - 0.6, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y + ST0, Math.max(a[1], b[1]))); }
     col.rect([x0, z0, x1, z1], el.foot - 0.6, y + ST0 + (n - 1) * ST);
-  } else col.rect([x0, z0, x1, z1], y + ST0, y + ST0 + (n - 1) * ST);
+  } else if (!UP) col.rect([x0, z0, x1, z1], y + ST0, y + ST0 + (n - 1) * ST);
 
   // ── the upper storeys: a plaster mass, each jetted
   let top = ST0;
-  for (let s = 1; s < n; s++) { B('lime_plaster', 0, L, top, top + ST, -jet(s), D); top += ST; }
+  for (let s = 1; s < n; s++) { if (!UP) B('lime_plaster', 0, L, top, top + ST, -jet(s), D); top += ST; }
   const jt = jet(n - 1), ye = top;                              // the top storey's front face, the eaves
   // the roof
   const p = 1.28 + rand() * 0.2, o = 0.32, yr = ye + (L / 2 + o) * p - 0.0, dF = -jt - 0.36, dB = D + 0.3, roof = rand() < 0.55 ? 'slate' : 'roof_tile';
@@ -97,8 +98,10 @@ function paris_house(el, { bag, col, lights }) {
   // the gable on the street: a plaster triangle in the plane of the top storey's face
   solid('lime_plaster', [[[0, ye, -jt], [L, ye, -jt], [L / 2, yr - 0.14, -jt]], [[0, ye, -jt + 0.18], [L / 2, yr - 0.14, -jt + 0.18], [L, ye, -jt + 0.18]], [[0, ye, -jt], [L / 2, yr - 0.14, -jt], [L / 2, yr - 0.14, -jt + 0.18]], [[0, ye, -jt], [L / 2, yr - 0.14, -jt + 0.18], [0, ye, -jt + 0.18]], [[L, ye, -jt], [L, ye, -jt + 0.18], [L / 2, yr - 0.14, -jt + 0.18]], [[L, ye, -jt], [L / 2, yr - 0.14, -jt + 0.18], [L / 2, yr - 0.14, -jt]]], [L / 2, ye + 1, -jt + 0.09]);
   // a stone chimney on the party wall
+  let chim = null;
   if (rand() < 0.45) {
     const u = rand() < 0.5 ? 0.3 : L - 0.3, dd = D * (0.5 + rand() * 0.2), up = ye + (L / 2 - Math.abs(u - L / 2)) * p + 1.3;
+    chim = { u, dd };
     B('limestone', u - 0.32, u + 0.32, ye - 0.3, up, dd - 0.32, dd + 0.32); B('limestone', u - 0.4, u + 0.4, up, up + 0.14, dd - 0.4, dd + 0.4);
   }
   if (simple) {
@@ -112,7 +115,8 @@ function paris_house(el, { bag, col, lights }) {
   const doorL = rand() < 0.5, ws = Math.max(2.2, Math.min(4.0, L - 1.7)), su = doorL ? L - 0.35 - ws : 0.35, du = doorL ? 0.3 : L - 1.2;
   const lintel = 2.75;
   const kind = frontKind(el);
-  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: trade.id, seed: el.seed, lights, lit: !!el.lit });
+  const UPV = UP ? planUpper({ el, L, D, n, doorL, ST0, ST, FL: 0.1, chim, jet, kind: el.upper, trade: trade.id }) : null;
+  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: trade.id, seed: el.seed, lights, lit: !!el.lit, up: UPV });
   if (kind === 'shop') {
     if (!OPEN) B('opening', su, su + ws, 0.12, lintel, -0.03, 0.05);
     for (const u of [su - 0.2, su + ws]) B('timber', u, u + 0.2, 0, lintel + 0.3, -0.14, 0.06);                 // the posts
@@ -187,27 +191,30 @@ function paris_house(el, { bag, col, lights }) {
     const nw = Math.max(1, Math.floor((L - 0.4) / 2.0)), sp = L / nw;
     for (let k = 0; k < nw; k++) {
       const uc = (k + 0.5) * sp, ww = 0.95, hw = 1.2, ya = yb + 0.78;
+      const gk = UPV && UPV.gal && s === 1 && UPV.gal.k === k;        // the gallery's door stands in this window
       if (k > 0) B('timber', k * sp - 0.065, k * sp + 0.065, yb + 0.27, yb + ST - 0.17, dd, -jf + 0.02);
       // the opening in two lights with a transom (the glass or oiled cloth dark), its frame and sill; the shutters
-      B('timber', uc - ww / 2 - 0.09, uc + ww / 2 + 0.09, ya - 0.12, ya + hw + 0.1, dd + 0.01, -jf + 0.02);
-      B('opening', uc - ww / 2, uc + ww / 2, ya, ya + hw, dd - 0.02, -jf + 0.03);
-      B('timber', uc - 0.03, uc + 0.03, ya, ya + hw, dd - 0.03, -jf);
+      if (!UP) { B('timber', uc - ww / 2 - 0.09, uc + ww / 2 + 0.09, ya - 0.12, ya + hw + 0.1, dd + 0.01, -jf + 0.02);
+      B('opening', uc - ww / 2, uc + ww / 2, ya, ya + hw, dd - 0.02, -jf + 0.03); }
+      if (!gk) { B('timber', uc - 0.03, uc + 0.03, ya, ya + hw, dd - 0.03, -jf);
       B('timber', uc - ww / 2, uc + ww / 2, ya + hw * 0.62, ya + hw * 0.62 + 0.05, dd - 0.03, -jf);
-      B('timber', uc - ww / 2 - 0.12, uc + ww / 2 + 0.12, ya - 0.2, ya - 0.1, dd - 0.1, -jf);              // the sill
+      B('timber', uc - ww / 2 - 0.12, uc + ww / 2 + 0.12, ya - 0.2, ya - 0.1, dd - 0.1, -jf); }             // the sill
       const open = rand();
       for (const sg of [-1, 1]) {
+        if (gk) break;
         const ue = uc + sg * (ww / 2 + 0.01);
         if (open < 0.4) B('wood_dark', ue, ue + sg * 0.04, ya, ya + hw, dd - 0.5, dd - 0.02);               // opened out against the wall's face
         else if (open < 0.75) { const e = ue + sg * 0.1; B('wood_dark', Math.min(e, e + sg * 0.45), Math.max(e, e + sg * 0.45), ya, ya + hw, dd - 0.06, dd - 0.02); }
         else B('wood_dark', Math.min(ue, ue - sg * ww / 2), Math.max(ue, ue - sg * ww / 2), ya, ya + hw, dd - 0.06, dd - 0.02);
       }
       // St Andrew's cross under the sill in the plaster panel between the beam and the window
-      if (!last || true) { const ua = uc - ww / 2 - 0.1, ub = uc + ww / 2 + 0.1, y0 = yb + 0.3, y1 = ya - 0.22; if (y1 - y0 > 0.3) { R('timber', [ua, y0, dd - 0.01], [ub, y1, dd - 0.01], 0.032, 4); R('timber', [ub, y0, dd - 0.01], [ua, y1, dd - 0.01], 0.032, 4); } }
+      if (!gk) { const ua = uc - ww / 2 - 0.1, ub = uc + ww / 2 + 0.1, y0 = yb + 0.3, y1 = ya - 0.22; if (y1 - y0 > 0.3) { R('timber', [ua, y0, dd - 0.01], [ub, y1, dd - 0.01], 0.032, 4); R('timber', [ub, y0, dd - 0.01], [ua, y1, dd - 0.01], 0.032, 4); } }
       // a brace from the beam over the window up to the plate, on alternate bays
       if (k % 2 === 0) R('timber', [uc - ww / 2 - 0.3, yb + ST - 0.17, dd - 0.01], [uc - ww / 2 - 0.1, ya + hw + 0.1, dd - 0.01], 0.04, 4);
     }
     yb += ST;
   }
+  if (UP) buildUpper(UPV, { bag, col, map, y, solid, roof: { ye, yr, p, jt, dF, dB } });
   // the flanks that a ruelle or the row's end leaves in view: the same frame (sill and plate beams, posts, a window and a brace)
   for (const [side, ex] of [[0, el.flank?.[0] ?? false], [1, el.flank?.[1] ?? false]]) {
     if (!ex) continue;
@@ -296,3 +303,36 @@ export function shopPoint(el) {
   return { at, out, inside, trade: TRADES[(el.seed >>> 3) % TRADES.length].id };
 }
 STYLES.gothic.elements.paris_house = paris_house;
+
+/** The ways up in an open house with rooms above (the same random draws as the house): world [x, z] waypoints for walk-check, from the street to the top storey and out to its room, and to the gallery and the attic. */
+export function upperRoutes(el) {
+  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, f = el.front || 's', along = f === 's' || f === 'n';
+  const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0, n = Math.max(2, el.storeys || 3);
+  const J = 0.3 + rand() * 0.12, jet = (s) => J * s;
+  rand(); rand();
+  let chim = null;
+  if (rand() < 0.45) { const u = rand() < 0.5 ? 0.3 : L - 0.3; chim = { u, dd: D * (0.5 + rand() * 0.2) }; }
+  const doorL = rand() < 0.5, du = doorL ? 0.3 : L - 1.2, U = planUpper({ el, L, D, n, doorL, ST0, ST, FL: 0.1, chim, jet, kind: el.upper });
+  const map = (u, d) => (f === 's' ? [x0 + u, z1 - d] : f === 'n' ? [x1 - u, z0 + d] : f === 'e' ? [x1 - d, z0 + u] : [x0 + d, z1 - u]);
+  const S = U.S, uD = du + 0.5, W = (u, d) => map(u, d);
+  const up = [W(uD, -2.5), W(uD, 1.0), W(uD, 5.0), W(S(0.9), 6.3)];
+  const dTop = U.dBack + 0.2;
+  for (const F of U.flights) {
+    const bay = (F.a0 + F.a1) / 2;
+    if (F.up > 0) up.push(W(S(bay), dTop)); else up.push(W(S(bay), F.to - 0.3));
+    if (F.k < n - 1) { // across to the next flight's foot
+      const nx = U.flights[F.k], nb = (nx.a0 + nx.a1) / 2;
+      if (F.up > 0) up.push(W(S(bay), dTop + 0.1), W(S(nb), dTop + 0.1)); else up.push(W(S(bay), F.to - 0.45), W(S(nb), F.to - 0.45));
+    }
+  }
+  const last = U.flights[U.flights.length - 1], { ladder } = U, first = up.slice(0, 5), uL = S(CORE + 0.35);
+  // from the top storey's landing down the lane beside the stair to the middle of the room
+  const lane = (up.length > 5 && last.up < 0 ? [W(uL, last.to - 0.35)] : [W(uL, dTop)]);
+  const mid = [...lane, W(uL, 5.5), W(L / 2, 5.5)];
+  const out = { room: [...up, ...mid] };
+  // the attic by the ladder in the middle of the front half
+  out.attic = [...out.room, W(L / 2, ladder.d0 - 0.7), W(L / 2, ladder.d0 + 0.5), W(L / 2, ladder.d1 + 0.9)];
+  // the gallery from the first floor
+  if (U.gal) { const jf = jet(1); out.gallery = [...first, W(uL, dTop), W(uL, 5.5), W(U.gal.uc, 5.5), W(U.gal.uc, -jf + 0.8), W(U.gal.uc, -jf - 0.6)]; }
+  return out;
+}
