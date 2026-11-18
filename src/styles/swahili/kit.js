@@ -79,6 +79,13 @@ export function wall(ctx, w) {
   }
 }
 
+/** The rectangle r less the rectangle h (an opening in a floor): up to four rectangles. */
+export function minusRect(r, h) {
+  const x0 = Math.max(r[0], h[0]), z0 = Math.max(r[1], h[1]), x1 = Math.min(r[2], h[2]), z1 = Math.min(r[3], h[3]);
+  if (x1 <= x0 || z1 <= z0) return [r];
+  return [[r[0], r[1], x0, r[3]], [x1, r[1], r[2], r[3]], [x0, r[1], x1, z0], [x0, z1, x1, r[3]]].filter((q) => q[2] - q[0] > 0.02 && q[3] - q[1] > 0.02);
+}
+
 /**
  * A barrel vault over the rectangle r, running along `along` ('x' or 'z'), springing at ys from the
  * long walls' faces: the half-cylinder seen from inside (the walls rise past it to the roof; its
@@ -195,7 +202,7 @@ export function poleCeiling(ctx, r, yc, along, { step = 0.32, rad = 0.065, bear 
     const m = new Matrix4();
     if (along === 'x') m.makeTranslation(x0 - bear, yc - rad, s);
     else m.makeRotationY(-Math.PI / 2).setPosition(s, yc - rad, z0 - bear);
-    ctx.bag.addInstance(POLE, g, m);
+    ctx.bag.addInstance(POLE, g, m, { reach: 90 });
   }
   ctx.bag.add(soffit, box(x0, yc - 0.01, z0, x1, yc + th, z1));
   if (top) ctx.bag.add(top, box(x0, yc + th, z0, x1, yc + th + 0.02, z1));
@@ -392,13 +399,13 @@ export function rooms(ctx, o) {
       else if (vk === 'cone') domeBay(vt, r, fl + hs + span / 2 - 0.3, 0.3, yR, 0.25, 1.6);
       else { vault(vt, r, fl + hs, along); if (vk === 'oct') octPendentives(vt, r, fl + hs); }
     }
-    else if (roof === 'poles') poleCeiling(ctx, r, fl + hs, along === 'x' ? 'z' : 'x', { th: yR - fl - hs });
+    else if (roof === 'poles') for (const q of o.hole ? minusRect(r, o.hole) : [r]) poleCeiling(ctx, q, fl + hs, along === 'x' ? 'z' : 'x', { th: yR - fl - hs });
   }
   if (roof === 'vault') {
     ctx.bag.add(C, fromTriangles(vt));
     for (const r of R) if (!o.vaults || o.vaults[R.indexOf(r) % o.vaults.length] !== 'cone') ctx.bag.add(SMOOTH, box(r[0], fl + hs + span / 2 + 0.04, r[1], r[2], yR, r[3]));
   }
-  if (roof) for (const r of R) ctx.col.floor(r, yR);
+  if (roof) for (const r of R) for (const q of o.hole ? minusRect(r, o.hole) : [r]) ctx.col.floor(q, yR);
   return { rooms: R, yR, yB };
 }
 

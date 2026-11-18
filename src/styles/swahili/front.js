@@ -155,18 +155,22 @@ export function furnishFront(ctx, o, R0) {
   for (const s of spans) shelf(bag, rand, s[0], Math.min(s[1], s[0] + 3.4), rz0, fl, duka ? trade : ['cloth', 'jars', 'spice', 'plain'][Math.floor(rand() * 4)], duka ? 3 : 2);
   if (duka) {
     // the counter: a low masonry block across a third of the room with a board top, scales (a beam on a post with two pans) and a coin box
-    const cx = (rx0 + rx1) / 2 + (rand() - 0.5) * 2, cw = Math.min(2.6, (rx1 - rx0) * 0.4), cz = rz0 + depth * 0.55;
+    let cx = (rx0 + rx1) / 2 + (rand() - 0.5) * 2, cw = Math.min(2.6, (rx1 - rx0) * 0.4), cz = rz0 + depth * 0.55;
+    // (a house with a stair: the counter in the part away from it, nearer the court, so that the stair's foot and the back door stay open)
+    if (o.up) { const lo = o.up.sg > 0 ? rx0 + 0.2 : o.up.xs + 1.2, hi = o.up.sg > 0 ? o.up.xs - 1.2 : rx1 - 0.2; cw = Math.min(cw, hi - lo); cx = (lo + hi) / 2; cz = rz0 + depth * 0.35; }
     bag.add('lime_plaster', box(cx - cw / 2, fl - 0.05, cz, cx + cw / 2, fl + 0.9, cz + 0.45)); col.rect([cx - cw / 2, cz, cx + cw / 2, cz + 0.45], fl, fl + 0.9);
     bag.add('timber', box(cx - cw / 2 - 0.04, fl + 0.9, cz - 0.04, cx + cw / 2 + 0.04, fl + 0.95, cz + 0.49));
     bag.add('iron', box(cx - 0.01, fl + 0.95, cz + 0.2, cx + 0.01, fl + 1.35, cz + 0.22)); bag.add('iron', box(cx - 0.3, fl + 1.34, cz + 0.2, cx + 0.3, fl + 1.36, cz + 0.22));
     for (const s of [-0.28, 0.28]) bag.add('bronze', lathe([[0.001, 0], [0.09, 0.02], [0.1, 0.035], [0.001, 0.02]], 8, null, cx + s, fl + 1.0, cz + 0.21));
     bag.add('wood_dark', box(cx + cw / 2 - 0.4, fl + 0.95, cz + 0.1, cx + cw / 2 - 0.15, fl + 1.08, cz + 0.32));
     // the goods heaped on the floor at the far end: sacks or jars of the trade
-    const gx = rand() < 0.5 ? rx0 + 0.6 : rx1 - 0.6;
+    let gx = rand() < 0.5 ? rx0 + 0.6 : rx1 - 0.6;
+    if (o.up) gx = o.up.sg > 0 ? (rx0 + 1.9 + o.up.xs) / 2 : (o.up.xs + rx1 - 1.9) / 2;
     for (let k = 0; k < 4; k++) { if (trade === 'jars' || trade === 'potter') jar(bag, GL[k % 3], gx + (k % 2) * 0.4, fl, rz1 - 0.4 - Math.floor(k / 2) * 0.4, 0.6, 0.2); else bag.add(k % 2 ? 'sacking' : 'wicker', box(gx - 0.2 + (k % 2) * 0.1, fl, rz1 - 0.7 + Math.floor(k / 2) * 0.1, gx + 0.35, fl + 0.5 + (k % 2) * 0.1, rz1 - 0.2)); }
   } else {
     // a chest of dark wood with iron bands (sanduku) against the far wall, and a stack of folded mats
-    const cx = rand() < 0.5 ? rx0 + 0.9 : rx1 - 0.9;
+    let cx = rand() < 0.5 ? rx0 + 0.9 : rx1 - 0.9;
+    if (o.up) cx = o.up.sg > 0 ? (rx0 + 1.9 + o.up.xs) / 2 : (o.up.xs + rx1 - 1.9) / 2;
     bag.add('wood_dark', box(cx - 0.45, fl, rz1 - 0.55, cx + 0.45, fl + 0.5, rz1 - 0.05)); col.rect([cx - 0.45, rz1 - 0.55, cx + 0.45, rz1 - 0.05], fl, fl + 0.5);
     for (const d of [-0.3, 0.3]) bag.add('iron', box(cx + d - 0.02, fl, rz1 - 0.555, cx + d + 0.02, fl + 0.5, rz1 - 0.05));
     bag.add('reed_mat', box(cx + 0.55, fl + 0.012, rz1 - 0.5, cx + 1.0, fl + 0.3, rz1 - 0.1));
@@ -187,7 +191,10 @@ export function furnishBack(ctx, o, B0) {
 /** The court: a hearth of three stones with a pot and firewood, a mortar and pestle (kinu) for pounding grain, a coconut-shell heap. Court rect C. */
 export function furnishCourt(ctx, o, C) {
   const { bag } = ctx, { cf, rand } = o, [cx0, cz0, cx1, cz1] = C;
-  const hx = cx0 + 0.9 + rand() * Math.max(0.2, cx1 - cx0 - 1.8), hz = cz1 - 0.55;
+  let hx = cx0 + 0.9 + rand() * Math.max(0.2, cx1 - cx0 - 1.8);
+  const hz = cz1 - 0.55;
+  // (a house with a stair: the hearth and the mortar at the end of the court farther from the front door, which is walked)
+  if (o.up) hx = o.fdc - cx0 > cx1 - o.fdc ? cx0 + 0.9 : cx1 - 1.0;
   for (let k = 0; k < 3; k++) { const a = k * 2.094; bag.add('rubble', box(hx + Math.cos(a) * 0.14 - 0.06, cf, hz + Math.sin(a) * 0.14 - 0.06, hx + Math.cos(a) * 0.14 + 0.06, cf + 0.13, hz + Math.sin(a) * 0.14 + 0.06)); }
   bag.add('pottery_dark', lathe([[0.001, 0.13], [0.15, 0.15], [0.21, 0.28], [0.17, 0.4], [0.18, 0.42], [0.001, 0.42]], 9, null, hx, cf, hz));
   for (let k = 0; k < 4; k++) bag.add('wood_dark', box(hx + 0.35, cf + k * 0.045, hz - 0.12 + k * 0.03, hx + 0.95, cf + k * 0.045 + 0.04, hz - 0.08 + k * 0.03));

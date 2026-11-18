@@ -8,6 +8,7 @@
 
 import { box, fromTriangles } from '../../core/geom.js';
 import { TRADES, DUKA, frontCuts, dressFront, furnishFront, furnishBack, furnishCourt } from './front.js';
+import { upPlan, notches, upper, routeOf } from './upper.js';
 import { C, RAG, DRESSED, SMOOTH, rng, solid, slab, wall, rooms, carvedPanel, wallFace, nicheHoles, lathe8, bowl, cut, face } from './kit.js';
 
 const ROOM = 2.25, T = 0.42;
@@ -40,6 +41,15 @@ function mirrorCtx(ctx, zc) {
   return { ...ctx, bag, col };
 }
 
+let LAST = undefined;
+const NULL_CTX = { bag: { add() {}, addInstance() {} }, col: { floor() {}, rect() {}, circle() {}, segment() {}, ramp() {} } };
+/** The routes up a house with an upper floor (a dry run of its build): { A, B, yU, zc, flip, z0 } in the house's own coordinates, or null. */
+export function upRoute(el) {
+  LAST = null;
+  house({ ...el, up: true }, NULL_CTX);
+  const f = LAST; LAST = undefined;
+  return f;
+}
 /** swahili_house: see below. */
 export function house(el, ctx0) {
   const ctx = el.flip ? mirrorCtx(ctx0, (el.rect[1] + el.rect[3]) / 2) : ctx0;
@@ -103,16 +113,23 @@ export function house(el, ctx0) {
   const frontDoor = { u0: mx - 0.5 + (rand() - 0.5) * 1.5, v0: fl, v1: fl + 2.1, frame: 'door' }; frontDoor.u1 = frontDoor.u0 + 1.0;
   const backDoor = { u0: frontDoor.u0 > mx ? x0 + 1.0 : x1 - 2.0, v0: fl, v1: fl + 2.05, frame: 'door' }; backDoor.u1 = backDoor.u0 + 0.9;
   const open = !!el.open;
+  // the upper floor opened (docs/settlements/kilwa.md §21): a stair in the front room, the room above, the gallery and the roof
+  const fdc = (frontDoor.u0 + frontDoor.u1) / 2;
+  const UP = el.up && open && deep && W >= 8 ? upPlan({ x0, x1, zf, zb, T, fl, hs, fdc, doorX, thatch, trade: facts.trade, duka: facts.duka }) : null;
+  const NT = UP ? notches(UP) : { n: [], s: [] };
   const zid = []; if (open) { const n = Math.max(3, Math.floor((W - 2 * T - 2.4) / 0.55)); for (let j = 0; j < 2; j++) for (let i = 0; i < n; i++) { const u = x0 + T + 0.3 + (i + 0.5) * (W - 2 * T - 2.6) / n; zid.push({ u0: u - 0.18, u1: u + 0.18, v0: fl + 0.9 + j * 0.75, v1: fl + 1.35 + j * 0.75, d: 0.15, side: -1, holes: nicheHoles(u, fl + 0.9 + j * 0.75, 0.36, 0.36) }); } }
   const sideNiche = (zA, zB) => [{ u0: (zA + zB) / 2 - 0.22, u1: (zA + zB) / 2 + 0.22, v0: fl + 1.0, v1: fl + 1.5, d: 0.15, side: 1, holes: nicheHoles((zA + zB) / 2, fl + 1.0, 0.44, 0.45) }];
   const front = deep
-    ? rooms(ctx, { mat, rect: [x0, zf - T, x1, zb + T], along: 'x', n: 1, fl, yB: low, hs, roof: 'poles', t: T, door: 'n', holes: { n: [frontDoor], s: [backDoor] }, parapet: 0.5,
+    ? rooms(ctx, { mat, rect: [x0, zf - T, x1, zb + T], along: 'x', n: 1, fl, yB: low, hs, roof: 'poles', t: T, door: 'n', holes: { n: [frontDoor, ...NT.n], s: [backDoor, ...NT.s] }, hole: UP ? UP.hole : null, parapet: 0.5,
       rec: open ? { w: sideNiche(zf, zb), e: sideNiche(zf, zb).map((r) => ({ ...r, side: -1 })) } : {}, doorW: 1.0 })
     : null;
   const back = rooms(ctx, { mat, rect: [x0, zb, x1, z1], along: 'x', at: [x1 - 2.1], fl, yB: low, hs, roof: thatch && deep ? null : 'poles', t: T, door: null, cross: true, skip: deep ? ['n'] : [], parapet: thatch && deep ? 0.05 : 0.5, rec: { s: zid }, holes: deep ? {} : { n: [frontDoor] } });
   const main = front || back;
   // ---- a second storey over the front room on some houses: closed rooms with small barred windows to the street
-  if (twoStorey) {
+  if (UP) {
+    upper(ctx, UP, { x0, x1, z1, mat, cf, seed: el.seed || 1, trade: facts.trade, duka: facts.duka });
+    if (LAST !== undefined) LAST = { el, ...routeOf(UP, { doorX, z0, fdc }), UP, z0, zc: (el.rect[1] + el.rect[3]) / 2, flip: !!el.flip };
+  } else if (twoStorey) {
     const yU = main.yR, wins = [];
     for (let x = x0 + 1.2; x < x1 - 1; x += 2.4) wins.push({ u0: x - 0.3, u1: x + 0.3, v0: yU + 1.1, v1: yU + 1.9 });
     rooms(ctx, { mat, rect: front ? [x0, zf - T, x1, zb + T] : [x0, zb, x1, z1], along: 'x', n: 1, fl: yU + 0.01, yB: yU, hs: 2.6, roof: 'poles', t: T, door: null, floor: null, holes: { n: wins }, parapet: 0.5 });
@@ -132,7 +149,7 @@ export function house(el, ctx0) {
   }
   // ---- the street front: damp at the foot of the walls, plaster fallen from the rag in patches, spouts from the roof
   for (const p of cut(x0, low, x1, cf + 0.55, [[dH.u0 - 0.2, cf - 0.01, dH.u1 + 0.2, cf + 3]])) bag.add('plaster_damp', box(p[0], Math.max(p[1], low), z0 - 0.012, p[2], p[3], z0));
-  for (const zz of [z0, zf - T]) if (zz === z0 || twoStorey) for (let k = 0; k < 2; k++) {
+  for (const zz of [z0, zf - T]) if (zz === z0 || twoStorey || UP) for (let k = 0; k < 2; k++) {
     if (rand() < 0.4) continue;
     const yTop = zz === z0 ? yC : main.yR + 2.9, w = 0.4 + rand() * 0.9, h = 0.3 + rand() * 0.6, xa = x0 + 0.3 + rand() * (W - w - 0.6), ya = (zz === z0 ? cf + 0.7 : main.yR + 0.4) + rand() * Math.max(0.1, yTop - h - (zz === z0 ? cf + 1.0 : main.yR + 0.6));
     if (zz === z0 && xa < dH.u1 + 0.3 && xa + w > dH.u0 - 0.3) continue;
@@ -140,10 +157,12 @@ export function house(el, ctx0) {
     for (let j = 0; j < 3; j++) { const i0 = rand() * w * 0.25, i1 = rand() * w * 0.25; bag.add(RAG, box(xa + i0, ya + j * h / 3, zz - 0.018 + j * 0.002, xa + w - i1, ya + (j + 1) * h / 3, zz)); }
   }
   dressFront(ctx, fo, cuts);
-  const yS = (twoStorey ? main.yR + 2.6 + 0.3 : main.yR) + 0.02;
+  const yS = (twoStorey || UP ? main.yR + 2.6 + 0.3 : main.yR) + 0.02;
   for (const xx of [x0 + 0.6, x1 - 0.6]) bag.add(DRESSED, box(xx - 0.07, yS, zf - T - 0.55, xx + 0.07, yS + 0.1, zf - T));
   if (!open) return;
   fo.frontDoorU = [frontDoor.u0, frontDoor.u1];
+  if (UP) fo.fdc = fdc;
+  if (UP) fo.up = { sg: UP.sg, xs: UP.xs, xtop: UP.xtop };
   if (front) furnishFront(ctx, fo, front.rooms[0]);
   furnishBack(ctx, fo, back.rooms[1] ?? back.rooms[0]);
   furnishCourt(ctx, fo, [x0 + T, z0 + T, x1 - T, zf - T]);

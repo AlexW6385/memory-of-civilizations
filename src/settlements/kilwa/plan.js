@@ -1,5 +1,6 @@
 // Kilwa about 1330 (docs/settlements/kilwa.md §2–§4): the Great Mosque, Husuni Kubwa and its pool, dhows on the beach.
-import { STREETS, inRect, MOSQUE, PALACE, POOL, PY, CORE, SOUTH, COURTS, STAIR, BEACH_MOSQUE, GATE_STAIRS, TERRACES, height, inLot } from './layout.js';
+import { upFacts } from './up.js';
+import { lots, STREETS, inRect, MOSQUE, PALACE, POOL, PY, CORE, SOUTH, COURTS, STAIR, BEACH_MOSQUE, GATE_STAIRS, TERRACES, height, inLot } from './layout.js';
 
 const E = [];
 E.push({ t: 'swahili_mosque', rect: MOSQUE, bay: 4.6, big: [6, 5], y: height(-10, 15) });
@@ -61,4 +62,13 @@ export const kilwa = {
   walks: Object.assign([[[-15, -30], [-15, -15]]], {}),
 };
 kilwa.walks[0].y0 = height(-15, -30);
+// the upper floors of the opened houses (docs/settlements/kilwa.md §21): from the lane through the door, the court, the front room, up the stair, along the
+// upper floor to the gallery over the court; and from the upper room out onto the roof over the back rooms
+for (const l of lots()) {
+  const f = upFacts(l);
+  if (!f) continue;
+  const m = (z) => (f.flip ? 2 * f.zc - z : z), W = (A) => A.map(([x, z]) => [x, m(z)]);
+  const a = W(f.A); a.y0 = height(a[0][0], a[0][1]); kilwa.walks.push(a);
+  if (f.B) { const b = W(f.B); b.y0 = f.yU - 0.2; kilwa.walks.push(b); }
+}
 export default kilwa;
