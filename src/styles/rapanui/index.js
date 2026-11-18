@@ -189,7 +189,13 @@ function moai(el, { bag, col }) {
     }
   }
   if (kind === 'ahu' && el.eyes !== false) for (const e of moaiEyes()) putStone(bag, e.mat, e.g, m);
-  if (el.pukao) putStone(bag, 'scoria_red', pukaoGeometry().clone().translate(0, 1 - 0.006, -0.02), m);
+  if (el.pukao) {                                              // each pukao a little different: its width, height, turn and set on the head by the statue's place
+    const hs = (k) => { const q = Math.sin((x + k) * 12.9898 + (z - k) * 78.233) * 43758.5453; return q - Math.floor(q); };
+    const pm = m.clone().multiply(new Matrix4().makeTranslation((hs(1) - 0.5) * 0.012, 1 - 0.006, -0.02 + (hs(2) - 0.5) * 0.016))
+      .multiply(new Matrix4().makeRotationY(hs(3) * 6.28)).multiply(new Matrix4().makeRotationZ((hs(4) - 0.5) * 0.06)).multiply(new Matrix4().makeRotationX((hs(5) - 0.5) * 0.05))
+      .multiply(new Matrix4().makeScale(0.88 + 0.26 * hs(6), 0.8 + 0.5 * hs(7), 0.88 + 0.26 * hs(8)));
+    putStone(bag, 'scoria_red', pukaoGeometry(), pm);
+  }
   const r = h * 0.17 * wd;
   if (el.lie) col.circle(x, z, r * 1.4, y - 1, y + r * 1.5);
   else col.circle(x, z, r, y - 1, y + h);
@@ -263,6 +269,19 @@ function quarryBay(el, ctx) {
     const s = rand() < 0.5 ? -1 : 1, px = s * (hw + tr * 0.5), pz = rand() * h;
     add(B, frustum([px - 0.05, pz - 0.12, px + 0.05, pz + 0.12], -0.2 * h, -0.2 * h + 0.08, 0.01, 0.01, 0.04, 0.04));
   }
+  // the cut face above the head in steps where the carvers worked down, the walls' tops broken into hewn blocks, chips and spalls in the trench [inferred]
+  for (let k = 0; k < 3; k++) add(T, box(-hw - tr - wall + 0.2 * k, top + 0.4 + k * 0.5, h + 0.6 + 0.3 * k, hw + tr + wall - 0.2 * k - 0.3 * (k % 2), top + 0.9 + k * 0.5, h + 1.4 + 0.3 * k + 0.4));
+  const wp = (u, v, w) => new Vector3(u, v, w).applyMatrix4(Mb);
+  for (const s of [-1, 1]) for (let k = 0; k < 9; k++) {
+    const hs = (q) => { const f = Math.sin((x + q * 3 + k * 7 + s) * 12.9898 + (z + q) * 78.233) * 43758.5453; return f - Math.floor(f); };
+    const r = 0.3 + 0.35 * hs(1), v = wp(s * (hw + tr + 0.3 + wall * hs(2) * 0.8), top + r * 0.3, -0.5 + (h + 1.2) * (k + hs(3) * 0.8) / 9);
+    boulder(bag, T, v.x, v.y, v.z, r, k + s + hs(4) * 5);
+  }
+  for (let k = 0; k < 16; k++) {
+    const hs = (q) => { const f = Math.sin((x + q * 5 + k * 3) * 12.9898 + (z - q) * 78.233) * 43758.5453; return f - Math.floor(f); };
+    const side = hs(1) < 0.5 ? -1 : 1, v = wp(side * (hw + tr * (0.2 + 0.7 * hs(2))), -0.2 * h + 0.04, 0.02 * h + hs(3) * h * 0.95);
+    boulder(bag, T, v.x, v.y, v.z, 0.07 + 0.08 * hs(4), k + hs(5) * 4);
+  }
   const ca = Math.cos(yaw), sa = Math.sin(yaw);
   col.circle(x + sa * h / 2, z + ca * h / 2, hw + tr + wall, y - 2, y + top + 1);
 }
@@ -275,6 +294,10 @@ function quarryBay(el, ctx) {
  * ramp (tahua) of water-worn boulders (poro) sloping to the plaza, kerbed with a row of set
  * stones; low sloping wings of rubble at either end.
  */
+/** A block seen from one side: its back rectangle at zb, its face at zf drawn in by `ins` on every edge (the fine joint), the face's top corners shifted by `lean` so no two lie alike. */
+function pillow(xa, ya, xb, yb, zb, zf, ins, lean = 0) {
+  return hull8([[xa, ya, zb], [xb, ya, zb], [xb, yb, zb], [xa, yb, zb], [xa + ins, ya + ins, zf], [xb - ins, ya + ins, zf], [xb - ins - lean, yb - ins, zf], [xa + ins + lean, yb - ins, zf]]);
+}
 function ahu(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 3, rp = el.ramp ?? 12, f = el.facing ?? 'n', rand = rng(el.seed ?? 7);
   if (f !== 'n') throw new Error('ahu: only facing n is drawn');
@@ -286,7 +309,7 @@ function ahu(el, { bag, col }) {
     let xa = x0 - 0.05;
     while (xa < x1 + 0.05) {
       const w = Math.min(x1 + 0.05 - xa, tall[0] + rand() * tall[1]), hh = small ? 0.6 + rand() * 0.25 : 1.5 + rand() * 0.8, d = 0.02 + rand() * 0.05;
-      bag.add(B, frustum([xa + 0.025, Math.min(zf, zf + dir * (0.3 + d)), xa + w - 0.025, Math.max(zf, zf + dir * (0.3 + d))], y - 0.6, Math.min(y + h - 0.12, y + hh), 0, 0, dir > 0 ? 0 : 0.02, dir > 0 ? 0.02 : 0));
+      bag.add(B, pillow(xa + 0.02, y - 0.6, xa + w - 0.02, Math.min(y + h - 0.12, y + hh), zf, zf + dir * (0.3 + d), 0.035 + rand() * 0.03, rand() * 0.04));
       if (y + hh < y + h - 0.4) {
         // the upper courses over this slab
         let ya = y + hh;
@@ -295,7 +318,7 @@ function ahu(el, { bag, col }) {
           const ch = Math.min(y + h - 0.12 - ya, 0.45 + rand() * 0.3);
           while (xb < xa + w - 0.05) {
             const bw = Math.min(xa + w - xb, 0.6 + rand() * 0.7), dd = 0.01 + rand() * 0.05;
-            bag.add(B, box(xb + 0.025, ya + 0.025, Math.min(zf, zf + dir * (0.26 + dd)), xb + bw - 0.025, ya + ch, Math.max(zf, zf + dir * (0.26 + dd))));
+            bag.add(B, pillow(xb + 0.02, ya + 0.02, xb + bw - 0.02, ya + ch, zf, zf + dir * (0.26 + dd), 0.03 + rand() * 0.03, rand() * 0.03));
             xb += bw;
           }
           ya += ch;
@@ -336,7 +359,15 @@ function ahu(el, { bag, col }) {
     const t = clamp((pz - zB) / (zA - zB)), py = y + 0.06 + (r0 - y - 0.06) * t;
     boulder(bag, mat, px, py, pz, r, px * 3.1 + pz);
   };
-  for (let k = 0; k < 520; k++) { const pz = zB + 0.3 + (rp - 0.6) * rand() ** 1.6, px = x0 - ex + 0.3 + rand() * (x1 - x0 + 2 * ex - 0.6); poro(px, pz, 0.14 + rand() * 0.16); }
+  // poro laid in rows across the ramp, each row a little wavering, the stones of a row alike in size, those of the next set between them; bigger toward the foot [stated: rounded beach cobbles paved the ramps; rows inferred]
+  for (let row = 0, pz = zB + 0.45; pz < zA - 0.3; row++, pz += 0.7) {
+    const rs = 0.29, sp = 0.7 + 0.05 * Math.sin(row * 1.7);
+    for (let px = -Math.min(30, x1 + ex - 0.3) + (row % 2) * sp / 2; px < Math.min(30, x1 + ex - 0.3); px += sp) {
+      const hh = Math.sin(px * 12.9898 + pz * 78.233) * 43758.5453; const hr = hh - Math.floor(hh);
+      poro(px + (hr - 0.5) * 0.08, pz + 0.07 * Math.sin(px * 0.31 + row) + (hr - 0.5) * 0.06, rs * (0.85 + 0.3 * hr));
+    }
+  }
+  for (let k = 0; x1 > 30 && k < 160; k++) { const pz = zB + 0.3 + (rp - 0.6) * rand(), px = (rand() < 0.5 ? -1 : 1) * (30 + rand() * (x1 - 30 + ex - 0.6)); poro(px, pz, 0.2 + rand() * 0.14); }
   for (let xa = x0 - ex; xa < x1 + ex - 0.3;) { const w = Math.min(x1 + ex - xa, 0.7 + rand() * 0.5); bag.add(B, box(xa + 0.03, y - 0.4, zB - 0.45, xa + w - 0.03, y + 0.28 + rand() * 0.1, zB + 0.05)); xa += w; }
   for (const xs of [x0 - ex - 0.45, x1 + ex]) for (let za = zB; za < zA - 0.2;) {
     const w = Math.min(zA - za, 0.7 + rand() * 0.5), t = clamp((za + w - zB) / (zA - zB));
@@ -461,7 +492,13 @@ function harePaenga(el, { bag, col }) {
   fan.push(-R, 0.1, cv, R, 0.1, cv, R, -0.3, cv, -R, 0.1, cv, R, -0.3, cv, -R, -0.3, cv);
   for (let k = 0; k < nseg; k++) fan.push(0, -0.3, cv, Math.cos(Math.PI * k / nseg) * R, -0.3, -Math.sin(Math.PI * k / nseg) * R * 0.75 + cv, Math.cos(Math.PI * (k + 1) / nseg) * R, -0.3, -Math.sin(Math.PI * (k + 1) / nseg) * R * 0.75 + cv);
   add('pebbles', fromTriangles(orientOutward(fan)));
-  for (let k = 0; k < 26; k++) { const a = rand() * Math.PI, rr = Math.sqrt(rand()) * (R - 0.3), br = 0.08 + rand() * 0.07; stone('pebbles', Math.cos(a) * rr, 0.08, -Math.sin(a) * rr * 0.75 + cv, br, k * 1.3); }
+  // the cobbles laid in rows following the crescent's edge, the rows' stones alike and set between those of the row before [stated: a semicircle of poro before the entrance]
+  for (let r = 0; r < 4; r++) {
+    const rr = (R - 0.35) * (0.2 + 0.26 * r), cnt = 5 + r * 4;
+    for (let k = 0; k < cnt; k++) { const a = Math.PI * (k + 0.5 + (r % 2) * 0.25) / (cnt + 0.25), br = 0.1 + 0.03 * rand(); stone('pebbles', Math.cos(a) * rr, 0.08, -Math.sin(a) * rr * 0.75 + cv, br, k * 1.3 + r); }
+  }
+  // the pole ends crossed over each end of the ridge, lashed [inferred from the poles pulled together and lashed to a ridge pole — The Past]
+  for (const e of [-1, 1]) for (const q of [-1, 1]) add('timber', rod([e * L * 0.455, ridge(e * L * 0.455)[1] - 0.25, q * 0.08], [e * (L / 2 + 0.3), ridge(e * L * 0.455)[1] + 0.35 + 0.15 * q, q * 0.22], 0.035, 5));
   // the earth oven: stones set on edge round a hollow of ash
   const [ou, ov] = [L * 0.3 * ((el.seed ?? 11) % 2 ? -1 : 1), dv - 2.4];
   for (let k = 0; k < 6; k++) {
