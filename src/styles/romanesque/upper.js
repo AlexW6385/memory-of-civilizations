@@ -5,11 +5,14 @@
 // (the pilgrims' hostel's dormitory, the inn's guest chambers, the merchant's chamber, the shops' dwellings, the craftsmen's and farmers'
 // lofts). Everything is drawn in the house's own frame (u along the front, v inward from it, h up) with the meshes of the house: no new
 // material, no instanced shape (each piece is varied a little by a hash of its own place).
-import { box, frustum, lathe, rod } from '../../core/geom.js';
+import { box, frustum, lathe, rod, fromTriangles } from '../../core/geom.js';
 
 export const DEP = 0.5;
 const hs = (a, b) => { let h = (Math.floor(a * 37.1) * 73856093) ^ (Math.floor(b * 53.3) * 19349663); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
+// (the materials the tiles that hold these houses all have already: a material a tile lacked would be a draw of its own; the rest stand in for what they are not)
+const MAT = { thatch: 'wood_ochre', linen: 'cloth_white', cloth_red: 'cloth_ochre', cloth_green: 'cloth_indigo', cloth_brown: 'cloth_ochre', cloth_grey: 'cloth_white', hide_white: 'cloth_white', hide_grey: 'sacking', hide_brown: 'sacking', hide_tan: 'sacking', wicker: 'wood_ochre', ivory: 'cloth_white', cloth_black: 'cloth_indigo', cloth_maroon: 'cloth_indigo' };
+const mt = (m) => MAT[m] ?? m;
 const rb = (x0, y0, z0, x1, y1, z1) => frustum([x0, z0, x1, z1], y0, y1, 0, 0, 0, 0, { noTop: true });     // a box with no top face (rails: nothing to stand on)
 
 /** The upper floor's plan as data (the same for the style, the settlement's walks and the furnishing), or null. */
@@ -68,17 +71,20 @@ export function guard(c, z) {
 /** The upper floor of an open house, drawn into its frame c: the ceiling, the stair, the rails, the windows' reveals, the balcony, the furniture, the light. */
 export function upperFloor(c, el, P, lights) {
   const { L, D, ceil, yc, fy, N, rise, t, side, su0, su1, v0, vT, hole, bal, uc } = P, F = ceil, W = L - 0.5, Bk = D - 0.5;
-  const bag = c.bag, col = c.col, cm = (u) => (side === 'L' ? u : L - u);
+  const bag = { add: (m, g) => c.bag.add(mt(m), g) }, col = c.col;
   // each piece is varied a little by a hash of its own place: no two of a shape are alike (so none is drawn as an instance)
   const wv = (u, v, y) => { const p = c.P(u, v); return hs(p[0] * 1.3 + y * 2.9, p[1] * 1.7 + y); };
-  const B = (m, u0, v1, u1, v2, ya, yb, k = false) => { const h = wv((u0 + u1) / 2, (v1 + v2) / 2, ya + yb), e = 0.014 * (h - 0.5); c.B(m, u0, v1, u1 + e, v2 + e * 1.3, ya, yb + e * 0.8, k); };
+  const B = (m, u0, v1, u1, v2, ya, yb, k = false) => { const h = wv((u0 + u1) / 2, (v1 + v2) / 2, ya + yb), e = 0.014 * (h - 0.5); c.B(mt(m), u0, v1, u1 + e, v2 + e * 1.3, ya, yb + e * 0.8, k); };
   const vase = (m, u, v, y, r, hh) => { const p = c.P(u, v), k = 0.93 + 0.14 * wv(u, v, y); bag.add(m, lathe([[r * 0.6 * k, 0], [r * k, hh * 0.45], [r * 0.75 * k, hh * 0.85], [r * 0.55 * k, hh], [0.001, hh]], 10, null, p[0], y, p[1])); };
   const cask = (u, v, y, s = 1) => { const p = c.P(u, v), k = s * (0.94 + 0.12 * wv(u, v, y)), pr = [[0.25, 0], [0.3, 0.22], [0.31, 0.42], [0.3, 0.62], [0.25, 0.84], [0.001, 0.84]].map(([r, h]) => [r * k, h * k]);
     bag.add('timber', lathe(pr, 12, null, p[0], y, p[1])); for (const yy of [0.1, 0.7]) bag.add('iron', lathe([[0.295 * k, 0], [0.295 * k, 0.04], [0.001, 0.04]], 12, null, p[0], y + yy * k, p[1])); col.circle(p[0], p[1], 0.3 * k, y, y + 0.84 * k); };
-  const rail = (a, b) => {                                         // a rail on the floor from (u, v) a to b: posts, top rail, middle rail; blocks the way
-    const [ua, va] = a, [ub, vb] = b, n = Math.max(1, Math.ceil(Math.hypot(ub - ua, vb - va) / 1.0)), h = 0.95 + 0.06 * wv(ua, va, F), tt = 0.04;
-    for (let i = 0; i <= n; i++) { const u = ua + (ub - ua) * i / n, v = va + (vb - va) * i / n, r = c.R(u - tt, v - tt, u + tt, v + tt); bag.add('wood_dark', rb(r[0], F, r[1], r[2], F + h, r[3])); }
-    for (const [yy, hh] of [[h - 0.07, 0.07], [0.45, 0.05]]) { const r = c.R(Math.min(ua, ub) - 0.03, Math.min(va, vb) - 0.03, Math.max(ua, ub) + 0.03, Math.max(va, vb) + 0.03); bag.add('wood_dark', rb(r[0], F + yy, r[1], r[2], F + yy + hh, r[3])); }
+  const rail = (a, b) => {                                         // a rail on the floor from (u, v) a to b: posts, top rail, middle rail, balusters; blocks the way. One piece, its posts placed by a hash of its place (no two rails of a shape)
+    const [ua, va] = a, [ub, vb] = b, n = Math.max(1, Math.ceil(Math.hypot(ub - ua, vb - va) / 1.0)), h = 0.95 + 0.06 * wv(ua, va, F), tt = 0.04, tri = [];
+    const put = (g) => { const q = g.index ? g.toNonIndexed().attributes.position.array : g.attributes.position.array; for (const x of q) tri.push(x); };
+    for (let i = 0; i <= n; i++) { const f = Math.min(1, Math.max(0, i / n + (i > 0 && i < n ? 0.06 * (wv(ua + i, va, 3) - 0.5) : 0))), u = ua + (ub - ua) * f, v = va + (vb - va) * f, r = c.R(u - tt, v - tt, u + tt, v + tt); put(rb(r[0], F, r[1], r[2], F + h, r[3])); }
+    for (const [yy, hh] of [[h - 0.07, 0.07], [0.45, 0.05]]) { const r = c.R(Math.min(ua, ub) - 0.03, Math.min(va, vb) - 0.03, Math.max(ua, ub) + 0.03, Math.max(va, vb) + 0.03); put(rb(r[0], F + yy, r[1], r[2], F + yy + hh, r[3])); }
+    for (let i = 1; i < n * 3; i++) { const f = (i + 0.4 * (wv(ub + i, vb, 4) - 0.5)) / (n * 3), u = ua + (ub - ua) * f, v = va + (vb - va) * f, r = c.R(u - 0.02, v - 0.02, u + 0.02, v + 0.02); put(rb(r[0], F + 0.1, r[1], r[2], F + h - 0.07, r[3])); }
+    bag.add('wood_dark', fromTriangles(tri));
     col.rect(c.R(Math.min(ua, ub) - 0.06, Math.min(va, vb) - 0.06, Math.max(ua, ub) + 0.06, Math.max(va, vb) + 0.06), F, F + h);
   };
   // — the floor of boards: the slab round the well (the ceiling of the room below), and the ceiling of this room on beams
@@ -124,14 +130,14 @@ export function upperFloor(c, el, P, lights) {
     B('iron', ub + 0.52, DEP + 0.05, ub + 0.98, DEP + 0.075, F + 0.5, F + 0.57); B('iron', ub + 0.52, DEP + 0.05, ub + 0.98, DEP + 0.075, F + 1.35, F + 1.42);
   }
   // — the room, by use
-  const K = { B, vase, cask, rail, F, W, Bk, L, D, uc, uA: uc + 0.5, vT, P, wv, bag, c, col, cm };
+  const K = { B, vase, cask, rail, F, W, Bk, L, D, uc, uA: uc + 0.5, vT, P, wv, bag, c, col };
   (KINDS[P.kind] ?? KINDS.family)(K);
   // the room is lit by a rushlight on its stand (the dormitory has two)
   for (const u of P.kind === 'hostel' ? [L * 0.3, L * 0.7] : [L * 0.55]) { const q = c.P(u, D * 0.62); lights?.push({ at: [q[0], F + 1.7, q[1]], color: '#ffb46b', intensity: 3, distance: 7 }); }
 }
 
 // ── the things of the rooms ───────────────────────────────────────────────────
-const CL = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_brown'];
+const CL = ['cloth_indigo', 'cloth_ochre', 'cloth_white'];
 const clOf = (K, u, v) => CL[Math.floor(K.wv(u, v, 7) * CL.length)];
 /** A bed of boards with straw, a blanket over its foot, a bolster and a headboard; its head at the back (v1). */
 function bed(K, u0, v0, u1, v1, cl) {
