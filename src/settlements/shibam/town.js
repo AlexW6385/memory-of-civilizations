@@ -1,7 +1,7 @@
 // Shibam — the townscape (docs/settlements/shibam.md §5–§8): the tower houses in rows along the streets, the sultan's palace, the wall and its
 // gate, the square with its well and stalls, the people and beasts of the streets, the gardens' workers outside.
 
-import { RADIUS, WALL, WALL_TH, WALL_H, GATE, SQUARE, PALACE, LM, lots, streets, shops, doorOf, crossings, gardens, HALL, shopPoint, shopSize } from './layout.js';
+import { RADIUS, WALL, WALL_TH, WALL_H, GATE, SQUARE, PALACE, LM, lots, streets, shops, doorOf, crossings, gardens, HALL, shopPoint, shopSize, ups } from './layout.js';
 import { ground, chanZ } from './ground.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -198,12 +198,12 @@ function interiorLife() {
 
 export async function town() {
   const plans = [], L = lots(), S = shops();
-  void S;
+  void S; ups();
   // the tower houses in chunks of the town's area, so that the far ones are culled together
   const cells = new Map();
   for (const l of L) { const k = Math.floor((l.rect[0] + l.rect[2]) / 2 / 70) + ',' + Math.floor((l.rect[1] + l.rect[3]) / 2 / 70); (cells.get(k) ?? cells.set(k, []).get(k)).push(l); }
   let i = 0;
-  for (const list of cells.values()) plans.push(base(`shibam-towers-${i++}`, list.map((l) => ({ t: 'tower_house', rect: l.rect, front: l.front, storeys: l.storeys, seed: l.seed, free: l.free, rich: l.rich, door: doorOf(l), ...(l.shop ? { shop: l.shop } : {}) }))));
+  for (const list of cells.values()) plans.push(base(`shibam-towers-${i++}`, list.filter((l) => !l.up).map((l) => ({ t: 'tower_house', rect: l.rect, front: l.front, storeys: l.storeys, seed: l.seed, free: l.free, rich: l.rich, door: doorOf(l), ...(l.shop ? { shop: l.shop } : {}) }))));
   plans.push(base('shibam-palace', [{ t: 'tower_house', rect: PALACE, front: 's', storeys: 6, seed: 99, white: 3, towers: true, free: { n: 1, s: 1, e: 1, w: 1 }, rich: false, hall: true, door: HALL.door }]));
   plans.push(base('shibam-wall', wall()));
   // ground kept clear of the generic street life (src/objects/life.js reads these footprints): the shops' doors, the palace's door, the stalls and the arrival

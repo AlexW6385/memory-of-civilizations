@@ -134,3 +134,12 @@ Built (arrival frame: main 315 draws before and after; main triangles 2.09 M bef
 
 Tried and dropped: thin reveal boards as boxes (+350 000 triangles and 7 draws); teeth as custom pyramids (new prototypes, draws).
 Still missing for L3: the palace is a flat wall of four window columns (its draws would rise with more), doors of the ordinary houses repeat four fashions, the wall's merlons are plain.
+
+## 15. Round 6: upstairs in six more tower houses (`up.js`, `open.js` `tower_up`)
+
+The arrival's tower house (`tower_open`) and six more of the rows nearest the arrival (`ups()` in `layout.js`: the nearest lots at least 8.6 m wide that are not shops) can be climbed from the street door to the roof terrace.
+
+- [stated] Shibam's tower houses stand on a windowless ground storey for animals and grain, with stores above, the men's reception room (mafraj/majlis) on a middle floor, the family floors, the kitchen high up, and a terrace under a parapet; the stair winds round a central pier of mud brick (UNESCO; Wikipedia "Shibam"; Hadhrami architecture literature).
+- [inferred] Here the stair is two straight flights with a landing at every storey, divided by a mud wall, as in the arrival's house; the same rooms are furnished by storey use (store and stable, women's floor, family room, bedroom, majlis on the fifth floor, further family rooms in turn, a room under the roof), the terrace has washing, jars and a sleeping mat. Lots turn the house so that its door is on the lot's front (north or south); the wall's taper is kept on free faces only, and the side windows are left out where the side touches a neighbour.
+- Each opened house has two walk routes (street to the majlis, street to the roof) in the landmark plan's `walks`, and so has the arrival's house.
+- Still shut: all other tower houses, the palace's upper floors, and lots narrower than 8.6 m.
