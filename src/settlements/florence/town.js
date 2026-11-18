@@ -32,7 +32,7 @@ function tiles(id, style, elements) {
  * by the Mercato Vecchio and on the Via Calzaiuoli and the Via Larga: one of each trade where the lots allow.
  * Returns a map from lot to its use ('inn', 'home' or the trade).
  */
-function enterable(all) {
+export function enterable(all) {
   const ok = all.filter((l) => l.kind !== 'torre' && l.kind !== 'palazzo' && (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] >= 5.2 && l.rect[3] - l.rect[1] >= 8 : l.rect[3] - l.rect[1] >= 5.2 && l.rect[2] - l.rect[0] >= 8) && l.storeys >= 2);
   const out = new Map(), A = ARRIVALS['florence'];
   const dist = (l, x, z) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
@@ -61,8 +61,15 @@ function enterable(all) {
   return out;
 }
 
+/** The houses whose upper floors can be climbed (docs/settlements/florence.md §15): the enterable ones within UPPER_REACH m of the arrival, along the first streets. */
+export const UPPER_REACH = 70;
+export function upper(l) {
+  const A = ARRIVALS['florence'];
+  return Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]) <= UPPER_REACH;
+}
+
 export async function houses() {
   const all = lots(), open = enterable(all);
-  const mine = all.map((l) => ({ t: 'casa', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) }));
+  const mine = all.map((l) => ({ t: 'casa', ...l, ...(open.has(l) ? { open: true, use: open.get(l), ...(upper(l) ? { upper: true } : {}) } : {}) }));
   return [...tiles('florence-houses', 'renaissance', mine), ...insidePlans(mine.filter((l) => l.open))];
 }
