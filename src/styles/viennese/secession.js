@@ -5,7 +5,8 @@
 // the front, v up), set in the world once. The front faces north (−z).
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
-import { prism, fbox, ngon } from '../dutch/facade.js';
+import { prism, ngon } from '../dutch/facade.js';
+import { fbox } from './fbox.js';
 import { rng } from './mietshaus.js';
 
 const MOTTO_FONT = {

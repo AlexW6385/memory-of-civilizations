@@ -3,7 +3,8 @@
 // its pediment, the two columns, the great dome). Both are massed from real parts but not entered.
 import { box, lathe, frustum, rod } from '../../core/geom.js';
 import { operaMass, operaInside } from './opera-int.js';
-import { faceFrame, prism, fbox, arch, ngon, outline } from '../dutch/facade.js';
+import { faceFrame, prism, arch, ngon, outline } from '../dutch/facade.js';
+import { fbox } from './fbox.js';
 
 /** opera: { rect, y } — front to the north (the Ring). */
 export function opera(el, ctx) {

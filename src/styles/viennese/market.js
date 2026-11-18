@@ -1,7 +1,8 @@
 // Street life's furniture (docs/settlements/vienna.md §5): the Naschmarkt's stalls under striped awnings with boxes of vegetables
 // and fruit, the gas lamp of the older streets, the park bench, the Fiaker rank's water trough.
 import { box, lathe } from '../../core/geom.js';
-import { faceFrame, fbox } from '../dutch/facade.js';
+import { faceFrame } from '../dutch/facade.js';
+import { fbox } from './fbox.js';
 import { rng } from './mietshaus.js';
 
 const GOODS = ['cloth_green', 'cloth_red', 'paint_ochre', 'glaze_yellow', 'terracotta', 'cloth_green', 'cloth_maroon', 'linen'];

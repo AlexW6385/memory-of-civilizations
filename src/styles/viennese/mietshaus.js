@@ -4,7 +4,8 @@
 // Everything is drawn on the face's own frame (u along the front, v up, d outward; styles/dutch/facade.js).
 
 import { box, frustum, lathe } from '../../core/geom.js';
-import { faceFrame, prism, fbox, outline, ngon } from '../dutch/facade.js';
+import { faceFrame, prism, outline, ngon } from '../dutch/facade.js';
+import { fbox } from './fbox.js';
 import { weather, flowerBox, curtains, enamelSign, numberPlate, oriel, turret, rearFace, passage } from './detail.js';
 import { lettering } from './lettering.js';
 import { shopFront, shopRoom, SHOP_T, SHOP_RD, NAMES } from './shopint.js';

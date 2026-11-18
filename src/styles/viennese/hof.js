@@ -3,7 +3,8 @@
 // things of a tenement's common life — the carpet-beating frame, the washing line with its wash, the dustbins, the firewood and coal
 // store, a bench under the tree, a hand-cart, the pump or well, the Bassena's tap, pots by the doors.
 import { box, lathe, rod, frustum } from '../../core/geom.js';
-import { faceFrame, fbox } from '../dutch/facade.js';
+import { faceFrame } from '../dutch/facade.js';
+import { fbox } from './fbox.js';
 import { rng, rearFace } from './detail.js';
 import { sashWindow } from './mietshaus.js';
 
