@@ -6,6 +6,7 @@ import music from './music.js';
 import { town as houses } from './town.js';
 import '../../styles/chinese/index.js';
 import { HALL, height, KOFUKU } from './layout.js';
+import { sculptPlans } from './lod.js';
 export { music };
 export const landmarks = [{ plan: todaiji, music }];
 // the Great Buddha (Vairocana) in bronze, 15 m seated on his lotus, in the hall; the two attendant
@@ -65,10 +66,7 @@ const daibutsu = {
 const rushana = {
   id: 'nara-rushana', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [hx0, hz0, hx1, hz1], entrance: { at: [0, 180], facing: 'n' },
   elements: [
-    { t: 'obj', kind: 'daibutsu', at: [cx, cz - 1], y: Y, h: 15.8, dir: [0, 1], mat: 'bronze' },
-    // the attendants: Kokūzō on the west (the visitor's left), Nyoirin Kannon on the east (§4)
-    { t: 'obj', kind: 'bosatsu', bodhisattva: 'kokuzo', at: [cx - 15, cz + 2], y: Y, h: 5.2, dir: [0, 1] },
-    { t: 'obj', kind: 'bosatsu', bodhisattva: 'nyoirin', at: [cx + 15, cz + 2], y: Y, h: 5.2, dir: [0, 1] },
+    // the Great Buddha and the two attendants are in lod.js (§19)
     // the offerings on the altar: the censer, two vases of lotus, two lamps (§10)
     { t: 'nara_altar_set', at: [cx, cz + 9.3], y: Y + 1.02, w: 6.4 },
   ],
@@ -214,4 +212,4 @@ const shrineFigures = { id: 'nara-shrine-figures', style: 'nara', origin: [0, 0]
     shrineFigures.elements.push({ t: 'nara_altar_set', at: [hx, bz + 7.6], y: h.y + 0.86, w: 3 });
   }
 }
-export async function town() { return [shrineStone, shrineFigures, daibutsu, rushana, deer, ceremonySet, ceremonyPeople, courtLife, ...(await houses())]; }
+export async function town() { return [...sculptPlans(), shrineStone, shrineFigures, daibutsu, rushana, deer, ceremonySet, ceremonyPeople, courtLife, ...(await houses())]; }
