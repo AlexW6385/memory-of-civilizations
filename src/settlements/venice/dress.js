@@ -35,19 +35,19 @@ function frontsOf(l) {
     if (c < 0.6) continue;
     const isFront = (front === 'n' && sd.n[1] === -1) || (front === 's' && sd.n[1] === 1);
     const P = (u, d = 0) => { const a = sd.at(w, s0 + u); return [a[0] + sd.n[0] * d, a[1] + sd.n[1] * d]; };
-    const rot = sd.rot;
+    const rot = sd.rot, bays = Math.max(1, Math.round(len / 2.5)), doorU = (Math.floor(bays / 2) + 0.5) * len / bays;   // (the door of house_med: the middle bay, counted from the west)
     if (c >= 1.7 && r() < (isFront ? 0.5 : 0.65)) E.push({ t: 'shop_sign', board: true, at: P(len * (0.12 + 0.2 * r())), y: GROUND + 0.2, rot, h: 3.0 + r() * 0.5, seed: Math.floor(r() * 1e6) });
     if (c >= 1.7 && r() < 0.4) E.push({ t: 'laundry_pole', at: P(len * (0.25 + 0.5 * r())), y: GROUND + 4.35, rot, seed: Math.floor(r() * 1e6) });
     if (r() < 0.3) E.push({ t: 'lantern', kind: 'iron', at: P(len * (0.8 + 0.12 * r()), 0.06), y: GROUND, rot: rot + Math.PI, h: 2.6, });
-    if (isFront) for (const k of [-1, 1]) if (r() < 0.8) E.push({ t: 'pot', kind: pick(r, ['water_pot', 'dark_pot', 'glazed_jar', 'blue_jar']), at: P(len / 2 + k * 1.0, 0.35), y: GROUND, rot: r() * 6, n: 1 + Math.floor(r() * 2), seed: Math.floor(r() * 1e6) });
+    if (isFront) for (const k of [-1, 1]) if (r() < 0.8) E.push({ t: 'pot', kind: pick(r, ['water_pot', 'dark_pot', 'glazed_jar', 'blue_jar']), at: P(doorU + k * 1.0, 0.35), y: GROUND, rot: r() * 6, n: 1 + Math.floor(r() * 2), seed: Math.floor(r() * 1e6) });
     else if (r() < 0.5) E.push({ t: 'pot', kind: pick(r, ['water_pot', 'dark_pot', 'glazed_jar']), at: P(len * (0.15 + 0.7 * r()), 0.35), y: GROUND, rot: r() * 6, n: 2, seed: Math.floor(r() * 1e6) });
-    if (c >= 1.7 && r() < 0.28) E.push({ t: 'bench', at: P(len * (0.65 + 0.2 * r()), 0.28), y: GROUND, rot, len: 1.7, back: r() < 0.5 });
+    if (c >= 1.7 && r() < 0.28) { const bu = len * (0.65 + 0.2 * r()), back = r() < 0.5; if (!(isFront && Math.abs(bu - doorU) < 1.6)) E.push({ t: 'bench', at: P(bu, 0.28), y: GROUND, rot, len: 1.7, back }); }
     if (c >= 1.7 && r() < 0.42) {
       const u = len * (0.1 + 0.15 * r()), kind = pick(r, ['crates', 'barrel', 'sacks', 'basket', 'firewood']);
       E.push({ t: kind, at: P(u, 0.55), y: GROUND, rot: r() * 6, seed: Math.floor(r() * 1e6), ...(kind === 'sacks' ? { n: 3 } : {}) });
       if (r() < 0.5) E.push({ t: pick(r, ['barrel', 'crates']), at: P(u + 0.9, 0.5), y: GROUND, rot: r() * 6, seed: Math.floor(r() * 1e6) });
     }
-    if (c >= 3.2 && r() < 0.14) E.push({ t: 'ladder', at: P(len * (0.4 + 0.2 * r()), 0.2), y: GROUND, rot, seed: Math.floor(r() * 1e6) });
+    if (c >= 3.2 && r() < 0.14) { const lu = len * (0.4 + 0.2 * r()), ls = Math.floor(r() * 1e6); if (!(isFront && Math.abs(lu - doorU) < 1.2)) E.push({ t: 'ladder', at: P(lu, 0.2), y: GROUND, rot, seed: ls }); }
     if (c >= 3.2 && r() < 0.1) E.push({ t: 'handcart', at: P(len * (0.5 + 0.3 * r()), 1.3), y: GROUND, rot: rot + Math.PI / 2, seed: Math.floor(r() * 1e6) });
     if (c >= 3.2 && r() < 0.09) E.push({ t: 'rain_tub', at: P(len * (0.3 + 0.4 * r()), 0.7), y: GROUND, rot, seed: Math.floor(r() * 1e6) });
     if (c >= 3.2 && r() < 0.2) E.push(person(r, P(len * (0.2 + 0.6 * r()), 1.5 + r()), rot + (r() - 0.5), { pose: r() < 0.5 ? 'talk' : 'stand', carry: r() < 0.25 ? 'basket' : 'none' }));
