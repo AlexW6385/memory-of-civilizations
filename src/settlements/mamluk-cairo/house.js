@@ -14,6 +14,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import '../../styles/mamluk/index.js';
 import * as F from '../../styles/mughal/furnish.js';
 import { S, rng, frame, polyGeo, archPoly, voussoirs, dbl } from '../../styles/mamluk/kit.js';
+import { varied, foldedFar } from './unique.js';
 import { stoneStair, ladderStair, bedroom, workroom, storeroom, familyHall } from './upper.js';
 
 const T = 0.5, H = 3.4, HU = 6.6, DA = 2.9, SW = 0.4, ARC = 0.45, FL = 0.15, BD = 0.04, GW = 1.5, NS = 16;
@@ -244,7 +245,9 @@ export function cairoHouseOpen(el, { bag, col, lights }) {
   { const [cx, cz] = P(cu, cd); lights.push({ at: [cx, y + 3.0, cz], color: '#fff0d0', intensity: 3.0, distance: 8 }); }
 }
 
-registerStyle('mamluk-cairo', { ...STYLES.mamluk, elements: { ...STYLES.mamluk.elements, cairo_house_open: cairoHouseOpen } });
+registerStyle('mamluk-cairo', { ...STYLES.mamluk, elements: { ...STYLES.mamluk.elements, cairo_house_open: varied(cairoHouseOpen), cairo_shop: varied(STYLES.mamluk.elements.cairo_shop),
+  // far off the oriels' lattice is one wood with the other dark timber
+  house_mamluk: foldedFar(STYLES.mamluk.elements.house_mamluk, { koshi: 'wood_dark' }), cairo_shopfront: foldedFar(STYLES.mamluk.elements.cairo_shopfront, { koshi: 'wood_dark' }) } });
 void box;
 
 /** Walk-check routes (world [x, z]) for the house of lot el: from the lane through the bent entrance and up the stair to the front room and the store, and on to the upper hall, the ladder-stair and the terrace. */

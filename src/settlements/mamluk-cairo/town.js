@@ -34,7 +34,7 @@ export async function town() {
     }
     return out;
   };
-  plans.push(...tiles('mamluk-cairo-blocks', 'mamluk', [...houses.map((l) => ({ t: 'house_mamluk', ...l })), ...[...frontSet].map((l) => ({ t: 'cairo_shopfront', ...l, trade: tradeOf(l) })), ...yardEls], NEAR, true));
+  plans.push(...tiles('mamluk-cairo-blocks', 'mamluk-cairo', [...houses.map((l) => ({ t: 'house_mamluk', ...l })), ...[...frontSet].map((l) => ({ t: 'cairo_shopfront', ...l, trade: tradeOf(l) })), ...yardEls], NEAR, true));
   plans.push(...tiles('mamluk-cairo-dress', 'mamluk', houses.map((l) => ({ t: 'cairo_dress', ...l })), 100, false));
   // the shops that can be entered, one in each stretch of the market streets: a trade each, furnished
   // (grouped in 200 m cells, one plan and one set of meshes for each)

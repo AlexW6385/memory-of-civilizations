@@ -6,9 +6,10 @@ import { RADIUS, WAY, WALL_Z, ESAGILA, RIVER, BRIDGE, QUAY, MARKET, riverX, lots
 import { lifePlans } from './life.js';
 import { height as ground0 } from './layout.js';
 import { QUFFAS } from './plan.js';
+import './trim.js';
 import { esagilaStatue } from '../../styles/babylonian/temple.js';
 
-const base = (id, elements) => ({ id, style: 'babylonian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, -370], facing: 's' } });
+const base = (id, elements) => ({ id, style: 'babylonian-g', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, -370], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
 const CLOTH = ['cloth_white', 'cloth_white', 'linen', 'cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_brown'];
