@@ -2,6 +2,8 @@
 // roofs of palm thatch and shingle, posts sheathed in brass with plaques nailed to them, the clay altar with its heads and tusks.
 import { box, frustum, lathe, rod } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
+import { lodAt, reliefPlaque } from './relief.js';
+import { headCast, birdCast } from './cast.js';
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const WALLS = ['tuff_red', 'stucco_red', 'tuff_red', 'scoria_red'];
@@ -72,86 +74,11 @@ export function pillar(ctx, x, z, y, h, r = 0.21, mat = 'bronze') {
   col.circle(x, z, r * 1.3, y, y + h);
 }
 /**
- * A brass plaque nailed to a pillar or wall, its face toward 'n' | 's' | 'e' | 'w' at (x, z) on the surface, centre height y. A gilt field in a
- * double frame with nail heads at the corners and river leaves (quatrefoils of pointed leaves) between the figures, which stand in relief
- * in three depths, the heads highest (the Benin plaques: figures on a field of river leaves and stippling; heads in the highest relief,
- * a third of the body; the Oba on his mudfish legs with two attendants; war chiefs; Portuguese in brimmed hats with manillas; leopards;
- * British Museum Af1898,0115.26 and Art Institute of Chicago, in docs/settlements/benin-city.md §12). The composition is chosen by seed.
+ * A brass plaque nailed to a pillar or wall, its face toward 'n' | 's' | 'e' | 'w' at (x, z) on the surface, centre height y: high relief on a ground of
+ * incised river leaves, one of twelve designs by the hash of its place (src/styles/benin/relief.js), in three levels of detail by its distance from the way a
+ * visitor walks (full to 15 m, reduced to 40 m, a minimal panel beyond; docs/settlements/benin-city.md §14).
  */
-export function plaque(ctx, x, y, z, face, seed, w = 0.4, h = 0.5) {
-  const { bag } = ctx, rand = rng(seed), t = 0.018;
-  const dir = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[face], al = [-dir[1], dir[0]];
-  const P = (u, v, d) => [x + al[0] * u + dir[0] * d, y + v, z + al[1] * u + dir[1] * d];
-  const slab = (u0, v0, u1, v1, d0, d1, m = 'bronze') => {
-    const a = P(u0, v0, d0), b = P(u1, v1, d1), r = [Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])];
-    if (r[2] - r[0] < 1e-3) { r[0] -= 0.002; r[2] += 0.002; }
-    if (r[3] - r[1] < 1e-3) { r[1] -= 0.002; r[3] += 0.002; }
-    bag.add(m, box(r[0], Math.min(a[1], b[1]), r[1], r[2], Math.max(a[1], b[1]), r[3]));
-  };
-  const lim = (u0, v0, u1, v1, d0, d1, m) => slab(u0, v0, u1, v1, d0, d1, m);
-  const bar = (u0, v0, u1, v1, r, d, m = 'bronze') => { const a = P(u0, v0, d), b = P(u1, v1, d); bag.add(m, rod(a, b, r, 4)); };
-  // the field, the double frame (an outer rim and an inner fillet), the nail heads
-  slab(-w / 2, -h / 2, w / 2, h / 2, 0, t, 'gilt_bronze');
-  for (const [u0, v0, u1, v1] of [[-w / 2, -h / 2, w / 2, -h / 2 + 0.03], [-w / 2, h / 2 - 0.03, w / 2, h / 2], [-w / 2, -h / 2, -w / 2 + 0.03, h / 2], [w / 2 - 0.03, -h / 2, w / 2, h / 2]]) slab(u0, v0, u1, v1, t, t + 0.014, 'bronze');
-  for (const [u0, v0, u1, v1] of [[-w / 2 + 0.045, -h / 2 + 0.045, w / 2 - 0.045, -h / 2 + 0.05], [-w / 2 + 0.045, h / 2 - 0.05, w / 2 - 0.045, h / 2 - 0.045]]) slab(u0, v0, u1, v1, t, t + 0.006, 'bronze');
-  for (const [u, v] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 1], [0, -1]]) { const nu = u * (w / 2 - 0.015), nv = v * (h / 2 - 0.015); slab(nu - 0.005, nv - 0.005, nu + 0.005, nv + 0.005, t + 0.014, t + 0.02, 'iron'); }
-  // river leaves: four pointed leaves crossing at a heart, three clusters (rods lying in the field)
-  const leaves = (cu, cv, s) => { for (const [du, dv] of [[1, 0], [0, 1], [0.7, 0.7], [0.7, -0.7]]) bar(cu - du * s, cv - dv * s, cu + du * s, cv + dv * s, 0.0055, t + 0.004); slab(cu - 0.007, cv - 0.007, cu + 0.007, cv + 0.007, t + 0.004, t + 0.012); };
-  const kind = (seed >>> 0) % 20, K = kind < 10 ? 0 : kind < 14 ? 1 : kind < 17 ? 2 : 3;
-  const g = h * 0.5, base = -h * 0.4;                          // unit and ground line
-  // one standing, seated or kneeling figure: u its axis, vb its feet, k its scale (1 = 0.8 of the plaque's height)
-  const person = (u, vb, k, o = {}) => {
-    const H = h * 0.8 * k, V = (f) => vb + H * f, W = (f) => H * f;
-    const d1 = t + 0.004, d2 = t + 0.009, d3 = t + 0.013;      // gilt parts stay below 0.04 m (the ridges of a clay wall stand 0.05 m proud)
-    // legs: the Oba's on mudfish (two curving rods ending in the fish heads), others plain and kneeling or standing
-    if (o.legs === 'mudfish') for (const s of [-1, 1]) { bar(u + s * W(0.05), V(0.3), u + s * W(0.2), V(0.04), W(0.028), d2); slab(u + s * W(0.2) - W(0.045), V(0), u + s * W(0.2) + W(0.045), V(0.05), d2, d3); }
-    else if (o.legs === 'kneel') { slab(u - W(0.16), V(0.02), u + W(0.16), V(0.13), d1, d2); for (const s of [-1, 1]) bar(u + s * W(0.06), V(0.3), u + s * W(0.1), V(0.06), W(0.034), d2); }
-    else for (const s of [-1, 1]) { slab(u + s * W(0.06) - W(0.03), V(0), u + s * W(0.06) + W(0.03), V(0.3), d1, d2); slab(u + s * W(0.06) - W(0.05), V(0), u + s * W(0.06) + W(0.04) * s, V(0.04), d1, d2); }
-    // the wrapper (a gilt-banded skirt), the tunic, the beaded collar, the arms
-    slab(u - W(0.15), V(0.27), u + W(0.15), V(0.5), d1, d2); if (k > 0.8) for (const f of [0.31, 0.38, 0.45]) slab(u - W(0.15), V(f), u + W(0.15), V(f) + W(0.018), d2, d2 + 0.004, 'gilt_bronze');
-    slab(u - W(0.11), V(0.5), u + W(0.11), V(0.68), d1, d2);
-    if (k > 0.8) for (let i = 0; i < 4; i++) slab(u - W(0.11) + i * W(0.055), V(0.5), u - W(0.11) + i * W(0.055) + W(0.02), V(0.68), d2, d2 + 0.004, 'gilt_bronze');
-    slab(u - W(0.15), V(0.66), u + W(0.15), V(0.74), d2, d3); if (k > 0.8) for (const f of [0.69, 0.72]) slab(u - W(0.15), V(f), u + W(0.15), V(f) + W(0.01), d3, d3 + 0.004, 'gilt_bronze');
-    for (const s of [-1, 1]) bar(u + s * W(0.12), V(0.64), u + s * W(0.2), V(o.arms === 'up' ? 0.9 : 0.42), W(0.024), d2);
-    // the head, large (a third of the figure) and in the highest relief, with its headdress
-    slab(u - W(0.08), V(0.74), u + W(0.08), V(0.9), d2, d3 + 0.012);
-    slab(u - W(0.012), V(0.78), u + W(0.012), V(0.84), d3 + 0.012, d3 + 0.02);
-    if (o.hat === 'crown') { slab(u - W(0.095), V(0.9), u + W(0.095), V(1.04), d2, d3 + 0.004, 'gilt_bronze'); slab(u + W(0.095), V(0.97), u + W(0.14), V(1.0), d3, d3 + 0.01); for (const s of [-1, 0, 1]) slab(u + s * W(0.05) - W(0.012), V(1.04), u + s * W(0.05) + W(0.012), V(1.07), d3, d3 + 0.012); }
-    else if (o.hat === 'helmet') { slab(u - W(0.09), V(0.9), u + W(0.09), V(1.0), d2, d3 + 0.004, 'gilt_bronze'); bar(u, V(1.0), u + W(0.03), V(1.12), W(0.012), d3); }
-    else if (o.hat === 'brim') { slab(u - W(0.17), V(0.9), u + W(0.17), V(0.935), d2, d3 + 0.016); slab(u - W(0.07), V(0.935), u + W(0.07), V(1.03), d2, d3 + 0.014); }
-    // what the figure carries: the ceremonial sword (a broad blade), a shield, a manilla, a spear
-    const fl = o.flip ?? 1;                                    // the side the carried thing is on (the attendants hold theirs toward the middle)
-    if (o.hold === 'ada') { slab(u + fl * W(0.2), V(0.3), u + fl * W(0.235), V(0.9), d2, d2 + 0.012); slab(Math.min(u + fl * (W(0.2) - W(0.03)), u + fl * (W(0.235) + W(0.12))), V(0.9), Math.max(u + fl * (W(0.2) - W(0.03)), u + fl * (W(0.235) + W(0.12))), V(1.04), d2, d2 + 0.008, 'gilt_bronze'); }
-    if (o.hold === 'shield') { slab(u - fl * W(0.5), V(0.36), u - fl * W(0.2), V(0.9), d2, d3 + 0.004, 'gilt_bronze'); slab(u - fl * W(0.44), V(0.5), u - fl * W(0.26), V(0.78), d3 + 0.004, d3 + 0.012); }
-    if (o.hold === 'spear') bar(u + fl * W(0.26), V(0), u + fl * W(0.26), V(1.15), W(0.012), d2);
-    if (o.hold === 'manilla') { const m = [u + W(0.22), V(0.3), u + W(0.5), V(0.55)]; for (const [a, b, c, e] of [[m[0], m[1], m[2], m[1] + 0.012], [m[0], m[3] - 0.012, m[2], m[3]], [m[0], m[1], m[0] + 0.012, m[3]], [m[2] - 0.012, m[1], m[2], m[3]]]) slab(a, b, c, e, d2, d3); }
-  };
-  if (K === 0) {                                              // the Oba with his two attendants
-    person(0, base, 1.0, { legs: 'mudfish', hat: 'crown', hold: 'ada' });
-    for (const s of [-1, 1]) person(s * w * 0.34, base, 0.6, { legs: 'kneel', hat: 'crown', arms: 'up' });
-    leaves(-w * 0.34, h * 0.32, 0.03); leaves(w * 0.34, h * 0.32, 0.03); leaves(0, -h * 0.03 + h * 0.44, 0.022);
-  } else if (K === 1) {                                       // a war chief with sword and shield, two shield-bearers
-    person(0, base, 1.0, { legs: 'stand', hat: 'helmet', hold: 'ada' });
-    for (const s of [-1, 1]) person(s * w * 0.35, base, 0.6, { legs: 'stand', hat: 'helmet', hold: 'shield', flip: s });
-    leaves(-w * 0.34, h * 0.34, 0.028); leaves(w * 0.34, h * 0.34, 0.028);
-  } else if (K === 2) {                                       // a Portuguese in his brimmed hat, a manilla in his hand; two boys holding manillas
-    person(0, base, 1.0, { legs: 'stand', hat: 'brim', hold: 'manilla' });
-    for (const s of [-1, 1]) { const u = s * w * 0.36, r = [u - 0.034, base + h * 0.5, u + 0.034, base + h * 0.5 + 0.068]; for (const [a, b, c, e] of [[r[0], r[1], r[2], r[1] + 0.01], [r[0], r[3] - 0.01, r[2], r[3]], [r[0], r[1], r[0] + 0.01, r[3]], [r[2] - 0.01, r[1], r[2], r[3]]]) slab(a, b, c, e, t, t + 0.016); }
-    leaves(-w * 0.34, h * 0.32, 0.026); leaves(w * 0.34, h * 0.32, 0.026);
-  } else {                                                    // two leopards face to face, spotted, their tails three-pronged
-    for (const s of [-1, 1]) {
-      const u0 = s * w * 0.04, bv = -h * 0.12, L = w * 0.32;                     // body from the middle outward
-      slab(Math.min(u0, u0 + s * L), bv, Math.max(u0, u0 + s * L), bv + h * 0.2, t, t + 0.012);
-      slab(u0 - s * 0.004, bv + h * 0.2, u0 + s * w * 0.1, bv + h * 0.31, t, t + 0.02);                 // the head toward the middle
-      for (const f of [0.28, 0.56, 0.84]) slab(u0 + s * L * f - 0.012, bv + h * 0.06, u0 + s * L * f + 0.012, bv + h * 0.1, t + 0.012, t + 0.017, 'gilt_bronze');
-      for (const f of [0.18, 0.42, 0.7]) slab(u0 + s * L * f - 0.012, bv + h * 0.13, u0 + s * L * f + 0.012, bv + h * 0.17, t + 0.012, t + 0.017, 'gilt_bronze');
-      for (const f of [0.1, 0.9]) slab(u0 + s * L * f - 0.014, bv - h * 0.2, u0 + s * L * f + 0.014, bv, t, t + 0.012);
-      for (const k of [-1, 0, 1]) bar(u0 + s * L, bv + h * 0.16, u0 + s * (L + 0.035), bv + h * 0.16 + k * 0.04, 0.007, t + 0.01);
-    }
-    leaves(0, h * 0.3, 0.03); leaves(-w * 0.32, h * 0.33, 0.024); leaves(w * 0.32, h * 0.33, 0.024); leaves(0, -h * 0.36, 0.022);
-  }
-  void rand; void lim;
-}
+export function plaque(ctx, x, y, z, face, seed, w = 0.4, h = 0.5) { return reliefPlaque(ctx, x, y, z, face, seed, w, h, lodAt(ctx, x, z)); }
 /**
  * The commemorative head of an Oba (the Met 1979.206.86, the Cleveland head, the Art Institute's: a round face of regular features, a cap of coral beads
  * in a lattice with strands hanging at the temples and a bead down the brow to the nose, many rings of coral beads in a collar rising to the chin,
@@ -159,6 +86,8 @@ export function plaque(ctx, x, y, z, face, seed, w = 0.4, h = 0.5) {
  * (0 = +z; sin, cos), with the tusk, whose face is carved in bands, set in its top.
  */
 export function head(ctx, x, y, z, rot, seed, tusk = true) {
+  const lod = lodAt(ctx, x, z);
+  if (lod > 0) return headCast(ctx, x, y, z, rot, seed, tusk, lod);
   const { bag } = ctx, rand = rng(seed);
   const put = (m, g) => { g.rotateY(rot); g.translate(x, y, z); bag.add(m, g); };
   // the flared base with its rim, then the collar: stacked rings of coral beads narrowing a little toward the top
@@ -200,6 +129,8 @@ export function head(ctx, x, y, z, rot, seed, tusk = true) {
  * leading edge and a fan of five feathers swept back, rising a little at the tips. s: scale (1 = about 1.1 m across the wings).
  */
 export function bird(ctx, x, y, z, s = 1, rot = 0, mat = 'bronze') {
+  const lod = lodAt(ctx, x, z, 1.6);
+  if (lod > 0) return birdCast(ctx, x, y, z, s, rot, mat, lod);
   const { bag } = ctx, put = (g) => { g.rotateY(rot); g.translate(x, y, z); bag.add(mat, g); };
   const R = (a, b, r, n = 4) => put(rod([a[0] * s, a[1] * s, a[2] * s], [b[0] * s, b[1] * s, b[2] * s], r * s, n));
   const body = lathe([[0.001, -0.24], [0.08, -0.17], [0.115, -0.02], [0.1, 0.14], [0.05, 0.27], [0.001, 0.31]], 8); body.rotateX(Math.PI / 2); body.scale(s, s, s); body.translate(0, 0.17 * s, 0); put(body);
