@@ -42,3 +42,10 @@ export function courses(rand, u0, u1, y0, y1, { h = [0.8, 1.3], w = [1, 2.4], ta
   }
   return out;
 }
+
+/** A deterministic number in [0, 1) from a position (and a salt): the same on every build, so repeated pieces differ without any counter or Math.random. */
+export function hash2(x, z, k = 0) {
+  let h = Math.imul(Math.round(x * 100) | 0, 374761393) ^ Math.imul(Math.round(z * 100) | 0, 668265263) ^ Math.imul(k | 0, 2147483647);
+  h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
