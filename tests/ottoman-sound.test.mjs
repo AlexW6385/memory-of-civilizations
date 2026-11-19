@@ -103,7 +103,7 @@ test('every voice can be made, with a few nodes each', () => {
   m.place({ voices: {}, animals: profileOf('ottoman-istanbul').animals, roof: 'tile' });
   const bus = m.src([5, 0], 8, { dur: 5 }), f = m.along([[0, 0], [20, 0]], 1);
   for (const v of Object.keys(OTTOMAN_VOICES)) assert.equal(typeof m[v], 'function', v);
-  for (const v of ['copperBeat', 'goldTap', 'lastTap', 'chop', 'ladle', 'ovenPeel', 'tavla', 'trayCups', 'fountain', 'tap', 'hamamDrip', 'recite', 'cups', 'ney', 'swifts', 'gull', 'pigeons', 'crowCaw', 'catCry', 'donkeyBray']) {
+  for (const v of ['copperBeat', 'ottGoldTap', 'lastTap', 'chop', 'ladle', 'ovenPeel', 'tavla', 'trayCups', 'ottFountain', 'tap', 'hamamDrip', 'recite', 'cups', 'ney', 'swifts', 'gull', 'pigeons', 'crowCaw', 'catCry', 'donkeyBray']) {
     const c0 = count();
     assert.ok(m[v](ctx.currentTime, bus, 1) > 0.3, v);
     assert.ok(count() - c0 < 700, `${v} made ${count() - c0} nodes`);

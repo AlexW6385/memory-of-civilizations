@@ -7,7 +7,7 @@
 // (Guillaume de Villeneuve, 1265: some 130 cries, from the baths at dawn to the pastry sellers at the day's end; Wikipedia "Street cries";
 // the product list: parisfoodhistory.blogspot.com, "What the cries of Paris tell us about Parisian food history"), but every melody is ours.]
 
-import { VOICES, SEASON_OF, inHours, seasonOf } from './voices.js';
+import { VOICES, addVoices, SEASON_OF, inHours, seasonOf } from './voices.js';
 
 const R = Math.random;
 const mapOf = (m) => m.plc?.life?.map;
@@ -245,4 +245,4 @@ export const PARIS_VOICES = {
     return w + 3;
   },
 };
-for (const [k, v] of Object.entries(PARIS_VOICES)) if (!VOICES[k]) VOICES[k] = v;
+addVoices('voices-paris.js', PARIS_VOICES);

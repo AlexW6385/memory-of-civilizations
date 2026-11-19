@@ -198,8 +198,8 @@ export const EMITTERS = [
   { voice: 'chainRattle', at: [mc[0] + 1.2, mc[1] + 1.2], r50: 18, gap: [25, 60], hours: [6.4, 7.2], dry: true },
   { voice: 'chainRattle', at: [mc[0] + 1.2, mc[1] + 1.2], r50: 18, gap: [25, 60], hours: [12.8, 13.6], dry: true },
   // the butchers' shops on the Ponte Vecchio: the cleaver on the block, mornings
-  { voice: 'cleaver', at: [BRIDGE.x - 4.5, arnoZ(BRIDGE.x) - 14], r50: 9, gap: [9, 22], hours: [6, 13], dry: true },
-  { voice: 'cleaver', at: [BRIDGE.x + 4.5, arnoZ(BRIDGE.x) + 11], r50: 9, gap: [11, 26], hours: [6, 13], dry: true },
+  { voice: 'floCleaver', at: [BRIDGE.x - 4.5, arnoZ(BRIDGE.x) - 14], r50: 9, gap: [9, 22], hours: [6, 13], dry: true },
+  { voice: 'floCleaver', at: [BRIDGE.x + 4.5, arnoZ(BRIDGE.x) + 11], r50: 9, gap: [11, 26], hours: [6, 13], dry: true },
   // the dyers' yard on the Arno's north bank: cloth wrung and rinsed, water poured from the vats
   { voice: 'pour', at: [TI[0] - 20, TINTORI[3] - 4], r50: 12, gap: [16, 34], hours: [6.5, 18], dry: true },
   { voice: 'clothRustle', at: [TI[0] + 10, TINTORI[3] - 8], r50: 12, gap: [14, 30], hours: [6.5, 18], dry: true },

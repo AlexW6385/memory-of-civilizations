@@ -7,7 +7,7 @@
 // [inferred throughout: no recording of Muromachi Kyoto exists; the instruments, calls and hours are from general knowledge
 // of the Japanese sources named in the dossier, and the pitches and contours are ours.]
 
-import { VOICES, inSeason, doyOf, inHours } from './voices.js';
+import { VOICES, addVoices, inSeason, doyOf, inHours } from './voices.js';
 import { ENV } from './env.js';
 
 const R = Math.random;
@@ -308,5 +308,5 @@ export const KYOTO_VOICES = {
   },
 };
 
-Object.assign(VOICES, KYOTO_VOICES);
+addVoices('voices-kyoto.js', KYOTO_VOICES);
 void clamp;

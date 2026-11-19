@@ -30,7 +30,7 @@ export const VOICES_FLORENCE = {
     return 1.6;
   },
   /** A cleaver on a butcher's block: a heavy chop and the block's hollow answer, twice or three times. */
-  cleaver(t, bus, lv) {
+  floCleaver(t, bus, lv) {
     const n = 2 + Math.floor(R() * 2);
     for (let k = 0; k < n; k++) this.cue(t + k * (0.32 + R() * 0.12), (x) => { this.knock(x, 170 * (0.9 + R() * 0.2), 0.07 * lv, bus, 0.1); this.burst(x, 0.03, 1900, 0.9, 0.03 * lv, bus); });
     return n * 0.45 + 0.4;

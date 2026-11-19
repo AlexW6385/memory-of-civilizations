@@ -131,7 +131,7 @@ export const QING_VOICES = {
   },
 
   /** The shoemaker's awl and waxed thread: the hole pricked, the thread drawn through with a hiss, the mallet's tap on the sole; a few stitches. */
-  awl(t, bus, lv) {
+  qingAwl(t, bus, lv) {
     let w = t;
     for (let k = 0, n = 3 + Math.floor(R() * 4); k < n; k++) {
       this.cue(w, (x) => { this.burst(x, 0.02, 3200, 2, 0.03 * lv, bus); this.rasp(x + 0.06, 0.34, 3800, 1.3, 0.012 * lv, bus, 30, 0.5); });
