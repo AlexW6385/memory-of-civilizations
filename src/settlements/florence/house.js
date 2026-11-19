@@ -13,6 +13,7 @@
 // { rect, front, storeys, kind, trade, plaster, seed, exposed, y, foot, simple }
 
 import { STYLES } from '../../core/build.js';
+import '../../styles/renaissance/index.js';                     // (the style whose elements this adds to is registered first, whoever imports this)
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { faceFrame, Local, ext, archOutline, archRise, voussoirs, wrect, dropBack } from '../../styles/renaissance/face.js';
