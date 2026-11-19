@@ -75,6 +75,11 @@ export function palaceNight() {
   return { lanterns, posts, embers };
 }
 
+/** A bag that puts the lanterns' dark parts into materials the landmark's plan already has (a new material is a new draw): by `map`. */
+const remap = (bag, map) => { const b = Object.create(bag); b.add = (m, g) => bag.add(map[m] ?? m, g); return b; };
+const PALACE_MAP = { timber: 'lacquer_chestnut', lacquer_black: 'iron', cloth_red: 'lacquer_red', lamp_paper: 'lacquer_red' };
+const TEMPLE_MAP = { timber: 'wood_dark', lacquer_black: 'iron', cloth_red: 'lacquer_red' };
+
 /** bj_night_palace: { list: palaceNight() } — the lanterns and watch lamps, their glow shades and halos, in the landmark plan. */
 function bjNightPalace(el, { bag }) {
   const all = new Parts(), H = new Halo(), { lanterns, posts, embers } = el.list;
@@ -95,7 +100,7 @@ function bjNightPalace(el, { bag }) {
     lanternLight(H, lx, lz, p.y + 1.97, p.y, 0.9, null, 2.6);
   }
   for (const e of embers) { H.ball(e.x, e.y, e.z, 0.7); H.floor(e.x, e.y - 1.3, e.z, 1.6); }
-  all.emit(bag, 0, 0, 0);
+  all.emit(remap(bag, PALACE_MAP), 0, 0, 0);
   H.flush(bag);
 }
 
@@ -125,7 +130,7 @@ function bjNightTemple(el, { bag }) {
     H.ball(l.x, cy, l.z, 0.95 * s * 1.15); H.floor(l.x + l.face[0] * 0.5, l.fy + 0.03, l.z + l.face[1] * 1.3, 3.0 * s, 3.4 * s);
   }
   for (const e of embers) { H.ball(e.x, e.y, e.z, 0.7); H.floor(e.x, e.y - 1.9, e.z, 1.6); }
-  all.emit(bag, 0, 0, 0);
+  all.emit(remap(bag, TEMPLE_MAP), 0, 0, 0);
   H.flush(bag);
 }
 
@@ -151,7 +156,7 @@ function shrineWithLamp(base) {
     base(el, ctx);
     const P = new Parts(), H = new Halo(), [x, z] = el.at;
     P.add('pottery_dark', lathe([[0.001, 0], [0.05, 0.005], [0.06, 0.03], [0.04, 0.04], [0.001, 0.04]], 8));
-    P.add('lamp_white', lathe([[0.001, 0.045], [0.012, 0.05], [0.006, 0.085], [0.001, 0.1]], 5));
+    P.add('pottery_dark', lathe([[0.001, 0.045], [0.012, 0.05], [0.006, 0.085], [0.001, 0.1]], 5));
     P.emit(ctx.bag, x, 0.03 + 0.34, z + 0.85, 0);
     H.ball(x, 0.03 + 0.5, z + 0.9, 0.5);
     H.floor(x, 0.08, z + 1.3, 1.5, 1.3);
@@ -190,7 +195,7 @@ export function registerNight() {
   });
   // the interiors: the lanterns of the rooms (their real point lights are the engine's; these show at the low preset)
   const floorY = (el) => (el.y ?? 0.3) + 0.04;
-  for (const n of ['bj_teahouse', 'bj_pharmacy', 'bj_shop_cloth', 'bj_shop_grain', 'bj_shop_pawn', 'bj_shop_wine', 'bj_shop_lantern', 'bj_shop_shoes', 'bj_palace_room']) wrapLamps('life', n, floorY, { pool: 1.5, scale: 0.9 });
+  for (const n of ['bj_teahouse', 'bj_pharmacy', 'bj_shop_cloth', 'bj_shop_grain', 'bj_shop_pawn', 'bj_shop_wine', 'bj_shop_lantern', 'bj_shop_shoes']) wrapLamps('life', n, floorY, { pool: 1.5, scale: 0.9 });
   const S = STYLES.life;
   if (S) {
     S.elements.bj_night = bjNight;
