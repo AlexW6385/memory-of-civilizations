@@ -102,6 +102,12 @@ E.push({ t: 'block', walk: true, rect: [-238, -54, -204, -36], y0: 0, y1: 0.6, m
 E.push({ t: 'water_rect', rect: [-236, -52, -206, -38], y: 0.5 });
 E.push({ t: 'lane', rect: [gx0 + 6, -50, gx1 - 1, -40], y: 0.04, mat: 'brick_paving' });
 
+// ---- the night (docs/settlements/isfahan.md §26): the lamps of the shops under the arcades and in the bazaar, the iwans' lamps (light only)
+E.push({ t: 'isf_night',
+  shops: arcadeBays().map((b) => ({ c: b.c, u: b.u, n: b.n, w: b.w, open: b.open, lit: b.open || ((Math.round(b.c[0] * 7) * 31 + Math.round(b.c[1] * 3) * 17) & 255) < 150 })),
+  bazaar: { x: BAZAAR.x, z0: BAZAAR.z0, z1: BAZAAR.z1, w: BAZAAR.w },
+  iwans: [[0, 5], [1, 5], [-1, 5], [0, -5]].map(([k, y], i) => { const [su, sv] = [[0, -1], [1, 0], [-1, 0], [0, 1]][i]; const p = M(su * (ch + 4), sv * (ch + 4)); return [p[0], y + 0.5, p[1]]; }) });
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('square', SQUARE, 0, 'open'), room('garden', GARDEN, 0, 'open'), room('talar', [-92, az0 + 1, ax1, az1 - 1], 13, 'hall'), room('music_room', [-102, -47, -94, -38], 32.5, 'hall'), room('bazaar', [-2.5, BAZAAR.z1, 2.5, BAZAAR.z0], 0, 'hall'), room('shah_sanctuary', [M(0, sv)[0] - 8, M(0, sv)[1] - 8, M(0, sv)[0] + 8, M(0, sv)[1] + 8], 0, 'hall'), room('lotfollah', [LOTF.c[0] - 6.7, LOTF.c[1] - 6.7, LOTF.c[0] + 6.7, LOTF.c[1] + 6.7], 0, 'hall')];
 const walks = [[[0, -280], [1.3, -267.3], [0, 68.8], [0, 245]]];   // down the square's axis, bearing round the strollers and goods the generated street life stands on it (found by search over the built collision world; the life's places shift whenever the town's plans change, so re-run when they do)
