@@ -156,31 +156,26 @@ function walkPlans() {
   const plans = [];
   for (const [k, list] of walkCells()) {
     const [i, j] = k.split(',').map(Number), center = [i * WALK_CELL + WALK_CELL / 2, j * WALK_CELL + WALK_CELL / 2];
-    plans.push({ ...base(`ming-suzhou-walk-${k}`, list.map(([l, s]) => ({ ...walkElement(l, s), t: 'walk_near' }))), style: 'suzhou-quarter', near: WALK_NEAR, center });
+    plans.push({ ...base(`ming-suzhou-walk-${k}`, list.map(([l, s]) => ({ ...walkElement(l, s), t: 'floor_near', keeper: s.type === 'shop' ? walkKeeper(l) : undefined }))), style: 'suzhou-quarter', near: WALK_NEAR, center });
     // (and the doorway lanes: a rectangle each that the street-life pass of src/objects/life.js reads as a footprint, so that none of its people, animals or things is put in one)
     const lanes = laneList().filter((ln) => list.some(([l]) => l === ln.lot)).map((ln) => {
       const c = [[-1.0, -0.2], [1.0, -0.2], [-1.0, 3.4], [1.0, 3.4]].map(([a, o]) => [ln.p[0] + ln.u[0] * a + ln.n[0] * o, ln.p[1] + ln.u[1] * a + ln.n[1] * o]);
       return { t: 'door_clear', rect: [Math.min(...c.map((q) => q[0])), Math.min(...c.map((q) => q[1])), Math.max(...c.map((q) => q[0])), Math.max(...c.map((q) => q[1]))] };
     });
-    plans.push({ ...base(`ming-suzhou-walk-${k}-far`, [...list.map(([l, s]) => ({ ...walkElement(l, s), t: 'walk_far' })), ...lanes]), style: 'suzhou-quarter', far: WALK_NEAR, center, nocollide: true });
-    const folk = walkFolk(list);
-    if (folk.length) plans.push({ ...base(`ming-suzhou-walk-${k}-folk`, folk), style: 'life', near: WALK_NEAR, center });
+    plans.push({ ...base(`ming-suzhou-walk-${k}-far`, [...list.map(([l, s]) => ({ ...walkElement(l, s), t: 'floor_far' })), ...lanes]), style: 'suzhou-quarter', far: WALK_NEAR, center, nocollide: true });
   }
   return plans;
 }
-/** The shopkeepers: one behind each counter, standing, facing the street (from the lot's own seed). */
-function walkFolk(list) {
-  const E = [], pick = (r, a) => a[Math.floor(r() * a.length)];
-  for (const [l, s] of list) {
-    if (s.type !== 'shop') continue;
-    const r = rng((l.seed ^ 0x5bd1e995) >>> 0), F = frameOf(l.rect, false, l.front), lay = layoutOf(F.L), cEnd = lay.dc - 0.7;
-    const a = Math.max(0.9, cEnd * 0.5), p = F.at(a, 1.15), q = F.at(a, 0.15);
-    const e = { t: 'figure', at: p, y: LEVEL.street + 0.45, rot: Math.atan2(-(q[0] - p[0]), -(q[1] - p[1])), seed: Math.floor(r() * 1e9), dress: r() < 0.7 ? 'robe' : 'trousers', cloth: pick(r, CLOTH), cloth2: pick(r, CLOTH), skin: r() < 0.7 ? 'skin_light' : 'skin_medium', hat: pick(r, ['none', 'none', 'cap']), carry: 'none', pose: 'stand' };
-    if (CAP_MING && e.hat === 'cap') e.cap = 'ming';
-    if (CAP_MING) e.hair = 'netknot';
-    E.push(e);
-  }
-  return E;
+/** The shopkeeper: behind the counter, standing, facing the street (from the lot's own seed). He is built into the shop's near plan with the street life's figure
+ *  builder, not placed in the street life: its figures are drawn within 170 m wherever they stand, and these are only wanted inside the shops. */
+function walkKeeper(l) {
+  const pick = (r, a) => a[Math.floor(r() * a.length)];
+  const r = rng((l.seed ^ 0x5bd1e995) >>> 0), F = frameOf(l.rect, false, l.front), lay = layoutOf(F.L), cEnd = lay.dc - 0.7;
+  const a = Math.max(0.9, cEnd * 0.5), p = F.at(a, 1.15), q = F.at(a, 0.15);
+  const e = { t: 'figure', at: p, y: LEVEL.street + 0.45, rot: Math.atan2(-(q[0] - p[0]), -(q[1] - p[1])), seed: Math.floor(r() * 1e9), dress: r() < 0.7 ? 'robe' : 'trousers', cloth: pick(r, CLOTH), cloth2: pick(r, CLOTH), skin: r() < 0.7 ? 'skin_light' : 'skin_medium', hat: pick(r, ['none', 'none', 'cap']), carry: 'none', pose: 'stand' };
+  if (CAP_MING && e.hat === 'cap') e.cap = 'ming';
+  if (CAP_MING) e.hair = 'netknot';
+  return e;
 }
 
 /** The doorways of the walk's lots, each { p (on the lot's front line), n (out into the street), u (along the front) }. */

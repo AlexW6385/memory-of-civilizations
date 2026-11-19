@@ -1,8 +1,9 @@
 // The opened lots of the walk (openwalk.js, docs/settlements/ming-suzhou.md §26), as three elements of the style `suzhou-quarter`:
 //   house_walk  the lot's closed shell, always drawn: the shared house builder's own pieces with the front (a shop's open bay, a house's
 //               door, the back door of a house walked through) cut out of them, and the colliders of the walls round the room;
-//   walk_far    what fills the cut where the lot is far (a plan shown beyond 45 m): one dark board, one material, one draw;
-//   walk_near   what is there within 45 m (a plan shown within it): the open front (counter, doorway, posts), the room with its fittings from
+// (the names carry 'floor' so that the street life's pass of src/objects/life.js, which reads elements with a rectangle as footprints, skips them: the shell is the house's footprint)
+//   floor_far   what fills the cut where the lot is far (a plan shown beyond 45 m): one dark board, one material, one draw;
+//   floor_near   what is there within 45 m (a plan shown within it): the open front (counter, doorway, posts), the room with its fittings from
 //               the climbable houses' kits (rooms*.js), a house's lobby, screen wall and court, the ceiling, and the colliders of what stands in them.
 // All three read the same of the shared builder (analyse): its pieces are cut, never rebuilt, so a lot's far form is the town's own.
 
@@ -233,6 +234,7 @@ function walkNear(el, { bag, col }) {
     floorOf(0.55, rd);
     ceiling(0.92, rd);
     groundFit(ctx);
+    if (el.keeper && STYLES.life) STYLES.life.elements.figure({ ...el.keeper }, { bag, col });
   } else if (el.wk === 'ajar') {
     // a door standing ajar: the leaf swung 70° in on its hinge, the lobby, a screen wall facing the door, the court beyond it with a jar and a plant
     const hx = dc - 0.475, ang = 70 * Math.PI / 180, ca = Math.cos(ang), sa = Math.sin(ang), w = 0.9, t = 0.03;
@@ -282,5 +284,5 @@ function walkNear(el, { bag, col }) {
 
 registerStyle('suzhou-quarter', {
   ...STYLES['suzhou-quarter'],
-  elements: { ...STYLES['suzhou-quarter'].elements, house_walk: houseWalk, walk_far: walkFar, walk_near: walkNear, door_clear: () => {} },
+  elements: { ...STYLES['suzhou-quarter'].elements, house_walk: houseWalk, floor_far: walkFar, floor_near: walkNear, door_clear: () => {} },
 });
