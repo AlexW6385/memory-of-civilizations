@@ -486,7 +486,7 @@ function templePlan() {
   E.push({ t: 'paving', rect: [x0 + 0.6, z0 + 0.6, x1 - 0.6, z1 - 0.6], y: LEVEL.street + 0.04, th: 0.3 });
   wall([x0, z1], [x1, z1], { gates: [{ at: cx - x0, w: 3.2, h: 3.5, plaque: true }] });
   wall([x0, z0], [x1, z0]); wall([x0, z1], [x0, z0]); wall([x1, z0], [x1, z1]);
-  E.push({ t: 'tablet_text', a: [x0, z1], b: [x1, z1], y: 0.04, th: 0.45, at: cx - x0, cv: 3.5 + 0.55, w: 1.6, n: 3, text: '報恩寺', seed: 5 });   // the gate's tablet (§23)
+  E.push({ t: 'tablet_text', a: [x0, z1], b: [x1, z1], y: 0.04, th: 0.45, along: cx - x0, cv: 3.5 + 0.55, w: 1.6, n: 3, text: '報恩寺', seed: 5 });   // the gate's tablet (§23)
   // the main hall (nine bays wide in the temple's scale, here five), its steps; the side halls facing the axis
   E.push({ t: 'suzhou_hall', rect: [cx - 12, -127, cx + 12, -117.5], y: 1.15, H: 7.2, front: 's', four: false, roof: 'xieshan', plat: 1.15, eave: 1.7, sweep: 1.4 });
   E.push({ t: 'stair', rect: [cx - 3, -116.6, cx + 3, -114.6], y0: 0.04, y1: 1.15, dir: 'n', riser: 0.18, mat: 'granite_block' });

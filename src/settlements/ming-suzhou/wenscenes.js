@@ -11,6 +11,7 @@ import { Parts, box, lathe, ball, table, drumStool, teaSet, qin, books, fromTria
 import { hash } from './corework.js';
 import { ground } from './ground.js';
 import { AT, WALKS } from './wen.js';
+import { lettering, nameAt } from './boards.js';
 
 const H = (x, z) => ground.height(x, z);
 const TAU = Math.PI * 2;
@@ -166,6 +167,7 @@ function pavilion(P, col, o) {
     const a2 = [a[0] + ux * 0.4 + nx, a[1] + uz * 0.4 + nz], b2 = [b[0] - ux * 0.4 + nx, b[1] - uz * 0.4 + nz];
     obox(P, 'timber', [a2[0] - ux * 0.04, a2[1] - uz * 0.04], [b2[0] + ux * 0.04, b2[1] + uz * 0.04], fy + Hh - 0.67, fy + Hh - 0.21, 0.07);
     obox(P, 'lacquer_black', [a2[0] + nx * 0.2, a2[1] + nz * 0.2], [b2[0] + nx * 0.2, b2[1] + nz * 0.2], fy + Hh - 0.63, fy + Hh - 0.25, 0.07);
+    lettering(P, nameAt(cx, cz), a2, b2, nx, nz, fy + Hh - 0.44);                                                    // its name, in gilt (boards.js)
   }
   const Rr = half * (n === 4 ? Math.SQRT2 : 1) + 0.95;
   pyramid(P, { n, cx, cz, y0: fy + Hh, R: Rr, rise: o.rise ?? (tile ? 1.45 : 1.65), thatch: !tile, mat: tile ? 'tile_dark' : 'reed_mat' });
@@ -425,7 +427,7 @@ function erer(P, col) {
   wall([x0, z0], [x0, z1]); wall([x0, z0], [x1, z0]); wall([x0, z1], [x1, z1]);
   for (let k = 0; k < 4; k++) { const z = z0 + (z1 - z0) * k / 3; P.add('lacquer_chestnut', lathe([[0.085, fy + 0.1], [0.075, fy + Hh], [0.001, fy + Hh]], 6, null, x1, 0, z)); P.add('granite_grey', lathe([[0.17, fy], [0.15, fy + 0.12], [0.001, fy + 0.12]], 8, null, x1, 0, z)); col.circle(x1, z, 0.1, fy, fy + Hh); }
   rod(P, 'lacquer_chestnut', [x1, fy + Hh - 0.08, z0], [x1, fy + Hh - 0.08, z1], 0.07, 4);
-  { const zb = (z0 + z1) / 2; obox(P, 'timber', [x1 + 0.1, zb - 0.95], [x1 + 0.1, zb + 0.95], fy + Hh - 0.67, fy + Hh - 0.21, 0.07); obox(P, 'lacquer_black', [x1 + 0.14, zb - 0.9], [x1 + 0.14, zb + 0.9], fy + Hh - 0.63, fy + Hh - 0.25, 0.07); }   // the name board, plain
+  { const zb = (z0 + z1) / 2; obox(P, 'timber', [x1 + 0.1, zb - 0.95], [x1 + 0.1, zb + 0.95], fy + Hh - 0.67, fy + Hh - 0.21, 0.07); obox(P, 'lacquer_black', [x1 + 0.14, zb - 0.9], [x1 + 0.14, zb + 0.9], fy + Hh - 0.63, fy + Hh - 0.25, 0.07); lettering(P, '爾耳軒', [x1 + 0.1, zb - 0.95], [x1 + 0.1, zb + 0.95], 1, 0, fy + Hh - 0.44, 0.078); }   // the name board, plain
   // the roof: a gable over the three bays, its ridge along z, swept at the eaves
   const A = (z1 - z0) / 2 + 0.7, B = (x1 - x0) / 2 + 0.85, cx = (x0 + x1) / 2, ry = fy + Hh - 0.1, R = 1.35, out = [], cen = [cx, ry - 2, zc], N = 6;
   const prof = (v) => ry + R * Math.pow(1 - Math.abs(v) / B, 1.4);

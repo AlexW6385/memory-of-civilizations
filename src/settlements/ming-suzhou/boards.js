@@ -5,6 +5,7 @@
 // Built facing +z, the origin at the bottom centre of the board.
 import { box } from '../../core/geom.js';
 import { canWrite, inscription } from './script.js';
+import { AT } from './wen.js';
 
 const FINISH = {
   gilt: { field: 'lacquer_black', ink: 'paint_ochre', rim: 'paint_ochre' },
@@ -43,4 +44,17 @@ export function boardBuild(P, el) {
     P.add(F.rim, box(x - s * 0.36, y - s * 0.36, 0.052, x + s * 0.36, y + s * 0.36, 0.056));
     P.add('lacquer_red', box(x - s * 0.3, y - s * 0.3, 0.056, x + s * 0.3, y + s * 0.3, 0.058));
   }
+}
+
+// ── the plain boards of Wen Zhengming's scenes (wenscenes.js): the characters on their black faces ──
+const WEN_NAMES = { jingshen: '凈深亭', huaiyu: '槐雨亭', jiashi: '嘉實亭', dezhen: '得真亭' };
+/** The name of the Wen pavilion standing at (cx, cz), if it is one of the four. */
+export const nameAt = (cx, cz) => { for (const [id, t] of Object.entries(WEN_NAMES)) if (AT[id]?.c && Math.abs(AT[id].c[0] - cx) < 0.01 && Math.abs(AT[id].c[1] - cz) < 0.01) return t; return null; };
+/** Gilt characters on the black face of a plain board centred between a and b (its front `off` m out along the normal (nx, nz)), at height ymid, read right to left. */
+export function lettering(P, text, a, b, nx, nz, ymid, off = 0.056) {
+  if (!canWrite(text)) return;
+  const m = [...text].length, L = Math.hypot(b[0] - a[0], b[1] - a[1]), { size, pitch } = fit(m, L - 0.2, 0.34), l = Math.hypot(nx, nz) || 1;
+  const g = inscription(text, { pitch, size, z0: 0, z1: Math.min(0.016, size * 0.07), thick: 1.3 }).translate(0, ymid, off);
+  g.rotateY(Math.atan2(nx / l, nz / l)); g.translate((a[0] + b[0]) / 2, 0, (a[1] + b[1]) / 2);
+  P.add('paint_ochre', g);
 }

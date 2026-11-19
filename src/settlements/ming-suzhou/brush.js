@@ -140,7 +140,7 @@ function ribbonsOf(st, W) {
   const seg = (A, B, prof, mul = 1) => R.push(ribbon(pathOf([A, B]), prof, Wg, mul));
   const curve = (pts, prof, mul = 1) => R.push(ribbon(pathOf(pts, true), prof, Wg, mul));
   const A = [a[0], a[1]], B = [a[2], a[3]];
-  const flick = (E, len) => curve(bent([E[0] + 0.1 * Wg, E[1] - 0.2 * Wg], [E[0] - len, E[1] + len * 0.36], 178, 128, 4), PROFILE.k);
+  const flick = (E, len) => curve(bent([E[0] + 0.1 * Wg, E[1] + 0.12 * Wg], [E[0] - len, E[1] + len * 0.4], 184, 130, 4), PROFILE.k);
   switch (kind) {
     case 'h': seg(A, B, PROFILE.h); break;
     case 's': seg(A, B, PROFILE.s); break;
