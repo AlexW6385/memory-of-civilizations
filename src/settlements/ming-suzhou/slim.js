@@ -9,11 +9,13 @@ export function mergeAlways(plans) {
   const out = [], first = new Map();
   for (const p of plans) {
     if (p.style === 'life' || p.near || p.far || p.center || extra(p).length || p.id === 'ming-suzhou-garden') { out.push(p); continue; }
-    const k = `${p.style}|${p.bounds}|${p.base}|${p.yaw}|${p.origin}|${p.feature}`;
+    // (a feature plan's bounds are not read by the viewer, which skips such plans in locate(); the joined plan gets the union)
+    const k = `${p.style}|${p.feature ? '' : p.bounds}|${p.base}|${p.yaw}|${p.origin}|${p.feature}`;
     const q = first.get(k);
     if (!q) { first.set(k, p); out.push(p); continue; }
     q.elements = q.elements.concat(p.elements);
     q.rooms = (q.rooms || []).concat(p.rooms || []);
+    if (p.bounds && q.bounds) q.bounds = [Math.min(q.bounds[0], p.bounds[0]), Math.min(q.bounds[1], p.bounds[1]), Math.max(q.bounds[2], p.bounds[2]), Math.max(q.bounds[3], p.bounds[3])];
   }
   return out;
 }
