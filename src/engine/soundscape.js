@@ -79,6 +79,7 @@ import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
 import * as PARIS from '../settlements/paris/soundmap.js';
 import './voices-paris.js';
 import * as ROME from '../settlements/rome/soundmap.js';
+import * as KAIFENG from '../settlements/song-kaifeng/soundmap.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -195,7 +196,7 @@ export const PROFILES = {
   rome: T(MED, { cicadas: 0.5, frogs: 0.3, animals: withLife({ donkey: 0.4, horse: 0.3, dog: 0.3, rooster: 0.3 }, { canal: 1, market: 1, eaves: 1, map: ROME }) }),
   sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: { cattle: 0.6, goat: 0.4, rooster: 0.3 }, roof: 'thatch' }),
   'song-hangzhou': T(EAS, { cicadas: 0.7, frogs: 0.6, animals: { rooster: 0.4, dog: 0.3 }, roof: 'tile', bells: 'monastery' }),
-  'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, animals: { donkey: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'tile', bells: 'monastery' }),
+  'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, roof: 'tile', bells: null, animals: withLife({ donkey: 0.4, rooster: 0.3, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: KAIFENG }) }),
   stonehenge: T({ warbler: 1, crow: 0.6 }, { animals: { cattle: 0.4, dog: 0.3 }, roof: 'thatch' }),
   sydney: T({ gull: 0.8, tropic: 0.5 }, { cicadas: 0.4, animals: {}, roof: 'flat' }),
   'tang-wutai': T({ warbler: 0.7, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.3, cattle: 0.3 }, roof: 'tile', bells: 'monastery' }),
