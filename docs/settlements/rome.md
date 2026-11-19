@@ -178,6 +178,17 @@ As for the Pantheon (`docs/buildings/pantheon.md` §9).
 - **Rooms.** The Pantheon's rotunda (a hush, long air; rain falls through the oculus), the baths' halls, the atrium house, an inn, the fuller's, the mill, the latrine, the shops of the rows and the upper floors each have a tone, a roof and small works of their own (`ROOMS`, `UPPER`).
 - **Not verified.** No one has listened to any of this; the voices were measured with `tools/sound-render.mjs` (spectrum, envelope, onsets) and a test makes every one of them against a stand-in audio context. Whether they sound like Rome is untested. The Latin of the cries is not used: the hawkers cry on pitches only (no words are synthesised).
 
+## 4.20 Animals with a rig (`fauna.js`, `critters`)
+
+None of the sources below was fetched in this pass; what is [stated] rests on the author's memory of them and is to be re-checked before it is relied on.
+
+- **Dog at the door.** [stated, from memory: the mosaic *cave canem* of the House of the Tragic Poet at Pompeii, and Petronius, *Satyricon* 29, a chained dog painted at the door] **Built:** a dog (`dog`) by the jamb of the atrium house's street door, 0.8 m off the door's 1.6 m, lying at a distance and standing and facing the visitor within 3.5 m. [inferred: a live dog, and its place.]
+- **Cats.** [inferred] The domestic cat was kept in Roman houses and shops by the second century (the evidence is thin: mosaics and a few epitaphs; stated here from memory only). **Built:** up to six cats (`cat_tabby`, `cat_orange`) curled at the foot of a pier between two shops of a row, on the pavement, out of the 1.5 m width of every door, chosen by the position of the row (one in five); one asleep on the tiled coping (2.95 m) of the south wall of the garden nearest the arrival.
+- **Fowl.** [stated, from memory: Columella, *De re rustica* 8, keeps of hens, including in town] **Built:** a rooster and five hens in the court of the inn, kept off the passage's line to the well (the court is §4.13).
+- **A cage.** [stated, from memory: Martial, *Epigrams* 14.73–77, gifts of a parrot, a magpie and a nightingale, and Pliny, *Natural History* 10, talking birds] **Built:** one cage (`cagebird`) hung by the first pier of the inn's front, left of the bar door; [inferred] the place.
+- **The Tiber.** [inferred] Ducks and geese were kept for the table; nothing says where on the river. **Built:** six farm ducks (`duck_white`, `duck_brown`) rafting on the water within a few metres of a landing's steps, 2 m off the quay's wall (the surface is 5 m below the quay: they are seen from the quay's edge); a kingfisher (`kingfisher`) on a mooring stone, diving to the water.
+- **Not done.** A goose (the Capitoline geese of Livy 5.47 are stated; no goose model was added to the engine); a cormorant and the fishing craft belong to Suzhou's canal and are not used; the animals of the Via Lata's carts (mules at the mill are drawn by sound only).
+
 ## Sources
 
 - [The Bronze Roof Truss of the Vestibule of the Pantheon in Rome — University of Cologne](https://archaeologie.phil-fak.uni-koeln.de/en/research/research-projects/the-bronze-roof-truss-of-the-vestibule-of-the-pantheon-in-rome)
