@@ -86,6 +86,16 @@ export function lanternLight(H, x, z, cy, gy, s, wall = null, pool = 2.6) {
  * or z, at least 0.3 m wide and high. Each: { x0, y0, z0, x1, y1, z1 }.
  */
 export function slabsOf(g, thick = 0.2) {
+  const out = [];
+  for (const b of boxesOf(g)) {
+    const dx = b.x1 - b.x0, dz = b.z1 - b.z0, dy = b.y1 - b.y0, th = Math.min(dx, dz), w = Math.max(dx, dz);
+    if (th > thick || w < 0.3 || dy < 0.3 || th < 0.002) continue;
+    out.push(b);
+  }
+  return out;
+}
+/** The boxes of the connected pieces of a geometry (triangles that share a corner are one piece): { x0, y0, z0, x1, y1, z1 } each. */
+export function boxesOf(g) {
   const gg = g.index ? g.toNonIndexed() : g, P = gg.attributes.position.array, n = P.length / 9;
   const par = new Int32Array(n).map((_, i) => i), find = (i) => { while (par[i] !== i) { par[i] = par[par[i]]; i = par[i]; } return i; };
   const seen = new Map();
@@ -104,13 +114,7 @@ export function slabsOf(g, thick = 0.2) {
       if (x < b.x0) b.x0 = x; if (x > b.x1) b.x1 = x; if (y < b.y0) b.y0 = y; if (y > b.y1) b.y1 = y; if (z < b.z0) b.z0 = z; if (z > b.z1) b.z1 = z;
     }
   }
-  const out = [];
-  for (const b of box.values()) {
-    const dx = b.x1 - b.x0, dz = b.z1 - b.z0, dy = b.y1 - b.y0, th = Math.min(dx, dz), w = Math.max(dx, dz);
-    if (th > thick || w < 0.3 || dy < 0.3 || th < 0.002) continue;
-    out.push(b);
-  }
-  return out;
+  return [...box.values()];
 }
 /** The lit panes for one slab: a sheet a hair off each of its two faces (full leaf less a frame's width). */
 function panesOf(H, b, off) {
@@ -150,16 +154,6 @@ export function litWindows(ctx, share = 0.35, seed = 11) {
   return { ctx: { ...ctx, bag }, finish: () => H.flush(real) };
 }
 
-/** The bounding box of a geometry: { x0, y0, z0, x1, y1, z1 }. */
-export function boxOf(g) {
-  const P = g.attributes.position.array, b = { x0: Infinity, y0: Infinity, z0: Infinity, x1: -Infinity, y1: -Infinity, z1: -Infinity };
-  for (let i = 0; i < P.length; i += 3) {
-    if (P[i] < b.x0) b.x0 = P[i]; if (P[i] > b.x1) b.x1 = P[i];
-    if (P[i + 1] < b.y0) b.y0 = P[i + 1]; if (P[i + 1] > b.y1) b.y1 = P[i + 1];
-    if (P[i + 2] < b.z0) b.z0 = P[i + 2]; if (P[i + 2] > b.z1) b.z1 = P[i + 2];
-  }
-  return b;
-}
 /**
  * Wrap a builder context so that every glow shade it makes (`lamp_paper`, `lamp_white`, `lamp_glass`) throws its light: the glow round it,
  * a pool on the floor `floor` under it (the element's floor; a shade hung under 0.9 m of the floor gives none) and, for the lanterns of a
@@ -173,8 +167,9 @@ export function lampLights(ctx, floor, { pool = 2.2, scale = 1, max = 24 } = {})
     get(t, k) {
       if (k === 'add') return (mat, g) => {
         if ((mat === 'lamp_paper' || mat === 'lamp_white' || mat === 'lamp_glass') && g?.attributes?.position && n < max) {
-          const b = boxOf(g), w = Math.max(b.x1 - b.x0, b.z1 - b.z0), h = b.y1 - b.y0;
-          if (w > 0.12 && w < 1.6 && h > 0.1 && h < 2.2) {
+          for (const b of boxesOf(g)) {
+            const w = Math.max(b.x1 - b.x0, b.z1 - b.z0), h = b.y1 - b.y0;
+            if (n >= max || w < 0.12 || w > 1.6 || h < 0.1 || h > 2.2) continue;
             const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2, cy = (b.y0 + b.y1) / 2, s = Math.max(0.5, Math.min(1.7, w / 0.3)) * scale;
             H.ball(cx, cy, cz, 0.95 * s);
             if (cy - floor > 0.9 && cy - floor < 5.5) H.floor(cx, floor + 0.03, cz, pool * s * (0.7 + 0.3 * Math.min(1, (cy - floor) / 2.4)));

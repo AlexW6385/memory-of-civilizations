@@ -7,6 +7,7 @@
 import './style.js';
 import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, MOAT, LEVEL, TEMPLE, DANBI, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, isDeep, shopRows, houses, lanes } from './layout.js';
 import { SHOP_SITES } from './shops.js';
+import { gateLamps } from './nightwork.js';
 
 const base = (id, style, elements, center = [0, 0]) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' }, center, near: 230 });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -204,6 +205,7 @@ function streetPlans(rand) {
       H.push({ t: 'figure', at: [x - 1.5, z + 2.9], y: 0.03, rot: 0, seed: seed(), ...FIG, dress: 'trousers', cloth: 'cloth_brown', hat: 'brim', carry: 'pole' });
     }
   }
+  H.push(...gateLamps());                                           // the gate lanterns of the rank houses (nightwork.js)
   plans.push(...tiled('qing-beijing-hutong-life', H, 200));
   void RING; void SHOP_APRONS;
   return plans;
