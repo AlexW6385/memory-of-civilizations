@@ -9,6 +9,7 @@ import '../../objects/index.js';
 import { suzhouShop } from './shops.js';
 import '../../styles/ming/index.js';
 import { Parts, table, rock, pine, plaqueBuild, box, lathe } from './props.js';
+import { boardLit } from './boards.js';
 import { scholarStudy } from './study.js';
 import { hallFurniture } from './halls.js';
 import { courtPiece } from './court.js';
@@ -21,7 +22,7 @@ import { Matrix4, Quaternion, Vector3 } from '../../core/three.js';
  * few strokes: the real characters of the name when `text` is one the script lists (script.js), generic strokes otherwise.
  */
 function plaque(el, { bag }) {
-  const P = new Parts(); plaqueBuild(P, el);
+  const P = new Parts(); plaqueBuild(P, { ...el, glow: el.glow ?? (!!el.text && boardLit(el.at, el.y)) });
   const [fx, fz] = el.facing ?? [0, 1];
   P.emit(bag, el.at[0], el.y, el.at[1], Math.atan2(fx, fz));
 }

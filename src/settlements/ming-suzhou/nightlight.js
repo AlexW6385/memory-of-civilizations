@@ -48,13 +48,13 @@ export class Halo {
     }
   }
   /** A disc lying on a horizontal plane (the paving, the water, a floor, an eave's underside) at height y; water: the ripple-broken kind. */
-  floor(x, y, z, r, rz = r, yaw = 0, segs = 8, water = false) {
+  floor(x, y, z, r, rz = r, yaw = 0, segs = 8, water = false, k = 1) {
     const s = Math.sin(yaw), c = Math.cos(yaw);
-    this.disc([x, y, z], [c, 0, -s], [s, 0, c], r, rz, null, segs, [1, 0.42, 0], [0, 0.5, 1], water ? -1 : 1);
+    this.disc([x, y, z], [c, 0, -s], [s, 0, c], r, rz, null, segs, [k, 0.42 * k, 0], [0, 0.5, 1], water ? -1 : 1);
   }
   /** A disc standing on a wall at (x, y, z), the wall's outward normal nh = [x, z]; rw wide and rh high (semi-axes). */
-  wall(x, y, z, nh, rw, rh, segs = 8) {
-    this.disc([x, y, z], [-nh[1], 0, nh[0]], [0, 1, 0], rw, rh, nh, segs, [0.9, 0], [0, 1]);
+  wall(x, y, z, nh, rw, rh, segs = 8, k = 1) {
+    this.disc([x, y, z], [-nh[1], 0, nh[0]], [0, 1, 0], rw, rh, nh, segs, [0.9 * k, 0], [0, 1]);
   }
   /** The glow round a flame at (x, y, z), radius r: three upright discs crossed at 60° (brightness varies by 7 % with the view), each a cone of light from its middle. */
   ball(x, y, z, r) {
@@ -82,9 +82,10 @@ export class Halo {
  * below it, `s` its size; a wall `wall` = { n: [x, z] (outward), d (behind the lantern, m) } if one stands behind it.
  */
 export function lanternLight(H, x, z, cy, gy, s, wall = null, pool = 2.6) {
+  // (the pool and the wash are kept small and soft, so that two lanterns of a gate leave dark between their pools: the whole front washed orange was too much)
   H.ball(x, cy, z, 0.95 * s);
-  H.floor(x, gy + 0.03, z, pool * s);
-  if (wall) H.wall(x - wall.n[0] * wall.d, cy, z - wall.n[1] * wall.d, wall.n, 1.9 * s, 1.5 * s);
+  H.floor(x, gy + 0.03, z, pool * s * 0.55, pool * s * 0.55, 0, 8, false, 0.8);
+  if (wall) H.wall(x - wall.n[0] * wall.d, cy, z - wall.n[1] * wall.d, wall.n, 1.25 * s, 1.0 * s, 8, 0.6);
 }
 /** The reflection streak on water at (x, z) (a lantern's own place), the water surface at wy: toward the nearest water within `reach` m. Returns whether one was laid. */
 export function waterStreak(H, x, z, wy, s = 1, reach = 7) {
@@ -220,7 +221,7 @@ function panesOf(H, b, off) {
   const thinX = b.x1 - b.x0 < b.z1 - b.z0, m = 0.035, y0 = b.y0 + m, y1 = b.y1 - m;
   if (y1 - y0 < 0.15) return;
   // (each room its own strength, by the hash of its place: a lamp near the window or far back)
-  const f = 0.6 + 0.4 * hashAt((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2, 23 + Math.floor(b.y0 / 2.5));
+  const f = 0.42 + 0.36 * hashAt((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2, 23 + Math.floor(b.y0 / 2.5));
   if (thinX) {
     const z0 = b.z0 + m, z1 = b.z1 - m;
     for (const [x, nx] of [[b.x1 + off, 1], [b.x0 - off, -1]]) H.quad([x, y0, z0], [x, y0, z1], [x, y1, z1], [x, y1, z0], [nx, 0], f);
@@ -269,5 +270,5 @@ function wrapElement(style, name, share) {
 /** Register the street life's element and the lit windows of the houses and halls. */
 export function registerNight() {
   if (STYLES.life) STYLES.life.elements.suzhou_halo = suzhouHalo;
-  for (const [style, name, share] of [['suzhou-quarter', 'house_jiangnan', 0.42], ['suzhou-quarter', 'house_walk', 0.42], ['suzhou-town', 'house_up', 0.5], ['suzhou-site', 'ming_hall', 0.7], ['suzhou-site', 'ming_pavilion', 0.5], ['suzhou-site', 'lou', 0.6]]) wrapElement(style, name, share);
+  for (const [style, name, share] of [['suzhou-quarter', 'house_jiangnan', 0.42], ['suzhou-quarter', 'house_walk', 0.42], ['suzhou-town', 'house_up', 0.5], ['suzhou-site', 'ming_hall', 0.55], ['suzhou-site', 'ming_pavilion', 0.5], ['suzhou-site', 'lou', 0.6]]) wrapElement(style, name, share);
 }
