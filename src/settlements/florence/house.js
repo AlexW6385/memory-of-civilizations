@@ -20,6 +20,7 @@ import { faceFrame, Local, ext, archOutline, archRise, voussoirs, wrect, dropBac
 import { rusticate } from '../../styles/renaissance/signoria.js';
 import { openGround, openUpper, doorAt } from '../../styles/renaissance/casa-open.js';
 import { openFloors, layout, houseClass, balconyOf } from '../../styles/renaissance/casa-up.js';
+import { Halo } from './halo.js';
 
 const PF = 'limestone_yellow', SER = 'pietra_serena', W = 'wood_dark', O = 'opening', IR = 'iron', TM = 'timber', ROOF = 'roof_tile';
 const WALLS = ['stucco_pale', 'stucco_siena', 'stucco_ochre', 'stucco_cream', 'stucco_warm', 'stucco_rome'];
@@ -137,8 +138,20 @@ function sign(Lc, u, ys, trade, rand) {
   void rand;
 }
 
+/** A lamp-lit window at night: a sheet of the halo material (halo.js) in the opening, f its brightness (face frame: u, y, d out). */
+function litSheet(Lc, u0, y0, u1, y1, f) {
+ 
+  const H = new Halo();
+  H.quad([u0, y0, 0.05], [u1, y0, 0.05], [u1, y1, 0.05], [u0, y1, 0.05], [0, 1], f);
+  Lc.add('halo', H.geometry());
+}
+/** The light of a lamp at (u, cy, d) in the face frame: glow, wall wash and (gy given) the pool on the paving (halo.js). */
+function lampLight(Lc, u, cy, d, gy, s) { const H = new Halo(); H.lamp(u, cy, d, gy, s); Lc.add('halo', H.geometry()); }
+/** Is the window at storey s, bay i of this house lit on a night of the lamps (about one in five, by the house's own seed)? 0 or its brightness. */
+const litAt = (seed, s, i) => ((seed * 2654435761 + s * 40503 + i * 9973) >>> 0) % 100 < 20 ? 0.26 + (((seed >>> 3) + s * 7 + i) % 5) * 0.03 : 0;
+
 /** A window under a round arch: its dark, the stone ring round it, the sill, the shutters open on either side (or shut). */
-function win(Lc, uc, s, w, hs, rand, shut, lite, shape = 'round', thru = false, deep = false) {
+function win(Lc, uc, s, w, hs, rand, shut, lite, shape = 'round', thru = false, deep = false, lit = 0) {
   const ys = s + hs;
   if (shape === 'rect') {
     // a plain rectangular window in a stone architrave under a flat lintel (the later quattrocento houses)
@@ -159,6 +172,7 @@ function win(Lc, uc, s, w, hs, rand, shut, lite, shape = 'round', thru = false, 
   }
   if (shape !== 'rect') Lc.box(SER, uc - w / 2 - 0.22, s - 0.2, -0.03, uc + w / 2 + 0.22, s - 0.1, 0.2);
   if (rand() < 0.28 && !thru) { Lc.box(shut, uc - w / 2, s, 0.03, uc + w / 2, ys, 0.07); return; }               // the shutters closed
+  if (lit && !thru) litSheet(Lc, uc - w / 2, s, uc + w / 2, ys, lit);                                                // a lamp in the room: its light on the open window
   if (!lite) {
     if (!thru) { Lc.add(W, flr(uc - 0.025, s, uc + 0.025, ys + 0.1, 0.06)); Lc.add(W, flr(uc - w / 2, s + hs * 0.62, uc + w / 2, s + hs * 0.62 + 0.05, 0.06)); }      // the casement's mullion and transom (an open window has none)
     for (const sg of [-1, 1]) Lc.add(shut, flr(uc + sg * (w / 2 + 0.17), s, uc + sg * (w / 2 + 0.17 + 0.42), ys - 0.1, 0.075));
@@ -267,7 +281,7 @@ export function casaF(el, { bag, col }) {
         if (tr && up.bal && s === 1 && i === up.ib) { balcony(Lu2, col, FMu, bu(i), ys[1] + 0.1, y, shut); continue; }
         const wdt = s === 1 ? 1.05 : 0.95, sill = ys[s] + (s === 1 ? 0.95 : 0.9), hsw = s === 1 ? 1.55 : 1.35;
         if (manner === 'quatt' && s === 1 && Lu > 4.5 && !simple) { bif(Lu2, bu(i), ys[s] + 0.9, 1.75, 1.95, lite, tr, deep); continue; }
-        win(Lu2, bu(i), sill, wdt, hsw, rand, shut, lite, manner === 'gothic' ? 'pointed' : manner === 'rect' ? 'rect' : 'round', tr, deep);
+        win(Lu2, bu(i), sill, wdt, hsw, rand, shut, lite, manner === 'gothic' ? 'pointed' : manner === 'rect' ? 'rect' : 'round', tr, deep, litAt(el.seed || 1, s, i));
       }
     }
     // the tower's top floor: windows (shuttered) between the corbels
@@ -301,7 +315,7 @@ export function casaF(el, { bag, col }) {
           Lc.box(PF, u - 1.4 > 0 ? u - 1.4 : 0.1, -0.2, 0.3, Math.min(L - 0.1, u + 1.4), 0.48, 0.8); col.rect(wrect(FMg, Math.max(0.1, u - 1.4), 0.3, Math.min(L - 0.1, u + 1.4), 0.8), y, y + 0.48);
         }
         if (!simple) { for (const sg of [-1, 1]) Lc.add(IR, lathe([[0.1, 0], [0.12, 0.02], [0.001, 0.02]], 6, null, 0, 0, 0).rotateX(Math.PI / 2).translate(pu + sg * (pw / 2 + 1.3), 2.0, 0.05)); }
-        Lc.box(IR, 0.28, 3.0, 0.0, 0.32, 3.8, 0.9); Lc.box(IR, 0.28, 3.76, 0.0, 0.34, 3.82, 0.95); Lc.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.25], [0.001, 0.3]], 6, null, 0.3, 3.5, 0.82));   // the torch-holder at the corner
+        Lc.box(IR, 0.28, 3.0, 0.0, 0.32, 3.8, 0.9); Lc.box(IR, 0.28, 3.76, 0.0, 0.34, 3.82, 0.95); Lc.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.25], [0.001, 0.3]], 6, null, 0.3, 3.5, 0.82)); lampLight(Lc, 0.3, 3.65, 0.82, 0, 1.25);   // the torch-holder at the corner
         rusticate(Lc, 0, L, 0.15, ys[1] - 0.45, holes, 0.2, rand, deep ? 1.6 : 0.8);
         Lc.box(PF, -0.2, ys[1] - 0.45, -0.04, L + 0.2, ys[1] + 0.1, 0.24);
         // upper floors' ashlar: courses scored by a string course under the cornice and the piano nobile's sills
@@ -370,11 +384,11 @@ export function casaF(el, { bag, col }) {
         if (el.plaster) for (let k = 0, n = 1 + Math.floor(L / 2.5); k < n; k++) { const u = 0.3 + rand() * (L - 0.9), h0 = ys[Math.min(top, 2)] - rand() * 2.5, a = 1.2 + rand() * 1.5, b = 0.2 + rand() * 0.3; if (!lite) Lu2.add('plaster_streak', flr(u, h0 - a, u + b, h0, 0.0265)); }
       }
       if (!pal && !tow && rand() < 0.38) { const u = Math.min(L - 0.5, Math.max(0.5, L / 2 + (rand() < 0.5 ? -1 : 1) * (0.2 + rand()))); Lc.box(SER, u - 0.28, gh - 0.95, 0.0, u + 0.28, gh - 0.35, 0.09); Lc.box(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green'][Math.floor(rand() * 4)], u - 0.2, gh - 0.88, 0.09, u + 0.2, gh - 0.5, 0.11); Lc.box('cloth_white', u - 0.2, gh - 0.73, 0.1, u + 0.2, gh - 0.65, 0.12); }
-      if (!tow && rand() < 0.3) { const u = rand() < 0.5 ? 0.35 : L - 0.35; Lc.box(IR, u - 0.02, 3.3, 0.0, u + 0.02, 3.5, 0.75); Lc.box(IR, u - 0.015, 3.5, 0.7, u + 0.015, 4.0, 0.74); Lc.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.12, 0.2], [0.001, 0.28]], 6, null, u, 3.1, 0.72)); }
+      if (!tow && rand() < 0.3) { const u = rand() < 0.5 ? 0.35 : L - 0.35; Lc.box(IR, u - 0.02, 3.3, 0.0, u + 0.02, 3.5, 0.75); Lc.box(IR, u - 0.015, 3.5, 0.7, u + 0.015, 4.0, 0.74); Lc.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.12, 0.2], [0.001, 0.28]], 6, null, u, 3.1, 0.72)); lampLight(Lc, u, 3.24, 0.72, 0, 1); }
       if (!pal && !tow && !shop && rand() < 0.12) {
         // the tabernacolo: a niche with a gabled stone frame, a blue-robed Madonna, a lamp below
         const u = L - 0.9; Lu2.box(PF, u - 0.5, ys[1] + 0.9, 0.0, u + 0.5, ys[1] + 2.6, 0.18); Lu2.box(O, u - 0.3, ys[1] + 1.1, 0.18, u + 0.3, ys[1] + 2.2, 0.2); Lu2.box('cloth_blue', u - 0.12, ys[1] + 1.15, 0.14, u + 0.12, ys[1] + 1.8, 0.2); Lu2.box('gilt_bronze', u - 0.07, ys[1] + 1.8, 0.14, u + 0.07, ys[1] + 1.98, 0.2);
-        Lu2.box(SER, u - 0.6, ys[1] + 2.6, 0.0, u + 0.6, ys[1] + 2.72, 0.26); Lu2.box(IR, u - 0.01, ys[1] + 0.95, 0.15, u + 0.01, ys[1] + 1.1, 0.3); Lu2.add('lamp_glass', lathe([[0.001, 0], [0.07, 0.04], [0.08, 0.14], [0.001, 0.2]], 6, null, u, ys[1] + 0.75, 0.3));
+        Lu2.box(SER, u - 0.6, ys[1] + 2.6, 0.0, u + 0.6, ys[1] + 2.72, 0.26); Lu2.box(IR, u - 0.01, ys[1] + 0.95, 0.15, u + 0.01, ys[1] + 1.1, 0.3); Lu2.add('lamp_glass', lathe([[0.001, 0], [0.07, 0.04], [0.08, 0.14], [0.001, 0.2]], 6, null, u, ys[1] + 0.75, 0.3)); lampLight(Lu2, u, ys[1] + 0.85, 0.3, null, 0.8);
       }
     }
     // the cornice / eave: on the upper rectangle (its brackets along the front and sides)

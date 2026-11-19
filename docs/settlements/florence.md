@@ -190,3 +190,15 @@ The eleven enterable houses within 70 m of the arrival (osteria, merchant's hous
 
 ## Round 5: houses to enter
 - Eleven houses within 120 m of the arrival are open (the osteria, five homes, botteghe of cloth, wine, goldsmith, smith and candles), with the innkeeper and customers, the craftsman at his counter or bench, the wife at the hearth (`src/settlements/florence/inside.js`).
+
+## 16. The visitor's walk, and the slimming it paid for
+- The walk is the arrival's streets plus the routes of `walk.js`. Houses within 42 m of a route keep the full near form; the others take a flat, far-lite near form (flat window and door frames, fewer arc segments, no goods or signs on counters, a coarser rustication). The full form is unchanged. [inferred: a walker cannot see the difference beyond a few metres; the geometry saved is 131 MB to 103 MB]
+- Every shop-house (bottega) within 24 m of a walk route is open, with its trade's goods at the door and its keeper at the bench; one casa in three beside them is lived in (hearth room or kitchen). [stated: workshop and shop fronts opened onto the street as counters under the shutter — yourwaytoflorence.com/db/brunell/houses.htm; the hearth room as the heart of the workers' home — hiddenflorence.org/stories/giovanni/3-the-workers-home] The 46 routes of `openwalk.js` pass the door and enter the front room.
+- The first frame holds its draws: near the arrival the walk's extra homes and the goldsmith are not opened (they would bring new goods materials into the first view). [inferred, a budget decision]
+
+## 17. Night
+- There was no public street lighting. Light at night came from what the houses and the shrines carried. [stated: torch brackets (porta-torcia) held flaming torches "before the advent of gas and electric street lighting"; "nighttime Florence depended on firelight mounted directly onto buildings" — travelbinger.com, the hardware of a Renaissance city]
+- Palaces carried wrought-iron lanterns and torch-stands, and rings, at the corners and on the facade (Palazzo Strozzi, by Niccolo Grosso, il Caparra); a lantern was lit by firing "tangled oiled rags" on the central spike. [stated: en.wikipedia.org/wiki/Palazzo_Strozzi; yourwaytoflorence.com/db/brunell/facade.htm] Built: the torch-holder at the palazzo corner and the lantern brackets of the casas glow (the `lamp_glass` pieces) and throw a pool on the paving, a wash on the wall and a glow ball (the `halo` material, additive, at night only).
+- The street tabernacles had candles lit "to provide light during the night". [stated: firenze-oltrarno.net/english/arte/tabernacoli.php] Built: each tabernacolo lamp has a small wash on its wall and a glow.
+- Lit windows: about one house window in five on the near houses shows a dim lamp-lit sheet where the shutters are open. [inferred: oil lamps and candles in rooms; a sheet of dull brightness, not a glare. The spread by hash of the house's seed]
+- Not built: any lamp on a street with no wall fixture, any lit shop at night (the shops closed with the light; [inferred]).
