@@ -447,7 +447,11 @@ function shopFronts() {
     if (!tiles.has(k)) tiles.set(k, []);
     tiles.get(k).push(e);
   }
-  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`ming-suzhou-shops-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
+  const plans = [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`ming-suzhou-shops-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
+  // the shutters put up at night (shops.js suzhouShutters): one piece for every shop (a draw of its own, in a material there at night only)
+  const all = [...tiles.values()].flat().map(({ at, y, rot, L, v0, gap, gaps, water, open }) => ({ at, y, rot, L, v0, gap, gaps, water, open }));
+  plans.push({ ...base('ming-suzhou-shutters', [{ t: 'suzhou_shutters', list: all }]), style: 'life', center: [0, 0], near: 400 });
+  return plans;
 }
 function inDisc([x, z], m = 30) { return Math.hypot(x, z) < R - m; }
 let openLots = new Set();

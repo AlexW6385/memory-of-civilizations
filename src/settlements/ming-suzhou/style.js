@@ -6,7 +6,7 @@
 
 import { STYLES, registerStyle } from '../../core/build.js';
 import '../../objects/index.js';
-import { suzhouShop } from './shops.js';
+import { suzhouShop, suzhouShutters } from './shops.js';
 import '../../styles/ming/index.js';
 import { Parts, table, rock, pine, plaqueBuild, box, lathe } from './props.js';
 import { boardLit } from './boards.js';
@@ -146,3 +146,4 @@ registerStyle('suzhou-town', { ...base, elements: { ...base.elements, house_up: 
 
 // the shop fronts are an element of the street life (instanced pieces, shared settlement-wide)
 STYLES.life.elements.suzhou_shop = suzhouShop;
+STYLES.life.elements.suzhou_shutters = suzhouShutters;
