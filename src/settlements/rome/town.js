@@ -11,6 +11,7 @@ import { furnishElement } from './upper.js';
 import { rowFurnElement } from './upper-rows.js';
 import { cauponaFurn, fullonicaFurn } from './upper-inns.js';
 import './nightlight.js';
+import './writing.js';
 import { shopKeepers } from './keepers.js';
 /** lodTiles of src/settlements/lod.js with a wider tile (the geometry budget counts plan x material buckets). */
 function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
