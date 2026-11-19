@@ -15,6 +15,7 @@ import { box, lathe, fromTriangles, rod, hangFrom, windMat, placeHanging } from 
 import { placer, assembly, rng } from '../../objects/kit.js';
 import { Matrix4, Quaternion, Vector3 } from '../../core/three.js';
 import { prismX } from './props.js';
+import { hashAt, SHOP_LIT } from './nightlight.js';
 import { glyphGeometry } from './script.js';
 
 // ── the writing: characters as brush relief (script.js, brush.js; docs/settlements/ming-suzhou.md §23) ──
@@ -385,4 +386,27 @@ function suzhouShop(el, { bag, col }) {
     }
   }
 }
-export { suzhouShop, U as __units };
+/**
+ * suzhou_shutters: { list: [{ at, y, rot, L, v0, gaps, water, open }] } — at night the shop that does not stay open (nightlight.js SHOP_LIT)
+ * puts its shutters up: a plank panel in each bay, in front of the day's boards. The panels of every shop are one piece in the material
+ * 'timber+night' (present at night only: materials.js), so that they cost one draw however many shops there are; the collision is the
+ * day's, as the posts and boards stay. Frames as in suzhouShop (x along the front, z out into the street).
+ */
+function suzhouShutters(el, { bag }) {
+  const T = [];
+  for (const e of el.list) {
+    const [cx, cz] = e.at, c = Math.cos(e.rot), s = Math.sin(e.rot), L = e.L, y0 = e.y ?? 0;
+    if (e.water || e.open || hashAt(cx, cz, 5) < SHOP_LIT) continue;
+    const gaps = e.gaps ?? (e.gap ? [e.gap] : []), inGap = (x0, x1) => gaps.some((g) => x1 > g[0] && x0 < g[1]);
+    const loc = (lx, lz) => [cx + lx * c + lz * s, cz - lx * s + lz * c];
+    const nb = Math.max(1, Math.round(L / 3.3)), bw = (L - 0.5) / nb;
+    for (let k = 0; k < nb; k++) {
+      const xa = -L / 2 + 0.25 + bw * k + 0.1, xb = -L / 2 + 0.25 + bw * (k + 1) - 0.1;
+      if (inGap(xa, xb)) continue;
+      const A = loc(xa, 0.06 - e.v0), B = loc(xb, 0.06 - e.v0), y1 = y0 + 0.2, y2 = y0 + 2.8;
+      T.push(A[0], y1, A[1], B[0], y1, B[1], B[0], y2, B[1], A[0], y1, A[1], B[0], y2, B[1], A[0], y2, A[1]);
+    }
+  }
+  if (T.length) bag.add('timber+night', fromTriangles(T));
+}
+export { suzhouShop, suzhouShutters, U as __units };

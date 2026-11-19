@@ -97,9 +97,10 @@ function planting(x, z, p) {
   const cd = canalDistance(x, z);
   if (cd < 0.5 || onBridge(x, z, 3)) return null;
   // willows along the canals, on the street's edge above the water: in loose groups, a gap between
+  // (a willow's crown is about 4-5 m across from the trunk: none within 5.2 m of a house, or its branches reach through the loggia windows)
   if (cd < 1.3 && onStreet(x, z)) {
     const n = vnoise(x * 0.11 + 7, z * 0.11 - 3);
-    return { willow: 14 * sm(-0.5, 0.15, n) };
+    return { willow: inLot(x, z, 5.2) ? 0 : 14 * sm(-0.5, 0.15, n) };
   }
   if (onStreet(x, z) || inLot(x, z, 0.6) || inRect(RESIDENCE, x, z, 0.5)) return null;
   if (inRect(GARDEN, x, z)) {
@@ -149,6 +150,7 @@ function planting(x, z, p) {
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
+  grows: ['camphor', 'tea'],      // (src/engine/flora/scatter-worker.js: these two grow only where a ground names them)
   maxDensity: { willow: 20, bamboo: 6, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 2.2, camphor: 0.12, tea: 0.8, grass: 80, pagoda_tree: 3.0, oleander: 3.5, chinese_pine: 1.6 },
   // late spring in Jiangnan (the plum rains near): soft hazy sun, drizzle and mist over the water
   climate: {

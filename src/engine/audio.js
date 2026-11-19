@@ -834,6 +834,7 @@ export class Music {
         for (const b of [outB, outD, outC]) if (b.emitter) b.emitter.until = end + 3;
         break;
       }
+      case 'paris': end = this.parisBells(arg, t0); break;                 // Notre-Dame's bells, the parish churches', the office sung (voices-paris.js)
       case 'bosingak': strokes(33, 5, (w) => this.bonsho(w, 82, 0.065, out, 0.33)); break;   // the great bell's slow beat
       case 'zhong': strokes(18, 4.5, (w) => this.bonsho(w, 110, 0.05, out)); break;
       case 'gu': end = this.drumRolls(t0, out, 3); break;

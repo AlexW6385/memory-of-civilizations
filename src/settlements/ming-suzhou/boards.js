@@ -6,11 +6,20 @@
 import { box } from '../../core/geom.js';
 import { canWrite, inscription } from './script.js';
 import { AT } from './wen.js';
+import { Halo } from './nightlight.js';
+import { gardenLanterns } from './lamps.js';
 
 const FINISH = {
   gilt: { field: 'lacquer_black', ink: 'paint_ochre', rim: 'paint_ochre' },
   wood: { field: 'paint_ochre', ink: 'lacquer_black', rim: 'lacquer_red' },
 };
+
+let LANTERNS = null;
+/** Whether a lantern of the garden hangs within 6 m of a board at `at` ([x, z]), foot at height y: such a board gets a faint halo at night (boards are unlit, and the gilt of the halls and the ink of the pavilions are lost in the dark). */
+export function boardLit(at, y) {
+  LANTERNS ??= gardenLanterns();
+  return LANTERNS.some((l) => Math.hypot(l.x - at[0], l.z - at[1]) < 6 && Math.abs(l.y - y) < 4.5);
+}
 
 /** The characters' size and pitch for a board's field (m): `room` the length they run along, `across` the other way. */
 export function fit(m, room, across) {
@@ -33,6 +42,11 @@ export function boardBuild(P, el) {
   const r = 0.012, a = fw - 0.002;
   P.add(F.rim, box(-w / 2 + a, a, 0.04, w / 2 - a, a + r, 0.058)); P.add(F.rim, box(-w / 2 + a, h - a - r, 0.04, w / 2 - a, h - a, 0.058));
   P.add(F.rim, box(-w / 2 + a, a + r, 0.04, -w / 2 + a + r, h - a - r, 0.058)); P.add(F.rim, box(w / 2 - a - r, a + r, 0.04, w / 2 - a, h - a - r, 0.058));
+  if (el.glow) {                                              // the lantern's light on the field: a faint pane (night only, the `halo` material) just in front of the field and behind the characters
+    const H = new Halo(), z = 0.056, x0 = -w / 2 + fw, x1 = w / 2 - fw, y0 = fw, y1 = h - fw;
+    H.quad([x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z], [0, 1], 0.5);
+    H.flush(P);
+  }
   if (!canWrite(el.text)) return;
   const m = [...el.text].length, seal = el.seal && !vertical ? 0.2 : 0, edge = fw + 0.035;
   const room = (vertical ? h : w) - 2 * edge - seal, across = (vertical ? w : h) - 2 * edge;

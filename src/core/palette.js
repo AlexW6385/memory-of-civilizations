@@ -395,13 +395,14 @@ const SPECS = {
 };
 
 /**
- * The materials by key. A key "<key>+wind" (cloth hung in the wind, src/core/geom.js windMat) is
- * its plain key's material wherever it is looked up — the light baker's albedo, the shadows, the
+ * The materials by key. A key "<key>+wind" (cloth hung in the wind, src/core/geom.js windMat) or "<key>+night" (the
+ * material at night only: shutters put up, engine/materials.js) is its plain key's material wherever it is looked up — the light baker's albedo, the shadows, the
  * tints — though only the plain keys are listed.
  */
+const plain = (k) => (typeof k !== 'string' ? k : k.endsWith('+wind') ? k.slice(0, -5) : k.endsWith('+night') ? k.slice(0, -6) : k);
 export const MATERIALS = new Proxy(SPECS, {
-  get: (t, k) => (typeof k === 'string' && k.endsWith('+wind') ? t[k.slice(0, -5)] : t[k]),
-  has: (t, k) => (typeof k === 'string' && k.endsWith('+wind') ? k.slice(0, -5) in t : k in t),
+  get: (t, k) => t[plain(k)],
+  has: (t, k) => plain(k) in t,
 });
 
 export function albedo(key) {
