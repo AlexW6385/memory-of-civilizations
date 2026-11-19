@@ -48,11 +48,11 @@ export function shopWalks() {
   }
   return out;
 }
-/** Rectangles (world) before each door and window: the dressing keeps clear of them: [[x0, z0, x1, z1]]. */
+/** Rectangles (world) from each door out across the portico to 3 m past the columns: the dressing keeps clear of them: [[x0, z0, x1, z1]]. */
 export function shopLanes() {
   const out = [];
   for (const R of ranges()) for (const s of shopSlots(R.L, R.n, R.shops)) {
-    const a = at(R, s.u0 - 0.4, 3.6), b = at(R, s.u0 + s.W + 0.4, -P);
+    const a = at(R, s.uc - 1.4, 3.0), b = at(R, s.uc + 1.4, -P);
     out.push([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]);
   }
   return out;
