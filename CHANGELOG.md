@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.47 — Suzhou's shops open on the street (2026-11-19)
+
+Along the walk from the arrival by the canal streets and bridges to the residence, the temple and the pagoda, forty-five shops now stand open-fronted with their boards taken down, the counter at the street, goods laid out and the keeper behind, and can be entered to the front room; three more houses can be entered and six stand with the door ajar on a screen wall and a court. Of the seventy-nine lots on that walk sixty-six can be entered; in the whole town seventy-four of 794. The interiors are built only near the visitor.
+
 ## v12.46 — Suzhou's temple, pagoda and wall (2026-11-19)
 
 In the Bao'en temple the main hall has its three Buddhas on lotus thrones, disciples and eighteen arhats, the altar with the five offerings, banners, canopy, cushions, drum and bell, and monks; the side halls are a sutra store and a refectory, and the guardian kings stand in the gate. The pagoda can be climbed inside, all nine storeys, to the top gallery over the town. The wall's gate tower has its watch-post with guards, drum and water clock, and the wall walk is reached by both ramps; the court has old camphors in railings, stelae on tortoises, a carp pond, worshippers, and beggars and a seller at the gate.
