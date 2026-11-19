@@ -71,6 +71,8 @@
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
 import * as VENICE from '../settlements/venice/soundmap.js';
+import * as PARIS from '../settlements/paris/soundmap.js';
+import './voices-paris.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -179,7 +181,7 @@ export const PROFILES = {
   'new-york': T({ sparrow: 0.8 }, { animals: {}, roof: 'flat' }),
   'norse-borgund': T({ warbler: 1, crow: 0.5 }, { animals: { sheepbell: 0.7, cattle: 0.6, dog: 0.3, horse: 0.2 }, roof: 'shingle', bells: 'parish' }),
   'ottoman-istanbul': T({ ...MED, gull: 0.8 }, { cicadas: 0.4, animals: { dog: 0.5, donkey: 0.3, horse: 0.3 }, roof: 'tile', adhan: 2 }),
-  paris: T(EU, { animals: { horse: 0.5, rooster: 0.3, dog: 0.3 }, roof: 'slate', bells: 'office' }),
+  paris: T(EU, { roof: 'slate', bells: 'paris', animals: withLife({ horse: 0.5, rooster: 0.3, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: PARIS }) }),
   persepolis: T(NEAR, { animals: { horse: 0.5, donkey: 0.4, dog: 0.3 }, roof: 'flat' }),
   petra: T({ dove: 1, kite: 0.4, sparrow: 0.5 }, { animals: { goat: 0.6, donkey: 0.4 }, roof: 'flat' }),
   'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, animals: { dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'drumbell' }),
@@ -224,6 +226,8 @@ const HOURS = {
   // Suzhou: Hanshan's bell at midnight, far off; the Bao'en Temple's bell and drum at the fifth
   // watch's end and at dusk; the watchman's five watches (戌 7 pm, 亥 9, 子 11, 丑 1, 寅 3)
   suzhou: [[0, 'hanshan'], [4.6, 'temple-am'], [5, 'tower:am'], [18.5, 'temple-pm'], [18.75, 'tower:pm'], [19, 'watch:1'], [21, 'watch:2'], [23, 'watch:3'], [1, 'watch:4'], [3, 'watch:5']],
+  // Paris 1248: the canonical hours from Notre-Dame's north tower and the parish churches, the curfew bell at 7:30 (the equinox between seven in winter and eight in summer)
+  paris: [[2, 'paris:matins'], [5, 'paris:lauds'], [6, 'paris:prime'], [9, 'paris:terce'], [12, 'paris:sext'], [15, 'paris:none'], [17.5, 'paris:vespers'], [19.5, 'paris:curfew']],
   monastery: [[5, 'zhong'], [18.5, 'gu']],
   bonsho: [[5.5, 'bonsho'], [18.2, 'bonsho']],
   zvon: [[6.5, 'zvon'], [17, 'zvon']],

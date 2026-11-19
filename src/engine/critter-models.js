@@ -446,8 +446,66 @@ export function kingfisher() {
   return m;
 }
 
+// ═════════════ the town's birds on the ground (Paris 1248: pigeons on the parvis, geese at the strand; both walk and peck as the fowl do) ═════════════
+/** A rock dove (or a white one) walking, 0.3 m long: grey with two dark wing bars, the neck's green and violet sheen, a dark tail band, pink legs. */
+export function pigeon(variant) {
+  const m = new Model(), white = variant === 'white', dark = variant === 'dark';
+  const C = white ? { back: [0.93, 0.92, 0.9], breast: [0.96, 0.95, 0.93], tail: [0.86, 0.85, 0.82], bar: [0.85, 0.84, 0.8], neck: [0.9, 0.89, 0.86] }
+    : dark ? { back: [0.3, 0.3, 0.33], breast: [0.34, 0.34, 0.37], tail: [0.12, 0.12, 0.14], bar: [0.1, 0.1, 0.12], neck: [0.2, 0.34, 0.3] }
+    : { back: [0.5, 0.52, 0.56], breast: [0.56, 0.58, 0.62], tail: [0.17, 0.18, 0.21], bar: [0.12, 0.12, 0.15], neck: [0.26, 0.44, 0.4] };
+  const S = [[0.1, 0.135, 0.03, 0.027], [0.06, 0.14, 0.05, 0.046], [0.0, 0.13, 0.055, 0.05], [-0.07, 0.12, 0.044, 0.04], [-0.12, 0.115, 0.018, 0.018]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 7, col: ({ p, n }) => lerp(C.back, C.breast, sm(0.3, -0.4, n[1]) * (1 - sm(-0.04, 0.0, -p[0]) * 0.2)) });
+  for (const z of [-1, 1]) {
+    m.ball([-0.015, 0.152, z * 0.046], [0.085, 0.026, 0.022], ({ p }) => (hash3(p, 3) > 0.5 ? C.bar : C.back), { nu: 5, nv: 5 });
+    m.ball([-0.05, 0.14, z * 0.044], [0.07, 0.022, 0.02], ({ p }) => lerp(C.back, C.bar, sm(-0.08, -0.02, p[0]) * 0.8), { nu: 4, nv: 5 });
+  }
+  m.as(3, [-0.12, 0.12, 0], null, () => m.poly([[-0.1, 0.118, -0.02], [-0.1, 0.118, 0.02], [-0.2, 0.1, 0.035], [-0.22, 0.095, 0], [-0.2, 0.1, -0.035]], [C.back, C.back, C.tail, C.tail, C.tail]));
+  const NP = [0.085, 0.14, 0], HP = [0.12, 0.185, 0];
+  m.as(1, NP, null, () => m.tube([[0.08, 0.14, 0], [0.105, 0.17, 0], [0.12, 0.19, 0]], [0.03, 0.026, 0.021], { sides: 6, ref: [1, 0, 0], col: ({ t }) => lerp(C.breast, C.neck, 0.4 + 0.6 * Math.sin(Math.PI * t)) }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.14, 0.205, 0], [0.026, 0.024, 0.021], ({ n }) => (white ? C.back : lerp(C.back, C.neck, 0.3 * sm(0, 0.6, -n[1]))));
+    m.tube([[0.162, 0.2, 0], [0.188, 0.195, 0]], [[0.007, 0.008], [0.002, 0.003]], { sides: 4, col: [0.18, 0.17, 0.17] });
+    m.ball([0.163, 0.206, 0], [0.007, 0.006, 0.008], [0.92, 0.9, 0.86], { nu: 3, nv: 4 });
+    eyes(m, 0.15, 0.212, 0.017, 0.0055, [0.85, 0.4, 0.08]);
+  });
+  for (const [part, z] of [[4, -1], [5, 1]]) {
+    const hip = [0.0, 0.1, z * 0.03];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [0.0, 0.05, z * 0.03], [0.004, 0.008, z * 0.03]], [0.011, 0.007, 0.005], { sides: 4, col: [0.78, 0.3, 0.36] });
+      for (const a of [-0.5, 0, 0.5]) m.tube([[0.004, 0.008, z * 0.03], [0.03, 0.004, z * 0.03 + a * 0.015], [0.05, 0.002, z * 0.03 + a * 0.03]], [0.0035, 0.003, 0.002], { sides: 3, col: [0.78, 0.3, 0.36] });
+    });
+  }
+  return m;
+}
+/** A goose on its feet, 0.75 m to the crown: white (or grey), orange bill and feet, the long neck that rises, turns and lowers to graze. */
+export function goose(variant) {
+  const m = new Model(), grey = variant === 'grey';
+  const C = grey ? { back: [0.52, 0.5, 0.46], breast: [0.7, 0.68, 0.64], tail: [0.4, 0.38, 0.35] } : { back: [0.95, 0.94, 0.9], breast: [0.97, 0.96, 0.93], tail: [0.9, 0.89, 0.85] };
+  const ORANGE = [0.9, 0.5, 0.12];
+  const S = [[0.24, 0.32, 0.07, 0.065], [0.14, 0.33, 0.115, 0.1], [0.0, 0.30, 0.13, 0.115], [-0.14, 0.29, 0.11, 0.095], [-0.27, 0.32, 0.05, 0.05], [-0.31, 0.34, 0.012, 0.012]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 8, col: ({ p, n }) => lerp(C.back, C.breast, sm(0.4, -0.4, n[1])) });
+  for (const z of [-1, 1]) m.ball([-0.05, 0.37, z * 0.1], [0.2, 0.06, 0.04], ({ p }) => lerp(C.back, shade(C.back, 0.88), sm(0.1, -0.2, p[0])), { nu: 5, nv: 6 });
+  m.as(3, [-0.27, 0.34, 0], null, () => m.poly([[-0.26, 0.33, -0.04], [-0.26, 0.33, 0.04], [-0.37, 0.36, 0.05], [-0.4, 0.37, 0], [-0.37, 0.36, -0.05]], [C.back, C.back, C.tail, C.tail, C.tail]));
+  const NP = [0.22, 0.36, 0], HP = [0.3, 0.68, 0];
+  m.as(1, NP, null, () => m.tube([[0.2, 0.36, 0], [0.25, 0.46, 0], [0.28, 0.58, 0], [0.3, 0.68, 0]], [0.06, 0.04, 0.032, 0.03], { sides: 6, ref: [1, 0, 0], col: ({ t }) => lerp(C.breast, C.back, t * 0.3) }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.32, 0.7, 0], [0.05, 0.04, 0.035], C.back);
+    m.tube([[0.36, 0.695, 0], [0.42, 0.685, 0]], [[0.022, 0.026], [0.012, 0.016]], { sides: 5, col: ORANGE });
+    m.ball([0.375, 0.72, 0], [0.012, 0.008, 0.012], [0.9, 0.5, 0.12], { nu: 3, nv: 4 });
+    eyes(m, 0.33, 0.715, 0.032, 0.008, [0.12, 0.08, 0.04]);
+  });
+  for (const [part, z] of [[4, -1], [5, 1]]) {
+    const hip = [0.0, 0.2, z * 0.07];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [0.0, 0.1, z * 0.07], [0.01, 0.02, z * 0.07]], [0.03, 0.016, 0.012], { sides: 5, col: ({ t }) => (t < 0.25 ? C.breast : ORANGE) });
+      m.poly([[0.0, 0.02, z * 0.07 - 0.03], [0.0, 0.02, z * 0.07 + 0.03], [0.14, 0.005, z * 0.07 + 0.05], [0.16, 0.005, z * 0.07], [0.14, 0.005, z * 0.07 - 0.05]], ORANGE);
+    });
+  }
+  return m;
+}
 export const MODELS = {
   mandarin_drake: () => duck('drake'), mandarin_hen: () => duck('hen'), duck_white: () => duck('white'), duck_brown: () => duck('brown'),
   crane, hen_brown: () => fowl('brown'), hen_white: () => fowl('white'), rooster: () => fowl('rooster'),
   cat_tabby: () => cat('tabby'), cat_orange: () => cat('orange'), dog, cormorant, fishing_craft: craft, cagebird, swallow_nest: swallowNest, kingfisher,
 };
+Object.assign(MODELS, { pigeon_grey: () => pigeon('grey'), pigeon_white: () => pigeon('white'), pigeon_dark: () => pigeon('dark'), goose_white: () => goose('white'), goose_grey: () => goose('grey') });
