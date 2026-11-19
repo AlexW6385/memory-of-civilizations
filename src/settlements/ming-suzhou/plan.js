@@ -11,6 +11,7 @@ import {
 } from './layout.js';
 import { ground } from './ground.js';
 import { lots } from './layout.js';
+import { nearScene } from './wen.js';
 import { upOf, routeOf } from './uphouses.js';
 import { SHORE, hash2 } from './taihu.js';
 
@@ -56,7 +57,7 @@ for (const sh of shore) {
   let arc = [];
   for (let k = 0; k <= n; k++) {
     const a = k / n * TAU, x = sh.c[0] + Math.cos(a) * sh.r[0], z = sh.c[1] + Math.sin(a) * sh.r[1];
-    const ok = Math.abs(pondDistance(x, z)) < 0.12 && !nearBuilding(x, z, 1.1) && !nearBridge(x, z, 1.5) && !nearRockPath(x, z, 1.3);
+    const ok = Math.abs(pondDistance(x, z)) < 0.12 && !nearBuilding(x, z, 1.1) && !nearBridge(x, z, 1.5) && !nearRockPath(x, z, 1.3) && !nearScene(x, z, 1.2);
     if (ok) arc.push([x, z]); else { if (arc.length > 2) arcs.push(arc); arc = []; }
   }
   if (arc.length > 2) arcs.push(arc);
@@ -86,6 +87,7 @@ for (const [si, sh] of shore.entries()) {
 const nNear = stones.filter((q) => q.near).length, nFar = stones.length - nNear;
 const useNear = NEAR.slice(0, Math.max(1, Math.min(NEAR.length, Math.floor(nNear / 12)))), useFar = FAR.slice(0, Math.max(1, Math.min(FAR.length, Math.floor(nFar / 12))));
 for (const q of stones) {
+  if (nearScene(q.x, q.z, 1.6)) { rand(); rand(); rand(); continue; }   // (a scene of Wen's record stands here; the same random draws as the stone)
   // (the shape by a hash of the stone's own place: no two neighbours alike, and the same plan builds the same stones)
   const near = q.near, hq = hashAt(q.x, q.z), v = near ? useNear[Math.floor(hq * useNear.length)] : useFar[Math.floor(hq * useFar.length)];
   E.push({ t: 'taihu', c: [q.x, q.z], y: H(q.x, q.z) + 0.12, v, s: q.s, lod: near ? 0 : 1, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.12, tz: (rand() - 0.5) * 0.12 });
@@ -100,6 +102,7 @@ for (const [i, s] of [...ISLANDS.slice(0, 2), ...MOUNDS].entries()) {
     const feature = tall < 2 && i < 2;
     if (feature) tall++;
     const v = feature ? 2 + ((i + tall) % 2) : [5, 6, 7, 8, 9, 10][(i + k) % 6];
+    if (nearScene(x, z, 2.4)) { rand(); rand(); rand(); rand(); continue; }   // (a scene of Wen's record stands here; the same random draws as the stone)
     E.push({ t: 'taihu', c: [x, z], y: H(x, z) - 0.05, v, s: feature ? 0.8 + rand() * 0.35 : 0.7 + rand() * 0.5, lod: feature ? 0 : 2, hero: feature, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.08, tz: (rand() - 0.5) * 0.08, solid: true });
   }
 }
@@ -274,6 +277,17 @@ board([-20, B.yiyu.rect[1] - 0.2], G + B.yiyu.y + 3.8 - 0.98, [0, -1], 1.8, 3, 1
 board([B.linglong.rect[0] - 0.2, -3.375], G + B.linglong.y + 3.9 - 0.98, [-1, 0], 1.8, 3, 14, { h: 0.6, text: '玲瓏館' });
 board([0, 40.4], G + 0.45 + 5.0 - 1.02, [0, 1], 2.4, 4, 15);
 board([-21.8, 34.5], G + 0.35 + 3.8 - 0.98, [1, 0], 1.6, 3, 16, { h: 0.55 });
+// the pavilions' boards (§23): hung on the outer face of the beam at each open side, in plain wood and black ink; the Snowy Fragrance board carries a seal (Wang Ji's inscription hangs there [stated])
+for (const [id, text, w, h] of [['hefeng', '荷風四面亭', 2.0, 0.5], ['xuexiang', '雪香雲蔚亭', 2.0, 0.5], ['daishuang', '待霜亭', 1.4, 0.46]]) {
+  const b = B[id], H0 = 3.3, hex = b.kind === 'hex', ap = hex ? b.r * Math.cos(Math.PI / 6) : b.d / 2;
+  for (const k of hex ? [1, 4] : [0, 2]) {
+    const a = hex ? (k + 1) / 6 * Math.PI * 2 : 0, n = hex ? [Math.cos(a), Math.sin(a)] : [0, k === 0 ? -1 : 1];
+    E.push({ t: 'plaque', at: [b.c[0] + n[0] * (ap + 0.13), b.c[1] + n[1] * (ap + 0.13)], y: G + b.y + H0 - 0.38 - h, facing: n, w, h, n: [...text].length, seed: 30 + k, text, finish: 'wood', seal: id === 'xuexiang' });
+  }
+}
+// Little Canglang (on its north front) and Small Flying Rainbow (over each end of the bridge)
+E.push({ t: 'plaque', at: [(B.xiaocanglang.rect[0] + B.xiaocanglang.rect[2]) / 2, B.xiaocanglang.rect[1] - 0.2], y: G + B.xiaocanglang.y + 3.4 - 0.98, facing: [0, -1], w: 1.5, h: 0.5, n: 3, seed: 34, text: '小滄浪', finish: 'wood' });
+for (const [x, f] of [[B.xiaofeihong.rect[0] + 0.1, -1], [B.xiaofeihong.rect[2] - 0.1, 1]]) E.push({ t: 'plaque', at: [x, (B.xiaofeihong.rect[1] + B.xiaofeihong.rect[3]) / 2], y: G + B.xiaofeihong.y + 2.7 - 0.84, facing: [f, 0], w: 1.4, h: 0.44, n: 3, seed: 35 + f, text: '小飛虹', finish: 'wood' });
 // the couplet on the two columns of the Hall of Distant Fragrance's doorway, facing the pond
 for (const x of [0, 3.6]) E.push({ t: 'plaque', at: [x, B.yuanxiang.rect[1] - 0.17], y: G + B.yuanxiang.y + 1.2, facing: [0, -1], w: 0.3, h: 2.5, n: 7, vertical: true, seed: 20 + x, field: 'lacquer_black', ink: 'gilt_bronze' });
 // potted landscapes on stone stands: in the loquat court, before the Hall of Distant Fragrance, in the study's court

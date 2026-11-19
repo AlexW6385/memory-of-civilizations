@@ -315,13 +315,13 @@ function orient(tri) {
 /** tablet_text { a, b (the wall's ends), y (its foot), th, at (along), cv (the plaque's centre height), w (its width), n (characters), seed }: the inscription on both faces of a gate's plaque. */
 export function tabletText(el, { bag }) {
   const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
-  const w = el.w - 0.22, h = 0.46 - 0.2, P = new Parts2();
+  const w = el.w - 0.22, h = 0.46 - 0.17, P = new Parts2();
   for (const sg of [-1, 1]) {
     const Q = new Parts2();
-    if (canWrite(el.text)) { const m = [...el.text].length, size = Math.min(h * 0.92, w / m / 1.1); Q.add('tile_dark', inscription(el.text, { pitch: Math.min(size * 1.12, w / m), size, z0: 0, z1: 0.013, thick: 0.9 }).translate(0, h / 2, 0)); }
+    if (canWrite(el.text)) { const m = [...el.text].length, size = Math.min(h * 0.92, w / m / 1.1); Q.add('lacquer_black', inscription(el.text, { pitch: Math.min(size * 1.12, w / m), size, z0: 0, z1: 0.016, thick: 1.3 }).translate(0, h / 2, 0)); }
     else glyphs(Q, w, h, el.n ?? 3, (el.seed ?? 5) + (sg > 0 ? 0 : 0), 0, 'tile_dark');      // (both faces carry the same inscription, read from its own side)
     const yaw = Math.atan2(nx * sg, nz * sg), o = sg * (el.th / 2 + 0.025);
-    Q.emit(P, ax + ux * el.at + nx * o, el.y + el.cv - h / 2, az + uz * el.at + nz * o, yaw);
+    Q.emit(P, ax + ux * (el.along ?? el.at) + nx * o, el.y + el.cv - h / 2, az + uz * (el.along ?? el.at) + nz * o, yaw);
   }
   P.emit(bag, 0, 0, 0, 0);
 }
