@@ -483,6 +483,26 @@ export function arastaShops(el) {
   }
   return out;
 }
+/**
+ * A worn sill: a stone threshold along (ux, uz) from `o`, u0 to u1, `dep` deep, its top 5.5 cm above `y` at the ends and dipped to 3 cm in the middle (the
+ * hollow of the feet of centuries), the arrises bevelled. Pattern of Suzhou's wear.js (copied: that file reads Suzhou's pieces).
+ */
+export function wornSill(out, o, ux, uz, u0, u1, dep, y, dip = 0.026) {
+  const nx = -uz, nz = ux, N = 12, hz = dep / 2, bev = 0.016;
+  const P = (u, v, h) => [o[0] + ux * u + nx * v, y + h, o[1] + uz * u + nz * v];
+  const top = (u) => { const m = (u - (u0 + u1) / 2) / ((u1 - u0) / 2); return 0.055 - dip * Math.exp(-m * m * 5); };
+  const q = (p0, p1, p2, p3) => out.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);
+  for (let i = 0; i < N; i++) {
+    const ua = u0 + (u1 - u0) * i / N, ub = u0 + (u1 - u0) * (i + 1) / N, ha = top(ua), hb = top(ub);
+    q(P(ua, -hz + bev, ha), P(ub, -hz + bev, hb), P(ub, hz - bev, hb), P(ua, hz - bev, ha));
+    q(P(ua, -hz, ha - bev), P(ub, -hz, hb - bev), P(ub, -hz + bev, hb), P(ua, -hz + bev, ha));
+    q(P(ua, hz - bev, ha), P(ub, hz - bev, hb), P(ub, hz, hb - bev), P(ua, hz, ha - bev));
+    q(P(ua, -hz, 0), P(ub, -hz, 0), P(ub, -hz, hb - bev), P(ua, -hz, ha - bev));
+    q(P(ub, hz, 0), P(ua, hz, 0), P(ua, hz, ha - bev), P(ub, hz, hb - bev));
+  }
+  q(P(u0, hz, 0), P(u0, -hz, 0), P(u0, -hz, top(u0) - bev), P(u0, hz, top(u0) - bev));
+  q(P(u1, -hz, 0), P(u1, hz, 0), P(u1, hz, top(u1) - bev), P(u1, -hz, top(u1) - bev));
+}
 /** A hash in [0, 1) of a position (variation by place, never by a counter). */
 const hashAt = (x, z, s = 0) => { let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
 
@@ -526,6 +546,9 @@ function arasta(el, ctx) {
       const gap = 0.85, sk = hashAt(X(0), zc, 4) < 0.5 ? -1 : 1;         // the keeper's side of the shop, by the shop's place
       bag.add(S, box(Math.min(X(d - 0.45), X(d + 0.75)), y - 0.3, zc - gap, Math.max(X(d - 0.45), X(d + 0.75)), y + 0.3, zc + gap));
       col.floor([Math.min(X(d - 0.45), X(d + 0.75)), zc - gap, Math.max(X(d - 0.45), X(d + 0.75)), zc + gap], y + 0.3);
+      // worn: a hollowed sill on the doorway's line, the step's outer edge rounded
+      { const sill = []; wornSill(sill, [X(d - 0.15), 0], 0, 1, zc - gap + 0.05, zc + gap - 0.05, 0.34 + 0.04 * hashAt(X(0), zc, 8), y + 0.3, 0.014 + 0.02 * hashAt(X(0), zc, 9)); bag.add(S, fromTriangles(sill)); }
+      bag.add(S, rod([X(d + 0.72), y + 0.285, zc - gap + 0.02], [X(d + 0.72), y + 0.285, zc + gap - 0.02], 0.026 + 0.008 * hashAt(X(0), zc, 10), 6));
       // the shutter frame: a beam across the arch at the springing, the fixed lattice above it
       bag.add('wood_dark', box(Math.min(X(d - 0.62), X(d - 0.42)), ys - 0.2, za, Math.max(X(d - 0.62), X(d - 0.42)), ys, zb));
       for (let v = za + 0.25; v < zb - 0.1; v += 0.25) { const top2 = ys + Math.sqrt(Math.max(0, 1 - ((v - zc) / hw) ** 2)) * hw * 1.2 - 0.1; if (top2 > ys + 0.05) bag.add('wood_dark', box(Math.min(X(d - 0.56), X(d - 0.5)), ys, v - 0.02, Math.max(X(d - 0.56), X(d - 0.5)), Math.min(top2, ys + 1.5), v + 0.02)); }
