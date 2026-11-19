@@ -165,6 +165,19 @@ export function lots() {
       XL.push([x, zb]); x += XLANE;
     }
   }
+  // the houses at the Way's foot, on the road the visitor walks up from the Agora to the ramp (docs §18): the road lots deepened to 15 m
+  // (away from the road) and opened as walk-in houses of the small plan, where the ground is level enough for a floor
+  for (const l of [...LOTS]) {
+    if (!l.road || l.open || (l.front !== 'n' && l.front !== 's')) continue;
+    const [x0, z0, x1, z1] = l.rect, n = l.front === 'n', r = n ? [x0, z0, x1, z0 + 15] : [x0, z1 - 15, x1, z1];
+    const hit = LOTS.filter((o) => o !== l && r[0] < o.rect[2] + 0.1 && r[2] > o.rect[0] - 0.1 && r[1] < o.rect[3] + 0.1 && r[3] > o.rect[1] - 0.1);
+    if (x1 - x0 < 9 || hit.some((o) => o.road || o.open) || !rectFree(r, [], true)) continue;
+    const [g0, g1] = groundOf(r);
+    if (g1 - l.y > 0.3 || l.y - g0 > 1.2) continue;                  // (the floor stays at the street's height: the ground may fall away behind it, not rise)
+    for (const o of hit) LOTS.splice(LOTS.indexOf(o), 1);          // the closed houses of the band behind give way
+    l.rect = r; l.fall = Math.max(0, l.y - g0); l.open = true; l.kind = 'small'; l.walkRoad = true;
+  }
+  HASH = new Map(); LOTS.forEach((l, i) => hashAdd(l, i));
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => !!lotAt(x, z, m);

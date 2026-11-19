@@ -11,6 +11,7 @@ import { summitAltar } from './summit.js';
 import './maidens.js';
 import { houseWalks } from './houses.js';
 import './promachos.js';
+import { walkRoutes } from './walk.js';
 
 const T = ACRO.top, E = [];
 // ── the Propylaia (Mnesikles, 437–432; docs/settlements/athens.md §4b) ──
@@ -239,6 +240,8 @@ E.push({ t: 'stoa', rect: [-292, -195, -281.27, -151.44], front: 'e', y: 0.4, h:
 E.push({ t: 'zeus_statue', at: [-268.5, -173.2], y: 0, rot: Math.PI / 2 });
 E.push({ t: 'stoa', rect: [-262, -124.89, -219, -110], front: 'n', y: 0.35, h: 3.6, d: 0.53, sp: 1.745, flutes: 0, inner: { d: 0.5, every: 2 }, rooms: { n: 8, depth: 5.9 }, mat: 'limestone', wall: 'mud_plaster', seed: 41 });
 E.push({ t: 'tholos', c: [-280, -133], r: 9.16, h: 5.2, y: 0.1 });
+// two steps up to the Tholos' door over its socle (the socle's face is a wall to the walker; docs §18)
+E.push({ t: 'stair', rect: [-271.9, -134.5, -269.2, -131.5], dir: 'w', y0: 0, y1: 0.4, riser: 0.2, base: -0.3, mat: 'limestone' });
 E.push({ t: 'horos', at: [-267.5, -120.5], y: 0, rot: Math.PI / 2 });
 E.push({ t: 'altar12', c: [-240, -208], y: 0 });
 // the Herms at the north-west corner, where the Panathenaic Way comes in
@@ -267,6 +270,7 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('acropolis', [-108, -55, 128, 55], T + 0.04, 'open'), room('agora', AGORA, 0, 'open')];
 const walks = [[[-300, 70], [-235, 45], [-175, 18], [-150, 2], [-136, 0], [-100, 0]]];
 walks[0].y0 = height(-300, 70);
+walks.push(...walkRoutes());                                   // the visitor's walk: into the stoas, shops, Tholos and market (docs §18)
 walks.push(...houseWalks());                                   // the stairs and ladders of the houses opened upstairs (docs §17)
 
 export const acropolis = {
