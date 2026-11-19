@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.45 — brush writing in Suzhou (2026-11-19)
+
+The tablets, boards and shop signs of Suzhou are written with a brush: tapered strokes with their press and lift, hooks and teardrop dots, in slight relief, gilt on black lacquer or ink on plain wood within a raised frame; horizontal boards read from right to left. Sixty-eight characters, each checked against its standard form: the garden's halls and pavilions, the five new boards of Wen Zhengming's scenes (槐雨亭, 凈深亭, 嘉實亭, 得真亭, 爾耳軒), the temple gate (報恩寺) and shop boards for twelve trades.
+
 ## v12.44 — the garden as Wen Zhengming recorded it (2026-11-19)
 
 Eighteen more of the thirty-one scenes of Wen Zhengming's record of the Humble Administrator's Garden are built, small and plain as the Ming garden was, and four more planted as groves: the Locust Rain pavilion with its banana rail, the fishing rock, the Jade Spring with its kerb, the terrace for the distant view, the Pavilion of Fine Fruit, Dezhen pavilion, the rose path and arches, the bamboo brook and its bridge, the herb plot, seats for the pine wind. Every position is inferred from the order and directions of the record and is marked so in the dossier.
