@@ -2,7 +2,8 @@
 // Beg's madrasa on its west side with its pishtaq, minarets, court and cells (the north-east corner hall a furnished
 // classroom), the khanqah on the east, the rows of shops on the north and south. The other monuments are in town.js.
 
-import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S, TAPCHANS, marketLayout } from './layout.js';
+import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S, TAPCHANS, marketLayout, houses, houseGeom } from './layout.js';
+import { upperRoute } from '../../styles/timurid/upper.js';
 
 const E = [];
 E.push({ t: 'tim_madrasa', rect: MADRASA });
@@ -34,6 +35,20 @@ const rooms = [
 ];
 const walks = [[[40, 0], [0, 0], [-40, 0], [-52, 0], [-66, 0], [-83, 0]]];
 walks[0].y0 = 0;
+// from the lane to an upper room of the houses nearest the arrival: three merchant's houses and one of each trade's (stair of the court, roof, upper room)
+{
+  const near = houses().filter((h) => !h.garden && h.full).map((h) => ({ h, d: Math.hypot((h.rect[0] + h.rect[2]) / 2 - 14, (h.rect[1] + h.rect[3]) / 2) })).sort((a, b) => a.d - b.d);
+  const seen = new Map();
+  for (const { h } of near) {
+    const key = h.rich ? 'rich' : h.trade, cap = h.rich ? 3 : 1;
+    if ((seen.get(key) || 0) >= cap) continue;
+    const R = upperRoute(h);
+    if (!R) continue;
+    seen.set(key, (seen.get(key) || 0) + 1);
+    const G = houseGeom(h), w = R.map(([x, z]) => G.toWorld(x, z));
+    w.y0 = 0; walks.push(w);
+  }
+}
 
 export const registan = {
   id: 'samarkand-registan',

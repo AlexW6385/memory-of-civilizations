@@ -10,6 +10,7 @@ import { houseGeom } from '../../settlements/timurid-samarkand/layout.js';
 import { frame } from './frame.js';
 import { laneItem } from './market.js';
 import { workshop } from './workshops.js';
+import { upperFloor, upperMass, facts as upperFacts } from './upper.js';
 import { bannai, rng, B, LAP, TUR, CRE, WHI } from './kit.js';
 
 const bx = (bag, m, x0, y0, z0, x1, y1, z1) => bag.add(m, box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1)));
@@ -107,6 +108,9 @@ function dressFace(f, bag, rand, o) {
   for (let i = 0; i < n; i++) f.put(bag, i % 4 === 3 ? 'wood_dark' : 'timber', 0.3 + i * 0.6 - 0.05, 0.3 + i * 0.6 + 0.05, o.H - 0.32, o.H - 0.2, 0, 0.32);
   // small high windows with a lattice in a brick frame
   for (const s of o.windows ?? []) {
+    if (o.open) {
+      continue;
+    }
     f.put(bag, 'brick_buff', s - 0.45, s + 0.45, o.wy - 0.07, o.wy + 0.6, 0, 0.05);
     f.put(bag, 'lattice', s - 0.34, s + 0.34, o.wy, o.wy + 0.5, 0.05, 0.1);
   }
@@ -151,6 +155,7 @@ export function timHouse(el, ctx) {
     face(E2, H, 2.4, full && rsgn > 0 ? [] : [D / 2]); face(W2, H, 2.4, full && rsgn < 0 ? [] : [D / 2]);
     bx(bag, D0, xd - PW / 2, 0, z1 - 0.6, xd + PW / 2, DH, z1 - 0.55);
     if (full) { const zc = (zf + zs) / 2; bx(bag, D0, rsgn < 0 ? x0 - 0.03 : x1, 1.6, zc - 0.4, rsgn < 0 ? x0 : x1 + 0.03, 2.4, zc + 0.4); }
+    upperMass(bag, upperFacts(h), WALL);
     void hW;
     return;
   }
@@ -160,8 +165,9 @@ export function timHouse(el, ctx) {
   solid(fr, WALL, -3.6, z0, 3.6, zb, 0, HN);
   bx(bag, WALL, -3.6, 3.6, zb, 3.6, HN, zf); col.rect([-3.6, zb, 3.6, zf], 3.3, HN);
   // the street wing with the passage
-  solid(fr, WALL, x0, zs, xd - PW / 2, z1, 0, HS); solid(fr, WALL, xd + PW / 2, zs, x1, z1, 0, HS);
-  bx(bag, WALL, xd - PW / 2, DH, zs, xd + PW / 2, HS, z1); col.rect([xd - PW / 2, zs, xd + PW / 2, z1], DH, HS);
+  const HG = rich ? H : HS;       // a rich house: the ground floor's top is the upper floor (upper.js builds what stands on it)
+  solid(fr, WALL, x0, zs, xd - PW / 2, z1, 0, HG); solid(fr, WALL, xd + PW / 2, zs, x1, z1, 0, HG);
+  bx(bag, WALL, xd - PW / 2, DH, zs, xd + PW / 2, HG, z1); col.rect([xd - PW / 2, zs, xd + PW / 2, z1], DH, HG);
   bx(bag, 'brick_paving', xd - PW / 2, 0, zs, xd + PW / 2, 0.06, z1);
   // the side wings (the room's wing is built below)
   const side = (sg) => {
@@ -210,7 +216,7 @@ export function timHouse(el, ctx) {
   const S = faceOf([x0, z1], [x1, z1], [0, 1]), Nf = faceOf([x1, z0], [x0, z0], [0, -1]), Ef = faceOf([x1, z1], [x1, z0], [1, 0]), Wf = faceOf([x0, z0], [x0, z1], [-1, 0]);
   const swin = []; for (const s of [3.4, W - 3.4]) if (Math.abs(s - (xd - x0)) > 2.2 && rand() < 0.8) swin.push(s);
   const sfaceSkip = [[xd - x0 - 1.8, xd - x0 + 1.8]];
-  dressFace(S, bag, rand, { H: HS, wy: rich ? 5.0 : 2.5, windows: rich ? [4.5, W - 4.5, W / 2 + 3] : swin, skip: sfaceSkip, brick: WALL === 'brick_buff' });
+  dressFace(S, bag, rand, { H: HS, wy: rich ? 5.0 : 2.5, windows: rich ? [1.8, 4.5, W / 2 + 3, W - 4.5, W - 1.8] : swin, open: rich, skip: sfaceSkip, brick: WALL === 'brick_buff' });
   dressFace(Nf, bag, rand, { H: HN, wy: 2.5, windows: rand() < 0.5 ? [W / 2] : [], brick: WALL === 'brick_buff' });
   dressFace(Ef, bag, rand, { H, wy: 2.4, windows: h.full && rsgn > 0 ? [] : [D / 2], brick: WALL === 'brick_buff' });
   dressFace(Wf, bag, rand, { H, wy: 2.4, windows: h.full && rsgn < 0 ? [] : [D / 2], brick: WALL === 'brick_buff' });
@@ -282,18 +288,26 @@ export function timHouse(el, ctx) {
     }
     if (!rich && front !== 'gate' && h.seed % 3 === 1) for (let i = 0; i * 0.9 + 0.8 < W; i++) bx(bag, WALL, x0 + 0.35 + i * 0.9, HS + 0.71, z1 - 0.3, x0 + 0.8 + i * 0.9, HS + 1.05, z1);
   }
-  // the roof of the street wing: a rich house's balcony of timber over the lane
-  if (rich) {
-    const s = W / 2 - 3, bw = 4.4;
-    for (let i = 0; i < 4; i++) S.put(bag, 'timber', s - bw / 2 + 0.3 + i * (bw - 0.6) / 3 - 0.07, s - bw / 2 + 0.3 + i * (bw - 0.6) / 3 + 0.07, 3.55, 3.95, 0, 1.0);
-    S.put(bag, 'timber', s - bw / 2, s + bw / 2, 3.95, 4.05, 0, 1.05);
-    S.put(bag, 'wood_painted', s - bw / 2, s + bw / 2, 4.05, 4.12, 0, 1.05);
-    for (let i = 0; i <= 8; i++) S.put(bag, 'timber', s - bw / 2 + i * bw / 8 - 0.03, s - bw / 2 + i * bw / 8 + 0.03, 4.12, 5.1, 0.98, 1.04);
-    S.put(bag, 'lattice', s - bw / 2, s + bw / 2, 4.2, 5.0, 0.98, 1.02);
-    S.put(bag, 'timber', s - bw / 2, s + bw / 2, 5.1, 5.18, 0.95, 1.07);
-    S.put(bag, 'wood_dark', s - 0.7, s + 0.7, 4.12, 5.6, 0, 0.06); S.put(bag, 'lattice', s - 0.6, s + 0.6, 4.3, 5.4, 0.06, 0.1);
-    { const p = S.p(s - bw / 2, 0), q = S.p(s + bw / 2, 1.05); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], 4.05, 5.2); }
-  }
+  // the roof of the street wing: a rich house's balcony of timber over the lane, level with the upper floor (a deck to step out on, rails on three sides)
+  const balcony = () => {
+    const s = W / 2 - 3, bw = 4.4, fy = H, dy = fy - 4.12;
+    for (let i = 0; i < 4; i++) S.put(bag, 'timber', s - bw / 2 + 0.3 + i * (bw - 0.6) / 3 - 0.07, s - bw / 2 + 0.3 + i * (bw - 0.6) / 3 + 0.07, 3.55 + dy, 3.95 + dy, 0, 1.0);
+    S.put(bag, 'timber', s - bw / 2, s + bw / 2, 3.95 + dy, 4.05 + dy, 0, 1.05);
+    S.put(bag, 'wood_painted', s - bw / 2, s + bw / 2, 4.05 + dy, 4.12 + dy, 0, 1.05);
+    for (let i = 0; i <= 8; i++) S.put(bag, 'timber', s - bw / 2 + i * bw / 8 - 0.03, s - bw / 2 + i * bw / 8 + 0.03, 4.12 + dy, 5.1 + dy - 0.1, 0.98, 1.04);
+    S.put(bag, 'lattice', s - bw / 2, s + bw / 2, 4.3 + dy, 4.95 + dy, 0.98, 1.02);
+    S.put(bag, 'timber', s - bw / 2, s + bw / 2, 5.0 + dy, 5.08 + dy, 0.95, 1.07);
+    for (const sg of [-1, 1]) S.put(bag, 'timber', s + sg * 0.55 - 0.05, s + sg * 0.55 + 0.05, 4.12 + dy, 5.0 + dy, 0.0, 0.1);
+    S.put(bag, 'timber', s - 0.65, s + 0.65, 4.12 + dy + 2.1, 4.12 + dy + 2.2, 0, 0.12);
+    const rc = (a, b, y0, y1) => { const p = S.p(a, 0), q = S.p(b, 1.05); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y0, y1); };
+    const fl = (a, b, o0, o1, y) => { const p = S.p(a, o0), q = S.p(b, o1); col.floor([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y); };
+    fl(s - bw / 2, s + bw / 2, 0.0, 1.05, fy);
+    // rails: the front and the two ends (the wall side is the house)
+    { const p = S.p(s - bw / 2, 0.95), q = S.p(s + bw / 2, 1.05); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], fy, fy + 1.0); }
+    for (const e of [s - bw / 2, s + bw / 2 - 0.1]) { const p = S.p(e, 0), q = S.p(e + 0.1, 1.05); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], fy, fy + 1.0); }
+    void rc;
+  };
+  if (rich) balcony();
   // ---- the passage's screen, the court
   const sx = xd, scz = zs - 1.5;
   solid(fr, 'kahgel', sx - 1.8, scz - 0.2, sx + 1.8, scz + 0.2, 0, 2.3);
@@ -359,7 +373,8 @@ export function timHouse(el, ctx) {
     for (let i = 0; i < 28; i++) bx(bag, i % 4 ? 'cloth_ochre' : 'cloth_red', rx + 0.1 + (i % 7) * 0.26, H + 0.04, zf + 1.0 + Math.floor(i / 7) * 0.28, rx + 0.2 + (i % 7) * 0.26, H + 0.08, zf + 1.1 + Math.floor(i / 7) * 0.28);
     if (rand() < 0.4) { const px = (x0 + xl) / 2 * (rsgn > 0 ? -1 : 1) + (rsgn > 0 ? 0 : 0); bx(bag, 'kahgel', px - 0.7, HN, z0 + 1.5, px + 0.7, HN + 1.6, z0 + 2.9); for (let i = 0; i < 6; i++) bx(bag, 'wood_dark', px - 0.5 + (i % 3) * 0.4, HN + 0.9 + Math.floor(i / 3) * 0.35, z0 + 2.9, px - 0.4 + (i % 3) * 0.4, HN + 1.0 + Math.floor(i / 3) * 0.35, z0 + 2.95); }
   }
-  if (!rich && rand() < 0.28) { const r = 1.5; bag.add('kahgel', lathe([[r, 0], [r * 0.96, r * 0.35], [r * 0.7, r * 0.75], [r * 0.3, r * 0.98], [0.001, r]], 12, null, x1 - 3, HS + 0.05, z1 - 2.4)); }
+  if (!rich && rand() < 0.28 && !(upperFacts(h).room && upperFacts(h).room.e > 0)) { const r = 1.5; bag.add('kahgel', lathe([[r, 0], [r * 0.96, r * 0.35], [r * 0.7, r * 0.75], [r * 0.3, r * 0.98], [0.001, r]], 12, null, x1 - 3, HS + 0.05, z1 - 2.4)); }
+  upperFloor({ bag, col, lights }, h);
   void lathe; void rod; void B;
 }
 
