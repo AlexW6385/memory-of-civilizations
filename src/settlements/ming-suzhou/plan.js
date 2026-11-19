@@ -284,6 +284,7 @@ for (const [id, text, w, h] of [['hefeng', '荷風四面亭', 2.0, 0.5], ['xuexi
 }
 // Little Canglang (on its north front) and Small Flying Rainbow (over each end of the bridge)
 E.push({ t: 'plaque', at: [(B.xiaocanglang.rect[0] + B.xiaocanglang.rect[2]) / 2, B.xiaocanglang.rect[1] - 0.2], y: G + B.xiaocanglang.y + 3.4 - 0.98, facing: [0, -1], w: 1.5, h: 0.5, n: 3, seed: 34, text: '小滄浪', finish: 'wood' });
+for (const [x, f] of [[B.xiaofeihong.rect[0] + 0.1, -1], [B.xiaofeihong.rect[2] - 0.1, 1]]) E.push({ t: 'plaque', at: [x, (B.xiaofeihong.rect[1] + B.xiaofeihong.rect[3]) / 2], y: G + B.xiaofeihong.y + 2.7 - 0.84, facing: [f, 0], w: 1.4, h: 0.44, n: 3, seed: 35 + f, text: '小飛虹', finish: 'wood' });
 // the couplet on the two columns of the Hall of Distant Fragrance's doorway, facing the pond
 for (const x of [0, 3.6]) E.push({ t: 'plaque', at: [x, B.yuanxiang.rect[1] - 0.17], y: G + B.yuanxiang.y + 1.2, facing: [0, -1], w: 0.3, h: 2.5, n: 7, vertical: true, seed: 20 + x, field: 'lacquer_black', ink: 'gilt_bronze' });
 // potted landscapes on stone stands: in the loquat court, before the Hall of Distant Fragrance, in the study's court

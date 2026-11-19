@@ -11,59 +11,26 @@
 // each as one instanced mesh), so a street of shops costs a few hundred matrices, not geometry.
 // Local frame of a shop: x along the front, z out into the street, y up from the street.
 
-import { box, lathe, fromTriangles, rod, hangFrom, windMat } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod, hangFrom, windMat, placeHanging } from '../../core/geom.js';
 import { placer, assembly, rng } from '../../objects/kit.js';
+import { Matrix4, Quaternion, Vector3 } from '../../core/three.js';
 import { prismX } from './props.js';
+import { glyphGeometry } from './script.js';
 
-// ── the writing: characters as brush strokes ──────────────────────────────────────────────────────
-// Each character is a few strokes [kind, x0, y0, x1, y1] on a 100-unit grid (heng, shu, pie, na, dian,
-// ti): the hand of a signwriter, tapered, raised from the board on a lower layer. They are the
-// characters the shops' trades call for (cha, jiu, mi, bu, yao, shu, jin, mian) and a few of the
-// names (yong, ji, lin, tong, ben); the strokes are approximations, as the study's boards.
-const GLYPHS = {
-  茶: [['h', 12, 92, 88, 92], ['s', 34, 100, 34, 82], ['s', 66, 100, 66, 82], ['p', 50, 80, 22, 54], ['n', 50, 80, 80, 54], ['h', 16, 40, 84, 40], ['s', 50, 52, 50, 4], ['p', 46, 34, 16, 8], ['n', 54, 34, 84, 8]],
-  酒: [['d', 16, 92, 26, 84], ['d', 10, 70, 20, 62], ['t', 10, 32, 26, 46], ['h', 42, 90, 92, 90], ['s', 48, 90, 48, 14], ['s', 86, 90, 86, 14], ['h', 48, 14, 86, 14], ['h', 48, 52, 86, 52], ['s', 67, 90, 67, 52]],
-  米: [['d', 30, 88, 42, 78], ['p', 70, 88, 60, 78], ['h', 12, 62, 88, 62], ['s', 50, 96, 50, 6], ['p', 46, 58, 14, 12], ['n', 54, 58, 86, 12]],
-  布: [['h', 10, 80, 90, 80], ['p', 46, 92, 16, 18], ['s', 28, 58, 28, 8], ['h', 28, 58, 80, 58], ['s', 80, 58, 80, 18], ['s', 54, 76, 54, 4]],
-  藥: [['h', 8, 95, 92, 95], ['s', 30, 100, 30, 88], ['s', 70, 100, 70, 88], ['d', 22, 82, 32, 74], ['d', 66, 82, 76, 74], ['h', 38, 84, 62, 84], ['s', 38, 84, 38, 68], ['s', 62, 84, 62, 68], ['h', 38, 76, 62, 76], ['h', 38, 68, 62, 68], ['h', 12, 56, 88, 56], ['s', 50, 62, 50, 6], ['p', 46, 52, 12, 22], ['n', 54, 52, 90, 22], ['d', 26, 56, 32, 44], ['d', 74, 56, 68, 44]],
-  書: [['s', 50, 100, 50, 46], ['h', 22, 90, 78, 90], ['h', 22, 78, 78, 78], ['h', 22, 66, 78, 66], ['s', 22, 90, 22, 66], ['s', 78, 90, 78, 66], ['h', 12, 52, 88, 52], ['s', 24, 40, 24, 4], ['s', 76, 40, 76, 4], ['h', 24, 40, 76, 40], ['h', 24, 22, 76, 22], ['h', 24, 4, 76, 4]],
-  金: [['p', 50, 98, 12, 66], ['n', 50, 98, 88, 66], ['h', 28, 72, 72, 72], ['h', 20, 56, 80, 56], ['s', 50, 72, 50, 14], ['d', 32, 44, 40, 36], ['d', 68, 44, 60, 36], ['h', 8, 16, 92, 16]],
-  林: [['h', 6, 66, 44, 66], ['s', 25, 92, 25, 8], ['p', 22, 58, 6, 34], ['d', 28, 58, 44, 34], ['h', 56, 66, 94, 66], ['s', 75, 92, 75, 8], ['p', 72, 58, 56, 34], ['d', 78, 58, 94, 34]],
-  永: [['d', 50, 98, 58, 88], ['h', 20, 76, 80, 76], ['s', 50, 76, 50, 10], ['p', 48, 56, 16, 38], ['p', 48, 40, 14, 12], ['n', 52, 56, 86, 12]],
-  同: [['s', 12, 92, 12, 8], ['h', 12, 92, 88, 92], ['s', 88, 92, 88, 14], ['h', 32, 66, 68, 66], ['s', 32, 66, 32, 32], ['s', 68, 66, 68, 32], ['h', 32, 32, 68, 32]],
-  本: [['h', 10, 64, 90, 64], ['s', 50, 96, 50, 4], ['p', 46, 58, 14, 14], ['n', 54, 58, 86, 14], ['h', 32, 24, 68, 24]],
-  面: [['h', 12, 90, 88, 90], ['s', 50, 98, 50, 90], ['s', 12, 90, 12, 10], ['s', 88, 90, 88, 10], ['s', 30, 70, 30, 16], ['s', 70, 70, 70, 16], ['h', 30, 70, 70, 70], ['h', 30, 44, 70, 44], ['h', 30, 16, 70, 16], ['s', 50, 70, 50, 16]],
-  吉: [['h', 26, 96, 74, 96], ['s', 50, 98, 50, 56], ['h', 14, 78, 86, 78], ['s', 26, 52, 26, 10], ['h', 26, 52, 74, 52], ['s', 74, 52, 74, 10], ['h', 26, 10, 74, 10]],
-  當: [['s', 50, 100, 50, 84], ['p', 40, 96, 28, 82], ['d', 62, 96, 74, 84], ['h', 16, 76, 84, 76], ['s', 16, 76, 16, 62], ['s', 84, 76, 84, 62], ['s', 36, 70, 36, 58], ['h', 36, 70, 64, 70], ['s', 64, 70, 64, 58], ['h', 36, 58, 64, 58], ['h', 22, 48, 78, 48], ['s', 22, 48, 22, 6], ['s', 78, 48, 78, 6], ['h', 22, 28, 78, 28], ['h', 22, 6, 78, 6], ['s', 50, 48, 50, 6]],
-  和: [['h', 6, 78, 44, 78], ['p', 28, 98, 10, 86], ['s', 26, 94, 26, 6], ['p', 24, 66, 8, 40], ['n', 28, 66, 46, 40], ['s', 56, 72, 56, 22], ['h', 56, 72, 92, 72], ['s', 92, 72, 92, 22], ['h', 56, 22, 92, 22]],
-  昌: [['s', 30, 98, 30, 58], ['s', 70, 98, 70, 58], ['h', 30, 98, 70, 98], ['h', 30, 78, 70, 78], ['h', 30, 58, 70, 58], ['s', 30, 44, 30, 6], ['s', 70, 44, 70, 6], ['h', 30, 44, 70, 44], ['h', 30, 25, 70, 25], ['h', 30, 6, 70, 6]],
-  泰: [['h', 18, 96, 82, 96], ['h', 8, 82, 92, 82], ['p', 50, 100, 12, 62], ['n', 50, 88, 90, 62], ['s', 50, 56, 50, 4], ['p', 44, 48, 16, 22], ['n', 56, 48, 86, 22], ['d', 24, 52, 30, 42], ['d', 76, 52, 70, 42]],
-  大: [['h', 8, 66, 92, 66], ['p', 50, 98, 10, 6], ['n', 50, 66, 92, 6]],
-  太: [['h', 8, 66, 92, 66], ['p', 50, 98, 10, 6], ['n', 50, 66, 92, 6], ['d', 66, 34, 78, 22]],
-  元: [['h', 22, 90, 78, 90], ['h', 10, 66, 90, 66], ['p', 40, 62, 26, 8], ['s', 66, 62, 66, 20], ['h', 66, 20, 88, 14]],
-  正: [['h', 12, 92, 88, 92], ['s', 50, 92, 50, 30], ['s', 28, 72, 28, 30], ['h', 28, 52, 50, 52], ['h', 8, 14, 92, 14]],
-  德: [['p', 30, 96, 10, 74], ['p', 30, 74, 10, 52], ['s', 22, 52, 22, 8], ['h', 42, 92, 92, 92], ['h', 46, 80, 90, 80], ['h', 42, 68, 92, 68], ['s', 66, 98, 66, 54], ['s', 52, 54, 52, 38], ['h', 52, 54, 84, 54], ['s', 84, 54, 84, 38], ['h', 52, 38, 84, 38], ['s', 66, 38, 66, 12], ['p', 62, 24, 50, 8], ['d', 76, 18, 86, 10]],
-};
-/** A glyph's strokes placed in the box x0…x1 × y0…y1 of the 100-grid (for the compound characters). */
-const sub = (ch, x0, y0, x1, y1) => GLYPHS[ch].map(([k, ax, ay, bx, by]) => [k, x0 + ax * (x1 - x0) / 100, y0 + ay * (y1 - y0) / 100, x0 + bx * (x1 - x0) / 100, y0 + by * (y1 - y0) / 100]);
-// the noodle shop's 麵: the wheat radical (left) and 面 (right)
-GLYPHS['麵'] = [['h', 4, 90, 42, 90], ['s', 23, 100, 23, 28], ['h', 6, 66, 40, 66], ['s', 14, 66, 14, 40], ['s', 34, 66, 34, 40], ['p', 22, 34, 4, 8], ['n', 26, 34, 44, 8], ...sub('面', 50, 4, 98, 96)];
-/** Width at the start and end of a stroke, and how far its caps run on (in grid units / 100). */
-const STROKE = { h: [0.068, 0.09, 0.02, 0.035], s: [0.095, 0.058, 0.02, 0.05], p: [0.1, 0.02, 0.02, 0.06], n: [0.03, 0.125, 0.01, 0.045], d: [0.125, 0.085, 0.02, 0.03], t: [0.085, 0.03, 0.02, 0.05] };
-/** A stroke's tapered outline (counter-clockwise), pushed as triangles extruded from z0 to z1 (front face and sides, no back). */
-function stroke(out, [k, ax, ay, bx, by], grow, z0, z1) {
-  const [wa, wb, ca, cb] = STROKE[k], dx = bx - ax, dy = by - ay, l = Math.hypot(dx, dy) / 100, ux = dx / 100 / l, uy = dy / 100 / l, nx = -uy, ny = ux;
-  const A = [ax / 100 - 0.5, ay / 100 - 0.5], B = [bx / 100 - 0.5, by / 100 - 0.5], g = grow;
-  const P = [
-    [A[0] - ux * (ca + g), A[1] - uy * (ca + g)], [A[0] - nx * (wa / 2 + g), A[1] - ny * (wa / 2 + g)], [B[0] - nx * (wb / 2 + g), B[1] - ny * (wb / 2 + g)],
-    [B[0] + ux * (cb + g), B[1] + uy * (cb + g)], [B[0] + nx * (wb / 2 + g), B[1] + ny * (wb / 2 + g)], [A[0] + nx * (wa / 2 + g), A[1] + ny * (wa / 2 + g)],
-  ];
-  for (let i = 1; i < 5; i++) out.push(P[0][0], P[0][1], z1, P[i][0], P[i][1], z1, P[i + 1][0], P[i + 1][1], z1);
-  for (let i = 0; i < 6; i++) {
-    const p = P[i], q = P[(i + 1) % 6];
-    out.push(p[0], p[1], z0, q[0], q[1], z0, q[0], q[1], z1, p[0], p[1], z0, q[0], q[1], z1, p[0], p[1], z1);
-  }
+// ── the writing: characters as brush relief (script.js, brush.js; docs/settlements/ming-suzhou.md §23) ──
+// Each character is built in two forms of one cell of 1 m, scaled by the placing: the near form in full relief
+// (the strokes tapered, bevelled and raised 9 cm of the cell; drawn within about 20 m) and the far form flat,
+// its face a little inside the near form's walls so that the two never show at once (drawn to the street's far end).
+// Each is built in six hands (the stroke weight differs a little), picked by a hash of the place.
+const HANDS = [0.94, 1.0, 1.06, 1.12, 0.97, 1.03], SHAPES = new Map();
+function glyphShape(ch, v) {
+  const key = ch + v;
+  let s = SHAPES.get(key);
+  if (!s) SHAPES.set(key, (s = { near: glyphGeometry(ch, 0, 0.09, { thick: HANDS[v] }), far: glyphGeometry(ch, 0.04, 0.04, { flat: true, top: 0.74, thick: HANDS[v] }) }));
+  return s;
 }
+const hashPos = (x, z, y) => { let h = (Math.round(x * 37) * 73856093) ^ (Math.round(z * 37) * 19349663) ^ (Math.round(y * 37) * 83492791); h = Math.imul(h ^ (h >>> 13), 0x5bd1e995); return ((h ^ (h >>> 15)) >>> 0) / 4294967296; };
+const _gm = new Matrix4(), _gq = new Quaternion(), _gu = new Vector3(0, 1, 0), _gp = new Vector3(), _gs = new Vector3();
 
 // ── the shapes (built once, shared by every shop) ─────────────────────────────────────────────────
 const U = {}, DEF = {};
@@ -80,21 +47,11 @@ const rodG = (a, b, r, seg = 6) => rod(a, b, r, seg);
 const bowl = (x, y, z, k = 1) => ly([[0.001, 0], [0.036 * k, 0], [0.07 * k, 0.026 * k], [0.088 * k, 0.07 * k], [0.082 * k, 0.072 * k], [0.064 * k, 0.034 * k], [0.001, 0.014 * k]], 8, x, y, z);
 const jar = (r, h, x, y, z) => ly([[0.001, 0], [r * 0.5, 0], [r, h * 0.22], [r * 1.12, h * 0.5], [r * 0.9, h * 0.78], [r * 0.55, h * 0.93], [r * 0.6, h], [0.001, h]], 10, x, y, z);
 
-/** a glyph (unit cell 1 m; scale it by the placing) in two raised layers: its base and its face. */
-function glyphUnit(ch) {
-  if (U[`g${ch}`]) return;
-  unit(`g${ch}`, { g: 'gilt_bronze' }, (a) => {
-    const t = [];
-    for (const s of GLYPHS[ch]) stroke(t, s, 0.004, 0, 0.09);
-    a('g', fromTriangles(t));
-  });
-}
-for (const ch of Object.keys(GLYPHS)) glyphUnit(ch);
 /** the roles of a unit that are cloth in the wind (their `hang` set from the attachment's height) */
 const WINDY = new Set(['flag.c', 'flag.e', 'streamers.c']);
 // the characters on a flag (cloth, sewn on: they sway with it; its top is 1.04 above the cell's middle at the flag's scale)
 for (const ch of ['酒', '茶', '麵', '當']) {
-  unit(`f${ch}`, { g: 'cloth_black' }, (a) => { const t = []; for (const s of GLYPHS[ch]) stroke(t, s, 0.004, 0, 0.09); a('g', hangFrom(fromTriangles(t), 1.04)); });
+  unit(`f${ch}`, { g: 'cloth_black' }, (a) => a('g', hangFrom(glyphGeometry(ch, 0.03, 0.03, { flat: true, top: 1 }), 1.04)));
   WINDY.add(`f${ch}.g`);
 }
 
@@ -314,9 +271,9 @@ unit('teajars', { j: 'glaze_white', l: 'wood_dark', s: 'bamboo_culm' }, (a) => {
 
 // ── the shop: its parts, laid out by trade and by seed ────────────────────────────────────────────
 /** The characters of a trade's own name, and the pool of names. */
-const TRADE_CHAR = { cloth: '布', tea: '茶', rice: '米', medicine: '藥', lacquer: '金', books: '書', wine: '酒', pottery: '永', iron: '金', fans: '同', food: '麵', pawn: '當' };
+const TRADE_CHAR = { cloth: '布', tea: '茶', rice: '米', medicine: '藥', lacquer: '漆', books: '書', wine: '酒', pottery: '瓷', iron: '金', fans: '扇', food: '麵', pawn: '當' };
 /** The names of the houses (two characters before the trade's own): auspicious compounds, picked by the shop's seed. */
-const NAMES = ['永和', '同和', '大昌', '泰昌', '元和', '正泰', '太和', '同泰', '永昌', '大和', '元昌', '正大', '同德', '永德', '元泰', '太昌'];
+const NAMES = ['永和', '同和', '大昌', '泰昌', '元和', '正泰', '太和', '同泰', '永昌', '大和', '元昌', '正大', '正和', '永泰', '元泰', '太昌'];
 const FLAG = { wine: ['cloth_white', 'cloth_indigo', 'cloth_ochre'], tea: ['cloth_green', 'cloth_ochre'], food: ['cloth_red', 'cloth_white', 'cloth_ochre'], cloth: ['cloth_indigo'], pawn: ['cloth_red', 'cloth_white'] };
 /** The banner each trade hangs from its pole: [unit, y of its hook from the arm]. */
 const BANNER = { wine: 'flag', food: 'flag', tea: 'flag', pawn: 'flag', cloth: 'streamers', medicine: 'gourd', rice: 'dou', lacquer: 'hbowl', books: 'hbook', pottery: 'hvase', iron: 'hpan', fans: 'humbrella' };
@@ -337,7 +294,7 @@ const GOODS = {
 };
 const CLOTHS = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_grey', 'cloth_brown', 'cloth_green', 'cloth_black'];
 const BOOKS = ['cloth_white', 'cloth_indigo', 'cloth_brown'];
-const PLATE = [['lacquer_black', 'gilt_bronze', 'gilt_bronze'], ['lacquer_black', 'gilt_bronze', 'gilt_bronze'], ['lacquer_black', 'gilt_bronze', 'gilt_bronze'], ['lacquer_red', 'gilt_bronze', 'gilt_bronze']];
+const PLATE = [['lacquer_black', 'gilt_bronze', 'paint_ochre'], ['lacquer_black', 'gilt_bronze', 'paint_ochre'], ['lacquer_black', 'gilt_bronze', 'paint_ochre'], ['lacquer_red', 'gilt_bronze', 'paint_ochre']];
 
 /**
  * suzhou_shop: the signs and goods of one shop front { at (the middle of its front, on the lot's edge), y,
@@ -352,8 +309,16 @@ function suzhouShop(el, { bag, col }) {
     const P = placer({ t: el.t, at: loc(x, z), y: y0 + y, rot: rot + ry, s: k }, bag);
     for (const [role, g] of Object.entries(U[name])) { let m = mats[role] ?? DEF[name][role]; if (WINDY.has(`${name}.${role}`)) m = windMat(m); if (globalThis.__shopStat) { const key = `${name}.${role}:${m}`; globalThis.__shopStat[key] = (globalThis.__shopStat[key] || 0) + 1; } P(m, g.clone()); }
   };
-  const glyph = (ch, o) => put(`g${ch}`, { mats: { g: o.m }, x: o.x, z: o.z, y: o.y, ry: o.ry ?? 0, k: o.k });
-  const tc = TRADE_CHAR[trade] || '本';
+  // a character on a board, a sign or a wall: the near form (full relief, to about 20 m; a larger character a little farther) and
+  // the far form (flat, to the street's end), in the hand the place's hash picks (script.js)
+  const glyph = (ch, o) => {
+    const [gx, gz] = loc(o.x, o.z), k = o.k, { near, far } = glyphShape(ch, Math.floor(hashPos(gx, gz, o.y) * HANDS.length));
+    _gm.compose(_gp.set(gx, y0 + o.y, gz), _gq.setFromAxisAngle(_gu, rot + (o.ry ?? 0)), _gs.set(k, k, k));
+    if (!bag.addInstance) { const g = near.clone(); placeHanging(g, _gm); bag.add(o.m, g); return; }
+    bag.addInstance(o.m, near.clone(), _gm, { real: o.m, reach: Math.max(12, Math.min(25, k * 60)) });
+    bag.addInstance(o.m, far.clone(), _gm, { real: o.m, reach: 230 });
+  };
+  const tc = TRADE_CHAR[trade] || '永';
 
   // the name board: over the shutters on the shop board, or on the beam where there is none; its three characters
   // (the house's two-character name, then the trade's own) are 0.34 m tall, so that they read from across the street
@@ -364,7 +329,7 @@ function suzhouShop(el, { bag, col }) {
     const [fm, bm, gm] = pick(PLATE);
     put('plate', { mats: { f: fm, b: bm }, z: zp, y: yc - 0.23 * k, k });
     const chars = [house[0], house[1], tc], pitch = 0.56 * k;
-    chars.forEach((ch, j) => glyph(ch, { m: gm, x: (j - 1) * pitch, z: zp + 0.045 * k, y: yc, k: 0.34 * k }));
+    chars.forEach((ch, j) => glyph(ch, { m: gm, x: (1 - j) * pitch, z: zp + 0.045 * k, y: yc, k: 0.34 * k }));
   }
   // the pawnshop (dang pu): its front a blank wall to the street with the one great character 當 painted on it, the tall counter within
   if (trade === 'pawn' && !el.open && !el.water) {
@@ -376,7 +341,7 @@ function suzhouShop(el, { bag, col }) {
   if (rand() < (el.water ? 0.8 : 0.7)) {
     const x = side * (L / 2 - 0.125), top = 3.08, chars = [house[0], house[1], tc];
     put('hsign', { x, z: zPost, y: top, k: 1 });
-    for (const ry of [Math.PI / 2, -Math.PI / 2]) chars.forEach((ch, j) => glyph(ch, { m: 'gilt_bronze', x: x + Math.sin(ry) * 0.036, z: zPost + 0.81, y: top - 0.42 - j * 0.34, ry, k: 0.31 }));
+    for (const ry of [Math.PI / 2, -Math.PI / 2]) chars.forEach((ch, j) => glyph(ch, { m: 'paint_ochre', x: x + Math.sin(ry) * 0.036, z: zPost + 0.81, y: top - 0.42 - j * 0.34, ry, k: 0.31 }));
   }
   if (!el.water) {
     const x = -side * (L / 2 - 0.2), zp = 0.2, bn = BANNER[trade];

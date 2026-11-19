@@ -240,7 +240,7 @@ export function relief(out, strokes, cx, cy, size, z0, z1, { thick = 1, top = 0.
   for (const st of strokes) for (const rb of ribbonsOf(st, W)) {
     const sec = sections(rb), m = sec.length, hi = flat ? z0 : z1;
     const B = [], T = [];                                    // the outline loop at the foot and at the face
-    for (const q of [[1, B], [flat ? 1 : top, T]]) {
+    for (const q of [[1, B], [top, T]]) {
       const kk = q[0], arr = q[1], R = [], L = [];
       for (const s of sec) { R.push([X(s.cx - s.nx * s.hr * kk), Y(s.cy - s.ny * s.hr * kk)]); L.push([X(s.cx + s.nx * s.hl * kk), Y(s.cy + s.ny * s.hl * kk)]); }
       arr.push(R, L);
