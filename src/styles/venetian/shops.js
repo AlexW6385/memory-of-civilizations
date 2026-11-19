@@ -47,6 +47,8 @@ export function shopShell(Sh, col, FM, y, L, D, h, slots) {
     // the room: a boarded floor, the ceiling slab (the underside of the block over it)
     Sh.box(FLOOR, su0, -0.3, back, su1, 0.05, d1); col.floor(wr(su0, su1, back, d1), y + 0.05);
     Sh.box(PL, su0, CEIL, back, su1, YA, d0); col.rect(wr(su0, su1, back, d0), y + CEIL, y + h);
+    // the doorstep: a slab of Istrian stone worn to a dish by the feet of the generations (the middle 1.2 m, 1 cm lower), level with the boards [inferred]
+    Sh.box(I, dc0, -0.02, d0 - 0.05, dc0 + 0.3, 0.06, d1 + 0.12); Sh.box(I, dc1 - 0.3, -0.02, d0 - 0.05, dc1, 0.06, d1 + 0.12); Sh.box(I, dc0 + 0.3, -0.02, d0 - 0.05, dc1 - 0.3, 0.052, d1 + 0.12);
     // stone jambs and lintel of the doorway, the sill of the window
     for (const [a, b] of [[dc0 - 0.12, dc0], [dc1, dc1 + 0.12]]) Sh.box(I, a, 0, d0, b, 2.55, d1 + 0.07);
     Sh.box(I, dc0 - 0.14, 2.55, d0, dc1 + 0.14, 2.75, d1 + 0.07);
@@ -67,7 +69,7 @@ export const TRADES = {
   glass: { word: 'VETRO', shelf: ['flask'], mats: ['glass_topaz', 'glass_outer', 'glaze_lapis'], counter: 'flasks', floor: 'crate' },
   wine: { word: 'VIN', shelf: ['jug'], mats: ['terracotta', 'pottery_dark'], counter: 'cups', floor: 'barrels' },
   bread: { word: 'PAN', shelf: ['loaf'], mats: ['hide_tan', 'wood_ochre'], counter: 'loaves', floor: 'flour' },
-  shoes: { word: 'CALZE', shelf: ['shoe'], mats: ['hide_brown', 'hide_black', 'hide_tan'], counter: 'last', floor: 'hides' },
+  shoes: { word: 'CALEGHER', shelf: ['shoe'], mats: ['hide_brown', 'hide_black', 'hide_tan'], counter: 'last', floor: 'hides' },
   barber: { word: 'BARBIER', shelf: ['jar'], mats: ['glaze_white', 'terracotta'], counter: 'basin', floor: 'chair' },
   hats: { word: 'BERETE', shelf: ['cap'], mats: ['cloth_red', 'cloth_black', 'cloth_indigo', 'cloth_maroon'], counter: 'stack', floor: 'chest' },
 };
@@ -159,6 +161,13 @@ export function shopFit(el, ctx) {
     H.ball(lw.x, lw.y - 0.05, lw.z, 1.0); H.floor(lw.x, y + 0.08, lw.z, 2.2, 1.8, 0, 10);
     const dl = P3(uc, 0, -P - 1.0);
     H.wall(dl.x, fy(lw) - 0.3, dl.z, [nd[0], nd[1]], 1.2, 1.0);
+    // the damp of the wall's foot (rising damp and splash: a band of greyed plaster, higher in patches) and rain streaks under the counter-window's sill [inferred: Venice's walls]
+    for (const [a, b, k] of [[su0, uc - DOOR / 2 - 0.14, 11], [uc + DOOR / 2 + 0.14, s.su1, 12]]) for (let x = a, j = 0; x < b - 0.2; j++) {
+      const w = Math.min(b - x, 0.5 + 0.9 * h(k + j * 3)), top = 0.28 + 0.4 * h(k + 1 + j * 3);
+      if (h(k + 2 + j * 3) < 0.8) Lc.box('plaster_damp', x, 0, -P, x + w, top, -P + 0.006);
+      x += w;
+    }
+    for (let q = 0; q < 3; q++) Lc.box('plaster_streak', uw - 0.62 + q * 0.5 + 0.1 * h(20 + q), 0.7, -P, uw - 0.62 + q * 0.5 + 0.1 * h(20 + q) + 0.06, 0.93 - 0.06 * h(23 + q), -P + 0.006);
     // the sign over the doorway: a painted board on the wall of the portico with the trade's word in capitals
     sign(Lc, bag, P3, T.word, uc, 3.35, -P + 0.02, seed);
     // the keeper behind the counter, facing the door; a patron now and then in front of it
@@ -182,8 +191,8 @@ export function shopGlow(el, { bag }) {
     const { uc, uw } = s, d = -P + 0.03, q = (u0, y0, u1, y1, f) => { const a = P3(u0, y0, d), b = P3(u1, y0, d), c = P3(u1, y1, d), e = P3(u0, y1, d); H.quad([a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z], [e.x, e.y, e.z], nd, f); };
     const dd = P3(uc, 0, -P + 0.9);
     H.floor(dd.x, y + 0.07, dd.z, 1.8, 1.4, 0, 10);
-    q(uc - DOOR / 2, 0.1, uc + DOOR / 2, 2.5, 0.5);
-    q(uw - WIN / 2, 0.95, uw + WIN / 2, 2.25, 0.36);
+    q(uc - DOOR / 2, 0.1, uc + DOOR / 2, 2.5, 0.26);
+    q(uw - WIN / 2, 0.95, uw + WIN / 2, 2.25, 0.2);
   }
   H.flush(bag);
 }

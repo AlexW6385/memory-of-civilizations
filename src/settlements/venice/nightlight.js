@@ -26,16 +26,24 @@ export function capitelli() {
 /** All the night's plans; `dress` is dressPlans()'s list (the lanterns are read from it). */
 export function nightPlans(dress) {
   const out = [];
-  // the lanterns, tile by tile
+  // the lanterns, by the two hundred metres
+  const coarse = new Map();
   for (const p of dress) {
     if (!/^venice-(fronts|merceria)/.test(p.id)) continue;
     const items = p.elements.filter((e) => e.t === 'lantern' && e.kind === 'iron').map((e) => ({ k: 'lantern', at: e.at, y: e.y ?? GROUND, rot: e.rot, h: e.h }));
-    if (items.length) out.push(plan(`venice-night-${p.id.slice(7)}`, [{ t: 'ven_halo', items }], p.center, 110));
+    if (!items.length) continue;
+    const key = p.id.startsWith('venice-merceria') ? 'm' : `${Math.floor(p.center[0] / 200)},${Math.floor(p.center[1] / 200)}`;
+    (coarse.get(key) ?? coarse.set(key, []).get(key)).push(...items);
   }
-  // the capitelli, by the hundred metres
+  // (one plan to every 200 m square: every plan is a mesh to every material it holds)
+  for (const [key, items] of coarse) {
+    const [i, j] = key === 'm' ? [0, -1] : key.split(',').map(Number);
+    out.push(plan(`venice-night-lanterns-${key}`, [{ t: 'ven_halo', items }], key === 'm' ? [10.5, -84] : [i * 200 + 100, j * 200 + 100], key === 'm' ? 100 : 150));
+  }
+  // the capitelli, by the two hundred metres
   const tiles = new Map();
-  for (const c of capitelli()) { const key = `${Math.floor(c.at[0] / 100)},${Math.floor(c.at[1] / 100)}`; (tiles.get(key) ?? tiles.set(key, []).get(key)).push(c); }
-  for (const [key, list] of tiles) { const [i, j] = key.split(',').map(Number); out.push(plan(`venice-night-capitelli-${key}`, list, [i * 100 + 50, j * 100 + 50], 110)); }
+  for (const c of capitelli()) { const key = `${Math.floor(c.at[0] / 200)},${Math.floor(c.at[1] / 200)}`; (tiles.get(key) ?? tiles.set(key, []).get(key)).push(c); }
+  for (const [key, list] of tiles) { const [i, j] = key.split(',').map(Number); out.push(plan(`venice-night-capitelli-${key}`, list, [i * 200 + 100, j * 200 + 100], 150)); }
   // the stern lanterns of the gondolas at the Molo
   const gl = molo.elements.filter((e) => e.t === 'gondola' && hashAt(e.at[0], e.at[1], 21) < 0.6).map((e) => {
     const yaw = e.yaw ?? 0, L = (e.len ?? 10.8) / 2 - 0.9;
