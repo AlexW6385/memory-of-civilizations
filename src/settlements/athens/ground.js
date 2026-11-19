@@ -4,13 +4,19 @@
 
 import { KERAMEIKOS, ACADEMY, FOUNTAIN, SHOPROW } from './layout.js';
 import { PALAESTRA, XYSTOS, PARADROMIS, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS, GATE } from './quarters.js';
-import { RADIUS, ACRO, AGORA, height, acroE, onWay, pathAt, RAMP, inRect, inLot, lotAt, SLOPE, THEATRE, ODEION } from './layout.js';
+import { RADIUS, ACRO, AGORA, WAY, height, acroE, onWay, pathAt, RAMP, inRect, inLot, lotAt, SLOPE, THEATRE, ODEION } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.2, grass: 0.25, rock: 0, soil: 0.55, fields: 0, dry: 0.8, warmth: 0.75, red: 0.45, road: 0, snow: 0, forest: 0 };
   if (acroE(x, z) < 1) { c.rock = 0.85; c.sand = 0.15; return c; }
   if (ny < 0.8) { c.rock = 0.8; c.soil = 0.2; return c; }
-  if (onWay(x, z) || pathAt(x, z, RAMP)[0] < 6 || inRect(AGORA, x, z)) { c.road = 0.75; return c; }
+  if (onWay(x, z) || pathAt(x, z, RAMP)[0] < 6 || inRect(AGORA, x, z)) {
+    c.road = 0.75;
+    // the wear (docs §22): along the middle of the Way and of the ramp the soil is trodden off and the stone shows, polished by the carts and the processions
+    const m = Math.min(pathAt(x, z, WAY)[0], pathAt(x, z, RAMP)[0]);
+    if (m < 2.2) { const w = 1 - m / 2.2; c.road = 0.75 + 0.25 * w; c.rock = 0.16 * w; c.soil = 0.55 * (1 - 0.3 * w); }
+    return c;
+  }
   // the lanes between the houses and under their walls: beaten earth and gravel, no grass; the courts and the ground beside them dust
   if (lotAt(x, z, 4)) { c.road = lotAt(x, z, 0) ? 0.35 : 0.8; c.grass = 0; c.dry = 0.9; c.soil = 0.4; return c; }
   if (Math.hypot(x, z) > RADIUS - 60) { c.fields = 0.4; c.grass = 0.4; return c; }
