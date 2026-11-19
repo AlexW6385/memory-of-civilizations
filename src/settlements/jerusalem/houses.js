@@ -11,6 +11,7 @@ import { STYLES, registerStyle } from '../../core/build.js';
 import { box, lathe } from '../../core/geom.js';
 import { levantHouse, openLayout } from '../../styles/islamic/house.js';
 import { CARDO, SEPULCHRE, HARAM } from './layout.js';
+import { levantHouseUp } from './house-up.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -185,7 +186,7 @@ function trade(el, { bag, col, lights }) {
 
 function house(el, ctx) {
   const cls = el.front && el.front !== 'plain' ? el.front : null;
-  levantHouse({ ...el, gs: 0 }, ctx);              // (the lane's width is held back: the bench is set here, clear of the door)
+  if (el.up) levantHouseUp({ ...el, gs: 0 }, ctx); else levantHouse({ ...el, gs: 0 }, ctx);              // (the lane's width is held back: the bench is set here, clear of the door)
   if (cls) dressFront(el, ctx, cls);
   if (!el.open) bench(el, ctx);
   if (el.open && el.trade) trade(el, ctx);

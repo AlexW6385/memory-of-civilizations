@@ -3,6 +3,7 @@
 // by the hearths, sacks and baskets before the shops; the pounding of grain. One life-style plan; positions come from the
 // houses' own facts (houseFacts: where the door is, which side the front faces), never hard-coded.
 import { lots, height, inRect, STREETS, isOpen, SIMPLE_FROM } from './layout.js';
+import { upFacts } from './up.js';
 import { houseFacts } from '../../styles/swahili/house.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -37,7 +38,7 @@ export function fronts() {
     // mortar at its far side, the rubble block in the corner by the street wall): the woman of the house on her low stool pounding grain, or a man sitting on a mat, in the
     // court's free stretch beside the door's line
     if (isOpen(l) && l.dh < 120 && !l.simple && rand() < 0.55) {
-      const [, z0, , z1] = l.rect, zc0 = z0 + 0.42 + 1.25, cz = l.flip ? z0 + z1 - zc0 : zc0, dir = d - x0 > x1 - d ? -1 : 1, cx = d + dir * 1.7;
+      const [, z0, , z1] = l.rect, zc0 = z0 + 0.42 + 1.25, cz = l.flip ? z0 + z1 - zc0 : zc0, uf = upFacts(l), dir = uf ? (uf.A[3][0] > d ? -1 : 1) : d - x0 > x1 - d ? -1 : 1, cx = d + dir * 1.7;   // (a house with a stair: on the side away from its front door, off the walked line)
       if (cx > x0 + 1.0 && cx < x1 - 2.0 && z1 - z0 >= 9.2) {
         const cy = l.y + 0.05, to = [cx, cz + (l.flip ? -1 : 1) * 5];
         if (rand() < 0.65) { L.push({ t: 'stool', at: [cx, cz], y: cy, rot: 0, seed: l.seed + 9 }); woman([cx, cz], cy, to, { pose: 'sit_low', carry: 'none' }); }

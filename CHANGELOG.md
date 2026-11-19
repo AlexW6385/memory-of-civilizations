@@ -2,6 +2,14 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.39 — five more upstairs (2026-11-18)
+
+Kilwa: ten houses with a rubble stair to a long upper room, a gallery over the court and the flat roof. Conques: thirty houses by a timber stair to chambers, lofts and dormitories, some with a balcony over the lane. Jerusalem: twelve houses with two chambers, a loggia and a balcony on the roof terrace. Ur: nine houses with a bedchamber, a store or workroom by trade, a street room and a timber gallery over the court. Djenné: twenty-four houses with open windows, rooms by household, a roofed gallery and a banco stair to the roof terrace.
+
+## v12.38 — Suzhou's garden closer to the standard; three more upstairs (2026-11-18)
+
+In Suzhou's garden the Taihu stones are pierced, hollowed and creased, each different; the leaky windows along the walks have ten tracery patterns; the pavilions, the stone boat and the tower have their roof trim, and the boat and tower are furnished; thresholds are worn, steps rounded, moss grows at the north feet of walls and a few terrace slabs have sunk; the tablets carry their real names (拙政園, 遠香堂, 倚玉軒, 玲瓏館, 見山樓); goldfish gather at the bridges; the figures wear cloth colours. Houses can be climbed in Lisbon (ten on the Jerónimos plaza, with stone balconies and roof terraces), Sydney (eight shops and four Rocks terraces, with lace-iron and slab balconies) and Hangzhou (nine shops, an inn, a pawnshop and a silk-weaver's, with loggias over the street).
+
 ## v12.37 — Suzhou by lantern light (2026-11-18)
 
 Suzhou has its lamps at night: small lanterns along the garden's covered walks and in its pavilions, palace lanterns under the halls' eaves, a pair at the residence gate, lantern poles at the bridge heads and drum lanterns over the doors of the inn and the tea and wine shops; lit at night, hanging unlit by day. East of the pond stands an orchard and in the west a bamboo hollow and a plum slope, as Wen Zhengming's record gives them.

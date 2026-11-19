@@ -165,7 +165,7 @@ Sources (2026-11-07):
 - **Husuni Kubwa** [inferred, §11]: the sultan seated on the pavilion with two attendants, courtiers on mats in the audience court, guards at the west gate, women with jars and baskets and a trader's mat in the domestic court.
 - **Beach and water** [inferred]: racks of mangrove poles with split fish drying, net-menders and women with baskets by them, children at the waterline, dugout canoes poled in the shallows, pied crows at the racks; mangrove stands at the island's two flat ends (the tide's edge; mangrove poles were the coast's building timber, §12), banana groves and gardens at the town's edge, millet fields behind the town.
 - **Sound**: the open zone adds a kora-like plucked line over the reed and drone, the hall a lute under the voice with a short-long rhythm.
-- **Not built**: the mosque's older northern hall, the Small Domed Mosque, Husuni Ndogo, upper storeys of the houses (closed, no stair), a coin mint.
+- **Not built**: the mosque's older northern hall, the Small Domed Mosque, Husuni Ndogo, a coin mint.
 
 ## 20. Detail pass: the great dome's panels, the ablution porch, the outer houses, the manager's stair (2026-11-17)
 
@@ -189,3 +189,16 @@ Sources (2026-11-07):
 - **Cornice** [inferred]: two stepped courses of dressed coral under the cresting round the outer walls.
 - **Boats** [inferred, as §10]: the mtepe have a timber rail along each gunwale and aft a half-barrel shelter of plaited mat on hoops (kidari, the cabin of the coast's sewn boats).
 - All new pieces are merged into one geometry per material for the whole mosque (no new draws at the arrival). Not built: the doors' leaves, a glazed bowl in each niche, the older northern hall.
+
+## 21. The upper floors of the houses (2026-11-18)
+
+Ten of the furnished houses nearest the arrival and the main walk (the nine nearest of 8 m width or more, and the two nearest shops, `layout.js` `upSet`) can be climbed; the others keep their closed upper rooms. The houses' kinds follow their trades: a shop with its dwelling (the beads dealer on the soko, the ivory dealer in the mosque street), a cloth merchant's, craftsmen's (carpenter, fisherman, copra, rope, potter), and plain households.
+
+- **Two storeys, a stair inside** [stated: two storeys in some houses, §12; the stair inferred — no source gives one for Kilwa]: rooms "long and narrow", floors and roofs of coral on joists [stated, Lamu/Songo Mnara]. Ours: a masonry stair of plastered rubble along the front room's back wall, 13 steps (rise 0.23, tread 0.25 — steep, as in Swahili houses), timber nosings, a guard wall on its open side; the opening in the floor above lies over the upper steps, a baluster rail round it, the stair arriving at a landing at the end wall. The ground floor's chest and the shop's counter stand away from it.
+- **The upper room** over the front room, 2.25 m wide, as long as the house; windows with open reveals and dressed-coral frames, a plank shutter folded back by each, looking over the court to the lane [inferred, after the barred upper windows of the closed houses].
+- **Gallery over the court** [inferred]: a deck of boards on poles built into the front room's wall, 1.15 m deep, a rail on three sides, carried by two struts (no post stands in the court); a door from the upper room. Stepping out one looks over the street wall to the lane. No balcony projects over the lane itself: those belong to later Omani houses.
+- **Roof terrace** [stated: flat roofs of lime concrete on poles, §12; its use inferred]: a door in the upper room's back wall leads onto the flat roof over the back rooms (parapet 0.5 m) — jars, a mat laid to dry, a line of washing; houses whose back room is thatched have no terrace.
+- **Furnished by use** [inferred]: sleeping — a built platform bed (kitanda) with mat and cloth, a chest, a water jar, clothes on a line; storing — sacks, bales of cloth, jars or tusks by the shop's goods, the merchant's chest; working — a carpenter's bench and boards, a potter's shelves and wheel, a rope-maker's hanks, a fisherman's nets, floats and oars, copra sacks, a weaver's loom. All shapes vary by their own position.
+- **Walked**: `plan.walks` has a route from the lane to the gallery of each opened house and, where there is a terrace, from the upper room onto it; `tools/walk-check.mjs --sites kilwa` passes (the ramp under the stair, obstacles for the guard wall and the steps, 0.3 m of clear room beside the rail).
+- **Budget**: the roof poles of every house ceiling (instanced, about a million triangles in view at the arrival) are drawn within 90 m only: from farther they are hidden under their roofs.
+- **Still shut**: the other furnished houses' upper rooms; the roof over the upper room (no way up); the outer ring's solid blocks; the inner room's and back room's upper floors.

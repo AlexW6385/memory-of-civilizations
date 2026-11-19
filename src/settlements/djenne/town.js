@@ -1,7 +1,7 @@
 // The town round the mosque (docs/settlements/djenne.md §6, §11): the market square on market day,
 // the houses packed along the streets.
 
-import { RADIUS, MARKET, LEVEL, ISLAND, MOSQUE, SHOPS, COURT, houses, shore, inHouse } from './layout.js';
+import { RADIUS, MARKET, LEVEL, ISLAND, MOSQUE, SHOPS, COURT, houses, shore, inHouse, enterable, upperHomes } from './layout.js';
 import { ground } from './ground.js';
 import { boatFloat } from '../../objects/index.js';
 import { lodTiles } from '../lod.js';
@@ -201,14 +201,6 @@ function crepissage() {
 }
 
 
-/** The houses nearest the market and the mosque are enterable (docs §16): deep enough for the vestibule, court and back block. */
-function enterable(all) {
-  // every house of a width that holds the vestibule, court and back block (6 m and more across, 10 m deep, a front on a lane) in the
-  // old core about the market and the mosque, and beyond it more than half of them, by the house's seed (the rest stay shut shells)
-  const ok = all.filter((h) => (h.front === 'n' || h.front === 's') && h.rect[2] - h.rect[0] >= 6 && h.rect[3] - h.rect[1] >= 10);
-  const d = (h) => Math.hypot((h.rect[0] + h.rect[2]) / 2 - 30, (h.rect[1] + h.rect[3]) / 2);
-  return new Set(ok.filter((h) => d(h) < 105 || h.seed % 100 < 58));
-}
 /**
  * The front of a house by rule (docs §17): in the old core within 110 m of the mosque the two-storey houses are Tukulor (the
  * pre-1900 type with the covered porch); beyond it the quarter (a 52 m cell) decides between Tukulor, Moroccan and Plain, the
@@ -327,7 +319,8 @@ export async function town() {
   const all = houses(), homes = enterable(all);
   // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full (interiors, fittings, door work) within NEAR of the visitor, simple (the solid form, the
   // facade's masses, the door) beyond; the arrival at the market sees the far form only of what is far
-  const lots = all.map((h) => ({ rect: h.rect, front: h.front, storeys: h.storeys, seed: h.seed, kind: kindOf(h), home: homes.has(h) }));
+  const ups = upperHomes();
+  const lots = all.map((h) => ({ rect: h.rect, front: h.front, storeys: h.storeys, seed: h.seed, kind: kindOf(h), home: homes.has(h), ...(ups.has(h) ? { up: ups.get(h) } : {}) }));
   // (the street life reads the houses from the plans (src/objects/life.js) and chooses its places by their order: `sahel_house_lot` is the plan of the lots in their own order,
   // drawing nothing; the tiles' elements are named `sahel_near_wall`, which it does not take for houses, so that the life lies as it lay before the tiles)
   plans.push(base('djenne-lots', lots.map((l) => ({ t: 'sahel_house_lot', ...l }))));

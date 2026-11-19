@@ -8,6 +8,7 @@
 
 import { fromTriangles, lathe } from '../../core/geom.js';
 import { Parts as Parts2 } from './props.js';
+import { canWrite, inscription } from './script.js';
 
 const TAU = Math.PI * 2;
 const ROOF = 'tile_dark', WOOD = 'lacquer_chestnut';
@@ -125,7 +126,7 @@ function extrude(out, prof, x, z, n, t) {
 }
 
 /** The outer posts of a hall, as ming_hall sets them out: [{ x, z, nx, nz }] (a corner post twice, once for each face). */
-function rimPosts(el) {
+export function rimPosts(el) {
   const [x0, z0, x1, z1] = el.rect, Lx = x1 - x0, Lz = z1 - z0, along = Lx >= Lz;
   const nb = el.bays?.[0] ?? Math.max(1, 2 * Math.round(((along ? Lx : Lz) / 3.6 - 1) / 2) + 1), nd = el.bays?.[1] ?? Math.max(1, Math.round((along ? Lz : Lx) / 3.4));
   const xs = [], zs = [];
@@ -245,6 +246,35 @@ export function hallTrim(bag, el) {
   bag.add(WOOD, fromTriangles(wood));
 }
 
+/**
+ * pavilionTrim(bag, el): the eave work of a pyramid-roofed pavilion (hexagonal or square, as the
+ * style's pyramidRoof lays it, its eaves 1 m beyond the posts): a round tile end at every cover-tile
+ * row of every edge, a drip tile between, and a scroll at the foot of each hip.
+ */
+export function pavilionTrim(bag, el) {
+  const [cx, cz] = el.c, y0 = el.y + (el.H ?? 3.3) - 0.2, sweep = el.sweep ?? 1.0;
+  let poly;
+  if (el.shape === 'square' || el.shape === 'rect') { const w = el.w / 2, d = (el.d ?? el.w) / 2; poly = [[cx - w, cz - d], [cx + w, cz - d], [cx + w, cz + d], [cx - w, cz + d]]; }
+  else poly = Array.from({ length: el.shape === 'oct' ? 8 : 6 }, (_, k) => { const a = (k + 0.5) / (el.shape === 'oct' ? 8 : 6) * TAU; return [cx + Math.cos(a) * el.r, cz + Math.sin(a) * el.r]; });
+  const ext = poly.map((p) => { const dx = p[0] - cx, dz = p[1] - cz, l = Math.hypot(dx, dz); return [cx + dx / l * (l + 1.0), cz + dz / l * (l + 1.0)]; });
+  const tiles = [], n = ext.length, sp = 0.21;
+  for (let k = 0; k < n; k++) {
+    const A = ext[k], B = ext[(k + 1) % n], L = Math.hypot(B[0] - A[0], B[1] - A[1]), ux = (B[0] - A[0]) / L, uz = (B[1] - A[1]) / L;
+    const mx = (A[0] + B[0]) / 2 - cx, mz = (A[1] + B[1]) / 2 - cz;
+    let nx = uz, nz = -ux; if (nx * mx + nz * mz < 0) { nx = -nx; nz = -nz; }
+    const hAt = (a) => y0 + sweep * Math.pow(Math.abs(a - 0.5) * 2, 3);
+    const m = Math.floor((L - 0.3) / sp);
+    for (let i = 0; i <= m; i++) {
+      const a = (0.15 + i * sp) / L, s = a * L, px = A[0] + ux * s, pz = A[1] + uz * s;
+      if (hash(px, pz, 3) > 0.012) tileEnd(tiles, [px, hAt(a) - 0.038, pz], [nx, nz], 0.074, 0.033, 0.012);
+      if (i < m) { const a2 = (0.15 + (i + 0.5) * sp) / L, s2 = a2 * L; dripTile(tiles, [A[0] + ux * s2, hAt(a2) - 0.185, A[1] + uz * s2], [nx, nz], 0.062, 0.13); }
+    }
+    const V = ext[k], dx = V[0] - cx, dz = V[1] - cz, dl = Math.hypot(dx, dz);
+    hipScroll(tiles, [V[0] - dx / dl * 0.05, y0 + sweep + 0.14, V[1] - dz / dl * 0.05], [dx / dl, dz / dl], 0.6, 0.075);
+  }
+  bag.add(ROOF, fromTriangles(tiles));
+}
+
 // ── the gates' name tablets: characters on the brick plaques of the gates ──
 /** Strokes of n characters in a row of width w and height h (the glyphs generic: horizontals, verticals and falling strokes in the proportions of characters), facing +z, from z0 up 1.2 cm. */
 function glyphs(P, w, h, n, seed, z0, mat) {
@@ -287,7 +317,9 @@ export function tabletText(el, { bag }) {
   const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
   const w = el.w - 0.22, h = 0.46 - 0.2, P = new Parts2();
   for (const sg of [-1, 1]) {
-    const Q = new Parts2(); glyphs(Q, w, h, el.n ?? 3, (el.seed ?? 5) + (sg > 0 ? 0 : 0), 0, 'tile_dark');      // (both faces carry the same inscription, read from its own side)
+    const Q = new Parts2();
+    if (canWrite(el.text)) { const m = [...el.text].length, size = Math.min(h * 0.92, w / m / 1.1); Q.add('tile_dark', inscription(el.text, { pitch: Math.min(size * 1.12, w / m), size, z0: 0, z1: 0.013, thick: 0.9 }).translate(0, h / 2, 0)); }
+    else glyphs(Q, w, h, el.n ?? 3, (el.seed ?? 5) + (sg > 0 ? 0 : 0), 0, 'tile_dark');      // (both faces carry the same inscription, read from its own side)
     const yaw = Math.atan2(nx * sg, nz * sg), o = sg * (el.th / 2 + 0.025);
     Q.emit(P, ax + ux * el.at + nx * o, el.y + el.cv - h / 2, az + uz * el.at + nz * o, yaw);
   }

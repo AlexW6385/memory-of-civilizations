@@ -5,6 +5,7 @@
 
 import { RADIUS, ABBEY, RIVER, BRIDGE, HOSTEL, FOUNTAINS, STAIRS, TANNERY, MILL, worksLevel, lots, gardens, laneZ, level, height, bandZ, BAND } from './layout.js';
 import { shopPoint } from '../../styles/romanesque/village.js';
+import { upPlan, upMap } from '../../styles/romanesque/upper.js';
 
 const base = (id, elements, style = 'life') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, 0], facing: 'e' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -33,7 +34,10 @@ export function laneLife() {
         if (b.storeys < 2 || b.gallery || b.hostel || Math.abs(b.rect[0] - a.rect[0]) > 12) continue;
         const x0 = Math.max(a.rect[0], b.rect[0]) + 1.0, x1 = Math.min(a.rect[2], b.rect[2]) - 1.0;
         if (x1 - x0 < 0.6 || !near(x0, z, 125) || rand() > 0.42) continue;
-        const x = x0 + rand() * (x1 - x0);
+        let x = x0 + rand() * (x1 - x0);
+        // (not across the lane before the door of a house whose upper floor is open: the line is moved aside along the lane, or left out)
+        const doors = [a, b].filter((q) => q.up).map((q) => upMap(q)(upPlan(q).du, 0)[0]);
+        if (doors.some((d) => Math.abs(d - x) < 1.7)) { const alt = [x - 2.2, x + 2.2].find((c2) => c2 >= x0 && c2 <= x1 && doors.every((d) => Math.abs(d - c2) >= 1.7)); if (alt === undefined) continue; x = alt; }
         if (STAIRS.some((sx) => Math.abs(sx - x) < 3.5)) continue;
         E.push({ t: 'wash_line', at: [x, z], y: a.y + Math.min(a.G, b.G) + 1.85, rot: Math.PI / 2, len: 3.0, emb: [0.25, 0.25], clear: [0.55, 0.55], drop: 0.9, seed: a.seed + b.seed });
       }
@@ -139,7 +143,7 @@ export function insides() {
     else if (l.trade === 'smith') f(W / 2, D / 2 + 0.55, W / 2, D / 2 - 0.4, { ...apron, cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'none', hair: 'short', beard: true, pose: 'talk' });
     else if (l.trade === 'weaver') { const v = D - 1.4 - 0.7, a = at(W / 2, v); robe(a, fy, face(a, at(W / 2, v + 1)), { cloth: 'cloth_ochre', cloth2: 'cloth_white', hat: 'veil', hatMat: 'cloth_white', hair: 'bun', pose: 'sit' }); }
     else if (l.trade === 'tavern') f(3.7, D - 1.5, 3.7, 0.8, { ...apron, cloth: 'cloth_maroon' });
-    else f(Math.min(W - 1, Math.max(1, shopPoint(l).a0 + 0.9)), 1.4, W / 2, -2, { ...apron });
+    else f(Math.min(W - 1, Math.max(1, shopPoint(l).a0 + 0.9)), 2.3, W / 2, -2, { ...apron });
     void out;
   }
   // the tanner at his beam between the two, scraping a hide; the miller by his stones

@@ -18,7 +18,7 @@ import { Matrix4, Quaternion, Vector3 } from '../../core/three.js';
 /**
  * plaque: an inscribed board { at, y (its foot), facing ([dx, dz]), w, h, n (characters), ink }: a frame
  * of dark lacquer round a field of wood, the characters raised on it in malachite green — each a
- * few strokes (the inscriptions themselves are not modelled; ours are generic strokes).
+ * few strokes: the real characters of the name when `text` is one the script lists (script.js), generic strokes otherwise.
  */
 function plaque(el, { bag }) {
   const P = new Parts(); plaqueBuild(P, el);
@@ -40,10 +40,39 @@ function penjing(el, { bag, col }) {
 }
 import { houseUp } from './upstairs.js';
 import { realLatticeBag, roofWork, terraceRail, moonDress } from './hallwork.js';
-import { hallTrim, tabletText, doorCarving } from './corework.js';
+import { hallTrim, tabletText, doorCarving, pavilionTrim } from './corework.js';
 import { pebbleCourt } from './pebbles.js';
 import { hallLife } from './lifework.js';
+import { taihu, rockery } from './taihu.js';
+import { leakyCtx } from './leaky.js';
+import { hallWear, wallWear, terracePaving } from './wear.js';
 const base = STYLES.ming;
+
+/** ming_pavilion with the roof work of the halls: the rectangular pavilion as a hip-and-gable roof, the hexagonal and square ones as pyramids. */
+function pavilion(el, ctx) {
+  base.elements.ming_pavilion(el, ctx);
+  if (!el.fine) return;
+  if (el.shape === 'rect') { const [cx, cz] = el.c, w = el.w / 2, d = (el.d ?? el.w) / 2, H = el.H ?? 3.3; hallTrim(ctx.bag, { rect: [cx - w, cz - d, cx + w, cz + d], y: el.y, H: H + 0.05, eave: 1.0, roof: 'xieshan', rise: (d + 1) * 0.7, sweep: 0.9, trim: 'lite' }); }
+  else pavilionTrim(ctx.bag, el);
+}
+/** The stone boat: the shared hull with its three roofs trimmed like the halls'. */
+function boat(el, ctx) {
+  base.elements.stone_boat(el, ctx);
+  const [x0, z0, x1, z1] = el.rect, y = el.y, zc = (z0 + z1) / 2, W = (z1 - z0) / 2;
+  hallTrim(ctx.bag, { rect: [x1 - 3.0 - 1.3, zc - 1.2, x1 - 3.0 + 1.3, zc + 1.2], y, H: 3.05, eave: 1.0, roof: 'xieshan', rise: (1.2 + 1) * 0.7, sweep: 0.9, trim: 'lite' });
+  hallTrim(ctx.bag, { rect: [x0 + 3.6, zc - W * 0.72, x1 - 4.6, zc + W * 0.72], y, H: 3.1, eave: 0.6, roof: 'gable', trim: 'lite' });
+  hallTrim(ctx.bag, { rect: [x0, zc - W * 0.78, x0 + 3.6, zc + W * 0.78], y, H: 5.8, eave: 0.8, roof: 'xieshan', trim: 'lite' });
+}
+/** The Mountain-in-View tower: the shared tower with its roofs trimmed (the hip roof between the floors and the great one over them). */
+function tower(el, ctx) {
+  base.elements.lou(el, ctx);
+  const [x0, z0, x1, z1] = el.rect;
+  hallTrim(ctx.bag, { rect: el.rect, y: el.y, H: 6.4, eave: 1.1, roof: 'xieshan', trim: true });
+  hallTrim(ctx.bag, { rect: [x0, z0, x1, z1], y: el.y, H: 3.25, eave: 0.9, roof: 'hip', rise: 0.5, sweep: 0.4, trim: 'lite' });
+}
+/** The garden's walls and galleries: the shared ones, their leaky windows' tracery replaced by ours (leaky.js). */
+function leakyWall(el, ctx) { const L = leakyCtx(ctx, el, 'wall'); base.elements.ming_wall(el, L.ctx); L.finish(); wallWear(ctx.bag, el); }
+function leakyGallery(el, ctx) { const L = leakyCtx(ctx, el, 'gallery'); base.elements.ming_gallery(el, L.ctx); L.finish(); }
 
 /** ming_hall, with the fine work of the landmark's halls where the plan asks: `real` (lattice as geometry), `tiles` (cover tiles and rafters). */
 function hall(el, ctx) {
@@ -52,6 +81,7 @@ function hall(el, ctx) {
   if (el.tiles) roofWork(ctx.bag, el, { roof: 'tile_dark', wood: 'lacquer_chestnut' });
   if (el.trim) hallTrim(ctx.bag, el);
   if (el.carve) doorCarving(ctx.bag, el);
+  if (el.trim) hallWear(ctx.bag, el);
 }
 
 /**
@@ -108,7 +138,7 @@ function drapeTri(a, b, c, H, out, depth) {
   drapeTri(A, m, r, H, out, d); drapeTri(m, B, q, H, out, d); drapeTri(r, q, C, H, out, d); drapeTri(m, q, r, H, out, d);
 }
 
-registerStyle('suzhou-site', { ...base, elements: { ...base.elements, ming_hall: hall, terrace_rail: terraceRail, moon_dress: moonDress, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath, pebble_paving: pebbleCourt(base.elements.pebble_paving), hall_life: hallLife, tablet_text: tabletText } });
+registerStyle('suzhou-site', { ...base, elements: { ...base.elements, ming_hall: hall, terrace_rail: terraceRail, moon_dress: moonDress, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath, pebble_paving: pebbleCourt(base.elements.pebble_paving), hall_life: hallLife, tablet_text: tabletText, taihu, ming_rockery: rockery, ming_wall: leakyWall, ming_gallery: leakyGallery, ming_pavilion: pavilion, terrace_paving: terracePaving, stone_boat: boat, lou: tower } });
 
 // the houses whose upper floors can be climbed: the canal quarter's style with `house_up` (upstairs.js)
 registerStyle('suzhou-town', { ...base, elements: { ...base.elements, house_up: houseUp } });

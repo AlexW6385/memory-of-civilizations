@@ -79,6 +79,64 @@ function lotus(x, z) {
 const t2 = (x, z, m) => (Math.hypot(x, z) > 0.4 && hash(x, z, 5) < 0.2 ? WH : m);
 const FIG = { crane, plum, lotus };
 
+// ── the outlines: dark tile set on edge round the parts of each figure, so that it reads at standing height ──
+// (the cells of pebbles are 13 cm: the figure's edges would stair-step; a line of tile 2.6 cm wide, raised 1.6 cm, draws them cleanly)
+const circle = (cx, cz, r, n = 18) => Array.from({ length: n }, (_, k) => [cx + Math.cos(k / n * TAU) * r, cz + Math.sin(k / n * TAU) * r]);
+const ellip = (cx, cz, a, b, rot, n = 22) => Array.from({ length: n }, (_, k) => { const t = k / n * TAU, u = Math.cos(t) * a, v = Math.sin(t) * b; return [cx + u * Math.cos(rot) - v * Math.sin(rot), cz + u * Math.sin(rot) + v * Math.cos(rot)]; });
+/** Offset a polyline (with radii) to a closed outline: down one side and back up the other. */
+function sleeve(pts) {
+  const L = [], R = [];
+  pts.forEach((p, i) => { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)]; let dx = b[0] - a[0], dz = b[1] - a[1]; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l; L.push([p[0] - dz * p[2], p[1] + dx * p[2]]); R.push([p[0] + dz * p[2], p[1] - dx * p[2]]); });
+  return [...L, ...R.reverse()];
+}
+const quad = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
+const OUTLINES = {
+  crane: () => [
+    { closed: true, pts: CRANE.tail }, { closed: true, pts: CRANE.wing }, { closed: false, pts: CRANE.quill.slice(0, 4) },
+    { closed: true, pts: ellip(0.0, 0.03, 0.4, 0.17, -0.3) }, { closed: true, pts: sleeve(CRANE.neck) }, { closed: true, pts: circle(0.59, -0.665, 0.062, 12) },
+    { closed: false, pts: CRANE.beak.map((q) => [q[0], q[1]]), w: 0.05 }, { closed: false, pts: CRANE.legA.map((q) => [q[0], q[1]]), w: 0.05 }, { closed: false, pts: CRANE.legB.map((q) => [q[0], q[1]]), w: 0.05 },
+    { closed: false, pts: CRANE.ground.map((q) => [q[0], q[1]]), w: 0.045 }, { closed: true, pts: circle(-0.46, -0.56, 0.17, 20), w: 0.03 }, { closed: true, pts: circle(-0.46, -0.56, 0.1, 16), w: 0.02 },
+    { closed: true, pts: circle(0.62, -0.675, 0.014, 6), w: 0.03, fill: true },
+    ...CRANE.clouds.map((c) => ({ closed: false, pts: c.map((q) => [q[0], q[1]]), w: 0.03 })),
+    ...[0.1, 0.2, 0.3].map((t) => ({ closed: false, pts: [[-0.3 - t * 0.3, -0.1 + t * 0.55], [-0.62 - t * 0.2, -0.12 + t * 0.2 * 0.4]], w: 0.012 })),
+  ],
+  plum: () => [
+    ...Array.from({ length: 5 }, (_, k) => { const a = -Math.PI / 2 + k / 5 * TAU; return { closed: true, pts: circle(Math.cos(a) * 0.5, Math.sin(a) * 0.5, 0.42, 22) }; }),
+    { closed: true, pts: circle(0, 0, 0.19, 18) }, { closed: true, pts: circle(0, 0, 0.1, 12), w: 0.025 },
+    ...Array.from({ length: 5 }, (_, k) => { const a = -Math.PI / 2 + (k + 0.5) / 5 * TAU; return { closed: true, pts: circle(Math.cos(a) * 0.27, Math.sin(a) * 0.27, 0.03, 6), w: 0.03, fill: true }; }),
+  ],
+  lotus: () => {
+    const petal = (a, r0, r1, wd) => [[r0, 0], [(r0 + r1) * 0.5, -wd], [r1 - 0.12 * (r1 - r0), -wd * 0.55], [r1, 0], [r1 - 0.12 * (r1 - r0), wd * 0.55], [(r0 + r1) * 0.5, wd]].map(([u, v]) => [u * Math.cos(a) - v * Math.sin(a), u * Math.sin(a) + v * Math.cos(a)]);
+    return [
+      ...Array.from({ length: 8 }, (_, k) => ({ closed: true, pts: petal(k / 8 * TAU, 0.22, 0.9, 0.25) })),
+      ...Array.from({ length: 8 }, (_, k) => ({ closed: true, pts: petal((k + 0.5) / 8 * TAU, 0.2, 0.55, 0.14) })),
+      { closed: true, pts: circle(0, 0, 0.17, 14) },
+    ];
+  },
+};
+/** The outlines as raised strips: tile on edge 1.6 cm over the pebbles, 2.6 cm wide. */
+function outlineTris(name, cx, cz, mr, y) {
+  const out = [], W = 0.026, H = 0.016;
+  for (const o of OUTLINES[name]?.() ?? []) {
+    const P = o.pts.map(([u, v]) => [cx + u * mr, cz + v * mr]), n = P.length;
+    const hw = o.w ? Math.max(0.013, o.w * mr * 0.5) : W / 2;
+    if (o.fill) {                                                                            // a dot: a fan over the points
+      const c = P.reduce((q, p) => [q[0] + p[0] / n, q[1] + p[1] / n], [0, 0]);
+      for (let i = 0; i < n; i++) { const a = P[i], b = P[(i + 1) % n]; out.push(c[0], y + H, c[1], b[0], y + H, b[1], a[0], y + H, a[1]); }
+      continue;
+    }
+    const segs = o.closed ? n : n - 1;
+    for (let i = 0; i < segs; i++) {
+      const a = P[i], b = P[(i + 1) % n], dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz) || 1, nx = -dz / l * hw, nz = dx / l * hw;
+      const A0 = [a[0] - nx, y + H, a[1] - nz], A1 = [a[0] + nx, y + H, a[1] + nz], B0 = [b[0] - nx, y + H, b[1] - nz], B1 = [b[0] + nx, y + H, b[1] + nz];
+      quad(out, A0, B0, B1, A1);
+      const g = (p) => [p[0], y, p[2]];
+      quad(out, g(A0), g(A1), A1, A0); quad(out, B0, B1, g(B1), g(B0)); quad(out, A0, B0, g(B0), g(A0)); quad(out, A1, g(A1), g(B1), B1);
+    }
+  }
+  return out;
+}
+
 /** pebble_medal { at: [x, z], y (the court's own level: the top of its flats), d (the medallion's diameter), medallion: 'crane' | 'plum' | 'lotus', seed } */
 export function pebbleMedal(el, { bag }) {
   const fig = FIG[el.medallion]; if (!fig) return;
@@ -109,6 +167,8 @@ export function pebbleMedal(el, { bag }) {
     up(m, c00, c10, ap); up(m, c10, c11, ap); up(m, c11, c01, ap); up(m, c01, c00, ap);
   }
   for (const [m, t] of Object.entries(out)) bag.add(m, fromTriangles(t));
+  const ol = outlineTris(el.medallion, cx, cz, mr, y0 + 0.004);
+  if (ol.length) bag.add(DK, fromTriangles(ol));
 }
 
 /** The style's pebble_paving with the medallion laid in real pebbles: the court's field and borders as before, the medallion by pebbleMedal. */

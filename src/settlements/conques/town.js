@@ -5,6 +5,7 @@ import { openLots, lodTiles } from '../lod.js';
 // (§5a): pilgrims on the road to Santiago before the west portal, monks of the abbey, the hostel's guests.
 import { RADIUS, ABBEY, RIVER, BAND, STAIRS, STAIR, GATE, FOUNTAINS, HOSTEL, PILGRIM_WAY, TANNERY, MILL, worksLevel, lots, gardens, lanes, stairs, level, laneZ, bandZ, shelf, height, inRect } from './layout.js';
 import { shopPoint, doorU } from '../../styles/romanesque/village.js';
+import { upPlan, upMap } from '../../styles/romanesque/upper.js';
 
 const base = (id, elements, style = 'vernacular') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, 0], facing: 'e' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -54,6 +55,8 @@ function works() {
   const [mx0, mz0, mx1, mz1] = MILL.rect, wy = RIVER.level + MILL.wheelR - 0.1;
   E.push({ t: 'block', rect: [mx0 - 0.5, mz0 - 2.2, mx1 + 0.5, mz1 + 0.2], y0: RIVER.bed - 1, y1: W.mill - 0.05, mat: 'schist_rubble', walk: true });
   E.push({ t: 'roue', c: [MILL.cx, mz1 + 0.3], y: wy, r: MILL.wheelR, w: 1.2, wall: mz1 - 0.2, pier: mz1 + 2.0, bed: RIVER.bed - 1 });
+  // the lane before the door of each house whose upper floor is open is kept free of the street life's figures (the life pass reads these ways as taken)
+  for (const l of lots()) if (l.up) { const M = upMap(l), d = upPlan(l).du; E.push({ t: 'way_reserve', pts: [M(d, -1.2), M(d, -2.0)] }); }
   return { id: 'conques-works', style: 'romanesque', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, 0], facing: 'e' } };
 }
 
@@ -66,7 +69,11 @@ function goods() {
     const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
     const out = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[f];
     if (l.shop) {
-      const sp = shopPoint(l), a0 = sp.a0, kind = kinds[l.seed % kinds.length], top = l.y + 0.96, dir = l.seed % 2 ? 1 : -1;
+      const sp = shopPoint(l), a0 = sp.a0, kind = kinds[l.seed % kinds.length], top = l.y + 0.96;
+      // (the barrel and the sacks stand on the side away from the door: the way in is kept clear)
+      const doorAt = (rng(l.seed || 1)() < 0.5) ? Lw - 4.52 : 4.52;
+      let dir = l.seed % 2 ? 1 : -1;
+      if (Lw >= 5.3 && [2.0, 1.5].some((q) => Math.abs(a0 - dir * q - doorAt) < 1.15)) dir = -dir;
       const at = (u, v) => P(a0 + u, v);
       if (kind === 'shells') { L.push({ t: 'basket', at: at(-0.6, 0.15), y: top, rot: out, n: 2, seed: l.seed, goods: 'ivory' }); L.push({ t: 'basket', at: at(0.55, 0.2), y: top, rot: out, n: 1, seed: l.seed + 1, goods: 'ivory' }); }
       else if (kind === 'staffs') { L.push({ t: 'basket', at: at(-0.5, 0.2), y: top, rot: out, n: 2, seed: l.seed, goods: 'wood_ochre' }); }
