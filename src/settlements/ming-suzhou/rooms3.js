@@ -5,8 +5,8 @@
 // Kept clear: the lane b 1.4–2.2 from the door to the stair's foot and a 1.65–2.15 up to b 4.7 beside the stair; in a waterside house the
 // way to the back door (diagonal in the narrow ones, through the partition's doorway at a 1.6–2.5 and along LANE in the wide ones, then
 // the strip bc ± 0.7 to the door); above, the way from the stair's top by the stair room's side to the gallery door.
-// Coarse pieces are boxes gathered by the house's builder (B); pieces under 0.4 m (bowls, shoes, books, tools) are their own geometries (F,
-// latF) and so fall into the detail mesh, drawn only near. `k` is rooms.js's kit.
+// Everything is boxes (B, F) and lathe pieces (lat, latF) gathered into the house's materials: pieces under 0.4 m sent apart would make one
+// detail mesh, and so one draw, per material per plan (about +33 at the arrival), so F and latF are B and lat for now. `k` is rooms.js's kit.
 
 export const HOUSEHOLD_USES = ['boatman', 'teahouse', 'drawloom', 'lodging', 'scholar', 'printer', 'grocer', 'dwelling', 'jade', 'tinsmith'];
 
@@ -14,9 +14,9 @@ export const HOUSEHOLD_USES = ['boatman', 'teahouse', 'drawloom', 'lodging', 'sc
 function things(c, k) {
   const { B, blk, F, latF, lat } = c;
   const t = {};
-  t.bowl = (mat, a, b, yy, s = 1) => latF(mat, [[0.001, 0], [0.05 * s, 0], [0.13 * s, 0.06 * s], [0.12 * s, 0.07 * s], [0.001, 0.02 * s]], 8, a, b, yy);
-  t.cup = (a, b, yy) => latF('glaze_white', [[0.001, 0], [0.03, 0], [0.042, 0.07], [0.001, 0.012]], 7, a, b, yy);
-  t.teapot = (a, b, yy, mat = 'pottery_dark') => latF(mat, [[0.001, 0], [0.07, 0.01], [0.1, 0.07], [0.09, 0.13], [0.04, 0.15], [0.001, 0.16]], 8, a, b, yy);
+  t.bowl = (mat, a, b, yy, s = 1) => latF(mat, [[0.05 * s, 0], [0.13 * s, 0.065 * s], [0.001, 0.03 * s]], 7, a, b, yy);
+  t.cup = (a, b, yy) => latF('glaze_white', [[0.03, 0], [0.042, 0.07], [0.001, 0.02]], 6, a, b, yy);
+  t.teapot = (a, b, yy, mat = 'pottery_dark') => latF(mat, [[0.07, 0.0], [0.1, 0.07], [0.09, 0.13], [0.001, 0.16]], 7, a, b, yy);
   /** A pair of cloth shoes by a bed, one turned over the other's toe. */
   t.pair = (a, b, yy) => { F(a, b, a + 0.07, b + 0.2, yy, yy + 0.07, 'cloth_black'); F(a + 0.1, b + 0.06, a + 0.17, b + 0.26, yy, yy + 0.07, 'cloth_black'); };
   t.book = (a, b, yy, mat = 'cloth_indigo', n = 1) => { for (let q = 0; q < n; q++) F(a, b, a + 0.2, b + 0.14, yy + q * 0.03, yy + q * 0.03 + 0.028, q % 2 ? 'cloth_white' : mat); };
@@ -27,7 +27,7 @@ function things(c, k) {
   t.washstand = (a, b, yy) => {
     for (const [da, db] of [[-0.2, -0.17], [0.2, -0.17], [-0.2, 0.17], [0.2, 0.17]]) B(a + da - 0.02, b + db - 0.02, a + da + 0.02, b + db + 0.02, yy, yy + 0.7, 'lacquer_chestnut');
     B(a - 0.23, b - 0.2, a + 0.23, b + 0.2, yy + 0.7, yy + 0.74, 'lacquer_chestnut'); B(a - 0.2, b - 0.17, a + 0.2, b + 0.17, yy + 0.3, yy + 0.33, 'lacquer_chestnut');
-    latF('glaze_white', [[0.001, 0], [0.1, 0.005], [0.2, 0.09], [0.21, 0.11], [0.19, 0.11], [0.001, 0.03]], 10, a, b, yy + 0.74);
+    latF('glaze_white', [[0.1, 0], [0.21, 0.1], [0.001, 0.04]], 8, a, b, yy + 0.74);
     B(a - 0.2, b + 0.15, a + 0.2, b + 0.17, yy + 0.74, yy + 1.15, 'lacquer_chestnut'); F(a - 0.14, b + 0.12, a + 0.14, b + 0.15, yy + 0.8, yy + 1.1, 'cloth_white');
     blk(a - 0.25, b - 0.22, a + 0.25, b + 0.22, yy, yy + 1.15);
   };
@@ -113,7 +113,7 @@ export function groundHouse(c, k) {
     t.bowl('glaze_white', 0.6, 5.2, y0 + 0.74, 1.2); t.bowl('glaze_white', 0.95, 5.4, y0 + 0.74, 1.2); t.bowl('pottery_dark', 0.75, 5.5, y0 + 0.74, 1.4); F(0.8, 5.25, 0.83, 5.5, y0 + 0.74, y0 + 0.77, 'bamboo_culm'); F(0.86, 5.25, 0.89, 5.5, y0 + 0.74, y0 + 0.77, 'bamboo_culm');
     for (let q = 0; q < 3; q++) { const b = 6.3 + q * 0.14; B(0.3, b, 0.36, b + 0.05, y0, y0 + 2.2, 'bamboo_culm'); B(0.28, b - 0.02, 0.44, b + 0.07, y0 + 1.55, y0 + 2.2, 'timber'); }     // the oars, blades up, against the west wall
     blk(0.28, 6.25, 0.46, 6.8, y0, y0 + 2.2);
-    B(il, 6.95, 1.6, 6.99, y0 + 2.3, y0 + 2.36, 'bamboo_culm'); B(il + 0.02, 6.96, 1.58, 6.98, y0 + 1.1, y0 + 2.3, 'lattice');                      // the net on its pole
+    B(il, 6.95, 1.6, 6.99, y0 + 2.3, y0 + 2.36, 'bamboo_culm'); B(il + 0.02, 6.96, 1.58, 6.98, y0 + 1.1, y0 + 2.3, 'thatch');                      // the net on its pole
     for (let q = 0; q < 5; q++) F(0.4 + q * 0.27, 6.93, 0.5 + q * 0.27, 7.0, y0 + 2.2, y0 + 2.27, 'thatch');
     B(0.26, 2.9, 0.3, 3.5, y0 + 1.0, y0 + 2.0, 'thatch'); latF('thatch', [[0.32, 0], [0.1, 0.1], [0.001, 0.15]], 10, 0.5, 3.2, y0 + 1.75);              // (the rain cape and the bamboo hat on the stair's wall)
     for (let q = 0; q < 3; q++) F(1.65 + q * 0.2, 3.0, 1.75 + q * 0.2, 3.35, y0 + 1.3, y0 + 1.7 + (q % 2) * 0.1, 'cloth_grey');
@@ -154,7 +154,7 @@ export function groundHouse(c, k) {
     k.table(4.2, 4.7, 5.9, 5.4, y0, 0.8, 'timber'); for (let q = 0; q < 3; q++) F(4.4 + q * 0.4, 4.85, 4.7 + q * 0.4, 5.25, y0 + 0.8, y0 + 0.82 + q * 0.01, 'iron'); k.stool(5.0, 4.3, y0, 0.4, 0.15, false);
     B(ir - 0.7, 3.4, ir, 4.1, y0, y0 + 0.9, 'iron'); blk(ir - 0.7, 3.4, ir, 4.1, y0, y0 + 0.9); latF('iron', [[0.001, 0], [0.2, 0.01], [0.2, 0.05], [0.001, 0.06]], 10, ir - 0.35, 3.75, y0 + 0.9);       // the coil of sheet
     t.stoveE(ir, 6.6, 7.5, y0); t.waterJar(ir - 1.4, 8.4, y0, 2.0); k.table(3.5, 8.0, 4.7, 8.8, y0, 0.74, 'timber'); t.bowl('glaze_white', 3.9, 8.4, y0 + 0.74, 1.2); t.bowl('glaze_white', 4.3, 8.5, y0 + 0.74, 1.2); k.stool(4.1, 9.2, y0, 0.45, 0.15); k.stool(3.3, 8.4, y0, 0.45, 0.15);
-    k.stool(1.3, 3.6, y0, 0.4, 0.15, false); lampAt(1.3, 5.9, 2.3); front(1.3);
+    k.stool(2.75, 5.1, y0, 0.4, 0.15, false); lampAt(1.3, 5.9, 2.3); front(1.3);
   } else if (use === 'jade') {
     // the jade cutter's: the treadle wheel at the window with its water trough, dishes of sand, rough stones and finished pieces on the shelf; the family's stove and table in the east
     k.table(il + 0.1, 4.7, il + 1.5, 5.45, y0, 0.82, 'timber');
@@ -162,7 +162,7 @@ export function groundHouse(c, k) {
     B(il + 0.2, 4.8, il + 0.9, 4.85, y0 + 0.2, y0 + 0.25, 'wood_dark'); B(il + 0.5, 5.35, il + 0.54, 5.38, y0, y0 + 0.82, 'wood_dark');                                      // the treadle bar
     for (const a of [il + 0.95, il + 1.2]) t.bowl('glaze_white', a, 5.1, y0 + 0.82, 1.1);
     B(il + 0.1, 5.7, il + 0.8, 6.15, y0, y0 + 0.4, 'timber'); blk(il + 0.1, 5.7, il + 0.8, 6.15, y0, y0 + 0.4); latF('glaze_blue', [[0.001, 0], [0.22, 0], [0.26, 0.1], [0.24, 0.12], [0.001, 0.09]], 10, il + 0.45, 5.92, y0 + 0.4);   // the trough
-    k.stool(il + 0.8, 4.2, y0, 0.45, 0.15, false);
+    k.stool(2.2, 5.1, y0, 0.45, 0.15, false);
     k.shelves(il, 3.0, ib - 0.5, ib, y0, [0.5, 1.15, 1.8], 'jars');
     for (let q = 0; q < 5; q++) F(il + 0.25 + q * 0.5, ib - 0.35, il + 0.41 + q * 0.5, ib - 0.2, y0 + 1.15, y0 + 1.27, q % 2 ? 'glaze_green' : 'glaze_white');         // pieces of jade, rough and cut
     k.table(4.2, 3.0, 5.3, 3.7, y0, 0.74, 'lacquer_chestnut'); t.teaSet(4.75, 3.35, y0 + 0.74); k.stool(3.7, 3.35, y0, 0.45, 0.15); k.stool(5.8, 3.35, y0, 0.45, 0.15);        // the customers' table
@@ -248,7 +248,7 @@ export function upperHouse(c, k) {
   if (use === 'boatman') {
     bed(2.4, 3.35, false, 'cloth_indigo');
     k.chest(0.4, back - 0.55, 1.3, back - 0.08, y, 0.55); k.chest(0.4, back - 1.3, 1.1, back - 0.8, y, 0.5, 'wood_dark');
-    B(0.3, 5.6, 2.2, 5.64, y + 2.1, y + 2.14, 'bamboo_culm'); B(0.32, 5.61, 2.18, 5.63, y + 1.1, y + 2.1, 'lattice');                      // the second net, drying under the roof
+    B(0.3, 5.6, 2.2, 5.64, y + 2.1, y + 2.14, 'bamboo_culm'); B(0.32, 5.61, 2.18, 5.63, y + 1.1, y + 2.1, 'thatch');                      // the second net, drying under the roof
     latF('thatch', [[0.17, 0], [0.19, 0.04], [0.17, 0.08], [0.001, 0.08]], 12, 1.0, 6.5, y); t.bowl('pottery_dark', 1.0, 7.0, y, 1.4);
     desk(0.4, 1.3, 1.25, 1.85, false); t.bowl('glaze_white', 0.8, 1.55, y + 0.76, 1.2); F(0.55, 1.45, 0.95, 1.5, y + 0.76, y + 0.78, 'bamboo_culm');
     lampAt(1.9, back - 1.5, 2.1);

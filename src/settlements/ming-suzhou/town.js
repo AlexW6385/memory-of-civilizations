@@ -6,7 +6,7 @@
 
 import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layout.js';
 import { northPlans } from './north.js';
-import { upOf, faceOf, doorGap, shopkeeperAt } from './uphouses.js';
+import { upOf, faceOf, frameOf, doorGap, shopkeeperAt } from './uphouses.js';
 import './style.js';
 import './townwork.js';
 import './quaywork.js';
@@ -158,7 +158,7 @@ function houses() {
   });
   // the climbable houses, west and east of the way in, each side one plan with its own bounds (drawn only where they are near):
   // the first sixteen by the south street, and the houses added after them (uphouses.js NEXT) about the quarter
-  for (const [name, test] of [['w', (l) => !upOf(l).fresh && l.rect[0] < 0], ['e', (l) => !upOf(l).fresh && l.rect[0] > 0], ['w2', (l) => upOf(l).fresh && l.rect[0] < 0], ['e2', (l) => upOf(l).fresh && l.rect[0] > 0]]) {
+  for (const [name, test] of [['w', (l) => l.rect[0] < 0], ['e', (l) => l.rect[0] > 0]]) {
     const mine = ups.filter(test);
     if (!mine.length) continue;
     const E = mine.map((l) => { const u = upOf(l); return { t: 'house_up', rect: l.rect, y: LEVEL.street, front: faceOf(l, u), use: u.use, Hf: u.Hf, Hu: u.Hu, mir: !!u.mir, water: !!u.flip, seed: l.seed, roof: l.roof, tone: l.tone }; });
@@ -327,11 +327,46 @@ function riverLife() {
       L.push({ t: 'well', kind: 'open', mat: 'granite_grey', at: p, y: LEVEL.street + 0.04, rot: 0, seed: Math.floor(hh(p[0], p[1], 9) * 1e9) });
     }
   }
+  L.push(...insideFolk());                                      // (after all the rest, so that nothing above shifts)
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   const plans = [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`ming-suzhou-riverlife-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
   if (M.length) plans.push(base('ming-suzhou-house-steps', M));
   return plans;
+}
+
+/**
+ * The people at work in the rooms of the houses added after the first sixteen (rooms3.js), each at a seat or a station of its
+ * household, from a stream of their own so that the street life's stays where it is. [a, b, toward a, toward b, pose, extra], in
+ * the house's frame, the figure facing the direction given; the figures are the street life's own instanced ones (no draws).
+ */
+const FOLK = {
+  boatman: (ib) => [[0.8, 6.0, 0, -1, 'sit', { dress: 'trousers', hat: 'none' }]],
+  drawloom: () => [[0.85, 4.4, 0, 1, 'sit', { dress: 'robe', hat: 'none' }]],
+  printer: () => [[0.8, 4.6, 0, 1, 'sit', { dress: 'robe', hat: 'cap' }]],
+  tinsmith: () => [[2.75, 5.1, -1, 0, 'sit', { dress: 'trousers', hat: 'none' }]],
+  jade: () => [[2.2, 5.1, -1, 0, 'sit', { dress: 'robe', hat: 'none' }]],
+  grocer: (ib) => [[0.8, ib - 2.3, 0, 1, 'stand', { dress: 'robe', hat: 'none', woman: true }]],
+  teahouse: () => [[2.6, 3.0, 1, 0, 'sit', { dress: 'robe', hat: 'cap' }], [4.7, 3.62, 0, -1, 'sit', { dress: 'robe', hat: 'none' }]],
+  lodging: (ib) => [[2.9, ib - 1.6, 0, 1, 'stand', { dress: 'robe', hat: 'none', woman: true }]],
+  scholar: () => [[5.1, 3.45, 0, -1, 'sit', { dress: 'robe', hat: 'cap' }]],
+  dwelling: (ib) => [[6.3, 3.4, 0, -1, 'sit', { dress: 'robe', hat: 'cap' }], [0.9, ib - 1.7, 0, 1, 'stand', { dress: 'robe', hat: 'none', woman: true }]],
+};
+function insideFolk() {
+  const L = [], rand = rng(2207), pick = (a) => a[Math.floor(rand() * a.length)];
+  for (const l of lots()) {
+    const u = upOf(l);
+    if (!u?.fresh || !FOLK[u.use]) continue;
+    const F = frameOf(l.rect, !!u.mir, faceOf(l, u));
+    for (const [a, b, da, db, pose, ex] of FOLK[u.use](F.D - 0.4)) {
+      const p = F.at(a, b), q = F.at(a + da, b + db), { woman, ...rest } = ex;
+      const e = { t: 'figure', at: p, y: LEVEL.street + 0.45, rot: Math.atan2(-(q[0] - p[0]), -(q[1] - p[1])), seed: Math.floor(rand() * 1e9), cloth: pick(CLOTH), cloth2: pick(CLOTH), skin: rand() < 0.7 ? 'skin_light' : 'skin_medium', carry: 'none', pose, ...rest };
+      if (CAP_MING && e.hat === 'cap') e.cap = 'ming';
+      if (CAP_MING && !woman) e.hair = 'netknot';
+      L.push(e);
+    }
+  }
+  return L;
 }
 
 /** The signs and goods of every shop front (shops.js), in tiles of the street life. */

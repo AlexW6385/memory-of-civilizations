@@ -26,8 +26,8 @@ export function kit(c) {
     for (const [da, db] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) B(a + da * (s - 0.03) - 0.025, b + db * (s - 0.03) - 0.025, a + da * (s - 0.03) + 0.025, b + db * (s - 0.03) + 0.025, yy, yy + h - 0.04, 'lacquer_chestnut');
     if (coll) blk(a - s, b - s, a + s, b + s, yy, yy + h);
   };
-  k.jar = (mat, a, b, yy, s = 1) => lat(mat, [[0.001, 0], [0.1 * s, 0.01], [0.16 * s, 0.12 * s], [0.17 * s, 0.22 * s], [0.1 * s, 0.32 * s], [0.07 * s, 0.36 * s], [0.001, 0.36 * s]], 9, a, b, yy);
-  k.bowl = (mat, a, b, yy, s = 1) => lat(mat, [[0.001, 0], [0.05 * s, 0], [0.13 * s, 0.06 * s], [0.12 * s, 0.07 * s], [0.001, 0.02 * s]], 9, a, b, yy);
+  k.jar = (mat, a, b, yy, s = 1) => lat(mat, [[0.1 * s, 0], [0.16 * s, 0.12 * s], [0.17 * s, 0.22 * s], [0.1 * s, 0.32 * s], [0.07 * s, 0.36 * s], [0.001, 0.36 * s]], 8, a, b, yy);
+  k.bowl = (mat, a, b, yy, s = 1) => lat(mat, [[0.05 * s, 0], [0.13 * s, 0.065 * s], [0.001, 0.03 * s]], 8, a, b, yy);
   k.lamp = (a, b, yy) => lat('lamp_paper', [[0.07, 0], [0.17, 0.07], [0.19, 0.2], [0.16, 0.34], [0.07, 0.4], [0.001, 0.4]], 12, a, b, yy);
   /** Sacks of grain or salt stacked in a block a0..a1 × b0..b1, n high (each 0.5 × 0.34 × 0.2, laid crosswise by rows). */
   k.sacks = (a0, b0, a1, b1, yy, n, mats = ['cloth_ochre', 'cloth_white', 'cloth_ochre', 'cloth_grey']) => {
