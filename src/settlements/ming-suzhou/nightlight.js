@@ -11,7 +11,7 @@
 // Everything is a function of the lantern's own place: no counters, no Math.random.
 
 import { BufferGeometry, Float32BufferAttribute, Matrix4, Quaternion, Vector3 } from '../../core/three.js';
-import { placeHanging } from '../../core/geom.js';
+import { placeHanging, box, lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { assembly } from '../../objects/kit.js';
 import { LEVEL, CANALS, POND, pondDistance } from './layout.js';
@@ -112,18 +112,26 @@ export function waterStreak(H, x, z, wy, s = 1, reach = 7) {
 // ── the street's lanterns: one element of the street life per lantern ──────────────────────────────────
 // { t: 'suzhou_halo', at, y (the ground), rot (+z out, the wall behind at −z), kind }
 const KINDS = {
-  hang:  { cy: 2.32, s: 0.9, wall: 0.2, pool: 2.7, gy: 0.1 },     // the lantern hung from an eave over a shop front (objects: hang_lantern, its hook 2.95 m up)
-  inn:   { cy: 2.57, s: 1.25, wall: 0.25, pool: 2.8, gy: 0.1 },   // the tall drum lantern over the door of an inn (suzhou_lamp 'inn', its hook 3.25 m up)
+  hang:  { cy: 2.32, s: 0.9, wall: 0.2, pool: 2.3, gy: 0.1 },     // the lantern hung from an eave over a shop front (objects: hang_lantern, its hook 2.95 m up)
+  inn:   { cy: 2.57, s: 1.25, wall: 0.25, pool: 2.9, gy: 0.1 },   // the tall drum lantern over the door of an inn (suzhou_lamp 'inn', its hook 3.25 m up)
   pole:  { cy: 2.38, s: 1.0, wall: 0, pool: 3.4, gy: 0.03, z: 0.62 }, // the lamp on its pole at a bridge head
   post:  { cy: 2.17, s: 0.9, wall: 0, pool: 3.0, gy: 0.03, z: 0.42 }, // a lantern on a post or bracket (objects: lantern)
   spill: {},                                                       // the light from a shop's open front on the street
   streak: {},
+  stern: {},                                                       // the lantern on a post at a moored boat's stern
 };
 function unitOf(kind, v) {
   const key = `suzhou-halo|${kind}|${v ?? ''}`;
   return assembly(key, (a) => {
     const H = new Halo(), K = KINDS[kind];
-    if (kind === 'streak') H.floor(0, 0, 0, 0.62, 2.1, 0, 10, true);
+    if (kind === 'stern') {
+      // the lantern on a post at a boat's stern (origin: the deck at the post's foot): the post, a bracket, the paper lantern, its glow, a pool on the deck and its streak on the water (0.72 m below)
+      a('timber', box(-0.025, 0, -0.025, 0.025, 1.05, 0.025)); a('timber', box(-0.02, 0.98, -0.02, 0.02, 1.02, 0.3));
+      a('lacquer_black', lathe([[0.001, 0.93], [0.07, 0.93], [0.06, 0.9], [0.001, 0.9]], 8, null, 0, 0, 0.3));
+      a('lamp_paper', lathe([[0.07, 0.9], [0.12, 0.84], [0.13, 0.74], [0.12, 0.64], [0.07, 0.58]], 8, null, 0, 0, 0.3));
+      a('lacquer_black', lathe([[0.07, 0.58], [0.07, 0.55], [0.001, 0.55]], 8, null, 0, 0, 0.3));
+      H.ball(0, 0.75, 0.3, 0.7); H.floor(0, 0.03, 0.3, 1.5); H.floor(0, -0.70, 0.3, 0.62, 1.7, 0, 10, true);
+    } else if (kind === 'streak') H.floor(0, 0, 0, 0.62, 2.1, 0, 10, true);
     else if (kind === 'spill') H.floor(0, 0.06, 1.3, 2.4, 1.9, 0, 10);
     else lanternLight(H, 0, K.z ?? 0, K.cy, K.gy, K.s, K.wall ? { n: [0, 1], d: K.wall } : null, K.pool / K.s);
     const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(H.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(H.nor, 3)); a(MAT, g);
@@ -151,7 +159,11 @@ export function streetHalos(elements, inDisc = () => true) {
       else out.push({ t: 'suzhou_halo', kind: 'pole', at: e.at, y: e.y, rot: e.rot });
       near(x, z);
     } else if (e.t === 'lantern' && (e.kind === 'paper' || e.kind === 'white')) out.push({ t: 'suzhou_halo', kind: 'post', at: e.at, y: e.y ?? 0, rot: e.rot });
-    else if (e.t === 'suzhou_shop' && !e.water && hashAt(x, z, 5) < 0.55) {
+    else if (e.t === 'boat' && e.moor && e.dir && hashAt(x, z, 9) < 0.8) {
+      // a moored boat: a lantern on a post at the stern (the style's boat has its stern at +dir), on the side the hash chooses
+      const [dx, dz] = e.dir, L = e.len ?? 7, o = (hashAt(x, z, 3) < 0.5 ? -1 : 1) * 0.6, s = L / 2 - 0.4;
+      out.push({ t: 'suzhou_halo', kind: 'stern', at: [x + dx * s - dz * o, z + dz * s + dx * o], y: (e.y ?? LEVEL.canal) + 0.72, rot: Math.atan2(dx, dz) });
+    } else if (e.t === 'suzhou_shop' && !e.water && hashAt(x, z, 5) < 0.55) {
       // the shop front stays open into the evening: its lamp-light across the doorstep (a shop is facing out along rot)
       const r = e.rot ?? 0, s = Math.sin(r), c = Math.cos(r);
       out.push({ t: 'suzhou_halo', kind: 'spill', at: [x + s * 0.2, z + c * 0.2], y: e.y ?? 0, rot: r });

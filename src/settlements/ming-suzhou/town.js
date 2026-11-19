@@ -360,6 +360,10 @@ function bridgeLampPlans() {
 export async function town() {
   const hs = houses();
   const plans = [waterways(), ...hs, ...riverLife(), ...bridgeLampPlans(), ...shopFronts(), ...northPlans()];
-  for (const p of plans) if (p.style === 'life') p.elements.push(...streetHalos(p.elements, ([x, z]) => inDisc([x, z], 0)));   // the light of the lanterns and shop fronts at night (nightlight.js)
+  // the light of the lanterns, shop fronts and moored boats' stern lamps at night (nightlight.js); the boats' are in the waterways plan, their light goes into the bridge lamps' plan
+  const halos = plans.map((p) => streetHalos(p.elements, ([x, z]) => inDisc([x, z], 0)));
+  plans.forEach((p, i) => { if (p.style === 'life') p.elements.push(...halos[i]); });
+  const lamps = plans.find((p) => p.id === 'ming-suzhou-bridge-lamps');
+  if (lamps) plans.forEach((p, i) => { if (p.style !== 'life') lamps.elements.push(...halos[i]); });
   return plans;
 }

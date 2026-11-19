@@ -300,7 +300,7 @@ const SPECS = {
   lamp_white:       { clean: true, color: '#e8dcc0', roughness: 0.8, kind: 'glow', glow: '#ffc27a', power: 2.4 },
   lamp_glass:       { clean: true, color: '#c9c2a8', roughness: 0.2, kind: 'glow', glow: '#ffd08a', power: 3.2 },
   // the light a lantern or a lit window throws, added over what is behind it at night only: one material for all of it (materials.js 'halo'; no light, no shadow, no collision)
-  halo:             { clean: true, color: '#000000', roughness: 1, kind: 'halo', glow: '#ff8d3c', power: 0.5 },
+  halo:             { clean: true, color: '#000000', roughness: 1, kind: 'halo', glow: '#ff9d48', power: 0.36 },
   // Mediterranean and French town houses: shutters, painted stuccoes, pietra serena, painted timber
   shutter_green:    { color: '#3d5a3e', roughness: 0.7, kind: 'wood' },
   shutter_brown:    { color: '#5a3c28', roughness: 0.7, kind: 'wood' },
