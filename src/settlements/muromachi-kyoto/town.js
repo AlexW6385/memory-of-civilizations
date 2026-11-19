@@ -5,6 +5,7 @@
 import { RADIUS, STREAM, BRIDGES, SHRINE, TEA, GINKAKU, RYOAN, lots, yards, isOpen, inRect, mirrored, frontOf } from './layout.js';
 import { lifeTiles } from './life.js';
 import { stoneHalos } from './nightlight.js';
+import { gutterMoss } from './wearwork.js';
 import { gutters, furniture, yardWork, streamWork, templeWork } from './streetwork.js';
 
 const base = (id, elements, style = 'muromachi') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [190, 100], facing: 'n' } });
@@ -69,8 +70,8 @@ export async function town() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 60) plans.push(base(`muromachi-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ t: 'machiya_m', at: l.at, facing: l.facing, w: l.w, d: l.d, seed: l.seed, trade: l.trade, open: isOpen(l), mirror: mirrored(l), front: frontOf(l), up: !!l.up, keeper: !!l.keeper, y: 0 }))));
   plans.push(base('muromachi-civic', civic()));
-  plans.push(base('muromachi-gutters', gutters()));
-  plans.push(base('muromachi-furniture', [...furniture(), ...streamWork(), ...templeWork()]));
+  { const g = gutters(); plans.push(base('muromachi-gutters', [...g, ...gutterMoss(g)])); }
+  { const sw = streamWork(); plans.push(base('muromachi-furniture', [...furniture(), ...sw, ...templeWork()])); }
   plans.push(base('muromachi-yards', yardWork()));
   plans.push(base('muromachi-people', people(), 'life'));
   for (const t of lifeTiles()) plans.push({ ...base(t.id, t.elements, 'life'), center: t.center, near: 230 });

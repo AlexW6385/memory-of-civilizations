@@ -12,9 +12,10 @@ import { sacredElements } from './sacred.js';
 import { streetElements } from './street.js';
 import { gardenElements } from './garden.js';
 import { boardElements } from './boards.js';
+import { wearElements } from './wear.js';
 
 registerStyle('muromachi', {
   column: () => {}, trim: () => {}, opening: () => {},
-  elements: { ...STYLES.edo.elements, ...STYLES.japanese.elements, ...ginkakuElements, ...zenElements, ...houseElements, ...sacredElements, ...streetElements, ...gardenElements, ...boardElements },
+  elements: { ...STYLES.edo.elements, ...STYLES.japanese.elements, ...ginkakuElements, ...zenElements, ...houseElements, ...sacredElements, ...streetElements, ...gardenElements, ...boardElements, ...wearElements },
   objects: {},
 });
