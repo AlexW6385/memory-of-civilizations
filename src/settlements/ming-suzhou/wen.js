@@ -1,5 +1,5 @@
 // Ming Suzhou — the scenes of Wen Zhengming's record and album that the garden did not yet hold
-// (docs/settlements/ming-suzhou.md §25): where each stands, the paths between them, the stands of
+// (docs/settlements/ming-suzhou.md §26): where each stands, the paths between them, the stands of
 // planting round them, and what must be kept clear of them. Pure data and functions (no three.js):
 // used by ground.js (planting), plan.js (the shore stones and the revetment stop at them) and
 // wenscenes.js (the builders). Coordinates as layout.js: metres, +x east, +z south.

@@ -7,6 +7,7 @@
 const BOLT = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_grey', 'cloth_brown', 'cloth_black'];
 
 import { NEW_USES, groundExtra, upperExtra } from './rooms2.js';
+import { HOUSEHOLD_USES, groundHouse, upperHouse, householdBits } from './rooms3.js';
 
 export function kit(c) {
   const { B, blk, lat, rand } = c;
@@ -25,8 +26,8 @@ export function kit(c) {
     for (const [da, db] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) B(a + da * (s - 0.03) - 0.025, b + db * (s - 0.03) - 0.025, a + da * (s - 0.03) + 0.025, b + db * (s - 0.03) + 0.025, yy, yy + h - 0.04, 'lacquer_chestnut');
     if (coll) blk(a - s, b - s, a + s, b + s, yy, yy + h);
   };
-  k.jar = (mat, a, b, yy, s = 1) => lat(mat, [[0.001, 0], [0.1 * s, 0.01], [0.16 * s, 0.12 * s], [0.17 * s, 0.22 * s], [0.1 * s, 0.32 * s], [0.07 * s, 0.36 * s], [0.001, 0.36 * s]], 9, a, b, yy);
-  k.bowl = (mat, a, b, yy, s = 1) => lat(mat, [[0.001, 0], [0.05 * s, 0], [0.13 * s, 0.06 * s], [0.12 * s, 0.07 * s], [0.001, 0.02 * s]], 9, a, b, yy);
+  k.jar = (mat, a, b, yy, s = 1) => lat(mat, [[0.1 * s, 0], [0.16 * s, 0.12 * s], [0.17 * s, 0.22 * s], [0.1 * s, 0.32 * s], [0.07 * s, 0.36 * s], [0.001, 0.36 * s]], 8, a, b, yy);
+  k.bowl = (mat, a, b, yy, s = 1) => lat(mat, [[0.05 * s, 0], [0.13 * s, 0.065 * s], [0.001, 0.03 * s]], 8, a, b, yy);
   k.lamp = (a, b, yy) => lat('lamp_paper', [[0.07, 0], [0.17, 0.07], [0.19, 0.2], [0.16, 0.34], [0.07, 0.4], [0.001, 0.4]], 12, a, b, yy);
   /** Sacks of grain or salt stacked in a block a0..a1 × b0..b1, n high (each 0.5 × 0.34 × 0.2, laid crosswise by rows). */
   k.sacks = (a0, b0, a1, b1, yy, n, mats = ['cloth_ochre', 'cloth_white', 'cloth_ochre', 'cloth_grey']) => {
@@ -191,6 +192,8 @@ export function groundFit(c) {
     k.lamp((a0 + a1) / 2, 3.4, y0 + 2.2);
   }
   if (NEW_USES.includes(use)) groundExtra(c, { ...k, B, blk });
+  if (HOUSEHOLD_USES.includes(use)) groundHouse(c, k);
+  householdBits(c, k, 0);
   void P; void blk; void lay;
 }
 function lat0(c, mat, a, b, yy) { c.lat(mat, [[0.001, 0], [0.08, 0.01], [0.1, 0.1], [0.06, 0.16], [0.001, 0.16]], 8, a, b, yy); }
@@ -296,5 +299,7 @@ export function upperFit(c) {
     blk(0.25, 2.95, 0.45, 3.95, y, y + 1.3);
   }
   if (NEW_USES.includes(use)) upperExtra(c, k);
+  if (HOUSEHOLD_USES.includes(use)) upperHouse(c, k);
+  householdBits(c, k, 1);
   void backJars; void ibU;
 }
