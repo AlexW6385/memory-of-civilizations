@@ -35,7 +35,7 @@ const ids = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1].
 // the viewer's rules (src/engine/world.js, life-instances.js)
 const DETAIL_REACH = 160, DETAIL_SHADOW = 50, LIFE_SHADOW = 120;
 const NO_SHADOW = new Set(['water', 'glass_outer', 'glass_topaz', 'opening', 'daylight', 'daylight_plain']);
-const NO_SHADOW_KINDS = new Set(['glow', 'water', 'foam']);
+const NO_SHADOW_KINDS = new Set(['glow', 'water', 'foam', 'halo']);
 const castsShadow = (mat) => !NO_SHADOW.has(mat) && !NO_SHADOW_KINDS.has(MATERIALS[mat]?.kind);
 const { LIFE_MIN, lifeInstanced } = await import('../src/engine/life-instances.js').catch(() => ({ LIFE_MIN: 13, lifeInstanced: (n) => n >= 13 }));
 

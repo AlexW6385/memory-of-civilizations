@@ -785,6 +785,7 @@ async function main() {
         frogs: P.frogs * (1 - cl.day) * Math.min(1, 0.3 + wetN / 4 + cl.rain) * low,
         dawn: am && cl.sunEl > -8 && cl.sunEl < 14 ? 1 : 0,
         rain: cl.rain, indoors: !outdoors,
+        at: inTown > 0.05 && world.anchor.site === near.s ? { x: c.x, z: c.z, y: controls.feet.y, yaw: controls.yaw, hour: climate.hour } : null,   // where the listener stands in the settlement (placed sounds: voices.js)
       });
       // the hours of the place: bells, drums, horns, the call to prayer — within the settlement only
       const now = { hour: climate.hour, el: cl.sunEl, lat: latLon(u)[0] };
