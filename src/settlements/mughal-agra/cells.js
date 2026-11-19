@@ -127,7 +127,13 @@ function agraRow(el, { bag, col }) {
 }
 
 // ── what stands in an opened cell ───────────────────────────────────────────────────────────────────────────
-const CLOTH = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_white', 'cloth_maroon'];
+// (the large pieces of a cell — dais, boards, rugs, bolts, sacks — use seven materials only, so that the near plans add few draws: DESIGN §8)
+const CLOTH = ['cloth_red', 'cloth_white', 'cloth_red'];
+/** A grain sack, mouth rolled down, the grain showing (a lathe in the palette's cloth and terracotta). */
+function sack(bag, x, y, z, k = 1) {
+  bag.add('cloth_white', lathe([[0.001, 0], [0.17 * k, 0], [0.2 * k, 0.08 * k], [0.2 * k, 0.3 * k], [0.23 * k, 0.34 * k], [0.22 * k, 0.38 * k], [0.17 * k, 0.36 * k], [0.001, 0.36 * k]], 10, null, x, y, z));
+  bag.add('terracotta', lathe([[0.17 * k, 0], [0.12 * k, 0.05 * k], [0.001, 0.08 * k]], 10, null, x, y + 0.35 * k, z));
+}
 /** A phial of attar (itr): a small glass bottle with a long neck and a stopper, in the glazes the palette has. */
 function phial(bag, x, y, z, k = 1, mat = 'glaze_blue') {
   bag.add(mat, lathe([[0.001, 0], [0.035 * k, 0], [0.05 * k, 0.04 * k], [0.045 * k, 0.09 * k], [0.018 * k, 0.12 * k], [0.016 * k, 0.2 * k], [0.022 * k, 0.21 * k], [0.001, 0.21 * k]], 8, null, x, y, z));
@@ -156,14 +162,14 @@ function agraCells(el, { bag, col }) {
     const ob = (u0, v0, u1, v1, ya, yb, m) => { const q = rect(u0, v0, u1, v1); bag.add(m, box(q[0], ya, q[1], q[2], yb, q[3])); return q; };
     const dq = ob(-dw / 2, dv0, dw / 2, dv1, y0, y0 + 0.17, 'wood_dark'); col.rect(dq, y0, y0 + 0.17);
     ob(-dw / 2 + 0.03, dv0 + 0.03, dw / 2 - 0.03, dv1 - 0.03, y0 + 0.17, y0 + 0.182, 'cloth_white');
-    { const [bx, bz] = at(0.1, dv1 - 0.2); F.bolster(bag, bx, y0 + 0.182, bz, 1.5, 0.12, s > 0 ? 0 : 0, 'cloth_red', 'cloth_ochre'); }
+    { const [bx, bz] = at(0.1, dv1 - 0.2); F.bolster(bag, bx, y0 + 0.182, bz, 1.5, 0.12, 0, 'cloth_red', 'cloth_red'); }
     { const [rx, rz] = at(0.75, dv0 + 0.35); F.rahle(bag, rx, y0 + 0.182, rz, back); }
     { const [hx, hz] = at(-0.78, dv0 + 0.3); F.hookah(bag, hx, y0 + 0.182, hz, back); }
     { const [kx, kz] = at(0.1, dv0 + 0.5); keepers.push(keeperOf(Math.imul(c.k + 5, 6700417) ^ (r.sx * 977 + r.sz * 113 + 1), [kx, kz], y0 + 0.182, back)); }
     // a niche in the back wall with an oil lamp, over the dais's corner
-    { const [nx, nz] = at(-0.9, D - 0.5 - 0.02); ob(-1.2, D - 0.5 - 0.3, -0.62, D - 0.5, y0 + 1.5, y0 + 1.56, R); F.oilLamp(bag, null, nx, y0 + 1.56, at(-0.9, D - 0.5 - 0.17)[1], 'terracotta', 0); }
+    { const [nx, nz] = at(-0.9, D - 0.5 - 0.02); ob(-1.2, D - 0.5 - 0.3, -0.62, D - 0.5, y0 + 1.5, y0 + 1.56, 'wood_dark'); F.oilLamp(bag, null, nx, y0 + 1.56, at(-0.9, D - 0.5 - 0.17)[1], 'terracotta', 0); }
     // the dhurrie on the floor between the door and the dais (not in the lane's middle: the lane is a 1.7 m way, the rug is on it, flat)
-    { const [dx, dz] = at(0, 1.2); F.kilim(bag, dx, y0, dz, 1.6, 2.0, 0, [CLOTH[(c.k + 1) % 6], 'cloth_white', CLOTH[(c.k + 3) % 6], 'cloth_white']); }
+    { const [dx, dz] = at(0, 1.2); F.kilim(bag, dx, y0, dz, 1.6, 2.0, 0, [CLOTH[c.k % 2], 'cloth_white', CLOTH[(c.k + 1) % 2], 'cloth_white']); }
     // the shelves on the two partitions: three boards on posts, 0.3 deep, from 0.5 to 2.2 m in; collider as a thin wall
     for (const sg of [-1, 1]) {
       const u0 = sg * hw, u1 = sg * (hw - 0.3), v0 = 0.5, v1 = 2.3, ub = Math.min(u0, u1), uc = Math.max(u0, u1);
@@ -176,24 +182,24 @@ function agraCells(el, { bag, col }) {
       for (let i = 0; i < 3; i++) {
         const hh = [0.655, 1.215, 1.775][i], v = 1.4 + (i % 2) * 0.05, [gx, gz] = along(v);
         if (T === 'cloth') { F.bolts(bag, gx, y0 + hh, gz, 4 + (i + c.k) % 2, yaw + (s > 0 ? Math.PI : 0), CLOTH, 0.5); const [hx, hz] = along(v - 0.62); F.bolts(bag, hx, y0 + hh, hz, 3, yaw, CLOTH.slice().reverse(), 0.5); }
-        else if (T === 'carpets') { const [hx, hz] = along(v); F.bolts(bag, hx, y0 + hh, hz, 4, yaw, ['cloth_maroon', 'cloth_indigo', 'cloth_red'], 0.5); }
+        else if (T === 'carpets') { const [hx, hz] = along(v); F.bolts(bag, hx, y0 + hh, hz, 4, yaw, ['cloth_red', 'cloth_white', 'cloth_red'], 0.5); }
         else if (T === 'brass') F.copperware(bag, gx, y0 + hh, gz, yaw, c.k * 7 + i + sg + 5, 4);
-        else if (T === 'grain') { for (const dv of [-0.5, 0.5]) { const [hx, hz] = along(v + dv); bag.add('bronze', lathe([[0.001, 0], [0.06, 0], [0.08, 0.1], [0.075, 0.11], [0.001, 0.03]], 8, null, hx, y0 + hh, hz)); bag.add(['cloth_ochre', 'cloth_red', 'cloth_green'][(i + c.k) % 3], lathe([[0.075, 0.05], [0.05, 0.12], [0.001, 0.14]], 8, null, hx, y0 + hh, hz)); } }
+        else if (T === 'grain') { for (const dv of [-0.5, 0.5]) { const [hx, hz] = along(v + dv); bag.add('bronze', lathe([[0.001, 0], [0.06, 0], [0.08, 0.1], [0.075, 0.11], [0.001, 0.03]], 8, null, hx, y0 + hh, hz)); bag.add(['terracotta', 'cloth_red'][(i + c.k) % 2], lathe([[0.075, 0.05], [0.05, 0.12], [0.001, 0.14]], 8, null, hx, y0 + hh, hz)); } }
         else if (T === 'pots') F.pots(bag, gx, y0 + hh, gz, yaw, 5, ['terracotta', 'glaze_blue', 'glaze_green', 'terracotta', 'glaze_white']);
         else for (let j = 0; j < 5; j++) { const [hx, hz] = along(v - 0.6 + j * 0.3); phial(bag, hx, y0 + hh, hz, 1, ['glaze_blue', 'glaze_green', 'glaze_white', 'glaze_blue', 'glaze_green'][(i + j + c.k) % 5]); }
       }
       // on the floor under the shelf
       const [fx, fz] = at(sg * (hw - 0.22), 1.4);
-      if (T === 'grain') F.spiceSacks(bag, fx, y0, fz, yaw, 4, ['cloth_ochre', 'cloth_red', 'terracotta', 'cloth_brown']);
+      if (T === 'grain') for (let q = 0; q < 4; q++) { const [sx2, sz2] = at(sg * (hw - 0.22), 0.95 + q * 0.4); sack(bag, sx2, y0, sz2, 1); }
       else if (T === 'pots') F.waterJar(bag, fx, y0, fz, 0.7);
-      else if (T === 'carpets') F.rolledCarpets(bag, fx, y0, fz, 3, 1.1, yaw, ['cloth_red', 'cloth_maroon', 'cloth_indigo', 'cloth_red']);
+      else if (T === 'carpets') F.rolledCarpets(bag, fx, y0, fz, 3, 1.1, yaw, ['cloth_red', 'cloth_white', 'cloth_red', 'cloth_white']);
       else if (T === 'brass') { const [qx, qz] = at(sg * (hw - 0.22), 1.1); bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.19, 0.08], [0.2, 0.2], [0.17, 0.26], [0.19, 0.28], [0.17, 0.285], [0.15, 0.27], [0.001, 0.25]], 14, null, qx, y0, qz)); }
-      else F.bale(bag, fx, y0, fz, 0.75, 0.45, 0.5, yaw, sg > 0 ? 'cloth_white' : 'sacking');
+      else F.cushion(bag, fx, y0, fz, 0.9, 0.5, 0.45, yaw, 'cloth_white');   // a bale of cloth
     }
     // beams under the ceiling, and from the middle one a brass lamp on a chain
     for (const v of [0.7, 1.85, 2.95]) ob(-hw, v - 0.07, hw, v + 0.07, y0 + H - PY - 0.3, y0 + H - PY - 0.12, 'wood_dark');
     { const [lx, lz] = at(0, 1.85); const top = y0 + H - PY - 0.3;
-      bag.add('bronze', rod([lx, top, lz], [lx, top - 0.55, lz], 0.006, 3));
+      bag.add('wood_dark', rod([lx, top, lz], [lx, top - 0.55, lz], 0.006, 3));
       bag.add('bronze', lathe([[0.001, 0], [0.07, 0], [0.11, 0.05], [0.12, 0.09], [0.09, 0.1], [0.001, 0.04]], 10, null, lx, top - 0.68, lz));
       bag.add('flame', lathe([[0.001, 0], [0.012, 0.015], [0.001, 0.05]], 6, null, lx, top - 0.6, lz)); }
   }
