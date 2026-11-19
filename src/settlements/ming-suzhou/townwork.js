@@ -22,6 +22,15 @@ export class Acc {
   arr(mat) { let a = this.m.get(mat); if (!a) this.m.set(mat, (a = [])); return a; }
   tri(mat, a, b, c) { this.arr(mat).push(...a, ...b, ...c); }
   quad(mat, a, b, c, d, both = false) { this.tri(mat, a, b, c); this.tri(mat, a, c, d); if (both) { this.tri(mat, a, c, b); this.tri(mat, a, d, c); } }
+  /** A quad of a convex solid about the point `ctr`, its two triangles wound to face away from it (one-sided: it was drawn twice, once each way). */
+  quadOut(mat, a, b, c, d, ctr) {
+    for (const t of [[a, b, c], [a, c, d]]) {
+      const [p, q, r] = t, ux = q[0] - p[0], uy = q[1] - p[1], uz = q[2] - p[2], vx = r[0] - p[0], vy = r[1] - p[1], vz = r[2] - p[2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const mx = (p[0] + q[0] + r[0]) / 3 - ctr[0], my = (p[1] + q[1] + r[1]) / 3 - ctr[1], mz = (p[2] + q[2] + r[2]) / 3 - ctr[2];
+      if (nx * mx + ny * my + nz * mz >= 0) this.tri(mat, p, q, r); else this.tri(mat, p, r, q);
+    }
+  }
   box(mat, x0, y0, z0, x1, y1, z1) {
     if (x1 - x0 < 1e-5 || y1 - y0 < 1e-5 || z1 - z0 < 1e-5) return;
     const p = [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]], q = [];
@@ -74,9 +83,11 @@ function ringAt(acc, F, mat, a, y, o, R, r, n = 8) {
     const t0 = k / n * Math.PI * 2, t1 = (k + 1) / n * Math.PI * 2;
     const P = (t, d, e) => [a + Math.cos(t) * (R + d), y + Math.sin(t) * (R + d), o + e];
     const A0 = P(t0, -r, 0), A1 = P(t1, -r, 0), B0 = P(t0, r, 0), B1 = P(t1, r, 0), C0 = P(t0, 0, r), C1 = P(t1, 0, r), D0 = P(t0, 0, -r), D1 = P(t1, 0, -r);
+    const ctr = [0, 0, 0];
+    for (const [aa, yy, oo] of [A0, A1, B0, B1, C0, C1, D0, D1]) { const [x, z] = F.at(aa, oo); ctr[0] += x / 8; ctr[1] += yy / 8; ctr[2] += z / 8; }
     for (const [p, q, p2, q2] of [[A0, A1, C0, C1], [C0, C1, B0, B1], [B0, B1, D0, D1], [D0, D1, A0, A1]]) {
       const w = [p, q, q2, p2].map(([aa, yy, oo]) => { const [x, z] = F.at(aa, oo); return [x, yy, z]; });
-      acc.quad(mat, w[0], w[1], w[2], w[3], true);
+      acc.quadOut(mat, w[0], w[1], w[2], w[3], ctr);
     }
   }
 }
@@ -84,9 +95,10 @@ function ringAt(acc, F, mat, a, y, o, R, r, n = 8) {
 function bossAt(acc, F, mat, a, y, o0, o1, R, n = 8) {
   const pts = []; for (let k = 0; k < n; k++) pts.push([a + Math.cos(k / n * Math.PI * 2) * R, y + Math.sin(k / n * Math.PI * 2) * R]);
   F.poly(acc, mat, pts, o1);
+  const [cx, cz] = F.at(a, (o0 + o1) / 2), ctr = [cx, y, cz];
   for (let k = 0; k < n; k++) {
     const p = pts[k], q = pts[(k + 1) % n], w = [[p, o0], [q, o0], [q, o1], [p, o1]].map(([[aa, yy], oo]) => { const [x, z] = F.at(aa, oo); return [x, yy, z]; });
-    acc.quad(mat, w[0], w[1], w[2], w[3], true);
+    acc.quadOut(mat, w[0], w[1], w[2], w[3], ctr);
   }
 }
 

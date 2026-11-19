@@ -15,6 +15,7 @@ import { prepareTown, frontOf, HOUSE_TRADE } from './shopprep.js';
 import { walkSet, walkElement, analyse } from './openwalk.js';
 import './walkfront.js';
 import { streetHalos } from './nightlight.js';
+import { mergeAlways } from './slim.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const R = RADIUS - 26;                                  // the street life stops here (the people are drawn near)
@@ -119,10 +120,10 @@ function houses() {
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
     quads[(cx > 0 ? 1 : 0) + (cz > 0 ? 2 : 0) + (l.detail > 0 ? 0 : 4)].push(l);
   }
-  quads.forEach((q, i) => {
-    const E = q.map((l) => (walkSet().has(l) ? { ...walkElement(l, walkSet().get(l)), t: 'house_walk' } : { t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: HOUSE_TRADE[l.trade] || l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
-    if (E.length) plans.push({ ...base(`ming-suzhou-houses-${i}`, E), style: 'suzhou-quarter' });
-  });
+  // (one plan for all the always-shown houses: the viewer merges such plans per material settlement-wide anyway, so eight plans
+  // only meant eight meshes of every material in the budget count; the quadrants and detail classes stay in the order of the list)
+  const E = quads.flat().map((l) => (walkSet().has(l) ? { ...walkElement(l, walkSet().get(l)), t: 'house_walk' } : { t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: HOUSE_TRADE[l.trade] || l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
+  if (E.length) plans.push({ ...base('ming-suzhou-houses-0', E), style: 'suzhou-quarter' });
   plans.push(...walkPlans());
   // the climbable houses, west and east of the way in, each side one plan with its own bounds (drawn only where they are near):
   // the first sixteen by the south street, and the houses added after them (uphouses.js NEXT) about the quarter
@@ -466,5 +467,5 @@ export async function town() {
   plans.forEach((p, i) => { if (p.style === 'life') p.elements.push(...halos[i]); });
   const lamps = plans.find((p) => p.id === 'ming-suzhou-bridge-lamps');
   if (lamps) plans.forEach((p, i) => { if (p.style !== 'life') lamps.elements.push(...halos[i]); });
-  return plans;
+  return mergeAlways(plans);
 }
