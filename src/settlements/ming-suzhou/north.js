@@ -12,6 +12,9 @@ import '../../styles/ming/index.js';
 import '../../styles/song/index.js';
 import { beamTris, rectRoof } from '../../styles/ming/index.js';
 import { templeWare } from './templework.js';
+import { pagodaWalk, pagodaWear, pagodaFinial } from './pagodawork.js';
+import { gateTowerIn, wallWeather, wallWalks, courtWork, courtLife } from './wallwork.js';
+import { templeFigure, templeMainIn, templeSutraIn, templeRefectoryIn, templeKings } from './templehall.js';
 import { LEVEL, RADIUS, TEMPLE_COURT, NORTH_KEEP as KEEP } from './layout.js';
 import { tabletText } from './corework.js';
 
@@ -29,6 +32,8 @@ export const WALL = { z: -168, x0: -118, x1: 118, base: 9.4, top: 7.0, H: 9.0 };
  */
 export const NORTH_KEEP = KEEP;
 
+/** The core radius of the lowest tier (m): wide enough that the corridor and the chamber of the song style's walkable inside fit the top tier (docs §26). */
+export const TIER_R0 = 8.2;
 const PI = Math.PI;
 const ngon = (cx, cz, r, n = 8, rot = PI / 8) => Array.from({ length: n }, (_, k) => [cx + Math.cos(rot + k / n * PI * 2) * r, cz + Math.sin(rot + k / n * PI * 2) * r]);
 
@@ -141,7 +146,7 @@ function beisiPagoda(el, ctx) {
   // the coping of the lower stages: a slab overhanging a little
   prism(bag, 'granite_grey', ngon(cx, cz, A + 0.15), ngon(cx, cz, A + 0.15), y0 + hA - 0.1, y0 + hA);
   prism(bag, 'granite_grey', ngon(cx, cz, B + 0.15), ngon(cx, cz, B + 0.15), y0 + hB - 0.1, y0 + hB);
-  col.circle(cx, cz, C * Math.cos(PI / 8) - 0.5, y0, y0 + hC);
+  col.circle(cx, cz, C * Math.cos(PI / 8) - 1.4, y0, y0 + hC);   // (the landing of the top flight meets it)
   // the steps on the south (+z): to the first stage, the second, the base
   const f = (r) => r * Math.cos(PI / 8);
   const stairs = [[f(A) + 0.4, y0, y0 + hA, 7, 1.6], [f(B) + 0.4, y0 + hA, y0 + hB, 6, 1.6], [f(C) + 0.6, y0 + hB, y0 + hC, 5, 2.0]];
@@ -184,12 +189,14 @@ function beisiPagoda(el, ctx) {
   bag.add('granite_grey', fromTriangles(rails)); bag.add('granite_block', fromTriangles(slabs));
   // the pagoda itself, the brick body and the timber of its galleries
   const tiers = [];
-  for (let i = 0; i < 9; i++) tiers.push({ r: 6.2 - 0.42 * i, h: 9.2 - 0.5 * i });
+  for (let i = 0; i < 9; i++) tiers.push({ r: TIER_R0 - 0.3 * i, h: 9.2 - 0.5 * i });
   // (the song style's own eaves are thin plates: they are left out here, their tile and soffit
   // materials dropped, and replaced by deep eaves of our own)
   const fb = Object.create(bag);
-  fb.add = (m, g) => { if (m !== 'tile_dark' && m !== 'lacquer_red') bag.add(m, g); };
-  STYLES.song.elements.pagoda_oct({ c: el.c, y: y0 + hC + 0.34 - 0.05, base: { r: 0.3, h: 0.05 }, tiers, spire: 5.6, bells: null, core: 'brick_grey', frame: 'timber_red', eave: 'tile_dark' }, { ...ctx, bag: fb });
+  // (the song style's walkable inside is on: its stair, floors and chambers are kept; its big eave pieces are dropped, the offering table's small red is kept)
+  const small = (g) => { g.computeBoundingBox(); const b = g.boundingBox; return Math.max(b.max.x - b.min.x, b.max.z - b.min.z) < 3; };
+  fb.add = (m, g) => { if ((m !== 'tile_dark' && m !== 'lacquer_red') || (m === 'lacquer_red' && small(g))) bag.add(m, g); };
+  STYLES.song.elements.pagoda_oct({ c: el.c, y: y0 + hC + 0.34 - 0.05, base: { r: 0.3, h: 0.05 }, tiers, spire: 5.6, bells: null, core: 'brick_grey', frame: 'timber_red', eave: 'tile_dark', interior: true, images: true }, { ...ctx, bag: fb });
   let y = y0 + hC + 0.34;
   tiers.forEach((t, i) => {
     const g = t.r + 2.4, top = y + t.h;
@@ -445,7 +452,7 @@ function northWall(el, ctx) {
   }
   // ── the gate hall over each land gate that has one
   for (const g of gates) {
-    if (g.tower) ctx.style.elements.suzhou_hall({ rect: [g.x - g.tower / 2, z - 2.5, g.x + g.tower / 2, z + 2.5], y: H + 0.3, H: 5.0, front: 'n', four: false, roof: 'xieshan', plat: 0.3, eave: 1.5, sweep: 1.3 }, ctx);
+    if (g.tower) ctx.style.elements.suzhou_hall({ rect: [g.x - g.tower / 2, z - 2.5, g.x + g.tower / 2, z + 2.5], y: H + 0.3, H: 5.0, front: 's', four: false, roof: 'xieshan', plat: 0.3, eave: 1.5, sweep: 1.3 }, ctx);
   }
 }
 
@@ -466,7 +473,7 @@ function moatPool({ rect, y, gaps = [] }, { bag }) {
 
 registerStyle('suzhou-north', {
   ...STYLES.ming,
-  elements: { ...STYLES.ming.elements, tablet_text: tabletText, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare },
+  elements: { ...STYLES.ming.elements, tablet_text: tabletText, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare, temple_figure: templeFigure, temple_main_in: templeMainIn, temple_sutra_in: templeSutraIn, temple_refectory_in: templeRefectoryIn, temple_kings: templeKings, pagoda_wear: pagodaWear, pagoda_finial: pagodaFinial, gate_tower_in: gateTowerIn, wall_weather: wallWeather, court_work: courtWork, court_life: courtLife },
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -475,8 +482,17 @@ registerStyle('suzhou-north', {
 const base = (id, elements, style = 'suzhou-north') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 65], facing: 'n' } });
 
 /** The pagoda on its terraces. */
+export const TIERS = Array.from({ length: 9 }, (_, i) => ({ r: TIER_R0 - 0.3 * i, h: 9.2 - 0.5 * i }));
 function pagodaPlan() {
-  return base('ming-suzhou-pagoda', [{ t: 'beisi_pagoda', c: PAGODA_AT, y: 0 }]);
+  return base('ming-suzhou-pagoda', [{ t: 'beisi_pagoda', c: PAGODA_AT, y: 0 },     { t: 'pagoda_finial', c: PAGODA_AT, y: 2.2 + 0.34 + TIERS.reduce((a, t) => a + t.h, 0) + 5.55, r: TIERS[8].r + 3.6, yr: 2.2 + 0.34 + TIERS.reduce((a, t) => a + t.h, 0) + 0.2 }]);
+}
+
+/** The routes walk-check follows (plan.walks, hooked into the landmark's in index.js): from the street up the pagoda to its top. */
+const WALL_RAMPS = [-52, 58], WALL_TOWER = 17;
+export function northWalks() {
+  const [x0, , x1, z1] = COURT;
+  void x0; void x1;
+  return [pagodaWalk({ c: PAGODA_AT, y0: 0, tiers: TIERS, gate: [PAGODA_AT[0], z1], hallW: PAGODA_AT[0] - 16.5 }), ...wallWalks({ ...WALL, ramps: WALL_RAMPS, tower: WALL_TOWER })];
 }
 
 /** The temple's court: its walls with the gate on the south, the main hall and the side halls, the paved court. */
@@ -494,6 +510,52 @@ function templePlan() {
   E.push({ t: 'suzhou_hall', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4, front: 'w', four: false, roof: 'xieshan', plat: 0.4 });
   E.push({ t: 'temple_ware', gate: [cx, z1], burner: [cx, z1 - 1.75], w: 3.2, h: 3.5, zt: -114.6, y: LEVEL.street + 0.04 });
   return base('ming-suzhou-temple', E);
+}
+
+/** What stands inside the temple's halls: drawn only near (the visitor within 100 m of the court's middle). */
+function templeInPlan() {
+  const [x0, z0, x1, z1] = COURT, cx = PAGODA_AT[0], E = [];
+  E.push({ t: 'temple_main_in', rect: [cx - 12, -127, cx + 12, -117.5], y: 1.15, H: 7.2 });
+  E.push({ t: 'temple_kings', gate: [cx, z1], w: 3.2, y: LEVEL.street + 0.04 });
+  E.push({ t: 'temple_sutra_in', rect: [-72, -128, -63, -120], y: 0.4, H: 4.4 });
+  E.push({ t: 'temple_refectory_in', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4 });
+  void x0; void z0; void x1; void z1;
+  return { ...base('ming-suzhou-temple-in', E), near: 60, center: [cx, -125] };
+}
+
+/** The pagoda's stair wear: near only. */
+function pagodaNearPlan() { return { ...base('ming-suzhou-pagoda-in', [{ t: 'pagoda_wear', c: PAGODA_AT, y: 2.2 + 0.34, tiers: TIERS }]), near: 70, center: PAGODA_AT }; }
+
+/** The court's old trees, stelae, pond and the people at the gate: near only. */
+function courtNearPlan() {
+  const [x0, z0, x1, z1] = COURT, cx = PAGODA_AT[0], y = LEVEL.street + 0.34, ys = LEVEL.street, E = [];
+  void x0; void z0; void x1;
+  E.push({ t: 'court_work', y, trees: [[-66, -141, 1.0], [-14, -139, 0.9], [-67, -153, 0.8]], stelae: [[-26, -115.2, 0], [-18, -115.2, 0]], pond: [-70.5, -118.6, -62.5, -113.8] });
+  const m = { dress: 'robe', hair: 'shaven', hairMat: 'hair_dark', skin: 'skin_light' };
+  E.push({ t: 'court_life', y, people: [
+    { id: 1, at: [cx - 1.9, z1 - 3.4], rot: PI, ...m, over: 'cloak', cloth: 'cloth_grey', cloth2: 'cloth_ochre', pose: 'kneel', arms: 'pray' },
+    { id: 2, at: [cx + 2.3, z1 - 3.9], rot: PI, dress: 'tunic', hair: 'bun', cloth: 'cloth_indigo', skin: 'skin_medium', pose: 'kneel', arms: 'pray' },
+    { id: 3, at: [-30, -122], rot: 0.6, ...m, over: 'cloak', cloth: 'cloth_grey', cloth2: 'cloth_ochre', pose: 'stand', carry: 'broom' },
+    { id: 4, at: [-9, -131], rot: 2.2, ...m, cloth: 'cloth_brown', pose: 'stand' },
+  ] });
+  // outside the gate, on the road: two beggars by the wall, an incense seller
+  E.push({ t: 'court_life', y: ys + 0.04, people: [
+    { id: 11, at: [cx - 3.6, z1 + 0.9], rot: PI, dress: 'tunic', cloth: 'cloth_brown', skin: 'skin_dark', hair: 'short', pose: 'sit_ground' },
+    { id: 12, at: [cx + 3.4, z1 + 1.0], rot: PI, dress: 'tunic', cloth: 'cloth_grey', skin: 'skin_medium', hair: 'short', pose: 'sit_ground', hat: 'straw' },
+    { id: 13, at: [cx + 6.5, z1 + 1.3], rot: PI, dress: 'tunic', cloth: 'cloth_indigo', skin: 'skin_medium', hair: 'netknot', pose: 'stand', carry: 'pole' },
+  ] });
+  return { ...base('ming-suzhou-court-near', E), near: 80, center: [cx, -130] };
+}
+
+/** What stands on the wall and in its gate hall, and its weathering: near only (two plans, each for half the wall's length). */
+function wallNearPlans() {
+  const { z, base: B, top, H } = WALL, gt = [{ x: -100.5, w: 5 }, { x: -94, w: 4.4 }, { x: 17, w: 5.6 }, { x: 93, w: 4.4 }, { x: 99.5, w: 5 }].map((g) => [g.x - g.w / 2, g.x + g.w / 2]);
+  const half = (id, xa, xb, c, extra = []) => ({ ...base(id, [{ t: 'wall_weather', x0: xa, x1: xb, z, base: B, top, H, skip: gt, seed: 3 }, ...extra]), near: 90, center: [c, z] });
+  return [half('ming-suzhou-wall-w', WALL.x0, 0, -60), half('ming-suzhou-wall-e', 0, WALL.x1, 60, [])].map((p, i) => i ? p : p);
+}
+/** The gate hall's watch-post. */
+function gateNearPlan() {
+  return { ...base('ming-suzhou-gate-in', [{ t: 'gate_tower_in', x: WALL_TOWER, z: WALL.z, y: WALL.H + 0.3, w: 17, seed: 7 }]), near: 70, center: [WALL_TOWER, WALL.z] };
 }
 
 /** The wall, its gates, the roads through them, the canals under the water gates, the moat. */
@@ -524,4 +586,4 @@ function wallPlan() {
 }
 
 /** The plans of this part. */
-export function northPlans() { return [pagodaPlan(), templePlan(), wallPlan()]; }
+export function northPlans() { return [pagodaPlan(), pagodaNearPlan(), templePlan(), templeInPlan(), courtNearPlan(), wallPlan(), ...wallNearPlans(), gateNearPlan()]; }
