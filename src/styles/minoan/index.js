@@ -57,23 +57,49 @@ function wing(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, n = el.storeys ?? 2, sh = el.sh ?? 3.6, H = n * sh, rand = rng(el.seed || 3);
   // rooms, doorways and light wells cut into the block (el.holes: { rect, h (the void's height above the floor; H or
   // more: open to the sky) }), and sunken floors (el.pits: { rect, depth })
-  const holes = el.holes ?? [], pits = el.pits ?? [], R = [x0 + 0.05, z0 + 0.05, x1 - 0.05, z1 - 0.05];
+  const holes0 = el.holes ?? [], pits = el.pits ?? [], R = [x0 + 0.05, z0 + 0.05, x1 - 0.05, z1 - 0.05];
   for (const r of subtractRects(el.rect, pits.map((p) => p.rect))) bag.add(G, box(r[0], y - 2, r[1], r[2], y, r[3]));
   for (const p of pits) { bag.add(G, box(p.rect[0], y - 2, p.rect[1], p.rect[2], y - p.depth, p.rect[3])); col.floor(p.rect, y - p.depth); }
+  const holes = holes0;
   const solid = subtractRects(el.rect, holes.map((o) => o.rect));
+  // rooms cut in the upper storeys (el.up: { rect, k (the storey), h (clear height), yf (a floor of its own, default the storey's), open (the face it is open on: a loggia) }):
+  // the mass over and under each is left out, so that one can climb to it and walk in (docs/settlements/knossos.md §4j)
+  const ups = (el.up ?? []).map((u) => { const yf = y + (u.yf ?? u.k * sh); return { ...u, yf, yc: yf + (u.h ?? 3.0) }; });
+  const faceHoles = [...holes, ...ups.filter((u) => u.open).map((u) => ({ rect: u.rect, h: u.yc - y }))];
+  // the mass of a rectangle over `lo`, less the rooms cut in it: boxes and colliders by plan cells, each cell's solid parts between the rooms
+  const mass = (r, lo, ground) => {
+    const xs = new Set([r[0], r[2]]), zs = new Set([r[1], r[3]]);
+    for (const u of ups) for (const v of [u.rect[0], u.rect[2]]) if (v > r[0] && v < r[2]) xs.add(v);
+    for (const u of ups) for (const v of [u.rect[1], u.rect[3]]) if (v > r[1] && v < r[3]) zs.add(v);
+    const X = [...xs].sort((a, b) => a - b), Z = [...zs].sort((a, b) => a - b);
+    for (let i = 0; i < X.length - 1; i++) for (let j = 0; j < Z.length - 1; j++) {
+      const c = [X[i], Z[j], X[i + 1], Z[j + 1]], cx = (c[0] + c[2]) / 2, cz = (c[1] + c[3]) / 2;
+      if (c[2] - c[0] < 1e-4 || c[3] - c[1] < 1e-4) continue;
+      const here = ups.filter((u) => cx > u.rect[0] && cx < u.rect[2] && cz > u.rect[1] && cz < u.rect[3]).sort((a, b) => a.yf - b.yf);
+      const q = [Math.max(c[0], R[0]), Math.max(c[1], R[1]), Math.min(c[2], R[2]), Math.min(c[3], R[3])];
+      let a = lo;
+      const spans = [];
+      for (const u of here) { if (u.yf > a + 0.01) spans.push([a, u.yf]); a = Math.max(a, u.yc); }
+      if (y + H > a + 0.01) spans.push([a, y + H]);
+      spans.forEach(([s0, s1], n) => {
+        bag.add(P, box(q[0], s0, q[1], q[2], s1, q[3])); col.rect(c, n === 0 && ground ? y - 2 : s0, s1);
+      });
+      col.floor(c, y + H);
+    }
+  };
   for (const r of solid) {
     bag.add(G, box(r[0], y, r[1], r[2], y + 1.2, r[3]));
-    const q = [Math.max(r[0], R[0]), Math.max(r[1], R[1]), Math.min(r[2], R[2]), Math.min(r[3], R[3])];
-    bag.add(P, box(q[0], y + 1.2, q[1], q[2], y + H, q[3]));
-    col.rect(r, y - 2, y + H); col.floor(r, y + H);
+    mass(r, y + 1.2, true);
   }
+  for (const u of ups) { col.floor(u.rect, u.yf); bag.add('wood_dark', box(u.rect[0] + 0.02, u.yf - 0.2, u.rect[1] + 0.02, u.rect[2] - 0.02, u.yf + 0.015, u.rect[3] - 0.02)); }
   for (const o of holes) {
     for (const r of subtractRects(o.rect, pits.map((p) => p.rect))) col.floor(r, y);
     if (o.h >= H) continue;
     // the storeys over a room or a doorway (less what rises higher through it: a light well)
     for (const r of subtractRects(o.rect, holes.filter((q) => q.h > o.h).map((q) => q.rect))) {
       const q = [Math.max(r[0], R[0]), Math.max(r[1], R[1]), Math.min(r[2], R[2]), Math.min(r[3], R[3])];
-      bag.add(P, box(q[0], y + o.h, q[1], q[2], y + H, q[3])); col.rect(r, y + o.h, y + H); col.floor(r, y + H);
+      if (!ups.length) { bag.add(P, box(q[0], y + o.h, q[1], q[2], y + H, q[3])); col.rect(r, y + o.h, y + H); col.floor(r, y + H); }
+      else mass(r, y + o.h, false);
       if (o.lintel) bag.add('timber', box(r[0] - 0.02, y + o.h, r[1] - 0.02, r[2] + 0.02, y + o.h + 0.25, r[3] + 0.02));
     }
   }
@@ -110,7 +136,7 @@ function wing(el, { bag, col }) {
       for (let i = 0; i <= mw; i++) {
         const u = Math.min(L - 0.2, Math.max(0.05, i * L / mw - 0.07)), w0 = a0 + u - 0.05, w1 = a0 + u + 0.19;
         // a post over a doorway cut in this face starts above the doorway
-        const over = holes.filter((o) => (alongX ? (f === 'n' ? o.rect[1] <= z0 + 0.01 : o.rect[3] >= z1 - 0.01) && o.rect[0] < w1 && o.rect[2] > w0 : (f === 'w' ? o.rect[0] <= x0 + 0.01 : o.rect[2] >= x1 - 0.01) && o.rect[1] < w1 && o.rect[3] > w0));
+        const over = faceHoles.filter((o) => (alongX ? (f === 'n' ? o.rect[1] <= z0 + 0.01 : o.rect[3] >= z1 - 0.01) && o.rect[0] < w1 && o.rect[2] > w0 : (f === 'w' ? o.rect[0] <= x0 + 0.01 : o.rect[2] >= x1 - 0.01) && o.rect[1] < w1 && o.rect[3] > w0));
         const ya = over.length ? y + Math.max(...over.map((o) => o.h)) + 0.25 : y + 1.2;
         if (ya < y + H - 0.6) bag.add('timber', at(u, u + 0.14, ya, y + H - 0.3, 0.05));
       }
@@ -122,7 +148,7 @@ function wing(el, { bag, col }) {
       for (const f of el.windows ?? 'nesw') {
         const alongX = f === 'n' || f === 's', L = alongX ? x1 - x0 : z1 - z0, a0 = alongX ? x0 : z0, fp = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
         const at = (mat, u0, u1, v0, v1, d0, d1) => { const p0 = fp + sg * d0, p1 = fp + sg * d1; const q = alongX ? [a0 + u0, Math.min(p0, p1), a0 + u1, Math.max(p0, p1)] : [Math.min(p0, p1), a0 + u0, Math.max(p0, p1), a0 + u1]; bag.add(mat, box(q[0], v0, q[1], q[2], v1, q[3])); };
-        const free = (u0, u1) => !holes.some((o) => (alongX ? (f === 'n' ? o.rect[1] <= z0 + 0.01 : o.rect[3] >= z1 - 0.01) && o.rect[0] < a0 + u1 && o.rect[2] > a0 + u0 : (f === 'w' ? o.rect[0] <= x0 + 0.01 : o.rect[2] >= x1 - 0.01) && o.rect[1] < a0 + u1 && o.rect[3] > a0 + u0));
+        const free = (u0, u1) => !faceHoles.some((o) => (alongX ? (f === 'n' ? o.rect[1] <= z0 + 0.01 : o.rect[3] >= z1 - 0.01) && o.rect[0] < a0 + u1 && o.rect[2] > a0 + u0 : (f === 'w' ? o.rect[0] <= x0 + 0.01 : o.rect[2] >= x1 - 0.01) && o.rect[1] < a0 + u1 && o.rect[3] > a0 + u0));
         for (let u = 0.1; u < L - 0.5; u += 1.8 + w2() * 1.6) { const w = Math.min(L - 0.1 - u, 1.2 + w2() * 2.4); if (free(u, u + w)) at('plaster_damp', u, u + w, y + 1.22, y + 1.5 + w2() * 0.7, 0.0, 0.012); }
         for (let i = 0, m = Math.floor(L / 6); i < m; i++) { const u = 0.5 + w2() * (L - 1.5), w = 0.3 + w2() * 0.6, v = y + 1.4 + w2() * (H - 3.2); if (free(u, u + w)) at(w2() < 0.7 ? 'rubble' : 'plaster_white', u, u + w, v, v + 0.2 + w2() * 0.5, 0.02, w2() < 0.5 ? 0.036 : 0.05); }
         for (let u = 1 + w2() * 3; u < L - 0.6; u += 4 + w2() * 5) if (free(u, u + 0.3)) at('plaster_streak', u, u + 0.28, y + H - 2.4 - w2() * 1.2, y + H - 0.9, 0.03, 0.044);
