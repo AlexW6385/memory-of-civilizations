@@ -127,14 +127,18 @@ export function walkElement(l, s) {
  * Routes into the opened lots, for the settlement's walk check: a shop: in at the doorway and along the aisle to the side wall; a house walked
  * through: in at the door, along the hall to the back door and out onto the step. The lanes' doors that are only ajar have no route.
  */
+/** The opening of a walked-through house's front and back doors (along the lot): 1.6 m about the door, kept off the party walls. The walker's raster reads anything nearer
+ *  than 0.75 m of the line it walks as a wall, so the doors are cut wide and the way goes down their middle. */
+export function houseOpen(L, dc = L / 2) { return [Math.max(0.3, dc - 0.8), Math.min(L - 0.3, dc + 0.8)]; }
+
 export function walkRoutes() {
   const out = [];
   for (const [l, s] of walkSet()) {
     const F = frameOf(l.rect, false, l.front), p = ([a, b]) => F.at(a, b);
     let r;
-    if (s.type === 'shop') { const dc = layoutOf(s.L).dc - 0.2; r = [[dc, -2.2], [dc, 0.2], [dc, 1.9], [1.0, 1.9]]; }   // (off the party wall's cell: the collision raster is half a metre)
+    if (s.type === 'shop') { const dc = layoutOf(s.L).dc - 0.1; r = [[dc, -2.2], [dc, 0.2], [dc, 1.9], [1.0, 1.9]]; }   // (off the party wall's cell: the collision raster is half a metre)
     else if (s.type === 'house') {
-      const A = analyse(walkElement(l, s)), dc = A.dc ?? s.L / 2;
+      const A = analyse(walkElement(l, s)), [o0, o1] = houseOpen(s.L, A.dc), dc = (o0 + o1) / 2;
       r = [[dc, -2.2], [dc, 0.2], [dc, 1.9], [dc, A.vb0 - 1.0], [dc, A.vb0 + 0.2], [dc, A.vb0 + 0.9]];
     } else continue;
     const w = r.map(p);

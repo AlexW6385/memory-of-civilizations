@@ -12,7 +12,7 @@ import './townwork.js';
 import './quaywork.js';
 import { Acc } from './townwork.js';
 import { frameOf, layoutOf } from './uphouses.js';
-import { analyse } from './openwalk.js';
+import { analyse, houseOpen } from './openwalk.js';
 import { kit, groundFit } from './rooms.js';
 
 const BASE = STYLES['suzhou-quarter'].elements.house_jiangnan;
@@ -70,18 +70,31 @@ function cutOut(arr, X, bx) {
 // ── what is cut, where ───────────────────────────────────────────────────────────────────────────────────────
 /** The boxes of the lot's front (and back door) taken out of the shell, in the house's frame. */
 function cutsOf(el, A) {
-  const { L, y0, yf } = A, cuts = [];
+  const { L, y0, yf } = A, cuts = [], [f0, f1] = stepSpan(el, A);
   if (el.wk === 'shop') {
     cuts.push({ a0: 0.252, a1: L - 0.252, b0: 0.25, b1: 1.5, y0: y0 + SILL, y1: yf - 0.955 });
     // (the 5 cm granite lip of the old front: the walker's raster takes its low faces for a wall in the doorway)
-    cuts.push({ a0: 0.252, a1: L - 0.252, b0: 0.6, b1: 1.1, y0: y0 + 0.001, y1: y0 + 0.0525 });
+    cuts.push({ a0: f0, a1: f1, b0: 0.3, b1: 1.5, y0: y0 + 0.001, y1: y0 + 0.0525 });
+  } else {
+    const [o0, o1] = openOf(el, A);
+    cuts.push({ a0: o0, a1: o1, b0: 0.25, b1: 1.05, y0: y0 + SILL, y1: y0 + 2.297 });
+    cuts.push({ a0: o0, a1: o1, b0: 0.25, b1: 1.05, y0: y0 + 0.001, y1: y0 + 0.0525 });
+    if (el.wk === 'house') {
+      // (the back door: a lintel no lower than three metres, as the raster's half-metre bands are measured from the floor)
+      cuts.push({ a0: o0, a1: o1, b0: A.vb0 - 0.4, b1: A.vb0 + 0.05, y0: y0 + SILL, y1: y0 + 2.55 });
+      cuts.push({ a0: o0, a1: o1, b0: A.vb0 - 0.4, b1: A.vb0 + 0.05, y0: y0 + 0.001, y1: y0 + 0.0525 });
+    }
   }
-  else {
-    const dc = A.dc ?? L / 2;
-    cuts.push({ a0: dc - 0.473, a1: dc + 0.473, b0: 0.25, b1: 1.05, y0: y0 + SILL, y1: y0 + 2.297 });
-    if (el.wk === 'house') cuts.push({ a0: dc - 0.598, a1: dc + 0.598, b0: A.vb0 - 0.4, b1: A.vb0 + 0.05, y0: y0 + SILL, y1: y0 + 2.097 });
-  }
+  // (the plinth cap's upright face in the walk-in: a wall to the walker's raster, a hand's breadth high; a slope takes its place, see houseWalk)
+  if (el.wk !== 'ajar') cuts.push({ a0: f0, a1: f1, b0: 0.5, b1: 0.62, y0: y0 - 0.5, y1: y0 + 0.035 });
   return cuts;
+}
+/** The front door's opening along the lot: the door of an ajar house as it was; a walked-through house's cut wide. */
+function openOf(el, A) { const dc = A.dc ?? A.L / 2; return el.wk === 'ajar' ? [dc - 0.473, dc + 0.473] : houseOpen(A.L, A.dc); }
+/** The span along the lot of the way up from the street over the plinth. */
+function stepSpan(el, A) {
+  if (el.wk === 'shop') { const dc = layoutOf(A.L).dc; return [dc - 1.0, dc + 0.65]; }
+  const [o0, o1] = openOf(el, A); return el.wk === 'ajar' ? [o0 - 0.28, o1 + 0.28] : [Math.max(0.26, o0 - 0.1), Math.min(A.L - 0.26, o1 + 0.1)];
 }
 const roomDepth = (A) => Math.min(A.vb0 - 0.25, ROOM);
 
@@ -123,9 +136,22 @@ function houseWalk(el, ctx) {
     const r = rect(a0, b0, a1, b1); acc.box('granite_grey', r[0], y - 0.2, r[1], r[2], y + 0.24, r[3]);
     if (walk) col.floor(r, y + 0.24);
   };
-  const dcs = el.wk === 'shop' ? layoutOf(L).dc : (A.dc ?? L / 2);
-  stepAt(dcs - 0.75, dcs + 0.75, 0.05, el.wk === 'shop' ? 0.62 : 0.6, el.wk !== 'ajar');
-  if (el.wk === 'house') stepAt(dcs - 0.7, dcs + 0.7, A.vb0 + 0.02, A.vb0 + 0.5, true);
+  const [f0, f1] = stepSpan(el, A), [o0, o1] = el.wk === 'shop' ? [0, 0] : openOf(el, A);
+  if (el.wk === 'ajar') stepAt(f0, f1, 0.05, 0.6, false);
+  else {
+    stepAt(f0, f1, -0.3, 0.62, true);   // (out into the lane: where the lane lies lower the walker is on the step before the plinth's cell)
+    // a slope up to the plinth in place of its upright face
+    const q = (a, b, yy) => { const p = F.at(a, b); return [p[0], yy, p[1]]; }, bw0 = 0.3, bw1 = 0.58;
+    acc.quad('granite_grey', q(f0, bw0, y + 0.24), q(f1, bw0, y + 0.24), q(f1, bw1, y0 + 0.04), q(f0, bw1, y0 + 0.04), true);
+    for (const a of [f0, f1]) acc.tri('granite_grey', q(a, bw0, y + 0.24), q(a, bw1, y0 + 0.04), q(a, bw1, y + 0.24)), acc.tri('granite_grey', q(a, bw0, y + 0.24), q(a, bw1, y + 0.24), q(a, bw1, y0 + 0.04));
+  }
+  if (el.wk === 'house') {
+    stepAt(o0 - 0.05, o1 + 0.05, A.vb0 + 0.02, A.vb0 + 0.5, true);
+    // the opening's two ends, which the cut leaves hollow
+    for (const [a0, a1] of [[o0 - 0.1, o0 + 0.01], [o1 - 0.01, o1 + 0.1]]) {
+      for (const [b0, b1] of [[0.6, 0.97], [A.vb0 - 0.32, A.vb0 + 0.07]]) { const r = rect(a0, b0, a1, b1); acc.box('granite_grey', r[0], y0, r[1], r[2], y0 + (b0 < 1 ? 2.297 : 2.55), r[3]); }
+    }
+  }
   acc.flush(ctx.bag);
   if (el.wk === 'ajar') return;
   // the walls round the room: both sides, the wall behind it, and for a house the front wall about its door and the wall about its back door
@@ -135,10 +161,10 @@ function houseWalk(el, ctx) {
     col.rect(rect(0, 0.4, 0.25, rd + 0.05), bot, top); col.rect(rect(L - 0.25, 0.4, L, rd + 0.05), bot, top);
     col.rect(rect(0, rd, L, bk), bot, top);
   } else {
-    const dc = A.dc ?? L / 2, vb0 = A.vb0;
+    const vb0 = A.vb0;
     col.rect(rect(0, 0.4, 0.25, vb0 + 0.1), bot, top); col.rect(rect(L - 0.25, 0.4, L, vb0 + 0.1), bot, top);
-    col.rect(rect(0.25, 0.62, dc - 0.475, 0.95), bot, top); col.rect(rect(dc + 0.475, 0.62, L - 0.25, 0.95), bot, top);
-    col.rect(rect(0.25, vb0 - 0.25, dc - 0.6, vb0 + 0.1), bot, top); col.rect(rect(dc + 0.6, vb0 - 0.25, L - 0.25, vb0 + 0.1), bot, top);
+    col.rect(rect(0.25, 0.62, o0, 0.95), bot, top); col.rect(rect(o1, 0.62, L - 0.25, 0.95), bot, top);
+    col.rect(rect(0.25, vb0 - 0.25, o0, vb0 + 0.1), bot, top); col.rect(rect(o1, vb0 - 0.25, L - 0.25, vb0 + 0.1), bot, top);
     // the yard behind a row house: its walls are drawn by the shared builder, with no collider of its own
     if (A.kind === 'row' && D - vb0 > 2.2) {
       const vy0 = vb0 + 0.2;
@@ -154,9 +180,9 @@ function walkFar(el, { bag }) {
   const B = (a0, b0, a1, b1, ya, yb) => { const r = wr(a0, b0, a1, b1); acc.box('wood_dark', r[0], ya, r[1], r[2], yb, r[3]); };
   if (el.wk === 'shop') B(0.25, 0.8, L - 0.25, 0.9, y0 + SILL, yf - 0.96);
   else {
-    const dc = A.dc ?? L / 2;
-    B(dc - 0.475, 0.68, dc + 0.475, 0.8, y0 + SILL, y0 + 2.3);
-    if (el.wk === 'house') B(dc - 0.6, A.vb0 - 0.2, dc + 0.6, A.vb0 - 0.05, y0 + SILL, y0 + 2.1);
+    const [o0, o1] = openOf(el, A);
+    B(o0, 0.68, o1, 0.8, y0 + SILL, y0 + 2.3);
+    if (el.wk === 'house') B(o0, A.vb0 - 0.2, o1, A.vb0 - 0.05, y0 + SILL, y0 + 2.55);
   }
   acc.flush(bag);
 }
@@ -182,7 +208,7 @@ function walkNear(el, { bag, col }) {
     for (let i = 0; i < 4; i++) { const p = P[i], q = P[(i + 1) % 4]; acc.quad(mat, w(p, ya), w(q, ya), w(q, yb), w(p, yb), true); }
     acc.quad(mat, w(P[0], yb), w(P[1], yb), w(P[2], yb), w(P[3], yb), true);
   };
-  const dc = el.wk === 'shop' ? layoutOf(L).dc : (A.dc ?? L / 2);
+  const [no0, no1] = houseOpen(L, A.dc), dc = el.wk === 'shop' ? layoutOf(L).dc : el.wk === 'house' ? (no0 + no1) / 2 : (A.dc ?? L / 2);
   const lay = layoutOf(L);
   const ctx = { B, F: B, latF: lat, blk, flr, put, lat, qF: () => {}, W, wr, slab: () => {}, quad4: () => {}, rand, L, D: A.D, y0, Y1: yf, Y2: yf + 2.7, lay, vb: rd + 0.25, ibB: rd, ibU: rd, S: { a0: 0.25, a1: 1.3, b0: 1.55 }, bh0: 3, use: el.use, el, wallMat: 'plaster_white', mir: false };
   const k = kit(ctx);
@@ -196,8 +222,9 @@ function walkNear(el, { bag, col }) {
 
   if (el.wk === 'shop') {
     // the front: the posts of the doorway, the counter across the rest of the bay, the doorstep (as the climbable shops', upstairs.js)
-    const d0 = dc - 0.6, d1 = dc + 0.6, span0 = 0.25, span1 = d0 - 0.1, sw = span1 - span0, top = yf - 0.5;
-    for (const [a0, a1] of [[d0 - 0.1, d0], [d1, d1 + 0.1]]) { B(a0, 0.66, a1, 0.9, y0, top, 'lacquer_chestnut'); blk(a0, 0.66, a1, 0.9, y, y0 + 3.2); }
+    const d0 = dc - 0.85, span0 = 0.25, span1 = d0 - 0.1, sw = span1 - span0, top = yf - 0.5;
+    // (one post, 1.5 m from the party wall: the walker's raster reads anything nearer than 0.75 m of the way through as a wall)
+    B(d0 - 0.1, 0.66, d0, 0.9, y0, top, 'lacquer_chestnut'); blk(d0 - 0.1, 0.66, d0, 0.9, y, y0 + 3.2);
     B(span0, 0.7, span1, 0.84, y0, y0 + 0.95, 'timber'); B(span0, 0.6, span1, 0.9, y0 + 0.95, y0 + 1.0, 'wood_dark'); B(span0, 0.68, span1, 0.7, y0 + 0.2, y0 + 0.9, 'wood_dark');
     blk(span0, 0.6, span1, 0.9, y, y0 + 1.0);
     const npost = Math.max(0, Math.round(sw / 2.4) - 1);
@@ -230,15 +257,15 @@ function walkNear(el, { bag, col }) {
     // a house walked through: the door open (its leaf folded back on the inside), the hall with its table and the shrine cabinet, the kitchen at the
     // back, the back door open on a step down to the yard
     const vb0 = A.vb0;
-    B(dc + 0.475, 0.94, dc + 0.51, 1.56, y0 + 0.05, y0 + 2.28, 'lacquer_chestnut');
+    B(no1, 0.94, no1 + 0.035, 1.56, y0 + 0.05, y0 + 2.28, 'lacquer_chestnut');
     floorOf(0.58, rd); ceiling(0.92, rd);
-    const right = (L - 0.25 - (dc + 0.55)) >= (dc - 0.55 - 0.25), s0 = right ? dc + 0.55 : 0.25, s1 = right ? L - 0.25 : dc - 0.55, wsd = s1 - s0, wall = right ? s1 : s0, dir = right ? -1 : 1;
+    const right = (L - 0.25 - no1) >= (no0 - 0.25), s0 = right ? no1 : 0.25, s1 = right ? L - 0.25 : no0, wsd = s1 - s0, wall = right ? s1 : s0, dir = right ? -1 : 1;
     const aOn = (d0, d1) => (dir < 0 ? [wall - d1, wall - d0] : [wall + d0, wall + d1]);
-    if (wsd >= 0.7) {
+    if (wsd >= 0.5) {
       // the hall: a table against the wall with two stools, a cabinet, a lamp
       const [t0, t1] = aOn(0.03, Math.min(0.62, wsd - 0.05)); k.table(t0, 1.35, t1, 2.35, fl, 0.76, 'lacquer_chestnut');
       k.bowl('glaze_white', (t0 + t1) / 2, 1.65, fl + 0.76, 1.1); k.jar('glaze_blue', (t0 + t1) / 2, 2.05, fl + 0.76, 0.7);
-      k.stool(dir < 0 ? t0 - 0.2 : t1 + 0.2, 1.6, fl, 0.45, 0.14, false); k.stool(dir < 0 ? t0 - 0.2 : t1 + 0.2, 2.1, fl, 0.45, 0.14, false);
+      if (wsd >= 1.25) { k.stool(dir < 0 ? t0 - 0.2 : t1 + 0.2, 1.6, fl, 0.45, 0.14, false); k.stool(dir < 0 ? t0 - 0.2 : t1 + 0.2, 2.1, fl, 0.45, 0.14, false); }
       const [c0, c1] = aOn(0.02, Math.min(0.5, wsd - 0.05)); k.cabinet(c0, 2.75, c1, 3.6, fl, 1.9, dir < 0 ? -1 : 1);
       k.lamp(dc, 2.2, y0 + 2.4);
       // the kitchen: the stove in the back corner with its chimney, the water jars, the firewood
@@ -247,10 +274,8 @@ function walkNear(el, { bag, col }) {
       const [w0, w1] = aOn(0.05, Math.min(0.5, wsd - 0.1)); for (let q = 0; q < 6; q++) B(w0, rd - 2.5 + (q % 3) * 0.2, w1, rd - 2.5 + (q % 3) * 0.2 + 0.17, fl + Math.floor(q / 3) * 0.17, fl + Math.floor(q / 3) * 0.17 + 0.15, 'timber'); blk(w0, rd - 2.5, w1, rd - 1.9, fl, fl + 0.4);
     }
     // the back door: jambs, lintel, the leaf folded on the inside; the way out over the floor of the wall's thickness and down a granite step
-    for (const a of [dc - 0.65, dc + 0.6]) B(a, vb0 - 0.28, a + 0.05, vb0 + 0.03, y0, y0 + 2.1, 'lacquer_chestnut');
-    B(dc - 0.65, vb0 - 0.28, dc + 0.65, vb0 + 0.03, y0 + 2.1, y0 + 2.2, 'lacquer_chestnut');
-    B(dc + 0.6 - 0.03, vb0 - 0.9, dc + 0.6, vb0 - 0.3, y0 + 0.05, y0 + 2.05, 'lacquer_chestnut');
-    flr(dc - 0.6, rd, dc + 0.6, vb0 + 0.02, fl);
+    B(no1 - 0.035, vb0 - 0.9, no1, vb0 - 0.3, y0 + 0.05, y0 + 2.05, 'lacquer_chestnut');
+    flr(no0, rd, no1, vb0 + 0.02, fl);
   }
   acc.flush(bag);
 }
