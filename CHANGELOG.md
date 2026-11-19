@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.43 — ten more Suzhou households (2026-11-19)
+
+Ten more houses in Suzhou can be entered and climbed, twenty-six in all, on lots facing any way: a boatman's, a tea house with its storyteller's table, a drawloom weaver's with a half-woven piece, an inn with kitchen and guest rooms, a scholar's, a woodblock printer's, a grocer's, a merchant family's, a jade cutter's and a tinsmith's — each with its stove and water jar, shrine shelf, bed, shoes and bowls, and eleven people at their work inside. Waterside houses have a back door, a deck and steps down to the canal.
+
 ## v12.42 — Suzhou by night, and its animals (2026-11-19)
 
 Suzhou's lanterns now throw light: a glow round each flame, a warm pool on the paving beneath, a wash on the wall behind and broken reflections on the canals and the pond; the paper windows of lived-in houses, halls and pavilions are lit from inside, some dark; moored boats carry a stern lantern and open shop fronts spill lamplight over the doorstep. It is done with one added-light material so that it shows at the low preset. Animals live in the garden and the lanes: a pair of mandarin ducks on the pond, a crane on the hall terrace, swallows nesting under the eave, a kingfisher at the shore, magpies and sparrows on the ridges, a cat on a court wall, a dog at the gate, a rooster and hens in a side yard, a caged songbird at the tea shop, cormorants on a fishing punt and a raft of ducks on the south canal.
