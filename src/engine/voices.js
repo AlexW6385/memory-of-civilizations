@@ -37,7 +37,7 @@ export function inSeason(doy, a, b, fade = 14) {
 }
 /** Windows (day of the year) of the season-bound sounds. */
 export const SEASON_OF = {
-  cicada: [165, 255, 14], frog: [100, 305, 18], cricket: [215, 320, 14], katydid: [210, 280, 10],
+  cicada: [165, 255, 14], frog: [100, 285, 25], cricket: [215, 320, 14], katydid: [210, 280, 10],
   cuckoo: [95, 170, 8], oriole: [140, 235, 10], magpie: [250, 340, 12], tit: [335, 95, 12],
   flowers: [40, 300, 12], melon: [160, 250, 10], cake: [300, 120, 12],
 };
@@ -308,7 +308,7 @@ export const VOICES = {
     const T = TRADES[trade], dur = f.dur;
     let w = t;
     const gap = T.inst ? 6 + R() * 4 : 8 + R() * 4;
-    for (let k = 0; w < t + dur - 3 && k < 6; k++) {
+    for (let k = 0; w < t + dur - 3 && k < 4; k++) {
       const x = w, fem = T.fem === null ? R() < 0.5 : T.fem, f0 = (T.base || (fem ? 300 : 175)) * (0.93 + R() * 0.14);
       this.cue(x, (y) => (T.inst ? this[T.inst](y, bus, lv) : this.cry(y, f0, T.cry, 0.05 * lv, bus, { fem, cutoff: 4200 })));
       w += gap + R() * 3;
@@ -641,13 +641,14 @@ export const VOICES = {
     }
     for (const e of P.stat) {
       if (!inHours(hour, e.hours) || rain > (e.rainMax ?? (e.dry ? 0.2 : 0.95))) continue;
-      if (this.gainAt(e.at, e.r50) < 0.085) continue;
+      if (this.gainAt(e.at, e.r50) < 0.15) continue;
       const k = 'n:' + e.id;
       if (!due(k, e.gap[1])) continue;
       if (busy()) { P[k] = t + 2; continue; }
       const same = room && e.inside && e.inside === room.same;
       at(k, e.gap[0], e.gap[1], same ? 0.6 : 1);
-      spawn(e.at, e.r50, e.lv ?? 1, e.voice, { inside: e.inside });
+      const bus = spawn(e.at, e.r50, e.lv ?? 1, e.voice, { inside: e.inside });
+      if (e.after) P[k] += bus.emitter.until - t;              // the long ones (a qin phrase, a flute's) are spaced from their end
     }
 
     // the far hours' sounds: dogs at night, beyond the roofs
@@ -670,7 +671,7 @@ export const VOICES = {
     track('cross', 'crossing', 1.25, 9, [16, 40], hour >= 6 && hour < 21.5 && rain < 0.6, () => M.bridgeTrack(l.x, l.z, r));
     track('sedan', 'sedan', 1.5, 12, [110, 240], hour >= 8 && hour < 18 && rain < 0.2, () => M.streetTrack(l.x, l.z, r, 90, 40));
     const trade = day || hour < 23 ? pickTrade(hour, doy) : null;
-    track('vendor', 'vendor', 1.0, 10, [16, 38], trade && rain < 0.4 && hour >= 5.5 && hour < 23, () => M.streetTrack(l.x, l.z, r, 80, 30), 1, () => trade);
+    track('vendor', 'vendor', 1.0, 10, [34, 80], trade && rain < 0.4 && hour >= 5.5 && hour < 23, () => M.streetTrack(l.x, l.z, r, 80, 30), 1, () => trade);
     track('watch', 'watchman', 1.0, 12, [34, 70], night && rain < 0.5, () => M.streetTrack(l.x, l.z, r, 90, 34));
 
     // the waters: the canals' walls, the pond's stones, the fish; the eaves' drips
@@ -698,14 +699,14 @@ export const VOICES = {
     const green = M.greenNear(l.x, l.z), froggy = M.frogGround(l.x, l.z);
     const frogW = seasonOf('frog', doy) * (night ? 1 : hour >= 17 || hour < 7 ? 0.5 : 0.1) * (1 + rain) * froggy;
     if (frogW > 0.05 && due('p:nextFrog', 1.5)) {
-      at('p:nextFrog', 0.5, 2.2, 1 / frogW);
+      at('p:nextFrog', 0.9, 3.5, 1 / frogW);
       let p = M.pondSpot(l.x, l.z, r, 28);
       if (!p && froggy > 0.2) { const a = r() * Math.PI * 2, q = [Math.cos(a) * 195, Math.sin(a) * 195]; if (Math.hypot(q[0] - l.x, q[1] - l.z) < 140) p = q; }
       if (p && !busy()) spawn(p, 14, 0.8 + 0.4 * r(), 'frog', { args: [r() < 0.3 + 0.3 * rain ? 'tree' : 'pond'] });
     }
     const cricW = seasonOf('cricket', doy) * (hour >= 18 || hour < 5.5 ? 1 : 0.2) * (rain > 0.5 ? 0.2 : 1) * green, katW = seasonOf('katydid', doy) * (night || dusk ? 1 : 0.2) * (rain > 0.5 ? 0.2 : 1) * green;
     if (cricW + katW > 0.04 && due('p:nextCricket', 1)) {
-      at('p:nextCricket', 0.35, 1.3, 1 / (cricW + katW));
+      at('p:nextCricket', 0.7, 2.0, 1 / (cricW + katW));
       for (let k = 0; k < 6; k++) {
         const p = around(3, 16);
         if (M.greenNear(p[0], p[1]) > 0.35 + 0.3 * r()) { if (!busy()) spawn(p, 6, 0.8 + 0.4 * r(), 'cricket', { args: [r() * (cricW + katW) < katW ? 'katydid' : 'cricket'] }); break; }

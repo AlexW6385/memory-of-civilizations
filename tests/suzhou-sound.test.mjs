@@ -120,7 +120,7 @@ test('the calendar: windows of the year, and the trades by hour and season', () 
   const on = (k) => Object.entries(D).filter(([, d]) => seasonOf(k, d) > 0.5).map(([n]) => n);
   assert.deepEqual(on('cicada'), ['summer']);
   assert.deepEqual(on('cricket'), ['autumn']);
-  assert.deepEqual(on('frog'), ['spring', 'summer', 'autumn']);
+  assert.deepEqual(on('frog'), ['spring', 'summer']);
   assert.deepEqual(on('cuckoo'), ['spring']);
   assert.deepEqual(on('oriole'), ['summer']);
   assert.deepEqual(on('magpie'), ['autumn']);

@@ -223,26 +223,27 @@ export function roomAt(x, z, y = 0) {
 
 /**
  * What each kind of room sounds like inside (the engine reads it): `tone` the room's own hush (a lowpass in Hz and a level),
- * `roof` how loud the rain on the tiles is from inside (relative), `work` the voice made in the room now and then [voice, gap s],
+ * `roof` how loud the rain on the tiles is from inside (relative), `work` the small voices made in the room now and then [voice, gap s]
+ * (the trade's own noise, a loom or a forge, is the house's emitter in WORK, heard whole inside it),
  * `hush` how much of the outdoors comes through (1 = as the muffle gives it).
  */
 export const ROOMS = {
-  inn: { tone: [420, 0.5], roof: 0.9, hush: 1.0, work: [['teaTalk', 5], ['teaClink', 4], ['teaBlock', 40]] },
-  rice: { tone: [300, 0.3], roof: 1.0, hush: 0.8, work: [['abacus', 22], ['sack', 30]] },
+  inn: { tone: [420, 0.5], roof: 0.9, hush: 1.0, work: [['teaClink', 6], ['teaBlock', 60]] },
+  rice: { tone: [300, 0.3], roof: 1.0, hush: 0.8, work: [['sack', 30]] },
   merchant: { tone: [260, 0.2], roof: 0.9, hush: 0.7, work: [['paper', 40]] },
-  cloth: { tone: [320, 0.25], roof: 1.0, hush: 0.8, work: [['scissors', 20], ['clothRustle', 26]] },
-  medicine: { tone: [280, 0.25], roof: 1.0, hush: 0.8, work: [['mortar', 14], ['drawer', 40]] },
-  books: { tone: [260, 0.2], roof: 1.0, hush: 0.7, work: [['chisel', 10], ['paper', 36]] },
+  cloth: { tone: [320, 0.25], roof: 1.0, hush: 0.8, work: [['clothRustle', 26]] },
+  medicine: { tone: [280, 0.25], roof: 1.0, hush: 0.8, work: [['drawer', 40]] },
+  books: { tone: [260, 0.2], roof: 1.0, hush: 0.7, work: [['paper', 36]] },
   lacquer: { tone: [220, 0.15], roof: 1.0, hush: 0.6, work: [['brushLacquer', 30]] },
-  tenement: { tone: [380, 0.4], roof: 1.0, hush: 0.9, work: [['kitchen', 8], ['broom', 50]] },
-  wine: { tone: [300, 0.3], roof: 1.0, hush: 0.8, work: [['pourWine', 20], ['jarLid', 40]] },
-  pawn: { tone: [240, 0.2], roof: 0.9, hush: 0.6, work: [['abacus', 16], ['coin', 34]] },
-  food: { tone: [500, 0.5], roof: 1.0, hush: 0.9, work: [['kitchen', 6], ['bowlClack', 14]] },
+  tenement: { tone: [380, 0.4], roof: 1.0, hush: 0.9, work: [['broom', 50]] },
+  wine: { tone: [300, 0.3], roof: 1.0, hush: 0.8, work: [['jarLid', 40]] },
+  pawn: { tone: [240, 0.2], roof: 0.9, hush: 0.6, work: [['coin', 34]] },
+  food: { tone: [500, 0.5], roof: 1.0, hush: 0.9, work: [['bowlClack', 14]] },
   silk: { tone: [240, 0.15], roof: 1.0, hush: 0.7, work: [['clothRustle', 24]] },
-  pottery: { tone: [320, 0.3], roof: 1.0, hush: 0.8, work: [['wheel', 26], ['clay', 14]] },
-  iron: { tone: [400, 0.4], roof: 1.0, hush: 1.0, work: [['hammer', 12]] },
-  fans: { tone: [260, 0.2], roof: 1.0, hush: 0.7, work: [['splitBamboo', 16], ['paper', 30]] },
-  weaver: { tone: [340, 0.35], roof: 1.0, hush: 0.8, work: [['loom', 8]] },
+  pottery: { tone: [320, 0.3], roof: 1.0, hush: 0.8, work: [['clay', 14]] },
+  iron: { tone: [400, 0.4], roof: 1.0, hush: 1.0, work: [['drawer', 120]] },
+  fans: { tone: [260, 0.2], roof: 1.0, hush: 0.7, work: [['paper', 30]] },
+  weaver: { tone: [340, 0.35], roof: 1.0, hush: 0.8, work: [['clothRustle', 40]] },
   hall: { tone: [160, 0.22], roof: 0.7, hush: 0.55, work: [['paper', 70]] },         // the garden's halls: high, empty, the air in them
   pavilion: { tone: [700, 0.18], roof: 0.5, hush: 0.9, work: [] },                    // open on every side: the garden comes in
   temple: { tone: [130, 0.3], roof: 0.6, hush: 0.45, work: [['woodfish', 70]] },
@@ -261,13 +262,13 @@ export const UPPER = { tone: [200, 0.12], roof: 1.7, hush: 0.6, work: [['brush',
 export const EMITTERS = [
   // the carpenter's yard on the back lane south of the south canal [inferred position]
   { voice: 'plane', at: [-126, 89.5], r50: 9, gap: [16, 38], hours: [7, 17.5], dry: true },
-  // the pedlars' crossroads at the bridge heads: a stall of the knife grinder at the middle bridge's south head
-  { voice: 'grinder', at: [3, 66], r50: 11, gap: [40, 100], hours: [8, 17], dry: true },
+  // the pedlars' crossroads at the bridge heads: the knife grinder's stand on the south street, between the two bridges west of the way in
+  { voice: 'grinder', at: [-33, 66.5], r50: 11, gap: [40, 100], hours: [8, 17], dry: true },
   // Little Canglang, where the scholar sits with his qin (xiaocanglang, layout.js): a phrase now and then, toward evening above all
-  { voice: 'qin', at: [-47, 5], r50: 22, gap: [26, 70], hours: [6.5, 22], rainMax: 0.7, lv: 1 },
+  { voice: 'qin', at: [-47, 5], r50: 22, gap: [45, 110], hours: [6.5, 22], rainMax: 0.7, lv: 1, after: true },
   // across the water at dusk: a flute from the far shore (the east island's side) and one from a boat on the east canal
-  { voice: 'xiao', at: [56, -62], r50: 28, gap: [45, 110], hours: [17, 20.5], rainMax: 0.5 },
-  { voice: 'xiao', at: [99.5, -80], r50: 34, gap: [70, 160], hours: [17.5, 20.5], rainMax: 0.4 },
+  { voice: 'xiao', at: [56, -62], r50: 28, gap: [40, 100], hours: [17, 20.5], rainMax: 0.5, after: true },
+  { voice: 'xiao', at: [99.5, -80], r50: 34, gap: [70, 160], hours: [17.5, 20.5], rainMax: 0.4, after: true },
 ];
 
 /** The qin's emitter and the others' hours as the schedule test reads them. */

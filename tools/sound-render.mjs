@@ -5,18 +5,20 @@
 // a row of digits 0-9 scaled to the peak) and the number of onsets (rises of the envelope).
 //
 // usage: node tools/sound-render.mjs [--sec 10] [--out /tmp/szs] [--sr 32000] 'name=js' ['name2=js2' …]
+// To hear a whole scene: set m.scene = (t) => m.place({...}) (called every 0.25 s with the engine's placeEvents).
 // The js runs with `m` (a Music on the offline context, its place() made), `ctx`, `at` (set the listener:
 // m.at = { x, z, yaw, hour, y }) and may be async; `m.cue` makes its events at once. e.g.
+// A job `name=@file.js` reads its code from a file.
 //   node tools/sound-render.mjs 'scull=m.scull(0.2, 1)' 'qin=m.qinPhrase(0.2, m.plc.out, 1)'
 import { chromium } from 'playwright';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { serve } from './serve.mjs';
 
 process.env.PLAYWRIGHT_BROWSERS_PATH ||= '/opt/pw-browsers';
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); if (i < 0) return d; return args.splice(i, 2)[1]; };
 const sec = +opt('sec', 10), outDir = opt('out', '/tmp/szs'), sr = +opt('sr', 32000);
-const jobs = args.map((a) => { const i = a.indexOf('='); return [a.slice(0, i), a.slice(i + 1)]; });
+const jobs = args.map((a) => { const i = a.indexOf('='); const code = a.slice(i + 1); return [a.slice(0, i), code.startsWith('@') ? readFileSync(code.slice(1), 'utf8') : code]; });
 mkdirSync(outDir, { recursive: true });
 const srv = await serve(0);
 const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
@@ -44,7 +46,7 @@ for (const [name, code] of jobs) {
     const run = new Function('m', 'ctx', 'V', 'return (async () => {' + code + '})()');
     await run(m, ctx, V);
     // the engine's tick, every 0.25 s of rendered time: moving sources are re-aimed at the listener
-    for (let k = 1; k * 0.25 < sec; k++) ctx.suspend(k * 0.25).then(() => { m.aimAll(ctx.currentTime); ctx.resume(); });
+    for (let k = 1; k * 0.25 < sec; k++) ctx.suspend(k * 0.25).then(() => { if (m.scene) { m.scene(ctx.currentTime); m.placeEvents(); } else m.aimAll(ctx.currentTime); ctx.resume(); });
     const buf = await ctx.startRendering();
     const L = buf.getChannelData(0), R = buf.getChannelData(1), n = L.length;
     const mono = new Float32Array(n);
