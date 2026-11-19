@@ -15,6 +15,7 @@ import { prepareTown, frontOf, HOUSE_TRADE } from './shopprep.js';
 import { walkSet, walkElement, analyse } from './openwalk.js';
 import './walkfront.js';
 import { streetHalos, registerNight } from './nightlight.js';
+import { mergeAlways } from './slim.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const R = RADIUS - 26;                                  // the street life stops here (the people are drawn near)
@@ -470,7 +471,7 @@ export async function town() {
   plans.forEach((p, i) => { if (p.style === 'life') p.elements.push(...halos[i]); });
   const lamps = plans.find((p) => p.id === 'ming-suzhou-bridge-lamps');
   if (lamps) plans.forEach((p, i) => { if (p.style !== 'life') lamps.elements.push(...halos[i]); });
-  return plans;
+  return mergeAlways(plans);
 }
 // the lit windows are put on once every style file has registered its houses, whatever the import order (nightlight.js)
 registerNight();
