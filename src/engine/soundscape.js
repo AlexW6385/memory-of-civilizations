@@ -70,6 +70,7 @@
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
+import * as FLORENCE from '../settlements/florence/soundmap.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -112,7 +113,7 @@ export const PROFILES = {
   constantinople: T({ ...MED, gull: 0.7 }, { cicadas: 0.5, animals: { rooster: 0.4, donkey: 0.4, dog: 0.5 }, bells: 'semantron' }),
   djenne: T({ dove: 1, sparrow: 0.6, kite: 0.5, tropic: 0.3 }, { frogs: 0.6, animals: { goat: 0.6, donkey: 0.5, rooster: 0.6, cattle: 0.4 }, roof: 'flat', adhan: 1 }),
   'edo-himeji': T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { rooster: 0.4, dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'toki' }),
-  florence: T(MED, { cicadas: 0.3, animals: { horse: 0.4, donkey: 0.3, dog: 0.3 }, bells: 'angelus-hours' }),
+  florence: T(MED, { cicadas: 0.3, animals: withLife({ horse: 0.4, donkey: 0.3, dog: 0.3 }, { market: 1, eaves: 1, map: FLORENCE }), bells: 'angelus-hours' }),
   shaolin: T({ warbler: 0.5, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.2 }, roof: 'tile', bells: 'monastery' }),
   'timurid-samarkand': T(NEAR, { animals: { donkey: 0.5, horse: 0.3, dog: 0.2 }, roof: 'flat', adhan: 1 }),
   dunhuang: T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: { dog: 0.3, donkey: 0.3, camel: 0.2 }, roof: 'flat', bells: 'monastery' }),
