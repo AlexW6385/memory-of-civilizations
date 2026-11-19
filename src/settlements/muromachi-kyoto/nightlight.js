@@ -161,7 +161,7 @@ function panesOf(H, b, off) {
   }
 }
 /** Materials whose slabs are windows (paper and bamboo lattice) and the sheet's distance off them. */
-const WINDOW = { shoji: 0.006, koshi: 0.004 };
+const WINDOW = { shoji: 0.03, koshi: 0.02 };
 /**
  * Wrap a builder context so that the windows it makes glow at night: each leaf of paper (shoji) or latticed bamboo (koshi) gets
  * a pane of lamp-light on each face if its room (a cell of the town by hash: 8 m squares, by storey) is one of those lit, `share` of them.
