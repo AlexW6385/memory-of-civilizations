@@ -14,5 +14,7 @@ garden.walks.push(...wenWalks());
 // the climb of the Bao'en pagoda and the walks on the north wall (north.js)
 garden.walks.push(...northWalks());
 export { town } from './town.js';
+import { registerNight } from './nightlight.js';
+registerNight();                  // (idempotent; after every style file, the same whatever the import order)
 export { music };
 export const landmarks = [{ plan: garden, music }];

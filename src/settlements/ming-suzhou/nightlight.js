@@ -236,14 +236,17 @@ function panesOf(H, b, off) {
  * Returns { ctx, finish } — call finish() once the element has been built.
  */
 export function litWindows(ctx, share = 0.42) {
+  // (one layer only: a wrapped builder called from inside another wrapped one, as the opened lots' shells call the town's house, must not pane its windows twice)
+  if (ctx.bag?.[LIT]) return { ctx, finish: () => {} };
   const H = new Halo(), real = ctx.bag;
   const lit = (b) => hashAt(Math.floor((b.x0 + b.x1) / 8) * 4, Math.floor((b.z0 + b.z1) / 8) * 4, 11 + Math.floor((b.y0 + b.y1) / 6)) < share;
   const bag = new Proxy(real, {
     get(t, k) {
+      if (k === LIT) return true;
       if (k === 'add') return (mat, g) => {
         if (typeof mat === 'string' && g?.attributes?.position && ((mat.startsWith('lattice') && mat !== 'lattice_red') || mat === 'plaster_white')) {
           const paper = mat === 'plaster_white', n = g.attributes.position.count;
-          if (!paper || n <= 36) for (const b of slabsOf(g, paper ? 0.02 : 0.2)) if (lit(b)) panesOf(H, b, paper ? 0.006 : 0.004);
+          if (!paper || n <= 36) for (const b of slabsOf(g, paper ? 0.02 : 0.2)) if (lit(b)) panesOf(H, b, 0.03);
         }
         return t.add(mat, g);
       };
@@ -253,6 +256,7 @@ export function litWindows(ctx, share = 0.42) {
   });
   return { ctx: { ...ctx, bag }, finish: () => H.flush(real) };
 }
+const LIT = Symbol('lit windows');
 /** Wrap a style's element so its windows glow at night: STYLES[style].elements[name] */
 function wrapElement(style, name, share) {
   const S = STYLES[style];
@@ -265,5 +269,5 @@ function wrapElement(style, name, share) {
 /** Register the street life's element and the lit windows of the houses and halls. */
 export function registerNight() {
   if (STYLES.life) STYLES.life.elements.suzhou_halo = suzhouHalo;
-  for (const [style, name, share] of [['suzhou-quarter', 'house_jiangnan', 0.42], ['suzhou-town', 'house_up', 0.5], ['suzhou-site', 'ming_hall', 0.7], ['suzhou-site', 'ming_pavilion', 0.5], ['suzhou-site', 'lou', 0.6]]) wrapElement(style, name, share);
+  for (const [style, name, share] of [['suzhou-quarter', 'house_jiangnan', 0.42], ['suzhou-quarter', 'house_walk', 0.42], ['suzhou-town', 'house_up', 0.5], ['suzhou-site', 'ming_hall', 0.7], ['suzhou-site', 'ming_pavilion', 0.5], ['suzhou-site', 'lou', 0.6]]) wrapElement(style, name, share);
 }

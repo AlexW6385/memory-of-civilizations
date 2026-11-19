@@ -16,7 +16,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { assembly, placer } from '../../objects/kit.js';
 import { Parts } from '../../styles/qing/carving.js';
 import { LEVEL, GALLERIES, BUILDINGS, BRIDGES, lots } from './layout.js';
-import { Halo, lanternLight, waterStreak, registerNight } from './nightlight.js';
+import { Halo, lanternLight, waterStreak } from './nightlight.js';
 
 const G = LEVEL.garden;
 /** A number in [0, 1) from a position alone (no counters, no Math.random). */
@@ -151,7 +151,6 @@ export function bridgeLamps(inDisc) {
 
 registerLamps();
 function registerLamps() {
-  registerNight();
   if (STYLES['suzhou-site']) STYLES['suzhou-site'].elements.garden_lanterns = gardenLanternsEl;
   if (STYLES.life) STYLES.life.elements.suzhou_lamp = suzhouLamp;
 }
