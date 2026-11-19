@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.48 — eight settlements brought toward the reference; Suzhou finished and lightened (2026-11-19)
+
+Beijing, Rome, Athens, Paris, Venice, Florence, Kyoto and Istanbul have been taken through the same six steps as Suzhou: shops open on the visitor's walk with their goods and keepers and enterable (Paris 44, Rome all 160 bays showing open shops with 27 keepers, Venice 33 cut into the Procuratie arcades, Florence every shop within 24 m of the walk, Istanbul all 40 of the arasta, Athens stoas, stalls and the fountain house); the night lit as each place was lit (cressets, braziers, altar candles, shop lamps, mosque lamps, stone lanterns, shrine lamps); each place's own sounds placed where they are made; cats, dogs, hens, cage birds, ducks, pigeons and geese; worn thresholds and steps; and writing only where it could be verified (Latin capitals in Rome and Venice, old Attic letters in Athens, hall plaques in Beijing, temple boards and shop curtains in Kyoto). Suzhou: the character 藥 corrected, seven more boards written, lit windows made deterministic and the lantern wash toned down to pools, banana plants remodelled, camphor and tea now growing, a night watchman with lantern and clapper, lanterns on boats, shops shuttered at night; its geometry cut from 124.5 MB to 98.4 MB with nothing visibly changed. A voice name used by two settlements now fails loudly instead of one silently replacing the other.
+
 ## v12.47 — Suzhou's shops open on the street (2026-11-19)
 
 Along the walk from the arrival by the canal streets and bridges to the residence, the temple and the pagoda, forty-five shops now stand open-fronted with their boards taken down, the counter at the street, goods laid out and the keeper behind, and can be entered to the front room; three more houses can be entered and six stand with the door ajar on a screen wall and a court. Of the seventy-nine lots on that walk sixty-six can be entered; in the whole town seventy-four of 794. The interiors are built only near the visitor.
