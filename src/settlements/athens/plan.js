@@ -12,6 +12,7 @@ import './maidens.js';
 import { houseWalks } from './houses.js';
 import './promachos.js';
 import { walkRoutes } from './walk.js';
+import './wayside.js';
 
 const T = ACRO.top, E = [];
 // ── the Propylaia (Mnesikles, 437–432; docs/settlements/athens.md §4b) ──
@@ -242,7 +243,7 @@ E.push({ t: 'stoa', rect: [-262, -124.89, -219, -110], front: 'n', y: 0.35, h: 3
 E.push({ t: 'tholos', c: [-280, -133], r: 9.16, h: 5.2, y: 0.1 });
 // two steps up to the Tholos' door over its socle (the socle's face is a wall to the walker; docs §18)
 E.push({ t: 'stair', rect: [-271.9, -134.5, -269.2, -131.5], dir: 'w', y0: 0, y1: 0.4, riser: 0.2, base: -0.3, mat: 'limestone' });
-E.push({ t: 'horos', at: [-267.5, -120.5], y: 0, rot: Math.PI / 2 });
+E.push({ t: 'athens_horos', at: [-267.5, -120.5], y: 0, rot: Math.PI / 2 });                 // the stone with its letters (wayside.js, docs §18e)
 E.push({ t: 'altar12', c: [-240, -208], y: 0 });
 // the Herms at the north-west corner, where the Panathenaic Way comes in
 const wayX = (z) => -260 + (z + 220) / 2;

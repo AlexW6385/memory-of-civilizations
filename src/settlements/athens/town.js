@@ -8,6 +8,9 @@ import { storeyOf } from './upstairs.js';
 import { summitLife } from './summit.js';
 import { acropolisWorks, acropolisLife } from './works.js';
 import { fronts, crossings, openLife } from './fronts.js';
+import { stallSites, steleSites } from './wayside.js';
+import { cfg } from './houses.js';
+import { frame } from '../../styles/greek/agora.js';
 import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
 const base = (id, elements) => ({ id, style: 'greek', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-300, 70], facing: 'e' } });
 const OPEN_TRADES = ['bronze', 'shoe', 'cloth', 'wine', 'perfume', 'carpenter'];
@@ -54,6 +57,9 @@ export async function town() {
   { const { herms, wells } = crossings();
     plans.push(base('athens-herms', herms.map((h) => ({ t: 'herm', ...h }))));
     plans.push({ ...lifePlan(), id: 'athens-fronts', elements: [...fronts(), ...wells, ...openLife()] }); }
+  // the visitor's walk (§18): the roadside stalls with their keepers, the stelae of decrees, the conical pillar of Apollo Agyieus before each walk-in house's door
+  plans.push(base('athens-walk', [...stallSites().map((s) => ({ t: 'athens_stall', ...s })), ...steleSites().map((s) => ({ t: 'athens_stele', ...s })),
+    ...opened.filter((l) => l.kind).map((l) => { const F = frame(l.rect, l.front), pc = cfg(l.kind, F.L, l.seed).front.find((c) => c.k === 'passage'), [x, z] = F.P((pc.u0 + pc.u1) / 2 - 1.35, -0.7); return { t: 'athens_agyieus', at: [x, z], y: l.y }; })]));
   plans.push({ ...lifePlan(), id: 'athens-summit-life', elements: [...summitLife(), ...acropolisLife()] });
   plans.push(...acropolisWorks());
   plans.push(lifePlan());

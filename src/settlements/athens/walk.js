@@ -8,7 +8,7 @@ import { RAMP, WAY, SHOPROW, FOUNTAIN, height, pathAt } from './layout.js';
 /** The walk, summit to Agora, as one polyline in world x, z (the Way read from the ramp's foot toward the Agora and on to the Dipylon). */
 export const WALK = [
   [86.8, 36], [30, 30], [-60, 14], [-118, 0], [-148, 2], ...RAMP.slice(0, 3).reverse().map(([x, z]) => [x, z]).slice(1),
-  [-310, 70], ...WAY.slice().reverse().slice(1),
+  ...WAY.slice().reverse().slice(1),
 ];
 /** Distance (m) of a point from the walk. */
 export function walkDist(x, z) {
