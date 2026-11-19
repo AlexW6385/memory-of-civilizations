@@ -10,6 +10,7 @@ import {
   pondDistance, canalDistance, inRect, onStreet, onBridge, inLot, nearGallery, nearRockPath, smooth as sm,
   NORTH_KEEP,
 } from './layout.js';
+import { STANDS, nearScene } from './wen.js';
 
 function bump(shapes, x, z) {
   let h = 0;
@@ -86,8 +87,8 @@ function viewWedge(x, z) {
   return Math.abs(x - 4) < 11 + Math.max(0, z + 50) * 0.35;
 }
 
-/** The Ming garden's named stands of planting: the orchard (east), the bamboo hollow and the plum slope (west). */
-const ORCHARD = [46, -34, 64, -14], HOLLOW = [-68, -34, -59, -20], PLUMS = [-68, -19, -59, -8];
+/** The Ming garden's named stands of planting (wen.js STANDS): the orchard, the bamboo hollow, the peach bank, the plum slope, the hibiscus bend, the locust canopy, willows, pines, bamboo. */
+const ORCHARD = STANDS.find((s) => s.id === 'orchard').rect, HOLLOW = STANDS.find((s) => s.id === 'hollow').rect;
 
 /** Plants per 100 m² at a place ({ x, z, h, ny, g }), or null where nothing grows. */
 function planting(x, z, p) {
@@ -103,6 +104,7 @@ function planting(x, z, p) {
   if (onStreet(x, z) || inLot(x, z, 0.6) || inRect(RESIDENCE, x, z, 0.5)) return null;
   if (inRect(GARDEN, x, z)) {
     if (FOOTPRINTS.some((r) => inRect(r, x, z, 1.2)) || nearGallery(x, z) || nearRockPath(x, z, 2.4)) return null;
+    if (nearScene(x, z, 0.9)) return null;                      // the Wen scenes' buildings, plots, rocks, fences and paths (wen.js)
     const pd = pondDistance(x, z);
     if (pd < 1.0) return null;                                  // the revetment's course and the bank above it
     const wall = Math.min(x - GARDEN[0], GARDEN[2] - x, z - GARDEN[1], GARDEN[3] - z);
@@ -114,7 +116,13 @@ function planting(x, z, p) {
     // the bamboo hollow (Xiangyun Wu) and the plum slope (Zhenli Ban) of the west; open ground between, no building
     if (inRect(ORCHARD, x, z)) return { apple: 2.0 * sm(0.0, 0.5, -n + 0.6), grass: 8 * sm(0.0, 0.6, tn), fig: 0.0 };
     if (inRect(HOLLOW, x, z)) return { bamboo: 5.5 * sm(-0.2, 0.3, gn + 0.2), grass: 6 * sm(0.0, 0.6, tn) };
-    if (inRect(PLUMS, x, z)) return { apple: 1.5 * sm(0.0, 0.5, n + 0.6), grass: 8 * sm(0.0, 0.6, tn) };
+    // the other stands of the record: peaches, plums, hibiscus, locusts, willows, pines, bamboo (their species are those the scatter knows)
+    for (const s of STANDS) if (s.plants && inRect(s.rect, x, z)) {
+      const o = { grass: 6 * sm(0.0, 0.6, tn) };
+      for (const [k, v] of Object.entries(s.plants)) o[k] = v;
+      if (o.apple) o.apple *= sm(0.0, 0.5, -n + 0.7);
+      return o;
+    }
     // mondo grass (grass stands in for it): thick strips along the walls, the galleries and the stone, thin patches elsewhere
     // under the trees; most of the ground bare of tufts (moss and groundcover in its colour)
     const edge = wall < 1.7 || nearGallery(x, z, 3.2) || nearRockPath(x, z, 3.6) ? 1 : 0;
@@ -141,7 +149,7 @@ function planting(x, z, p) {
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 20, bamboo: 6, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 2.2, camphor: 0.12, tea: 0.8, grass: 80 },
+  maxDensity: { willow: 20, bamboo: 6, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 2.2, camphor: 0.12, tea: 0.8, grass: 80, pagoda_tree: 3.0, oleander: 3.5, chinese_pine: 1.6 },
   // late spring in Jiangnan (the plum rains near): soft hazy sun, drizzle and mist over the water
   climate: {
     waterline: LEVEL.canal,              // the canals' still water: the stain line on their walls (src/engine/materials.js)
