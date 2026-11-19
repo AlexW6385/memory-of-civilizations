@@ -11,6 +11,7 @@ import './style.js';
 import './townwork.js';
 import './quaywork.js';
 import { bridgeLamps } from './lamps.js';
+import { streetHalos } from './nightlight.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const R = RADIUS - 26;                                  // the street life stops here (the people are drawn near)
@@ -358,5 +359,11 @@ function bridgeLampPlans() {
 
 export async function town() {
   const hs = houses();
-  return [waterways(), ...hs, ...riverLife(), ...bridgeLampPlans(), ...shopFronts(), ...northPlans()];
+  const plans = [waterways(), ...hs, ...riverLife(), ...bridgeLampPlans(), ...shopFronts(), ...northPlans()];
+  // the light of the lanterns, shop fronts and moored boats' stern lamps at night (nightlight.js); the boats' are in the waterways plan, their light goes into the bridge lamps' plan
+  const halos = plans.map((p) => streetHalos(p.elements, ([x, z]) => inDisc([x, z], 0)));
+  plans.forEach((p, i) => { if (p.style === 'life') p.elements.push(...halos[i]); });
+  const lamps = plans.find((p) => p.id === 'ming-suzhou-bridge-lamps');
+  if (lamps) plans.forEach((p, i) => { if (p.style !== 'life') lamps.elements.push(...halos[i]); });
+  return plans;
 }
