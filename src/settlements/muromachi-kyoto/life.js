@@ -3,7 +3,8 @@
 // old men, water jars, firewood, hens and dogs, the family at the counter and in the doma; at the stream the women washing and
 // the punts. Elements of the shared `life` style, placed from layout.js; tiles of 100 m as at Suzhou so that the viewer draws
 // them by distance.
-import { lots, isOpen, mirrored, yards, STREAM, BRIDGES, RADIUS, streets, inRect, onBridge, GINKAKU, RYOAN, SHRINE } from './layout.js';
+import { hangHalo, spillHalo } from './nightlight.js';
+import { lots, isOpen, frontOf, mirrored, yards, STREAM, BRIDGES, RADIUS, streets, inRect, onBridge, GINKAKU, RYOAN, SHRINE } from './layout.js';
 import { dims } from '../../styles/muromachi/machiya.js';
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -31,10 +32,11 @@ export function fronts() {
     const put = (e) => L.push({ y, seed: id(), ...e });
     const P = F.P, out = F.rot + Math.PI;
     // the lantern at the eave, the banner on its bracket at the corner post
-    if (open || R() < 0.3) put({ t: 'hang_lantern', at: P(hw - 0.8, 0.95), y: hook, kind: tr === 'sake' || tr === 'food' || tr === 'tea' ? 'paper' : 'white', drop: 0.25 });
+    if (open || R() < 0.3) { const hl = { t: 'hang_lantern', at: P(hw - 0.3, 0.95), y: hook, kind: tr === 'sake' || tr === 'food' || tr === 'tea' ? 'paper' : 'white', drop: 0.25 }; put(hl); L.push(hangHalo(hl, out)); }   // (the halo is pushed, not put: put() draws a seed and would shift every later element)
+    if (open && frontOf(l) === 'shop') { const sp = spillHalo(P(hw - 0.8, 0.2), out); if (sp) L.push(sp); }
     if (open && R() < 0.55) put({ t: 'shop_sign', at: P(-hw + 0.02, 0.15), rot: out, h: D.two ? D.H - 0.5 : 2.75, cloth: BANNER[tr] || 'cloth_indigo', len: 1.2 + R() * 0.4, out: 0.95, letters: 2 + Math.floor(R() * 2) });
     // the trade's goods in front
-    const gx = -hw + 0.9 + R() * Math.max(0.1, l.w - 3.2) * (l.up ? 0.4 : 1);      // (the opened houses keep the way to the passage clear)
+    const gx = -hw + 0.9 + R() * Math.max(0.1, l.w - 5.0);      // (every house keeps the passage's mouth, hw - 1.6 to hw, clear: the goods and what stands with them end 1.9 m short of the wall)
     if (open || R() < 0.4) {
       if (tr === 'sake') { put({ t: 'barrel', at: P(gx, 1.5), n: 2 + Math.floor(R() * 2), rot: F.rot }); }
       else if (tr === 'pottery') { put({ t: 'pot', at: P(gx, 1.55), kind: R() < 0.5 ? 'dark_pot' : 'glazed_jar', n: 3, rot: F.rot }); put({ t: 'pot', at: P(gx + 0.9, 1.45), kind: 'blue_jar', rot: F.rot }); }
@@ -54,16 +56,16 @@ export function fronts() {
     // the common things: a water jar by the door, firewood against the wall, a bench with an old man, a basket
     if (R() < (open ? 0.4 : 0.45)) put({ t: 'pot', at: P(hw - 0.15, 1.15), kind: 'vat', rot: R() * 6 });
     if (R() < 0.2) put({ t: 'firewood', at: P(-hw + 1.0 + R() * 1.5, 1.25), rot: F.rot, len: 1.25 });
-    if (R() < 0.2) { const bx = -hw + 1.4 + R() * (l.w - 3), c = P(bx, 1.35); put({ t: 'bench', at: c, rot: F.rot, len: 1.6 }); if (R() < 0.7) L.push(person(rand, P(bx - 0.3, 1.38), 0.0, F.rot, { pose: 'sit', woman: R() < 0.3, hat: R() < 0.4 ? 'straw' : 'none' })); }
+    if (R() < 0.2) { const bx = -hw + 1.4 + R() * Math.max(0.1, l.w - 4.2), c = P(bx, 1.35); put({ t: 'bench', at: c, rot: F.rot, len: 1.6 }); if (R() < 0.7) L.push(person(rand, P(bx - 0.3, 1.38), 0.0, F.rot, { pose: 'sit', woman: R() < 0.3, hat: R() < 0.4 ? 'straw' : 'none' })); }
     else if (R() < 0.12) put({ t: 'basket', at: P(-hw + 1 + R() * 2, 1.4), n: 2 });
-    if (R() < 0.1) put({ t: 'chickens', at: P(-hw + 1 + R() * (l.w - 2), 2.4), rot: R() * 6, kind: 'hen' });
-    else if (R() < 0.06) put({ t: 'animal', kind: 'dog', at: P(R() * hw, 2.2), rot: R() * 6, seed: id() });
-    else if (R() < 0.05) put({ t: 'animal', kind: 'cat', at: P(hw - 0.4, 1.3), rot: R() * 6, seed: id() });
+    if (R() < 0.1) put({ t: 'chickens', at: P(-hw + 1 + R() * Math.max(0.1, l.w - 3.8), 2.4), rot: R() * 6, kind: 'hen' });
+    else if (R() < 0.06) put({ t: 'animal', kind: 'dog', at: P(-R() * hw * 0.8, 2.2), rot: R() * 6, seed: id() });   // (on the shop side: the passage's mouth, hw - 1.6 to hw, stays clear)
+    else if (R() < 0.05) put({ t: 'animal', kind: 'cat', at: P(-hw + 0.4, 1.3), rot: R() * 6, seed: id() });
     // a woman sweeping, a child at play
     if (R() < 0.06) L.push(person(rand, P(-0.5 + R(), 2.3), 0, F.rot + 2.4, { woman: true, carry: 'broom' }));
     if (R() < 0.07) L.push(person(rand, P(R() * 2, 2.6), 0, rand() * 6, { woman: R() < 0.5, child: true, h: 1.0 + R() * 0.25, hat: 'none' }));
     // a second-storey pole: washing out of the loft window
-    if (D.two && R() < 0.5) put({ t: 'laundry_pole', at: P(R() * hw * 0.8, 0.2), y: D.H + 0.55, rot: out, len: 1.6 });
+    if (D.two && R() < 0.5) put({ t: 'laundry_pole', at: P(-R() * hw * 0.8, 0.2), y: D.H + 0.55, rot: out, len: 1.6 });
   }
   return L;
 }
@@ -76,9 +78,9 @@ export function inside() {
     const F = frame(l), R = rng(l.seed * 31 + 7), hw = l.w / 2, d = l.d, doma = 1.6, qm = Math.min(4.2, d * 0.4), fl = 0.45, tr = l.trade;
     if (d < 9) continue;
     // the housewife at the kamado in the doma, standing; the doma's floor is 0.03
-    if (R() < 0.6) P.push(person(rand, F.P(hw - (l.up ? 0.4 : 0.8), -d + 1.9), 0.03, F.rot + Math.PI * 0 + Math.PI, { woman: true, carry: 'none' }));
+    if (R() < 0.6) P.push(person(rand, F.P(hw - 0.4, -d + 1.9), 0.03, F.rot + Math.PI * 0 + Math.PI, { woman: true, carry: 'none' }));
     // a customer in the doma at the counter
-    if (R() < 0.45) P.push(person(rand, F.P(hw - (l.up ? 0.4 : 0.8), -0.9), 0.03, F.rot, { woman: R() < 0.5, hat: 'straw' }));
+    if (R() < 0.45) P.push(person(rand, F.P(hw - 0.4, -0.9), 0.03, F.rot, { woman: R() < 0.5, hat: 'straw' }));
     // a child on the mats at the back, or the old man by the hearth
     if (R() < 0.3) P.push(person(rand, F.P(-hw + 1.5, -d + 2.3), fl, R() * 6, { child: true, h: 0.95 + R() * 0.2, pose: 'sit_ground', hat: 'none' }));
     else if (R() < 0.3) P.push(person(rand, F.P(-hw + 2.3, -d + 1.0), fl, F.rot, { pose: 'seiza', woman: false, hat: 'none', hair: 'shaven' }));

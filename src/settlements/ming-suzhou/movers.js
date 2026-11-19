@@ -10,6 +10,7 @@ import { STYLES } from '../../core/build.js';
 import '../../styles/ming/index.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
+import { lathe } from '../../core/geom.js';
 import { addFigure, factor, flat, SLOT, LIMB } from '../../engine/movers-kit.js';
 
 // ── how many, how fast ───────────────────────────────────────────────────────
@@ -105,6 +106,10 @@ export const WALKERS = [
     c1: [CL.indigo, CL.white, CL.grey, CL.maroon, '#6a5a78', CL.ochre], c2: [CL.white, CL.indigo, CL.black], c3: [CL.black], speed: [0.95, 1.2], stride: 1.25, h: [0.9, 0.97] },
   { id: 'labourer', weight: 0.8, market: 0.7, el: { dress: 'trousers', hair: 'netknot', hat: 'straw', arms: 'hang' }, wet: 'cape',
     c1: [CL.indigo, CL.grey, CL.brown, CL.white, CL.ochre], c2: [CL.indigo, CL.black, CL.grey, CL.brown], c3: [CL.black], speed: [1.15, 1.45], stride: 1.4 },
+  // the night watchman (更夫, who walked the streets through the watches with a bamboo clapper and a lantern, calling the hour): in the
+  // streets at night only (`night`: movers.js), his lantern lit from within (the glow group), few of him
+  { id: 'watchman', weight: 0.9, market: 0.9, night: true, el: { dress: 'trousers', hair: 'netknot', hat: 'cap', cap: 'ming', over: 'sash', arms: 'staff' },
+    c1: [CL.black, CL.indigo, CL.brown], c2: [CL.black, CL.indigo], c3: [CL.black], speed: [0.8, 1.0], stride: 1.15 },
   { id: 'porter', weight: 1.0, market: 1.2, el: { dress: 'trousers', hair: 'netknot', hat: 'straw', carry: 'pole', arms: 'pole' }, wet: 'cape', swing: 0.75,
     c1: [CL.indigo, CL.grey, CL.brown, CL.white], c2: [CL.indigo, CL.black, CL.brown], c3: [CL.black], speed: [1.0, 1.25], stride: 1.1, pole: true },
 ];
@@ -162,6 +167,23 @@ function beam(out, p, q, r, n = 4) {
 }
 
 /**
+ * The watchman's gear (in the figure's frame, which faces −z): a bamboo pole in the right hand (the 'staff' grip) with a hook at its
+ * head and the paper lantern hung from it, ahead of him (the glow group); the bamboo clapper (bangzi), a hollow section, in the left hand.
+ */
+export function watchmanGear(add) {
+  const w = [], X = 0.23, Z = -0.5;
+  beam(w, [0.25, 0.02, -0.27], [X, 1.62, -0.27], 0.014, 6);
+  beam(w, [X, 1.62, -0.27], [X, 1.62, Z], 0.011, 5);
+  beam(w, [X, 1.62, Z], [X, 1.54, Z], 0.004, 4);
+  add('wood', flat(w), { col: factor('wood', 'bamboo_culm', 0.95) });
+  // the lantern: a drum of oiled paper on bamboo hoops, a wooden cap and foot
+  add('glow', lathe([[0.03, 1.25], [0.085, 1.27], [0.118, 1.34], [0.122, 1.40], [0.105, 1.47], [0.07, 1.50]], 8, null, X, 0, Z), { col: factor('glow', 'lamp_paper') });
+  add('wood', lathe([[0.07, 1.50], [0.075, 1.52], [0.02, 1.53], [0.004, 1.54]], 8, null, X, 0, Z), { col: factor('wood', 'timber', 0.7) });
+  add('wood', lathe([[0.001, 1.22], [0.04, 1.23], [0.05, 1.25], [0.03, 1.25]], 8, null, X, 0, Z), { col: factor('wood', 'timber', 0.7) });
+  const c = []; beam(c, [-0.245, 0.9, 0.12], [-0.245, 0.9, -0.2], 0.04, 8);
+  add('wood', flat(c), { col: factor('wood', 'bamboo_culm', 1.1), limb: LIMB.armL });
+}
+/**
  * The walkers' set (variants by name: `${id}|${dry|wet}|${near|far}`, the crew's `boatman|…`,
  * `passenger|…`) into the set builder sb.
  */
@@ -173,6 +195,7 @@ export function walkerShapes(sb) {
     let cape = null, extra = null;
     if (wet && k.wet === 'umbrella') { el.arms = 'staff'; extra = umbrella; }
     if (wet && k.wet === 'cape') { el.over = 'cloak'; cape = 'thatch_palm'; }
+    if (id === 'watchman') extra = watchmanGear;
     addFigure(sb, v, figure, el, { far, cape, extra });
   }
 }
@@ -186,6 +209,17 @@ export function walkerShapes(sb) {
  */
 // (hull: its half-beam over the gunwale and half-length, stem to stern, at scale 1: the moving boats keep these clear of one another)
 export const BOAT = { L: 7, pin: [0.2, 0.774, 3.15], deck: 0.57, stern: 2.35, passenger: [-0.05, 0.1, -0.3], hull: [1.34, 3.55] };
+/** The boat's lantern: a post at the bow (z −2.75) with a hook, a paper lantern hanging from it. */
+function boatLantern(sb, v) {
+  const w = [], Z = -2.95;
+  beam(w, [0, 0.57, -2.75], [0, 1.4, -2.75], 0.02, 6);
+  beam(w, [0, 1.4, -2.75], [0, 1.4, Z], 0.012, 5);
+  beam(w, [0, 1.4, Z], [0, 1.33, Z], 0.004, 4);
+  sb.addPiece(v, 'wood', flat(w), { slot: SLOT.c1, col: factor('wood', 'timber', 0.8) });
+  sb.addPiece(v, 'glow', lathe([[0.03, 1.03], [0.085, 1.05], [0.118, 1.12], [0.122, 1.18], [0.105, 1.25], [0.07, 1.28]], 8, null, 0, 0, Z), { col: factor('glow', 'lamp_white') });
+  sb.addPiece(v, 'wood', lathe([[0.07, 1.28], [0.075, 1.3], [0.02, 1.31], [0.004, 1.32]], 8, null, 0, 0, Z), { col: factor('wood', 'timber', 0.7) });
+  sb.addPiece(v, 'wood', lathe([[0.001, 1.0], [0.04, 1.01], [0.05, 1.03], [0.03, 1.03]], 8, null, 0, 0, Z), { col: factor('wood', 'timber', 0.7) });
+}
 export function boatShapes(sb) {
   const got = [];
   STYLES.ming.elements.boat({ at: [0, 0], dir: [0, 1], len: BOAT.L, y: 0 }, { bag: { add: (m, g) => got.push([m, g]) }, col: { circle() {}, box() {} } });
@@ -200,6 +234,8 @@ export function boatShapes(sb) {
     const v = sb.variant(`${kind}|${far ? 'far' : 'near'}`);
     sb.addPiece(v, 'wood', hull, { slot: SLOT.c1, col: wood });
     if (!far) sb.addPiece(v, 'wood', beams((b) => ok && b !== oar && (kind === 'covered' || !hoops(b))), { slot: SLOT.c1, col: [0.92, 0.92, 0.92] });
+    // the bow lantern, on a post by the stem (the glow group: lit at night)
+    if (!far) boatLantern(sb, v);
     if (kind === 'covered') sb.addPiece(v, 'fibre', mat, { slot: SLOT.c2, col: factor('fibre', 'reed_mat') });
     else {
       // the cargo: sacks of rice stacked amidships, baskets fore and aft

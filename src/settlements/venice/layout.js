@@ -57,7 +57,9 @@ function baseLots() {
 const hits = (a, r, m = 0) => a[2] + m > r[0] && a[0] - m < r[2] && a[3] + m > r[1] && a[1] - m < r[3];
 export function lots() {
   if (LOTS) return LOTS;
-  const clear = [...palazzi().map((p) => p.box), ...bridges().map((b) => b.corridor), squero().clear];
+  // (the houses that stood inside the Procuratie's blocks, hidden there: with the shops' rooms cut into the arcades' blocks (docs/settlements/venice.md §5f.1) they would show)
+  const PROCURATIE = [[PIAZZA[0], PIAZZA[1] - 18, CLOCK[0], PIAZZA[1]], [PIAZZA[0], PIAZZA[3], CAMPANILE[0] - 12, PIAZZA[3] + 16]];
+  const clear = [...palazzi().map((p) => p.box), ...bridges().map((b) => b.corridor), squero().clear, ...PROCURATIE];
   return (LOTS = baseLots().filter((l) => !clear.some((r) => hits(l.rect, r, 0.4))));
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

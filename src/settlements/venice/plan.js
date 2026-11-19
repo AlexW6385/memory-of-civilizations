@@ -1,14 +1,15 @@
 // The Piazza San Marco about 1500 (docs/settlements/venice.md §2–§4).
 import { upWalks } from './upper.js';
+import { shopsOf, shopWalks } from './shops.js';
 import { PIAZZA, PIAZZETTA, BASILICA, CAMPANILE, PALACE, CLOCK, GROUND, SEA, BASIN_Z } from './layout.js';
 
 const g = GROUND, E = [
   { t: 'basilica', c: BASILICA.c, s: BASILICA.s, w: BASILICA.w, h: 22, y: g, interior: true, noHorses: true },
   { t: 'bell_tower', c: CAMPANILE, s: 12, h: 98, y: g },
   { t: 'doges_palace', rect: PALACE, h: 25, y: g, noFigs: true },
-  { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[1] - 18, CLOCK[0], PIAZZA[1]], h: 11, front: 's', y: g },
+  { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[1] - 18, CLOCK[0], PIAZZA[1]], h: 11, front: 's', y: g, shops: shopsOf([PIAZZA[0], PIAZZA[1] - 18, CLOCK[0], PIAZZA[1]]) },
   { t: 'clock_tower', rect: CLOCK, h: 24, front: 's', y: g },
-  { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[3], CAMPANILE[0] - 12, PIAZZA[3] + 16], h: 11, front: 'n', y: g },
+  { t: 'procuratie', rect: [PIAZZA[0], PIAZZA[3], CAMPANILE[0] - 12, PIAZZA[3] + 16], h: 11, front: 'n', y: g, shops: shopsOf([PIAZZA[0], PIAZZA[3], CAMPANILE[0] - 12, PIAZZA[3] + 16]) },
   { t: 'procuratie', rect: [PIAZZA[0] - 16, PIAZZA[1] - 18, PIAZZA[0], PIAZZA[3] + 16], h: 11, front: 'e', y: g },
   { t: 'column_statue', c: [PIAZZETTA[0] + 12, PIAZZETTA[3] - 8], h: 12.5, y: g, statue: 'theodore', granite: 'granite_red', figs: false },
   { t: 'column_statue', c: [PIAZZETTA[2] - 12, PIAZZETTA[3] - 8], h: 12.5, y: g, statue: 'lion', figs: false },
@@ -28,7 +29,7 @@ export const sanMarco = {
     { id: 'basilica', rect: [BASILICA.c[0] - BASILICA.s + 1.5, BASILICA.c[1] - 9.5, BASILICA.c[0] + 8, BASILICA.c[1] + 9.5], y: g, kind: 'hall' },
     { id: 'transepts', rect: [BASILICA.c[0] - 9.5, BASILICA.c[1] - BASILICA.s * 0.8 + 2, BASILICA.c[0] + 9.5, BASILICA.c[1] + BASILICA.s * 0.8 - 2], y: g, kind: 'hall' }],
   // (past the market stall and the wells and well-heads of the square, then the Campanile's open ground floor: the street life stands where it stands)
-  walks: [...upWalks(), Object.assign([[-120, -5], [-108, -6.3], [-45, -6.3], [-38, 1.5], [12, 1.5], [17, -5], [22, -5], [40, -5], [BASILICA.c[0], BASILICA.c[1]]], { y0: g })],
+  walks: [...upWalks(), ...shopWalks(), Object.assign([[-120, -5], [-108, -6.3], [-45, -6.3], [-38, 1.5], [12, 1.5], [17, -5], [22, -5], [40, -5], [BASILICA.c[0], BASILICA.c[1]]], { y0: g })],
 };
 // the gondolas moored stern to the Molo before the Piazzetta and the palace, between their posts
 const boats = [];

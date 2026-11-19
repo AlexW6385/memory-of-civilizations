@@ -1,5 +1,6 @@
 // Florence about 1480 (docs/settlements/florence.md §2–§4).
 import { upperWalks } from './upstairs.js';
+import { doorWalks } from './openwalk.js';
 import { RADIUS, DUOMO, CAMPANILE, BAPTISTERY, PALAZZO, LOGGIA, ORSAN, ARNO, BRIDGE, MEDICI, MERCATO, NOVELLA, NOVELLA_PIAZZA } from './layout.js';
 
 const E = [
@@ -22,7 +23,7 @@ export const centre = {
   bakeTop: 115,
   elements: E,
   rooms: [{ id: 'nave', rect: [-70, -77.5, 17, -42.5], y: 0, kind: 'hall' }, { id: 'crossing', rect: [24, -76, 56, -44], y: 0, kind: 'hall', sealed: true }, { id: 'tribune east', rect: [64, -67.8, 79.5, -52.2], y: 0, kind: 'hall', sealed: true }, { id: 'tribune north', rect: [32.2, -99.5, 47.8, -84], y: 0, kind: 'hall', sealed: true }, { id: 'tribune south', rect: [32.2, -36, 47.8, -20.5], y: 0, kind: 'hall', sealed: true }, { id: 'piazza', rect: [-160, -110, 100, -10], y: 0, kind: 'open' }],
-  walks: [Object.assign([[-150, -60], [-150, -20], [-80, -20]], { y0: 0 }), ...upperWalks()],
+  walks: [Object.assign([[-150, -60], [-150, -20], [-80, -20]], { y0: 0 }), ...upperWalks(), ...doorWalks()],
 };
 const az = ARNO.z + 12 * Math.sin(BRIDGE.x / 130);
 export const bridge = {
