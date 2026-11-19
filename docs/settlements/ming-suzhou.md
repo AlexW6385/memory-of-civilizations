@@ -505,3 +505,27 @@ This amends §11 (boards) and §20 (real characters): the plain-bar strokes are 
 **Not built.** 梧竹幽居: a walled pavilion with round openings and no stated board in these sources. 綠漪亭: 綠 and 漪 not authored. 香洲: not built. The residence main hall and study boards keep generic strokes (their text is not stated). 紙, 油, 鹽, 醬 trades: not in the sources. Iron shops use 金 only. Couplets are unchanged: only the practice is sourced (Zhu Yuanzhang ordering door couplets), no verbatim Ming couplet text was found, so none was invented. Hooks (the flicks on a few characters) read as slightly flat wedges at 2 m, and the densest characters (瓏 麵 藥) are the least crisp.
 
 **Numbers** (arrival, `draw-count`, against master at the same commit): main draws 284 → 285, main triangles 2.53 → 2.56 M (+1.2%); geo-one 79.6 → 107.2 MB, 753 → 818 meshes. Dense shop glyphs would have become instanced draws; six stroke-weight variants chosen by hash of position keep each shape below that threshold. Checks: surface-check ok, plan-check ok, walk-check --sites ok, view-check and disc-check clean, worker test passes.
+
+## 28. The north zone at full standard: temple halls, climbable pagoda, wall and gate, court (`templefig.js`, `templehall.js`, `pagodawork.js`, `wallwork.js`, `north.js`; round 13)
+
+**Sources.** §12 (history, layout, wall) and §20 (gate furniture) stand. The Wikipedia pages on the Beisi Pagoda and the Bao'en Temple could not be fetched here (provenance refused), so nothing below is newly sourced from them. Marked **[stated]** where §12/§20 or the song pagoda dossier say it, **[inferred]** where the form is the usual one of a Jiangnan Chan temple of the Ming and the sources give no detail.
+
+**Audit before (read in code, rendered at 2 m) and after.**
+
+| Part | Before | After |
+|---|---|---|
+| Main hall inside | empty hall; nothing on the platform | three Buddhas on lotus thrones (Sakyamuni between Bhaisajyaguru and Amitabha) on sumeru dais, disciples and attendants, 18 arhats along the side walls on rock daises, altar table with five offerings (censer, candlesticks, vases, fruit), banners, canopy, cushions in rows, drum and bell, monks kneeling and standing at the service [inferred: the usual Ming arrangement; the three-Buddha group is the commonest form of a main hall] |
+| Side halls | empty | west: sutra store (cabinets, a revolving case, a reader); east: refectory (long tables, benches, monks at the meal) [inferred] |
+| Gate | door leaves and burner only | the four guardian kings in two open lean-to porches inside the gate: Chiguo (lute), Zengzhang (sword), Guangmu (dragon), Duowen (umbrella) [stated: the kings' names and attributes are the standard ones] |
+| Pagoda | shut brick shaft, no way in | song interior on (outer wall with three doors, corridor, chamber with image and table, stair, galleries); tiers widened (r 8.2 down by 0.3) so that the corridor, chamber and stair fit; worn treads; finial of lotus bowl, seven rings, water-flame, pearl and eight iron chains; walk-check route from the temple gate over the three terrace flights, in by the south-west door and up all nine storeys, out on the top gallery [inferred: the real pagoda's interior is closed to visitors in part; its stair is the song style's] |
+| Gate tower | blank wall on the wall-walk side, doors facing the moat | turned to face the wall-walk; inside a watch-post: bench, tea table, two weapon racks, bedrolls, great drum, water clock, notice board (plain), five guards [inferred] |
+| Wall | clean faces | tufts of grass and shrubs in the joints at the plinth and in the courses, rain streaks under the string course, a damp foot, both faces; routes up both stair-ramps, along the wall-walk, in front of and into the gate hall |
+| Court | paving, burner, gate | two old camphors and a third in stone railings, two stelae on tortoise bases, a pond of released carp with lotus leaves, a monk sweeping, worshippers kneeling before the burner, two beggars and an incense seller outside the gate [inferred] |
+
+**Form.** Fine work is in near plans (shown within 70-100 m): `temple-in` (halls), `court-near`, `pagoda-in` (wear), `gate-in`, `wall-w/e` (weathering). Figures are modelled once per image (`templefig.js`, no instancing, geometry identical every build); small pieces vary by a hash of place. The wall's second stair-ramp at x = 58 stood among two house lots; `NORTH_KEEP` gained one rectangle [55.5, -164, 61, -146] so the foot of the ramp is clear (two lots drop).
+
+**Wanted names for the boards (plain boards stand in).** 天王殿 (kings' porches, on the gate), 大雄寶殿 (main hall front), 藏經閣 (west side hall), 齋堂 (east side hall), 北寺塔 (pagoda's lowest door), 報恩寺 is already placed (§23). Notice board in the gate tower: plain.
+
+**Numbers** (arrival, `draw-count`): main draws 283 → 282, main triangles 2.50 → 2.54 M (+1.6% by the rounded figures; the pagoda's interior costs 0.01 M of it, the rest the wider tiers' gallery and finial); at the temple gate main draws 312-322 and 2.54 M triangles (limit 450 / 4.5 M); geo-one 86.4 MB, 913 meshes.
+
+**Not done.** Monks' cells; the water gate's portcullis and guards (the style's grille is unchanged); tile-end discs and bracket-sets on the pagoda's eaves beyond the existing deep eave; the interior of the pagoda is dark in simple light (no interior lamps).
