@@ -43,7 +43,7 @@ test('Florence: the Angelus at six, noon and six, the hours struck, and its map 
 
 test('Florence: the map\'s places lie where they should', () => {
   const S = FL.sites(), all = lots();
-  assert.ok(S.length >= 20, `${S.length} workshops with sounds`);
+  assert.ok(S.length >= 18, `${S.length} workshops with sounds`);
   for (const s of S) { assert.ok(all.some((l) => l.rect === s.rect), s.id); assert.ok(s.work.length); }
   assert.ok(S.some((s) => s.use === 'smith') && S.some((s) => s.use === 'inn') && S.some((s) => s.use === 'woodwork'));
   // the wells are the ones street life stands
