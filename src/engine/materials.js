@@ -4,7 +4,7 @@
 // recorded in each dossier (a tiling photo texture cannot follow a wall's coursing). Average colours come from src/core/palette.js,
 // which the light baker shares.
 
-import { MeshStandardNodeMaterial, DoubleSide, Color, PhysicalLightingModel } from 'three/webgpu';
+import { MeshStandardNodeMaterial, DoubleSide, Color, PhysicalLightingModel, CustomBlending, AddEquation, OneFactor } from 'three/webgpu';
 import {
   Fn, float, vec2, vec3, vec4, positionWorld, positionLocal, normalWorld, normalLocal, normalView, positionView, abs, floor, fract, min, max,
   mix, smoothstep, hash, dot, cross, normalize,
@@ -620,6 +620,34 @@ function make(spec) {
       const glowC = uniform(new Color(spec.glow || spec.color));
       m.colorNode = baseNode;
       m.emissiveNode = mix(glowC.mul(vec3(0.8, 0.45, 0.3)), glowC, face).mul(face.mul(0.6).add(0.4)).mul(float((spec.power ?? 3) * 0.4)).mul(smoothstep(0.15, 0.6, ENV.night)).mul(flick);
+      break;
+    }
+    case 'halo': {
+      // the light a lantern or a lit window throws, as geometry added over what is behind it (light
+      // added, nothing hidden), at night only (the glow shades' own switch): so that the lanterns
+      // read as lit at the low preset, where the pool of real lamps is off. One material for all of
+      // it, the shape of each piece carried by its normals (the mesh needs no attribute of its own,
+      // and an instance or a merge keeps them): the normal's y is the brightness, 1 at the middle of
+      // a disc and 0 at its rim (a pool of light on the paving, a wash on a wall, three crossed discs
+      // for the glow round the flame) or one value over a whole sheet (the lamp of a room behind
+      // window paper); a negative y marks the same on water, broken into ripples by the water's own
+      // motion (the lantern's reflection). Added in linear light, the scene's lights ignored, no
+      // shadow, no depth written.
+      const night = smoothstep(0.15, 0.6, ENV.night);
+      const flick = sin(time.mul(7.0).add(positionLocal.x.mul(3.1)).add(positionLocal.z.mul(2.3))).mul(0.05).add(sin(time.mul(2.3).add(positionLocal.z)).mul(0.04)).add(1);
+      const glowC = uniform(new Color(spec.glow || '#ff9a45'));
+      const ny = normalLocal.y, r = clamp(abs(ny), 0, 1);
+      const rip = smoothstep(0.1, 0.8, sin(positionLocal.x.mul(11.0).add(positionLocal.z.mul(7.0)).add(time.mul(0.9))).mul(0.5).add(0.5).add(r.mul(0.35)));
+      const f = pow(r, 1.7).mul(select(ny.lessThan(0), rip, float(1)));
+      m.colorNode = vec3(0, 0, 0);
+      m.emissiveNode = glowC.mul(f.mul(float(spec.power ?? 0.5))).mul(night).mul(flick);
+      m.opacityNode = float(0.004);
+      m.lights = false;
+      m.fog = false;                       // (fog added to an added light would be a haze of the fog's colour over everything the halo covers, by day too)
+      m.transparent = true;
+      m.depthWrite = false;
+      m.side = DoubleSide;
+      m.blending = CustomBlending; m.blendEquation = AddEquation; m.blendSrc = OneFactor; m.blendDst = OneFactor;
       break;
     }
     case 'flame': {
