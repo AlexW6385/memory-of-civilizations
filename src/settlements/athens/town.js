@@ -10,6 +10,7 @@ import { acropolisWorks, acropolisLife } from './works.js';
 import { fronts, crossings, openLife } from './fronts.js';
 import { stallSites, steleSites } from './wayside.js';
 import { walkDist } from './walk.js';
+import { fires } from './nightlight.js';
 import { cfg } from './houses.js';
 import { frame } from '../../styles/greek/agora.js';
 import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
@@ -33,8 +34,9 @@ export async function town() {
         { id: 'store', rect: [xk + 0.4, sz, X1 - 0.5, Z1 - 0.5], y: l.y, kind: 'inner' });
       return { t: 'athens_open_house', rect: l.rect, y: l.y, seed: l.seed, trade: tr }; });
     plans.push({ ...base(`athens-open-${g / 4}`, els), rooms }); }
+  // (Simon's plan also carries the town's few night fires, nightlight.js: a plan's lights are one flames draw)
   // the house and shop by the south-west corner of the Agora that the finds name Simon the shoemaker's (§5b), walked into
-  plans.push({ ...base('athens-simon', [{ t: 'simon_house', rect: SIMON, y: 0, seed: 410 }]), rooms: [
+  plans.push({ ...base('athens-simon', [{ t: 'simon_house', rect: SIMON, y: 0, seed: 410 }, ...fires()]), rooms: [
     { id: 'shoemaker shop', rect: [SIMON[0] + 0.5, SIMON[1] + 0.5, SIMON[0] + 5, SIMON[1] + 5.3], y: 0, kind: 'inner', market: false },
     { id: 'andron', rect: [SIMON[0] + 7.4, SIMON[1] + 0.5, SIMON[2] - 0.5, SIMON[1] + 5.3], y: 0, kind: 'inner' }] });
   // the potters' quarter of the Kerameikos (§11a): workshops in two rows on a lane, each walked into
