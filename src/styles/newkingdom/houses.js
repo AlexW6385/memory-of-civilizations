@@ -10,6 +10,7 @@ import { rng } from './kit.js';
 import { nkPalm } from './palm.js';
 import { facade, cabin, dovecote, shopGoods } from './dress.js';
 import { lamp, person } from './interiors.js';
+import { DOOR_OPEN } from './doorsite.js';
 
 export function frame(rect, front, bag, col) {
   const [x0, z0, x1, z1] = rect, zs = front === 's' ? z1 : z0, sg = front === 's' ? -1 : 1, Z = (v) => zs + sg * v;
@@ -68,6 +69,7 @@ export function door(F, wallMat, u, w, h, v0, v1, open, H) {
   F.b('limestone_core', u - w / 2 - 0.05, -0.04, v0 - 0.12, u + w / 2 + 0.05, 0.1, v1 + 0.08, false);
   F.b('timber', u - w / 2 - 0.06, 0, v0 - 0.03, u - w / 2 + 0.02, h, v1 + 0.03, false); F.b('timber', u + w / 2 - 0.02, 0, v0 - 0.03, u + w / 2 + 0.06, h, v1 + 0.03, false);
   if (!open) F.b('cedar', u - w / 2 + 0.02, 0.02, v0 + 0.1, u + w / 2 - 0.02, h - 0.02, v0 + 0.2);
+  else if (w > 1.2) F.b('cedar', u - w / 2 + 0.04, 0.02, v1 + 0.02, u - w / 2 + 0.12, h - 0.03, v1 + 0.62, false);        // the leaf stands open against the inside of the wall
 }
 export const slit = (F, u, y, v, w = 0.5, h = 0.32) => F.b('opening', u - w / 2, y, v - 0.01, u + w / 2, y + h, v + 0.03, false);
 
@@ -79,20 +81,59 @@ function shell(F, wm, uD, dw, dh, th, H, D, kind) {
   F.b(wm, th, 0, th, F.W - th, kind === 'row' ? 1.0 : 2.2, D - th);
 }
 
+/**
+ * The front wall of a shop (a row house with a trade): a pier, a counter of mud brick 0.95 m high with the wall opened above it to the lintel,
+ * a pier, the door. The opening is on the side of the door with more wall. Returns { o0, o1 } (the opening's ends along the front) or null if no side is wide enough.
+ */
+function shopFront(F, wm, uD, dw, dh, th, H) {
+  const W = F.W, l0 = uD - dw / 2, r0 = uD + dw / 2, left = l0 - 0.45 - 0.4, right = W - 0.45 - (r0 + 0.4);
+  const onLeft = left >= right;
+  if (Math.max(left, right) < 1.5) return null;
+  const o0 = onLeft ? 0.45 : r0 + 0.4, o1 = onLeft ? l0 - 0.4 : W - 0.45;
+  const top = 2.2, edges = onLeft ? [[0, o0], [o1, l0], [r0, W]] : [[0, l0], [r0, o0], [o1, W]];
+  for (const [a, b] of edges) if (b - a > 0.01) F.b(wm, a, 0, 0, b, H, th);                        // the piers and the wall beside the door
+  F.b(wm, uD - dw / 2, dh, 0, uD + dw / 2, H, th);
+  F.b(wm, o0, 0, 0, o1, 0.95, th);                                                                 // the counter's body
+  F.b(wm, o0, top, 0, o1, H, th);                                                                  // the lintel over the opening
+  F.b('palm_trunk', o0 - 0.1, top - 0.2, -0.06, o1 + 0.1, top + 0.04, th + 0.06, false);
+  F.b('palm_trunk', uD - dw / 2 - 0.15, dh - 0.16, -0.06, uD + dw / 2 + 0.15, dh + 0.08, th + 0.06, false);
+  F.b('limestone_core', uD - dw / 2 - 0.05, -0.04, -0.12, uD + dw / 2 + 0.05, 0.1, th + 0.08, false);
+  F.b('mud_plaster', o0, 0.95, -0.25, o1, 1.0, th + 0.55, false);                                 // the counter's top, a mat over it
+  F.b('reed_mat', o0 + 0.05, 1.0, -0.2, o1 - 0.05, 1.02, th + 0.5, false);
+  return { o0, o1 };
+}
+/** The goods on a shop's counter and on the shelf behind it, by trade (each of the materials the houses already have). */
+function counterGoods(F, rand, { o0, o1 }, kind) {
+  const n = Math.max(2, Math.floor((o1 - o0 - 0.3) / 0.4)), y = 1.02;
+  for (let i = 0; i < n; i++) {
+    const u = o0 + 0.25 + i * ((o1 - o0 - 0.5) / Math.max(1, n - 1)), v = 0.1 + (i % 2) * 0.22;
+    if (kind === 'bread') F.lathe('banco_smooth', [[0.001, 0], [0.17, 0.02], [0.18, 0.07], [0.1, 0.13], [0.001, 0.15]], u, y, v, 8);
+    else if (kind === 'pots') F.lathe('terracotta', JAR(0.1 + rand() * 0.05), u, y, v, 8);
+    else if (kind === 'beer') F.lathe('pottery_dark', JAR(0.13), u, y, v, 8);
+    else if (kind === 'fruit') { F.lathe('wicker', [[0.17, 0], [0.2, 0.12], [0.001, 0.14]], u, y, v, 8); F.lathe('fresco_green', [[0.001, 0.14], [0.14, 0.16], [0.001, 0.22]], u, y, v, 7); }
+    else if (kind === 'cloth') F.b(['cloth_white', 'cloth_ochre', 'cloth_indigo', 'cloth_blue'][i % 4], u - 0.17, y, v - 0.2, u + 0.17, y + 0.12 + (i % 3) * 0.06, v + 0.2, false);
+    else F.b('hide_tan', u - 0.15, y, v - 0.18, u + 0.15, y + 0.05, v + 0.18, false);
+  }
+  F.b('timber', o0, 2.0, 0.5, o1, 2.05, 0.56, false);                                              // the rail the wares hang from
+  for (let i = 0; i < Math.floor(n / 2); i++) F.b(kind === 'cloth' ? 'cloth_ochre' : kind === 'leather' ? 'hide_brown' : 'rope_fibre', o0 + 0.3 + i * 0.8, 1.5, 0.52, o0 + 0.45 + i * 0.8, 2.0, 0.54, false);
+}
+
 /** nk_row_house: { rect, front, seed, open } — the workman's house. */
 export function rowHouse(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, H = 3.1 + rand() * 0.3, wm = WALLS[Math.floor(rand() * WALLS.length)], simple = !!el.simple, open = !!el.open && !simple;
   const uD = W * (0.3 + rand() * 0.4);
-  if (simple) { shell(F, wm, uD, 0.9, 1.95, th, H, D, 'row'); roof(F, rand, H, null, false, undefined, true); return; }
-  door(F, wm, uD, 0.9, 1.95, 0, th, open, H);
-  facade(F, rng(el.seed + 99), { W, H, wm, uD, dw: 0.9, lod: el.lod ?? 1, open, shop: !!el.shop });
+  const dw = open ? DOOR_OPEN : 0.9, dh = open ? 2.15 : 1.95;
+  if (simple) { shell(F, wm, uD, dw, dh, th, H, D, 'row'); roof(F, rand, H, null, false, undefined, true); return; }
+  const sf = open && el.shop ? shopFront(F, wm, uD, dw, dh, th, H) : null;                        // a shop: the wall opened to a counter beside the door
+  if (!sf) door(F, wm, uD, dw, dh, 0, th, open, H);
+  facade(F, rng(el.seed + 99), { W, H, wm, uD, dw, doorH: dh, lod: el.lod ?? 1, open, shop: !!el.shop, hole: sf ? [sf.o0, sf.o1] : null });
   F.b(wm, 0, 0, th, th, H, D); F.b(wm, W - th, 0, th, W, H, D); F.b(wm, 0, 0, D - th, W, H, D);
   slit(F, W * 0.5 + (uD < W / 2 ? 1.2 : -1.2), 2.45, -0.0); slit(F, uD, H - 0.5, 0, 0.5, 0.26);
   F.b('limewash_white', 0, 0, -0.02, W, 0.5, 0.0, false);                               // the whitewash's edge at the foot (the street's dust on it)
   F.b('banco_rough', 0, 0, -0.03, W, 0.32, 0.0, false);
   const stairV0 = D - 4.4, hole = [th, stairV0, 1.35, D - th];
   if (open) {
-    const wall = (v, gap) => { F.b(wm, th, 0, v, gap - 0.45, H, v + 0.35); F.b(wm, gap + 0.45, 0, v, W - th, H, v + 0.35); F.b(wm, gap - 0.45, 2.0, v, gap + 0.45, H, v + 0.35); };
+    const wall = (v, gap) => { F.b(wm, th, 0, v, gap - 0.7, H, v + 0.35); F.b(wm, gap + 0.7, 0, v, W - th, H, v + 0.35); F.b(wm, gap - 0.7, 2.1, v, gap + 0.7, H, v + 0.35); };
     wall(3.4, W / 2); wall(stairV0 - 0.35, W * 0.55);
     F.b(wm, 1.35, 0, stairV0, 1.7, H, D - 3.2);
     // stair to the roof along the left wall, rising toward the rear
@@ -104,8 +145,9 @@ export function rowHouse(el, ctx) {
     for (const [a, b, c, d] of [[th, 3.75, W - th, 3.8], [th, 8.65, W - th, 8.7]]) F.b('limewash_white', a, 0.03, b, c, 1.0, d, false);
     // the front room: a bench along the wall, jars
     F.b('mud_plaster', W - th - 0.5, 0, th, W - th, 0.4, 3.0); F.b('reed_mat', W - th - 0.45, 0.4, th + 0.1, W - th - 0.05, 0.42, 2.9, false);
-    if (el.shop) shopGoods(F, rng(el.seed + 5), uD, th, el.shop);
-    F.lathe('terracotta', JAR(0.22), th + 0.35, 0, th + 0.4, 10); F.lathe('terracotta', JAR(0.18), th + 0.35, 0, th + 1.0, 10);
+    if (sf) counterGoods(F, rng(el.seed + 5), sf, el.shop);
+    else if (el.shop) shopGoods(F, rng(el.seed + 5), uD, th, el.shop);
+    if (!(sf && sf.o0 < 1.2)) { F.lathe('terracotta', JAR(0.22), th + 0.35, 0, th + 0.4 + (sf ? 1.2 : 0), 10); F.lathe('terracotta', JAR(0.18), th + 0.35, 0, th + 1.0 + (sf ? 1.2 : 0), 10); }
     // the main room: the platform with its steps, the niche with a little altar, a stool and a chest, a mat
     F.b('mud_plaster', W - th - 1.9, 0, 4.1, W - th, 0.5, 6.2); F.b('mud_plaster', W - th - 2.5, 0, 4.9, W - th - 1.9, 0.25, 5.5);
     F.b('opening', W - th - 1.1, 1.0, 3.84, W - th - 0.4, 1.8, 3.86, false); F.b('limestone_core', W - th - 1.15, 0.95, 3.8, W - th - 0.35, 1.0, 4.05, false);
@@ -123,7 +165,8 @@ export function rowHouse(el, ctx) {
     // the room is lit by a clay lamp on the platform, and someone is at home: the housewife at the oven, the master on his mat, the shopkeeper behind the counter
     lamp(F, ctx, W - th - 0.5, 0.5, 5.9, 0, 2.6);
     const pr = rng(el.seed + 31), q = pr();
-    if (el.shop) person(F, ctx, { u: Math.max(th + 0.5, uD - 1.5), v: 1.7, face: [0, -1], who: pr() < 0.5 ? 'woman' : 'man', pose: 'squat', seed: el.seed + 3 });
+    if (sf) person(F, ctx, { u: (sf.o0 + sf.o1) / 2, v: 1.45, face: [0, -1], who: pr() < 0.5 ? 'woman' : 'man', pose: 'squat', seed: el.seed + 3 });
+    else if (el.shop) person(F, ctx, { u: Math.max(th + 0.5, uD - 1.5), v: 1.7, face: [0, -1], who: pr() < 0.5 ? 'woman' : 'man', pose: 'squat', seed: el.seed + 3 });
     if (q < 0.6) person(F, ctx, { u: Math.max(2.2, W - th - 2.7), v: D - th - 1.0, face: [1, 0.2], who: 'woman', pose: 'kneel', seed: el.seed + 5, cloth: 'cloth_white' });
     if (q > 0.3) person(F, ctx, { u: 2.5, v: 6.6, face: [1, 0], who: q > 0.8 ? 'elder' : 'man', pose: 'sit_ground', seed: el.seed + 7 });
   }
@@ -141,15 +184,16 @@ export function courtHouse(el, ctx) {
     F.b(wm, 0, 0, th, th, 2.7, cv); F.b(wm, W - th, 0, th, W, 2.7, cv);
     F.b(wm, 0, 0, cv, W, H, D); roof(F, rand, H, null, false, [0, cv, W, D], true); return;
   }
-  door(F, wm, uD, 1.0, 2.0, 0, th, open, 2.7);
-  facade(F, rng(el.seed + 99), { W, H: 2.7, wm, uD, dw: 1.0, doorH: 2.0, lod: el.lod ?? 1, open });
+  const cdw = open ? DOOR_OPEN : 1.0;
+  door(F, wm, uD, cdw, open ? 2.15 : 2.0, 0, th, open, 2.7);
+  facade(F, rng(el.seed + 99), { W, H: 2.7, wm, uD, dw: cdw, doorH: open ? 2.15 : 2.0, lod: el.lod ?? 1, open });
   F.b(wm, 0, 0, th, th, 2.7, cv); F.b(wm, W - th, 0, th, W, 2.7, cv);                                // the court's walls
   F.b(wm, 0, 0, cv, th, H, D); F.b(wm, W - th, 0, cv, W, H, D); F.b(wm, 0, 0, D - th, W, H, D);      // the house's
   slit(F, W / 2, 2.5, 0, 0.45, 0.3);
   F.b('banco_rough', 0, 0, -0.03, W, 0.3, 0.0, false);
   // the roofed rooms at the back: the front wall of the house on the court with a door, the party wall between two rooms
-  const dm = W * 0.5; F.b(wm, th, 0, cv, dm - 0.5, H, cv + 0.35); F.b(wm, dm + 0.5, 0, cv, W - th, H, cv + 0.35); F.b(wm, dm - 0.5, 2.05, cv, dm + 0.5, H, cv + 0.35);
-  F.b('palm_trunk', dm - 0.65, 1.9, cv - 0.06, dm + 0.65, 2.14, cv + 0.4, false);
+  const dm = W * 0.5; F.b(wm, th, 0, cv, dm - 0.75, H, cv + 0.35); F.b(wm, dm + 0.75, 0, cv, W - th, H, cv + 0.35); F.b(wm, dm - 0.75, 2.1, cv, dm + 0.75, H, cv + 0.35);
+  F.b('palm_trunk', dm - 0.9, 1.95, cv - 0.06, dm + 0.9, 2.19, cv + 0.4, false);
   const sv = cv + 2.6; F.b(wm, th, 0, sv, W * 0.35, H, sv + 0.3); F.b(wm, W * 0.35 + 0.9, 0, sv, W - th, H, sv + 0.3);
   const hole = [th, D - 4.4, 1.35, D - th];
   if (open) {
@@ -158,7 +202,7 @@ export function courtHouse(el, ctx) {
     col.ramp(F.R(th, hole[1], 1.35, D - th), 0, H + 0.28, F.rise);
     F.b('mud_plaster', th, -0.02, cv + 0.35, W - th, 0.03, D - th, false);
     // the central room: a bench on two sides, a column of papyrus, a bed niche; the court: oven, granary, quern, jars, a palm
-    smallColumn(F, W / 2, cv + 1.6, H - 0.1, 0.2);
+    smallColumn(F, W / 2 + 1.3, cv + 1.6, H - 0.1, 0.2);
     F.b('mud_plaster', W - th - 0.5, 0, cv + 0.4, W - th, 0.4, sv - 0.1); F.b('reed_mat', W - th - 0.45, 0.4, cv + 0.5, W - th - 0.05, 0.42, sv - 0.2, false);
     F.b('timber', 0.6, 0.2, sv + 0.5, 2.6, 0.3, sv + 2.2, false); F.b('reed_mat', 0.62, 0.3, sv + 0.52, 2.58, 0.32, sv + 2.18, false);
     F.lathe('terracotta', JAR(0.28), W - th - 0.5, 0, sv + 1.0, 10);

@@ -2,6 +2,8 @@
 import '../../styles/newkingdom/index.js';
 import karnak from './plan.js';
 import music from './music.js';
+import { walkRoutes } from './walk.js';
+karnak.walks.push(...walkRoutes());                   // routes into the shops and houses of the first streets (walk.js)
 export { town } from './town.js';
 export { music };
 export const landmarks = [{ plan: karnak, music }];
