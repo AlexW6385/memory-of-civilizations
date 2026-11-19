@@ -48,6 +48,8 @@ export function furniture() {
   }
   // beside the stream, in the strip before Ginkaku-ji's wall: an Inari shrine and a Jizō
   E.push({ t: 'inari', at: [108.2, 52], rot: -Math.PI / 2 }, { t: 'jizo', at: [107.5, -36], rot: -Math.PI / 2 });
+  // along the walk from the bridge to the gate of Jishō-ji: the street's well at the lane's mouth before the first shop, and a wayside Jizō where the street ends at the gate road
+  E.push({ t: 'ido', at: [113.5, 95.2], y: 0, rot: 0.6 }, { t: 'jizo', at: [194.9, 99.2], rot: Math.PI });
   return E;
 }
 

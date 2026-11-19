@@ -2,6 +2,8 @@
 // with the Dōjinsai, the gate and the earthen walls, stone lanterns, the court of white gravel. The landmark.
 import { GINKAKU, RADIUS, lots } from './layout.js';
 import { dims } from '../../styles/muromachi/machiya.js';
+import { stoneHalos } from './nightlight.js';
+import { togudoWear } from './wearwork.js';
 import { upWindows, stairAt } from '../../styles/muromachi/upper.js';
 
 const E = [];
@@ -11,6 +13,7 @@ const [x0, z0, x1, z1] = GINKAKU.rect, [gx, gz] = GINKAKU.gate, P = GINKAKU.pond
 const wall = (a, b) => E.push({ t: 'tsuijibei', a, b, y: 0, h: 2.4 });
 wall([x0, z0], [x1, z0]); wall([x1, z0], [x1, z1]); wall([x0, z0], [x0, z1]); wall([x0, z1], [gx - 4.5, z1]); wall([gx + 4.5, z1], [x1, z1]);
 E.push({ t: 'yakumon', at: [gx, gz], y: 0, yaw: 0, w: 3.2 });
+E.push({ t: 'kyoto_board', at: [gx, gz + 0.87], y: 3.2, rot: 0, text: '慈照寺', w: 1.7, h: 0.58 });   // the name on the street side of the gate (Jishō-ji: named for Yoshimasa's posthumous name, 1490)
 // the path from the gate to the court, between the pond and the wall, and round the pond
 E.push({ t: 'lane', rect: [gx - 1.6, P.c[1] + P.r[1] + 4, gx + 1.6, z1], y: 0.02, mat: 'flagstone' });
 E.push({ t: 'lane', rect: [P.c[0] - P.r[0] - 4, P.c[1] + P.r[1] + 3, P.c[0] + P.r[0] + 4, P.c[1] + P.r[1] + 5.4], y: 0.02, mat: 'flagstone' });
@@ -27,6 +30,8 @@ for (const sx of [-1, 1]) { E.push({ t: 'ikegaki', a: [gx + sx * 2.15, z1 - 4], 
 // the Kannon-den facing the pond, the Tōgu-dō facing it from the west
 E.push({ t: 'kannon_den', at: GINKAKU.kannon, y: 0, facing: 's' });
 E.push({ t: 'togudo', at: GINKAKU.togudo, y: 0, facing: 'e' });
+E.push(...togudoWear());                                    // the worn treads before the Tōgu-dō
+E.push({ t: 'kyoto_board', at: [GINKAKU.togudo[0] + 3.55, GINKAKU.togudo[1]], y: 3.25, rot: Math.PI / 2, text: '東求堂', w: 1.3, h: 0.32 });   // the hall's name on the beam over its front (dossier §12)
 // the court of gravel before the pavilion, with a path of stones to the Tōgu-dō
 E.push({ t: 'lane', rect: [GINKAKU.kannon[0] - 14, GINKAKU.kannon[1] + 7.6, GINKAKU.kannon[0] + 14, GINKAKU.kannon[1] + 11], y: 0.02, mat: 'flagstone' });
 for (const [x, z, s] of [[170, -16, 1], [232, -16, 1], [150, 38, 0.9], [244, 30, 0.9], [GINKAKU.togudo[0] + 9, GINKAKU.togudo[1] + 6, 0.8]]) E.push({ t: 'ishidoro', at: [x, z], y: 0, s });
@@ -62,7 +67,19 @@ for (const l of lots()) {
   r.y0 = 0;
   walks.push(r);
 }
+// the open houses of the walk without an upper room (the gate-town's and the keepers'): from the street along the earth passage and up onto the
+// shop's mats, to the counter (docs §12: the visitor may enter every shop he passes)
+for (const l of lots()) {
+  if (l.open !== true || l.up) continue;
+  const th = TH[l.facing], co = Math.round(Math.cos(th)), si = Math.round(Math.sin(th)), mir = ((l.seed >>> 4) & 1) === 1;
+  const P = ([x, z]) => { if (mir) x = -x; return [l.at[0] + x * co + z * si, l.at[1] - x * si + z * co]; };
+  const hw = l.w / 2, xl = hw - 1.6 - 0.7;
+  const r = [[hw - 1.25, 3.5], [hw - 1.25, -1.0], [hw - 1.25, -3.0], [xl, -3.0], [xl - 1.0, -2.2]].map(P);
+  r.y0 = 0;
+  walks.push(r);
+}
 
+E.push(...stoneHalos(E));                                    // the stone lanterns lit at night (nightlight.js)
 export const ginkaku = {
   id: 'muromachi-ginkaku',
   name: { en: 'Ginkaku-ji (Jishō-ji)', zh: '银阁寺（慈照寺）' },
