@@ -54,6 +54,9 @@ walks[2].y0 = 0;
 // up into the houses (docs/settlements/ur.md §5.14): from the lane through the street door, the court and the brick stair to the bedchamber, the store, the terrace and the room on the street; and again to the roof of the rooms by the ladder
 for (const h of houses()) if (h.upper) for (const r of [upperRoute(h), hasLadder(h) ? roofRoute(h) : null]) if (r) { r.y0 = 0; walks.push(r); }
 
+// from the lane under the reed-mat awning of the street door into the court of two houses that have one (the awning once shut the doorway: src/styles/sumerian/dress.js)
+for (const h of houses()) if ([632118, 83813].includes(h.seed)) { const r = upperRoute(h).slice(0, 6); r.y0 = 0; walks.push(r); }
+
 export const precinct = {
   id: 'ur-ziggurat',
   name: { en: 'The Ziggurat of Ur', zh: '乌尔大塔庙' },

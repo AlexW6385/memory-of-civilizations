@@ -2,7 +2,8 @@
 // the Ishtar Gate in the double wall, the Processional Way between glazed walls, the Southern
 // Palace, the river.
 
-import { esagilaChambers, RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height } from './layout.js';
+import { esagilaChambers, RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height, lots } from './layout.js';
+import { frame } from '../../styles/sumerian-ur/upper.js';
 
 const E = [];
 // the level of detail of the modelled relief by distance from the arrival (src/planet/arrivals.js): full to the gate, reduced beyond
@@ -65,6 +66,12 @@ const rooms = [room('processional way', [WAY.x - WAY.w / 2, WAY.z0, WAY.x + WAY.
   room('cella of marduk', [ESAGILA[0] + 6, (ESAGILA[1] + ESAGILA[3]) / 2 - 12, ESAGILA[0] + 20.5, (ESAGILA[1] + ESAGILA[3]) / 2 + 12], 0.06, 'hall')];
 const walks = [[[WAY.x, -370], [WAY.x, WALL_Z - 20], [WAY.x, WALL_Z + 40], [WAY.x, -80]]];
 walks[0].y0 = 0;
+// from the lane under the reed-mat awning of the street door into the court of two houses that have one (the awning once shut the doorway: src/styles/sumerian/dress.js)
+for (const l of lots()) if ([216624, 47731].includes(l.seed)) {
+  const F = frame({ rect: l.rect, door: l.door }), { W, t, dF, vC0 } = F, dc = t + 0.72;
+  const r = [W(dc, -2.2), W(dc, 0.3), W(dc, t + 0.9), W(t + 1.4, t + dF - 0.3), W(t + 1.4, vC0 + 1.3), W(t + 1.4, vC0 + 0.5)];
+  r.y0 = 0; walks.push(r);
+}
 
 export const babylon = {
   id: 'babylon-centre',
