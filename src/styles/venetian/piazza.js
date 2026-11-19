@@ -14,6 +14,7 @@ import { box, lathe, frustum, rod, disc } from '../../core/geom.js';
 import { faceFrame, Local, ext, archOutline, headPts, wrect } from '../renaissance/face.js';
 import { human, blob, limb as slimb } from '../greek/sculpture.js';
 import { ball, limb, T } from '../qing/carving.js';
+import { shopSlots, shopShell } from './shops.js';
 
 const M = 'marble', I = 'limestone', O = 'opening', GB = 'gilt_bronze', BLUE = 'paint_blue', PL = 'plaster_white', R = 'roof_tile', CV = 'limestone_carved';
 
@@ -126,8 +127,10 @@ export function procuratieOld(el, { bag, col }) {
   const { M: FM, L } = faceFrame(rect, f, y), D = f === 'n' || f === 's' ? z1 - z0 : x1 - x0, P = 4.2;
   const yA = 5.6, n = Math.max(2, Math.round(L / 3.1)), bay = L / n;
   // the block behind the portico, the upper storey over all, the roof
-  const core = wrect(FM, 0, -D, L, -P);
-  bag.add(PL, box(core[0], y - 0.5, core[1], core[2], y + yA, core[3])); col.rect(core, y, y + h);
+  const core = wrect(FM, 0, -D, L, -P), slots = shopSlots(L, Math.max(2, Math.round(L / 3.1)), el.shops);
+  if (!slots.length) { bag.add(PL, box(core[0], y - 0.5, core[1], core[2], y + yA, core[3])); col.rect(core, y, y + h); }
+  else { const Sh = new Local(); shopShell(Sh, col, FM, y, L, D, h, slots); Sh.emit(bag, FM); }      // the shops opened (shops.js): the rooms cut into the block
+  const opened = new Set(slots.flatMap((s) => [s.i, s.i + 1]));
   const Lc = new Local(); Lc.noBack = true; Lc.L = L;
   Lc.box(PL, 0, yA, -D, L, h, 0);
   // the arcade: columns with leaf capitals and impost blocks; the stilted arches; the ceiling of the portico
@@ -147,6 +150,7 @@ export function procuratieOld(el, { bag, col }) {
   Lc.box('brick_paving', 0, -0.3, -P, L, 0.05, 0); col.floor(wrect(FM, 0, -P, L, 0), y + 0.05);
   // the shops at the back of the portico: a door and a window in each bay, the shutters propped
   for (let i = 0; i < n; i++) {
+    if (opened.has(i)) continue;
     const uc = (i + 0.5) * bay;
     Lc.box(O, uc - 0.55, 0.05, -P - 0.02, uc + 0.55, 2.4, -P + 0.01);
     Lc.box('wood_dark', uc - 0.6, 2.4, -P, uc + 0.6, 2.55, -P + 0.08);

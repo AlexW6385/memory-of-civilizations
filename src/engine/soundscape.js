@@ -70,6 +70,7 @@
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
+import * as VENICE from '../settlements/venice/soundmap.js';
 import * as PARIS from '../settlements/paris/soundmap.js';
 import './voices-paris.js';
 import * as ROME from '../settlements/rome/soundmap.js';
@@ -197,7 +198,7 @@ export const PROFILES = {
   tenochtitlan: T({ warbler: 0.8, tropic: 0.5 }, { frogs: 0.7, animals: { dog: 0.3 }, roof: 'flat' }),
   teotihuacan: T({ warbler: 0.8, dove: 0.5 }, { cicadas: 0.4, animals: { dog: 0.3 }, roof: 'flat' }),
   ur: T({ ...NEAR, gull: 0 }, { frogs: 0.5, animals: { donkey: 0.6, goat: 0.4, dog: 0.3 }, roof: 'flat' }),
-  venice: T({ ...MED, gull: 1 }, { cicadas: 0.2, animals: { dog: 0.2 }, roof: 'tile', bells: 'venice' }),
+  venice: T({ ...MED, gull: 1 }, { cicadas: 0.2, animals: withLife({ dog: 0.2 }, { canal: 1, market: 1, map: VENICE }), roof: 'tile', bells: 'venice' }),
   versailles: T(EU, { animals: { horse: 0.8, dog: 0.4 }, roof: 'slate', bells: 'angelus' }),
 };
 const DEFAULT = T({ warbler: 1, sparrow: 0.5 });
