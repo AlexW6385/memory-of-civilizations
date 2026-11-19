@@ -54,6 +54,16 @@ function lump(P, mat, x, y, z, rx, ry, rz, seed = 0, yaw = 0) {
   g.computeVertexNormals(); g.rotateY(yaw); g.translate(x, y, z);
   return P.add(mat, g);
 }
+/** A mass of leaf: an ellipsoid roughened by a hash of its place, flat shaded (a shrub, a tree's crown, a hedge's mound). */
+function bush(P, mat, x, y, z, rx, ry, rz, seed = 0) {
+  const g = ball(rx, ry, rz, 8, 4), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const px = p.getX(i), py = p.getY(i), pz = p.getZ(i), k = 0.78 + 0.44 * hs(Math.round(px * 30) + seed, Math.round(pz * 30) - seed, Math.round(py * 30));
+    p.setXYZ(i, px * k, py * (0.9 + 0.2 * k), pz * k);
+  }
+  g.computeVertexNormals(); g.translate(x, y, z);
+  return P.add(mat, g);
+}
 const stoneStool = (P, x, y, z) => P.add('granite_grey', lathe([[0.001, 0], [0.16, 0], [0.2, 0.06], [0.17, 0.16], [0.2, 0.3], [0.22, 0.4], [0.22, 0.44], [0.001, 0.44]], 8, null, x, y, z));
 const stoneTable = (P, x, y, z, r = 0.36, h = 0.74) => P.add('granite_grey', lathe([[0.001, 0], [r * 0.5, 0], [r * 0.45, 0.06], [r * 0.3, 0.12], [r * 0.3, h - 0.1], [r * 0.6, h - 0.05], [r, h - 0.04], [r, h], [0.001, h]], 10, null, x, y, z));
 /** A round stone table with n stools round it (and a tea set on it), a collider each. */
@@ -149,6 +159,14 @@ function pavilion(P, col, o) {
       col.rect([(a[0] + b[0]) / 2 - ex, (a[1] + b[1]) / 2 - ez, (a[0] + b[0]) / 2 + ex, (a[1] + b[1]) / 2 + ez], fy, fy + 0.8);
     }
   }
+  // the name board (plain: the calligraphy is another's work) hung under the beam of the side the visitor comes to
+  {
+    const k = o.board ?? (n === 4 ? (o.open ?? ['s'])[0] : 's'), [a, b] = n === 4 ? { n: [pts[0], pts[1]], e: [pts[1], pts[2]], s: [pts[3], pts[2]], w: [pts[0], pts[3]] }[k] : [pts[2], pts[1]];
+    const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L, ox = (b[0] + a[0]) / 2 - cx, oz = (b[1] + a[1]) / 2 - cz, ol = Math.hypot(ox, oz), nx = ox / ol * 0.09, nz = oz / ol * 0.09;
+    const a2 = [a[0] + ux * 0.4 + nx, a[1] + uz * 0.4 + nz], b2 = [b[0] - ux * 0.4 + nx, b[1] - uz * 0.4 + nz];
+    obox(P, 'timber', [a2[0] - ux * 0.04, a2[1] - uz * 0.04], [b2[0] + ux * 0.04, b2[1] + uz * 0.04], fy + Hh - 0.67, fy + Hh - 0.21, 0.07);
+    obox(P, 'lacquer_black', [a2[0] + nx * 0.2, a2[1] + nz * 0.2], [b2[0] + nx * 0.2, b2[1] + nz * 0.2], fy + Hh - 0.63, fy + Hh - 0.25, 0.07);
+  }
   const Rr = half * (n === 4 ? Math.SQRT2 : 1) + 0.95;
   pyramid(P, { n, cx, cz, y0: fy + Hh, R: Rr, rise: o.rise ?? (tile ? 1.45 : 1.65), thatch: !tile, mat: tile ? 'tile_dark' : 'reed_mat' });
   return { fy };
@@ -217,7 +235,7 @@ function smallTree(P, col, x, z, h, blossom, seed) {
   P.add('bark_dark', lathe([[0.1, y], [0.06, y + h * 0.55], [0.001, y + h * 0.7]], 5, null, x, 0, z));
   for (let k = 0; k < 3; k++) {
     const a = k * 2.1 + seed, d = k ? 0.5 : 0, cy = y + h * (0.62 + 0.14 * k);
-    P.add('lotus_leaf', ball(h * 0.38, h * 0.26, h * 0.38, 6, 3).translate(x + Math.cos(a) * d, cy, z + Math.sin(a) * d));
+    bush(P, 'lotus_leaf', x + Math.cos(a) * d, cy, z + Math.sin(a) * d, h * 0.4, h * 0.27, h * 0.4, seed + k);
     for (let j = 0; j < 7; j++) { const b = hs(seed, k, j) * TAU, e = (hs(seed, j, k + 3) - 0.3) * 1.1, rr = h * 0.37; P.add(blossom, ball(0.05, 0.04, 0.05, 4, 2).translate(x + Math.cos(a) * d + Math.cos(b) * Math.cos(e) * rr, cy + Math.sin(e) * h * 0.25, z + Math.sin(a) * d + Math.sin(b) * Math.cos(e) * rr)); }
   }
   col.circle(x, z, 0.14, y, y + h * 0.7);
@@ -362,10 +380,12 @@ function meigui(P, col) {
   const { a, b, gap } = AT.meigui;
   const runs = [[a[0], a[1], gap[0], a[1]], [gap[1], a[1], b[0], a[1]]];
   fence(P, col, runs, { h: 0.95, brush: true });
-  for (const [x0, x1] of [[a[0], gap[0]], [gap[1], b[0]]]) for (let x = x0 + 0.5; x < x1 - 0.3; x += 1.25) {
-    const z = a[1] + (hs(x, 1) - 0.5) * 0.3, y = H(x, z);
-    P.add('lotus_leaf', ball(0.55, 0.38, 0.4, 6, 3).translate(x, y + 0.75, z));
-    for (let j = 0; j < 6; j++) { const t = hs(x, j, 2) * TAU; P.add('cloth_red', ball(0.05, 0.04, 0.05, 4, 2).translate(x + Math.cos(t) * 0.5, y + 0.8 + (hs(x, j, 3) - 0.3) * 0.5, z + Math.sin(t) * 0.35)); }
+  for (const [x0, x1] of [[a[0], gap[0]], [gap[1], b[0]]]) for (let x = x0 + 0.4; x < x1 - 0.3; x += 0.85) {
+    // (the canes lean over the fence in loose mounds of leaf, each a little other than its neighbours)
+    const h = hs(x, 1), z = a[1] + (hs(x, 2) - 0.5) * 0.3, y = H(x, z);
+    bush(P, 'lotus_leaf', x, y + 0.55 + 0.12 * hs(x, 5), z, 0.5 + 0.2 * h, 0.34, 0.36, 3);
+    bush(P, 'lotus_leaf', x + 0.4, y + 0.85 + 0.1 * hs(x, 6), z + (hs(x, 7) - 0.5) * 0.2, 0.34, 0.26, 0.3, 5);
+    for (let j = 0; j < 4; j++) { const t = hs(x, j, 2) * TAU; P.add('cloth_red', ball(0.04, 0.03, 0.04, 4, 2).translate(x + Math.cos(t) * 0.38, y + 0.7 + hs(x, j, 3) * 0.4, z + Math.sin(t) * 0.28)); }
   }
 }
 function qiangwei(P, col) {
@@ -375,13 +395,13 @@ function qiangwei(P, col) {
     const q = A[Math.min(A.length - 1, i + 1)], p = A[Math.max(0, i - 1)];
     let dx = q[0] - p[0], dz = q[1] - p[1]; const l = Math.hypot(dx, dz); dx /= l; dz /= l;
     const nx = -dz, nz = dx, y = H(x, z), pts = [];
-    for (let k = 0; k <= 8; k++) { const t = k / 8 * Math.PI, c = Math.cos(t), s = Math.sin(t); pts.push([x + nx * c * 0.95, y + 0.1 + s * 2.2, z + nz * c * 0.95]); }
+    for (let k = 0; k <= 8; k++) { const t = k / 8 * Math.PI, c = Math.cos(t), s = Math.sin(t); pts.push([x + nx * c * 1.1, y + 0.1 + s * 2.3, z + nz * c * 1.1]); }
     for (let k = 0; k < 8; k++) rod(P, 'bamboo_culm', pts[k], pts[k + 1], 0.022, 3);
-    for (const [px, py, pz] of [pts[1], pts[4], pts[7]]) {
-      P.add('lotus_leaf', ball(0.33, 0.2, 0.3, 5, 2).translate(px, py, pz));
-      for (let j = 0; j < 3; j++) P.add('cloth_red', ball(0.05, 0.04, 0.05, 4, 2).translate(px + (hs(px, pz, j) - 0.5) * 0.4, py + (hs(pz, px, j) - 0.4) * 0.3, pz + (hs(px, py, j) - 0.5) * 0.3));
+    for (const [px, py, pz] of [pts[1], pts[2], pts[4], pts[6], pts[7]]) {
+      P.add('lotus_leaf', ball(0.19, 0.11, 0.17, 5, 2).translate(px + (hs(px, pz, 4) - 0.5) * 0.15, py, pz));
+      for (let j = 0; j < 2; j++) P.add('cloth_red', ball(0.045, 0.035, 0.045, 4, 2).translate(px + (hs(px, pz, j) - 0.5) * 0.4, py + (hs(pz, px, j) - 0.4) * 0.3, pz + (hs(px, py, j) - 0.5) * 0.3));
     }
-    for (const s of [-1, 1]) col.circle(x + nx * 0.95 * s, z + nz * 0.95 * s, 0.07, y, y + 2.0);
+    for (const s of [-1, 1]) col.circle(x + nx * 1.1 * s, z + nz * 1.1 * s, 0.07, y, y + 2.0);
     if (i + 1 < A.length) for (const k of [1, 4, 7]) rod(P, 'bamboo_culm', pts[k], [A[i + 1][0] + (pts[k][0] - x) + (A[i + 1][0] - x) * 0, pts[k][1], A[i + 1][1] + (pts[k][2] - z)], 0.015, 3);
   });
 }
@@ -405,6 +425,7 @@ function erer(P, col) {
   wall([x0, z0], [x0, z1]); wall([x0, z0], [x1, z0]); wall([x0, z1], [x1, z1]);
   for (let k = 0; k < 4; k++) { const z = z0 + (z1 - z0) * k / 3; P.add('lacquer_chestnut', lathe([[0.085, fy + 0.1], [0.075, fy + Hh], [0.001, fy + Hh]], 6, null, x1, 0, z)); P.add('granite_grey', lathe([[0.17, fy], [0.15, fy + 0.12], [0.001, fy + 0.12]], 8, null, x1, 0, z)); col.circle(x1, z, 0.1, fy, fy + Hh); }
   rod(P, 'lacquer_chestnut', [x1, fy + Hh - 0.08, z0], [x1, fy + Hh - 0.08, z1], 0.07, 4);
+  { const zb = (z0 + z1) / 2; obox(P, 'timber', [x1 + 0.1, zb - 0.95], [x1 + 0.1, zb + 0.95], fy + Hh - 0.67, fy + Hh - 0.21, 0.07); obox(P, 'lacquer_black', [x1 + 0.14, zb - 0.9], [x1 + 0.14, zb + 0.9], fy + Hh - 0.63, fy + Hh - 0.25, 0.07); }   // the name board, plain
   // the roof: a gable over the three bays, its ridge along z, swept at the eaves
   const A = (z1 - z0) / 2 + 0.7, B = (x1 - x0) / 2 + 0.85, cx = (x0 + x1) / 2, ry = fy + Hh - 0.1, R = 1.35, out = [], cen = [cx, ry - 2, zc], N = 6;
   const prof = (v) => ry + R * Math.pow(1 - Math.abs(v) / B, 1.4);
