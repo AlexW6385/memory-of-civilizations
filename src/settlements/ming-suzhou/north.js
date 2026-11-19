@@ -520,7 +520,7 @@ function templeInPlan() {
   E.push({ t: 'temple_sutra_in', rect: [-72, -128, -63, -120], y: 0.4, H: 4.4 });
   E.push({ t: 'temple_refectory_in', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4 });
   void x0; void z0; void x1; void z1;
-  return { ...base('ming-suzhou-temple-in', E), near: 100, center: [cx, -125] };
+  return { ...base('ming-suzhou-temple-in', E), near: 60, center: [cx, -125] };
 }
 
 /** The pagoda's stair wear: near only. */

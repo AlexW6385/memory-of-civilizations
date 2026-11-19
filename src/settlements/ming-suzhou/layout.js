@@ -61,7 +61,7 @@ for (const x of [-178, 178]) STREETS.push([x - LANE, -205, x + LANE, 60]);
 // the north (north.js): the Bao'en Temple's court and the city wall with its moat and gate road
 // are kept free of houses and lanes; the canal streets pass the wall by their gates
 export const TEMPLE_COURT = [-76, -159.5, -4, -111.8];
-export const NORTH_KEEP = [TEMPLE_COURT, [-120, -184, 120, -160], [-92, -192, 92, -160], [13, -192, 21, -108], [55.5, -164, 61, -146]];   // (the last: the stair-ramp up the wall at x = 58)
+export const NORTH_KEEP = [TEMPLE_COURT, [-120, -184, 120, -160], [-92, -192, 92, -160], [13, -192, 21, -108], [56.2, -164, 60.1, -146]];   // (the last: the stair-ramp up the wall at x = 58)
 const GATE_STREETS = new Set([STREETS[1], STREETS[2]]);       // the east and west canal streets
 const NORTH_CUT = [[-77, -160.5, -3, -110.8], [-121, -215, 121, -160]];
 /** r minus the rectangle k, along r's long axis (the pieces left, longer than 2 m). */
