@@ -16,6 +16,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { assembly, placer } from '../../objects/kit.js';
 import { Parts } from '../../styles/qing/carving.js';
 import { LEVEL, GALLERIES, BUILDINGS, BRIDGES, lots } from './layout.js';
+import { Halo, lanternLight, waterStreak, registerNight } from './nightlight.js';
 
 const G = LEVEL.garden;
 /** A number in [0, 1) from a position alone (no counters, no Math.random). */
@@ -46,10 +47,10 @@ function palace(P, k = 1) {
 }
 
 // ── what hangs where in the garden ─────────────────────────────────────────────────────────────────────────
-/** The lanterns of the garden and the residence: [{ x, y (the hook), z, kind ('drum' | 'palace'), k }]. */
+/** The lanterns of the garden and the residence: [{ x, y (the hook), z, kind ('drum' | 'palace'), k, fy (the floor under it), wall ({ n: [x, z] outward, d } if a wall stands behind it) }]. */
 export function gardenLanterns() {
   const out = [];
-  const add = (x, y, z, kind, k = 1) => out.push({ x, y, z, kind, k });
+  const add = (x, y, z, kind, k = 1, fy = y - 2.4, wall = null) => out.push({ x, y, z, kind, k, fy, wall });
   // the covered walks: a small lantern at every second tie beam (the beams stand every ~3 m; none at a turn)
   const walks = GALLERIES.map((pts) => ({ pts, y: G + 0.3, H: 2.8 }));
   const [x0, z0, x1, z1] = BUILDINGS.xiaofeihong.rect;
@@ -59,7 +60,7 @@ export function gardenLanterns() {
     for (let k = 1; k < n; k++) {
       if ((k + i) % 2) continue;
       const s = k * L / n, x = a[0] + (b[0] - a[0]) / L * s, z = a[1] + (b[1] - a[1]) / L * s;
-      add(x, y + H - 0.42, z, 'drum', 0.9 + 0.2 * hash(x, z));
+      add(x, y + H - 0.42, z, 'drum', 0.9 + 0.2 * hash(x, z), y);
     }
   }
   // the pavilions: one at the middle of each open side, just inside the beam
@@ -70,29 +71,34 @@ export function gardenLanterns() {
     else { const w = b.w / 2, d = (b.d ?? b.w) / 2; poly = [[cx - w, cz - d], [cx + w, cz - d], [cx + w, cz + d], [cx - w, cz + d]]; open = [0, 2]; }
     for (const k of open) {
       const p = poly[k], q = poly[(k + 1) % poly.length], mx = (p[0] + q[0]) / 2, mz = (p[1] + q[1]) / 2, dx = cx - mx, dz = cz - mz, l = Math.hypot(dx, dz);
-      add(mx + dx / l * 0.3, y + H - 0.55, mz + dz / l * 0.3, 'drum', 1);
+      add(mx + dx / l * 0.3, y + H - 0.55, mz + dz / l * 0.3, 'drum', 1, y);
     }
   }
   // Little Canglang over the water: a pair on its pond front
-  { const [rx0, rz0, rx1] = BUILDINGS.xiaocanglang.rect, y = G + BUILDINGS.xiaocanglang.y; for (const x of [rx0 + 2.5, rx1 - 2.5]) add(x, y + 3.4 - 0.3, rz0 - 0.45, 'palace', 0.85); }
+  { const [rx0, rz0, rx1] = BUILDINGS.xiaocanglang.rect, y = G + BUILDINGS.xiaocanglang.y; for (const x of [rx0 + 2.5, rx1 - 2.5]) add(x, y + 3.4 - 0.3, rz0 - 0.45, 'palace', 0.85, y, { n: [0, -1], d: 0.4 }); }
   // the great halls: a pair of palace lanterns under the eaves of the front, hung from the middle bay's beam
-  { const [rx0, rz0, rx1] = BUILDINGS.yuanxiang.rect, y = G + BUILDINGS.yuanxiang.y, cx = (rx0 + rx1) / 2; for (const s of [-1, 1]) add(cx + s * 5.4, y + 5.0 - 0.25, rz0 - 0.5, 'palace', 1.15); }
-  { const [rx0, rz0, rx1] = BUILDINGS.yiyu.rect, y = G + BUILDINGS.yiyu.y, cx = (rx0 + rx1) / 2; for (const s of [-1, 1]) add(cx + s * 2.0, y + 3.8 - 0.25, rz0 - 0.5, 'palace', 1.0); }
+  { const [rx0, rz0, rx1] = BUILDINGS.yuanxiang.rect, y = G + BUILDINGS.yuanxiang.y, cx = (rx0 + rx1) / 2; for (const s of [-1, 1]) add(cx + s * 5.4, y + 5.0 - 0.25, rz0 - 0.5, 'palace', 1.15, y, { n: [0, -1], d: 0.42 }); }
+  { const [rx0, rz0, rx1] = BUILDINGS.yiyu.rect, y = G + BUILDINGS.yiyu.y, cx = (rx0 + rx1) / 2; for (const s of [-1, 1]) add(cx + s * 2.0, y + 3.8 - 0.25, rz0 - 0.5, 'palace', 1.0, y, { n: [0, -1], d: 0.42 }); }
   // the residence: the gate hall's street front (the household's lanterns, larger), the courts' fronts of the sedan hall, the main hall and the women's building
-  for (const s of [-1, 1]) add(s * 2.6, G + 0.45 + 4.0 - 0.2, 61.15, 'palace', 1.3);
-  for (const [zf, H, kk] of [[50.8, 4.2, 1.05], [40.2, 5.0, 1.15], [28.0, 6.6, 1.15]]) for (const s of [-1, 1]) add(s * 3.4, G + 0.45 + H - 0.25, zf + 0.5, 'palace', kk);
+  for (const s of [-1, 1]) add(s * 2.6, G + 0.45 + 4.0 - 0.2, 61.15, 'palace', 1.3, G + 0.45, { n: [0, 1], d: 0.35 });
+  for (const [zf, H, kk] of [[50.8, 4.2, 1.05], [40.2, 5.0, 1.15], [28.0, 6.6, 1.15]]) for (const s of [-1, 1]) add(s * 3.4, G + 0.45 + H - 0.25, zf + 0.5, 'palace', kk, G + 0.45, { n: [0, 1], d: 0.42 });
   return out;
 }
 
 /** garden_lanterns: { list: [{ x, y, z, kind, k }] } — each lantern merged per material into the plan's one piece. */
 function gardenLanternsEl(el, { bag }) {
-  const all = new Parts();
+  const all = new Parts(), H = new Halo();
   for (const l of el.list) {
-    const P = new Parts();
-    if (l.kind === 'palace') palace(P, l.k); else drum(P, l.k, hash(l.x + 3, l.z) < 0.35);
+    const P = new Parts(), tall = l.kind !== 'palace' && hash(l.x + 3, l.z) < 0.35;
+    if (l.kind === 'palace') palace(P, l.k); else drum(P, l.k, tall);
     P.emit(all, l.x, l.y, l.z, hash(l.z, l.x) * 6.28);
+    // its light (nightlight.js): the glow round it, the pool on the floor under it, the wash on the wall behind, its reflection in the pond
+    const body = l.kind === 'palace' ? 0.55 * l.k : (tall ? 0.32 : 0.28) * l.k, size = l.kind === 'palace' ? 1.15 * l.k : 0.8 * l.k;
+    lanternLight(H, l.x, l.z, l.y - body, l.fy, size, l.wall, l.kind === 'palace' ? 3.0 : 2.3);
+    waterStreak(H, l.x, l.z, l.fy, l.kind === 'palace' ? 1.1 : 0.8, 5);
   }
   all.emit(bag, 0, 0, 0);
+  H.flush(bag);
 }
 
 // ── the street: the lamp on its pole at a bridge head, the tall lantern over an inn's door ─────────────
@@ -145,6 +151,7 @@ export function bridgeLamps(inDisc) {
 
 registerLamps();
 function registerLamps() {
+  registerNight();
   if (STYLES['suzhou-site']) STYLES['suzhou-site'].elements.garden_lanterns = gardenLanternsEl;
   if (STYLES.life) STYLES.life.elements.suzhou_lamp = suzhouLamp;
 }

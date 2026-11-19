@@ -11,6 +11,7 @@ import './style.js';
 import './townwork.js';
 import './quaywork.js';
 import { bridgeLamps } from './lamps.js';
+import { streetHalos } from './nightlight.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const R = RADIUS - 26;                                  // the street life stops here (the people are drawn near)
@@ -358,5 +359,7 @@ function bridgeLampPlans() {
 
 export async function town() {
   const hs = houses();
-  return [waterways(), ...hs, ...riverLife(), ...bridgeLampPlans(), ...shopFronts(), ...northPlans()];
+  const plans = [waterways(), ...hs, ...riverLife(), ...bridgeLampPlans(), ...shopFronts(), ...northPlans()];
+  for (const p of plans) if (p.style === 'life') p.elements.push(...streetHalos(p.elements, ([x, z]) => inDisc([x, z], 0)));   // the light of the lanterns and shop fronts at night (nightlight.js)
+  return plans;
 }

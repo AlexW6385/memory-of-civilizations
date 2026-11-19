@@ -4,7 +4,7 @@
 // recorded in each dossier (a tiling photo texture cannot follow a wall's coursing). Average colours come from src/core/palette.js,
 // which the light baker shares.
 
-import { MeshStandardNodeMaterial, DoubleSide, Color, PhysicalLightingModel } from 'three/webgpu';
+import { MeshStandardNodeMaterial, DoubleSide, Color, PhysicalLightingModel, CustomBlending, AddEquation, OneFactor } from 'three/webgpu';
 import {
   Fn, float, vec2, vec3, vec4, positionWorld, positionLocal, normalWorld, normalLocal, normalView, positionView, abs, floor, fract, min, max,
   mix, smoothstep, hash, dot, cross, normalize,
@@ -620,6 +620,44 @@ function make(spec) {
       const glowC = uniform(new Color(spec.glow || spec.color));
       m.colorNode = baseNode;
       m.emissiveNode = mix(glowC.mul(vec3(0.8, 0.45, 0.3)), glowC, face).mul(face.mul(0.6).add(0.4)).mul(float((spec.power ?? 3) * 0.4)).mul(smoothstep(0.15, 0.6, ENV.night)).mul(flick);
+      break;
+    }
+    case 'halo': {
+      // the light a lantern or a lit window throws, as geometry added over what is behind it (light
+      // added, nothing hidden), at night only (the glow shades' own switch): so that the lanterns
+      // read as lit at the low preset, where the pool of real lamps is off. Four modes:
+      //   ball   a small low shell round the lantern, soft at its rim (the eye looks through the same
+      //          depth of haze at its middle): the lantern's bloom;
+      //   wash   a flat disc laid on the paving, the water or the wall under a lantern: the shape of
+      //          its normals carries the falloff (its y is 1 at the middle, 0 at the rim) so that the
+      //          mesh needs neither an attribute nor a position of its own: a warm pool of light;
+      //   streak a wash broken into ripples by the water's own motion: the lantern's reflection;
+      //   pane   a flat sheet in front of window paper: the lamp of the room within, each room (a cell
+      //          of the settlement) at its own strength.
+      // Added in linear light, no lights of the scene, no shadow, no depth written.
+      const night = smoothstep(0.15, 0.6, ENV.night);
+      const flick = sin(time.mul(7.0).add(positionLocal.x.mul(3.1)).add(positionLocal.z.mul(2.3))).mul(0.05).add(sin(time.mul(2.3).add(positionLocal.z)).mul(0.04)).add(1);
+      const glowC = uniform(new Color(spec.glow || '#ff9a45'));
+      let f;
+      if (spec.mode === 'ball') {
+        f = pow(abs(dot(normalView, normalize(positionView).negate())), 2.4);
+      } else if (spec.mode === 'pane') {
+        const rc = floor(positionLocal.div(vec3(3.4, 3.0, 3.4)));
+        const hr = hash(rc.x.mul(7.13).add(rc.y.mul(31.7)).add(rc.z.mul(113.1)).add(0.31));
+        f = hr.mul(0.55).add(0.45).mul(sin(time.mul(2.1).add(hr.mul(40.0))).mul(0.05).add(1));
+      } else {
+        const r = clamp(normalLocal.y, 0, 1);
+        f = pow(r, 1.7);
+        if (spec.mode === 'streak') f = f.mul(smoothstep(0.1, 0.8, sin(positionLocal.x.mul(11.0).add(positionLocal.z.mul(7.0)).add(time.mul(0.9))).mul(0.5).add(0.5).add(r.mul(0.35))));
+      }
+      m.colorNode = vec3(0, 0, 0);
+      m.emissiveNode = glowC.mul(f.mul(float(spec.power ?? 0.5))).mul(night).mul(flick);
+      m.opacityNode = float(0.004);
+      m.lights = false;
+      m.transparent = true;
+      m.depthWrite = false;
+      m.side = DoubleSide;
+      m.blending = CustomBlending; m.blendEquation = AddEquation; m.blendSrc = OneFactor; m.blendDst = OneFactor;
       break;
     }
     case 'flame': {
