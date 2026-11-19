@@ -15,13 +15,17 @@ import './nightlight.js';
 /** The words, by the place that carries each. */
 export const WORDS = { inn: 'CAVPONA', fuller: 'FVLLONICA', mill: 'PISTRINVM', salve: 'SALVE', cave: 'CAVE CANEM' };
 
-/** A sign of white letters on the red band over a door: u0…u1 the band's width along the front, v0…v1 its height. */
+/**
+ * A sign of white letters on a red panel over a door: u0…u1 the panel's width along the front, v0…v1 its height. (The red band that the
+ * builders put over their doors lies inside the wall's thickness and cannot be seen; the panel here stands 12 mm proud of the wall.)
+ */
 const signed = (base, word, [u0, u1, v0, v1]) => (el, ctx) => {
   base(el, ctx);
   if (el.simple || (el.front ?? 's') !== 's') return;
-  const F = frame(el.rect, 's'), y = el.y ?? 0, gap = 0.3;
-  const h = Math.min((v1 - v0) * 0.66, 0.92 * (u1 - u0) / widthOf(word, gap)), at = F.P((u0 + u1) / 2, 0);
-  ctx.bag.add('plaster_white', wallText(word, { at, y: y + v0 + ((v1 - v0) - h) / 2, h, dep: 0.02, gap }));
+  const F = frame(el.rect, 's'), y = el.y ?? 0, gap = 0.3, P = F.P((u0 + u1) / 2, 0), pr = F.R(u0, u1, 0, 0);
+  const h = Math.min((v1 - v0) * 0.66, 0.92 * (u1 - u0) / widthOf(word, gap));
+  ctx.bag.add('wall_red', box(pr[0], y + v0, pr[3], pr[2], y + v1, pr[3] + 0.012));
+  ctx.bag.add('plaster_white', wallText(word, { at: [P[0], P[1] + 0.012], y: y + v0 + ((v1 - v0) - h) / 2, h, dep: 0.014, gap }));
 };
 
 /** The worn lip of the threshold in front of each shop of a row: the walkers' pale polish on the step's front edge. */
@@ -44,12 +48,12 @@ const mosaic = (base) => (el, ctx) => {
   // the fauces runs from the street wall (z = Z1 − t) 5 m to the wall behind the shops; its floor is 2.2 m between the shops' side walls
   const z0 = Z1 - t - 1.2, z1 = Z1 - t - 3.4;
   ctx.bag.add('lacquer_black', floorText(WORDS.salve, { at: [mx, z0], y: y + 0.0, h: 0.2, dep: 0.012, gap: 0.3 }));
-  ctx.bag.add('lacquer_black', floorText(WORDS.cave, { at: [mx, z1], y: y + 0.0, h: 0.15, dep: 0.012, gap: 0.3 }));
+  ctx.bag.add('lacquer_black', floorText(WORDS.cave, { at: [mx, z1], y: y + 0.0, h: 0.17, dep: 0.012, gap: 0.3 }));
 };
 
 const wrap = (style, name, f) => { const E = STYLES[style].elements; if (E[name]) E[name] = f(E[name]); };
-wrap('rome-town', 'caupona', (b) => signed(b, WORDS.inn, [2.0, 4.6, 3.5, 3.9]));
-wrap('rome-town', 'fullonica', (b) => signed(b, WORDS.fuller, [1.8, 4.6, 3.4, 3.8]));
+wrap('rome-town', 'caupona_up', (b) => signed(b, WORDS.inn, [2.0, 4.6, 3.5, 3.9]));        // the inns are built with their upper floors (upper-inns.js)
+wrap('rome-town', 'fullonica_up', (b) => signed(b, WORDS.fuller, [1.8, 4.6, 3.4, 3.8]));
 wrap('rome-town', 'pistrinum', (b) => signed(b, WORDS.mill, [1.8, 4.4, 3.4, 3.8]));
 wrap('rome-town', 'taberna_row', worn);
 wrap('rome-site', 'domus', mosaic);
