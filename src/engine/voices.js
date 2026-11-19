@@ -13,6 +13,7 @@
 // instruments and calls are in docs/settlements/ming-suzhou.md §22.]
 
 import { ENV } from './env.js';
+import { QING_VOICES } from './voices-qing.js';
 
 const R = Math.random;
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -831,5 +832,6 @@ export const VOICES = {
 /** Put the voices on Music's prototype (audio.js does it once). */
 export function installVoices(Music) {
   for (const [k, v] of Object.entries(VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
+  for (const [k, v] of Object.entries(QING_VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;     // Beijing's (voices-qing.js)
   Music.prototype.seasonDoy = function seasonDoy() { return this.doyOverride ?? doyOf(ENV.seasonWinter.value, ENV.seasonAutumn.value); };
 }

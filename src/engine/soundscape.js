@@ -70,6 +70,7 @@
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
+import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -181,7 +182,7 @@ export const PROFILES = {
   paris: T(EU, { animals: { horse: 0.5, rooster: 0.3, dog: 0.3 }, roof: 'slate', bells: 'office' }),
   persepolis: T(NEAR, { animals: { horse: 0.5, donkey: 0.4, dog: 0.3 }, roof: 'flat' }),
   petra: T({ dove: 1, kite: 0.4, sparrow: 0.5 }, { animals: { goat: 0.6, donkey: 0.4 }, roof: 'flat' }),
-  'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, animals: { dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'drumbell' }),
+  'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, roof: 'tile', bells: 'beijing', animals: withLife({ dog: 0.3, horse: 0.2 }, { market: 1, patrol: 1, eaves: 1, map: BEIJING }) }),
   'rapa-nui': T({ gull: 1, tropic: 0.2 }, { animals: { rooster: 0.4 }, roof: 'thatch' }),
   rome: T(MED, { cicadas: 0.5, animals: { donkey: 0.4, horse: 0.3, dog: 0.3 } }),
   sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: { cattle: 0.6, goat: 0.4, rooster: 0.3 }, roof: 'thatch' }),
@@ -219,6 +220,8 @@ const HOURS = {
   toki: [[6, 'toki:6'], [8, 'toki:5'], [10, 'toki:4'], [12, 'toki:9'], [14, 'toki:8'], [16, 'toki:7'], [18, 'toki:6'], [20, 'toki:5'], [22, 'toki:4'], [0, 'toki:9'], [2, 'toki:8'], [4, 'toki:7']],
   bosingak: [[4, 'bosingak'], [22, 'bosingak']],
   drumbell: [[5, 'zhong'], [19, 'drum-tower']],
+  // Beijing: the Bell Tower's morning bell, the Drum Tower's evening drum then bell; the night's watches (the Drum and Bell Towers marked them, the watchmen of the lanes struck them)
+  beijing: [[5, 'zhong'], [19, 'drum-tower'], [21, 'watch:2'], [23, 'watch:3'], [1, 'watch:4'], [3, 'watch:5']],
   hanshan: [[0, 'hanshan']],
   // Suzhou: Hanshan's bell at midnight, far off; the Bao'en Temple's bell and drum at the fifth
   // watch's end and at dusk; the watchman's five watches (戌 7 pm, 亥 9, 子 11, 丑 1, 寅 3)
