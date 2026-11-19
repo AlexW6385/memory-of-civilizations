@@ -63,6 +63,8 @@ export function frame(c, n) {
     at: (a, o) => [c[0] + u[0] * a + n[0] * o, c[1] + u[1] * a + n[1] * o],
     /** a box in local terms (a0…a1 along, o0…o1 out, y0…y1) as a world-aligned box */
     box(acc, mat, a0, a1, o0, o1, y0, y1) {
+      // a decal of 5 mm or less (the couplets' strokes, the door gods' colours, a rain streak): its face only; its edge is a pixel or two at two metres and its back is on the wall
+      if (o1 - o0 > 0 && o1 - o0 <= 0.0055 && y1 > y0 && a1 > a0) { this.poly(acc, mat, [[a0, y0], [a1, y0], [a1, y1], [a0, y1]], o1); return; }
       const p = [c[0] + u[0] * a0 + n[0] * o0, c[1] + u[1] * a0 + n[1] * o0], q = [c[0] + u[0] * a1 + n[0] * o1, c[1] + u[1] * a1 + n[1] * o1];
       acc.box(mat, Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1]));
     },
