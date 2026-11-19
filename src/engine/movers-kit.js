@@ -26,7 +26,8 @@ export const LIMB = { rigid: 0, arms: 1, armL: 2, robe: 3, legs: 4, basketF: 5, 
 /** Colour slots: the instance's colours (iC1…iC4), or 4: none (the fixed colour alone). */
 export const SLOT = { c1: 0, c2: 1, skin: 2, c3: 3, none: 4 };
 /** The base palette material of each group: the fixed and instance colours are factors over it. */
-export const GROUP_BASE = { skin: 'skin_light', cloth: 'cloth_white', fibre: 'wicker', wood: 'timber' };
+// (glow: a lantern's paper, lit from within at night; a settlement's sets list the group only if they have lanterns, and an empty group makes no mesh)
+export const GROUP_BASE = { skin: 'skin_light', cloth: 'cloth_white', fibre: 'wicker', wood: 'timber', glow: 'lamp_white' };
 
 const _a = new Color(), _b = new Color();
 /** The factor (linear rgb) taking a group's base colour to a palette material's colour (or a hex), times shade. */

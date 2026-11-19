@@ -17,9 +17,9 @@ self.onmessage = async (e) => {
       for (const g of Object.values(groups)) for (const a of Object.values(g)) transfer.push(a.buffer);
       return { groups, variants: sb.variants };
     };
-    const W = new SetBuilder(['skin', 'cloth', 'fibre', 'wood']);
+    const W = new SetBuilder(['skin', 'cloth', 'fibre', 'wood', 'glow']);
     D.walkerShapes(W);
-    const B = new SetBuilder(['wood', 'fibre']);
+    const B = new SetBuilder(['wood', 'fibre', 'glow']);
     D.boatShapes(B);
     const ww = D.walkways(), walk = graphFromRects(ww.rects, ww.links, ww.clip);
     const wa = D.waterways(), water = graphFromRects(wa.rects, [], wa.clip);

@@ -16,7 +16,7 @@
 
 import * as THREE from 'three/webgpu';
 import {
-  Fn, attribute, positionGeometry, vec3, float, sin, cos, abs, clamp, smoothstep, select, max, floor, fract, exp2, varying, uniform, time, mix, length, positionView,
+  Fn, attribute, positionGeometry, vec3, float, sin, cos, abs, clamp, smoothstep, select, max, floor, fract, exp2, varying, uniform, time, mix, length, positionView, normalView, dot, normalize,
 } from 'three/tsl';
 import { MATERIALS } from '../core/palette.js';
 import { material as paletteMaterial } from './materials.js';
@@ -129,7 +129,13 @@ export function moverMaterial(group) {
     const fine = noiseT(vec3(rest.x.mul(120), rest.y.mul(120), rest.z.mul(3)));
     pat = streak.mul(0.12).add(fine.mul(0.05)).add(0.97).mul(noiseT(rest.mul(1.7)).mul(0.08).add(1));
   }
-  m.colorNode = base.mul(tint).mul(pat);
+  m.colorNode = base.mul(tint).mul(group === 'glow' ? float(1) : pat);
+  if (group === 'glow') {
+    // a lantern's paper (as the palette's glow material): its own colour by day, lit from within at night, brightest looking through it square on
+    const face = abs(dot(normalView, normalize(positionView).negate())), glowC = uniform(new THREE.Color(spec.glow || spec.color));
+    const flick = sin(time.mul(7.0).add(rest.x.mul(3.1))).mul(0.06).add(sin(time.mul(2.3).add(rest.z)).mul(0.04)).add(1);
+    m.emissiveNode = mix(glowC.mul(vec3(0.8, 0.45, 0.3)), glowC, face).mul(face.mul(0.6).add(0.4)).mul(float((spec.power ?? 3) * 0.4)).mul(smoothstep(0.15, 0.6, ENV.night)).mul(flick);
+  }
   MATS.set(group, m);
   return m;
 }
@@ -197,7 +203,7 @@ export class MoverSet {
       const mesh = new THREE.InstancedMesh(g, moverMaterial(group), max);
       mesh.instanceMatrix = this.matrix;
       mesh.count = 0; mesh.frustumCulled = false;
-      mesh.castShadow = cast; mesh.receiveShadow = true;
+      mesh.castShadow = cast && group !== 'glow'; mesh.receiveShadow = true;
       mesh.userData.dynamic = true;
       mesh.layers.set(layer);
       mesh.name = `movers:${name}:${group}`;
