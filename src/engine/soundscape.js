@@ -72,6 +72,7 @@
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
+import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
 import * as VENICE from '../settlements/venice/soundmap.js';
@@ -118,7 +119,7 @@ export const PROFILES = {
   cahokia: T(AMER, { cicadas: 0.6, frogs: 0.8, animals: { dog: 0.6 }, roof: 'thatch' }),
   'chichen-itza': T(TROP, { cicadas: 1, frogs: 0.5, animals: { dog: 0.4 }, roof: 'thatch' }),
   conques: T(EU, { animals: { rooster: 0.7, cattle: 0.5, sheepbell: 0.5, dog: 0.3 }, roof: 'slate', bells: 'office' }),
-  constantinople: T({ ...MED, gull: 0.7 }, { cicadas: 0.5, animals: { rooster: 0.4, donkey: 0.4, dog: 0.5 }, bells: 'semantron' }),
+  constantinople: T({ ...MED, gull: 0.7 }, { cicadas: 0.5, animals: withLife({ rooster: 0.4, donkey: 0.4, dog: 0.5 }, { market: 0.9, map: CONSTANTINOPLE }), bells: 'semantron' }),
   djenne: T({ dove: 1, sparrow: 0.6, kite: 0.5, tropic: 0.3 }, { frogs: 0.6, animals: { goat: 0.6, donkey: 0.5, rooster: 0.6, cattle: 0.4 }, roof: 'flat', adhan: 1 }),
   'edo-himeji': T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { rooster: 0.4, dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'toki' }),
   florence: T(MED, { cicadas: 0.3, animals: withLife({ horse: 0.4, donkey: 0.3, dog: 0.3 }, { market: 1, eaves: 1, map: FLORENCE }), bells: 'angelus-hours' }),
