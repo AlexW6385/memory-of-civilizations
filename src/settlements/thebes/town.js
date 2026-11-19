@@ -6,6 +6,7 @@ import { RADIUS, RIVER, QUAY, QUAY_STAIRS, ENCL, ENCL_TH, LAKE, LAKE_Y, LAKE_BED
 import { boatFloat } from '../../objects/index.js';
 import { propPlans } from './props.js';
 import { lodTiles } from '../lod.js';
+import { fires, STANDS } from './nightlight.js';
 import { ramPlans, planters, colossusPlans, pylonReliefPlans, columnPlans } from './sculpt.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -69,7 +70,7 @@ export async function town() {
   // the gateway (a small pylon with flagstaffs): its own frame, the axis along −z through the wall
   plans.push({ ...base('thebes-gateway', [{ t: 'nk_pylon', z0: -ENCL_TH, z1: 0, half: 14, h: 15, g: TEMPLE_GATE.w / 2, gateH: 9, flags: true, poleH: 20, y0: 0 }]), origin: [ex0, 0], yaw: 90, bounds: [-16, -10, 16, 6], entrance: { at: [0, 4], facing: 'n' } });
   // the avenue of sphinxes: the paved way and the rams, heads toward the way
-  plans.push(base('thebes-avenue', [{ t: 'floor', rect: [AVENUE.x0 - 4, -8.4, AVENUE.x1 + 1, 8.4], y: 0.02, mat: 'sandstone_floor', th: 0.4 }, ...planters()]));
+  plans.push(base('thebes-avenue', [{ t: 'floor', rect: [AVENUE.x0 - 4, -8.4, AVENUE.x1 + 1, 8.4], y: 0.02, mat: 'sandstone_floor', th: 0.4 }, ...planters(), ...fires()]));
   plans.push(...ramPlans(), ...colossusPlans(), ...pylonReliefPlans('pylon2', PYLON2, 56, 5, 38, true), ...columnPlans());
   // the forecourt before the second pylon: paved, the side colonnades
   {
@@ -94,7 +95,10 @@ export async function town() {
     return { t: K[l.kind], rect: l.rect, front: l.front, seed: l.seed, open: l.open && (l.trade || d < OPEN_R), trade: l.trade, lod: l.lod ?? (d < 150 ? 2 : d < 240 ? 1 : 0), shop: l.shop };
   });
   plans.push(...lodTiles('thebes-town', 'newkingdom', els, { near: NEAR, R: RADIUS, entrance: { at: [-200, 0], facing: 'e' } }));
-  for (const p of propPlans()) plans.push(base(p.id, [{ t: 'nk_props', items: p.items }]));
+  const PP = propPlans();
+  for (const p of PP) plans.push(base(p.id, [{ t: 'nk_props', items: p.items }]));
+  // the night's glow of every lit house, brazier and stand, in one plan of its own (nightlight.js: one draw)
+  plans.push(base('thebes-night', [{ t: 'thebes_halo', lots: LOTS.filter((l) => l.open && (l.trade || Math.hypot((l.rect[0] + l.rect[2]) / 2 + 120, (l.rect[1] + l.rect[3]) / 2) < OPEN_R)), braziers: PP.flatMap((p) => p.items.filter((i) => i.k === 'brazier').map((i) => i.at)), stands: STANDS }], { nocollide: true }));
   void ez0; void ez1; void ex1;
   return (CACHE = plans);
 }
