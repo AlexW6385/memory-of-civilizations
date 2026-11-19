@@ -32,6 +32,7 @@ export async function town() {
     rooms: [{ id: 'coffee house', rect: [x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4], y: coffee.y + 0.45, kind: 'hall' }] });
   plans.push({ ...base('ottoman-istanbul-court-paving', courtPaving()), style: 'ottoman', bounds: [-80, -100, 80, 95] });
   plans.push(...tiles('ottoman-istanbul-yards', 'ottoman', yardItems().map((y) => ({ t: 'yard_dress', ...y })), { near: 150 }).filter((p) => !p.far));
+  plans.push(...tiles('ottoman-istanbul-night', 'ottoman', all.map((l) => ({ t: 'night_house', rect: l.rect, ...l, ...(l.shop ? { shop: true, use: l.trade } : {}), ...(open.has(l) ? { open: true, use: l.shop ? l.trade : 'home' } : {}), ...(ups.has(l) ? { up: true, upKind: ups.get(l) } : {}) })), { R: RADIUS, near: 120 }).filter((p) => !p.far).map((p) => ({ ...p, elements: [{ t: 'night_houses', list: p.elements }] })));
   plans.push(...arastaNearPlans(RADIUS));
   plans.push(lifePlan());
   return plans;
