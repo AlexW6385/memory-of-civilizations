@@ -87,7 +87,7 @@ export function canalSpot(x, z) {
  * A boat's track on a canal: the straight centre line through the canal's reach nearest to (x, z), from s0 to s1 along it
  * (a pass by the nearest point, starting `lead` metres before it), or null if no canal is within `reach`.
  */
-export function canalTrack(x, z, rnd, reach = 110, lead = 38) {
+export function canalTrack(x, z, rnd, reach = 70, lead = 38) {
   const c = canalSpot(x, z);
   if (!c || c.d > reach) return null;
   const r = CANALS[c.i], horiz = r[2] - r[0] > r[3] - r[1], mid = horiz ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2;
@@ -129,12 +129,17 @@ export function pondSpot(x, z, rnd, reach = 24) {
   return null;
 }
 
-/** The pond's shore near (x, z) (a point at the water's edge on the stone, for the lap), or null. */
+/** The pond's shore near (x, z): where a ray from it in a random direction first crosses the water's edge (the stone, for the lap), or null. */
 export function shoreSpot(x, z, rnd, reach = 22) {
   if (!inRect(GARDEN, x, z, 30)) return null;
-  for (let k = 0; k < 16; k++) {
-    const a = rnd() * Math.PI * 2, d = 2 + rnd() * reach, px = x + Math.cos(a) * d, pz = z + Math.sin(a) * d, pd = pondDistance(px, pz);
-    if (pd > -0.6 && pd < 0.6 && inRect(GARDEN, px, pz)) return [px, pz];
+  for (let k = 0; k < 6; k++) {
+    const a = rnd() * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+    let prev = pondDistance(x + c, z + s) < 0;
+    for (let d = 2; d <= reach; d++) {
+      const px = x + c * d, pz = z + s * d, w = pondDistance(px, pz) < 0;
+      if (w !== prev && inRect(GARDEN, px, pz)) return [px, pz];
+      prev = w;
+    }
   }
   return null;
 }

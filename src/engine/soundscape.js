@@ -222,7 +222,7 @@ const HOURS = {
   hanshan: [[0, 'hanshan']],
   // Suzhou: Hanshan's bell at midnight, far off; the Bao'en Temple's bell and drum at the fifth
   // watch's end and at dusk; the watchman's five watches (戌 7 pm, 亥 9, 子 11, 丑 1, 寅 3)
-  suzhou: [[0, 'hanshan'], [4.6, 'temple-am'], [18.5, 'temple-pm'], [19, 'watch:1'], [21, 'watch:2'], [23, 'watch:3'], [1, 'watch:4'], [3, 'watch:5']],
+  suzhou: [[0, 'hanshan'], [4.6, 'temple-am'], [5, 'tower:am'], [18.5, 'temple-pm'], [18.75, 'tower:pm'], [19, 'watch:1'], [21, 'watch:2'], [23, 'watch:3'], [1, 'watch:4'], [3, 'watch:5']],
   monastery: [[5, 'zhong'], [18.5, 'gu']],
   bonsho: [[5.5, 'bonsho'], [18.2, 'bonsho']],
   zvon: [[6.5, 'zvon'], [17, 'zvon']],

@@ -721,7 +721,7 @@ export class Music {
    * one low note by a chorus (vowels of "na-mo-e-mi-tuo-fo"), a step up at the end of each phrase
    * of six. One voice for the whole chant, its pitch and vowel set up front; the knocks are cued.
    */
-  chant(when, n, level, dest) {
+  chant(when, n, level, dest, drone = false) {
     const beat = 0.8, V = ['a', 'o', 'e', 'i', 'o', 'o'], v = this.vox(dest, 1500, null, true), f0 = 112;
     v.oscs.forEach((o) => o.frequency.setValueAtTime(f0, when));
     v.bps.forEach((b, i) => b.frequency.setValueAtTime(VOWEL.a[i], when));
@@ -735,6 +735,14 @@ export class Music {
       this.cue(w, (x) => this.knock(x, 700, level * 1.5, dest, 0.11));
     }
     const end = when + n * beat;
+    if (drone) {
+      // under the chant the long low hum of the monks' breath: two low notes (an octave under the chant and its fifth), swelling slowly
+      const ctx = this.ctx, g = ctx.createGain(), lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 260;
+      g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(level * 0.7, when + 3); g.gain.setValueAtTime(level * 0.7, end - 2); g.gain.exponentialRampToValueAtTime(0.0001, end + 2);
+      for (const [f, ty, a] of [[56, 'sine', 1], [84, 'triangle', 0.5], [112.4, 'sine', 0.4]]) { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = ty; o.frequency.value = f; og.gain.value = a; o.connect(og); og.connect(lp); o.start(when); o.stop(end + 2.1); }
+      lp.connect(g); g.connect(dest);
+    }
     v.env.gain.exponentialRampToValueAtTime(0.0001, end + 0.5);
     v.oscs.forEach((o) => { o.start(when); o.stop(end + 0.55); });
     return end;
@@ -749,13 +757,15 @@ export class Music {
     const ctx = this.ctx;
     if (!ctx || ctx.state !== 'running' || !this.plc) return;
     const t0 = ctx.currentTime + 0.2, [kind, arg] = ev.split(':');
-    if (t0 < (this.ringBusy || 0) && kind !== 'quarter' && kind !== 'watch') return;   // one thing at a time (but for the quarters and the watchman, who go their own way)
+    if (t0 < (this.ringBusy || 0) && kind !== 'quarter' && kind !== 'watch' && kind !== 'tower') return;   // one thing at a time (but for the quarters and the watchman, who go their own way)
     if (!this.far) {
       this.far = ctx.createGain(); this.far.gain.value = 1;
       const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
       this.far.connect(lp); lp.connect(this.amb.muffle);
     }
     const out = this.far, N = +arg || 0;
+    // a place with a map (Suzhou) hears each bell, drum and chant from where it is: the temple's halls, the old city's towers, Hanshan
+    const M = this.plc.life?.map, place = (at, r50, dur, o = {}) => (M ? this.src(at, r50, { dur, ...o }) : out);
     let end = t0;
     const strokes = (n, every, fn) => { for (let k = 0; k < n; k++) fn(t0 + k * every, k); end = Math.max(end, t0 + n * every); };
     switch (kind) {
@@ -788,9 +798,17 @@ export class Music {
       }
       case 'toki': strokes(N, 7, (w) => this.bonsho(w, 98, 0.06, out)); break;
       case 'bonsho': strokes(9, 9, (w) => this.bonsho(w, 88, 0.07, out)); break;
-      case 'hanshan': strokes(12, 8, (w) => this.bonsho(w, 104, 0.04, out)); break;   // across the water, far
+      case 'hanshan': { const o = place(M?.FAR.hanshan, 2500, 120); strokes(12, 8, (w) => this.bonsho(w, 104, 0.04, o)); break; }   // across the water, far
+      case 'tower': {                         // the old city's towers, a kilometre off: the evening drum in rolls, the morning bell in slow strokes
+        const o = place(M?.FAR.tower, 600, 90);
+        if (arg === 'pm') end = this.drumRolls(t0, o, 3); else strokes(12, 4.2, (w) => this.bonsho(w, 110, 0.05, o));
+        if (o.emitter) o.emitter.until = end + 2;
+        break;
+      }
       case 'watch': {                         // the watchman at the watch's start: clapper beats, N strokes of the gong, the call
-        const bus = this.spot(out, -0.4 + Math.random() * 0.8, 0, 12, 3200, 1);
+        // with a map: on the street nearest the listener, walking; else (or none near) far off
+        const l = M ? this.lis() : null, tr = M ? M.streetTrack(l.x, l.z, Math.random, 120, 30) : null, mv = tr ? this.along(tr.pts, 1.0) : null;
+        const bus = mv ? this.src(mv, 12, { dur: mv.dur + 5 }) : this.spot(out, -0.4 + Math.random() * 0.8, 0, 12, 3200, 1);
         for (const d of [0, 1.1, 1.4, 3.4, 4.5, 4.8]) this.cue(t0 + d, (w) => this.knock(w, d % 3.4 ? 960 : 820, 0.04, bus));
         for (let k = 0; k < N; k++) this.cue(t0 + 7.5 + k * 2.4, (w) => this.gong(w, 330, 0.035, bus));
         this.cue(t0 + 8.5 + N * 2.4, (w) => this.cry(w, 125, FIRE_CALL, 0.045, bus, { cutoff: 3500 }));
@@ -799,18 +817,21 @@ export class Music {
       case 'temple-am':
       case 'temple-pm': {                     // 晨钟暮鼓: the bell then the drum at dawn, the drum then the bell at dusk, then the service
         // the bell's 108 strokes (18 fast, 18 slow, 18 between, twice) shortened to 6 + 6 + 6
-        const bell = (at) => { let w = at; for (const [n, gap, dec] of [[6, 1.25, 0.45], [6, 4.2, 1], [6, 2.5, 0.7]]) for (let k = 0; k < n; k++) { this.cue(w, (x) => this.templeBell(x, 110, 0.06, out, dec)); w += gap; } return w; };
+        // the bell in the east side hall, the drum in the west one (dong zhong xi gu), the chant in the main hall
+        const outB = place(M?.TEMPLE.bell, 70, 260), outD = place(M?.TEMPLE.drum, 60, 260), outC = place(M?.TEMPLE.hall, 24, 260, { inside: 'temple:hall' });
+        const bell = (at) => { let w = at; for (const [n, gap, dec] of [[6, 1.25, 0.45], [6, 4.2, 1], [6, 2.5, 0.7]]) for (let k = 0; k < n; k++) { this.cue(w, (x) => this.templeBell(x, 110, 0.06, outB, dec)); w += gap; } return w; };
         const drum = (at) => {                // one roll on the great drum, quickening and dying away (as drumRolls), a beat a cue
           let w = at, gap = 0.9;
           for (let k = 0; k < 24; k++) {
             const v = 0.06 * (0.5 + 0.5 * Math.sin(Math.PI * k / 24));
-            this.cue(w, (x) => { this.tone(x, [[0, 72], [0.25, 48]], 0.6, v, out); this.burst(x, 0.08, 700, 1, 0.02, out); });
+            this.cue(w, (x) => { this.tone(x, [[0, 72], [0.25, 48]], 0.6, v, outD); this.burst(x, 0.08, 700, 1, 0.02, outD); });
             w += gap; gap = Math.max(0.12, gap * 0.88);
           }
           return w + 1.5;
         };
         const e = kind === 'temple-am' ? drum(bell(t0) + 1.5) : bell(drum(t0) + 0.5);
-        end = this.chant(e + 3, 56, 0.035, out);
+        end = this.chant(e + 3, 56, 0.035, outC, true);
+        for (const b of [outB, outD, outC]) if (b.emitter) b.emitter.until = end + 3;
         break;
       }
       case 'bosingak': strokes(33, 5, (w) => this.bonsho(w, 82, 0.065, out, 0.33)); break;   // the great bell's slow beat

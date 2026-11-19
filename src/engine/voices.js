@@ -37,7 +37,7 @@ export function inSeason(doy, a, b, fade = 14) {
 }
 /** Windows (day of the year) of the season-bound sounds. */
 export const SEASON_OF = {
-  cicada: [165, 255, 14], frog: [100, 285, 18], cricket: [215, 320, 14], katydid: [210, 280, 10],
+  cicada: [165, 255, 14], frog: [100, 305, 18], cricket: [215, 320, 14], katydid: [210, 280, 10],
   cuckoo: [95, 170, 8], oriole: [140, 235, 10], magpie: [250, 340, 12], tit: [335, 95, 12],
   flowers: [40, 300, 12], melon: [160, 250, 10], cake: [300, 120, 12],
 };
@@ -68,6 +68,9 @@ export function pickTrade(hour, doy, rnd = R()) {
   for (const [k, w] of list) if ((x -= w) <= 0 && w > 0) return k;
   return list.find(([, w]) => w > 0)[0];
 }
+
+/** How loud each voice is made relative to its own scale (set by measuring the render: tools/sound-render.mjs). */
+export const GAIN = { loom: 0.6, hammer: 0.8, qin: 0.4, cicada: 2.2, frog: 1.4, scissors: 2.2, teaBlock: 0.7 };
 
 export const VOICES = {
   // ── the place of a sound ────────────────────────────────────────────────────
@@ -176,10 +179,10 @@ export const VOICES = {
   },
   /** A step on stone: the thump of the body and the tick of the sole; clog: a wooden shoe's clack; hollow: an arch under it. */
   step(when, level, dest, shoe = 'cloth', hollow = 0) {
-    this.tone(when, [[0, 150 * (0.85 + R() * 0.3)], [0.05, 70]], 0.06, level * 0.7, dest, 'sine');
-    this.burst(when, 0.022, shoe === 'clog' ? 2300 : 1100, 1.2, level * (shoe === 'clog' ? 0.8 : 0.45), dest);
-    if (shoe === 'clog') this.tone(when, [[0, 720], [0.03, 560]], 0.04, level * 0.35, dest, 'triangle');
-    if (hollow) this.tone(when, [[0, 88], [0.2, 70]], 0.26, level * hollow, dest, 'sine');
+    this.tone(when, [[0, 150 * (0.85 + R() * 0.3)], [0.05, 70]], 0.06, level * 0.3, dest, 'sine');
+    this.burst(when, 0.03, shoe === 'clog' ? 2300 : 1500, 1, level * (shoe === 'clog' ? 1.6 : 1.1), dest);
+    if (shoe === 'clog') this.tone(when, [[0, 820], [0.03, 600]], 0.05, level * 0.5, dest, 'triangle');
+    if (hollow) this.tone(when, [[0, 88], [0.2, 70]], 0.26, level * hollow * 0.3, dest, 'sine');
   },
 
   // ── water ───────────────────────────────────────────────────────────────────
@@ -231,10 +234,10 @@ export const VOICES = {
     let w = t;
     for (let k = 0; k < n; k++) {
       const P = 0.92 + R() * 0.2;
-      this.cue(w, (x) => { this.tone(x, [[0, 95], [0.09, 58]], 0.1, 0.045 * lv, bus); this.burst(x, 0.05, 220, 1, 0.02 * lv, bus); });
-      this.cue(w + 0.2, (x) => { this.burst(x, 0.045, 2400, 3, 0.03 * lv, bus); this.burst(x + 0.07, 0.03, 1900, 3, 0.02 * lv, bus); });
-      this.cue(w + 0.41, (x) => { this.knock(x, 205 + R() * 15, 0.06 * lv, bus, 0.11); this.burst(x, 0.03, 900, 1.2, 0.025 * lv, bus); });
-      if (R() < 0.12) this.cue(w + 0.55, (x) => this.knock(x, 215, 0.04 * lv, bus, 0.09));
+      this.cue(w, (x) => { this.tone(x, [[0, 110], [0.07, 70]], 0.08, 0.02 * lv, bus); this.burst(x, 0.04, 700, 1.2, 0.04 * lv, bus); });         // the treadle
+      this.cue(w + 0.2, (x) => { this.burst(x, 0.03, 2600, 3, 0.07 * lv, bus); this.burst(x + 0.07, 0.025, 2100, 3, 0.05 * lv, bus); });       // the shuttle thrown and caught
+      this.cue(w + 0.41, (x) => { this.knock(x, 520 + R() * 50, 0.09 * lv, bus, 0.07); this.burst(x, 0.04, 1500, 1, 0.06 * lv, bus); });         // the beater
+      if (R() < 0.12) this.cue(w + 0.55, (x) => this.knock(x, 540, 0.06 * lv, bus, 0.06));
       w += P;
     }
     return w - t;
@@ -366,7 +369,8 @@ export const VOICES = {
     return w - t + 2.6;
   },
   wheel(t, bus, lv) {
-    this.tone(t, [[0, 66], [2.5, 62], [5, 50]], 5, 0.03 * lv, bus, 'sawtooth', ['lowpass', 220, 1]);
+    this.tone(t, [[0, 66], [2.5, 62], [5, 50]], 5, 0.02 * lv, bus, 'sawtooth', ['lowpass', 220, 1]);
+    this.rasp(t, 5, 380, 1, 0.012 * lv, bus, 3, 0.5);                       // the whirr of the wet clay turning
     for (const d of [0.8, 2.6]) this.cue(t + d, (x) => this.burst(x, 0.3, 900, 0.8, 0.02 * lv, bus, 0.05));
     return 5;
   },
@@ -479,13 +483,13 @@ export const VOICES = {
     const ctx = this.ctx, g = ctx.createGain(), sr = ctx.sampleRate;
     g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(level, when + 0.22); g.gain.setValueAtTime(level * 0.9, when + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
     const o = ctx.createOscillator(), o2 = ctx.createOscillator(), og = ctx.createGain(), vib = ctx.createOscillator(), vg = ctx.createGain();
-    o.type = 'sine'; o2.type = 'triangle'; og.gain.value = 0.18;
+    o.type = 'sine'; o2.type = 'triangle'; og.gain.value = 0.3;
     o.frequency.setValueAtTime(f * Math.pow(2, from / 12), when); o.frequency.exponentialRampToValueAtTime(f, when + 0.2);
     o2.frequency.setValueAtTime(f * 2 * Math.pow(2, from / 12), when); o2.frequency.exponentialRampToValueAtTime(f * 2, when + 0.2);
     vib.frequency.value = 4.5 + R() * 0.8; vg.gain.setValueAtTime(0, when); vg.gain.linearRampToValueAtTime(f * 0.009, when + dur * 0.6); vib.connect(vg); vg.connect(o.frequency);
     o.connect(g); o2.connect(og); og.connect(g);
     const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain();
-    n.buffer = this.noiseBuf; bp.type = 'bandpass'; bp.frequency.value = f * 2.1; bp.Q.value = 3; ng.gain.value = 0.3;
+    n.buffer = this.noiseBuf; bp.type = 'bandpass'; bp.frequency.value = f * 2.1; bp.Q.value = 3; ng.gain.value = 0.45;
     n.connect(bp); bp.connect(ng); ng.connect(g); g.connect(dest);
     o.start(when); o.stop(when + dur + 0.05); o2.start(when); o2.stop(when + dur + 0.05); vib.start(when); vib.stop(when + dur + 0.05); n.start(when, R() * 3); n.stop(when + dur + 0.05);
     return dur;
@@ -577,7 +581,7 @@ export const VOICES = {
     }
     if (kind === 'magpie') {
       const n = 6 + Math.floor(R() * 4), f = 1500 + R() * 200;
-      for (let k = 0; k < n; k++) this.cue(t + k * 0.11, (x) => this.tone(x, [[0, f * (1 - k * 0.012)], [0.05, f * 0.85]], 0.07, 0.02 * lv, bus, 'sawtooth', ['bandpass', 1500, 2]));
+      for (let k = 0; k < n; k++) this.cue(t + k * 0.11, (x) => this.tone(x, [[0, f * (1 - k * 0.012)], [0.05, f * 0.85]], 0.07, 0.04 * lv, bus, 'sawtooth', ['bandpass', 1500, 2]));
       return n * 0.11 + 0.1;
     }
     // great tit
@@ -624,7 +628,7 @@ export const VOICES = {
     const stamp = () => recent.push(t);
     const due = (k, gap, first = 0.15) => { if (!P[k]) P[k] = t + gap * (first + 0.6 * r()); return t > P[k]; };
     const at = (k, a, b, mul = 1) => { P[k] = t + (a + (b - a) * r()) * mul; };
-    const spawn = (pos, r50, lv, voice, opt = {}) => { const bus = this.src(pos, r50, { dur: 30, ...opt }); const d = this[voice](t + 0.05, bus, lv, ...(opt.args || [])); bus.emitter.until = t + 0.05 + (typeof d === 'number' ? d : 8) + 1.5; stamp(); return bus; };
+    const spawn = (pos, r50, lv, voice, opt = {}) => { const bus = this.src(pos, r50, { dur: 30, ...opt }); const d = this[voice](t + 0.05, bus, lv * (GAIN[voice] ?? 1), ...(opt.args || [])); bus.emitter.until = t + 0.05 + (typeof d === 'number' ? d : 8) + 1.5; stamp(); return bus; };
     const around = (a, b) => { const an = r() * Math.PI * 2, d = a + (b - a) * r(); return [l.x + Math.cos(an) * d, l.z + Math.sin(an) * d]; };
     const wind = this.wind || 0;
     const room = P.room;
@@ -647,7 +651,7 @@ export const VOICES = {
     }
 
     // the far hours' sounds: dogs at night, beyond the roofs
-    if (night && rain < 0.7 && due('nextDog', 70)) { at('nextDog', 35, 95); if (!busy()) spawn(around(110, 380), 70, 1, 'dogFar'); }
+    if (night && rain < 0.7 && due('p:nextDog', 70)) { at('p:nextDog', 35, 95); if (!busy()) spawn(around(110, 380), 70, 1, 'dogFar'); }
 
     // the passing: boats on the canals, walkers on the bridges, vendors and sedan chairs and the watchman in the streets
     const track = (k, voice, speed, r50, gap, ok, get, lv = 1, extra = null) => {
@@ -658,7 +662,7 @@ export const VOICES = {
       if (!tr) return;
       const f = this.along(tr.pts, speed);
       const bus = this.src(f, r50, { dur: f.dur + 2 });
-      const d = this[voice](t + 0.05, bus, lv, f, ...(extra ? [extra()] : []));
+      const d = this[voice](t + 0.05, bus, lv * (GAIN[voice] ?? 1), f, ...(extra ? [extra()] : []));
       bus.emitter.until = t + 0.05 + Math.max(f.dur, typeof d === 'number' ? d : 0) + 1.5;
       stamp();
     };
@@ -671,57 +675,57 @@ export const VOICES = {
 
     // the waters: the canals' walls, the pond's stones, the fish; the eaves' drips
     const cs = M.canalSpot(l.x, l.z);
-    if (cs && cs.d < 24 && due('nextLap', 1.2)) {
-      at('nextLap', 0.3, 1.4, 1 / (0.5 + 1 / (1 + cs.d / 8)));
+    if (cs && cs.d < 24 && due('p:nextLap', 1.2)) {
+      at('p:nextLap', 0.3, 1.4, 1 / (0.5 + 1 / (1 + cs.d / 8)));
       const p = [cs.p[0] + (r() - 0.5) * 12, cs.p[1] + (r() - 0.5) * 12];
       const bus = this.src(p, 5, { dur: 1 }); this.lap(t + 0.02, 1.2 + rain * 0.5, bus); bus.emitter.until = t + 1;
     }
     const sh = M.shoreSpot(l.x, l.z, r);
-    if (sh && due('nextShore', 2.5)) {
-      at('nextShore', 1.2, 4);
+    if (sh && due('p:nextShore', 2.5)) {
+      at('p:nextShore', 1.2, 4);
       const bus = this.src(sh, 5, { dur: 1 }); this.lap(t + 0.02, 0.55, bus); bus.emitter.until = t + 1;
     }
-    if (P.eaveWet > 0.08 && (!P.indoors || rain > 0.1) && due('nextDrip', 0.5)) {
-      at('nextDrip', 0.12, 0.8, 1 / (P.eaveWet + 0.15));
+    if (P.eaveWet > 0.08 && (!P.indoors || rain > 0.1) && due('p:nextDrip', 0.5)) {
+      at('p:nextDrip', 0.12, 0.8, 1 / (P.eaveWet + 0.15));
       spawn(around(1.5, 6), 3, 0.7 + P.eaveWet * 0.5, 'eaveDrip');
     }
     if (day && rain < 0.6 && cs?.d !== undefined) {
       const pond = M.pondSpot(l.x, l.z, r);
-      if (pond && due('nextFish', 14)) { at('nextFish', 9, 26, doy > 90 && doy < 300 ? 1 : 2.5); if (!busy()) spawn(pond, 8, 1, 'fishRise'); }
+      if (pond && due('p:nextFish', 14)) { at('p:nextFish', 9, 26, doy > 90 && doy < 300 ? 1 : 2.5); if (!busy()) spawn(pond, 8, 1, 'fishRise'); }
     }
 
     // the creatures of the season and the hour
     const green = M.greenNear(l.x, l.z), froggy = M.frogGround(l.x, l.z);
     const frogW = seasonOf('frog', doy) * (night ? 1 : hour >= 17 || hour < 7 ? 0.5 : 0.1) * (1 + rain) * froggy;
-    if (frogW > 0.05 && due('nextFrog', 1.5)) {
-      at('nextFrog', 0.5, 2.2, 1 / frogW);
+    if (frogW > 0.05 && due('p:nextFrog', 1.5)) {
+      at('p:nextFrog', 0.5, 2.2, 1 / frogW);
       let p = M.pondSpot(l.x, l.z, r, 28);
       if (!p && froggy > 0.2) { const a = r() * Math.PI * 2, q = [Math.cos(a) * 195, Math.sin(a) * 195]; if (Math.hypot(q[0] - l.x, q[1] - l.z) < 140) p = q; }
       if (p && !busy()) spawn(p, 14, 0.8 + 0.4 * r(), 'frog', { args: [r() < 0.3 + 0.3 * rain ? 'tree' : 'pond'] });
     }
     const cricW = seasonOf('cricket', doy) * (hour >= 18 || hour < 5.5 ? 1 : 0.2) * (rain > 0.5 ? 0.2 : 1) * green, katW = seasonOf('katydid', doy) * (night || dusk ? 1 : 0.2) * (rain > 0.5 ? 0.2 : 1) * green;
-    if (cricW + katW > 0.04 && due('nextCricket', 1)) {
-      at('nextCricket', 0.35, 1.3, 1 / (cricW + katW));
+    if (cricW + katW > 0.04 && due('p:nextCricket', 1)) {
+      at('p:nextCricket', 0.35, 1.3, 1 / (cricW + katW));
       for (let k = 0; k < 6; k++) {
         const p = around(3, 16);
         if (M.greenNear(p[0], p[1]) > 0.35 + 0.3 * r()) { if (!busy()) spawn(p, 6, 0.8 + 0.4 * r(), 'cricket', { args: [r() * (cricW + katW) < katW ? 'katydid' : 'cricket'] }); break; }
       }
     }
-    const cicW = seasonOf('cicada', doy) * (hour >= 9 && hour < 17.5 ? 1 : 0.15) * (rain > 0.3 ? 0.1 : 1) * green;
-    if (cicW > 0.05 && due('nextCicada', 4)) {
-      at('nextCicada', 1.5, 6, 1 / cicW);
+    const cicW = seasonOf('cicada', doy) * (hour >= 11 && hour < 17 ? 1 : hour >= 8 && hour < 18.5 ? 0.5 : 0) * (rain > 0.3 ? 0.1 : 1) * green;
+    if (cicW > 0.05 && due('p:nextCicada', 4)) {
+      at('p:nextCicada', 1.5, 6, 1 / cicW);
       const p = M.treeSpot(l.x, l.z, r, 36);
       if (p && !busy()) spawn(p, 12, 1, 'cicada');
     }
-    if (day && rain < 0.5 && due('nextBird', 30)) {
-      at('nextBird', 14, 50);
+    if (day && rain < 0.5 && due('p:nextBird', 30)) {
+      at('p:nextBird', 14, 50);
       const W = { cuckoo: seasonOf('cuckoo', doy), oriole: seasonOf('oriole', doy), magpie: seasonOf('magpie', doy), tit: seasonOf('tit', doy) };
       const kind = Object.keys(W).sort((a, b) => W[b] - W[a])[0], p = M.treeSpot(l.x, l.z, r, 40);
       if (p && W[kind] > 0.15 && !busy()) spawn(p, 18, 1, 'seasonBird', { args: [kind] });
     }
     // bamboo knocking in a gust
-    if (wind > 0.28 && M.bambooNear(l.x, l.z) > 0.35 && due('nextCulm', 4)) {
-      at('nextCulm', 3, 9, 1 / wind);
+    if (wind > 0.28 && M.bambooNear(l.x, l.z) > 0.35 && due('p:nextCulm', 4)) {
+      at('p:nextCulm', 3, 9, 1 / wind);
       if (!busy()) spawn(around(5, 12), 6, 0.6 + wind, 'culm');
     }
 
