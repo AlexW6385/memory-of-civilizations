@@ -8,6 +8,8 @@ import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layou
 import { northPlans } from './north.js';
 import { upOf, doorGap, shopkeeperAt } from './uphouses.js';
 import './style.js';
+import './townwork.js';
+import './quaywork.js';
 import { bridgeLamps } from './lamps.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -48,7 +50,7 @@ function waterways() {
     if (!r) continue;
     let pieces = [r];
     for (const o of done) pieces = pieces.flatMap((q) => minus(q, o));
-    for (const q of pieces) E.push({ t: 'paving', rect: q, y: LEVEL.street + 0.04, th: 0.3 });
+    for (const q of pieces) { E.push({ t: 'paving', rect: q, y: LEVEL.street + 0.04, th: 0.3 }); if (Math.max(q[2] - q[0], q[3] - q[1]) > 8 && Math.min(q[2] - q[0], q[3] - q[1]) > 1.8) E.push({ t: 'street_wear', rect: q, y: LEVEL.street + 0.04 }); }
     done.push(r);
   }
   for (const c of CANALS) {
@@ -86,7 +88,7 @@ function waterways() {
         const bl = 6.5 + rand(), c = [face[0] + u[0] * (bl / 2 - 0.4) + dir[0] * 2.45, face[1] + u[1] * (bl / 2 - 0.4) + dir[1] * 2.45];
         const ring = [face[0] + dir[0] * 0.13, LEVEL.canal + 0.6, face[1] + dir[1] * 0.13];
         E.push({ t: 'boat', at: c, dir: u, len: bl, y: LEVEL.canal, moor: [ring[0], ring[1], ring[2]] });
-        MOORED.push(c);
+        MOORED.push(Object.assign(c, { u, len: bl }));
       } else {
         // the bottom slab's middle (a single flight runs down along u and leaves the slab at its far end)
         const m = double ? 0 : 0.6;
@@ -98,14 +100,14 @@ function waterways() {
     if (Math.hypot(...b.at) > R - 6) continue;
     E.push({ t: 'ming_arch_bridge', at: b.at, across: b.across, span: b.span + 0.4, width: b.width, rise: 3.0, landing: 4.6, y: LEVEL.street + 0.04, water: LEVEL.canal, bed: LEVEL.canalBed });
   }
-  return base('ming-suzhou-waterways', E);
+  return { ...base('ming-suzhou-waterways', E), style: 'suzhou-quarter' };
 }
 
 /** The houses, in plans by quadrant and by how rich their detail is (so that the far, cheap ones cull apart from the near). */
 const TRADE_ORDER = ['cloth', 'medicine', 'tea', 'books', 'rice', 'lacquer'];
 // the trades of the shops outside the six open ones (weights), and the interior the house builder gives each (it knows six)
 const TRADE_W = { cloth: 1, tea: 1.2, rice: 1, medicine: 0.9, lacquer: 0.7, books: 0.8, wine: 1.2, pottery: 0.9, iron: 0.7, fans: 0.7, food: 1.2 };
-const HOUSE_TRADE = { wine: 'tea', food: 'tea', pottery: 'lacquer', iron: 'lacquer', fans: 'books' };
+const HOUSE_TRADE = { wine: 'tea', food: 'tea', pottery: 'lacquer', iron: 'lacquer', fans: 'books', pawn: 'lacquer' };
 /** More shops along the main streets, and every shop but the open six given one of the eleven trades (a separate stream: the lots stay as they were). */
 function prepareShops(open) {
   const all = lots();
@@ -126,6 +128,8 @@ function prepareShops(open) {
   const names = Object.keys(TRADE_W);
   mine.sort((a, b) => (a.water ? 1 : 0) - (b.water ? 1 : 0));            // (the shops on the canals show no goods outside: the others first, so that each trade has as many)
   mine.forEach((l, i) => { l.trade = names[i % names.length]; });
+  // a few of the wide dry shops are pawnshops (dang pu: a great 當 on the wall), by the lot's own seed: about one in twenty
+  for (const l of mine) if (!l.water && frontOf(l).L > 4.3 && ((l.seed * 2246822519) >>> 0) % 100 < 6) l.trade = 'pawn';
 }
 function houses() {
   const all = lots(), plans = [];
@@ -140,7 +144,7 @@ function houses() {
   for (const l of dry.filter((q) => !q.shop).slice(0, 3)) { l.overhang = false; open.add(l); }
   prepareShops(open);
   // the houses whose upper floors can be climbed (uphouses.js): the open ones, and the weaver's beside them
-  for (const l of all) if (upOf(l) && !open.has(l)) { l.overhang = false; open.add(l); }
+  for (const l of all) if (upOf(l) && !open.has(l)) { l.overhang = false; open.add(l); const u = upOf(l); if (u.trade) { l.trade = u.trade; l.shop = true; } }
   const ups = all.filter((l) => upOf(l));
   const quads = [[], [], [], [], [], [], [], []];
   for (const l of all) {
@@ -150,7 +154,7 @@ function houses() {
   }
   quads.forEach((q, i) => {
     const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: HOUSE_TRADE[l.trade] || l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
-    if (E.length) plans.push(base(`ming-suzhou-houses-${i}`, E));
+    if (E.length) plans.push({ ...base(`ming-suzhou-houses-${i}`, E), style: 'suzhou-quarter' });
   });
   // the climbable houses, west and east of the way in, each side one plan with its own bounds (drawn only where they are near)
   for (const [name, test] of [['w', (l) => l.rect[0] < 0], ['e', (l) => l.rect[0] > 0]]) {
@@ -236,6 +240,27 @@ function riverLife() {
     L.push({ t: 'basket', at: [g.c[0] - g.u[0] * (n * 0.45 + 0.35) - g.dir[0] * 0.15, g.c[1] - g.u[1] * (n * 0.45 + 0.35) - g.dir[1] * 0.15], y: yS, rot: rand() * 6.28, s: 0.8, seed: Math.floor(rand() * 1e9) });
     if (rand() < 0.35) person([g.c[0] - g.dir[0] * 1.6 + g.u[0] * 1.2, g.c[1] - g.dir[1] * 1.6 + g.u[1] * 1.2], LEVEL.street, faceTo(g.dir), { pose: 'stand', dress: 'robe', carry: 'basket', hat: 'none', woman: true });
   }
+  // quay life that needs no draw of the stream's own (its places come of the landing's and the boat's own place): the load on every moored boat's
+  // fore deck and the water pots and a basket aft, the washing hung out beside some landings, and a few wells on the streets
+  const hh = (a, b, c = 0) => { let h = (Math.imul(Math.round(a * 31), 374761393) + Math.imul(Math.round(b * 31), 668265263) + Math.imul(c + 1, 2147483647)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  for (const c of MOORED) {
+    if (!inDisc(c, 12)) continue;
+    const u = c.u, bl = c.len, rot = Math.atan2(u[0], u[1]), deckAt = (f) => LEVEL.canal + 0.5 + 0.32 * Math.pow(Math.abs(f * bl) / (bl / 2), 2.2) - 0.06;
+    const pAt = (f, o = 0) => [c[0] + u[0] * f * bl - u[1] * o, c[1] + u[1] * f * bl + u[0] * o];
+    const kind = Math.floor(hh(c[0], c[1], 1) * 4), sd = Math.floor(hh(c[0], c[1], 2) * 1e9);
+    if (kind === 0) L.push({ t: 'pot', kind: 'dark_pot', n: 5, at: pAt(-0.37), y: deckAt(-0.37), rot, s: 1.1, seed: sd });
+    else if (kind === 1) L.push({ t: 'sacks', n: 5, at: pAt(-0.37), y: deckAt(-0.37), rot, seed: sd });
+    else if (kind === 2) L.push({ t: 'crates', n: 3, at: pAt(-0.37, 0.4), y: deckAt(-0.37), rot, seed: sd });
+    else L.push({ t: 'basket', n: 3, goods: 'cloth_white', at: pAt(-0.37), y: deckAt(-0.37), rot, s: 1.3, seed: sd });
+    L.push({ t: 'pot', kind: 'dark_pot', n: 2, at: pAt(0.36, 0.45), y: deckAt(0.36), rot: 0, s: 0.9, seed: sd + 1 });
+    L.push({ t: 'basket', n: 1, at: pAt(0.33, -0.5), y: deckAt(0.33), rot: 0, s: 0.9, seed: sd + 2 });
+  }
+  // the washing hung out on poles along the quay beside the public landings (not over the steps; two in five)
+  for (const g of LANDINGS) {
+    if (!inDisc(g.c, 20) || hh(g.c[0], g.c[1], 3) > 0.4) continue;
+    const side = hh(g.c[0], g.c[1], 4) < 0.5 ? -1 : 1, d = [-g.dir[0], -g.dir[1]], at = [g.c[0] + g.u[0] * side * 4.6 + d[0] * 2.3, g.c[1] + g.u[1] * side * 4.6 + d[1] * 2.3];
+    L.push({ t: 'laundry', at, y: LEVEL.street, rot: Math.atan2(g.u[0], g.u[1]) + Math.PI / 2, len: 3, seed: Math.floor(hh(g.c[0], g.c[1], 5) * 1e9) });
+  }
   // the boats once posed mid-canal at the oar: now sculled along by src/engine/movers.js, so these
   // are drawn for nothing but kept out of the plan (L cut back after the loop: the draws stay, so
   // the rest of the life keeps its places)
@@ -264,6 +289,7 @@ function riverLife() {
   }
   L.length = before;
   // the streets: people walking (some with loads on shoulder poles), knots talking; benches by the water under the willows
+  const BENCHES = [];
   for (const st of STREETS.slice(0, 3)) {
     const r = clip(st);
     if (!r) continue;
@@ -283,8 +309,20 @@ function riverLife() {
       const a = (horiz ? r[0] : r[1]) + s0, edge = horiz ? r[3] - 0.7 : (r[0] < 0 ? r[0] + 0.7 : r[2] - 0.7), p = horiz ? [a, edge] : [edge, a];
       if (!inDisc(p) || onBridge(p[0], p[1], 4)) continue;
       L.push({ t: 'bench', at: p, y: LEVEL.street, rot: horiz ? 0 : Math.PI / 2, seed: Math.floor(rand() * 1e9) });
+      BENCHES.push(p);
       const tow = horiz ? [0, -1] : [r[0] < 0 ? 1 : -1, 0];
       for (const q of [-0.4, 0.4]) if (rand() < 0.75) person(horiz ? [p[0] + q, p[1]] : [p[0], p[1] + q], LEVEL.street, faceTo(tow), { pose: 'sit', dress: 'robe', cloth: pick(['cloth_grey', 'cloth_indigo', 'cloth_black']), hat: pick(['cap', 'none']) });
+    }
+  }
+  // the wells: a stone curb with its bucket on the canal side of the main streets, every seventy to ninety metres, clear of benches, bridges and landings
+  for (const st of STREETS.slice(0, 3)) {
+    const r = clip(st);
+    if (!r) continue;
+    const horiz = r[2] - r[0] > r[3] - r[1], len = horiz ? r[2] - r[0] : r[3] - r[1];
+    for (let s0 = 30 + hh(r[0], r[1], 7) * 25; s0 < len - 20; s0 += 70 + hh(r[0] + s0, r[1], 8) * 20) {
+      const a = (horiz ? r[0] : r[1]) + s0, edge = horiz ? r[3] - 1.5 : (r[0] < 0 ? r[0] + 1.5 : r[2] - 1.5), p = horiz ? [a, edge] : [edge, a];
+      if (!inDisc(p, 14) || onBridge(p[0], p[1], 9) || BENCHES.some((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < 5) || LANDINGS.some((g) => Math.hypot(g.c[0] - p[0], g.c[1] - p[1]) < 9) || MOORED.some((m) => Math.hypot(m[0] - p[0], m[1] - p[1]) < 5)) continue;
+      L.push({ t: 'well', kind: 'open', mat: 'granite_grey', at: p, y: LEVEL.street + 0.04, rot: 0, seed: Math.floor(hh(p[0], p[1], 9) * 1e9) });
     }
   }
   const tiles = new Map();

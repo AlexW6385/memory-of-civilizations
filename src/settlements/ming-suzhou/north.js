@@ -11,6 +11,7 @@ import { box, fromTriangles, lathe } from '../../core/geom.js';
 import '../../styles/ming/index.js';
 import '../../styles/song/index.js';
 import { beamTris, rectRoof } from '../../styles/ming/index.js';
+import { templeWare } from './templework.js';
 import { LEVEL, RADIUS, TEMPLE_COURT, NORTH_KEEP as KEEP } from './layout.js';
 
 // ── where things stand (m, +x east, +z south; the north is −z) ──────────────
@@ -464,7 +465,7 @@ function moatPool({ rect, y, gaps = [] }, { bag }) {
 
 registerStyle('suzhou-north', {
   ...STYLES.ming,
-  elements: { ...STYLES.ming.elements, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool },
+  elements: { ...STYLES.ming.elements, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare },
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -489,6 +490,7 @@ function templePlan() {
   E.push({ t: 'stair', rect: [cx - 3, -116.6, cx + 3, -114.6], y0: 0.04, y1: 1.15, dir: 'n', riser: 0.18, mat: 'granite_block' });
   E.push({ t: 'suzhou_hall', rect: [-72, -128, -63, -120], y: 0.4, H: 4.4, front: 'e', four: false, roof: 'xieshan', plat: 0.4 });
   E.push({ t: 'suzhou_hall', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4, front: 'w', four: false, roof: 'xieshan', plat: 0.4 });
+  E.push({ t: 'temple_ware', gate: [cx, z1], burner: [cx, z1 - 1.75], w: 3.2, h: 3.5, zt: -114.6, y: LEVEL.street + 0.04 });
   return base('ming-suzhou-temple', E);
 }
 

@@ -6,7 +6,9 @@
 
 const BOLT = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_grey', 'cloth_brown', 'cloth_black'];
 
-function kit(c) {
+import { NEW_USES, groundExtra, upperExtra } from './rooms2.js';
+
+export function kit(c) {
   const { B, blk, lat, rand } = c;
   const k = {};
   const hash = (a, b) => { let h = Math.imul(Math.floor(a * 100) | 0, 374761393) + Math.imul(Math.floor(b * 100) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -188,6 +190,7 @@ export function groundFit(c) {
     B(a0 + 0.2, b1 - 0.7, a1 - 0.2, b1 - 0.35, y0, y0 + 0.4, 'timber'); blk(a0, b0, a1, b1, y0, y0 + 1.5);
     k.lamp((a0 + a1) / 2, 3.4, y0 + 2.2);
   }
+  if (NEW_USES.includes(use)) groundExtra(c, { ...k, B, blk });
   void P; void blk; void lay;
 }
 function lat0(c, mat, a, b, yy) { c.lat(mat, [[0.001, 0], [0.08, 0.01], [0.1, 0.1], [0.06, 0.16], [0.001, 0.16]], 8, a, b, yy); }
@@ -240,7 +243,7 @@ export function upperFit(c) {
     B(e0 + 1.35, 3.2, e0 + 1.62, 3.26, y + 0.9, y + 0.92, 'iron');
     k.shelves(e1 - 1.3, e1 - 0.05, back - 0.55, back - 0.05, y, [0.4, 0.95, 1.5], 'bolts'); k.shelves(e0 + 0.1, e0 + 2.2, back - 0.55, back - 0.05, y, [0.4, 0.95, 1.5], 'bolts');
     k.stool(e0 + 1.0, 4.1, y, 0.35, 0.16); k.hanging(e1 - 1.5, e1 - 0.1, 2.9, y, y + 2.4, ['cloth_indigo', 'cloth_red', 'cloth_ochre']);
-    k.chest(0.3, 1.3, 1.2, 1.9, y, 0.5); for (let q = 0; q < 3; q++) B(0.3 + q * 0.28, 2.05, 0.52 + q * 0.28, 2.6, y, y + 0.22, ['cloth_grey', 'thatch', 'cloth_grey'][q]);
+    k.chest(0.3, 1.3, 1.2, 1.9, y, 0.5); for (let q = 0; q < 3; q++) B(0.3 + q * 0.28, 2.05, 0.52 + q * 0.28, 2.6, y, y + 0.22, ['cloth_indigo', 'thatch', 'cloth_indigo'][q]);
     k.bed(e1 - 0.95, 2.75, e1 - 0.05, 3.9, y, false, 'cloth_grey');
   } else if (use === 'medicine') {
     // the physician's loft: herbs drying on racks of bamboo and hung in bundles, jars, the mortar, a narrow bed for the apprentice
@@ -292,5 +295,6 @@ export function upperFit(c) {
     B(0.28, 3.0, 0.4, 3.9, y + 1.2, y + 1.26, 'bamboo_culm'); for (let q = 0; q < 5; q++) B(0.3, 3.05 + q * 0.17, 0.38, 3.15 + q * 0.17, y + 0.6 + k.hash(q, 1) * 0.1, y + 1.2, ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][q]);
     blk(0.25, 2.95, 0.45, 3.95, y, y + 1.3);
   }
+  if (NEW_USES.includes(use)) upperExtra(c, k);
   void backJars; void ibU;
 }

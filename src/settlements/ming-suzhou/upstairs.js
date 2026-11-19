@@ -71,7 +71,7 @@ export function houseUp(el, { bag, col }) {
   const vb = D - 0.15, ibB = vb - 0.25, ibU = UF + 0.22;
   const [wallMat, bandMat] = TONES[el.tone || 'white'] || TONES.white;
   const roofMat = rand() < 0.22 ? 'tile_grey' : 'tile_dark';
-  const shopFront = el.shopFront !== false && ['rice', 'inn', 'cloth', 'medicine', 'books', 'lacquer'].includes(use);
+  const shopFront = el.shopFront !== false && ['rice', 'inn', 'cloth', 'medicine', 'books', 'lacquer', 'wine', 'pawn', 'food', 'silk', 'pottery', 'iron', 'fans'].includes(use);
   const wall = (a0, b0, a1, b1, ya, yb) => { const m = Math.min(yb, ya + 0.95); B(a0, b0, a1, b1, ya, m, bandMat); if (yb > m) B(a0, b0, a1, b1, m, yb, wallMat); };
 
   // ── the ground: plinth, brick floor, doorstep ──
