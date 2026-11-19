@@ -245,20 +245,20 @@ export function buildRooms(c, rooms, { y, RH = 6.4, TOP = 8.0, ceil = 4.8, floor
     const [x0, z0, x1, z1] = rm.rect, door = rm.door, ax = door === '+x' || door === '-x', rl = ax ? z1 - z0 : x1 - x0;
     const xw = door === '+x' ? x1 - 0.4 : door === '-x' ? x0 + 0.4 : null, zw = door === '+z' ? z1 - 0.4 : door === '-z' ? z0 + 0.4 : null;
     const dd = rl / 2, win = (at) => ({ at, w: 0.9, h: 1.3, y0: y + 1.7, flat: true });
-    const ops = [{ at: dd, w: rm.doorW ?? 1.9, h: rm.doorH ?? 3.5 }, ...(rl > 5.4 ? [win(dd - 2.2), win(dd + 2.2)] : [])];
+    const ops = [{ at: dd, w: rm.doorW ?? 1.9, h: rm.doorH ?? 3.5 }, ...((rl > 5.4 && !rm.upper) ? [win(dd - 2.2), win(dd + 2.2)] : []), ...(rm.upper?.front ?? [])];
     if (ax) {
       wallRun(c, { a: [xw, z0], b: [xw, z1], th: 0.8, y0: y, y1: y + TOP, mat, ops });
       for (const zz of [z0, z1]) if ((zz === z0 && rm.k >= 0) || (zz === z1 && rm.k === rm.n - 1)) wallRun(c, { a: [x0, zz], b: [door === '+x' ? x1 - 0.8 : x1, zz], th: 0.6, y0: y, y1: y + RH, mat });
-      for (const at of rl > 5.4 ? [dd - 2.2, dd + 2.2] : []) bag.add('lattice', box(xw - 0.05, y + 1.7, z0 + at - 0.45, xw + 0.05, y + 3.0, z0 + at + 0.45));
+      for (const at of (rl > 5.4 && !rm.upper) ? [dd - 2.2, dd + 2.2] : []) bag.add('lattice', box(xw - 0.05, y + 1.7, z0 + at - 0.45, xw + 0.05, y + 3.0, z0 + at + 0.45));
     } else {
       wallRun(c, { a: [x0, zw], b: [x1, zw], th: 0.8, y0: y, y1: y + TOP, mat, ops });
-      for (const xx of [x0, x1]) if ((xx === x0 && rm.k >= 0) || (xx === x1 && rm.k === rm.n - 1)) wallRun(c, { a: [xx, door === '+z' ? z0 : z0 + 0.8], b: [xx, door === '+z' ? zw - 0.4 : z1], th: 0.6, y0: y, y1: y + RH, mat });
-      for (const at of rl > 5.4 ? [dd - 2.2, dd + 2.2] : []) bag.add('lattice', box(x0 + at - 0.45, y + 1.7, zw - 0.05, x0 + at + 0.45, y + 3.0, zw + 0.05));
+      for (const xx of [x0, x1]) if ((xx === x0 && rm.k >= 0) || (xx === x1 && rm.k === rm.n - 1)) wallRun(c, { a: [xx, door === '+z' ? z0 : z0 + 0.8], b: [xx, door === '+z' ? zw - 0.4 : z1], th: 0.6, y0: y, y1: y + RH, mat, ops: rm.upper?.sides ?? [] });
+      for (const at of (rl > 5.4 && !rm.upper) ? [dd - 2.2, dd + 2.2] : []) bag.add('lattice', box(x0 + at - 0.45, y + 1.7, zw - 0.05, x0 + at + 0.45, y + 3.0, zw + 0.05));
     }
-    if (back) { if (door === '+z') wallRun(c, { a: [x0, z0 + 0.3], b: [x1, z0 + 0.3], th: 0.6, y0: y, y1: y + RH, mat }); else if (door === '-z') wallRun(c, { a: [x0, z1 - 0.3], b: [x1, z1 - 0.3], th: 0.6, y0: y, y1: y + RH, mat }); else if (door === '+x') wallRun(c, { a: [x0 + 0.3, z0], b: [x0 + 0.3, z1], th: 0.6, y0: y, y1: y + RH, mat }); else wallRun(c, { a: [x1 - 0.3, z0], b: [x1 - 0.3, z1], th: 0.6, y0: y, y1: y + RH, mat }); }
-    bag.add('timber', box(x0, y + ceil, z0, x1, y + ceil + 0.16, z1)); bag.add('mud_plaster', box(x0, y + RH, z0, x1, y + RH + 0.14, z1)); bag.add(floor, box(x0, y - 0.2, z0, x1, y + 0.03, z1));
+    if (back) { if (door === '+z') wallRun(c, { a: [x0, z0 + 0.3], b: [x1, z0 + 0.3], th: 0.6, y0: y, y1: y + RH, mat, ops: rm.upper?.back ?? [] }); else if (door === '-z') wallRun(c, { a: [x0, z1 - 0.3], b: [x1, z1 - 0.3], th: 0.6, y0: y, y1: y + RH, mat }); else if (door === '+x') wallRun(c, { a: [x0 + 0.3, z0], b: [x0 + 0.3, z1], th: 0.6, y0: y, y1: y + RH, mat }); else wallRun(c, { a: [x1 - 0.3, z0], b: [x1 - 0.3, z1], th: 0.6, y0: y, y1: y + RH, mat }); }
+    if (!rm.upper) bag.add('timber', box(x0, y + ceil, z0, x1, y + ceil + 0.16, z1)); bag.add('mud_plaster', box(x0, y + RH, z0, x1, y + RH + 0.14, z1)); bag.add(floor, box(x0, y - 0.2, z0, x1, y + 0.03, z1));
     bag.add('plaster_white', ax ? box(xw - 0.45, y + TOP - 0.3, z0, xw + 0.45, y + TOP, z1) : box(x0, y + TOP - 0.3, zw - 0.45, x1, y + TOP, zw + 0.45));
-    const clear = door === '+x' ? [x0 + 0.1, z0 + 0.3, x1 - 0.8, z1 - 0.3] : door === '-x' ? [x0 + 0.8, z0 + 0.3, x1 - 0.1, z1 - 0.3] : door === '+z' ? [x0 + 0.3, z0 + 0.1, x1 - 0.3, z1 - 0.8] : [x0 + 0.3, z0 + 0.8, x1 - 0.3, z1 - 0.1];
+    const clear = rm.upper?.clear ?? (door === '+x' ? [x0 + 0.1, z0 + 0.3, x1 - 0.8, z1 - 0.3] : door === '-x' ? [x0 + 0.8, z0 + 0.3, x1 - 0.1, z1 - 0.3] : door === '+z' ? [x0 + 0.3, z0 + 0.1, x1 - 0.3, z1 - 0.8] : [x0 + 0.3, z0 + 0.8, x1 - 0.3, z1 - 0.1]);
     furnish(c, rm.kind, clear, door, y + 0.03, ceil, rand, { light: rm.k % lightEvery === 0 });
   }
 }

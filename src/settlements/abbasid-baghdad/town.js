@@ -108,7 +108,7 @@ export async function town() {
     WORKSHOPS.forEach((w, i) => plans.push({ ...base(`abbasid-baghdad-work${i}`, [{ t: 'abbasid_workshop', rect: w.rect, face: 'n', kind: w.kind, y: 0, seed: 90 + i }]), bounds: bnd(w.rect), rooms: [{ id: `${w.kind} workshop`, rect: [w.rect[0] + 0.6, w.rect[1] + 0.6, w.rect[2] - 0.6, w.rect[3] - 0.6], y: 0, kind: 'hall' }] }));
   }
   // ── the south gate road's service houses and shops: one plan, each a furnished room with its own front ──
-  plans.push({ ...base('abbasid-baghdad-esplanade', ESPLANADE.map((b, i) => ({ t: 'abbasid_workshop', rect: b.rect, face: b.face, kind: b.kind, front: b.front, mat: b.mat, y: 0, seed: 120 + i * 7 }))),
+  plans.push({ ...base('abbasid-baghdad-esplanade', ESPLANADE.map((b, i) => ({ t: 'abbasid_workshop', rect: b.rect, face: b.face, kind: b.kind, front: b.front, mat: b.mat, upper: b.upper, y: 0, seed: 120 + i * 7 }))),
     bounds: [-150, 18, -74, 116], rooms: ESPLANADE.map((b) => ({ id: b.name, rect: [b.rect[0] + 0.6, b.rect[1] + 0.6, b.rect[2] - 0.6, b.rect[3] - 0.6], y: 0, kind: 'hall' })) });
   // ── the water: the river, the canal, the bridges, the jetties and the boats ──
   const pts = []; for (let z = -540; z <= 540; z += 30) pts.push([riverX(z), z]);

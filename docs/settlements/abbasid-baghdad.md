@@ -130,6 +130,19 @@ Sources added: Di Cesare, *reconstructive hypothesis* of the Round City's palace
 
 Still missing for L3: a stair to the gate's audience chamber and the upper majlis; carved wooden ceilings in the mosque; arcaded ring streets with vaulted bays (the shop rows are as in §12); wear and weathering.
 
+## 15. Upstairs (round 6): the dwellings over the service houses of the south gate road
+
+What was shut: the ground floor of every enterable house was furnished, the space above was a closed void (the courtyard houses' two-storey ranges and the single-room shops alike). Opened now: eight of the twelve houses and shops along the south gate road, the nearest enterable buildings to the arrival and on the way to the Golden Gate: the palace bakehouse, the clerks of the diwan, a perfumer, the cook-shop, a coppersmith, the petitioners' waiting house, a potter, the grooms' lodging (code: `abbasid_workshop` with `upper`, `khan.js`; helpers in `upstairs.js`).
+
+- **A dwelling over the shop** [stated: the Abbasid house is usually of two storeys, the upper with a timber ceiling-floor and a flat terraced roof; plain exteriors, richer interiors, see §3; the shop with the family's rooms over it is the common suq type, inferred]. Floors of palm-trunk joists and boards; the shop's room is 3.6 m clear (4.5 m under the 'tall' fronts), the upper room 3.3 m under the flat roof.
+- **The stair** [inferred]: a straight flight of baked brick (solid, 1.25 m wide, treads 0.17 high, slope 0.66) along one party wall, rising from the back of the shop toward the street, its foot entered from a lane beside it; the opening in the floor over it with a cedar rail 1 m high. The side of the stair is mirrored by the building's seed.
+- **Upstairs** [inferred]: a sleeping room at the back (mattresses on reed mats, chest, water jar), a family room in front (divans, carpet, tray, brazier; a kitchen over the bakehouse and the cook-shop, an archive of desks and bookcases over the diwan clerks), windows as open reveals on the street and the back.
+- **The balcony** [stated: Baghdad houses had projecting timber oriels (shanashil / rawshan) over the street, see §12 'tall' fronts; the open balcony is inferred]: a deck on three brackets, 1.1 m out, a lattice-filled rail, a door onto it from the front room; the two 'tall' fronts (diwan, waiting house) keep their lattice oriel, now a walkable bay 2.3 m high, its door beside the shop door.
+- **Changes to the fronts**: the high ground-floor lattice windows and the doorstep of these eight are left out (their openings would overlap the new ones); the bakehouse's reed-mat awning is now the broad shop arch with folded shutters (the awning made the doorway a shell for the walker), the board over the door of the buildings with a balcony is dropped.
+- **Walks**: eight routes in `plan.js` from the street, up the stair, to the balcony door of each house.
+
+Still shut: the courtyard houses (their ranges are hollow on the ground floor only: the court is too narrow to put a stair and a gallery beside the bent entrance), the khan's cells, the roofs; the other four service houses (single rooms for the guard, the store, the treasury, the stable).
+
 ## Sources
 
 - Wikipedia, *Round City of Baghdad* — https://en.wikipedia.org/wiki/Round_City_of_Baghdad (founding 762–766; gates; centre; materials; wooden columns of the mosque).

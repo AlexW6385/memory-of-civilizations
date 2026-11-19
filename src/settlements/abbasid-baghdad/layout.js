@@ -58,18 +58,18 @@ export const ENTERABLE = [KHAN_RECT, HAMMAM_RECT, ...WORKSHOPS.map((w) => w.rect
 // the coppersmith, the potter, a lodging for the grooms. Single furnished rooms on the road's two sides, fronts to the road (x = C[0]); each
 // with its own front, height and colour. rect [x0, z0, x1, z1]; `face` the street side; `kind` the furnishing (styles/abbasid/dress.js).
 export const ESPLANADE = [
-  { rect: [-142, 24, -130, 36], face: 'e', kind: 'bakery', front: 'awning', mat: 'brick_buff', name: 'the palace bakehouse' },
+  { rect: [-142, 24, -130, 36], face: 'e', kind: 'bakery', front: 'wide', mat: 'brick_buff', name: 'the palace bakehouse', upper: { kind: 'kitchen' } },
   { rect: [-140, 40, -130, 50], face: 'e', kind: 'guard', front: 'arch', mat: 'mudbrick', name: 'the road guard post' },
-  { rect: [-142, 54, -130, 66], face: 'e', kind: 'diwan', front: 'tall', mat: 'plaster_white', name: 'the clerks of the diwan' },
-  { rect: [-140, 70, -130, 80], face: 'e', kind: 'perfumer', front: 'portico', mat: 'mud_plaster', name: 'a perfumer' },
-  { rect: [-142, 84, -130, 96], face: 'e', kind: 'kitchen', front: 'arch', mat: 'mudbrick', name: 'the cook-shop' },
+  { rect: [-142, 54, -130, 66], face: 'e', kind: 'diwan', front: 'tall', mat: 'plaster_white', name: 'the clerks of the diwan', upper: { kind: 'diwan' } },
+  { rect: [-140, 70, -130, 80], face: 'e', kind: 'perfumer', front: 'portico', mat: 'mud_plaster', name: 'a perfumer', upper: { kind: 'reception' } },
+  { rect: [-142, 84, -130, 96], face: 'e', kind: 'kitchen', front: 'arch', mat: 'mudbrick', name: 'the cook-shop', upper: { kind: 'kitchen' } },
   { rect: [-140, 100, -130, 110], face: 'e', kind: 'store', front: 'wide', mat: 'brick_buff', name: 'the water-carriers\' store' },
-  { rect: [-90, 24, -80, 34], face: 'w', kind: 'coppersmith', front: 'wide', mat: 'plaster', name: 'a coppersmith' },
+  { rect: [-90, 24, -80, 34], face: 'w', kind: 'coppersmith', front: 'wide', mat: 'plaster', name: 'a coppersmith', upper: { kind: 'reception' } },
   { rect: [-92, 38, -80, 50], face: 'w', kind: 'stable', front: 'portico', mat: 'mud_plaster', name: 'the horse-boys\' stable' },
   { rect: [-90, 54, -80, 64], face: 'w', kind: 'treasury', front: 'domed', mat: 'brick_buff', name: 'the treasury\'s cash room' },
-  { rect: [-90, 68, -80, 80], face: 'w', kind: 'reception', front: 'tall', mat: 'brick_buff', name: 'the petitioners\' waiting house' },
-  { rect: [-90, 84, -80, 94], face: 'w', kind: 'potter', front: 'awning', mat: 'mudbrick', name: 'a potter' },
-  { rect: [-92, 98, -80, 108], face: 'w', kind: 'bedroom', front: 'arch', mat: 'plaster_white', name: 'the grooms\' lodging' },
+  { rect: [-90, 68, -80, 80], face: 'w', kind: 'reception', front: 'tall', mat: 'brick_buff', name: 'the petitioners\' waiting house', upper: { kind: 'reception' } },
+  { rect: [-90, 84, -80, 94], face: 'w', kind: 'potter', front: 'awning', mat: 'mudbrick', name: 'a potter', upper: { kind: 'kitchen' } },
+  { rect: [-92, 98, -80, 108], face: 'w', kind: 'bedroom', front: 'arch', mat: 'plaster_white', name: 'the grooms\' lodging', upper: { kind: 'reception' } },
 ];
 export const SHOP = [-148, 318, -138, 336];           // the bookseller's shop you can enter (a house-like room beside the paper suq)
 // streets (rects) the walkers use and the lots keep clear of
