@@ -1647,9 +1647,9 @@
     ]
    }
   ],
-  "bytes": 1216770,
-  "seconds": 201,
-  "baked": "2026-11-18"
+  "bytes": 1216855,
+  "seconds": 208,
+  "baked": "2026-11-19"
  },
  "foguang-east-hall": {
   "site": "tang-wutai",
@@ -3330,7 +3330,7 @@
    }
   ],
   "bytes": 160415,
-  "seconds": 147,
+  "seconds": 32,
   "baked": "2026-11-19"
  },
  "mohenjo-daro-citadel": {
@@ -3487,7 +3487,7 @@
  },
  "muromachi-ginkaku": {
   "site": "muromachi-kyoto",
-  "hash": "2a58a5cab672ab7c",
+  "hash": "9acd442b291d035b",
   "rays": 128,
   "probes": 3882,
   "boxes": [
@@ -3525,13 +3525,13 @@
     ]
    }
   ],
-  "bytes": 66756,
-  "seconds": 6,
-  "baked": "2026-11-18"
+  "bytes": 66747,
+  "seconds": 5,
+  "baked": "2026-11-19"
  },
  "muromachi-ryoanji": {
   "site": "muromachi-kyoto",
-  "hash": "01f98e97a1c38de7",
+  "hash": "a012f4374c0876ac",
   "rays": 128,
   "probes": 4743,
   "boxes": [
@@ -3552,9 +3552,9 @@
     ]
    }
   ],
-  "bytes": 78350,
-  "seconds": 8,
-  "baked": "2026-11-18"
+  "bytes": 78354,
+  "seconds": 6,
+  "baked": "2026-11-19"
  },
  "muscovy-dormition": {
   "site": "muscovy",
@@ -3897,7 +3897,7 @@
  },
  "ottoman-istanbul-suleymaniye": {
   "site": "ottoman-istanbul",
-  "hash": "2bccb85f59449e5f",
+  "hash": "432e36ff6450e307",
   "rays": 128,
   "probes": 74624,
   "boxes": [
@@ -3935,9 +3935,9 @@
     ]
    }
   ],
-  "bytes": 1209752,
-  "seconds": 143,
-  "baked": "2026-11-18"
+  "bytes": 1209767,
+  "seconds": 204,
+  "baked": "2026-11-19"
  },
  "pantheon": {
   "site": "rome",
@@ -3966,8 +3966,8 @@
    }
   ],
   "bytes": 1212795,
-  "seconds": 1145,
-  "baked": "2026-11-18"
+  "seconds": 715,
+  "baked": "2026-11-19"
  },
  "parthenon": {
   "site": "athens",
@@ -3995,8 +3995,8 @@
    }
   ],
   "bytes": 371275,
-  "seconds": 50,
-  "baked": "2026-11-18"
+  "seconds": 42,
+  "baked": "2026-11-19"
  },
  "persepolis-terrace": {
   "site": "persepolis",
@@ -4258,7 +4258,7 @@
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
-  "hash": "0d892cf78a94a7a0",
+  "hash": "d2cd73cef896bbed",
   "rays": 128,
   "probes": 78200,
   "boxes": [
@@ -4281,9 +4281,9 @@
     ]
    }
   ],
-  "bytes": 1197841,
-  "seconds": 123,
-  "baked": "2026-11-18"
+  "bytes": 1198078,
+  "seconds": 161,
+  "baked": "2026-11-19"
  },
  "sainte-chapelle": {
   "site": "paris",
@@ -5204,7 +5204,7 @@
  },
  "venice-san-marco": {
   "site": "venice",
-  "hash": "1d26adf12b5e18a3",
+  "hash": "779af4d7cbd30467",
   "rays": 128,
   "probes": 73554,
   "boxes": [
@@ -5226,9 +5226,9 @@
     ]
    }
   ],
-  "bytes": 1202067,
-  "seconds": 131,
-  "baked": "2026-11-18"
+  "bytes": 1202054,
+  "seconds": 227,
+  "baked": "2026-11-19"
  },
  "versailles-chateau": {
   "site": "versailles",
