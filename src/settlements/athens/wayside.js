@@ -9,7 +9,8 @@ import { frame, B } from '../../styles/greek/agora.js';
 import { blob } from '../../styles/greek/sculpture.js';
 import { vase, leaning } from '../../styles/greek/vessels.js';
 import { WALK, walkDist } from './walk.js';
-import { KERAMEIKOS, FOUNTAIN, SHOPROW, SIMON, RAMP, height, lotAt, inRect, pathAt } from './layout.js';
+import { KERAMEIKOS, FOUNTAIN, SHOPROW, SIMON, RAMP, height, lots, lotAt, inRect, pathAt } from './layout.js';
+import { cfg } from './houses.js';
 import { inscribe } from './script.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -199,4 +200,15 @@ export function steleSites() {
     if (out.length >= 7) break;
   }
   return out;
+}
+
+/**
+ * Where a walk-in house's street door, its dog's place and its court are, for the `n` houses nearest the walk: { l, door, dog, court, out }.
+ * The Agyieus pillar stands left of the door, the dog on the other side; the court's middle is where the hens scratch (fauna.js).
+ */
+export function houseSpots(n = 10) {
+  return lots().filter((l) => l.open && l.kind && l.kind !== 'simon').sort((a, b) => walkDist(a.rect[0], a.rect[1]) - walkDist(b.rect[0], b.rect[1])).slice(0, n).map((l) => {
+    const F = frame(l.rect, l.front), C = cfg(l.kind, F.L, l.seed), pc = C.front.find((c) => c.k === 'passage'), um = (pc.u0 + pc.u1) / 2;
+    return { l, door: F.P(um - 1.35, -0.7), dog: F.P(um + 1.6, -1.1), court: F.P(F.L / 2 + ((l.seed % 5) - 2) * 0.5, (C.FR + F.D - C.RD - C.PD) / 2), out: F.out };
+  });
 }
