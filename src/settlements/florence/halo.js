@@ -25,8 +25,8 @@ export class Halo {
       }
     }
   }
-  /** A disc lying on a horizontal plane (the paving) at height y. */
-  floor(x, y, z, r, rz = r, segs = 6) { this.disc([x, y, z], [1, 0, 0], [0, 0, 1], r, rz, null, segs, [1, 0.42, 0], [0, 0.5, 1]); }
+  /** A disc lying on a horizontal plane (the paving) at height y, of brightness b (1 a lamp's pool). */
+  floor(x, y, z, r, rz = r, segs = 6, b = 1) { this.disc([x, y, z], [1, 0, 0], [0, 0, 1], r, rz, null, segs, [b, 0.42 * b, 0], [0, 0.5, 1]); }
   /** A disc standing on a wall at (x, y, z), the wall's outward normal nh = [u, d]; rw wide and rh high (semi-axes). */
   wall(x, y, z, nh, rw, rh, segs = 6) { this.disc([x, y, z], [-nh[1], 0, nh[0]], [0, 1, 0], rw, rh, nh, segs, [0.9, 0], [0, 1]); }
   /** The glow round a flame: three upright discs crossed at 60°. */

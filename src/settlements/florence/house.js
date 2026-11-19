@@ -336,7 +336,7 @@ export function casaF(el, { bag, col }) {
             const dn = deep ? 2 : 4;
             Lc.add(O, fl(archOutline(c, 0.15, doorW, dh, 'round', dn), 0.01));
             Lc.add(SER, xr(archOutline(c, 0.0, doorW + 0.4, dh, 'round', dn), [archOutline(c, 0.15, doorW, dh, 'round', dn)], -0.03, 0.12));
-            Lc.box(W, c - doorW / 2, 0.15, 0.0, c - doorW / 2 + 0.06, dh, 0.7 * doorW); Lc.box(SER, c - doorW / 2 - 0.3, -0.08, 0.1, c + doorW / 2 + 0.3, 0.1, 0.7);
+            Lc.box(W, c - doorW / 2, 0.15, 0.0, c - doorW / 2 + 0.06, dh, 0.7 * doorW); Lc.box(SER, c - doorW / 2 - 0.3, -0.08, 0.1, c + doorW / 2 + 0.3, 0.1, 0.7); if (!simple && !deep) Lc.box('plaster_damp', c - 0.42, 0.1, 0.3, c + 0.42, 0.108, 0.62);   // the tread hollowed and darkened where feet cross it
             u += doorW + pier; continue;
           }
           const c = u + aw / 2, bot = 0.1;
@@ -350,6 +350,8 @@ export function casaF(el, { bag, col }) {
           const aw2 = box(c - aw / 2 + 0.06, -0.03, 0, c + aw / 2 - 0.06, 0.03, 1.0); aw2.rotateX(-0.45); aw2.translate(0, ysp - 0.3, 0.1); Lc.add(W, aw2);
           Lc.box(IR, c - aw / 2 + 0.06, ysp - 0.34, 0.08, c - aw / 2 + 0.08, ysp - 0.3, 0.1);
           if (!simple && !deep) goods(Lc, el.trade, c - aw / 2 + 0.05, c + aw / 2 - 0.05, ysp, rand, pt);
+          // the soot of a forge or an oven that has drawn through its open front for years: a dark tongue on the wall above the arch's ring
+          if (!simple && !deep && (el.trade === 'smith' || el.trade === 'bread')) { const sh = 0.7 + (Math.abs(Math.floor(c * 97)) % 8) * 0.1; Lc.add(W, fl([[c - aw * 0.28, ysp + 0.28], [c + aw * 0.28, ysp + 0.28], [c + aw * 0.12, ysp + 0.28 + sh], [c - aw * 0.16, ysp + 0.28 + sh * 0.8]], 0.046)); }
           if (!simple && it === 'arch' && (nb === 1 || rand() < 0.8) && !deep) sign(Lc, c + aw / 2 + pier * 0.4, ysp, el.trade, rand);
           u += aw + pier;
         }
@@ -360,6 +362,9 @@ export function casaF(el, { bag, col }) {
         if (!open) Lc.add(O, fl(archOutline(du, 0.15, doorW, dh, 'round', hn), 0.01));
         Lc.add(SER, xr(archOutline(du, 0.0, doorW + 0.4, dh, 'round', hn), [archOutline(du, 0.15, doorW, dh, 'round', hn)], -0.03, 0.12));
         if (!open) Lc.box(W, du - doorW / 2, 0.15, 0.0, du - doorW / 2 + 0.06, dh, 0.7 * doorW); Lc.box(SER, du - doorW / 2 - 0.3, -0.08, 0.1, du + doorW / 2 + 0.3, 0.1, 0.7);
+        if (!simple && !deep) Lc.box('plaster_damp', du - 0.42, 0.1, 0.3, du + 0.42, 0.108, 0.62);   // the tread hollowed and darkened where feet cross it
+        // the lit room's light on the street at night: through the open door of the osteria, and of the homes with a fire
+        if (open && (el.use === 'inn' || el.use === 'home' || el.use === 'kitchen')) { const H = new Halo(); H.floor(du, 0.03, 1.5, 1.9, 1.7, 6, el.use === 'inn' ? 0.62 : 0.4); Lc.add('halo', H.geometry()); }
         const nw = Math.max(0, Math.round((L - 3) / 3.1));
         for (let i = 0; i < nw; i++) {
           const u = (i + 0.5) * L / nw; if (Math.abs(u - du) < 1.6) continue;
