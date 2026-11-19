@@ -7,7 +7,7 @@ import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 import { minoanHorns as horns } from './index.js';
-import { stairLayout, holeRects, buildUpper, onStair } from './upstairs.js';
+import { stairLayout, holeRects, buildUpper, onStair, jbox } from './upstairs.js';
 export { onStair };
 
 const G = 'gypsum_minoan', RED = 'paint_minoan_red', BLK = 'paint_minoan_black';
@@ -76,10 +76,10 @@ function dwelling(el, ctx) {
     bag.add(el.floor ?? 'mud_plaster', box(x0 + T, fl - 0.035, z0 + T, x1 - T, fl, z1 - T));
     // the ceiling: planks on joists under the upper floor (an opening in it where the stair comes up)
     const hole1 = UPH[1] ? [UPH[1]] : [];
-    for (const r of subtractRects([x0 + T, z0 + T, x1 - T, z1 - T], hole1)) bag.add('wood_ochre', box(r[0], ceil - 0.06, r[1], r[2], ceil, r[3]));
+    for (const r of subtractRects([x0 + T, z0 + T, x1 - T, z1 - T], hole1)) if (Math.max(r[2] - r[0], r[3] - r[1]) > 0.45) bag.add('wood_ochre', (upOn ? (...a) => jbox('wood_ochre', ...a) : box)(r[0], ceil - 0.06, r[1], r[2], ceil, r[3]));
     const ax = FR.alongX; for (let u = T + 0.4; u < (ax ? FR.L : FR.D) - T; u += 0.65) {
       const jr = ax ? [x0 + u, z0 + T, x0 + u + 0.14, z1 - T] : [x0 + T, z0 + u, x1 - T, z0 + u + 0.14];
-      for (const r of subtractRects(jr, hole1)) bag.add('timber', box(r[0], ceil - 0.2, r[1], r[2], ceil - 0.06, r[3]));
+      for (const r of subtractRects(jr, hole1)) if (Math.max(r[2] - r[0], r[3] - r[1]) > 0.45) bag.add('timber', box(r[0], ceil - 0.2, r[1], r[2], ceil - 0.06, r[3]));
     }
     if (!upOn) {
       bag.add(PL, box(x0, ceil, z0, x1, y + (n > 1 ? SH : H), z1)); col.rect(el.rect, ceil, y + H); col.floor(el.rect, y + H);

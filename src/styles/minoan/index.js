@@ -91,7 +91,7 @@ function wing(el, { bag, col }) {
     bag.add(G, box(r[0], y, r[1], r[2], y + 1.2, r[3]));
     mass(r, y + 1.2, true);
   }
-  for (const u of ups) { col.floor(u.rect, u.yf); bag.add('wood_ochre', box(u.rect[0] + 0.02, u.yf - 0.2, u.rect[1] + 0.02, u.rect[2] - 0.02, u.yf + 0.015, u.rect[3] - 0.02)); }
+  for (const u of ups) { col.floor(u.rect, u.yf); bag.add('wood_dark', box(u.rect[0] + 0.02, u.yf - 0.2, u.rect[1] + 0.02, u.rect[2] - 0.02, u.yf + 0.015, u.rect[3] - 0.02)); }
   for (const o of holes) {
     for (const r of subtractRects(o.rect, pits.map((p) => p.rect))) col.floor(r, y);
     if (o.h >= H) continue;

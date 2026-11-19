@@ -6,7 +6,7 @@
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 
-export const SH = 2.9, T = 0.5, B0 = T + 0.12;
+export const SH = 2.9, T = 0.5, B0 = T + 0.12 + 0.5;   // (the flights begin half a metre in from the front wall: a flat landing at the top of the odd ones)
 const SW = 1.05, GAP = 0.5, WG = 0.25, SLOPE = 0.77, OPEN = 0.4, G = 'gypsum_minoan', RED = 'paint_minoan_red';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const hashAt = (x, z, seed = 0) => rng(Math.floor(x * 131.7 + z * 977.3 + seed * 7919) + 29);
@@ -36,6 +36,16 @@ export function onStair(FR, UP, u, v, m = 0.35) {
   return u > lo - m && u < hi + m && v < B0 + UP.R + m;
 }
 
+/** A box, one corner a millimetre or two out by a hash of its place: pieces of one material that are all boxes would be one instanced prototype (a draw more); these are merged into the material's mesh. */
+/** (Materials the town and palace already draw as instanced boxes stay plain: more of them join those.) */
+const KEEP = new Set(['gypsum_minoan', 'timber', 'paint_minoan_red', 'plaster', 'rubble', 'plaster_damp', 'plaster_streak', 'paint_ochre', 'egyptian_blue']);
+export const jbox = (mat, ...a) => (KEEP.has(mat) ? box(...a) : jit(...a));
+export function jit(x0, y0, z0, x1, y1, z1) {
+  const g = box(x0, y0, z0, x1, y1, z1), h = hashAt(x0 * 1.3 + z0, y0 * 2.1 + (x1 - x0) * 3.7 + (z1 - z0) * 1.9, 3), a = h(), b = h(), c = h(), P = g.attributes.position.array;
+  for (let i = 0; i < P.length; i += 3) if (Math.abs(P[i] - x1) < 1e-4 && Math.abs(P[i + 1] - y1) < 1e-4 && Math.abs(P[i + 2] - z1) < 1e-4) { P[i] += Math.max(0.0008, (x1 - x0) * (0.0007 + a * 0.0006)); P[i + 1] += Math.max(0.0008, (y1 - y0) * (0.0007 + b * 0.0006)); P[i + 2] += Math.max(0.0008, (z1 - z0) * (0.0007 + c * 0.0006)); }
+  return g;
+}
+
 /** A thin vertical panel (both faces, no top): the rails and curtains. */
 function panel(bag, mat, a, b, ya, yb) {
   const t = [];
@@ -52,11 +62,11 @@ function panel(bag, mat, a, b, ya, yb) {
 export function buildUpper(el, ctx, FR, UP, PL, kind, cls) {
   const { bag, col } = ctx, n = UP.n, { L, D, P } = FR, Y = UP.Y, Q = rectOf(FR), seed = el.seed || 1;
   const holes = holeRects(FR, UP), inner = Q(T, L - T, T, D - T), vB = D - T - 0.12, W = (u0, u1) => [Math.min(u0, u1), Math.max(u0, u1)];
-  const Bx = (mat, u0, u1, v0, v1, ya, yb, solid = false) => { const r = Q(u0, u1, v0, v1); bag.add(mat, box(r[0], ya, r[1], r[2], yb, r[3])); if (solid) col.rect(r, ya, yb); return r; };
+  const Bx = (mat, u0, u1, v0, v1, ya, yb, solid = false) => { const r = Q(u0, u1, v0, v1); bag.add(mat, jbox(mat, r[0], ya, r[1], r[2], yb, r[3])); if (solid) col.rect(r, ya, yb); return r; };
   // ── the floors: planks on joists, less the openings of the stair; the roof's slab the same
   for (let k = 1; k <= n; k++) {
     const top = Y[k], thick = k === n ? 0.2 : 0.15, mat = k === n ? PL : 'wood_ochre';
-    for (const r of subtractRects(inner, holes[k] ? [holes[k]] : [])) { bag.add(mat, box(r[0], top - thick, r[1], r[2], top, r[3])); col.rect(r, top - thick, top); col.floor(r, top); }
+    for (const r of subtractRects(inner, holes[k] ? [holes[k]] : [])) { bag.add(mat, jbox(mat, r[0], top - thick, r[1], r[2], top, r[3])); col.rect(r, top - thick, top); col.floor(r, top); }
   }
   // ── the flights: solid steps (timber above the first), the ramp the walker climbs, the mass under the high part closed
   const dirB = { s: 'n', n: 's', w: 'e', e: 'w' }[FR.f], rev = { n: 's', s: 'n', e: 'w', w: 'e' };
@@ -76,7 +86,7 @@ export function buildUpper(el, ctx, FR, UP, PL, kind, cls) {
   // ── rails round the openings (no top faces), the way off the flight left open at its arrival
   const rail = (u0, u1, v0, v1, yb) => {
     const a = P(u0, v0), b = P(u1, v1), ya = yb;
-    panel(bag, 'timber', a, b, ya, ya + 0.9);
+    panel(bag, 'wood_dark', a, b, ya, ya + 0.9);
     const r = Q(u0 - 0.04, u1 + 0.04, v0 - 0.04, v1 + 0.04); col.rect(r, ya, ya + 0.95);
   };
   for (const f of UP.flights) {
@@ -169,7 +179,7 @@ function furnishUp(el, ctx, FR, UP, kind, { Bx, Q, free, uB }) {
   const table = (u, v, y, w = 1.2, d = 0.7) => { if (Math.abs(u - uB) < w / 2 + 1.0) return;   // no table in the lane from the balcony door
     Bx('timber', u - w / 2, u + w / 2, v - d / 2, v + d / 2, y + 0.5, y + 0.55); for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) Bx('timber', u + a * (w / 2 - 0.06) - 0.03, u + a * (w / 2 - 0.06) + 0.03, v + b * (d / 2 - 0.06) - 0.03, v + b * (d / 2 - 0.06) + 0.03, y, y + 0.5); col.rect(Q(u - w / 2, u + w / 2, v - d / 2, v + d / 2), y, y + 0.55); Bx('wood_dark', u - 0.2, u + 0.2, v + d / 2 + 0.2, v + d / 2 + 0.6, y, y + 0.32); };
   const shelf = (a0, a1, v, y, h0) => { const [p, q] = fu(a0, a1 - a0); Bx('timber', p, q, v, v + 0.28, y + h0, y + h0 + 0.04); for (let u = p + 0.12; u < q - 0.05; u += 0.2) { const [x, z] = P(u, v + 0.14); bag.add('terracotta', lathe([[0.001, 0], [0.06, 0], [0.07, 0.1], [0.04, 0.2], [0.001, 0.2]], 6).translate(x, y + h0 + 0.04, z)); } };
-  const hearth = (u, v, y) => { Bx('rubble', u - 0.5, u + 0.5, v - 0.5, v + 0.5, y, y + 0.14, true); Bx('lacquer_black', u - 0.38, u + 0.38, v - 0.38, v + 0.38, y + 0.14, y + 0.155); const [x, z] = P(u, v); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0], [0.19, 0.12], [0.15, 0.24], [0.17, 0.26], [0.001, 0.26]], 10).translate(x, y + 0.16, z)); };
+  const hearth = (u, v, y) => { Bx('mud_plaster', u - 0.5, u + 0.5, v - 0.5, v + 0.5, y, y + 0.14, true); Bx('lacquer_black', u - 0.38, u + 0.38, v - 0.38, v + 0.38, y + 0.14, y + 0.155); const [x, z] = P(u, v); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0], [0.19, 0.12], [0.15, 0.24], [0.17, 0.26], [0.001, 0.26]], 10).translate(x, y + 0.16, z)); };
   const mat = (u, v, y, w = 0.9, d = 1.8) => Bx('reed_mat', u - w / 2, u + w / 2, v - d / 2, v + d / 2, y, y + 0.03);
   const mid = (free[0] + free[1]) / 2;
   const y1 = Y[1];
@@ -181,7 +191,7 @@ function furnishUp(el, ctx, FR, UP, kind, { Bx, Q, free, uB }) {
     for (let i = 0; i < 12; i++) { const [x, z] = P(lu, lv - 0.7 + i * 0.127); bag.add('terracotta', lathe([[0.001, 0], [0.045, 0], [0.04, 0.09], [0.001, 0.09]], 6).translate(x, y1 + 0.4, z)); }
     col.rect(Q(lu - 0.1, lu + 0.1, lv - 0.9, lv + 0.9), y1, y1 + 1.9); Bx('wood_dark', lu + sg * 0.5 - 0.2, lu + sg * 0.5 + 0.2, lv - 0.2, lv + 0.2, y1, y1 + 0.38);
     for (let i = 0; i < 3; i++) basket(fu(0.5 + i * 0.55, 0.1)[0], vB - 0.5, y1, i === 1 ? 'cloth_white' : 'cloth_red');
-    { const [p] = fu(0.12, 0.1), vs = [D * 0.4, D * 0.62]; for (const v of vs) Bx('timber', p - 0.04, p + 0.04, v - 0.04, v + 0.04, y1, y1 + 1.9, true); Bx('timber', p - 0.03, p + 0.03, vs[0], vs[1], y1 + 1.85, y1 + 1.93); ['cloth_maroon', 'cloth_red', 'cloth_ochre', 'cloth_indigo'].forEach((m, i) => Bx(m, p - 0.07, p + 0.07, vs[0] + 0.1 + i * 0.12 + 0.02, vs[0] + 0.1 + i * 0.12 + 0.12, y1 + 1.0, y1 + 1.85)); }
+    { const [p] = fu(0.12, 0.1), vs = [D * 0.4, D * 0.62]; for (const v of vs) Bx('timber', p - 0.04, p + 0.04, v - 0.04, v + 0.04, y1, y1 + 1.9, true); Bx('timber', p - 0.03, p + 0.03, vs[0], vs[1], y1 + 1.85, y1 + 1.93); ['cloth_red', 'cloth_red', 'cloth_ochre', 'cloth_indigo'].forEach((m, i) => Bx(m, p - 0.07, p + 0.07, vs[0] + 0.1 + i * 0.12 + 0.02, vs[0] + 0.1 + i * 0.12 + 0.12, y1 + 1.0, y1 + 1.85)); }
     bed(0.35, vB - 1.9, y1);
   } else if (kind === 'shop') {
     // the dwelling over the shop: the hearth and its pot, a low table with stools, a shelf of cups, and a curtain across the sleeping place at the back
@@ -195,8 +205,8 @@ function furnishUp(el, ctx, FR, UP, kind, { Bx, Q, free, uB }) {
     basket(fu(0.5, 0.1)[0], D * 0.5, y1, 'cloth_white'); basket(fu(0.5, 0.1)[0], D * 0.5 + 0.7, y1, 'cloth_red'); mat(mid, D * 0.5, y1); Bx('cloth_ochre', mid - 0.3, mid + 0.3, D * 0.5 - 0.5, D * 0.5 + 0.1, y1 + 0.03, y1 + 0.08);
   } else if (FR.L < 7.4) {
     // a lodging: two cells divided by a plastered partition, a mat and a chest in front, the bed and a jar behind
-    const pv = D * 0.5, pa = UP.left ? free[0] + 1.1 : free[0], pb = UP.left ? free[1] : free[1] - 1.1;
-    Bx('plaster', pa, pb, pv - 0.06, pv + 0.06, y1, y1 + 2.5, true);
+    const pv = D * 0.5;
+    for (const [pa, pb] of [[free[0], mid - 0.65], [mid + 0.65, free[1]]]) if (pb - pa > 0.2) Bx('plaster', pa, pb, pv - 0.06, pv + 0.06, y1, y1 + 2.5, true);   // (the doorway between the cells in the middle)
     mat(mid, T + 1.8, y1); chest(0.3, T + 1.4, y1);
     bed(0.4, vB - 2.0, y1); jar(fu(1.9, 0.1)[0], vB - 0.6, y1, 0.45); chest(0.3, vB - 2.8, y1);
   } else {

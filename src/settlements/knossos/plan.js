@@ -160,7 +160,7 @@ for (const l of upstairsHouses()) {
   const c = (sI) => (UP.strip(sI)[0] + UP.strip(sI)[1]) / 2, mid = UP.left ? (L + UP.strip(1)[1]) / 2 : (UP.strip(1)[0] + 0) / 2 + 0.0, free = UP.left ? [UP.strip(1)[1] + 0.55, L - 0.5] : [0.5, UP.strip(1)[0] - 0.55];
   const uM = (free[0] + free[1]) / 2, uB = Math.max(free[0] + 0.9, Math.min(free[1] - 0.9, uM)), R = UP.R, pts = [];
   pts.push([F.du, -1.5], [F.du, 1.0], [c(0), B0 + 0.4], [c(0), B0 + R - 0.15], [c(0), B0 + R + 0.5], [uM, B0 + R + 1.0], [uB, 2.3], [uB, -0.5], [uB, 2.3], [uM, B0 + R + 1.0]);
-  pts.push([c(1), B0 + R + 0.4], [c(1), B0 + 0.0]);
+  pts.push([c(1), B0 + R + 0.4], [c(1), B0 - 0.3]);
   if (n === 2) pts.push([UP.left ? free[0] + 0.3 : free[1] - 0.3, B0 + 0.4], [uM, D * 0.5]);
   else pts.push([c(0), B0 + 0.35], [c(0), B0 + R - 0.15], [c(0), B0 + R + 0.5], [uM, D * 0.5]);
   const w = pts.map(([u, v]) => F.P(u, v)); w.y0 = 0; walks.push(w); void sgn; void mid; void openHouses;
