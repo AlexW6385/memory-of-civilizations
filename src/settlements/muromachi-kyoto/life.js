@@ -32,7 +32,7 @@ export function fronts() {
     const put = (e) => L.push({ y, seed: id(), ...e });
     const P = F.P, out = F.rot + Math.PI;
     // the lantern at the eave, the banner on its bracket at the corner post
-    if (open || R() < 0.3) { const hl = { t: 'hang_lantern', at: P(hw - 0.8, 0.95), y: hook, kind: tr === 'sake' || tr === 'food' || tr === 'tea' ? 'paper' : 'white', drop: 0.25 }; put(hl); L.push(hangHalo(hl, out)); }   // (the halo is pushed, not put: put() draws a seed and would shift every later element)
+    if (open || R() < 0.3) { const hl = { t: 'hang_lantern', at: P(hw - 0.3, 0.95), y: hook, kind: tr === 'sake' || tr === 'food' || tr === 'tea' ? 'paper' : 'white', drop: 0.25 }; put(hl); L.push(hangHalo(hl, out)); }   // (the halo is pushed, not put: put() draws a seed and would shift every later element)
     if (open && frontOf(l) === 'shop') { const sp = spillHalo(P(hw - 0.8, 0.2), out); if (sp) L.push(sp); }
     if (open && R() < 0.55) put({ t: 'shop_sign', at: P(-hw + 0.02, 0.15), rot: out, h: D.two ? D.H - 0.5 : 2.75, cloth: BANNER[tr] || 'cloth_indigo', len: 1.2 + R() * 0.4, out: 0.95, letters: 2 + Math.floor(R() * 2) });
     // the trade's goods in front

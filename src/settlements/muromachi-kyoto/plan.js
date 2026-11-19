@@ -12,6 +12,7 @@ const [x0, z0, x1, z1] = GINKAKU.rect, [gx, gz] = GINKAKU.gate, P = GINKAKU.pond
 const wall = (a, b) => E.push({ t: 'tsuijibei', a, b, y: 0, h: 2.4 });
 wall([x0, z0], [x1, z0]); wall([x1, z0], [x1, z1]); wall([x0, z0], [x0, z1]); wall([x0, z1], [gx - 4.5, z1]); wall([gx + 4.5, z1], [x1, z1]);
 E.push({ t: 'yakumon', at: [gx, gz], y: 0, yaw: 0, w: 3.2 });
+E.push({ t: 'kyoto_board', at: [gx, gz + 0.87], y: 3.2, rot: 0, text: '慈照寺', w: 1.7, h: 0.58 });   // the name on the street side of the gate (Jishō-ji: named for Yoshimasa's posthumous name, 1490)
 // the path from the gate to the court, between the pond and the wall, and round the pond
 E.push({ t: 'lane', rect: [gx - 1.6, P.c[1] + P.r[1] + 4, gx + 1.6, z1], y: 0.02, mat: 'flagstone' });
 E.push({ t: 'lane', rect: [P.c[0] - P.r[0] - 4, P.c[1] + P.r[1] + 3, P.c[0] + P.r[0] + 4, P.c[1] + P.r[1] + 5.4], y: 0.02, mat: 'flagstone' });

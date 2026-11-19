@@ -8,6 +8,7 @@ const [x0, z0, x1, z1] = RYOAN.rect, [gx, gz] = RYOAN.gate, [hx, hz] = RYOAN.hoj
 const wall = (a, b) => E.push({ t: 'tsuijibei', a, b, y: 0, h: 2.2 });
 wall([x0, z0], [x1, z0]); wall([x1, z0], [x1, z1]); wall([x0, z0], [x0, z1]); wall([x0, z1], [gx - 4.5, z1]); wall([gx + 4.5, z1], [x1, z1]);
 E.push({ t: 'yakumon', at: [gx, gz], y: 0, yaw: 0, w: 3.0 });
+E.push({ t: 'kyoto_board', at: [gx, gz + 0.87], y: 3.2, rot: 0, text: '龍安寺', w: 1.7, h: 0.58 });   // the temple's name over the gate
 E.push({ t: 'lane', rect: [gx - 1.4, hz + 7.4, gx + 1.4, gz], y: 0.02, mat: 'flagstone' });
 E.push({ t: 'hojo', at: [hx, hz], y: 0, facing: 'n', W: 26, D: 12 });
 E.push({ t: 'karesansui', rect: RYOAN.garden, y: 0, seed: 15 });
