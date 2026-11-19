@@ -60,11 +60,11 @@ export async function staticBoats() {
 // they put on a cloak or cape (umbrellas are not drawn).
 const CL = { grey: 'cloth_grey', brown: 'cloth_brown', white: 'cloth_white', black: 'cloth_black', red: 'cloth_red', green: 'cloth_green', blue: 'cloth_blue', indigo: 'cloth_indigo', maroon: 'cloth_maroon', ochre: 'cloth_ochre' };
 export const WALKERS = [
-  { id: 'gentleman', weight: 1.1, market: 1.2, el: { dress: 'trousers', hair: 'short', hat: 'brim', over: 'cloak', arms: 'hang', beard: 0.5 }, wet: 'cloak',
+  { id: 'gentleman', weight: 1.1, market: 1.2, el: { dress: 'trousers', hair: 'short', hat: 'brim', over: 'cloak', arms: 'hang', beard: 0.5 },
     c1: [CL.black, CL.black, CL.grey, CL.brown], c2: [CL.black, CL.grey], c3: [CL.black, CL.black, CL.grey], speed: [1.0, 1.3], stride: 1.5 },
   { id: 'clerk', weight: 1.4, market: 0.9, el: { dress: 'trousers', hair: 'short', hat: 'brim', over: 'collar', arms: 'hang' }, wet: 'cloak',
     c1: [CL.grey, CL.brown, CL.black, CL.indigo], c2: [CL.black, CL.grey], c3: [CL.black, CL.brown], speed: [1.2, 1.5], stride: 1.5 },
-  { id: 'lady', weight: 1.1, market: 1.5, el: { dress: 'robe', hair: 'bun', hat: 'brim', over: 'cape', arms: 'hang' }, wet: 'cloak', swing: 0.6,
+  { id: 'lady', weight: 1.1, market: 1.5, el: { dress: 'robe', hair: 'bun', hat: 'brim', over: 'cape', arms: 'hang' }, swing: 0.6,
     c1: [CL.maroon, CL.green, CL.indigo, CL.grey, CL.black, CL.blue], c2: [CL.black, CL.grey], c3: [CL.black, CL.maroon, CL.white], speed: [0.9, 1.15], stride: 1.2, h: [0.9, 0.96] },
   { id: 'workman', weight: 1.5, market: 0.8, el: { dress: 'trousers', hair: 'short', hat: 'cap', over: 'belt', arms: 'hang', beard: 0.4 }, wet: 'cloak',
     c1: [CL.brown, CL.grey, CL.ochre, CL.indigo], c2: [CL.brown, CL.grey, CL.black], c3: [CL.brown, CL.grey, CL.black], speed: [1.1, 1.4], stride: 1.45 },
@@ -76,9 +76,9 @@ export const WALKERS = [
     c1: ['prussian_blue'], c2: ['prussian_blue'], c3: ['prussian_blue'], speed: [0.95, 1.15], stride: 1.55 },
   { id: 'guardsman', weight: 0.35, market: 0.9, el: { dress: 'trousers', hair: 'short', hat: 'cap', over: 'belt', arms: 'hang', beard: 0.5 }, wet: 'cloak',
     c1: [CL.red], c2: ['prussian_blue'], c3: [CL.red], speed: [1.1, 1.3], stride: 1.6 },
-  { id: 'clergyman', weight: 0.4, market: 0.8, el: { dress: 'robe', hair: 'short', hat: 'brim', over: 'cloak', arms: 'hang', beard: 0.3 }, wet: 'cloak',
+  { id: 'clergyman', weight: 0.4, market: 0.8, el: { dress: 'robe', hair: 'short', hat: 'brim', over: 'cloak', arms: 'hang', beard: 0.3 },
     c1: [CL.black], c2: [CL.black], c3: [CL.black], speed: [0.95, 1.2], stride: 1.3 },
-  { id: 'nursemaid', weight: 0.5, market: 1.2, el: { dress: 'robe', hair: 'bun', hat: 'brim', over: 'cape', carry: 'child', arms: 'child' }, wet: 'cloak', swing: 0.4,
+  { id: 'nursemaid', weight: 0.5, market: 1.2, el: { dress: 'robe', hair: 'bun', hat: 'brim', over: 'cape', carry: 'child', arms: 'child' }, swing: 0.4,
     c1: [CL.grey, CL.indigo, CL.brown], c2: [CL.white, CL.black], c3: [CL.black, CL.grey], speed: [0.85, 1.05], stride: 1.15, h: [0.9, 0.95] },
   { id: 'sweep', weight: 0.35, market: 1.0, el: { dress: 'trousers', hair: 'short', hat: 'cap', over: 'belt', carry: 'staff', arms: 'staff', beard: 0.2 },
     c1: [CL.black, CL.grey], c2: [CL.black], c3: [CL.black], speed: [1.0, 1.25], stride: 1.4 },
@@ -94,7 +94,10 @@ export const CREW = {
 };
 export function walkerShapes(sb) {
   const kinds = [...WALKERS.map((k) => [k.id, k]), ['boatman', CREW.boatman], ['passenger', CREW.passenger]];
+  // 36 variants at most in a set (movers-kit.js): every kind near and far (30), and a wet near form (cloak over) for the six kinds
+  // that do not already wear a cloak or cape (the gentleman, lady, clergyman and nursemaid do); beyond `far` the wet kinds stay as dry
   for (const [id, k] of kinds) for (const wet of k.wet ? [false, true] : [false]) for (const far of [false, true]) {
+    if (wet && far) continue;
     const v = sb.variant(`${id}|${wet ? 'wet' : 'dry'}|${far ? 'far' : 'near'}`);
     const el = { ...k.el };
     if (wet) el.over = 'cloak';
