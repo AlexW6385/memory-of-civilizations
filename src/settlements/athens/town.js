@@ -8,6 +8,8 @@ import { storeyOf } from './upstairs.js';
 import { summitLife } from './summit.js';
 import { acropolisWorks, acropolisLife } from './works.js';
 import { fronts, crossings, openLife } from './fronts.js';
+import { stallSites, steleSites, houseSpots } from './wayside.js';
+import { fires } from './nightlight.js';
 import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
 const base = (id, elements) => ({ id, style: 'greek', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-300, 70], facing: 'e' } });
 const OPEN_TRADES = ['bronze', 'shoe', 'cloth', 'wine', 'perfume', 'carpenter'];
@@ -16,23 +18,28 @@ export async function town() {
   for (let i = 0; i < closed.length; i += 120) plans.push(base(`athens-houses-${i / 120}`, closed.slice(i, i + 120).map((l) => ({ t: 'athens_house', rect: l.rect, front: l.front, seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }))));
   // the walk-in houses (§5d): the same plan as Simon's, each with another trade in the shop on the street
   // grouped four to a plan (each distinct material of a plan is a mesh), neighbours together
-  const OT = OPEN_TRADES, sorted = opened.map((l, k) => ({ l, k })).sort((p, q) => Math.round(p.l.rect[1] / 60) - Math.round(q.l.rect[1] / 60) || p.l.rect[0] - q.l.rect[0]);
+  const OT = OPEN_TRADES, all4 = opened.map((l, k) => ({ l, k })).sort((p, q) => Math.round(p.l.rect[1] / 60) - Math.round(q.l.rect[1] / 60) || p.l.rect[0] - q.l.rect[0]);
+  // a walk-in house's element, and its rooms pushed into `rooms`
+  const house = ({ l, k }, rooms) => { const [X0, Z0, X1, Z1] = l.rect, t = 0.5, sz = Z1 - t - 3.1, xl = X0 + t + 4.3, xk = xl + 0.4 + 3.4, tr = OT[k % OT.length];
+    if (l.kind && l.kind !== 'simon') { rooms.push(...houseRooms(l)); return { t: 'athens_walk_house', rect: l.rect, front: l.front, y: l.y, seed: l.seed, kind: l.kind, storey: storeyOf(l) }; }
+    rooms.push(
+      { id: `shop (${tr})`, rect: [X0 + 0.5, Z0 + 0.5, X0 + 5, Z0 + 5.3], y: l.y, kind: 'inner', market: false },
+      { id: 'andron', rect: [X0 + 7.4, Z0 + 0.5, X1 - 0.5, Z0 + 5.3], y: l.y, kind: 'inner' },
+      { id: 'loom room', rect: [X0 + 0.5, sz, xl, Z1 - 0.5], y: l.y, kind: 'inner' },
+      { id: 'kitchen', rect: [xl + 0.4, sz, xk, Z1 - 0.5], y: l.y, kind: 'inner' },
+      { id: 'store', rect: [xk + 0.4, sz, X1 - 0.5, Z1 - 0.5], y: l.y, kind: 'inner' });
+    return { t: 'athens_open_house', rect: l.rect, y: l.y, seed: l.seed, trade: tr }; };
+  // the two houses on the road at the ramp's foot (layout.js walkRoad) go with Simon's plan: the others stay four to a plan as before
+  const sorted = all4.filter(({ l }) => !l.walkRoad), road = all4.filter(({ l }) => l.walkRoad);
   for (let g = 0; g < sorted.length; g += 4) {
-    const grp = sorted.slice(g, g + 4), rooms = [];
-    const els = grp.map(({ l, k }) => { const [X0, Z0, X1, Z1] = l.rect, t = 0.5, sz = Z1 - t - 3.1, xl = X0 + t + 4.3, xk = xl + 0.4 + 3.4, tr = OT[k % OT.length];
-      if (l.kind && l.kind !== 'simon') { rooms.push(...houseRooms(l)); return { t: 'athens_walk_house', rect: l.rect, front: l.front, y: l.y, seed: l.seed, kind: l.kind, storey: storeyOf(l) }; }
-      rooms.push(
-        { id: `shop (${tr})`, rect: [X0 + 0.5, Z0 + 0.5, X0 + 5, Z0 + 5.3], y: l.y, kind: 'inner', market: false },
-        { id: 'andron', rect: [X0 + 7.4, Z0 + 0.5, X1 - 0.5, Z0 + 5.3], y: l.y, kind: 'inner' },
-        { id: 'loom room', rect: [X0 + 0.5, sz, xl, Z1 - 0.5], y: l.y, kind: 'inner' },
-        { id: 'kitchen', rect: [xl + 0.4, sz, xk, Z1 - 0.5], y: l.y, kind: 'inner' },
-        { id: 'store', rect: [xk + 0.4, sz, X1 - 0.5, Z1 - 0.5], y: l.y, kind: 'inner' });
-      return { t: 'athens_open_house', rect: l.rect, y: l.y, seed: l.seed, trade: tr }; });
+    const rooms = [], els = sorted.slice(g, g + 4).map((h) => house(h, rooms));
     plans.push({ ...base(`athens-open-${g / 4}`, els), rooms }); }
+  // (Simon's plan also carries the town's few night fires, nightlight.js: a plan's lights are one flames draw)
   // the house and shop by the south-west corner of the Agora that the finds name Simon the shoemaker's (§5b), walked into
-  plans.push({ ...base('athens-simon', [{ t: 'simon_house', rect: SIMON, y: 0, seed: 410 }]), rooms: [
+  { const rr = [], hs = road.map((h) => house(h, rr));
+  plans.push({ ...base('athens-simon', [{ t: 'simon_house', rect: SIMON, y: 0, seed: 410 }, ...fires(), ...hs]), rooms: [...rr,
     { id: 'shoemaker shop', rect: [SIMON[0] + 0.5, SIMON[1] + 0.5, SIMON[0] + 5, SIMON[1] + 5.3], y: 0, kind: 'inner', market: false },
-    { id: 'andron', rect: [SIMON[0] + 7.4, SIMON[1] + 0.5, SIMON[2] - 0.5, SIMON[1] + 5.3], y: 0, kind: 'inner' }] });
+    { id: 'andron', rect: [SIMON[0] + 7.4, SIMON[1] + 0.5, SIMON[2] - 0.5, SIMON[1] + 5.3], y: 0, kind: 'inner' }] }); }
   // the potters' quarter of the Kerameikos (§11a): workshops in two rows on a lane, each walked into
   plans.push({ ...base('athens-kerameikos', WORKSHOPS.map((w, i) => ({ t: 'potter_works', ...w, y: 0, firing: i % 4 === 1 }))), rooms: WORKSHOPS.map((w, i) => {
     const [x0, z0, x1, z1] = w.rect, n = w.front === 'n';
@@ -52,7 +59,9 @@ export async function town() {
   ), rooms: [{ id: 'palaestra', rect: PALAESTRA, y: 0, kind: 'open' }] });
   // the street: what stands before the fronts, the herms at the lane crossings, the wells, the people of the fronts and of the walk-in houses
   { const { herms, wells } = crossings();
-    plans.push(base('athens-herms', herms.map((h) => ({ t: 'herm', ...h }))));
+    // the herms' plan also carries the visitor's walk (§18): the roadside stalls with their keepers, the stelae of decrees, the conical pillar of Apollo Agyieus before each walk-in house's door (one plan: fewer draws)
+    plans.push(base('athens-herms', [...herms.map((h) => ({ t: 'herm', ...h })), ...stallSites().map((s) => ({ t: 'athens_stall', ...s })), ...steleSites().map((s) => ({ t: 'athens_stele', ...s })),
+      ...houseSpots(10).map(({ l, door: [x, z] }) => ({ t: 'athens_agyieus', at: [x, z], y: l.y })) ]));
     plans.push({ ...lifePlan(), id: 'athens-fronts', elements: [...fronts(), ...wells, ...openLife()] }); }
   plans.push({ ...lifePlan(), id: 'athens-summit-life', elements: [...summitLife(), ...acropolisLife()] });
   plans.push(...acropolisWorks());

@@ -839,4 +839,5 @@ export function installVoices(Music) {
   for (const [k, v] of Object.entries(OTTOMAN_VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
   Music.prototype.seasonDoy = function seasonDoy() { return this.doyOverride ?? doyOf(ENV.seasonWinter.value, ENV.seasonAutumn.value); };
 }
+import { ATHENS_VOICES, ATHENS_GAIN } from './voices-athens.js'; Object.assign(VOICES, ATHENS_VOICES); Object.assign(GAIN, ATHENS_GAIN);   // Athens' voices (docs/settlements/athens.md §20)
 import { VOICES_FLORENCE } from './voices-florence.js'; Object.assign(VOICES, VOICES_FLORENCE);       // (Florence's own: the market's cries, the chain, the cleaver, the weirs)

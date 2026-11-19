@@ -4,6 +4,7 @@
 import { WAY, AGORA, ACRO, lots, laneRects } from './layout.js';
 import { WORKSHOPS } from './quarters.js';
 import { ground } from './ground.js';
+import { houseSpots } from './wayside.js';
 
 const fish = [];
 const flights = [
@@ -21,5 +22,17 @@ for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: ground.heig
 // house sparrows on the lanes before the houses nearest the visitor's ways, swallows skimming the longest lanes between the roofs
 { let n = 0; for (const l of lots()) { if (l.tier < 2 || n >= 70 || (l.seed % 3)) continue; const [x0, z0, x1, z1] = l.rect, f = l.front, x = f === 'e' ? x1 + 1.6 : f === 'w' ? x0 - 1.6 : (x0 + x1) / 2 + ((l.seed % 7) - 3), z = f === 's' ? z1 + 1.6 : f === 'n' ? z0 - 1.6 : (z0 + z1) / 2; perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z), rot: (x * 5) % 3, range: [1.6, 1.4] }); n++; } }
 for (const r of laneRects().filter((q) => q[2] - q[0] > 40).sort((a, b) => (b[2] - b[0]) - (a[2] - a[0])).slice(0, 4)) { const z = (r[1] + r[3]) / 2; flights.push({ kind: 'swallow', n: 3, lane: { a: [r[0] + 4, z], b: [r[2] - 4, z] }, y: [3, 8], speed: 9 }); }
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §21) ──
+// a dog at the door of each of the four walk-in houses nearest the walk, hens and a cock in the courts of the next three, a cat asleep on the floor of
+// each of three stoas [inferred: the usual picture of a Greek street; no donkey or owl model yet]
+const critters = [];
+const houses = houseSpots(10);
+houses.slice(0, 4).forEach(({ l, dog: [x, z], out }, i) => critters.push({ model: 'dog', at: [x, l.y, z], rot: Math.atan2(out[0], out[1]) + (i % 2 ? 0.6 : -0.6), range: [9, 3.5] }));
+houses.slice(4, 7).forEach(({ l, court: [x, z] }, i) => {
+  for (const [model, dx, dz, size] of [['rooster', 0, 0, 1], ['hen_brown', 1.1, 0.5, 1], ['hen_white', -0.9, 0.9, 0.96], ['hen_brown', 0.3, -1.0, 0.94]]) critters.push({ model, at: [x + dx, l.y, z + dz], rot: i + dx, range: [3.4, 1.4], size });
+});
+critters.push({ model: 'cat_tabby', at: [-240, 0.37, -122.6], rot: 0.4, range: [7, 2.5] });           // the South Stoa's floor, in the colonnade
+critters.push({ model: 'cat_orange', at: [-283.4, 0.42, -172], rot: 1.2, range: [7, 2.5] });          // the Stoa of Zeus
+critters.push({ model: 'cat_tabby', at: [-230, 0.64, -226.6], rot: 2.4, range: [7, 2.5] });           // the Painted Stoa
 void WAY; void AGORA; void ACRO;
-export default { fish, flights, perches };
+export default { fish, flights, perches, critters };
