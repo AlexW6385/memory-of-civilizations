@@ -10,7 +10,8 @@
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { STYLES } from '../../core/build.js';
 import { GROUND, BRIDGE, RADIUS } from './layout.js';
-import { nightSites, nightLots } from './town.js';
+import { nightSites } from './town.js';
+import { nightLots } from './open.js';
 import { westminster, bridge } from './plan.js';
 import { rng, terraceWindows, shopSpec, shopWindows, pubWindows } from '../../styles/victorian/upstairs.js';
 
