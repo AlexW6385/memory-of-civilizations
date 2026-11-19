@@ -110,7 +110,7 @@ export function bytesOf(root) {
 /** Static meshes merged across a settlement's plans (src/engine/merge.js); `?merge=0` keeps them per plan, to compare. */
 const MERGE = new URLSearchParams(globalThis.location?.search ?? '').get('merge') !== '0';
 const NO_SHADOW = new Set(['water', 'glass_outer', 'glass_topaz', 'opening', 'daylight', 'daylight_plain']);
-const NO_SHADOW_KINDS = new Set(['glow', 'water', 'foam']);
+const NO_SHADOW_KINDS = new Set(['glow', 'water', 'foam', 'halo']);
 const castsShadow = (mat) => !NO_SHADOW.has(mat) && !NO_SHADOW_KINDS.has(MATERIALS[mat]?.kind);
 
 /**

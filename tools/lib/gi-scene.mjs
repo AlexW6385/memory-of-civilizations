@@ -54,7 +54,7 @@ function albedoOf(mat) {
   return pp ? a.map((v, k) => v * (1 - pp.share) + pp.paper[k] * (1 - PAPER.T) * pp.share) : a;
 }
 const SKIP = new Set(['water', 'flame']);
-const SKIP_KINDS = new Set(['water', 'foam']);
+const SKIP_KINDS = new Set(['water', 'foam', 'halo']);
 
 /** Every settlement's landmark plans: [{ site, plan }] (features and plans without rooms included). */
 export async function landmarkPlans(only = null) {

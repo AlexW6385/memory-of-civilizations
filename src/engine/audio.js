@@ -5,6 +5,7 @@
 import { impulseResponse } from './acoustics.js';
 import { LIFE } from './soundscape.js';
 import { THUNDER } from './env.js';
+import { installVoices } from './voices.js';
 
 const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 // the first three formants (Hz) of the vowels a male voice sings, for the street calls and chants
@@ -114,7 +115,8 @@ export class Music {
     while (THUNDER.length) { const th = THUNDER.shift(); this.thunder(t + th.delay, th.dist, th.pan); }
     a.rainG.gain.setTargetAtTime(rain * 0.09, t, 1.5);
     a.windG.gain.setTargetAtTime(0.004 + wind * 0.05, t, 2.5);
-    a.muffle.frequency.setTargetAtTime(indoors ? 900 : 18000, t, 0.8);
+    this.wind = wind;
+    a.muffle.frequency.setTargetAtTime(indoors ? (this.roomCut || 900) : 18000, t, 0.8);   // (roomCut: a place's own rooms' colour, voices.js)
   }
 
   /**
@@ -152,7 +154,7 @@ export class Music {
    * knock, a cart, hooves) or, in a modern city, the hum of traffic, and rain on the roofs. Levels
    * 0…1; indoors muffles them with the weather. voices, animals: { name: weight }.
    */
-  place({ water = 0, birds = 0, crickets = 0, town = 0, traffic = 0, voices = null, cicadas = 0, frogs = 0, animals = null, dawn = 0, roof = 'tile', rain = 0, indoors = false } = {}) {
+  place({ water = 0, birds = 0, crickets = 0, town = 0, traffic = 0, voices = null, cicadas = 0, frogs = 0, animals = null, dawn = 0, roof = 'tile', rain = 0, indoors = false, at = null } = {}) {
     const ctx = this.ctx;
     if (!ctx || !this.amb) return;
     if (!this.plc) {
@@ -209,7 +211,9 @@ export class Music {
     }
     // under a roof one hears the rain on it above all; outside, on the roofs and the paving round
     P.patG.gain.setTargetAtTime(rain * (indoors ? 0.16 : 0.07), t, 1.5);
-    Object.assign(P, { birds, crickets, town, traffic, voices, animals, frogs, dawn, water, rain, life: animals?.[LIFE] || null });
+    Object.assign(P, { birds, crickets, town, traffic, voices, animals, frogs, dawn, water, rain, indoors, at, life: animals?.[LIFE] || null });
+    // the room one is in (a place's own map says which kind), for what is heard inside
+    P.room = indoors && at && P.life?.map ? P.life.map.roomAt(at.x, at.z, at.y) : null;
     this.lifeLayers(P.life, t);
   }
 
@@ -219,7 +223,8 @@ export class Music {
    */
   lifeLayers(L, t) {
     const ctx = this.ctx, P = this.plc;
-    const day = Math.max(0, Math.min(1, (P.town - 0.4) / 0.5)), hubWant = L?.market ? L.market * day : 0;
+    if (L?.map) this.placedLayers(L, t);
+    const day = Math.max(0, Math.min(1, (P.town - 0.4) / 0.5)), hubWant = L?.market ? L.market * day * (L.map ? L.map.townNear(this.lis().x, this.lis().z) : 1) : 0;
     if (hubWant > 0.01 && !P.hub) {
       // three bands of noise, each swelling at a syllable's rate (3–6 Hz) out of step with the rest:
       // a crowd talking, with no word in it
@@ -441,7 +446,7 @@ export class Music {
       this.bird(P.voices ? Music.pick(P.voices) : 'warbler', t + 0.05, P.birds);
       P.nextBird = t + (1.5 + Math.random() * 6) / (0.3 + P.birds);
     }
-    if (P.crickets > 0.02 && t > P.nextCricket) {
+    if (P.crickets > 0.02 && t > P.nextCricket && !P.life?.map) {
       const f = 4200 + Math.random() * 600;
       for (let k = 0; k < 3; k++) {
         const o = ctx.createOscillator(), g = ctx.createGain(), w = t + k * 0.06;
@@ -450,7 +455,7 @@ export class Music {
       }
       P.nextCricket = t + 0.35 + Math.random() * 0.9;
     }
-    if (P.frogs > 0.02 && t > P.nextFrog) {
+    if (P.frogs > 0.02 && t > P.nextFrog && !P.life?.map) {
       // a frog's croak: a quick train of pulses round a few hundred hertz
       const f = 220 + Math.random() * 380, n = 2 + Math.floor(Math.random() * 5);
       for (let k = 0; k < n; k++) this.tone(t + k * 0.11, [[0, f], [0.06, f * 0.85]], 0.07, 0.012 * P.frogs, P.out, 'sawtooth', ['bandpass', f * 2.5, 4]);
@@ -470,6 +475,7 @@ export class Music {
       P.nextHooves = t + 15 + Math.random() * 40;
     }
     this.drainCues(t);
+    this.aimAll(t);
     if (P.life) this.lifeEvents(P.life, t);
     if (P.town > 0.05 && t > P.nextKnock) {
       // a knock: a hammer, a door, a pot set down — a short filtered click
@@ -506,6 +512,7 @@ export class Music {
 
   /** The events of a place's life, by what is near and the hour (day: the town's din is up). */
   lifeEvents(L, t) {
+    if (L.map) { this.placed(L, t); return; }       // a place with a map has its sounds placed in it (voices.js)
     const P = this.plc, r = Math.random;
     const day = P.town > 0.5, night = P.crickets > 0.02 && P.town > 0.05, wet = P.water, calm = P.rain < 0.6;
     const due = (k, gap) => { if (!P[k]) P[k] = t + gap * (0.2 + 0.8 * r()); return t > P[k]; };   // the first falls soon
@@ -536,18 +543,18 @@ export class Music {
   }
 
   /** The water slapping a stone wall: a wet slap and, often, the hollow glug of the wall's hollow. */
-  lap(t, w) {
-    const out = this.plc.out, r = Math.random;
+  lap(t, w, dest = this.plc.out) {
+    const out = dest, r = Math.random;
     this.burst(t, 0.16 + r() * 0.12, 500 + r() * 700, 1.3, 0.05 * w * (0.5 + r() * 0.5), out);
     if (r() < 0.6) this.tone(t + 0.03, [[0, 240 + r() * 120], [0.07, 520 + r() * 200]], 0.12, 0.01 * w, out);
   }
 
   /** A drip from the eaves into a stone gutter or the canal: a small bright plink, or a bubble. */
-  drip(t, lv) {
+  drip(t, lv, dest = this.plc.out) {
     const ctx = this.ctx, r = Math.random, f = 1200 + r() * 1400, o = ctx.createOscillator(), g = ctx.createGain();
     o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(r() < 0.35 ? f * 1.8 : f * 0.7, t + 0.05);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.011 * lv, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
-    o.connect(g); g.connect(this.plc.out); o.start(t); o.stop(t + 0.1);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.1);
   }
 
   /** A hollow wooden knock (a clapper, a wooden fish): the board's note, falling, and a click. */
@@ -714,7 +721,7 @@ export class Music {
    * one low note by a chorus (vowels of "na-mo-e-mi-tuo-fo"), a step up at the end of each phrase
    * of six. One voice for the whole chant, its pitch and vowel set up front; the knocks are cued.
    */
-  chant(when, n, level, dest) {
+  chant(when, n, level, dest, drone = false) {
     const beat = 0.8, V = ['a', 'o', 'e', 'i', 'o', 'o'], v = this.vox(dest, 1500, null, true), f0 = 112;
     v.oscs.forEach((o) => o.frequency.setValueAtTime(f0, when));
     v.bps.forEach((b, i) => b.frequency.setValueAtTime(VOWEL.a[i], when));
@@ -728,6 +735,14 @@ export class Music {
       this.cue(w, (x) => this.knock(x, 700, level * 1.5, dest, 0.11));
     }
     const end = when + n * beat;
+    if (drone) {
+      // under the chant the long low hum of the monks' breath: two low notes (an octave under the chant and its fifth), swelling slowly
+      const ctx = this.ctx, g = ctx.createGain(), lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 260;
+      g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(level * 0.7, when + 3); g.gain.setValueAtTime(level * 0.7, end - 2); g.gain.exponentialRampToValueAtTime(0.0001, end + 2);
+      for (const [f, ty, a] of [[56, 'sine', 1], [84, 'triangle', 0.5], [112.4, 'sine', 0.4]]) { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = ty; o.frequency.value = f; og.gain.value = a; o.connect(og); og.connect(lp); o.start(when); o.stop(end + 2.1); }
+      lp.connect(g); g.connect(dest);
+    }
     v.env.gain.exponentialRampToValueAtTime(0.0001, end + 0.5);
     v.oscs.forEach((o) => { o.start(when); o.stop(end + 0.55); });
     return end;
@@ -742,13 +757,15 @@ export class Music {
     const ctx = this.ctx;
     if (!ctx || ctx.state !== 'running' || !this.plc) return;
     const t0 = ctx.currentTime + 0.2, [kind, arg] = ev.split(':');
-    if (t0 < (this.ringBusy || 0) && kind !== 'quarter' && kind !== 'watch') return;   // one thing at a time (but for the quarters and the watchman, who go their own way)
+    if (t0 < (this.ringBusy || 0) && kind !== 'quarter' && kind !== 'watch' && kind !== 'tower') return;   // one thing at a time (but for the quarters and the watchman, who go their own way)
     if (!this.far) {
       this.far = ctx.createGain(); this.far.gain.value = 1;
       const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
       this.far.connect(lp); lp.connect(this.amb.muffle);
     }
     const out = this.far, N = +arg || 0;
+    // a place with a map (Suzhou) hears each bell, drum and chant from where it is: the temple's halls, the old city's towers, Hanshan
+    const M = this.plc.life?.map, place = (at, r50, dur, o = {}) => (M ? this.src(at, r50, { dur, ...o }) : out);
     let end = t0;
     const strokes = (n, every, fn) => { for (let k = 0; k < n; k++) fn(t0 + k * every, k); end = Math.max(end, t0 + n * every); };
     switch (kind) {
@@ -781,9 +798,17 @@ export class Music {
       }
       case 'toki': strokes(N, 7, (w) => this.bonsho(w, 98, 0.06, out)); break;
       case 'bonsho': strokes(9, 9, (w) => this.bonsho(w, 88, 0.07, out)); break;
-      case 'hanshan': strokes(12, 8, (w) => this.bonsho(w, 104, 0.04, out)); break;   // across the water, far
+      case 'hanshan': { const o = place(M?.FAR.hanshan, 2500, 120); strokes(12, 8, (w) => this.bonsho(w, 104, 0.04, o)); break; }   // across the water, far
+      case 'tower': {                         // the old city's towers, a kilometre off: the evening drum in rolls, the morning bell in slow strokes
+        const o = place(M?.FAR.tower, 600, 90);
+        if (arg === 'pm') end = this.drumRolls(t0, o, 3); else strokes(12, 4.2, (w) => this.bonsho(w, 110, 0.05, o));
+        if (o.emitter) o.emitter.until = end + 2;
+        break;
+      }
       case 'watch': {                         // the watchman at the watch's start: clapper beats, N strokes of the gong, the call
-        const bus = this.spot(out, -0.4 + Math.random() * 0.8, 0, 12, 3200, 1);
+        // with a map: on the street nearest the listener, walking; else (or none near) far off
+        const l = M ? this.lis() : null, tr = M ? M.streetTrack(l.x, l.z, Math.random, 120, 30) : null, mv = tr ? this.along(tr.pts, 1.0) : null;
+        const bus = mv ? this.src(mv, 12, { dur: mv.dur + 5 }) : this.spot(out, -0.4 + Math.random() * 0.8, 0, 12, 3200, 1);
         for (const d of [0, 1.1, 1.4, 3.4, 4.5, 4.8]) this.cue(t0 + d, (w) => this.knock(w, d % 3.4 ? 960 : 820, 0.04, bus));
         for (let k = 0; k < N; k++) this.cue(t0 + 7.5 + k * 2.4, (w) => this.gong(w, 330, 0.035, bus));
         this.cue(t0 + 8.5 + N * 2.4, (w) => this.cry(w, 125, FIRE_CALL, 0.045, bus, { cutoff: 3500 }));
@@ -792,18 +817,21 @@ export class Music {
       case 'temple-am':
       case 'temple-pm': {                     // 晨钟暮鼓: the bell then the drum at dawn, the drum then the bell at dusk, then the service
         // the bell's 108 strokes (18 fast, 18 slow, 18 between, twice) shortened to 6 + 6 + 6
-        const bell = (at) => { let w = at; for (const [n, gap, dec] of [[6, 1.25, 0.45], [6, 4.2, 1], [6, 2.5, 0.7]]) for (let k = 0; k < n; k++) { this.cue(w, (x) => this.templeBell(x, 110, 0.06, out, dec)); w += gap; } return w; };
+        // the bell in the east side hall, the drum in the west one (dong zhong xi gu), the chant in the main hall
+        const outB = place(M?.TEMPLE.bell, 70, 260), outD = place(M?.TEMPLE.drum, 60, 260), outC = place(M?.TEMPLE.hall, 24, 260, { inside: 'temple:hall' });
+        const bell = (at) => { let w = at; for (const [n, gap, dec] of [[6, 1.25, 0.45], [6, 4.2, 1], [6, 2.5, 0.7]]) for (let k = 0; k < n; k++) { this.cue(w, (x) => this.templeBell(x, 110, 0.06, outB, dec)); w += gap; } return w; };
         const drum = (at) => {                // one roll on the great drum, quickening and dying away (as drumRolls), a beat a cue
           let w = at, gap = 0.9;
           for (let k = 0; k < 24; k++) {
             const v = 0.06 * (0.5 + 0.5 * Math.sin(Math.PI * k / 24));
-            this.cue(w, (x) => { this.tone(x, [[0, 72], [0.25, 48]], 0.6, v, out); this.burst(x, 0.08, 700, 1, 0.02, out); });
+            this.cue(w, (x) => { this.tone(x, [[0, 72], [0.25, 48]], 0.6, v, outD); this.burst(x, 0.08, 700, 1, 0.02, outD); });
             w += gap; gap = Math.max(0.12, gap * 0.88);
           }
           return w + 1.5;
         };
         const e = kind === 'temple-am' ? drum(bell(t0) + 1.5) : bell(drum(t0) + 0.5);
-        end = this.chant(e + 3, 56, 0.035, out);
+        end = this.chant(e + 3, 56, 0.035, outC, true);
+        for (const b of [outB, outD, outC]) if (b.emitter) b.emitter.until = end + 3;
         break;
       }
       case 'bosingak': strokes(33, 5, (w) => this.bonsho(w, 82, 0.065, out, 0.33)); break;   // the great bell's slow beat
@@ -1068,6 +1096,7 @@ export class Music {
    */
   surround(dists) {
     if (!this.ctx) return;
+    this.walls = dists;
     const t = this.ctx.currentTime;
     dists.forEach((d, i) => {
       const tap = this.taps[i];
@@ -1406,3 +1435,5 @@ export class Music {
     }
   }
 }
+
+installVoices(Music);
