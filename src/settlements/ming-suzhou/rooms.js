@@ -7,6 +7,7 @@
 const BOLT = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_grey', 'cloth_brown', 'cloth_black'];
 
 import { NEW_USES, groundExtra, upperExtra } from './rooms2.js';
+import { HOUSEHOLD_USES, groundHouse, upperHouse, householdBits } from './rooms3.js';
 
 export function kit(c) {
   const { B, blk, lat, rand } = c;
@@ -191,6 +192,8 @@ export function groundFit(c) {
     k.lamp((a0 + a1) / 2, 3.4, y0 + 2.2);
   }
   if (NEW_USES.includes(use)) groundExtra(c, { ...k, B, blk });
+  if (HOUSEHOLD_USES.includes(use)) groundHouse(c, k);
+  householdBits(c, k, 0);
   void P; void blk; void lay;
 }
 function lat0(c, mat, a, b, yy) { c.lat(mat, [[0.001, 0], [0.08, 0.01], [0.1, 0.1], [0.06, 0.16], [0.001, 0.16]], 8, a, b, yy); }
@@ -296,5 +299,7 @@ export function upperFit(c) {
     blk(0.25, 2.95, 0.45, 3.95, y, y + 1.3);
   }
   if (NEW_USES.includes(use)) upperExtra(c, k);
+  if (HOUSEHOLD_USES.includes(use)) upperHouse(c, k);
+  householdBits(c, k, 1);
   void backJars; void ibU;
 }
