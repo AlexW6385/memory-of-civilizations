@@ -319,6 +319,8 @@ function suzhouShop(el, { bag, col }) {
     bag.addInstance(o.m, far.clone(), _gm, { real: o.m, reach: 230 });
   };
   const tc = TRADE_CHAR[trade] || '永';
+  // the doorways in the street before this shop (its own, and a neighbour's that falls in its front): spans along the front kept clear of pole, shutters and goods
+  const gaps = el.gaps ?? (el.gap ? [el.gap] : []), inGap = (x0, x1) => gaps.some((g) => x1 > g[0] && x0 < g[1]);
 
   // the name board: over the shutters on the shop board, or on the beam where there is none; its three characters
   // (the house's two-character name, then the trade's own) are 0.34 m tall, so that they read from across the street
@@ -344,7 +346,8 @@ function suzhouShop(el, { bag, col }) {
     for (const ry of [Math.PI / 2, -Math.PI / 2]) chars.forEach((ch, j) => glyph(ch, { m: 'paint_ochre', x: x + Math.sin(ry) * 0.036, z: zPost + 0.81, y: top - 0.42 - j * 0.34, ry, k: 0.31 }));
   }
   if (!el.water) {
-    const x = -side * (L / 2 - 0.2), zp = 0.2, bn = BANNER[trade];
+    let x = -side * (L / 2 - 0.2); const zp = 0.2, bn = BANNER[trade];
+    if (inGap(x - 0.5, x + 0.5) && !inGap(-x - 0.5, -x + 0.5)) x = -x;               // (a doorway at that end: the pole stands at the other)
     put('pole', { x, z: zp, k: 1 });
     // the banner at the end of the cross-arm
     const hang = { x, z: zp, y: 4.28 };
@@ -357,10 +360,10 @@ function suzhouShop(el, { bag, col }) {
       put('hlantern', hang);
       for (const ry of [Math.PI / 2, -Math.PI / 2]) glyph(tc, { m: 'cloth_black', x: x + Math.sin(ry) * 0.222, z: zp + 0.5, y: 4.28 - 0.7, ry, k: 0.26 });
     } else if (bn) put(bn, bn === 'humbrella' ? { mats: { c: pick(['cloth_ochre', 'cloth_red', 'cloth_indigo']) }, ...hang } : bn === 'hbook' ? { mats: { c: pick(BOOKS) }, ...hang } : hang);
-    if (col) col.circle(...loc(x, zp), 0.22, y0, y0 + 4.6);
+    if (col && !inGap(x - 0.5, x + 0.5)) col.circle(...loc(x, zp), 0.22, y0, y0 + 4.6);
   }
   // the shutters of the shop, some stacked against the end post (the boards taken down at the opening)
-  if (!el.water && L > 3.2 && rand() < 0.65) put('shutters', { x: side * (L / 2 - 0.34), z: 0.0 - 0.15, ry: Math.PI, k: 1 });
+  if (!el.water && L > 3.2 && rand() < 0.65) { let sx = side * (L / 2 - 0.34); if (inGap(sx - 0.45, sx + 0.45)) sx = -sx; if (!inGap(sx - 0.45, sx + 0.45)) put('shutters', { x: sx, z: 0.0 - 0.15, ry: Math.PI, k: 1 }); }
   // goods on the apron and on trestles in front of the shutters, by trade
   if (!el.water) {
     const list = GOODS[trade] || GOODS.cloth, free0 = -L / 2 + 0.62, free1 = L / 2 - 0.62;
@@ -370,7 +373,7 @@ function suzhouShop(el, { bag, col }) {
     for (const [name, m, top] of order) {
       const w = (name === 'trestle' || top ? 1.35 : name === 'umbrellas' || name === 'fans' || name === 'mortar' || name === 'woks' ? 1.4 : 1.2);
       let xc = x + dir * w / 2;
-      if (el.gap && xc + w / 2 > el.gap[0] && xc - w / 2 < el.gap[1]) { x = dir > 0 ? el.gap[1] : el.gap[0]; xc = x + dir * w / 2; }   // (the doorway of a climbable house is kept clear)
+      for (const g of gaps) if (xc + w / 2 > g[0] && xc - w / 2 < g[1]) { x = dir > 0 ? g[1] : g[0]; xc = x + dir * w / 2; }   // (the doorways are kept clear)
       if (!first && (xc - w / 2 < free0 - 0.25 || xc + w / 2 > free1 + 0.25)) break;
       first = false;
       const mats = { ...m };

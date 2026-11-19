@@ -157,7 +157,12 @@ function walkPlans() {
   for (const [k, list] of walkCells()) {
     const [i, j] = k.split(',').map(Number), center = [i * WALK_CELL + WALK_CELL / 2, j * WALK_CELL + WALK_CELL / 2];
     plans.push({ ...base(`ming-suzhou-walk-${k}`, list.map(([l, s]) => ({ ...walkElement(l, s), t: 'walk_near' }))), style: 'suzhou-quarter', near: WALK_NEAR, center });
-    plans.push({ ...base(`ming-suzhou-walk-${k}-far`, list.map(([l, s]) => ({ ...walkElement(l, s), t: 'walk_far' }))), style: 'suzhou-quarter', far: WALK_NEAR, center, nocollide: true });
+    // (and the doorway lanes: a rectangle each that the street-life pass of src/objects/life.js reads as a footprint, so that none of its people, animals or things is put in one)
+    const lanes = laneList().filter((ln) => list.some(([l]) => l === ln.lot)).map((ln) => {
+      const c = [[-1.0, -0.2], [1.0, -0.2], [-1.0, 3.4], [1.0, 3.4]].map(([a, o]) => [ln.p[0] + ln.u[0] * a + ln.n[0] * o, ln.p[1] + ln.u[1] * a + ln.n[1] * o]);
+      return { t: 'door_clear', rect: [Math.min(...c.map((q) => q[0])), Math.min(...c.map((q) => q[1])), Math.max(...c.map((q) => q[0])), Math.max(...c.map((q) => q[1]))] };
+    });
+    plans.push({ ...base(`ming-suzhou-walk-${k}-far`, [...list.map(([l, s]) => ({ ...walkElement(l, s), t: 'walk_far' })), ...lanes]), style: 'suzhou-quarter', far: WALK_NEAR, center, nocollide: true });
     const folk = walkFolk(list);
     if (folk.length) plans.push({ ...base(`ming-suzhou-walk-${k}-folk`, folk), style: 'life', near: WALK_NEAR, center });
   }
@@ -169,7 +174,7 @@ function walkFolk(list) {
   for (const [l, s] of list) {
     if (s.type !== 'shop') continue;
     const r = rng((l.seed ^ 0x5bd1e995) >>> 0), F = frameOf(l.rect, false, l.front), lay = layoutOf(F.L), cEnd = lay.dc - 0.7;
-    const a = Math.max(0.9, cEnd * 0.5), p = F.at(a, 1.4), q = F.at(a, 0.4);
+    const a = Math.max(0.9, cEnd * 0.5), p = F.at(a, 1.15), q = F.at(a, 0.15);
     const e = { t: 'figure', at: p, y: LEVEL.street + 0.45, rot: Math.atan2(-(q[0] - p[0]), -(q[1] - p[1])), seed: Math.floor(r() * 1e9), dress: r() < 0.7 ? 'robe' : 'trousers', cloth: pick(r, CLOTH), cloth2: pick(r, CLOTH), skin: r() < 0.7 ? 'skin_light' : 'skin_medium', hat: pick(r, ['none', 'none', 'cap']), carry: 'none', pose: 'stand' };
     if (CAP_MING && e.hat === 'cap') e.cap = 'ming';
     if (CAP_MING) e.hair = 'netknot';
@@ -179,17 +184,19 @@ function walkFolk(list) {
 }
 
 /** The doorways of the walk's lots, each { p (on the lot's front line), n (out into the street), u (along the front) }. */
+let LANES = null;
 function laneList() {
+  if (LANES) return LANES;
   const out = [];
   for (const [l, s] of walkSet()) {
     const F = frameOf(l.rect, false, l.front), dc = s.type === 'shop' ? layoutOf(F.L).dc : (analyse(walkElement(l, s)).dc ?? F.L / 2);
-    out.push({ p: F.at(dc, 0), n: { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[l.front], u: F.u });
+    out.push({ p: F.at(dc, 0), n: { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[l.front], u: F.u, lot: l });
   }
-  return out;
+  return (LANES = out);
 }
-const MOVABLE = new Set(['figure', 'animal', 'chickens', 'barrow', 'drying_tray']);
+const MOVABLE = { figure: 0.4, animal: 0.4, chickens: 0.4, barrow: 0.8, drying_tray: 0.4, hang_lantern: 0.3, suzhou_lamp: 0.35 };    // (what stands or hangs in a door lane, and how far its clear space reaches)
 /**
- * Keep the street life out of the doorways of the walk's lots: what stands in the lane in front of a door (1.3 m either side, out to the middle of the
+ * Keep the street life out of the doorways of the walk's lots: what stands or hangs in the lane in front of a door (1.3 m either side, out to the middle of the
  * street) moves along the street to its edge (a tea table with its sitters as one). Nothing is dropped and nothing is drawn from the stream.
  */
 function clearLanes(L) {
@@ -217,11 +224,24 @@ function clearLanes(L) {
     e.at = q; if (e.c) e.c = q;
   }
   for (const e of L) {
-    if (!MOVABLE.has(e.t) || done.has(e) || (e.y ?? 0) > LEVEL.street + 0.2) continue;
-    e.at = shift(e.at, e.t === 'barrow' ? 0.8 : 0.4);
+    if (!(e.t in MOVABLE) || done.has(e) || (e.t === 'figure' && (e.y ?? 0) > LEVEL.street + 0.2)) continue;
+    e.at = shift(e.at, MOVABLE[e.t]);
   }
 }
 
+/** The doorways of the walk's lots that fall in a shop's front (the front's own frame: x east of its middle for a south front, as doorGap), each with a 0.95 m reach either side. */
+function walkGaps(l, F) {
+  const out = [], n = F.n, t = [-n[1], n[0]], m = F.P(0.5, 0);      // (the along axis of the shop element: x = (p − m) rotated by its rot, as doorGap)
+  const rot = F.rot, cs = Math.cos(rot), sn = Math.sin(rot);
+  for (const ln of laneList()) {
+    const dx = ln.p[0] - m[0], dz = ln.p[1] - m[1], o = dx * n[0] + dz * n[1];
+    if (Math.abs(o) > 1.5 || ln.n[0] !== n[0] || ln.n[1] !== n[1]) continue;
+    const x = dx * cs - dz * sn;
+    if (x > -F.L / 2 - 1.2 && x < F.L / 2 + 1.2) out.push([x - 0.95, x + 0.95]);
+  }
+  void t;
+  return out.length ? out : undefined;
+}
 // ── the life of the canals and streets (docs/settlements/ming-suzhou.md §6) ──
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 const CLOTH = ['cloth_indigo', 'cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black'];
@@ -427,7 +447,7 @@ function shopFronts() {
     const F = frontOf(l);
     if (!inDisc(F.P(0.5, 0), 20)) continue;
     const ovh = !!l.overhang && l.storeys > 1 && l.kind !== 'simple' && !open.has(l);
-    const at = F.P(0.5, 0), e = { t: 'suzhou_shop', gap: uh ? doorGap(l, uh) : walkSet().get(l)?.type === 'shop' ? doorGap(l, { mir: false }) : undefined, at, y: LEVEL.street, rot: F.rot, L: F.L, v0: ovh ? 1.15 : 0.7, trade: uh?.fresh ? uh.trade : l.trade, seed: l.seed + 7, open: open.has(l), detail: l.detail, water: l.water };
+    const at = F.P(0.5, 0), e = { t: 'suzhou_shop', gap: uh ? doorGap(l, uh) : walkSet().get(l)?.type === 'shop' ? doorGap(l, { mir: false }) : undefined, gaps: walkGaps(l, F), at, y: LEVEL.street, rot: F.rot, L: F.L, v0: ovh ? 1.15 : 0.7, trade: uh?.fresh ? uh.trade : l.trade, seed: l.seed + 7, open: open.has(l), detail: l.detail, water: l.water };
     const k = `${Math.floor(at[0] / 100)},${Math.floor(at[1] / 100)}`;
     if (!tiles.has(k)) tiles.set(k, []);
     tiles.get(k).push(e);

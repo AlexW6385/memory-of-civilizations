@@ -132,7 +132,7 @@ export function walkRoutes() {
   for (const [l, s] of walkSet()) {
     const F = frameOf(l.rect, false, l.front), p = ([a, b]) => F.at(a, b);
     let r;
-    if (s.type === 'shop') { const dc = layoutOf(s.L).dc; r = [[dc, -2.2], [dc, 0.2], [dc, 1.9], [1.0, 1.9]]; }
+    if (s.type === 'shop') { const dc = layoutOf(s.L).dc - 0.2; r = [[dc, -2.2], [dc, 0.2], [dc, 1.9], [1.0, 1.9]]; }   // (off the party wall's cell: the collision raster is half a metre)
     else if (s.type === 'house') {
       const A = analyse(walkElement(l, s)), dc = A.dc ?? s.L / 2;
       r = [[dc, -2.2], [dc, 0.2], [dc, 1.9], [dc, A.vb0 - 1.0], [dc, A.vb0 + 0.2], [dc, A.vb0 + 0.9]];

@@ -71,11 +71,15 @@ function cutOut(arr, X, bx) {
 /** The boxes of the lot's front (and back door) taken out of the shell, in the house's frame. */
 function cutsOf(el, A) {
   const { L, y0, yf } = A, cuts = [];
-  if (el.wk === 'shop') cuts.push({ a0: 0.252, a1: L - 0.252, b0: 0.25, b1: 1.5, y0: y0 + SILL, y1: yf - 0.955 });
+  if (el.wk === 'shop') {
+    cuts.push({ a0: 0.252, a1: L - 0.252, b0: 0.25, b1: 1.5, y0: y0 + SILL, y1: yf - 0.955 });
+    // (the 5 cm granite lip of the old front: the walker's raster takes its low faces for a wall in the doorway)
+    cuts.push({ a0: 0.252, a1: L - 0.252, b0: 0.6, b1: 1.1, y0: y0 + 0.001, y1: y0 + 0.0525 });
+  }
   else {
     const dc = A.dc ?? L / 2;
     cuts.push({ a0: dc - 0.473, a1: dc + 0.473, b0: 0.25, b1: 1.05, y0: y0 + SILL, y1: y0 + 2.297 });
-    if (el.wk === 'house') cuts.push({ a0: dc - 0.498, a1: dc + 0.498, b0: A.vb0 - 0.4, b1: A.vb0 + 0.05, y0: y0 + SILL, y1: y0 + 2.097 });
+    if (el.wk === 'house') cuts.push({ a0: dc - 0.598, a1: dc + 0.598, b0: A.vb0 - 0.4, b1: A.vb0 + 0.05, y0: y0 + SILL, y1: y0 + 2.097 });
   }
   return cuts;
 }
@@ -114,6 +118,15 @@ function houseWalk(el, ctx) {
     for (const c of cuts) arr = cutOut(arr, X, c);
     if (arr.length) ctx.bag.add(mat, fromTriangles(arr));
   }
+  // the step from the street, and a house walked through has one down to its yard: in the shell's own plan, so that the walker's roof test finds a floor under the eave
+  const acc = new Acc(), stepAt = (a0, a1, b0, b1, walk) => {
+    const r = rect(a0, b0, a1, b1); acc.box('granite_grey', r[0], y - 0.2, r[1], r[2], y + 0.24, r[3]);
+    if (walk) col.floor(r, y + 0.24);
+  };
+  const dcs = el.wk === 'shop' ? layoutOf(L).dc : (A.dc ?? L / 2);
+  stepAt(dcs - 0.75, dcs + 0.75, 0.05, el.wk === 'shop' ? 0.62 : 0.6, el.wk !== 'ajar');
+  if (el.wk === 'house') stepAt(dcs - 0.7, dcs + 0.7, A.vb0 + 0.02, A.vb0 + 0.5, true);
+  acc.flush(ctx.bag);
   if (el.wk === 'ajar') return;
   // the walls round the room: both sides, the wall behind it, and for a house the front wall about its door and the wall about its back door
   const top = y0 + 3.2, bot = y - 0.4, rd = roomDepth(A);
@@ -125,7 +138,7 @@ function houseWalk(el, ctx) {
     const dc = A.dc ?? L / 2, vb0 = A.vb0;
     col.rect(rect(0, 0.4, 0.25, vb0 + 0.1), bot, top); col.rect(rect(L - 0.25, 0.4, L, vb0 + 0.1), bot, top);
     col.rect(rect(0.25, 0.62, dc - 0.475, 0.95), bot, top); col.rect(rect(dc + 0.475, 0.62, L - 0.25, 0.95), bot, top);
-    col.rect(rect(0.25, vb0 - 0.25, dc - 0.5, vb0 + 0.1), bot, top); col.rect(rect(dc + 0.5, vb0 - 0.25, L - 0.25, vb0 + 0.1), bot, top);
+    col.rect(rect(0.25, vb0 - 0.25, dc - 0.6, vb0 + 0.1), bot, top); col.rect(rect(dc + 0.6, vb0 - 0.25, L - 0.25, vb0 + 0.1), bot, top);
     // the yard behind a row house: its walls are drawn by the shared builder, with no collider of its own
     if (A.kind === 'row' && D - vb0 > 2.2) {
       const vy0 = vb0 + 0.2;
@@ -143,7 +156,7 @@ function walkFar(el, { bag }) {
   else {
     const dc = A.dc ?? L / 2;
     B(dc - 0.475, 0.68, dc + 0.475, 0.8, y0 + SILL, y0 + 2.3);
-    if (el.wk === 'house') B(dc - 0.5, A.vb0 - 0.2, dc + 0.5, A.vb0 - 0.05, y0 + SILL, y0 + 2.1);
+    if (el.wk === 'house') B(dc - 0.6, A.vb0 - 0.2, dc + 0.6, A.vb0 - 0.05, y0 + SILL, y0 + 2.1);
   }
   acc.flush(bag);
 }
@@ -173,8 +186,7 @@ function walkNear(el, { bag, col }) {
   const lay = layoutOf(L);
   const ctx = { B, F: B, latF: lat, blk, flr, put, lat, qF: () => {}, W, wr, slab: () => {}, quad4: () => {}, rand, L, D: A.D, y0, Y1: yf, Y2: yf + 2.7, lay, vb: rd + 0.25, ibB: rd, ibU: rd, S: { a0: 0.25, a1: 1.3, b0: 1.55 }, bh0: 3, use: el.use, el, wallMat: 'plaster_white', mir: false };
   const k = kit(ctx);
-  // the step from the street (the plinth's cap is the floor), the ceiling under the roof, a floor of bricks over the cap
-  const step = (a0, a1, b0, b1) => { B(a0, b0, a1, b1, y - 0.2, y + 0.24, 'granite_grey'); flr(a0, b0, a1, b1, y + 0.24); };
+  // the ceiling under the roof, a floor of bricks over the cap (the steps from the street and to the yard are the shell's: its roof's eave needs a floor in its own plan)
   const ceiling = (b0, b1) => {
     B(0.25, b0, L - 0.25, b1, yf - 0.06, yf, 'timber');
     for (let a = 0.9; a < L - 0.3; a += 1.15) B(a - 0.07, b0, a + 0.07, b1, yf - 0.2, yf - 0.06, 'lacquer_chestnut');
@@ -191,7 +203,6 @@ function walkNear(el, { bag, col }) {
     const npost = Math.max(0, Math.round(sw / 2.4) - 1);
     for (let q = 1; q <= npost; q++) { const a = span0 + sw * q / (npost + 1); B(a - 0.1, 0.66, a + 0.1, 0.9, y0, top, 'lacquer_chestnut'); blk(a - 0.1, 0.66, a + 0.1, 0.9, y, y0 + 3.2); }
     // (the shutters, stacked at the end post, are the shop's own: shops.js; the board over the opening is the shared builder's)
-    step(dc - 0.75, dc + 0.75, 0.05, 0.62);
     floorOf(0.55, rd);
     ceiling(0.92, rd);
     groundFit(ctx);
@@ -219,7 +230,6 @@ function walkNear(el, { bag, col }) {
     // a house walked through: the door open (its leaf folded back on the inside), the hall with its table and the shrine cabinet, the kitchen at the
     // back, the back door open on a step down to the yard
     const vb0 = A.vb0;
-    step(dc - 0.75, dc + 0.75, 0.05, 0.6);
     B(dc + 0.475, 0.94, dc + 0.51, 1.56, y0 + 0.05, y0 + 2.28, 'lacquer_chestnut');
     floorOf(0.58, rd); ceiling(0.92, rd);
     const right = (L - 0.25 - (dc + 0.55)) >= (dc - 0.55 - 0.25), s0 = right ? dc + 0.55 : 0.25, s1 = right ? L - 0.25 : dc - 0.55, wsd = s1 - s0, wall = right ? s1 : s0, dir = right ? -1 : 1;
@@ -237,15 +247,15 @@ function walkNear(el, { bag, col }) {
       const [w0, w1] = aOn(0.05, Math.min(0.5, wsd - 0.1)); for (let q = 0; q < 6; q++) B(w0, rd - 2.5 + (q % 3) * 0.2, w1, rd - 2.5 + (q % 3) * 0.2 + 0.17, fl + Math.floor(q / 3) * 0.17, fl + Math.floor(q / 3) * 0.17 + 0.15, 'timber'); blk(w0, rd - 2.5, w1, rd - 1.9, fl, fl + 0.4);
     }
     // the back door: jambs, lintel, the leaf folded on the inside; the way out over the floor of the wall's thickness and down a granite step
-    for (const a of [dc - 0.55, dc + 0.5]) B(a, vb0 - 0.28, a + 0.05, vb0 + 0.03, y0, y0 + 2.1, 'lacquer_chestnut');
-    B(dc - 0.55, vb0 - 0.28, dc + 0.55, vb0 + 0.03, y0 + 2.1, y0 + 2.2, 'lacquer_chestnut');
-    B(dc + 0.5 - 0.03, vb0 - 0.9, dc + 0.5, vb0 - 0.3, y0 + 0.05, y0 + 2.05, 'lacquer_chestnut');
-    flr(dc - 0.5, rd, dc + 0.5, vb0 + 0.02, fl); step(dc - 0.6, dc + 0.6, vb0 + 0.02, vb0 + 0.5);
+    for (const a of [dc - 0.65, dc + 0.6]) B(a, vb0 - 0.28, a + 0.05, vb0 + 0.03, y0, y0 + 2.1, 'lacquer_chestnut');
+    B(dc - 0.65, vb0 - 0.28, dc + 0.65, vb0 + 0.03, y0 + 2.1, y0 + 2.2, 'lacquer_chestnut');
+    B(dc + 0.6 - 0.03, vb0 - 0.9, dc + 0.6, vb0 - 0.3, y0 + 0.05, y0 + 2.05, 'lacquer_chestnut');
+    flr(dc - 0.6, rd, dc + 0.6, vb0 + 0.02, fl);
   }
   acc.flush(bag);
 }
 
 registerStyle('suzhou-quarter', {
   ...STYLES['suzhou-quarter'],
-  elements: { ...STYLES['suzhou-quarter'].elements, house_walk: houseWalk, walk_far: walkFar, walk_near: walkNear },
+  elements: { ...STYLES['suzhou-quarter'].elements, house_walk: houseWalk, walk_far: walkFar, walk_near: walkNear, door_clear: () => {} },
 });

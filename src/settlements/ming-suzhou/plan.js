@@ -13,6 +13,7 @@ import { ground } from './ground.js';
 import { lots } from './layout.js';
 import { nearScene } from './wen.js';
 import { upOf, routeOf } from './uphouses.js';
+import { walkRoutes } from './openwalk.js';
 import { SHORE, hash2 } from './taihu.js';
 
 void PLACED; void MOUNDS;
@@ -308,6 +309,7 @@ const walks = [[[0, 64], [0, 62], [0, 58.8], [0, 54], [0, 49], [0, 44], [0, 39.7
 walks[0].y0 = 0;
 // from the street up the stair of each climbable house (uphouses.js) to its upper rooms and out onto its gallery
 for (const l of lots()) { const u = upOf(l); if (!u) continue; const r = routeOf(l, u); r.y0 = 0; walks.push(r); }
+walks.push(...walkRoutes());          // into the shops and the houses opened along the streets (openwalk.js)
 
 export const garden = {
   id: 'ming-suzhou-garden',
