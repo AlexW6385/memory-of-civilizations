@@ -8,6 +8,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js';
 import '../qing/index.js';
 import { KULLIYE } from './kulliye.js';
+export { arastaShops } from './kulliye.js';
 import { prayerHall } from './prayerhall.js';
 import { kahvehane } from './kahve.js';
 import { carsi } from './bazaar.js';
@@ -21,6 +22,8 @@ import { seams, domeProfile, alem } from './lead.js';
 import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone', L = 'lead';
+/** shop_keepers: { list } — the shopkeepers of the vaulted shops, the street life's figure built into a near plan (drawn only within reach of the visitor). */
+const shopKeepers = (el, ctx) => { const F = STYLES.life?.elements.figure; if (F) for (const k of el.list) F({ ...k }, ctx); };
 export const dome = (bag, x, y, z, r, mat = L) => {
   bag.add(S, lathe([[r * 1.04, 0], [r * 1.04, r * 0.22], [r * 0.98, r * 0.28]], 24, null, x, y, z));
   bag.add(mat, lathe([[r, 0], [r * 0.94, r * 0.3], [r * 0.78, r * 0.6], [r * 0.5, r * 0.85], [0.001, r * 0.95]], 24, null, x, y + r * 0.26, z));
@@ -393,6 +396,6 @@ function graves(el, { bag, col }) {
 
 registerStyle('ottoman', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ottoman_house: ottomanHouse, mescit, court_dress: courtDress, yard_dress: yardDress, ...KULLIYE },
+  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ottoman_house: ottomanHouse, shop_keepers: shopKeepers, mescit, court_dress: courtDress, yard_dress: yardDress, ...KULLIYE },
   objects: {},
 });

@@ -3275,7 +3275,7 @@
  },
  "ming-suzhou-garden": {
   "site": "ming-suzhou",
-  "hash": "115b08e6def274ca",
+  "hash": "d2bf3879499dc86d",
   "rays": 128,
   "probes": 9503,
   "boxes": [
@@ -3329,8 +3329,8 @@
     ]
    }
   ],
-  "bytes": 160413,
-  "seconds": 27,
+  "bytes": 160415,
+  "seconds": 147,
   "baked": "2026-11-19"
  },
  "mohenjo-daro-citadel": {
@@ -4326,8 +4326,8 @@
    }
   ],
   "bytes": 272827,
-  "seconds": 32,
-  "baked": "2026-11-17"
+  "seconds": 248,
+  "baked": "2026-11-19"
  },
  "sainte-foy-conques": {
   "site": "conques",
