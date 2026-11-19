@@ -21,8 +21,9 @@ import { glyphGeometry } from './script.js';
 // Each character is built in two forms of one cell of 1 m, scaled by the placing: the near form in full relief
 // (the strokes tapered, bevelled and raised 9 cm of the cell; drawn within about 20 m) and the far form flat,
 // its face a little inside the near form's walls so that the two never show at once (drawn to the street's far end).
-// Each is built in six hands (the stroke weight differs a little), picked by a hash of the place.
-const HANDS = [0.94, 1.0, 1.06, 1.12, 0.97, 1.03], SHAPES = new Map();
+// Each is built in one hand (it was six, the stroke weight differing by a few per cent: the same character in six shapes
+// of a dozen copies each was 250 shapes stored copy by copy, 24 MB; in one hand each character's copies share one prototype).
+const HANDS = [1.03], SHAPES = new Map();
 function glyphShape(ch, v) {
   const key = ch + v;
   let s = SHAPES.get(key);
