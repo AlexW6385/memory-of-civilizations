@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.46 — Suzhou's temple, pagoda and wall (2026-11-19)
+
+In the Bao'en temple the main hall has its three Buddhas on lotus thrones, disciples and eighteen arhats, the altar with the five offerings, banners, canopy, cushions, drum and bell, and monks; the side halls are a sutra store and a refectory, and the guardian kings stand in the gate. The pagoda can be climbed inside, all nine storeys, to the top gallery over the town. The wall's gate tower has its watch-post with guards, drum and water clock, and the wall walk is reached by both ramps; the court has old camphors in railings, stelae on tortoises, a carp pond, worshippers, and beggars and a seller at the gate.
+
 ## v12.45 — brush writing in Suzhou (2026-11-19)
 
 The tablets, boards and shop signs of Suzhou are written with a brush: tapered strokes with their press and lift, hooks and teardrop dots, in slight relief, gilt on black lacquer or ink on plain wood within a raised frame; horizontal boards read from right to left. Sixty-eight characters, each checked against its standard form: the garden's halls and pavilions, the five new boards of Wen Zhengming's scenes (槐雨亭, 凈深亭, 嘉實亭, 得真亭, 爾耳軒), the temple gate (報恩寺) and shop boards for twelve trades.
