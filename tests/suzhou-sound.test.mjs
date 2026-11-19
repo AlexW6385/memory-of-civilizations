@@ -163,6 +163,7 @@ test('the map: houses, wells, rooms, tracks, planting', () => {
   // the planting: bamboo in the hollow, lotus on the pond, none on the street
   assert.ok(SZ.bambooNear(-63, -27) > 0.9 && SZ.bambooNear(0, 150) === 0 && SZ.lotusNear(0, -36) > 0.9 && SZ.lotusNear(0, 150) === 0);
   assert.ok(SZ.greenNear(0, -20) > 0.9 && SZ.greenNear(0, 100) < 0.5);
+  assert.ok(SZ.townNear(0, 66) === 1 && SZ.townNear(0, -30) < 0.2 && SZ.townNear(-40, -135) < 0.2 && SZ.townNear(0, -190) < 0.3, 'the hubbub is of the streets');
 });
 
 test('the wells of the map are the wells the town builds', async () => {

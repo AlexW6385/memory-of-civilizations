@@ -224,7 +224,7 @@ export class Music {
   lifeLayers(L, t) {
     const ctx = this.ctx, P = this.plc;
     if (L?.map) this.placedLayers(L, t);
-    const day = Math.max(0, Math.min(1, (P.town - 0.4) / 0.5)), hubWant = L?.market ? L.market * day : 0;
+    const day = Math.max(0, Math.min(1, (P.town - 0.4) / 0.5)), hubWant = L?.market ? L.market * day * (L.map ? L.map.townNear(this.lis().x, this.lis().z) : 1) : 0;
     if (hubWant > 0.01 && !P.hub) {
       // three bands of noise, each swelling at a syllable's rate (3–6 Hz) out of step with the rest:
       // a crowd talking, with no word in it

@@ -732,7 +732,7 @@ export const VOICES = {
 
     // inside: the small sounds of the room (by its use)
     if (P.indoors && room) {
-      const R0 = (room.upper && room.use === 'merchant') ? M.UPPER : M.ROOMS[room.use] || M.ROOMS.house;
+      const R0 = room.upper ? M.UPPER : M.ROOMS[room.use] || M.ROOMS.house;
       for (const [voice, gap] of R0.work || []) {
         const k = 'rw:' + voice;
         if (!due(k, gap)) continue;
@@ -807,7 +807,7 @@ export const VOICES = {
       return { g, stops: [s] };
     }, t);
     // the room: its air, coloured by its use; the roof overhead in rain (the louder the nearer the tiles: upstairs)
-    const spec = inRoom ? ((room.upper && room.use === 'merchant') || room.upper ? M.UPPER : M.ROOMS[room.use] || M.ROOMS.house) : null;
+    const spec = inRoom ? (room.upper ? M.UPPER : M.ROOMS[room.use] || M.ROOMS.house) : null;
     const tone = this.layer('room', inRoom ? 1 : 0, spec ? spec.tone[1] * 0.012 : 0.003, () => {
       const stops = [], g = ctx.createGain(); g.gain.value = 0; g.connect(P.out);
       const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 300; this.noiseSrc(stops).connect(lp); lp.connect(g);

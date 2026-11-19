@@ -194,6 +194,14 @@ export function greenNear(x, z) {
   const willow = cs ? 0.5 * (1 - sm(1, 18, cs.d)) : 0;
   return Math.max(garden, edge * 0.8, willow, 0.12);
 }
+/** 0…1: how much of the town's hubbub reaches (x, z): all of it in the streets, a little in the garden, the owner's house and the temple's court, less toward the rim and beyond the wall. */
+export function townNear(x, z) {
+  if (inRect(GARDEN, x, z)) return 0.12;
+  if (inRect(RESIDENCE, x, z, 2)) return 0.4;
+  if (inRect(TEMPLE_COURT, x, z, 3)) return 0.12;
+  const north = 1 - 0.8 * sm(-150, -165, z);                    // beyond the city wall, the fields
+  return Math.max(0.1, (1 - 0.6 * sm(150, 210, Math.hypot(x, z))) * north);
+}
 /** 0…1: how much open water and wet ground (the frogs): the pond's shore, the rim's fields. */
 export function frogGround(x, z) {
   const pond = inRect(GARDEN, x, z, 40) ? 1 - sm(0, 40, Math.max(0, pondDistance(x, z))) : 0;
