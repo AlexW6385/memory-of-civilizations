@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.41 — the sound of Suzhou (2026-11-19)
+
+Suzhou's sounds are placed where they are made and heard from there: sculling boats passing on the canals, water lapping the quays, eave drips after rain, a bucket in a well; eight vendors' calls by hour and season, a rattle-drum, a loom, a forge, an abacus, the tea house's murmur, footsteps on the bridges; in the garden wind in bamboo, rain on lotus leaves, a qin from Little Canglang, a flute across the water at dusk, cicadas, frogs, crickets and a bird of the season; the evening drum and the morning bell, the watchman's clapper, the temple's bell, drum and chant; every kind of room has its own quiet. All synthesised; none of it has been listened to yet, only measured.
+
 ## v12.40 — Suzhou's town, doors that open, dimmer night rain (2026-11-18)
 
 Suzhou's streets: shop boards carry real characters (藥, 書, 麵, a great 當 on the pawnshop wall, and shop names); seven more houses can be climbed (sixteen in all); lane doors have thresholds, hinges, knockers, door gods and couplets; landing steps and bridge treads are worn, moss and weeds grow on the canal walls; moored boats carry their loads, washing hangs at the landings, there are wells; the temple has its incense burner, studded doors, stone lions and lamp posts. In Ur and Babylon the houses with a reed awning over the door can be entered again (about a third of them could not be). Upstairs in Baghdad (eight shops and lodgings on the gate road, with balconies and oriels) and Samarkand (three merchants' houses with a reception room, balcony and loggia, and an upper room on seven craftsmen's roofs). At Knossos the palace's Piano Nobile hall, an East Wing hall with its loggia and two chambers off the Grand Staircase are open and furnished, and eighteen town houses can be climbed to a balcony and the roof. Rain at dusk and at night is lit by the hour instead of falling as white streaks.
