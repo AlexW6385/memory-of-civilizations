@@ -357,3 +357,41 @@ export function templeRefectoryIn(el, ctx) {
   eat(2305, (x0 + x1) / 2 + 0.6, z0 + 1.5, PI, { pose: 'stand', cloth: 'cloth_brown', carry: 'none' });
   col.circle(tx[0] - 1.0, tz - 1.4, 0.3, y, y + 1.2);
 }
+
+// ── the guardian kings at the gate ───────────────────────────────────────────
+/**
+ * temple_kings { gate: [x, z of the gate on the wall's line], y, w (the gate's width) }: inside the gate, along the wall's inner face, two open lean-to
+ * porches (posts, a beam, a tiled slope from the wall) either side of the way, two kings of the four in each, on rocks, facing the court:
+ * Chiguo (white, the lute) and Zengzhang (blue, the sword) on the east, Guangmu (red, the dragon) and Duowen (green, the umbrella) on the west.
+ */
+export function templeKings(el, ctx) {
+  const { bag, col } = ctx, [cx, zg] = el.gate, y = el.y ?? 0.04, W = el.w ?? 3.2, P = new Parts(), zi = zg - 0.225, D = 2.4, hw = 4.2 + 0.0;
+  const KINGS = [
+    [1, 1.6, { skin: 'paint_white', arm: 'pipa', cloth: 'cloth_blue', ph: 0 }], [1, 4.6, { skin: 'paint_blue', arm: 'sword', cloth: 'clay_green', ph: 1 }],
+    [-1, 1.6, { skin: 'clay_robe', arm: 'snake', cloth: 'cloth_ochre', ph: 2 }], [-1, 4.6, { skin: 'clay_green', arm: 'umbrella', cloth: 'cloth_red', ph: 3 }],
+  ];
+  for (const s of [-1, 1]) {
+    const xa = cx + s * (W / 2 + 2.1), xb = cx + s * (W / 2 + 2.1 + 6.4), xl = Math.min(xa, xb), xr = Math.max(xa, xb);
+    P.add('granite_block', box(xl, y, zi - D, xr, y + 0.16, zi));
+    P.add('granite_grey', box(xl - 0.05, y + 0.16, zi - D - 0.05, xr + 0.05, y + 0.2, zi - D + 0.02));
+    // the posts at the front and the ends, a beam, the slope of the roof
+    const px = [xl + 0.3, (xl + xr) / 2, xr - 0.3];
+    for (const x of px) { P.add('lacquer_red', lathe([[0.2, 0], [0.18, 3.2], [0.001, 3.2]], 8, null, x, y + 0.2, zi - D + 0.25)); P.add('granite_grey', lathe([[0.001, 0], [0.3, 0], [0.26, 0.22], [0.001, 0.22]], 8, null, x, y + 0.2, zi - D + 0.25)); col.circle(x, zi - D + 0.25, 0.22, y, y + 3.4); }
+    P.add('lacquer_red', box(xl, y + 3.2, zi - D + 0.1, xr, y + 3.62, zi - D + 0.42));
+    P.add('lacquer_chestnut', box(xl, y + 3.06, zi - D + 0.12, xr, y + 3.2, zi - D + 0.4));
+    const t = [], u = [], hi = y + 4.55, lo = y + 3.7;
+    const q = (a, b, c, d, out) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
+    q([xl - 0.2, hi, zi], [xr + 0.2, hi, zi], [xr + 0.2, lo, zi - D - 0.5], [xl - 0.2, lo, zi - D - 0.5], t);
+    q([xl - 0.2, hi - 0.16, zi], [xl - 0.2, lo - 0.16, zi - D - 0.5], [xr + 0.2, lo - 0.16, zi - D - 0.5], [xr + 0.2, hi - 0.16, zi], u);
+    P.add('tile_dark', fromTriangles(t)); P.add('timber', fromTriangles(u));
+    P.add('tile_dark', box(xl - 0.2, lo - 0.1, zi - D - 0.55, xr + 0.2, lo + 0.03, zi - D - 0.4));
+    for (let x = xl; x <= xr; x += 0.42) P.add('timber_red', limb([x, hi - 0.2, zi], [x, lo - 0.2, zi - D - 0.45], 0.04, 0.04, 4));   // the rafters
+    col.rect([xl, zi - D, xr, zi - D + 0.5], y, y + 3.6);
+  }
+  for (const [s, off, o] of KINGS) {
+    const x = cx + s * (W / 2 + 2.1 + off + 0.6), z = zi - 1.25;
+    stat(P, king, x, y + 0.16, z, PI, 1.15, { ...o, lod: 0 });
+    col.circle(x, z, 0.8, y, y + 2.6);
+  }
+  P.emit(bag);
+}
