@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.42 — Suzhou by night (2026-11-19)
+
+Suzhou's lanterns now throw light: a glow round each flame, a warm pool on the paving beneath, a wash on the wall behind and broken reflections on the canals and the pond; the paper windows of lived-in houses, halls and pavilions are lit from inside, some dark; moored boats carry a stern lantern and open shop fronts spill lamplight over the doorstep. It is done with one added-light material so that it shows at the low preset.
+
 ## v12.41 — the sound of Suzhou (2026-11-19)
 
 Suzhou's sounds are placed where they are made and heard from there: sculling boats passing on the canals, water lapping the quays, eave drips after rain, a bucket in a well; eight vendors' calls by hour and season, a rattle-drum, a loom, a forge, an abacus, the tea house's murmur, footsteps on the bridges; in the garden wind in bamboo, rain on lotus leaves, a qin from Little Canglang, a flute across the water at dusk, cicadas, frogs, crickets and a bird of the season; the evening drum and the morning bell, the watchman's clapper, the temple's bell, drum and chant; every kind of room has its own quiet. All synthesised; none of it has been listened to yet, only measured.
