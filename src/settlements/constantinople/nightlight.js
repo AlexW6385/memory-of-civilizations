@@ -17,6 +17,7 @@ import { lathe, rod } from '../../core/geom.js';
 import { MESE_STOAS } from './stoas.js';
 import { height } from './layout.js';
 
+const NO = (typeof process !== 'undefined' && process.env?.CN_NO) || '';
 const TAU = Math.PI * 2;
 const MAT = 'halo';
 const hashAt = (x, z, s = 0) => { let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
@@ -63,9 +64,10 @@ export class Halo {
 /** The halo of one light of a plan (`lights` entries: { at, distance, intensity }) over the ground `g` (the element's floor, if it has one). */
 function lightHalo(H, l, g, scale = 1) {
   const [x, y, z] = l.at, d = l.distance ?? 6, k = Math.min(1, (l.intensity ?? 2) / 2.4);
-  H.ball(x, y, z, Math.max(0.42, Math.min(0.95, d * 0.11)) * (0.8 + 0.2 * k) * scale);
+  const j = 0.88 + 0.24 * hashAt(x, z, 3);                         // (each light its own size: identical shapes would be gathered into an instanced draw of their own)
+  H.ball(x, y, z, Math.max(0.42, Math.min(0.95, d * 0.11)) * (0.8 + 0.2 * k) * scale * j);
   const fy = Math.min(g ?? y - 0.5, y - 0.2);
-  if (y - fy < 3.2) H.floor(x, fy + 0.03, z, Math.max(1.3, Math.min(3.4, d * 0.42)), 10);
+  if (y - fy < 3.2) H.floor(x, fy + 0.03, z, Math.max(1.3, Math.min(3.4, d * 0.42)) * (2 - j), 10);
 }
 
 const MINE = /^(constantinople|cn-|hagia-sophia$)/;
@@ -97,6 +99,7 @@ function flame(el, { lights, bag }) {
 /** The lamps hung from the architrave of every portico, one between every second pair of columns: [{ x, z, y (the hook), fy (the floor) }]. [inferred, after the lit streets of Antioch] */
 export function porticoLamps() {
   const out = [];
+  if (NO.includes('lamps')) return out;
   for (const st of MESE_STOAS) {
     const [ax, az] = st.a, [bx, bz] = st.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], n = Math.max(1, Math.round(L / 3.8)), step = L / n, y0 = height(ax, az), fy = y0 + 0.18;
     for (let k = 0; k < n; k++) {
@@ -107,14 +110,13 @@ export function porticoLamps() {
   }
   return out;
 }
-/** cn_lamps: { list: [{ x, z, y, fy }] } — a bronze lamp on a chain from the architrave, its flame, its halo and a light. */
+/** cn_lamps: { list: [{ x, z, y, fy }] } — a clay lamp on an iron chain from the architrave, its halo and a light (the flame is the halo's). */
 function lamps(el, { bag, lights }) {
   const H = new Halo();
   for (const { x, z, y, fy } of el.list) {
-    const drop = 0.95 + 0.12 * hashAt(x, z), yb = y - drop;
-    bag.add('bronze', rod([x, y, z], [x, yb + 0.16, z], 0.008, 4));
-    bag.add('bronze', lathe([[0.001, 0], [0.07, 0.03], [0.13, 0.11], [0.15, 0.17], [0.12, 0.15], [0.001, 0.05]], 8, null, x, yb, z));
-    bag.add('flame', lathe([[0.001, 0.1], [0.022, 0.13], [0.001, 0.24]], 5, null, x, yb, z));
+    const drop = 0.95 + 0.12 * hashAt(x, z), yb = y - drop, q = 0.94 + 0.12 * hashAt(x, z, 5);          // (each lamp a little its own: twelve alike would be one instanced draw)
+    bag.add('iron', rod([x, y, z], [x, yb + 0.16, z], 0.008, 4));
+    bag.add('terracotta', lathe([[0.001, 0], [0.11 * q, 0.04], [0.2 * q, 0.15], [0.23 * q, 0.23], [0.19 * q, 0.2], [0.001, 0.07]], 8, null, x, yb, z));
     const l = { at: [x, yb + 0.22, z], color: '#ffb46b', intensity: 2.2, distance: 9 };
     lights.push(l);
     H.ball(x, yb + 0.22, z, 0.62);
@@ -173,6 +175,7 @@ function litDome(fn) {
  * pilgrims sleep in the porch on the great feasts [inferred: the lamps within, the door open; the porch-sleepers are not built].
  */
 export function fires() {
+  if (NO.includes('fires')) return [];
   const [dx, dz] = [-10, 36], y = height(dx, dz);
   return [
     { t: 'cn_flame', at: [dx, y + 2.4, dz - 1.2], intensity: 3, distance: 12, floor: y, r: 1.8 },
@@ -180,18 +183,19 @@ export function fires() {
   ];
 }
 
+
 let done = false;
 /** Wraps the styles' elements that make lights (once, after every file of the settlement has put its own into its style). */
 export function registerNight() {
   if (done) return; done = true;
   const R = STYLES.roman?.elements;
   if (!R) return;
-  for (const k of ['byz_shopfit', 'byz_home', 'cn_home', 'byz_chapel', 'byz_bath', 'thermae']) if (typeof R[k] === 'function') R[k] = wrap(R[k]);
-  if (typeof R.cn_house === 'function') R.cn_house = litHouse(R.cn_house);
+  for (const k of ['byz_shopfit', 'byz_home', 'cn_home', 'byz_chapel', 'byz_bath', 'thermae']) if (!NO.includes(k) && typeof R[k] === 'function') R[k] = wrap(R[k]);
+  if (!NO.includes('houses') && typeof R.cn_house === 'function') R.cn_house = litHouse(R.cn_house);
   const S = STYLES['constantinople-site']?.elements;
   if (S && typeof S.candle === 'function') S.candle = wrap(S.candle);
   const HS = STYLES['byzantine-hs'];
-  if (HS?.objects?.polykandelon) HS.objects.polykandelon = wrap(HS.objects.polykandelon, 1.6);
-  if (HS?.elements?.hs_dome_windows) HS.elements.hs_dome_windows = litDome(HS.elements.hs_dome_windows);
+  if (!NO.includes('sophia') && HS?.objects?.polykandelon) HS.objects.polykandelon = wrap(HS.objects.polykandelon, 1.6);
+  if (!NO.includes('sophia') && HS?.elements?.hs_dome_windows) HS.elements.hs_dome_windows = litDome(HS.elements.hs_dome_windows);
 }
 Object.assign(STYLES.roman.elements, { cn_flame: flame, cn_lamps: lamps });
