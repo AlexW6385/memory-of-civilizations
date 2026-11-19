@@ -3,6 +3,7 @@
 // sparrows on the paving and the parvis, a grey heron on the Left Bank's strand.
 import { NORTH_ARM, SOUTH_ARM, CATHEDRAL, PALACE, PARVIS, RADIUS, streets, inBlock, inRiver } from './layout.js';
 import { ground } from './ground.js';
+import { courtLots } from './court-lots.js';
 
 const mid = (a) => (a[1] + a[3]) / 2;
 const flights = [
@@ -32,4 +33,33 @@ for (const [x, z] of [[118, 20], [132, -14], [140, 30], [124, -30]]) perches.pus
 // a grey heron on the strand of the Left Bank, facing the water
 perches.push({ kind: 'heron', x: 38, z: SOUTH_ARM[3] + 2.2, y: ground.height(38, SOUTH_ARM[3] + 2.2), rot: -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 void inBlock;
-export default { fish: [], flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; docs/settlements/paris.md §6d) ──
+const critters = [];
+const hashAt = (x, z) => { const k = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return k - Math.floor(k); };
+const at = (x, z, dy = 0) => [x, ground.height(x, z) + dy, z];
+/** The Seine's water as signed distance (negative inside, metres to the nearer bank) for floaters: the arms' water rectangles of plan.js. */
+const ARM_WATER = [[-348, NORTH_ARM[1] + 2, 348, NORTH_ARM[3] - 2], [-348, SOUTH_ARM[1] + 2, 348, SOUTH_ARM[3] - 2]];
+export const riverDistance = (x, z) => Math.min(...ARM_WATER.map((r) => { const dx = Math.max(r[0] - x, x - r[2]), dz = Math.max(r[1] - z, z - r[3]); return dx > 0 || dz > 0 ? Math.hypot(Math.max(dx, 0), Math.max(dz, 0)) : Math.max(dx, dz); }));
+const WATER = -3;                                                                     // RIVER.level
+// pigeons on the parvis before Notre-Dame, among the stalls and the market's crumbs (the cries list pigeons for sale, "Crieries de Paris", 1265 [stated]; a flock about a church is [inferred])
+[[116, 2, 'grey'], [125, -6, 'grey'], [131, 5, 'white'], [121, 9, 'grey'], [136, -3, 'dark'], [141, 8, 'grey'], [112, -9, 'grey'], [128, 14, 'grey']].forEach(([x, z, v], i) => critters.push({ model: 'pigeon_' + v, at: at(x, z), rot: i * 1.9, range: [2.6, 1.8], tau: 9 + (i % 4), speed: 0.34, stride: 0.1, size: 0.97 + 0.05 * (i % 3) }));
+// pigeons in the palace court by the well and the May tree [inferred: the court's own dovecote, the palace's doves; court.js has them as figures too]
+[[-224, -22, 'grey'], [-231, -24, 'grey'], [-236, 20, 'dark'], [-241, 14, 'grey']].forEach(([x, z, v], i) => critters.push({ model: 'pigeon_' + v, at: at(x, z), rot: 0.8 + i * 1.7, range: [2.2, 1.6], tau: 10, speed: 0.33, stride: 0.1 }));
+// the court row's service yards: hens scratching in the carters' passage to the kitchen yard and the woodyard, a cock on the log pile (the kitchens kept poultry [inferred])
+critters.push({ model: 'rooster', at: at(-146, 31), rot: 2.4, range: [3, 2], tau: 15, speed: 0.5, stride: 0.22 });
+for (const [model, x, z] of [['hen_brown', -192.4, 30.2], ['hen_brown', -190.4, 32.4], ['hen_white', -194.2, 33.0], ['hen_brown', -148.6, 29.4], ['hen_white', -144.2, 33.2]]) critters.push({ model, at: at(x, z), rot: hashAt(x, z) * 6, range: [2.6, 1.7], tau: 13, speed: 0.46, stride: 0.2 });
+// geese driven to market on the Left Bank's strand and grazing at the water [stated: flocks of sheep, pigs and cows were driven to the markets, Wikipedia "Paris in the Middle Ages"; goslings are among the cries of the *Crieries*; the geese themselves are [inferred]]
+for (const [model, x, z] of [['goose_white', -22, 153.2], ['goose_white', -17.5, 154.4], ['goose_grey', -20, 156], ['goose_white', -14, 152.6]]) critters.push({ model, at: at(x, z), rot: 1.6 + hashAt(x, z), range: [4.5, 2.2], tau: 16, speed: 0.4, stride: 0.34 });
+// mallards and a farm duck or two on the Seine's south arm in the lee of the bank, and on the north arm west of the Grand Pont
+critters.push({ type: 'floaters', models: ['duck_brown', 'duck_brown', 'duck_white', 'duck_brown'], area: [22, 124, 62, 146], dist: riverDistance, a: [9, 3.2], ratio: 0.45, margin: 1.6, y: WATER, speed: 0.2, cycle: [16, 22] });
+critters.push({ type: 'floaters', models: ['duck_brown', 'duck_brown', 'duck_brown'], area: [-130, -163, -80, -150], dist: riverDistance, a: [9, 2.8], ratio: 0.35, margin: 1.5, y: WATER, speed: 0.24, cycle: [17, 23] });
+// a kingfisher on the Right Bank's strand west of the Grand Pont, watching the water
+{ const x = -100, z = NORTH_ARM[1] + 0.6; critters.push({ model: 'kingfisher', at: at(x, z, 0.06), rot: Math.PI / 2, water: [x, z + 1.6, WATER], cycle: 36 }); }
+// cats where the sun falls: by the well's foot in the court, and at the baker's corner of the court row (mousers of the granary and the bakehouse) [inferred]
+critters.push({ model: 'cat_tabby', at: at(-226.6, -26.4, 0.02), rot: 0.4, range: [7, 2.5] });
+{ const b = courtLots()[0]; critters.push({ model: 'cat_orange', at: at(b.rect[0] + 0.55, b.rect[1] - 0.6, 0.02), rot: -1.2, range: [7, 2.5] }); }
+// a hound at the court's hitching rail (the grooms' dog) and a butcher's dog before the first butcher's shop of the court row
+critters.push({ model: 'dog', at: at(-229, 17.4, 0.02), rot: 1.2, range: [9, 3.5] });
+
+export default { fish: [], flights, perches, critters };

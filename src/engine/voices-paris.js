@@ -64,7 +64,7 @@ export const PARIS_VOICES = {
   mill(t, bus, lv) {
     const dur = 12 + R() * 6, p = 0.62 + R() * 0.06, n = Math.floor(dur / p);
     this.rasp(t, dur, 160, 0.7, 0.03 * lv, bus, 3.2, 0.5);                                                                                              // the millstones: a low grinding
-    for (let k = 0; k < n; k++) this.cue(t + k * p, (x) => { this.burst(x, 0.22, 650 + R() * 200, 0.8, 0.05 * lv, bus); this.tone(x, [[0, 150], [0.1, 90]], 0.14, 0.03 * lv, bus); });   // a paddle enters the water
+    for (let k = 0; k < n; k++) this.cue(t + k * p, (x) => { this.burst(x, 0.22, 900 + R() * 300, 0.7, 0.09 * lv, bus); this.tone(x, [[0, 150], [0.1, 90]], 0.14, 0.02 * lv, bus); });   // a paddle enters the water
     for (let k = 0, m = Math.floor(dur / 0.31); k < m; k++) this.cue(t + k * 0.31, (x) => this.knock(x, 1250, 0.012 * lv, bus, 0.03));                   // the clapper on the hopper's shoe
     return dur;
   },
@@ -74,7 +74,7 @@ export const PARIS_VOICES = {
     let end = 0;
     for (let i = 0; i < women; i++) {
       const p = 0.78 + R() * 0.3, n = 5 + Math.floor(R() * 8), t0 = t + R() * 1.2;
-      for (let k = 0; k < n; k++) this.cue(t0 + k * p, (x) => { this.tone(x, [[0, 260 + R() * 40], [0.05, 130]], 0.09, 0.05 * lv, bus); this.burst(x, 0.07, 1400, 0.8, 0.02 * lv, bus); });
+      for (let k = 0; k < n; k++) this.cue(t0 + k * p, (x) => { this.tone(x, [[0, 260 + R() * 40], [0.05, 130]], 0.09, 0.025 * lv, bus); this.burst(x, 0.09, 1100, 0.7, 0.07 * lv, bus); });
       this.cue(t0 + n * p + 0.4, (x) => this.burst(x, 0.5, 800, 0.8, 0.03 * lv, bus, 0.04));
       end = Math.max(end, t0 + n * p - t + 1);
     }
