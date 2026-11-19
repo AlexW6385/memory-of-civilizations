@@ -10,6 +10,8 @@ import { Parts, torus } from '../../styles/qing/carving.js';
 import { plaqueBuild } from '../ming-suzhou/props.js';
 import { Frame, gableRoof, rng, tuft } from './houses.js';
 import { WALK_UP } from './layout.js';
+import { inscription, shopText } from './writing.js';
+import { wornSlab } from './wear.js';
 
 /** The hanging trade sign of each trade, in a local frame (hung from y = 0 down; +z out). */
 function sign(P, trade, r) {
@@ -36,7 +38,7 @@ function sign(P, trade, r) {
     }
     case 'pawn': {            // the great round board with 当
       const d = lathe([[0.001, -0.02], [0.55, -0.02], [0.55, 0.02], [0.001, 0.02]], 18); d.rotateX(Math.PI / 2);
-      P.add('lacquer_black', d.translate(0, -0.6, 0)); P.add('paint_ochre', box(-0.2, -0.78, 0.025, 0.2, -0.42, 0.05));
+      P.add('lacquer_black', d.translate(0, -0.6, 0)); P.add('paint_ochre', inscription('當', { pitch: 0.5, size: 0.5, z0: 0.02, z1: 0.036, thick: 1.4 }).translate(0, -0.6, 0));        // the great character 當 (dang) on the pawnshop's round board
       break;
     }
     case 'lantern': {
@@ -148,7 +150,7 @@ export function qingShop(el, ctx) {
   F.B(bag, 'paint_caihua', s0 + 0.5, dF + 0.7, s1 - 0.5, dF + 0.72, fy + 0.1, fy + fh - 0.1);
   const cap = F.rect(s0 + 0.2, dF + 0.45, s1 - 0.2, dF + 0.8); bag.add('tile_grey', box(cap[0], fy + fh, cap[1], cap[2], fy + fh + 0.2, cap[3]));
   // the name board on the facade (gilt characters on black) and the standing signboards
-  const nameP = new Parts(); plaqueBuild(nameP, { w: Math.min(L - 1.6, 4.2), h: 0.95, n: 3 + Math.floor(r() * 2), seed: el.seed % 997, ink: 'gilt_bronze' });
+  const nameP = new Parts(); plaqueBuild(nameP, { w: Math.min(L - 1.6, 4.2), h: 0.95, n: 3 + Math.floor(r() * 2), seed: el.seed % 997, ink: 'gilt_bronze', text: shopText(el.trade, el.seed) });
   const nf = F.P(0, dF + 0.74, fy + 0.2);
   nameP.emit(bag, nf[0], nf[1], nf[2], Math.atan2(F.n[0], F.n[1]));
   const tall = new Parts(); plaqueBuild(tall, { w: 0.55, h: 2.2, n: 3, vertical: true, seed: (el.seed >> 3) % 991, ink: 'gilt_bronze', field: 'lacquer_red' });
@@ -229,7 +231,7 @@ export function qingShop(el, ctx) {
   for (const q of ps.slice(1, -1)) col.rect(F.rect(q - 0.15, dF - 0.3, q + 0.15, dF), 0, T);
   col.floor(F.rect(s0 + 0.5, dB + 0.5, s1 - 0.5, dF - 0.05), y);
   const da = ps[doorBay] + 0.15, db = ps[doorBay + 1] - 0.15;
-  F.B(bag, 'granite_grey', da, dF + 0.5, db, dF + 0.9, 0, 0.26); F.B(bag, 'granite_grey', da, dF + 0.9, db, dF + 1.3, 0, 0.22);
+  wornSlab(bag, 'granite_grey', F, da, db, dF + 0.5, dF + 0.9, 0, 0.26, 0.025); wornSlab(bag, 'granite_grey', F, da, db, dF + 0.9, dF + 1.3, 0, 0.22, 0.025);       // the two steps, hollowed by the feet (wear.js)
   col.floor(F.rect(da, dF - 0.05, db, dF + 0.5), y);
   col.ramp(F.rect(da, dF + 0.5, db, dF + 1.3), 0.04 + WALK_UP, y, el.side === 'w' ? 'w' : 'e');
 }
