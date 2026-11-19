@@ -3,31 +3,18 @@
 // shops (arasta) stand open before the medreses, and down the terrace's gate to the lanes of the quarter with their open shops
 // and houses (konak.js). Pure data and functions: the arasta's elements and shops, their keepers, and the routes walk-check follows.
 
-import { arastaShops } from '../../styles/ottoman/index.js';
-import { MEDRESES, ARASTA, TOP, PRECINCT } from './layout.js';
+import { arastaRows, arastaShopData, TOP } from './layout.js';
 
-/** The two rows of vaulted shops as plan elements (west: cloth, the Tiryaki Çarşısı; east: copper, the Dökmeciler: §4.9). */
+/** The two rows of vaulted shops as plan elements (west: cloth, the Tiryaki Çarşısı; east: copper, the Dökmeciler: §4.9); the data is layout.js's. */
 export function arastaEls() {
-  return ['w', 'e'].map((f) => {
-    const gates = MEDRESES.filter((q) => (q.out === 'w') === (f === 'w')).map((q) => [q.rect[1] + 5 * 4.2 - 1.6, q.rect[1] + 6 * 4.2 + 1.6]);
-    return { t: 'arasta', x: ARASTA[f], z0: ARASTA.z0, z1: ARASTA.z1, face: f === 'w' ? 'e' : 'w', d: ARASTA.d, y: TOP, gaps: [...gates, [-9.8, -6.8]], goods: f === 'w' ? 'cloth' : 'copper' };
-  });
+  return arastaRows().map(({ f, ...el }) => ({ t: 'arasta', y: TOP, ...el }));
 }
 /** A hash in [0, 1) of a position alone (the builder's own, so that the keeper sits where the goods leave room). */
 const hashAt = (x, z, s = 0) => { let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
 let SHOPS = null;
-/**
- * Every shop of both rows in world metres: { sg (the way its front looks: +1 east, −1 west), xb (the back wall), X(v) (a point v in from the
- * back), zc, hw, goods, sk (the side of the keeper) }. The order is the west row from the north, then the east.
- */
+/** Every shop of both rows in world metres (layout.js arastaShopData) with X(v), a point v in from its back wall; the west row from the north, then the east. */
 export function arastaList() {
-  if (SHOPS) return SHOPS;
-  SHOPS = [];
-  for (const el of arastaEls()) {
-    const sg = el.face === 'w' ? -1 : 1;
-    for (const s of arastaShops(el)) SHOPS.push({ ...s, sg, xb: el.x, d: el.d, goods: el.goods, sk: hashAt(el.x, s.zc, 4) < 0.5 ? -1 : 1, X: (v) => el.x + sg * v });
-  }
-  return SHOPS;
+  return SHOPS ??= arastaShopData().map((s) => ({ ...s, X: (v) => s.xb + s.sg * v }));
 }
 /** The keeper of each shop, sitting cross-legged on the plank floor at the back on his side (the street life's figure; shapes differ by hat, beard and seat). */
 export function keeperSpecs(list) {
@@ -67,4 +54,3 @@ export function offLane(row, z, half = 0.9) {
   }
   return z;
 }
-export { PRECINCT };

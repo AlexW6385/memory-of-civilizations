@@ -210,6 +210,33 @@ Open houses (about 120 now, within 330 m of the terrace, shops by preference) ta
 
 **Not done.** The shops of the market lanes (§11: 2.4 m wide stalls, too narrow for a door of 1.5 m) stay counters with goods; the medreses' cells and the hamam are not opened beyond what §4 built.
 
+## 19. The sound of the place, placed (`soundmap.js`, `src/engine/voices-ottoman.js`; `tests/ottoman-sound.test.mjs`)
+
+**What was there.** The profile gave a town-wide mix: gulls, doves, sparrows, cicadas, dogs, donkeys and horses, and the five calls to prayer (the Hanafi asr: `adhan: 2`, so the call is the engine's, from the sun's angle, not placed). Nothing was louder where it was made.
+
+**Sources and limits.** Nothing about the sounds of Süleyman's Istanbul was found in a source that could be opened here; the shell reaches few sites. **[stated]** (Pfeifer, review of *As Night Falls: 18th-Century Ottoman Cities after Dark*, https://lrb.co.uk/the-paper/v44/n24/helen-pfeifer/babies-rubbed-with-garlic): the call to prayer marked the passage from day to night, markets and inns closed and the din died down as people and animals went in; bakers, fishermen and servants worked at least in part at night; neighbourhood gates were shut at nightfall (18th century); until street lighting reached Istanbul in the second half of the 19th century pedestrians had to carry lanterns. The bazaars' street vendors' cries are the subject of Maksudyan's chapter (*Acoustics of Empire*, OUP 2024; its page was opened, the chapter not, so no cry is taken from it). **[inferred]** from the dossier (§4, §10–§17) and the general knowledge of the Ottoman city: where each trade stood, the hours of its work, the cries' words and contours (wordless here), the makam Rast for the ney (a gesture with its neutral third and sixth, not a transcription).
+
+**What is heard where** (r50: the distance in metres at which it is half as loud; hours local):
+| Voice | Where | When | How it is made |
+|---|---|---|---|
+| Şadırvan | the courtyard's fountain (0, −28), r50 9 | 3:30–23:30 | broken hiss on two noise bands, drops plinking under it |
+| Çeşmes (6), pools of the four medreses and the hospital, the mescit's basins | the taps (layout `CESMES`, moved 0.8 m out), the courts' middles | by day | a thin stream, a gurgle rising in pitch as a vessel fills |
+| Hamam | the hot room, heard whole inside, through the walls from outside | 6–22 | drops with a long triple echo, a bowl scooped and poured |
+| Soup kitchen | the ladle struck on the cauldron, stir, pestle in the stone mortar (north kitchens); the bread oven at the east corner | 4:30–19; the oven 2:30–11 | struck copper (a low ring, four partials), rasp, thuds; peel scrape, loaves knocked, crackle |
+| Medreses, tomb | a student reciting in each dershane; a reader at Hürrem's tomb | 5:30–20; 7–19 | wordless chant on formants, two phrase shapes falling to a close |
+| Coffee house | backgammon (dice rattled, thrown, checkers clapped down), the murmur, cups; an evening ney | 7–22:30; the ney 17–22 | knocks and bursts; the engine's murmur voice; Rast on the engine's reed note |
+| Vaulted shops | the coppersmiths of the east row beating a sheet (45 % of the shops, by the hash of each's place) | 7:30–17:30, not in heavy rain | rounds of four or five strokes a second on a ringing copper note |
+| Market | goldsmiths' small hammers, shoe lane's last-taps, paper, cloth; murmur in the bedesten | by day | struck high partials, knocks, rasps |
+| Open shops near the way in (22 nearest) | the baker, coppersmith, cobbler, weaver, potter, butcher, tailor, spice-seller, sherbet seller and saddler of `openSet()` | each trade's hours | each its own (loom, wheel, scissors, mortar are the engine's voices; last-tap, chop, oven, cups new) |
+| Streets | a walker on the street nearest: the water seller (6–18), the simit boy (6–11), the sherbet seller's cups (summer, 10–18), the boza seller (cold months' evenings 17:30–22:30), the porter's destur with his heavy steps (7–17) | by hour and season | each trade a distinct contour (a test asserts no two alike) |
+| Night patrol | a street, 1.1 m/s | 19:30–4:30, not in rain | hard soles in threes, a staff tapped, a lantern's chain [the 16th-century night watch (asesbaşı's men) inferred; the lantern from the source above] |
+| Creatures | swifts screaming round the domes (April–August, dusk most); gulls from the north, over the Horn; pigeons rising in the court; crows; cats' yowls at night; dogs far off at night; the soup kitchen's donkeys | by hour and season | glides at 5–7 kHz; triangle mews; wing clatter and coos; sawtooth caws; formant bray |
+| Rain | drips from the eaves a minute or two after rain | | the engine's |
+
+**Rooms** (`roomAt`): the prayer hall (a huge soft room under lead: tone 150 Hz, rain 0.55, a murmur of prayer and carpets), the tomb, the hamam, the bedesten, the soup kitchen, the coffee house, the vaulted shops, every open shop of the quarter by its trade, any other house; upper rooms close under the tiles (rain louder). **Engine:** `voices.js` gets three added lines (the import, the install of the new voices, and `schedule` — a map that names its own scheduler gets it; Suzhou's still uses `placed()`); `soundscape.js` the import and Istanbul's profile (`withLife`, `market: 1`, `map`).
+
+**Measured, not heard** (`tools/sound-render.mjs`): peaks of every new voice lie between 3e-3 and 6e-2 (copper 5e-2, ladle, tavla, ney 4e-2, fountain 2.5e-2, gull 1.3e-2, swifts after a 1.6 gain 1e-2); the coppersmith's centroid 1.7 kHz at 1.3 kHz peak, the water seller's 0.3 kHz (B3 down to E3), the ney on its Rast notes (the pitch tracker reads octaves doubled on a breathy note), the tap's pitch rising C5 to D#5 as it fills. **Not checked:** whether any is convincing as its source, the balance of all together at a real level, the density; the engine's call to prayer is not placed at the minarets (it is the old global one); no mehter, no Friday sermon; the cries' real words are not known.
+
 ## Sources
 
 - [Strolling through Istanbul — Freely and Sumner-Boyd, the Süleymaniye](https://erenow.org/common/strolling-through-istanbul-classic-guide-to-the-city/11.php) (the interior's piers, arcades, mihrab, minbar, glass, tiles)
