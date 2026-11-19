@@ -194,7 +194,7 @@ export class CollisionWorld {
  * from inside (below the roof) it is out of reach. parts: [{ mat, geometry }] (unindexed, in the
  * collision world's coordinates). Gives the thread back every few milliseconds.
  */
-export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer', 'glass_topaz', 'water_jet', 'foam', 'halo_ball', 'halo_wash', 'halo_streak', 'halo_pane']) {
+export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer', 'glass_topaz', 'water_jet', 'foam', 'halo']) {
   let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
   for (const { mat, geometry } of parts) {
     if (skip.includes(mat)) continue;

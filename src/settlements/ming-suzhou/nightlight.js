@@ -1,15 +1,13 @@
 // Ming Suzhou by night, the light the lanterns and the lit rooms throw (docs/settlements/ming-suzhou.md §22).
 // The glow shades of lamps.js are lit from within by their own material; what they lack, where the lamps'
 // pool of real lights is off (the low preset), is the light they give the things round them. Here it is
-// made of geometry in the four `halo` materials (palette.js, materials.js 'halo'): light ADDED over what
-// is behind it, at night only, by the glow shades' own switch (ENV.night), with no light, no shadow and no
-// collision:
-//   halo_ball    a low shell round a lantern, soft at its rim: the bloom the eye sees round a flame;
-//   halo_wash    a flat disc on the paving, the water or a wall under a lantern: a warm pool;
-//   halo_streak  the same broken into ripples, on the water: the lantern's reflection in the canal and the pond;
-//   halo_pane    a sheet in front of the paper of a window: the lamp of the room within.
-// All pieces here are in the same few materials, merged per plan (the garden's) or per shape (the street
-// life's instances); the discs are 24 triangles, the shells 48, the panes 4.
+// made of geometry in one material, `halo` (palette.js, materials.js 'halo'): light ADDED over what is behind
+// it, at night only, by the glow shades' own switch (ENV.night), with no light, no shadow and no collision.
+// The shape of each piece is carried by its normals (materials.js): a glow round each lantern (three crossed
+// discs), a pool of light on the paving, the water or a floor under it, a wash on the wall behind it, a
+// reflection broken into ripples on the canal and the pond, a sheet in front of the paper of a window (the
+// lamp of the room within). The discs are 8 to 24 triangles, the panes 4. The garden's go into its plan's one
+// mesh of the material, the street's are `suzhou_halo` elements of the street life (instanced).
 // Everything is a function of the lantern's own place: no counters, no Math.random.
 
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
@@ -25,59 +23,55 @@ export function hashAt(x, z, s = 0) {
 }
 
 const TAU = Math.PI * 2;
-/** Triangles (position and a normal per corner) gathered by material. */
+const MAT = 'halo';
+/** Triangles (position and a normal per corner) of the halo material. */
 export class Halo {
-  constructor() { this.m = new Map(); }
-  arr(mat) { let a = this.m.get(mat); if (!a) this.m.set(mat, (a = { pos: [], nor: [] })); return a; }
-  tri(mat, p0, n0, p1, n1, p2, n2) { const a = this.arr(mat); a.pos.push(...p0, ...p1, ...p2); a.nor.push(...n0, ...n1, ...n2); }
+  constructor() { this.pos = []; this.nor = []; }
+  tri(p0, n0, p1, n1, p2, n2) { this.pos.push(...p0, ...p1, ...p2); this.nor.push(...n0, ...n1, ...n2); }
   /**
-   * A flat disc (an ellipse) at c, spanned by the unit axes U and V with the semi-axes su and sv, in three
-   * rings (the middle, half way out, the rim): the vertex normals carry the falloff in their y (1, 0.42, 0:
-   * materials.js 'halo'), their horizontal part pointing along `nh` ([x, z], a wall's outward) or radially.
+   * A flat disc (an ellipse) at c, spanned by the unit axes U and V with the semi-axes su and sv, in rings R
+   * (fractions of the radius, from 0 for the middle) of brightness F: the vertex normals carry it in their y
+   * (materials.js 'halo'; a negative y marks water), their horizontal part pointing along `nh` ([x, z], a wall's
+   * outward) or radially.
    */
-  disc(mat, c, U, V, su, sv, nh = null, segs = 8) {
-    const F = [1, 0.42, 0], R = [0, 0.5, 1];
+  disc(c, U, V, su, sv, nh = null, segs = 8, F = [1, 0.42, 0], R = [0, 0.5, 1], sign = 1) {
     const at = (r, k) => { const a = k / segs * TAU, u = Math.cos(a) * su * R[r], v = Math.sin(a) * sv * R[r]; return [c[0] + U[0] * u + V[0] * v, c[1] + U[1] * u + V[1] * v, c[2] + U[2] * u + V[2] * v]; };
-    const nm = (r, k) => { const a = k / segs * TAU, f = F[r], s = Math.sqrt(1 - f * f); return nh ? [nh[0] * s, f, nh[1] * s] : [Math.cos(a) * s, f, Math.sin(a) * s]; };
+    const nm = (r, k) => { const a = k / segs * TAU, f = F[r], q = Math.sqrt(1 - f * f); return nh ? [nh[0] * q, f * sign, nh[1] * q] : [Math.cos(a) * q, f * sign, Math.sin(a) * q]; };
+    const n = R.length - 1;
     for (let k = 0; k < segs; k++) {
-      this.tri(mat, at(0, k), nm(0, k), at(1, k), nm(1, k), at(1, k + 1), nm(1, k + 1));
-      for (const [r0, r1] of [[1, 2]]) {
-        this.tri(mat, at(r0, k), nm(r0, k), at(r1, k), nm(r1, k), at(r1, k + 1), nm(r1, k + 1));
-        this.tri(mat, at(r0, k), nm(r0, k), at(r1, k + 1), nm(r1, k + 1), at(r0, k + 1), nm(r0, k + 1));
+      this.tri(at(0, k), nm(0, k), at(1, k), nm(1, k), at(1, k + 1), nm(1, k + 1));
+      for (let r = 1; r < n; r++) {
+        this.tri(at(r, k), nm(r, k), at(r + 1, k), nm(r + 1, k), at(r + 1, k + 1), nm(r + 1, k + 1));
+        this.tri(at(r, k), nm(r, k), at(r + 1, k + 1), nm(r + 1, k + 1), at(r, k + 1), nm(r, k + 1));
       }
     }
   }
-  /** A disc lying on a horizontal plane (the paving, the water, a floor, an eave's underside) at height y. */
-  floor(mat, x, y, z, r, rz = r, yaw = 0, segs = 8) {
+  /** A disc lying on a horizontal plane (the paving, the water, a floor, an eave's underside) at height y; water: the ripple-broken kind. */
+  floor(x, y, z, r, rz = r, yaw = 0, segs = 8, water = false) {
     const s = Math.sin(yaw), c = Math.cos(yaw);
-    this.disc(mat, [x, y, z], [c, 0, -s], [s, 0, c], r, rz, null, segs);
+    this.disc([x, y, z], [c, 0, -s], [s, 0, c], r, rz, null, segs, [1, 0.42, 0], [0, 0.5, 1], water ? -1 : 1);
   }
   /** A disc standing on a wall at (x, y, z), the wall's outward normal nh = [x, z]; rw wide and rh high (semi-axes). */
-  wall(mat, x, y, z, nh, rw, rh, segs = 8) {
-    this.disc(mat, [x, y, z], [-nh[1], 0, nh[0]], [0, 1, 0], rw, rh, nh, segs);
+  wall(x, y, z, nh, rw, rh, segs = 8) {
+    this.disc([x, y, z], [-nh[1], 0, nh[0]], [0, 1, 0], rw, rh, nh, segs, [0.9, 0], [0, 1]);
   }
-  /** A shell round (x, y, z) of radius r: 8 sides, four bands; true normals. */
-  ball(mat, x, y, z, r, segs = 8) {
-    const lat = [-90, -45, 0, 45, 90].map((d) => d * Math.PI / 180);
-    const P = (i, k) => { const a = k / segs * TAU, cl = Math.cos(lat[i]); return [x + Math.cos(a) * cl * r, y + Math.sin(lat[i]) * r, z + Math.sin(a) * cl * r]; };
-    const N = (i, k) => { const a = k / segs * TAU, cl = Math.cos(lat[i]); return [Math.cos(a) * cl, Math.sin(lat[i]), Math.sin(a) * cl]; };
-    for (let i = 0; i < 4; i++) for (let k = 0; k < segs; k++) {
-      if (i > 0) this.tri(mat, P(i, k), N(i, k), P(i, k + 1), N(i, k + 1), P(i + 1, k), N(i + 1, k));
-      if (i < 3) { this.tri(mat, P(i, k + 1), N(i, k + 1), P(i + 1, k + 1), N(i + 1, k + 1), P(i + 1, k), N(i + 1, k)); }
-    }
+  /** The glow round a flame at (x, y, z), radius r: three upright discs crossed at 60° (brightness varies by 7 % with the view), each a cone of light from its middle. */
+  ball(x, y, z, r) {
+    for (let k = 0; k < 3; k++) { const a = k * Math.PI / 3, c = Math.cos(a), s = Math.sin(a); this.disc([x, y, z], [c, 0, s], [0, 1, 0], r, r, [-s, c], 8, [0.62, 0], [0, 1]); }
   }
-  /** A flat sheet (a window's lamp-lit paper): the four corners, both faces seen (the material is double-sided). */
-  quad(mat, a, b, c, d, n) { this.tri(mat, a, n, b, n, c, n); this.tri(mat, a, n, c, n, d, n); }
-  /** One geometry per material into the bag. */
+  /** A flat sheet (a window's lamp-lit paper) of brightness f (0..1), facing n = [x, z] (both faces are seen). */
+  quad(a, b, c, d, n, f) {
+    const q = Math.sqrt(1 - f * f), N = [n[0] * q, f, n[1] * q];
+    this.tri(a, N, b, N, c, N); this.tri(a, N, c, N, d, N);
+  }
+  /** Into the bag, one geometry. */
   flush(bag) {
-    for (const [mat, a] of this.m) {
-      if (!a.pos.length) continue;
-      const g = new BufferGeometry();
-      g.setAttribute('position', new Float32BufferAttribute(a.pos, 3));
-      g.setAttribute('normal', new Float32BufferAttribute(a.nor, 3));
-      bag.add(mat, g);
-    }
-    this.m.clear();
+    if (!this.pos.length) return;
+    const g = new BufferGeometry();
+    g.setAttribute('position', new Float32BufferAttribute(this.pos, 3));
+    g.setAttribute('normal', new Float32BufferAttribute(this.nor, 3));
+    bag.add(MAT, g);
+    this.pos = []; this.nor = [];
   }
 }
 
@@ -87,9 +81,9 @@ export class Halo {
  * below it, `s` its size; a wall `wall` = { n: [x, z] (outward), d (behind the lantern, m) } if one stands behind it.
  */
 export function lanternLight(H, x, z, cy, gy, s, wall = null, pool = 2.6) {
-  H.ball('halo_ball', x, cy, z, 0.85 * s);
-  H.floor('halo_wash', x, gy + 0.03, z, pool * s);
-  if (wall) H.wall('halo_wash', x - wall.n[0] * wall.d, cy, z - wall.n[1] * wall.d, wall.n, 1.9 * s, 1.5 * s);
+  H.ball(x, cy, z, 0.95 * s);
+  H.floor(x, gy + 0.03, z, pool * s);
+  if (wall) H.wall(x - wall.n[0] * wall.d, cy, z - wall.n[1] * wall.d, wall.n, 1.9 * s, 1.5 * s);
 }
 /** The reflection streak on water at (x, z) (a lantern's own place), the water surface at wy: toward the nearest water within `reach` m. Returns whether one was laid. */
 export function waterStreak(H, x, z, wy, s = 1, reach = 7) {
@@ -110,7 +104,7 @@ export function waterStreak(H, x, z, wy, s = 1, reach = 7) {
   if (!best) return false;
   const a = 2.1 * s, cx = best.qx + best.dx * (a + 0.15), cz = best.qz + best.dz * (a + 0.15);
   if (best.y === LEVEL.pond && (pondDistance(cx, cz) > -0.3 || pondDistance(best.qx + best.dx * (2 * a), best.qz + best.dz * (2 * a)) > 0)) return false;
-  H.floor('halo_streak', cx, best.y + 0.02, cz, 0.62 * s, a, Math.atan2(best.dx, best.dz), 10);
+  H.floor(cx, best.y + 0.02, cz, 0.62 * s, a, Math.atan2(best.dx, best.dz), 10, true);
   return true;
 }
 
@@ -128,10 +122,10 @@ function unitOf(kind, v) {
   const key = `suzhou-halo|${kind}|${v ?? ''}`;
   return assembly(key, (a) => {
     const H = new Halo(), K = KINDS[kind];
-    if (kind === 'streak') H.floor('halo_streak', 0, 0, 0, 0.62, 2.1, 0, 10);
-    else if (kind === 'spill') H.floor('halo_wash', 0, 0.06, 1.3, 2.4, 1.9, 0, 10);
+    if (kind === 'streak') H.floor(0, 0, 0, 0.62, 2.1, 0, 10, true);
+    else if (kind === 'spill') H.floor(0, 0.06, 1.3, 2.4, 1.9, 0, 10);
     else lanternLight(H, 0, K.z ?? 0, K.cy, K.gy, K.s, K.wall ? { n: [0, 1], d: K.wall } : null, K.pool / K.s);
-    for (const [mat, d] of H.m) { const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(d.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(d.nor, 3)); a(mat, g); }
+    const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(H.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(H.nor, 3)); a(MAT, g);
   });
 }
 /** suzhou_halo: the light of a lantern or of a shop front, instanced like the lanterns themselves. */
@@ -209,12 +203,14 @@ function slabsOf(g, thick = 0.2) {
 function panesOf(H, b, off) {
   const thinX = b.x1 - b.x0 < b.z1 - b.z0, m = 0.035, y0 = b.y0 + m, y1 = b.y1 - m;
   if (y1 - y0 < 0.15) return;
+  // (each room its own strength, by the hash of its place: a lamp near the window or far back)
+  const f = 0.6 + 0.4 * hashAt((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2, 23 + Math.floor(b.y0 / 2.5));
   if (thinX) {
     const z0 = b.z0 + m, z1 = b.z1 - m;
-    for (const [x, nx] of [[b.x1 + off, 1], [b.x0 - off, -1]]) H.quad('halo_pane', [x, y0, z0], [x, y0, z1], [x, y1, z1], [x, y1, z0], [nx, 0, 0]);
+    for (const [x, nx] of [[b.x1 + off, 1], [b.x0 - off, -1]]) H.quad([x, y0, z0], [x, y0, z1], [x, y1, z1], [x, y1, z0], [nx, 0], f);
   } else {
     const x0 = b.x0 + m, x1 = b.x1 - m;
-    for (const [z, nz] of [[b.z1 + off, 1], [b.z0 - off, -1]]) H.quad('halo_pane', [x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z], [0, 0, nz]);
+    for (const [z, nz] of [[b.z1 + off, 1], [b.z0 - off, -1]]) H.quad([x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z], [0, nz], f);
   }
 }
 /**

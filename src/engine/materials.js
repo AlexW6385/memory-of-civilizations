@@ -625,31 +625,20 @@ function make(spec) {
     case 'halo': {
       // the light a lantern or a lit window throws, as geometry added over what is behind it (light
       // added, nothing hidden), at night only (the glow shades' own switch): so that the lanterns
-      // read as lit at the low preset, where the pool of real lamps is off. Four modes:
-      //   ball   a small low shell round the lantern, soft at its rim (the eye looks through the same
-      //          depth of haze at its middle): the lantern's bloom;
-      //   wash   a flat disc laid on the paving, the water or the wall under a lantern: the shape of
-      //          its normals carries the falloff (its y is 1 at the middle, 0 at the rim) so that the
-      //          mesh needs neither an attribute nor a position of its own: a warm pool of light;
-      //   streak a wash broken into ripples by the water's own motion: the lantern's reflection;
-      //   pane   a flat sheet in front of window paper: the lamp of the room within, each room (a cell
-      //          of the settlement) at its own strength.
-      // Added in linear light, no lights of the scene, no shadow, no depth written.
+      // read as lit at the low preset, where the pool of real lamps is off. One material for all of
+      // it, the shape of each piece carried by its normals (the mesh needs no attribute of its own,
+      // and an instance or a merge keeps them): the normal's y is the brightness, 1 at the middle of
+      // a disc and 0 at its rim (a pool of light on the paving, a wash on a wall, three crossed discs
+      // for the glow round the flame) or one value over a whole sheet (the lamp of a room behind
+      // window paper); a negative y marks the same on water, broken into ripples by the water's own
+      // motion (the lantern's reflection). Added in linear light, the scene's lights ignored, no
+      // shadow, no depth written.
       const night = smoothstep(0.15, 0.6, ENV.night);
       const flick = sin(time.mul(7.0).add(positionLocal.x.mul(3.1)).add(positionLocal.z.mul(2.3))).mul(0.05).add(sin(time.mul(2.3).add(positionLocal.z)).mul(0.04)).add(1);
       const glowC = uniform(new Color(spec.glow || '#ff9a45'));
-      let f;
-      if (spec.mode === 'ball') {
-        f = pow(abs(dot(normalView, normalize(positionView).negate())), 2.4);
-      } else if (spec.mode === 'pane') {
-        const rc = floor(positionLocal.div(vec3(3.4, 3.0, 3.4)));
-        const hr = hash(rc.x.mul(7.13).add(rc.y.mul(31.7)).add(rc.z.mul(113.1)).add(0.31));
-        f = hr.mul(0.55).add(0.45).mul(sin(time.mul(2.1).add(hr.mul(40.0))).mul(0.05).add(1));
-      } else {
-        const r = clamp(normalLocal.y, 0, 1);
-        f = pow(r, 1.7);
-        if (spec.mode === 'streak') f = f.mul(smoothstep(0.1, 0.8, sin(positionLocal.x.mul(11.0).add(positionLocal.z.mul(7.0)).add(time.mul(0.9))).mul(0.5).add(0.5).add(r.mul(0.35))));
-      }
+      const ny = normalLocal.y, r = clamp(abs(ny), 0, 1);
+      const rip = smoothstep(0.1, 0.8, sin(positionLocal.x.mul(11.0).add(positionLocal.z.mul(7.0)).add(time.mul(0.9))).mul(0.5).add(0.5).add(r.mul(0.35)));
+      const f = pow(r, 1.7).mul(select(ny.lessThan(0), rip, float(1)));
       m.colorNode = vec3(0, 0, 0);
       m.emissiveNode = glowC.mul(f.mul(float(spec.power ?? 0.5))).mul(night).mul(flick);
       m.opacityNode = float(0.004);

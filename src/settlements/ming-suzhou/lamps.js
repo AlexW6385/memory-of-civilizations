@@ -95,7 +95,7 @@ function gardenLanternsEl(el, { bag }) {
     // its light (nightlight.js): the glow round it, the pool on the floor under it, the wash on the wall behind, its reflection in the pond
     const body = l.kind === 'palace' ? 0.55 * l.k : (tall ? 0.32 : 0.28) * l.k, size = l.kind === 'palace' ? 1.15 * l.k : 0.8 * l.k;
     lanternLight(H, l.x, l.z, l.y - body, l.fy, size, l.wall, l.kind === 'palace' ? 3.0 : 2.3);
-    waterStreak(H, l.x, l.z, l.fy, l.kind === 'palace' ? 1.1 : 0.8, 5);
+    waterStreak(H, l.x, l.z, l.fy, l.kind === 'palace' ? 1.1 : 0.8, l.kind === 'palace' ? 9 : 5);
   }
   all.emit(bag, 0, 0, 0);
   H.flush(bag);
