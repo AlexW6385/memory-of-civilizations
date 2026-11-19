@@ -11,6 +11,9 @@ export { TRADES };
 const WALLS = ['planks_grey', 'planks_grey', 'mud_plaster', 'plaster_grey'];
 // A late Muromachi house is known by its curtain (noren), not by a signboard (JAANUS, kanban: none in the rakuchū rakugai-zu): the cloth and
 // the mark on it by trade [inferred], and a few trades hang their goods from the eave.
+import { markAt } from './script.js';
+/** The character on the curtain of a trade whose character is drawn and verified (script.js): the sake-seller's 酒, the tea-seller's 茶, the rice-dealer's 米, the draper's 布, the pawnbroker's 當, the potter's 瓷, the lacquerer's 漆. */
+const MARK = { sake: '酒', tea: '茶', rice: '米', cloth: '布', doso: '當', pottery: '瓷', lacquer: '漆' };
 const NOREN = { sake: ['cloth_white', 'cloth_indigo'], tea: ['cloth_red', 'cloth_white'], food: ['cloth_red', 'cloth_white'], dye: ['cloth_indigo', 'cloth_white'], cloth: ['cloth_ochre', 'cloth_indigo'], pottery: ['cloth_brown', 'cloth_white'], rice: ['cloth_white', 'cloth_brown'], lacquer: ['cloth_maroon', 'cloth_white'], paper: ['cloth_white', 'cloth_black'], sandals: ['cloth_brown', 'cloth_white'], doso: ['cloth_black', 'cloth_white'], smith: ['cloth_grey', 'cloth_white'], wood: ['cloth_green', 'cloth_white'] };
 
 /** The dimensions a house gets from its seed: the same for the house and for its dressing (fronts.js). */
@@ -108,7 +111,7 @@ function machiya(el, ctx) {
     const up = !!el.up && D.two && open, wins = up ? upWindows(w, hw - doma) : [];
     const shutFront = !open || (el.front ? el.front === 'shut' : (el.seed >>> 2) % 3 === 1);
     const [nb, nm] = NOREN[trade] || ['cloth_indigo', 'cloth_white'], sg = rng((el.seed || 1) * 13 + 1);
-    const noren = (top) => { const n = 3, wd = (doma - 0.2) / n; for (let k = 0; k < n; k++) { const a = hw - doma + 0.1 + k * wd; B(nb, a + 0.01, y0 + 1.15, 0.03, a + wd - 0.01, top, 0.06); B(nm, a + wd / 2 - 0.1, top - 0.6, 0.062, a + wd / 2 + 0.1, top - 0.25, 0.066); } };
+    const noren = (top) => { const n = 3, wd = (doma - 0.2) / n; for (let k = 0; k < n; k++) { const a = hw - doma + 0.1 + k * wd; B(nb, a + 0.01, y0 + 1.15, 0.03, a + wd - 0.01, top, 0.06); if (!MARK[trade]) B(nm, a + wd / 2 - 0.1, top - 0.6, 0.062, a + wd / 2 + 0.1, top - 0.25, 0.066); else if (k === 1) bag.add(nm, markAt(MARK[trade], a + wd / 2, top - 0.43, 0.0625, 0.34, !!el.mirror)); } };   // (the trade's character on the middle panel, in the second colour; the others plain)
     // the foot, posts and beams (the posts run up through the low second storey)
     for (const sx of [-1, 1]) B('granite_block', sx * hw - 0.2, y0, -0.2, sx * hw + 0.2, y0 + 0.2, 0.2);
     B('granite_block', -hw, y0, -d, hw, y0 + 0.14, -d + 0.1);

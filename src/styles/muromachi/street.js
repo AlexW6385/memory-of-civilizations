@@ -34,7 +34,13 @@ function vegBed(el, { bag }) {
 /** stream_steps: { at: [x, z], side ('w' | 'e'), top, level } — three broad stone steps down the wall of the stream to the water. */
 function streamSteps(el, { bag }) {
   const [x, z] = el.at, s = el.side === 'e' ? -1 : 1, top = el.top ?? 0.15, lv = el.level ?? -0.55, hw = el.w ?? 1.3;
-  for (let k = 0; k < 3; k++) { const t = top - (top - lv) * k / 3; bx(bag, 'granite_block', Math.min(x + s * k * 0.65, x + s * (k + 1) * 0.65), t - 0.5, z - hw, Math.max(x + s * k * 0.65, x + s * (k + 1) * 0.65), t, z + hw); }
+  // (each tread is worn into a shallow dish by the feet: its middle 1.5 cm below the rim, a hand's width of rim at the sides and a finger's at the front)
+  for (let k = 0; k < 3; k++) {
+    const t = top - (top - lv) * k / 3, xa = Math.min(x + s * k * 0.65, x + s * (k + 1) * 0.65), xb = Math.max(x + s * k * 0.65, x + s * (k + 1) * 0.65), m = hw * 0.25;
+    bx(bag, 'granite_block', xa, t - 0.5, z - hw, xb, t - 0.015, z + hw);
+    for (const sg of [-1, 1]) bx(bag, 'granite_block', xa, t - 0.015, sg > 0 ? z + hw - m : z - hw, xb, t, sg > 0 ? z + hw : z - hw + m);
+    bx(bag, 'granite_block', s > 0 ? xb - 0.06 : xa, t - 0.015, z - hw + m, s > 0 ? xb : xa + 0.06, t, z + hw - m);      // (the lip toward the water)
+  }
 }
 
 /** stone_group: { at, y, seed, n, k } — a few weathered stones set together (a garden's, an islet's), the tallest a hand-span out of the rest. */

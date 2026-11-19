@@ -70,6 +70,9 @@
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
+import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
+import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
+import * as FLORENCE from '../settlements/florence/soundmap.js';
 import * as VENICE from '../settlements/venice/soundmap.js';
 import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
 import * as PARIS from '../settlements/paris/soundmap.js';
@@ -117,11 +120,11 @@ export const PROFILES = {
   constantinople: T({ ...MED, gull: 0.7 }, { cicadas: 0.5, animals: { rooster: 0.4, donkey: 0.4, dog: 0.5 }, bells: 'semantron' }),
   djenne: T({ dove: 1, sparrow: 0.6, kite: 0.5, tropic: 0.3 }, { frogs: 0.6, animals: { goat: 0.6, donkey: 0.5, rooster: 0.6, cattle: 0.4 }, roof: 'flat', adhan: 1 }),
   'edo-himeji': T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { rooster: 0.4, dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'toki' }),
-  florence: T(MED, { cicadas: 0.3, animals: { horse: 0.4, donkey: 0.3, dog: 0.3 }, bells: 'angelus-hours' }),
+  florence: T(MED, { cicadas: 0.3, animals: withLife({ horse: 0.4, donkey: 0.3, dog: 0.3 }, { market: 1, eaves: 1, map: FLORENCE }), bells: 'angelus-hours' }),
   shaolin: T({ warbler: 0.5, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.2 }, roof: 'tile', bells: 'monastery' }),
   'timurid-samarkand': T(NEAR, { animals: { donkey: 0.5, horse: 0.3, dog: 0.2 }, roof: 'flat', adhan: 1 }),
   dunhuang: T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: { dog: 0.3, donkey: 0.3, camel: 0.2 }, roof: 'flat', bells: 'monastery' }),
-  'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, animals: { dog: 0.2, crow: 0.2 }, roof: 'flat', bells: 'bonsho' }),
+  'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, roof: 'shingle', bells: null, animals: withLife({ dog: 0.2, crow: 0.2, rooster: 0.25 }, { canal: 1, market: 0.8, eaves: 1, map: KYOTO }) }),
   'abu-simbel': T(NEAR, { animals: { donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
   'qin-xianyang': T(NEAR, { animals: { cattle: 0.5, dog: 0.3, horse: 0.3 }, roof: 'tile' }),
   thebes: T(NEAR, { animals: { donkey: 0.5, dog: 0.3, cattle: 0.3 }, roof: 'flat' }),
@@ -186,7 +189,7 @@ export const PROFILES = {
   paris: T(EU, { roof: 'slate', bells: 'paris', animals: withLife({ horse: 0.5, rooster: 0.3, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: PARIS }) }),
   persepolis: T(NEAR, { animals: { horse: 0.5, donkey: 0.4, dog: 0.3 }, roof: 'flat' }),
   petra: T({ dove: 1, kite: 0.4, sparrow: 0.5 }, { animals: { goat: 0.6, donkey: 0.4 }, roof: 'flat' }),
-  'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, animals: { dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'drumbell' }),
+  'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, roof: 'tile', bells: 'beijing', animals: withLife({ dog: 0.3, horse: 0.2 }, { market: 1, patrol: 1, eaves: 1, map: BEIJING }) }),
   'rapa-nui': T({ gull: 1, tropic: 0.2 }, { animals: { rooster: 0.4 }, roof: 'thatch' }),
   rome: T(MED, { cicadas: 0.5, frogs: 0.3, animals: withLife({ donkey: 0.4, horse: 0.3, dog: 0.3, rooster: 0.3 }, { canal: 1, market: 1, eaves: 1, map: ROME }) }),
   sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: { cattle: 0.6, goat: 0.4, rooster: 0.3 }, roof: 'thatch' }),
@@ -224,6 +227,8 @@ const HOURS = {
   toki: [[6, 'toki:6'], [8, 'toki:5'], [10, 'toki:4'], [12, 'toki:9'], [14, 'toki:8'], [16, 'toki:7'], [18, 'toki:6'], [20, 'toki:5'], [22, 'toki:4'], [0, 'toki:9'], [2, 'toki:8'], [4, 'toki:7']],
   bosingak: [[4, 'bosingak'], [22, 'bosingak']],
   drumbell: [[5, 'zhong'], [19, 'drum-tower']],
+  // Beijing: the Bell Tower's morning bell, the Drum Tower's evening drum then bell; the night's watches (the Drum and Bell Towers marked them, the watchmen of the lanes struck them)
+  beijing: [[5, 'zhong'], [19, 'drum-tower'], [21, 'watch:2'], [23, 'watch:3'], [1, 'watch:4'], [3, 'watch:5']],
   hanshan: [[0, 'hanshan']],
   // Suzhou: Hanshan's bell at midnight, far off; the Bao'en Temple's bell and drum at the fifth
   // watch's end and at dusk; the watchman's five watches (戌 7 pm, 亥 9, 子 11, 丑 1, 寅 3)

@@ -13,6 +13,7 @@
 // instruments and calls are in docs/settlements/ming-suzhou.md §22.]
 
 import { ENV } from './env.js';
+import { QING_VOICES } from './voices-qing.js';
 import { OTTOMAN_VOICES } from './voices-ottoman.js';
 
 const R = Math.random;
@@ -834,6 +835,8 @@ export const VOICES = {
 /** Put the voices on Music's prototype (audio.js does it once). */
 export function installVoices(Music) {
   for (const [k, v] of Object.entries(VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
+  for (const [k, v] of Object.entries(QING_VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;     // Beijing's (voices-qing.js)
   for (const [k, v] of Object.entries(OTTOMAN_VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
   Music.prototype.seasonDoy = function seasonDoy() { return this.doyOverride ?? doyOf(ENV.seasonWinter.value, ENV.seasonAutumn.value); };
 }
+import { VOICES_FLORENCE } from './voices-florence.js'; Object.assign(VOICES, VOICES_FLORENCE);       // (Florence's own: the market's cries, the chain, the cleaver, the weirs)

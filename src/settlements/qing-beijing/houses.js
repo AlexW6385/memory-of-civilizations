@@ -9,6 +9,7 @@
 // Houses face south; each building is made in its own frame (s along its front, d out from it)
 // and turned to its side of the yard.
 
+import { wornSlab } from './wear.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { withPal, latticeBay } from '../../styles/ming/index.js';
 import { HOUSE } from '../../styles/qing/index.js';
@@ -274,7 +275,7 @@ function doorway(bag, col, F, o, sa, sb, y, fh, dW, lintelY, latM, doorM, fl) {
   for (const sg of [-1, 1]) F.B(bag, 'lacquer_red', sc + sg * dw / 2 - 0.06, dW - 0.1, sc + sg * dw / 2 + 0.06, dW + 0.1, y, y + top);
   F.B(bag, 'lacquer_red', sc - dw / 2 - 0.06, dW - 0.1, sc + dw / 2 + 0.06, dW + 0.1, y + top, y + top + 0.1);
   F.B(bag, latM, sc - dw / 2, dW - 0.04, sc + dw / 2, dW + 0.04, y + top + 0.1, lintelY);
-  F.B(bag, 'granite_grey', sc - dw / 2 - 0.1, dW - 0.2, sc + dw / 2 + 0.1, dW + 0.2, y, y + 0.04);          // the sill-stone (menkan) underfoot
+  wornSlab(bag, 'granite_grey', F, sc - dw / 2 - 0.1, sc + dw / 2 + 0.1, dW - 0.2, dW + 0.2, y, y + 0.04, 0.016);          // the sill-stone (menkan) underfoot, hollowed in the middle by the feet (wear.js)
   // the two leaves, open, swung back against the walls inside (a lattice leaf on a dado)
   for (const sg of [-1, 1]) {
     const s = sc + sg * (dw / 2 + 0.03);
