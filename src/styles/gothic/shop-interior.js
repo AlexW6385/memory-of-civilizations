@@ -38,6 +38,8 @@ export function openGround(c) {
   if (L > u) W('limestone', u, L, -0.1, T, 0, st);
   // the door's leaf standing open against its jamb, hinged at the side away from the shop
   { const hu = doorL ? du : du + 1.0; B('wood_dark', hu - 0.03, hu + 0.03, T, T + 0.95, 0, 2.2); }
+  // the worn threshold (docs/settlements/paris.md §6e): a slab of the hard stone across the door, its middle hollowed by feet (the flagstone showing through, in the line the feet take)
+  B('limestone', du - 0.02, du + 1.02, -0.12, T + 0.1, 0, 0.014); B('flagstone', du + 0.22, du + 0.8, -0.12, T + 0.1, 0.014, 0.02);
   // the floor above on its beams and boards; walked on the roof of the room, not in it
   // (with rooms above, upper.js builds the floor and its stairwell; the beams stop short of the stair's opening)
   if (!up) { const r = R(T, T, L - T, D - T); bag.add('timber', box(r[0], y + st - 0.06, r[1], r[2], y + st - 0.02, r[3])); }
