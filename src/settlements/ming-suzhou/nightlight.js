@@ -10,9 +10,10 @@
 // mesh of the material, the street's are `suzhou_halo` elements of the street life (instanced).
 // Everything is a function of the lantern's own place: no counters, no Math.random.
 
-import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
+import { BufferGeometry, Float32BufferAttribute, Matrix4, Quaternion, Vector3 } from '../../core/three.js';
+import { placeHanging } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
-import { assembly, placer } from '../../objects/kit.js';
+import { assembly } from '../../objects/kit.js';
 import { LEVEL, CANALS, POND, pondDistance } from './layout.js';
 
 /** A number in [0, 1) from a position alone. */
@@ -130,9 +131,12 @@ function unitOf(kind, v) {
 }
 /** suzhou_halo: the light of a lantern or of a shop front, instanced like the lanterns themselves. */
 function suzhouHalo(el, { bag }) {
-  const put = placer(el, bag), U = unitOf(el.kind, el.v);
-  for (const [mat, g] of Object.entries(U)) put(mat, g.clone());
+  const U = unitOf(el.kind, el.v), [x, z] = el.at;
+  const M = new Matrix4().compose(new Vector3(x, el.y ?? 0, z), new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), el.rot ?? 0), new Vector3(1, 1, 1));
+  // (drawn within 60 m of the eye: farther off a lantern is a point of light, which its own shade already gives, and the pool of light under it is too small to read)
+  for (const [mat, g] of Object.entries(U)) { if (bag.addInstance) bag.addInstance(mat, g.clone(), M, { reach: HALO_REACH }); else bag.add(mat, placeHanging(g.clone(), M)); }
 }
+const HALO_REACH = 60;
 
 /** The halos for a plan's list of street elements (a life plan's `elements`): one `suzhou_halo` for each lantern and the lit shop fronts; `inDisc` keeps them within the settlement. */
 export function streetHalos(elements, inDisc = () => true) {
