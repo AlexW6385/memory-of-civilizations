@@ -6,11 +6,14 @@
 
 import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layout.js';
 import { northPlans } from './north.js';
-import { upOf, faceOf, frameOf, doorGap, shopkeeperAt } from './uphouses.js';
+import { upOf, faceOf, frameOf, layoutOf, doorGap, shopkeeperAt } from './uphouses.js';
 import './style.js';
 import './townwork.js';
 import './quaywork.js';
 import { bridgeLamps } from './lamps.js';
+import { prepareTown, frontOf, HOUSE_TRADE } from './shopprep.js';
+import { walkSet, walkElement, analyse } from './openwalk.js';
+import './walkfront.js';
 import { streetHalos } from './nightlight.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -105,47 +108,10 @@ function waterways() {
 }
 
 /** The houses, in plans by quadrant and by how rich their detail is (so that the far, cheap ones cull apart from the near). */
-const TRADE_ORDER = ['cloth', 'medicine', 'tea', 'books', 'rice', 'lacquer'];
-// the trades of the shops outside the six open ones (weights), and the interior the house builder gives each (it knows six)
-const TRADE_W = { cloth: 1, tea: 1.2, rice: 1, medicine: 0.9, lacquer: 0.7, books: 0.8, wine: 1.2, pottery: 0.9, iron: 0.7, fans: 0.7, food: 1.2 };
-const HOUSE_TRADE = { wine: 'tea', food: 'tea', pottery: 'lacquer', iron: 'lacquer', fans: 'books', pawn: 'lacquer' };
-/** More shops along the main streets, and every shop but the open six given one of the eleven trades (a separate stream: the lots stay as they were). */
-function prepareShops(open) {
-  const all = lots();
-  if (all.prepared) return;
-  all.prepared = true;
-  const r = rng(2718);
-  for (const l of all) { l.shop0 = l.shop; l.trade0 = l.trade; }
-  const main = STREETS.slice(0, 4);
-  for (const l of all) {
-    if (open.has(l) || l.kind === 'yard' || l.kind === 'grand' || l.water) continue;
-    const F = frontOf(l), p = F.P(0.5, 3), near = main.some((s) => p[0] > s[0] - 1 && p[0] < s[2] + 1 && p[1] > s[1] - 1 && p[1] < s[3] + 1);
-    const q = r(), d = Math.hypot(p[0], p[1] - 40);
-    if (!l.shop && F.L > 3.3 && q < (near ? (d < 150 ? 1 : 0.9) : 0.4)) l.shop = true;
-  }
-  // every shop but the open six takes its trade in turn from a shuffled list, so that each trade has as many as another
-  const mine = all.filter((l) => l.shop && !open.has(l));
-  for (let i = mine.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [mine[i], mine[j]] = [mine[j], mine[i]]; }
-  const names = Object.keys(TRADE_W);
-  mine.sort((a, b) => (a.water ? 1 : 0) - (b.water ? 1 : 0));            // (the shops on the canals show no goods outside: the others first, so that each trade has as many)
-  mine.forEach((l, i) => { l.trade = names[i % names.length]; });
-  // a few of the wide dry shops are pawnshops (dang pu: a great 當 on the wall), by the lot's own seed: about one in twenty
-  for (const l of mine) if (!l.water && frontOf(l).L > 4.3 && ((l.seed * 2246822519) >>> 0) % 100 < 6) l.trade = 'pawn';
-}
 function houses() {
   const all = lots(), plans = [];
-  // a few houses by the south street can be entered (DESIGN §4.3): the six shops (one of each trade: cloth, medicine,
-  // tea, books, rice, lacquer) and three homes nearest the way in
-  const near = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 - 60);
-  const depth = (l) => (l.front === 's' || l.front === 'n' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]);
-  const dry = all.filter((l) => !l.water && (l.front === 's' || l.front === 'n') && l.kind === 'row' && depth(l) < 7.4 && l.rect[2] - l.rect[0] > 4.2).sort((a, b) => near(a) - near(b));
-  const open = new Set(); openLots = open;
-  const shopsNear = dry.filter((l) => l.shop).slice(0, 6);
-  shopsNear.forEach((l, k) => { l.trade = TRADE_ORDER[k]; l.overhang = false; open.add(l); });
-  for (const l of dry.filter((q) => !q.shop).slice(0, 3)) { l.overhang = false; open.add(l); }
-  prepareShops(open);
-  // the houses whose upper floors can be climbed (uphouses.js): the open ones, and the weaver's beside them
-  for (const l of all) if (upOf(l) && !open.has(l)) { l.overhang = false; open.add(l); const u = upOf(l); if (u.trade && !u.fresh) { l.trade = u.trade; l.shop = true; } }       // (the later houses keep the flags the lots have, so that the street life's stream stays as it was: their shop front, if any, is shopFronts()'s)
+  // a few houses by the south street can be entered (DESIGN §4.3): the six shops, three homes and the climbable houses (shopprep.js)
+  const open = prepareTown(); openLots = open;
   const ups = all.filter((l) => upOf(l));
   const quads = [[], [], [], [], [], [], [], []];
   for (const l of all) {
@@ -154,9 +120,10 @@ function houses() {
     quads[(cx > 0 ? 1 : 0) + (cz > 0 ? 2 : 0) + (l.detail > 0 ? 0 : 4)].push(l);
   }
   quads.forEach((q, i) => {
-    const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: HOUSE_TRADE[l.trade] || l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
+    const E = q.map((l) => (walkSet().has(l) ? { ...walkElement(l, walkSet().get(l)), t: 'house_walk' } : { t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: HOUSE_TRADE[l.trade] || l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
     if (E.length) plans.push({ ...base(`ming-suzhou-houses-${i}`, E), style: 'suzhou-quarter' });
   });
+  plans.push(...walkPlans());
   // the climbable houses, west and east of the way in, each side one plan with its own bounds (drawn only where they are near):
   // the first sixteen by the south street, and the houses added after them (uphouses.js NEXT) about the quarter
   for (const [name, test] of [['w', (l) => l.rect[0] < 0], ['e', (l) => l.rect[0] > 0]]) {
@@ -169,15 +136,95 @@ function houses() {
   return plans;
 }
 
+// ── the opened lots of the walk (openwalk.js, walkfront.js) ──
+const WALK_CELL = 36, WALK_NEAR = 58;                  // m: the cells the lots are planned in; the interiors and goods exist within this of a cell middle (a lot is near from 33 m)
+/** The walk's lots by cell: Map 'i,j' → [[lot, s]]. */
+function walkCells() {
+  const cells = new Map();
+  for (const [l, s] of walkSet()) {
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, k = `${Math.floor(cx / WALK_CELL)},${Math.floor(cz / WALK_CELL)}`;
+    if (!cells.has(k)) cells.set(k, []);
+    cells.get(k).push([l, s]);
+  }
+  return cells;
+}
+/**
+ * Per cell, the near plan (the open front, the rooms, their fittings and colliders), the far plan (one dark board where the front is cut: one material) and
+ * the shopkeepers (the street life's own figures) behind the counters; the shells themselves are in the houses' plans (house_walk).
+ */
+function walkPlans() {
+  const plans = [];
+  for (const [k, list] of walkCells()) {
+    const [i, j] = k.split(',').map(Number), center = [i * WALK_CELL + WALK_CELL / 2, j * WALK_CELL + WALK_CELL / 2];
+    plans.push({ ...base(`ming-suzhou-walk-${k}`, list.map(([l, s]) => ({ ...walkElement(l, s), t: 'walk_near' }))), style: 'suzhou-quarter', near: WALK_NEAR, center });
+    plans.push({ ...base(`ming-suzhou-walk-${k}-far`, list.map(([l, s]) => ({ ...walkElement(l, s), t: 'walk_far' }))), style: 'suzhou-quarter', far: WALK_NEAR, center, nocollide: true });
+    const folk = walkFolk(list);
+    if (folk.length) plans.push({ ...base(`ming-suzhou-walk-${k}-folk`, folk), style: 'life', near: WALK_NEAR, center });
+  }
+  return plans;
+}
+/** The shopkeepers: one behind each counter, standing, facing the street (from the lot's own seed). */
+function walkFolk(list) {
+  const E = [], pick = (r, a) => a[Math.floor(r() * a.length)];
+  for (const [l, s] of list) {
+    if (s.type !== 'shop') continue;
+    const r = rng((l.seed ^ 0x5bd1e995) >>> 0), F = frameOf(l.rect, false, l.front), lay = layoutOf(F.L), cEnd = lay.dc - 0.7;
+    const a = Math.max(0.9, cEnd * 0.5), p = F.at(a, 1.4), q = F.at(a, 0.4);
+    const e = { t: 'figure', at: p, y: LEVEL.street + 0.45, rot: Math.atan2(-(q[0] - p[0]), -(q[1] - p[1])), seed: Math.floor(r() * 1e9), dress: r() < 0.7 ? 'robe' : 'trousers', cloth: pick(r, CLOTH), cloth2: pick(r, CLOTH), skin: r() < 0.7 ? 'skin_light' : 'skin_medium', hat: pick(r, ['none', 'none', 'cap']), carry: 'none', pose: 'stand' };
+    if (CAP_MING && e.hat === 'cap') e.cap = 'ming';
+    if (CAP_MING) e.hair = 'netknot';
+    E.push(e);
+  }
+  return E;
+}
+
+/** The doorways of the walk's lots, each { p (on the lot's front line), n (out into the street), u (along the front) }. */
+function laneList() {
+  const out = [];
+  for (const [l, s] of walkSet()) {
+    const F = frameOf(l.rect, false, l.front), dc = s.type === 'shop' ? layoutOf(F.L).dc : (analyse(walkElement(l, s)).dc ?? F.L / 2);
+    out.push({ p: F.at(dc, 0), n: { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[l.front], u: F.u });
+  }
+  return out;
+}
+const MOVABLE = new Set(['figure', 'animal', 'chickens', 'barrow', 'drying_tray']);
+/**
+ * Keep the street life out of the doorways of the walk's lots: what stands in the lane in front of a door (1.3 m either side, out to the middle of the
+ * street) moves along the street to its edge (a tea table with its sitters as one). Nothing is dropped and nothing is drawn from the stream.
+ */
+function clearLanes(L) {
+  const lanes = laneList();
+  const shift = (at, r) => {
+    let q = at;
+    for (let pass = 0; pass < 4; pass++) {
+      let moved = false;
+      for (const ln of lanes) {
+        const dx = q[0] - ln.p[0], dz = q[1] - ln.p[1], out = dx * ln.n[0] + dz * ln.n[1], al = dx * ln.u[0] + dz * ln.u[1];
+        if (out < -0.3 || out > 3.8 || Math.abs(al) >= 1.3 + r) continue;
+        const sg = al > 0.05 ? 1 : al < -0.05 ? -1 : (Math.round(ln.p[0] * 7 + ln.p[1] * 3) & 1 ? 1 : -1), al2 = sg * (1.36 + r);
+        q = [ln.p[0] + ln.n[0] * out + ln.u[0] * al2, ln.p[1] + ln.n[1] * out + ln.u[1] * al2]; moved = true;
+      }
+      if (!moved) break;
+    }
+    return q;
+  };
+  const done = new Set();
+  for (const e of L) {
+    if (e.t !== 'tea_table') continue;
+    const q = shift(e.at, 1.1), d = [q[0] - e.at[0], q[1] - e.at[1]];
+    if (!d[0] && !d[1]) continue;
+    for (const f of L) if (f !== e && f.t === 'figure' && !done.has(f) && Math.hypot(f.at[0] - e.at[0], f.at[1] - e.at[1]) < 1.35) { f.at = [f.at[0] + d[0], f.at[1] + d[1]]; done.add(f); }
+    e.at = q; if (e.c) e.c = q;
+  }
+  for (const e of L) {
+    if (!MOVABLE.has(e.t) || done.has(e) || (e.y ?? 0) > LEVEL.street + 0.2) continue;
+    e.at = shift(e.at, e.t === 'barrow' ? 0.8 : 0.4);
+  }
+}
+
 // ── the life of the canals and streets (docs/settlements/ming-suzhou.md §6) ──
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 const CLOTH = ['cloth_indigo', 'cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black'];
-/** A lot's front: P(t, off) a point at fraction t along it, off out from it (negative: in); rot turns an object's +z outward. */
-function frontOf(l) {
-  const [x0, z0, x1, z1] = l.rect, f = l.front, n = FR[f], along = f === 'n' || f === 's';
-  const P = (t, off) => (along ? [x0 + (x1 - x0) * t, (f === 'n' ? z0 : z1) + n[1] * off] : [(f === 'e' ? x1 : x0) + n[0] * off, z0 + (z1 - z0) * t]);
-  return { P, n, L: along ? x1 - x0 : z1 - z0, rot: Math.atan2(n[0], n[1]) };
-}
 /**
  * Shops with their banners, lanterns and goods on the counters, shopkeepers and customers; tea
  * tables out in front; washing on bamboo poles out of the upper windows over the water; women
@@ -328,6 +375,7 @@ function riverLife() {
       L.push({ t: 'well', kind: 'open', mat: 'granite_grey', at: p, y: LEVEL.street + 0.04, rot: 0, seed: Math.floor(hh(p[0], p[1], 9) * 1e9) });
     }
   }
+  clearLanes(L);                                                // (the doorways of the walk's lots are kept clear of the people and their things)
   L.push(...insideFolk());                                      // (after all the rest, so that nothing above shifts)
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
@@ -379,7 +427,7 @@ function shopFronts() {
     const F = frontOf(l);
     if (!inDisc(F.P(0.5, 0), 20)) continue;
     const ovh = !!l.overhang && l.storeys > 1 && l.kind !== 'simple' && !open.has(l);
-    const at = F.P(0.5, 0), e = { t: 'suzhou_shop', gap: uh ? doorGap(l, uh) : undefined, at, y: LEVEL.street, rot: F.rot, L: F.L, v0: ovh ? 1.15 : 0.7, trade: uh?.fresh ? uh.trade : l.trade, seed: l.seed + 7, open: open.has(l), detail: l.detail, water: l.water };
+    const at = F.P(0.5, 0), e = { t: 'suzhou_shop', gap: uh ? doorGap(l, uh) : walkSet().get(l)?.type === 'shop' ? doorGap(l, { mir: false }) : undefined, at, y: LEVEL.street, rot: F.rot, L: F.L, v0: ovh ? 1.15 : 0.7, trade: uh?.fresh ? uh.trade : l.trade, seed: l.seed + 7, open: open.has(l), detail: l.detail, water: l.water };
     const k = `${Math.floor(at[0] / 100)},${Math.floor(at[1] / 100)}`;
     if (!tiles.has(k)) tiles.set(k, []);
     tiles.get(k).push(e);
