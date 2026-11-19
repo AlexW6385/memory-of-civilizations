@@ -7,6 +7,7 @@ import { ground } from './ground.js';
 import { frameOf, layoutOf } from '../../styles/mughal/townhouse.js';
 import { householdOf } from '../../styles/mughal/household.js';
 import { boatFloat } from '../../objects/index.js';
+import { rows as cellRows } from './cells.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const PIH = Math.PI / 2;
@@ -27,17 +28,20 @@ export function life() {
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     const x0 = sx < 0 ? fx0 + 4.2 : 48, x1 = sx < 0 ? -48 : fx1 - 4.2, zf = BZ + sz * BW, s = sz < 0 ? 1 : -1, n = Math.round((x1 - x0) / 3.2), bw = (x1 - x0) / n;
     const face = s > 0 ? Math.PI : 0;                                        // toward the street
+    const CR = cellRows().find((q) => q.sx === sx && q.sz === sz);
     for (let k = 0; k < n; k++) {
       if (rand() < 0.35) continue;
+      // (an opened cell: its keeper sits inside, its goods stand either side of the 1.7 m door lane, not in it: cells.js)
+      const opened = k >= CR.open[0] && k < CR.open[1];
       const xc = x0 + (k + 0.5) * bw, zg = zf - s * 1.35, r = rand();
-      for (const dx of [-0.55, 0.55]) {
+      for (const dx of opened ? [-1.2, 1.2] : [-0.55, 0.55]) {
         if (rand() < 0.25) continue;
         const at = [xc + dx, zg], q = rand();
         L.push(r < 0.3 ? { t: 'pot', kind: pick(['water_pot', 'dark_pot']), n: 2 + Math.floor(rand() * 4), at, y: PY, seed: Math.floor(rand() * 1e9) }
           : r < 0.55 ? { t: 'sacks', n: 2 + Math.floor(rand() * 3), at, y: PY, rot: face + (rand() - 0.5) * 0.4, seed: Math.floor(rand() * 1e9), mat: q < 0.5 ? 'sacking' : 'linen' }
             : { t: 'basket', n: 2 + Math.floor(rand() * 3), at, y: PY, seed: Math.floor(rand() * 1e9), goods: pick(['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_white', 'cloth_indigo']) });
       }
-      if (rand() < 0.6) person([xc, zf - s * 2.1], PY, face, { man: true, pose: 'cross' });
+      if (rand() < 0.6) { const n0 = L.length; person([xc, zf - s * 2.1], PY, face, { man: true, pose: 'cross' }); if (opened) L.length = n0; }   // (made and dropped, so that the stream of the street life stays as it was)
     }
     // buyers and passers-by in the street
     for (let k = 0; k < 7; k++) { const x = x0 + 3 + rand() * (x1 - x0 - 6); person([x, BZ + sz * (1 + rand() * 2.2)], 0.04, rand() < 0.6 ? face + Math.PI : rand() * 6.28); }
