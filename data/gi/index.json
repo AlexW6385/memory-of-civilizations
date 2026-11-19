@@ -578,8 +578,8 @@
    }
   ],
   "bytes": 809128,
-  "seconds": 153,
-  "baked": "2026-11-18"
+  "seconds": 161,
+  "baked": "2026-11-19"
  },
  "bali-pura": {
   "site": "bali-village",
@@ -3330,8 +3330,8 @@
    }
   ],
   "bytes": 160396,
-  "seconds": 166,
-  "baked": "2026-11-18"
+  "seconds": 47,
+  "baked": "2026-11-19"
  },
  "mohenjo-daro-citadel": {
   "site": "mohenjo-daro",
@@ -5199,8 +5199,8 @@
    }
   ],
   "bytes": 154551,
-  "seconds": 13,
-  "baked": "2026-11-18"
+  "seconds": 25,
+  "baked": "2026-11-19"
  },
  "venice-san-marco": {
   "site": "venice",

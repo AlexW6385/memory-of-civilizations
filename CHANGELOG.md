@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.40 — Suzhou's town, doors that open, dimmer night rain (2026-11-18)
+
+Suzhou's streets: shop boards carry real characters (藥, 書, 麵, a great 當 on the pawnshop wall, and shop names); seven more houses can be climbed (sixteen in all); lane doors have thresholds, hinges, knockers, door gods and couplets; landing steps and bridge treads are worn, moss and weeds grow on the canal walls; moored boats carry their loads, washing hangs at the landings, there are wells; the temple has its incense burner, studded doors, stone lions and lamp posts. In Ur and Babylon the houses with a reed awning over the door can be entered again (about a third of them could not be). Upstairs in Baghdad (eight shops and lodgings on the gate road, with balconies and oriels) and Samarkand (three merchants' houses with a reception room, balcony and loggia, and an upper room on seven craftsmen's roofs). Rain at dusk and at night is lit by the hour instead of falling as white streaks.
+
 ## v12.39 — five more upstairs (2026-11-18)
 
 Kilwa: ten houses with a rubble stair to a long upper room, a gallery over the court and the flat roof. Conques: thirty houses by a timber stair to chambers, lofts and dormitories, some with a balcony over the lane. Jerusalem: twelve houses with two chambers, a loggia and a balcony on the roof terrace. Ur: nine houses with a bedchamber, a store or workroom by trade, a street room and a timber gallery over the court. Djenné: twenty-four houses with open windows, rooms by household, a roofed gallery and a banco stair to the roof terrace.

@@ -44,7 +44,8 @@ export class Rain {
     const side = normalize(cross(dir, normalize(base.sub(cameraPosition)))).mul(WIDTH);
     const p = base.add(side.mul(cr.x)).sub(dir.mul(cr.y.mul(LEN)));
     m.positionNode = p;
-    m.colorNode = vec3(0.75, 0.78, 0.82);
+    // lit by the hour's light, as the snow is: rain at dusk and at night is dim, not white streaks on a dark scene
+    m.colorNode = vec3(0.75, 0.78, 0.82).mul(max(ENV.sunColor.mul(0.35).add(ENV.fogColor.mul(0.6)), vec3(0.05)));
     m.opacityNode = this.amount.mul(0.2).mul(mix(float(0.15), float(1), cr.y));
     m.fog = false;
     this.mesh = new THREE.Mesh(g, m);
