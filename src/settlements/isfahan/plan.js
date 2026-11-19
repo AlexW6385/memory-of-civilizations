@@ -115,6 +115,10 @@ walks[0].y0 = 0;
 walks.push([[-70, 167.5], [-82.6, 167.5], [-88, 167.5], [-82.6, 167.5]], [[70, 181.2], [82.6, 181.2], [88, 181.2]]);          // into an arcade shop on each side of the square, by the arch and the doorway
 walks.push(...openHouses().filter((h) => h.up).map((h) => upWalk(h)));   // up the stair of each house with an upstairs (docs/settlements/isfahan.md §25)
 walks.push(...openHouses().filter((h) => !h.up).slice(0, 8).map((h) => houseWalk(h)));   // into the court and under the talar's arch of eight walk-in houses (docs/settlements/isfahan.md §26.2)
+walks.push([[12, -324], [15.5, -324], [19.5, -324], [21.5, -321.5], [26, -320.8]]);   // in at the west door of the coffeehouse by the Qeysarieh (docs/settlements/isfahan.md §26.2)
+walks.push([[0, -302], [0, -316], [1.2, -330], [0.6, -344], [1.2, -358], [0, -372], [0, -383]]);   // down the covered bazaar from the Qeysarieh's portal to its far end, round the goods and people the generated life stands in it
+walks.push([M(0, 30), M(0, 44), M(0, 52), M(0, 58), M(0, 62)]);   // from the court's qibla iwan through the door into the Shah Mosque's sanctuary (docs/settlements/isfahan.md §17)
+walks.push([[70, -40], [86, -38], [92, -38.3], [96.8, -43.9], [103, -50.1], [107.5, -45.6], [112, -41], [110.4, -39.4], [106.5, -35.5], [103, -32]]);   // through Lotfollah's portal, the vestibule and the winding passage into its chamber
 walks.push(...arcadeUpBays().map((b) => arcadeUpWalk(b)));   // up behind the back wall of each shop with a room over it
 
 export const square = {
