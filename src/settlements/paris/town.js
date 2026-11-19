@@ -1,25 +1,17 @@
-import { openLots, lodTiles } from '../lod.js';
+import { lodTiles } from '../lod.js';
 import { courtHouses, courtHouseLife } from './court-houses.js';
-import { ARRIVALS } from '../../planet/arrivals.js';
 // The houses of the Cité and the banks (docs/settlements/paris.md §5, §5a): timber-framed, jettied, gabled.
 // The core (RICH) is built as `paris_house` of the gothic style in two levels (full near, the mass far); the outer
 // rows and the two houses that can be entered stay the vernacular timber house.
 import { RADIUS, RIVER, lots, streets } from './layout.js';
+import { RICH, OPEN_MAX, OPEN_OUTER, rich as richLot, openMap } from './openwalk.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -60], facing: 'w' } });
-export const RICH = { c: [60, 0], r: 250 };
-export const OPEN_MAX = 170, OPEN_OUTER = 60;          // the shops and homes of the core that can be entered, and the outer rows' workshops and inns
-const dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - 70, (l.rect[1] + l.rect[3]) / 2);
-const outerOpen = (all) => all.filter((l) => !rich(l) && l.rect[2] - l.rect[0] >= 5.0 && l.seed % 7 === 0).sort((a, b) => dist(a) - dist(b)).slice(0, OPEN_OUTER);
-export function openSet() { const all = lots(), near = openLots(all, [ARRIVALS.paris[0], ARRIVALS.paris[2]], 2), s = new Set(near.keys()); all.filter((l) => rich(l) && l.rect[2] - l.rect[0] >= 5.0 && l.seed % 4 === 0 && !s.has(l)).sort((a, b) => dist(a) - dist(b)).slice(0, OPEN_MAX).forEach((l) => s.add(l)); outerOpen(all).forEach((l) => s.add(l)); return s; }
-const rich = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - RICH.c[0], (l.rect[1] + l.rect[3]) / 2 - RICH.c[1]) < RICH.r;
+export { RICH, OPEN_MAX, OPEN_OUTER };
+export function openSet() { return new Set(openMap().keys()); }
+const rich = (l) => richLot(l);
 export async function houses() {
-  const all = lots(), plans = [], near = openLots(all, [ARRIVALS.paris[0], ARRIVALS.paris[2]], 2);
-  // the shops and homes that can be entered: every fourth lot of the core by its seed, the nearest to the Grand Pont and the parvis first
-  const open = new Map([...near]);
-  all.filter((l) => rich(l) && l.rect[2] - l.rect[0] >= 5.0 && l.seed % 4 === 0 && !open.has(l))
-    .sort((a, b) => dist(a) - dist(b)).slice(0, OPEN_MAX).forEach((l) => open.set(l, 'shop'));
+  const all = lots(), plans = [], open = openMap();
   const core = all.filter((l) => rich(l)), rest = all.filter((l) => !core.includes(l));
-  outerOpen(all).forEach((l) => open.set(l, 'outer'));
   plans.push(...lodTiles('paris-houses', 'gothic', core.map((l) => ({ t: 'paris_house', y: RIVER.ground, foot: RIVER.ground, ...l, ...(open.has(l) ? { open: true } : {}) })), { near: 200, R: RADIUS, entrance: { at: [0, -60], facing: 'w' } }));
   for (let i = 0; i < rest.length; i += 160) plans.push(base(`paris-outer-${i / 160}`, rest.slice(i, i + 160).map((l) => ({ t: 'house_timber', y: RIVER.ground, foot: RIVER.ground, ...l, ...(open.has(l) ? { open: true, use: (l.seed >>> 3) % 3 === 0 ? 'inn' : 'workshop' } : {}) }))));
   // the surfaces of the rues of the core, cut into pieces of 24 m (tiles of 100 m, full near, the crown and kerbs only far)
