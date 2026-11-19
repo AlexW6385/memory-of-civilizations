@@ -8,7 +8,8 @@ import { dressPlans } from './dress.js';
 import { roomPlans } from './rooms.js';
 import { frontPlans } from './fronts.js';
 import { upHouses } from './upper.js';
-import { shopPlans } from './shops.js';
+import { shopPlans, shopGlowPlan } from './shops.js';
+import { nightPlans } from './nightlight.js';
 import { inLot, wet } from './layout.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-120, -5], facing: 'e' } });
 export async function town() {
@@ -23,7 +24,8 @@ export async function town() {
     open.set(l, nf++ % 5 === 2 ? 'inn' : 'home');
   }
   for (const u of upHouses()) open.set(u.lot, u.use);                       // the climbable houses are entered too (upper.js; set after the far rule, so its inns stay where they were)
-  plans.push(...dressPlans(), ...shopPlans());
+  const dress = dressPlans();
+  plans.push(...dress, ...shopPlans(), shopGlowPlan(), ...nightPlans(dress));
   const up = new Map(upHouses().map((u) => [u.lot, u]));
   plans.push(...frontPlans(open, new Set(up.keys())));
   plans.push(...roomPlans(open, up));

@@ -157,8 +157,8 @@ export function shopFit(el, ctx) {
     // the night: the glow round the lamp, its pool on the boards, and the light spilling out of the doorway across the portico (halo material, night only)
     const fy = (p) => p.y;
     H.ball(lw.x, lw.y - 0.05, lw.z, 1.0); H.floor(lw.x, y + 0.08, lw.z, 2.2, 1.8, 0, 10);
-    const dd = P3(uc, 0, -P + 0.9), dl = P3(uc, 0, -P - 1.0);
-    H.floor(dd.x, y + 0.07, dd.z, 1.8, 1.4, 0, 10); H.wall(dl.x, fy(lw) - 0.3, dl.z, [nd[0], nd[1]], 1.2, 1.0);
+    const dl = P3(uc, 0, -P - 1.0);
+    H.wall(dl.x, fy(lw) - 0.3, dl.z, [nd[0], nd[1]], 1.2, 1.0);
     // the sign over the doorway: a painted board on the wall of the portico with the trade's word in capitals
     sign(Lc, bag, P3, T.word, uc, 3.35, -P + 0.02, seed);
     // the keeper behind the counter, facing the door; a patron now and then in front of it
@@ -169,6 +169,22 @@ export function shopFit(el, ctx) {
     }
   }
   Lc.emit(bag, FM);
+  H.flush(bag);
+}
+/**
+ * ven_shopglow { span, front, y, shops }: what the open shops give the arcade at night, for every shop of a range at any distance (the pool across the
+ * doorstep, the lit doorway and the lit counter-window): the halo material only, no collision. The lamp's own glow and pool inside are shopFit's.
+ */
+export function shopGlow(el, { bag }) {
+  const y = el.y ?? 0, { M: FM, L } = faceFrame(el.span, el.front, y), n = Math.max(2, Math.round(L / 3.1)), H = new Halo();
+  const P3 = (u, yy, d) => new Vector3(u, yy, d).applyMatrix4(FM), nd = (() => { const e = FM.elements; return [e[8], e[10]]; })();
+  for (const s of shopSlots(L, n, el.shops)) {
+    const { uc, uw } = s, d = -P + 0.03, q = (u0, y0, u1, y1, f) => { const a = P3(u0, y0, d), b = P3(u1, y0, d), c = P3(u1, y1, d), e = P3(u0, y1, d); H.quad([a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z], [e.x, e.y, e.z], nd, f); };
+    const dd = P3(uc, 0, -P + 0.9);
+    H.floor(dd.x, y + 0.07, dd.z, 1.8, 1.4, 0, 10);
+    q(uc - DOOR / 2, 0.1, uc + DOOR / 2, 2.5, 0.5);
+    q(uw - WIN / 2, 0.95, uw + WIN / 2, 2.25, 0.36);
+  }
   H.flush(bag);
 }
 /** A thin rod between two local points. */

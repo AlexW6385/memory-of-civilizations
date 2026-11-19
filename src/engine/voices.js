@@ -673,6 +673,7 @@ export const VOICES = {
     const trade = day || hour < 23 ? pickTrade(hour, doy) : null;
     track('vendor', 'vendor', 1.0, 10, [34, 80], trade && rain < 0.4 && hour >= 5.5 && hour < 23, () => M.streetTrack(l.x, l.z, r, 80, 30), 1, () => trade);
     track('watch', 'watchman', 1.0, 12, [34, 70], night && rain < 0.5, () => M.streetTrack(l.x, l.z, r, 90, 34));
+    for (const x of M.TRACKS || []) track(x.key, x.voice, x.speed, x.r50, x.gap, x.ok(hour, rain), () => x.get(l.x, l.z, r));   // a place's own passing sounds (Venice's gondolas, bridges, hawkers, patrol)
 
     // the waters: the canals' walls, the pond's stones, the fish; the eaves' drips
     const cs = M.canalSpot(l.x, l.z);

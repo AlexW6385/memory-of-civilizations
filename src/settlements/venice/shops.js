@@ -40,6 +40,11 @@ export function shopPlans() {
   }
   return out;
 }
+/** The night's glow of every shop (one plan, seen from the whole piazza): the pool before each door, the lit doorway and counter-window. */
+export function shopGlowPlan() {
+  return { id: 'venice-night-shops', style: 'venetian', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], entrance: { at: [-120, -5], facing: 'e' }, center: [-62, -5], near: 190,
+    bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], elements: RANGES.map((r) => ({ t: 'ven_shopglow', span: r.rect, front: r.front, y: GROUND, shops: shopsOf(r.rect).map((s) => ({ i: s.i, trade: s.trade, seed: s.seed })) })) };
+}
 /** Routes into every opened shop (plan `walks`): from the arcade's floor, through the door, along the aisle to the room's back. */
 export function shopWalks() {
   const out = [];
