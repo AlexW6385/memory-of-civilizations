@@ -12,7 +12,7 @@
 // Local frame of a shop: x along the front, z out into the street, y up from the street.
 
 import { box, lathe, fromTriangles, rod, hangFrom, windMat, placeHanging } from '../../core/geom.js';
-import { placer, assembly, rng } from '../../objects/kit.js';
+import { placer, assembly, rng, tint } from '../../objects/kit.js';
 import { Matrix4, Quaternion, Vector3 } from '../../core/three.js';
 import { prismX } from './props.js';
 import { glyphGeometry } from './script.js';
@@ -29,6 +29,12 @@ function glyphShape(ch, v) {
   let s = SHAPES.get(key);
   if (!s) SHAPES.set(key, (s = { near: glyphGeometry(ch, 0, 0.09, { thick: HANDS[v] }), far: glyphGeometry(ch, 0.04, 0.04, { flat: true, top: 0.74, thick: HANDS[v] }) }));
   return s;
+}
+/** The kit's placer with a reach of its own (m): the fine pieces of a unit (studs, knobs of a few centimetres) are drawn only near, the rest of it as far as the shop's. */
+function placeNear(el, bag, reach) {
+  const [x, z] = el.at, M = new Matrix4().compose(_gp.set(x, el.y, z), _gq.setFromAxisAngle(_gu, el.rot), _gs.set(el.s, el.s, el.s));
+  if (!bag.addInstance) return (mat, g) => { placeHanging(g, M); bag.add(mat, g); };
+  return (mat, g, shade = 1) => { const t = tint(mat, shade); bag.addInstance(t ? t.base : mat, g, M, { color: t?.color ?? null, real: mat, reach }); };
 }
 const hashPos = (x, z, y) => { let h = (Math.round(x * 37) * 73856093) ^ (Math.round(z * 37) * 19349663) ^ (Math.round(y * 37) * 83492791); h = Math.imul(h ^ (h >>> 13), 0x5bd1e995); return ((h ^ (h >>> 15)) >>> 0) / 4294967296; };
 const _gm = new Matrix4(), _gq = new Quaternion(), _gu = new Vector3(0, 1, 0), _gp = new Vector3(), _gs = new Vector3();
@@ -69,8 +75,12 @@ unit('plate', { f: 'lacquer_black', b: 'gilt_bronze' }, (a) => {
   const fr = 0.035;
   a('b', box(-W / 2 - 0.02, -0.02, 0.02, W / 2 + 0.02, fr - 0.02, 0.085)); a('b', box(-W / 2 - 0.02, H - fr + 0.02, 0.02, W / 2 + 0.02, H + 0.02, 0.085));
   a('b', box(-W / 2 - 0.02, fr - 0.02, 0.02, -W / 2 + fr - 0.02, H - fr + 0.02, 0.085)); a('b', box(W / 2 - fr + 0.02, fr - 0.02, 0.02, W / 2 + 0.02, H - fr + 0.02, 0.085));
-  for (const s of [-1, 1]) for (const yy of [0.12, 0.34]) a('b', drum(0.028, 0.02, 0.03, 6, s * (W / 2 - 0.09), yy, 0.05));
-  for (const s of [-1, 1]) a('b', ly([[0.001, 0], [0.04, 0], [0.05, 0.02], [0.001, 0.04]], 12, s * (W / 2 - 0.16), 0.23, 0.065).rotateX(0));
+});
+// ...and its studs and knobs (3 to 5 cm: 360 of the board's 408 triangles), a unit of their own, drawn only within 40 m
+unit('plateN', { n: 'gilt_bronze' }, (a) => {
+  const W = 1.9;
+  for (const s of [-1, 1]) for (const yy of [0.12, 0.34]) a('n', drum(0.028, 0.02, 0.03, 6, s * (W / 2 - 0.09), yy, 0.05));
+  for (const s of [-1, 1]) a('n', ly([[0.001, 0], [0.04, 0], [0.05, 0.02], [0.001, 0.04]], 12, s * (W / 2 - 0.16), 0.23, 0.065).rotateX(0));
 });
 // the pawnshop's wall: a black panel in a gilt frame (the great 當 is laid on it), 1.5 × 1.5 m, its face at z 0.05; origin at its foot
 unit('pawnwall', { f: 'lacquer_black', b: 'gilt_bronze' }, (a) => {
@@ -83,7 +93,6 @@ unit('pawnwall', { f: 'lacquer_black', b: 'gilt_bronze' }, (a) => {
 unit('hsign', { w: 'timber', b: 'lacquer_black', f: 'gilt_bronze', t: 'cloth_red' }, (a) => {
   a('w', box(-0.03, 0, 0, 0.03, 0.07, 0.98)); a('w', rodG([0, -0.42, 0.04], [0, 0.0, 0.62], 0.022, 8));
   a('w', box(-0.012, -0.2, 0.7, 0.012, 0, 0.74)); a('w', box(-0.012, -0.2, 0.9, 0.012, 0, 0.94));   // the cords
-  for (const z of [0.25, 0.5]) a('w', ly([[0.001, 0.0], [0.05, 0.0], [0.05, 0.07], [0.001, 0.09]], 10, 0, -0.0, z)); // carved knobs on the arm
   a('w', rodG([0, -0.3, 0.04], [0, 0.0, 0.3], 0.016, 6)); a('w', box(-0.04, -0.46, 0.0, 0.04, -0.4, 0.07));
   a('b', box(-0.018, -1.32, 0.66, 0.018, -0.22, 0.96));
   a('b', box(-0.04, -0.2, 0.62, 0.04, -0.15, 1.0)); a('b', box(-0.03, -0.15, 0.66, 0.03, -0.11, 0.96)); a('b', box(-0.02, -0.11, 0.72, 0.02, -0.08, 0.9));  // the cap
@@ -94,6 +103,7 @@ unit('hsign', { w: 'timber', b: 'lacquer_black', f: 'gilt_bronze', t: 'cloth_red
   for (const z of [0.76, 0.81, 0.86]) a('t', rodG([0, -1.36, z], [0, -1.58 - (z === 0.81 ? 0.08 : 0), z], 0.012, 5));
   a('t', ly([[0.001, -1.62], [0.04, -1.62], [0.03, -1.74], [0.001, -1.78]], 10, 0, 0, 0.81)); a('t', ly([[0.001, -1.36], [0.03, -1.38], [0.03, -1.44], [0.001, -1.46]], 8, 0, 0, 0.81));
 });
+unit('hsignN', { n: 'timber' }, (a) => { for (const z of [0.25, 0.5]) a('n', ly([[0.001, 0.0], [0.05, 0.0], [0.05, 0.07], [0.001, 0.09]], 10, 0, -0.0, z)); });   // the carved knobs on the arm, drawn only within 40 m
 // the standing signboard on stone feet (a board 0.4 × 1.6 between two posts, a little tiled hood)
 unit('sboard', { w: 'timber', b: 'lacquer_black', f: 'gilt_bronze', r: 'tile_dark', s: 'granite_grey' }, (a) => {
   a('s', box(-0.3, 0, -0.2, 0.3, 0.16, 0.2)); a('s', box(-0.2, 0.16, -0.12, 0.2, 0.26, 0.12));
@@ -109,10 +119,10 @@ unit('pole', { p: 'bamboo_culm', s: 'granite_grey', w: 'timber' }, (a) => {
   
   a('p', rodG([0, 0.3, 0], [0, 4.6, 0.12], 0.05, 8)); a('p', rodG([0, 4.6, 0.12], [0, 4.7, 0.13], 0.034, 6));
   a('w', box(-0.03, 4.28, 0.1, 0.03, 4.34, 0.95)); a('w', rodG([0, 4.0, 0.1], [0, 4.3, 0.6], 0.018, 6)); a('w', rodG([0, 3.95, 0.12], [0, 4.28, 0.9], 0.012, 6));
-  for (const z of [0.3, 0.5, 0.7, 0.9]) a('w', ly([[0.001, 0], [0.03, 0], [0.025, 0.05], [0.001, 0.07]], 8, 0, 4.34, z));
   a('w', ly([[0.001, 4.65], [0.05, 4.65], [0.04, 4.75], [0.001, 4.82]], 8, 0, 0, 0.13));
   for (const y of [1.2, 2.4, 3.4]) a('p', box(-0.056, y - 0.012, -0.056, 0.056, y + 0.012, 0.056).translate(0, 0, 0.0 + y * 0.028));   // the joints
 });
+unit('poleN', { n: 'timber' }, (a) => { for (const z of [0.3, 0.5, 0.7, 0.9]) a('n', ly([[0.001, 0], [0.03, 0], [0.025, 0.05], [0.001, 0.07]], 8, 0, 4.34, z)); });   // the knobs on the cross-arm, drawn only within 40 m
 // banner pieces hung at (0, 4.28, 0.9) of the pole, plane across the street (normal ±x)
 unit('flag', { c: 'cloth_white', w: 'timber', e: 'cloth_black' }, (a) => {
   a('w', box(-0.02, -0.05, 0.12, 0.02, 0.02, 0.88));
@@ -306,8 +316,8 @@ function suzhouShop(el, { bag, col }) {
   const rand = rng(el.seed || 1), pick = (a) => a[Math.floor(rand() * a.length)];
   const [cx, cz] = el.at, y0 = el.y ?? 0, rot = el.rot, L = el.L, v0 = el.v0, trade = el.trade, c = Math.cos(rot), s = Math.sin(rot);
   const loc = (lx, lz) => [cx + lx * c + lz * s, cz - lx * s + lz * c];
-  const put = (name, { mats = {}, x = 0, z = 0, y = 0, ry = 0, k = 1 } = {}) => {
-    const P = placer({ t: el.t, at: loc(x, z), y: y0 + y, rot: rot + ry, s: k }, bag);
+  const put = (name, { mats = {}, x = 0, z = 0, y = 0, ry = 0, k = 1, reach = 0 } = {}) => {
+    const P = reach ? placeNear({ at: loc(x, z), y: y0 + y, rot: rot + ry, s: k }, bag, reach) : placer({ t: el.t, at: loc(x, z), y: y0 + y, rot: rot + ry, s: k }, bag);
     for (const [role, g] of Object.entries(U[name])) { let m = mats[role] ?? DEF[name][role]; if (WINDY.has(`${name}.${role}`)) m = windMat(m); if (globalThis.__shopStat) { const key = `${name}.${role}:${m}`; globalThis.__shopStat[key] = (globalThis.__shopStat[key] || 0) + 1; } P(m, g.clone()); }
   };
   // a character on a board, a sign or a wall: the near form (full relief, to about 20 m; a larger character a little farther) and
@@ -331,6 +341,7 @@ function suzhouShop(el, { bag, col }) {
     const zp = el.open ? 0.05 - v0 : el.detail > 0 ? 0.18 - v0 : 0.02 - v0, yc = el.open ? 3.625 : el.detail > 0 ? 3.05 : 3.55;
     const [fm, bm, gm] = pick(PLATE);
     put('plate', { mats: { f: fm, b: bm }, z: zp, y: yc - 0.23 * k, k });
+    put('plateN', { mats: { n: bm }, z: zp, y: yc - 0.23 * k, k, reach: 40 });
     const chars = [house[0], house[1], tc], pitch = 0.56 * k;
     chars.forEach((ch, j) => glyph(ch, { m: gm, x: (1 - j) * pitch, z: zp + 0.045 * k, y: yc, k: 0.34 * k }));
   }
@@ -343,13 +354,13 @@ function suzhouShop(el, { bag, col }) {
   const side = rand() < 0.5 ? -1 : 1, zPost = 0.04 - v0;
   if (rand() < (el.water ? 0.8 : 0.7)) {
     const x = side * (L / 2 - 0.125), top = 3.08, chars = [house[0], house[1], tc];
-    put('hsign', { x, z: zPost, y: top, k: 1 });
+    put('hsign', { x, z: zPost, y: top, k: 1 }); put('hsignN', { x, z: zPost, y: top, k: 1, reach: 40 });
     for (const ry of [Math.PI / 2, -Math.PI / 2]) chars.forEach((ch, j) => glyph(ch, { m: 'paint_ochre', x: x + Math.sin(ry) * 0.036, z: zPost + 0.81, y: top - 0.42 - j * 0.34, ry, k: 0.31 }));
   }
   if (!el.water) {
     let x = -side * (L / 2 - 0.2); const zp = 0.2, bn = BANNER[trade];
     if (inGap(x - 0.5, x + 0.5) && !inGap(-x - 0.5, -x + 0.5)) x = -x;               // (a doorway at that end: the pole stands at the other)
-    put('pole', { x, z: zp, k: 1 });
+    put('pole', { x, z: zp, k: 1 }); put('poleN', { x, z: zp, k: 1, reach: 40 });
     // the banner at the end of the cross-arm
     const hang = { x, z: zp, y: 4.28 };
     if (bn === 'flag') {
