@@ -162,7 +162,7 @@ function pagodaPanes(H, el) {
   let y = y0 + 4.2 + 0.12;
   STOREYS.forEach((S, i) => {
     const { h, s, bays } = S, bodyH = h - 1.05, bw = (2 * s) / bays, aw = Math.min(bw * 0.62, 2.8), ah = i === 0 ? 5.4 : Math.min(bodyH * 0.6, 3.6), sill = i === 0 ? 0 : 0.9;
-    const f = i === 0 ? 0.55 : 0.9 - 0.04 * i, tw = s * 0.36 * 0.5;                 // (a sheet in the thickness of the wall: seen only through the opening)
+    const f = i === 0 ? 0.55 : 0.9 - 0.04 * i, tw = 0.16;                 // (a sheet just inside the outer face of the opening, so that it is seen from the court below)
     for (const [fx, fz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
       const px = cx + fx * (s - tw), pz = cz + fz * (s - tw), ux = fz !== 0 ? 1 : 0, uz = fz !== 0 ? 0 : 1, hw = aw / 2 - 0.05, ya = y + sill + 0.05, yb = y + sill + ah - 0.1;
       H.quad([px - ux * hw, ya, pz - uz * hw], [px + ux * hw, ya, pz + uz * hw], [px + ux * hw, yb, pz + uz * hw], [px - ux * hw, yb, pz - uz * hw], [fx, fz], f);
