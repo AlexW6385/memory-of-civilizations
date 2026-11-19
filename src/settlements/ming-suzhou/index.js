@@ -3,7 +3,7 @@ import '../../styles/ming/index.js';
 import './style.js';
 import garden from './plan.js';
 import music from './music.js';
-import { gardenLanterns } from './lamps.js';
+import { gardenLanterns, registerLamps } from './lamps.js';
 import { wenElements, wenWalks } from './wenscenes.js';
 import { northWalks } from './north.js';
 // the night's lanterns of the garden and the residence (lamps.js)
@@ -16,5 +16,6 @@ garden.walks.push(...northWalks());
 export { town } from './town.js';
 import { registerNight } from './nightlight.js';
 registerNight();                  // (idempotent; after every style file, the same whatever the import order)
+registerLamps();                  // (likewise: lamps.js can be evaluated before style.js through boards.js, when the style is not yet there)
 export { music };
 export const landmarks = [{ plan: garden, music }];
