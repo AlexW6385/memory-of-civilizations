@@ -9,6 +9,9 @@ import { STYLES } from '../../core/build.js';
 import { lots, LEVEL } from './layout.js';
 import { upOf, frameOf, layoutOf } from './uphouses.js';
 import { prepareTown, HOUSE_TRADE } from './shopprep.js';
+// (the walk reads the houses' shell at plan time, so the style is registered here; lamps.js first, as it was: it wraps the houses' windows in night light only
+// when the style is already there, and the houses' windows have not glowed so far)
+import './lamps.js';
 import './townwork.js';
 
 /** The walk: polylines along the middle of the streets, from the way in (the residence's street gate at 0, 62). */
