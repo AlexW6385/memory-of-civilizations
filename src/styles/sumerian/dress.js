@@ -91,8 +91,13 @@ export function dressFront({ bag, col }, o) {
     // the awning: a reed mat on two palm poles over the door, sloping down to the lane (about one house in three)
     if (rand() < 0.34) {
       const w = 1.1, u0 = dc - w, u1 = dc + w, T = [], A = F.P(u0, 0), B = F.P(u1, 0), C = F.P(u1, 0.9), D = F.P(u0, 0.9);
-      const quad = [[A[0], 2.75, A[1]], [B[0], 2.75, B[1]], [C[0], 2.3, C[1]], [D[0], 2.3, D[1]]];
-      T.push(...quad[0], ...quad[1], ...quad[2], ...quad[0], ...quad[2], ...quad[3], ...quad[0], ...quad[2], ...quad[1], ...quad[0], ...quad[3], ...quad[2]);
+      // (a mat a hand thick: a top and an underside 0.1 m below it, closed at the edges. The top field of the collision world
+      // then finds an underside over the head and one walks under it; a single sheet had no underside, so the door's frame
+      // below it counted as a wall in the cell and the doorway was shut)
+      const hi = [[A[0], 2.75, A[1]], [B[0], 2.75, B[1]], [C[0], 2.3, C[1]], [D[0], 2.3, D[1]]], lo = hi.map(([x, y, z]) => [x, y - 0.1, z]);
+      const tri = (a, b, c) => T.push(...a, ...b, ...c, ...a, ...c, ...b);
+      for (const Q of [hi, lo]) { tri(Q[0], Q[1], Q[2]); tri(Q[0], Q[2], Q[3]); }
+      for (const [i, j] of [[0, 1], [1, 2], [2, 3], [3, 0]]) { tri(hi[i], hi[j], lo[j]); tri(hi[i], lo[j], lo[i]); }
       bag.add('reed_mat', fromTriangles(T));
       for (const u of [u0 + 0.05, u1 - 0.05]) { fb('palm_trunk', u - 0.04, 0.86, u + 0.04, 0.94, 0, 2.32); fcol(u - 0.06, 0.84, u + 0.06, 0.96, 2.32); }
       fbeam('palm_trunk', u0, 0.9, 2.3, u1, 0.9, 2.3, 0.03, 0.05);
