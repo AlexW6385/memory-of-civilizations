@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.44 — the garden as Wen Zhengming recorded it (2026-11-19)
+
+Eighteen more of the thirty-one scenes of Wen Zhengming's record of the Humble Administrator's Garden are built, small and plain as the Ming garden was, and four more planted as groves: the Locust Rain pavilion with its banana rail, the fishing rock, the Jade Spring with its kerb, the terrace for the distant view, the Pavilion of Fine Fruit, Dezhen pavilion, the rose path and arches, the bamboo brook and its bridge, the herb plot, seats for the pine wind. Every position is inferred from the order and directions of the record and is marked so in the dossier.
+
 ## v12.43 — ten more Suzhou households (2026-11-19)
 
 Ten more houses in Suzhou can be entered and climbed, twenty-six in all, on lots facing any way: a boatman's, a tea house with its storyteller's table, a drawloom weaver's with a half-woven piece, an inn with kitchen and guest rooms, a scholar's, a woodblock printer's, a grocer's, a merchant family's, a jade cutter's and a tinsmith's — each with its stove and water jar, shrine shelf, bed, shoes and bowls, and eleven people at their work inside. Waterside houses have a back door, a deck and steps down to the canal.
