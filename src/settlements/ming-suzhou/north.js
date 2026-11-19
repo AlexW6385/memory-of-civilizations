@@ -12,7 +12,7 @@ import '../../styles/ming/index.js';
 import '../../styles/song/index.js';
 import { beamTris, rectRoof } from '../../styles/ming/index.js';
 import { templeWare } from './templework.js';
-import { templeFigure } from './templehall.js';
+import { templeFigure, templeMainIn, templeSutraIn, templeRefectoryIn } from './templehall.js';
 import { LEVEL, RADIUS, TEMPLE_COURT, NORTH_KEEP as KEEP } from './layout.js';
 
 // ── where things stand (m, +x east, +z south; the north is −z) ──────────────
@@ -468,7 +468,7 @@ function moatPool({ rect, y, gaps = [] }, { bag }) {
 
 registerStyle('suzhou-north', {
   ...STYLES.ming,
-  elements: { ...STYLES.ming.elements, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare, temple_figure: templeFigure },
+  elements: { ...STYLES.ming.elements, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare, temple_figure: templeFigure, temple_main_in: templeMainIn, temple_sutra_in: templeSutraIn, temple_refectory_in: templeRefectoryIn },
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -495,6 +495,16 @@ function templePlan() {
   E.push({ t: 'suzhou_hall', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4, front: 'w', four: false, roof: 'xieshan', plat: 0.4 });
   E.push({ t: 'temple_ware', gate: [cx, z1], burner: [cx, z1 - 1.75], w: 3.2, h: 3.5, zt: -114.6, y: LEVEL.street + 0.04 });
   return base('ming-suzhou-temple', E);
+}
+
+/** What stands inside the temple's halls: drawn only near (the visitor within 100 m of the court's middle). */
+function templeInPlan() {
+  const [x0, z0, x1, z1] = COURT, cx = PAGODA_AT[0], E = [];
+  E.push({ t: 'temple_main_in', rect: [cx - 12, -127, cx + 12, -117.5], y: 1.15, H: 7.2 });
+  E.push({ t: 'temple_sutra_in', rect: [-72, -128, -63, -120], y: 0.4, H: 4.4 });
+  E.push({ t: 'temple_refectory_in', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4 });
+  void x0; void z0; void x1; void z1;
+  return { ...base('ming-suzhou-temple-in', E), near: 100, center: [cx, -125] };
 }
 
 /** The wall, its gates, the roads through them, the canals under the water gates, the moat. */
@@ -525,4 +535,4 @@ function wallPlan() {
 }
 
 /** The plans of this part. */
-export function northPlans() { return [pagodaPlan(), templePlan(), wallPlan()]; }
+export function northPlans() { return [pagodaPlan(), templePlan(), templeInPlan(), wallPlan()]; }
