@@ -7,6 +7,7 @@
 import { AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, MESE, MILION, FORUM, SENATE, CHALKE, COURTS, COURT_KINDS, COURT_Y, height } from './layout.js';
 import sophiaPlan from '../../buildings/hagia-sophia/plan.js';
 import { MESE_STOAS } from './stoas.js';
+import { porticoLamps, fires } from './nightlight.js';
 
 export const JUSTINIAN = [AUGUSTAION[0] + 24, AUGUSTAION[1] + 32];
 const E = [];
@@ -58,6 +59,8 @@ E.push({ t: 'honor_column', kind: 'constantine', at: FORUM.c, y: height(...FORUM
 // the Mese's porticoes with the shops behind them (§4.5): their data is in stoas.js
 export { MESE_STOAS };
 for (const s of MESE_STOAS) E.push({ t: 'stoa', y: height(...s.a), depth: 5, h: 6, d: 0.62, spacing: 3.8, ...s });
+// the night (nightlight.js): the lamps hung in the porticoes, the light of the church's south door
+E.push({ t: 'cn_lamps', list: porticoLamps() }, ...fires());
 
 export const city = {
   id: 'constantinople-city',

@@ -10,6 +10,7 @@ import '../../styles/constantinople/fronts.js';
 import '../../styles/constantinople/homes.js';
 import './rider.js';
 import './chalke.js';
+import { registerNight } from './nightlight.js';
 import { sophia, city, JUSTINIAN } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';
@@ -21,6 +22,7 @@ import { outerLifePlans } from './outerlife.js';
 import { hippodromePlan } from './hippodrome.js';
 import { interiorPlan, interiorLifePlan, houseWalks } from './interiors.js';
 export { music };
+registerNight();                      // after every file has put its elements into the styles: those that make lights gain their halo (docs §16.2)
 // the walk-check routes up the enterable houses' stairs to their upper rooms and roof terraces ride on the landmark's plan (as Amsterdam's)
 export const landmarks = [{ plan: { ...sophia, walks: [...(sophia.walks ?? []), ...houseWalks()] }, music }];
 // the Column of Justinian's rider in two forms by distance: the old statue beyond 110 m, the modelled bronze rider within (the column's capital tops at y = 45.1)
