@@ -273,6 +273,11 @@ const walks = [[[-300, 70], [-235, 45], [-175, 18], [-150, 2], [-136, 0], [-100,
 walks[0].y0 = height(-300, 70);
 walks.push(...walkRoutes());                                   // the visitor's walk: into the stoas, shops, Tholos and market (docs §18)
 walks.push(...houseWalks());                                   // the stairs and ladders of the houses opened upstairs (docs §17)
+// keep the street life off every route: the pass of src/objects/life.js reads an element's rect as a footprint, so a no-op element every 2 m along each leg, 1.6 m wide, leaves the way clear (docs §18)
+for (const r of walks) for (let i = 0; i + 1 < r.length; i++) {
+  const [ax, az] = r[i], [bx, bz] = r[i + 1], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / 2));
+  for (let k = 0; k <= n; k++) { const x = ax + (bx - ax) * k / n, z = az + (bz - az) * k / n; E.push({ t: 'athens_clear', rect: [x - 0.8, z - 0.8, x + 0.8, z + 0.8] }); }
+}
 
 export const acropolis = {
   id: 'athens-acropolis',

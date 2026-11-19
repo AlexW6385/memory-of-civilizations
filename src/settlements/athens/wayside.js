@@ -179,7 +179,9 @@ function agyieus(el, { bag, col }) {
   col.circle(x, z, 0.24, y, y + h);
 }
 
-Object.assign(STYLES.greek.elements, { athens_stall: stall, athens_horos: horos, athens_stele: stele, athens_agyieus: agyieus });
+/** athens_clear: { rect } — nothing is built; the street-life pass reads its rect as a footprint (plan.js keeps the routes clear with it). */
+const clear_ = () => {};
+Object.assign(STYLES.greek.elements, { athens_stall: stall, athens_horos: horos, athens_stele: stele, athens_agyieus: agyieus, athens_clear: clear_ });
 
 /** The stelae of decrees: [{ at, rot, y, lines }], by the Agora's ways and at the summit's gate; each turned toward the nearest point of the walk. */
 export function steleSites() {
