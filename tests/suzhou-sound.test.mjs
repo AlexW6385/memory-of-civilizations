@@ -42,7 +42,7 @@ test('Suzhou has the voices of its waters and streets, riding on the animals', (
   assert.ok(L.canal && L.oar && L.hawkers && L.market && L.teahouse && L.patrol && L.eaves);
   assert.deepEqual(Object.keys(P.animals).sort(), ['dog', 'rooster'], 'the life is not an animal');
   assert.equal(P.roof, 'xiaoqing');
-  assert.equal(profileOf('paris').animals[LIFE], undefined);
+  assert.equal(profileOf('rome').animals[LIFE], undefined);
 });
 
 // a stand-in for the Web Audio API: every node and parameter accepts what is asked of it, and
