@@ -6,7 +6,6 @@
 import { courtLife, laneLife } from './court-life.js';
 import { RADIUS, TOP, height, COFFEE, IMARET, ARASTA, PRECINCT, lanes, TERRACE, MESCIT, openSet, upSet, roomPoint } from './layout.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
-import { keepers } from './walk.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -81,4 +80,4 @@ export function life() {
   }
   return L;
 }
-export const lifePlan = () => ({ id: 'ottoman-istanbul-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [...life(), ...courtLife(), ...laneLife(), ...keepers()], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -100], facing: 's' } });
+export const lifePlan = () => ({ id: 'ottoman-istanbul-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [...life(), ...courtLife(), ...laneLife()], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -100], facing: 's' } });

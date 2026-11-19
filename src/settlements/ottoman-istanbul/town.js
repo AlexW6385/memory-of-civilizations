@@ -4,6 +4,7 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, lots, COFFEE, openSet, upSet, yardItems } from './layout.js';
 import { lifePlan } from './life.js';
 import { courtPaving } from './court-life.js';
+import { arastaNearPlans } from './walk.js';
 /** The houses cut into 160 m tiles in two levels (as lod.js, but coarser: the mesh count is plan x material, DESIGN §8; budget). */
 const TILE = 160;
 function tiles(id, style, elements, { near = 240, R = RADIUS } = {}) {
@@ -31,6 +32,7 @@ export async function town() {
     rooms: [{ id: 'coffee house', rect: [x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4], y: coffee.y + 0.45, kind: 'hall' }] });
   plans.push({ ...base('ottoman-istanbul-court-paving', courtPaving()), style: 'ottoman', bounds: [-80, -100, 80, 95] });
   plans.push(...tiles('ottoman-istanbul-yards', 'ottoman', yardItems().map((y) => ({ t: 'yard_dress', ...y })), { near: 150 }).filter((p) => !p.far));
+  plans.push(...arastaNearPlans(RADIUS));
   plans.push(lifePlan());
   return plans;
 }
