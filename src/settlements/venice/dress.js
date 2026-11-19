@@ -3,6 +3,7 @@
 // life (the booths of the cloth and spice merchants under the Procuratie, the banner masts before San Marco, groups of people, pigeons),
 // the boats tied along the fondamente with their cargo. Pure data, derived from layout.js; the builders are the shared `life` style's.
 
+import { shopLanes } from './shops.js';
 import { GROUND, SEA, RADIUS, PIAZZA, PIAZZETTA, BASILICA, CLOCK, MERCERIA, BASIN_Z, RIALTO, lots, inLot, inRect, wet, rivePieces, wells, bands } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -56,10 +57,12 @@ function frontsOf(l) {
 }
 
 // ── the piazza ────────────────────────────────────────────────────────────────
+const LANES = () => shopLanes();
+const inLane = (x, z) => LANES().some((r) => inRect(r, x, z, 0.5));
 function piazza() {
   const r = rng(1509), E = [], [x0, z0, x1, z1] = PIAZZA;
   const wl = wells().map((w) => w.at);
-  const free = (x, z, m = 1.4) => !wl.some(([a, b]) => Math.hypot(a - x, b - z) < m + 1.2) && !inRect([BASILICA.c[0] - BASILICA.s - 13, z0, x1, z1], x, z, 0) && !inRect([CLOCK[0] - 1, CLOCK[1] - 2, CLOCK[2] + 1, CLOCK[3] + 8], x, z, 0);
+  const free = (x, z, m = 1.4) => !inLane(x, z) && !wl.some(([a, b]) => Math.hypot(a - x, b - z) < m + 1.2) && !inRect([BASILICA.c[0] - BASILICA.s - 13, z0, x1, z1], x, z, 0) && !inRect([CLOCK[0] - 1, CLOCK[1] - 2, CLOCK[2] + 1, CLOCK[3] + 8], x, z, 0);
   // the booths of the cloth and spice merchants and the money-changers' tables before the arcades of the long sides, their fronts to the square
   for (const [zz, rot, front] of [[z0 + 5.3, 0, 1], [z1 - 5.3, Math.PI, -1]]) for (let x = x0 + 14, k = 0; x < x1 - 36; x += 7.4, k++) {
     if (!free(x, zz, 2) || (k % 5 === 4)) continue;
@@ -135,7 +138,7 @@ function moored() {
  */
 function piazzaMore() {
   const r = rng(1511), E = [], [x0, z0, x1, z1] = PIAZZA, arr = [-60, -5];
-  const ok = (x, z, m = 8) => Math.hypot(x - arr[0], z - arr[1]) > m && inRect(PIAZZA, x, z, -3) && !wells().some((w) => Math.hypot(w.at[0] - x, w.at[1] - z) < 1.6) && !inRect([BASILICA.c[0] - BASILICA.s - 13, z0, x1, z1], x, z, 0) && !inRect([CLOCK[0] - 1, CLOCK[1] - 2, CLOCK[2] + 1, CLOCK[3] + 8], x, z, 0);
+  const ok = (x, z, m = 8) => !inLane(x, z) && Math.hypot(x - arr[0], z - arr[1]) > m && inRect(PIAZZA, x, z, -3) && !wells().some((w) => Math.hypot(w.at[0] - x, w.at[1] - z) < 1.6) && !inRect([BASILICA.c[0] - BASILICA.s - 13, z0, x1, z1], x, z, 0) && !inRect([CLOCK[0] - 1, CLOCK[1] - 2, CLOCK[2] + 1, CLOCK[3] + 8], x, z, 0);
   const add = (e) => { if (ok(e.at[0], e.at[1], e.t === 'figure' || e.t === 'animal' ? 8 : 9)) E.push(e); };
   // hawkers on their mats at the foot of the arcades, north and south sides, their backs to the columns
   for (const [zz, rot, front] of [[z0 + 1.7, Math.PI, 1], [z1 - 1.7, 0, -1]]) for (let x = x0 + 6, k = 0; x < x1 - 40; x += 5.2 + r() * 3, k++) {

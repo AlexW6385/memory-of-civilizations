@@ -5,7 +5,9 @@
 
 import { PRECINCT, ARASTA, TOP, MEDRESES, CARSI, TERRACE, RADIUS, lanes, height } from './layout.js';
 import { subtractRects } from '../../core/build.js';
+import { offLane } from './walk.js';
 
+const hashAt = (x, z, s = 0) => { let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const [p0, q0, p1, q1] = PRECINCT;
 const MOSQUE_FOOT = [-36, -50, 36, 54];
@@ -20,6 +22,12 @@ export function courtPaving() {
   blk([-4.5, q0 + 1.2, 4.5, MOSQUE_FOOT[1]], 0.02, 'marble_floor');
   blk([-4.7, q0 + 1.2, -4.5, MOSQUE_FOOT[1]], 0.028, 'limestone_carved'); blk([4.5, q0 + 1.2, 4.7, MOSQUE_FOOT[1]], 0.028, 'limestone_carved');
   for (let z = q0 + 4; z < MOSQUE_FOOT[1]; z += 3) blk([-4.5, z - 0.03, 4.5, z + 0.03], 0.026, 'limestone_carved');
+  // the wear of the way: cracks across the marble slabs here and there (the stone settled), each by its place
+  for (let x = -4.2; x < 4.2; x += 1.5) for (let z = q0 + 2; z < MOSQUE_FOOT[1] - 1; z += 1.5) {
+    if (hashAt(x, z, 61) > 0.1) continue;
+    const l = 0.5 + 0.9 * hashAt(x, z, 62), cx = x + 0.6 * (hashAt(x, z, 63) - 0.5), cz = z + 0.6 * (hashAt(x, z, 64) - 0.5), alongX = hashAt(x, z, 65) < 0.5;
+    blk(alongX ? [cx - l / 2, cz - 0.009, cx + l / 2, cz + 0.009] : [cx - 0.009, cz - l / 2, cx + 0.009, cz + l / 2], 0.034, 'limestone_carved');
+  }
   // a band of marble round the court inside the wall
   for (const r of [[p0 + 1.3, q0 + 1.3, p1 - 1.3, q0 + 2.1], [p0 + 1.3, q1 - 2.1, p1 - 1.3, q1 - 1.3], [p0 + 1.3, q0 + 2.1, p0 + 2.1, q1 - 2.1], [p1 - 2.1, q0 + 2.1, p1 - 1.3, q1 - 2.1]]) blk(r, 0.016, 'marble_floor');
   return E;
@@ -73,11 +81,11 @@ export function courtLife() {
     for (let z = ARASTA.z0 + 2.1; z < ARASTA.z1 - 1; z += 4.2, n++) {
       if (gates.some(([a, b]) => z > a - 0.5 && z < b + 0.5) || (z > -10.5 && z < -6)) continue;
       const x = f + out * 0.75, r = n % 5;
-      if (r === 0) L.push({ t: 'basket', n: 3, at: [x, z + 1.2], y: TOP, seed: n * 3 + 1 });
-      else if (r === 1) L.push({ t: 'pot', kind: pick(['blue_jar', 'glazed_jar', 'water_pot']), n: 3, at: [x, z + 1.0], y: TOP, seed: n * 3 + 2 });
-      else if (r === 2) L.push({ t: 'goods_mat', at: [x - out * 0.1, z], y: TOP, rot, goods: 'cloth', seed: n * 3 + 3 });
-      else if (r === 3) L.push({ t: 'crates', n: 2, at: [x, z - 1.1], y: TOP, seed: n * 3 + 4 });
-      else { L.push({ t: 'bench', at: [x - out * 0.1, z], y: TOP, rot, len: 1.6, seed: n }); man(x - out * 0.1, z, rot + S, { pose: 'sit', y: TOP + 0.5 }); }
+      if (r === 0) L.push({ t: 'basket', n: 3, at: [x, offLane(-sg, z + 1.2, 0.5)], y: TOP, seed: n * 3 + 1 });
+      else if (r === 1) L.push({ t: 'pot', kind: pick(['blue_jar', 'glazed_jar', 'water_pot']), n: 3, at: [x, offLane(-sg, z + 1.0, 0.5)], y: TOP, seed: n * 3 + 2 });
+      else if (r === 2) L.push({ t: 'goods_mat', at: [x - out * 0.1, offLane(-sg, z, 0.7)], y: TOP, rot, goods: 'cloth', seed: n * 3 + 3 });
+      else if (r === 3) L.push({ t: 'crates', n: 2, at: [x, offLane(-sg, z - 1.1, 0.5)], y: TOP, seed: n * 3 + 4 });
+      else { L.push({ t: 'bench', at: [x - out * 0.1, offLane(-sg, z, 0.8)], y: TOP, rot, len: 1.6, seed: n }); man(x - out * 0.1, offLane(-sg, z, 0.8), rot + S, { pose: 'sit', y: TOP + 0.5 }); }
       if (rand() < 0.45) man(f + out * (1.6 + rand() * 1.4), z + (rand() - 0.5) * 2, rot + S + (rand() - 0.5), { pose: rand() < 0.4 ? 'talk' : 'stand' });
     }
     // a donkey with its panniers and a porter in the avenue

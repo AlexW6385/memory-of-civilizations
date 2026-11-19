@@ -15,6 +15,7 @@
 
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { box, lathe, rod } from '../../core/geom.js';
+import { Halo } from './halo.js';
 
 const T = 0.08;                                     // the thickness of a lining (marble slabs, mosaic bed)
 
@@ -378,10 +379,16 @@ export function basilicaInterior(bag, col, lights, o) {
     for (const [a, b] of BAYS) { const d = Math.hypot(u - a, w - b); if (Math.abs(u - a) < r && Math.abs(w - b) < r && d < r - 0.3) return ys + r + dh + Math.sqrt(r * r - d * d) - 0.08; }
     return ys + Math.sqrt(Math.max(0, r * r - (Math.abs(u) <= Wi ? u * u : w * w))) - 0.05;
   };
+  // (at night, where the pool lights are off: the glow round each flame and its gold on the pavement; halo material, night only)
+  const HL = new Halo();
   for (const [u, w, yl] of lampsAt) {
     lamp(u, w, yl, vaultAt(u, w));
     lights.push({ at: [X(u), yl + 0.3, Z(w)], color: '#ffb46b', intensity: 2.2, distance: 8 });
+    HL.ball(X(u), yl + 0.42, Z(w), 1.5); HL.floor(X(u), (yl > y + 5 ? yp : y) + 0.05, Z(w), 3.2, 3.2, 0, 10);
   }
+  for (const dw2 of [-0.9, 0.9]) HL.ball(X(ua - 0.5), yp + 2.1, Z(dw2), 0.9);
+  HL.floor(X(ua - 0.5), yp + 0.05, Z(0), 2.4, 3.0, 0, 10);
+  HL.flush(bag);
   // the choir stalls along the presbytery's sides, of walnut
   for (const s of [-1, 1]) {
     bx(DX - 5.5, yp, s * 5.6, DX - 1.6, yp + 0.45, s * 6.3, 'wood_dark'); bx(DX - 5.5, yp, s * 6.2, DX - 1.6, yp + 2.1, s * 6.4, 'wood_dark');
