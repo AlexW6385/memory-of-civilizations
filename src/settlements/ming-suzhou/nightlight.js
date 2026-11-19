@@ -17,6 +17,8 @@ import { assembly } from '../../objects/kit.js';
 import { LEVEL, CANALS, POND, pondDistance } from './layout.js';
 
 /** A number in [0, 1) from a position alone. */
+/** The share of the shops that stay open into the evening, lamp-lit (the rest put their shutters up: shops.js, 'timber+night'). */
+export const SHOP_LIT = 0.35;
 export function hashAt(x, z, s = 0) {
   let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791);
   h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16;
@@ -164,7 +166,7 @@ export function streetHalos(elements, inDisc = () => true) {
       // a moored boat: a lantern on a post at the stern (the style's boat has its stern at +dir), on the side the hash chooses
       const [dx, dz] = e.dir, L = e.len ?? 7, o = (hashAt(x, z, 3) < 0.5 ? -1 : 1) * 0.6, s = L / 2 - 0.4;
       out.push({ t: 'suzhou_halo', kind: 'stern', at: [x + dx * s - dz * o, z + dz * s + dx * o], y: (e.y ?? LEVEL.canal) + 0.72, rot: Math.atan2(dx, dz) });
-    } else if (e.t === 'suzhou_shop' && !e.water && hashAt(x, z, 5) < 0.55) {
+    } else if (e.t === 'suzhou_shop' && !e.water && hashAt(x, z, 5) < SHOP_LIT) {
       // the shop front stays open into the evening: its lamp-light across the doorstep (a shop is facing out along rot)
       const r = e.rot ?? 0, s = Math.sin(r), c = Math.cos(r);
       out.push({ t: 'suzhou_halo', kind: 'spill', at: [x + s * 0.2, z + c * 0.2], y: e.y ?? 0, rot: r });

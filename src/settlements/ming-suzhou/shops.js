@@ -15,6 +15,7 @@ import { box, lathe, fromTriangles, rod, hangFrom, windMat, placeHanging } from 
 import { placer, assembly, rng } from '../../objects/kit.js';
 import { Matrix4, Quaternion, Vector3 } from '../../core/three.js';
 import { prismX } from './props.js';
+import { hashAt, SHOP_LIT } from './nightlight.js';
 import { glyphGeometry } from './script.js';
 
 // ── the writing: characters as brush relief (script.js, brush.js; docs/settlements/ming-suzhou.md §23) ──
@@ -364,6 +365,18 @@ function suzhouShop(el, { bag, col }) {
   }
   // the shutters of the shop, some stacked against the end post (the boards taken down at the opening)
   if (!el.water && L > 3.2 && rand() < 0.65) { let sx = side * (L / 2 - 0.34); if (inGap(sx - 0.45, sx + 0.45)) sx = -sx; if (!inGap(sx - 0.45, sx + 0.45)) put('shutters', { x: sx, z: 0.0 - 0.15, ry: Math.PI, k: 1 }); }
+  // at night the shop that does not stay open puts its shutters up: a plank panel in each bay, in front of the day's boards (the material
+  // is there at night only, 'timber+night'; the collision is the day's, as the posts and boards stay)
+  if (!el.water && !el.open && hashAt(cx, cz, 5) >= SHOP_LIT) {
+    const nb = Math.max(1, Math.round(L / 3.3)), bw = (L - 0.5) / nb, T = [];
+    for (let k = 0; k < nb; k++) {
+      const xa = -L / 2 + 0.25 + bw * k + 0.1, xb = -L / 2 + 0.25 + bw * (k + 1) - 0.1;
+      if (inGap(xa, xb)) continue;
+      const A = loc(xa, 0.06 - v0), B = loc(xb, 0.06 - v0), y1 = y0 + 0.2, y2 = y0 + 2.8;
+      T.push(A[0], y1, A[1], B[0], y1, B[1], B[0], y2, B[1], A[0], y1, A[1], B[0], y2, B[1], A[0], y2, A[1]);
+    }
+    if (T.length) bag.add('timber+night', fromTriangles(T));
+  }
   // goods on the apron and on trestles in front of the shutters, by trade
   if (!el.water) {
     const list = GOODS[trade] || GOODS.cloth, free0 = -L / 2 + 0.62, free1 = L / 2 - 0.62;
