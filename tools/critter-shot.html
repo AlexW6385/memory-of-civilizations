@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><base href="/"><title>Critter shots</title>
+<style>html,body{margin:0;background:#888;overflow:hidden}</style>
+<script type="importmap">{"imports":{"three":"/src/vendor/three/build/three.webgpu.js","three/webgpu":"/src/vendor/three/build/three.webgpu.js","three/tsl":"/src/vendor/three/build/three.tsl.js"}}</script>
+</head><body><canvas id="view" width="16" height="16"></canvas>
+<script type="module">
+// Renders the garden-and-street animals (src/engine/fauna-critters.js) at chosen times from chosen
+// viewpoints, in a grid, on a plain ground (tools/critter-shot.mjs). The game's fauna is not run by the
+// headless showroom, so this draws the same mesh with the same shader.
+import * as THREE from 'three/webgpu';
+import { ENV } from '/src/engine/env.js';
+import { buildCritters, buildFromInstances } from '/src/engine/fauna-critters.js';
+const cfg = await (await fetch('/__shot/config.json')).json();
+const [CW, CH] = cfg.cell;
+const renderer = new THREE.WebGPURenderer({ canvas: document.getElementById('view'), antialias: false });
+renderer.setSize(CW, CH, false); await renderer.init();
+const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(cfg.fov || 50, CW / CH, 0.03, 400);
+const hour = cfg.sun ?? 0.8;
+ENV.sunDir.value.set(0.4, hour, 0.45).normalize(); ENV.sunColor.value.setRGB(1.0, 0.93, 0.8); ENV.fogColor.value.setRGB(0.55, 0.62, 0.72); ENV.nightFill.value.setRGB(0, 0, 0);
+scene.background = new THREE.Color(0.55, 0.62, 0.72);
+const mat = (c) => new THREE.MeshBasicMaterial({ color: c });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400).rotateX(-Math.PI / 2), mat(cfg.groundColor || 0x6d7a55)); ground.position.y = cfg.ground ?? 0; scene.add(ground);
+for (const w of cfg.water || []) { const m = new THREE.Mesh(new THREE.CircleGeometry(w.r, 48).rotateX(-Math.PI / 2), mat(0x3d5560)); m.position.set(w.x, w.y, w.z); scene.add(m); }
+for (const b of cfg.boxes || []) { const m = new THREE.Mesh(new THREE.BoxGeometry(...b.size), mat(b.color || 0x998877)); m.position.set(...b.at); scene.add(m); }
+const C = cfg.inst ? buildFromInstances(cfg.inst) : buildCritters(cfg.critters, { id: cfg.id || 'shot' });
+scene.add(C.mesh);
+const OFF = new THREE.RenderTarget(CW, CH, { type: THREE.HalfFloatType });
+const cols = cfg.cols || 3, rows = Math.ceil(cfg.shots.length / cols);
+const out = document.createElement('canvas'); out.width = CW * cols; out.height = CH * rows; out.style.cssText = 'position:fixed;left:0;top:0';
+const g = out.getContext('2d');
+const enc = (v) => Math.round(255 * Math.min(1, Math.max(0, v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)));
+let k = 0;
+for (const s of cfg.shots) {
+  cam.position.set(...s.cam); cam.lookAt(...s.look); cam.updateMatrixWorld();
+  const vis = new THREE.Vector3(...(s.visitor || s.cam));
+  C.update(s.T, vis, hour, 0);
+  renderer.setRenderTarget(OFF);
+  renderer.render(scene, cam);
+  await renderer.backend.device.queue.onSubmittedWorkDone();
+  const px = await renderer.readRenderTargetPixelsAsync(OFF, 0, 0, CW, CH);
+  const im = g.createImageData(CW, CH), half = px instanceof Uint16Array, h = (v) => THREE.DataUtils.fromHalfFloat(v);
+  for (let i = 0; i < CW * CH; i++) for (let c = 0; c < 3; c++) im.data[i * 4 + c] = enc(half ? h(px[i * 4 + c]) : px[i * 4 + c]); 
+  for (let i = 0; i < CW * CH; i++) im.data[i * 4 + 3] = 255;
+  g.putImageData(im, (k % cols) * CW, Math.floor(k / cols) * CH);
+  g.fillStyle = '#fff'; g.font = '14px sans-serif'; g.fillText(s.label || `t=${s.T}`, (k % cols) * CW + 6, Math.floor(k / cols) * CH + 16);
+  k++;
+}
+document.body.appendChild(out);
+window.DONE = true;
+</script></body></html>

@@ -2,7 +2,7 @@
 // goldfish and red carp in the garden pond, dark carp in the canals, house swallows over the
 // canals and the pond, tree sparrows on the paving and the garden walls, crows at twilight over
 // the temple, a little egret on the canal's edge and a grey heron at the pond's shore.
-import { LEVEL, GARDEN, GARDEN_BRIDGES, FOOTPRINTS, CANALS, pondDistance, canalDistance, nearGallery, nearRockPath } from './layout.js';
+import { LEVEL, GARDEN, GARDEN_BRIDGES, FOOTPRINTS, CANALS, LOQUAT_COURT, lots, pondDistance, canalDistance, nearGallery, nearRockPath } from './layout.js';
 import { ground } from './ground.js';
 
 const pondArea = [GARDEN[0] + 6, GARDEN[1] + 10, GARDEN[2] - 6, GARDEN[3] - 40];
@@ -65,4 +65,41 @@ for (const [hint, kind] of [[[-49, -50], 'heron'], [[28, -36], 'egret']]) {
 // a little egret on the stone edge of the south canal (the street's side), facing the water
 perches.push({ kind: 'egret', x: -38, z: 67.5, y: 0.02, rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 });
 
-export default { fish, flights, perches };
+// magpies (xique, the bird of glad tidings) on the ridges and walls of the quarter, and sparrows along the Hall's ridge
+for (const [x, z, y, rot] of [[-36, -14.75, 9.6, 0], [32.5, GARDEN[1], top + 0.0, 0], [GARDEN[2], -38, top, Math.PI / 2]]) perches.push({ kind: 'pica', x, z, y, rot, range: [2.2, 0], alert: 6.5 });
+for (const x of [-3.2, 3.4]) perches.push({ kind: 'sparrow', x, z: -14.75, y: 9.6, rot: 0, range: [2.4, 0], alert: 5 });
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §22) ──
+const critters = [];
+const G = LEVEL.garden, hash = (x, z) => { const k = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return k - Math.floor(k); };
+// a mandarin drake and his hen on the pond before the Hall, a few metres from the bridge the visitor comes by: they go as a pair, the hen leading
+critters.push({ type: 'floaters', models: ['mandarin_drake', 'mandarin_hen'], area: [-14, -46, 14, -30], dist: pondDistance, a: [7, 3.2], ratio: 0.5, margin: 1.2, y: LEVEL.pond, speed: 0.22, cycle: [18, 24] });
+// the scholar's crane on the Hall's terrace (the terrace is the garden's one open, level paving before the Hall), walking along it and stopping
+critters.push({ model: 'crane', at: [0.5, 0.9, -23.2], rot: Math.PI, range: [7.0, 1.6], tau: 50, speed: 0.4 });
+// the house swallows' nests under the Hall's north eave, facing the pond: from them the birds sweep down over the water and back
+for (const [x, side] of [[-1.9, 1], [2.7, -1]]) critters.push({ model: 'swallow_nest', at: [x, 5.25, -19.7], rot: -Math.PI / 2, cycle: 34 + 3 * side, flight: 9, radius: 12, side, rise: -4.2 });
+// the kingfisher (feicui) on the pond's edge near the bridge, the little egret's neighbour
+{
+  const s = shore([-4, -40]);
+  if (s) critters.push({ model: 'kingfisher', at: [s.x, s.y + 0.05, s.z], rot: s.rot, water: [s.x + Math.cos(s.rot) * 1.7, s.z + Math.sin(s.rot) * 1.7, LEVEL.pond], cycle: 34 });
+}
+// a cat asleep on the coping of the loquat court's low north wall, a dog on the gate hall's platform, hens in the side yard by the service door
+critters.push({ model: 'cat_tabby', at: [LOQUAT_COURT[0] + 15.5, G + 3.2 + 0.62, LOQUAT_COURT[1]], rot: 0.15, range: [7, 2.5] });
+critters.push({ model: 'dog', at: [-4.6, G + 0.45, 60.9], rot: Math.PI / 2, range: [9, 3.5] });
+for (const [model, x, z, size] of [['rooster', -31.2, 54.4, 1], ['hen_brown', -29.0, 54.0, 1], ['hen_brown', -30.4, 55.4, 0.96], ['hen_white', -32.4, 53.6, 1]]) critters.push({ model, at: [x, G + 0.02, z], rot: 0, range: [3.4, 1.4], size });
+// the cage hung from the tea house's front, off its door lantern's line
+{
+  const open = lots().filter((l) => !l.water && (l.front === 's' || l.front === 'n') && l.kind === 'row' && ((l.front === 's' || l.front === 'n') ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]) < 7.4 && l.rect[2] - l.rect[0] > 4.2)
+    .sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2, (a.rect[1] + a.rect[3]) / 2 - 60) - Math.hypot((b.rect[0] + b.rect[2]) / 2, (b.rect[1] + b.rect[3]) / 2 - 60));
+  const tea = open.filter((l) => l.shop0 ?? l.shop)[2];
+  if (tea) { const [x0, , x1, z1] = tea.rect; critters.push({ model: 'cagebird', at: [x0 + (x1 - x0) * 0.32, ground.height(x0, z1) + 3.2, z1 + 0.4], rot: Math.PI / 2 }); }
+}
+// a fishing punt tied at the south bank of the south canal with cormorants on its rails, and a raft of farm ducks on the water beyond
+{
+  const bx = 30, bz = 74.8, by = LEVEL.canal;
+  critters.push({ model: 'fishing_craft', at: [bx, by, bz], rot: 0 });
+  [[-1.0, -1], [0.1, 1], [1.05, -1]].forEach(([u, sd], i) => critters.push({ model: 'cormorant', at: [bx + u, by + 0.296, bz + sd * 0.29], rot: sd * (Math.PI / 2) + (i - 1) * 0.25, cycle: 46 + 7 * i }));
+  critters.push({ type: 'floaters', models: ['duck_white', 'duck_brown', 'duck_white', 'duck_brown', 'duck_brown', 'duck_white'], raft: true, area: [-135, 73.6, -112, 75.2], dist: canalDistance, a: [10, 0.9], ratio: 0.12, margin: 0.75, y: LEVEL.canal, speed: 0.18, cycle: [26, 34] });
+}
+
+export default { fish, flights, perches, critters };

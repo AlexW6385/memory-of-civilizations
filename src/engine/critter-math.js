@@ -38,9 +38,9 @@ export class X {
   smooth(e0, e1) {
     const a = this.v, p = raw(e0), q = raw(e1);
     if (num(a) && num(p) && num(q)) { const t = Math.max(0, Math.min(1, (a - p) / (q - p))); return new X(t * t * (3 - 2 * t)); }
-    // (WGSL leaves smoothstep undefined when the edges are given the wrong way round: a falling edge is one minus the rising)
-    if (num(p) && num(q) && p > q) return new X(float(1).sub(tSmooth(q, p, node(a))));
-    return new X(tSmooth(p, q, node(a)));
+    // (WGSL leaves smoothstep undefined when the edges are the wrong way round, and ours may be nodes and fall: so the polynomial itself)
+    const t = X.of(a).sub(p).div(X.of(q).sub(p)).clamp(0, 1);
+    return t.mul(t).mul(X.of(3).sub(t.mul(2)));
   }
   /** 1 where this >= e, else 0 */
   ge(e) { return this._b(e, (a, b) => (a >= b ? 1 : 0), (a, b) => tStep(b, a)); }

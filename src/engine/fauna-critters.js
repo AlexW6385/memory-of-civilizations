@@ -12,7 +12,7 @@
 //       rooster), range [far, near] (cat_*, dog: the distance the head lifts and the dog stands), cycle (cormorant),
 //       cycle + flight + radius + side (swallow_nest), water [x, z, y] + cycle (kingfisher); fishing_craft and cagebird as props
 import * as THREE from 'three/webgpu';
-import { attribute, uniform, vec3, float, positionGeometry, sin, cos, normalize, dot, max, mix, smoothstep, step, abs, renderGroup, faceDirection, length, sub } from 'three/tsl';
+import { attribute, uniform, vec3, float, positionGeometry, sin, cos, normalize, dot, max, mix, smoothstep, step, abs, renderGroup, faceDirection, length, select } from 'three/tsl';
 import { ENV } from './env.js';
 import { MODELS } from './critter-models.js';
 import { POSES, KIND, context, RIG_FIELDS, TAU } from './critter-poses.js';
@@ -53,13 +53,13 @@ export function expandCritters(list, site) {
   const rand = rng(4421 + (site?.id?.length ?? 7)), out = [];
   for (const sp of list) {
     if (sp.type === 'floaters') {
-      const k = sp.k ?? 1, rot = sp.rot ?? rand() * TAU, loop = fitLoop(sp.dist, sp.area, sp.a, sp.ratio ?? 0.5, k, rot, sp.margin ?? 1.4, rand, sp.minA ?? 2);
+      const k = sp.k ?? 1, rot = sp.rot ?? rand() * TAU, loop = sp.loop ?? fitLoop(sp.dist, sp.area, sp.a, sp.ratio ?? 0.5, k, rot, sp.margin ?? 1.4, rand, sp.minA ?? 2);
       if (!loop) continue;
       const Tc = sp.cycle ? sp.cycle[0] + (sp.cycle[1] - sp.cycle[0]) * rand() : 15 + rand() * 6, meanR = Math.max(loop[2], loop[3]) * 0.8;
       const dTh = ((sp.speed ?? 0.3) * Tc / Math.max(2, meanR)) * (rand() < 0.5 ? 1 : -1), ph = rand() * TAU, grp = rand();
       sp.models.forEach((model, i) => {
-        const raft = sp.raft, along = raft ? (rand() - 0.5) * 2.4 : i === 0 ? 0.24 : -0.2, across = raft ? (rand() - 0.5) * 1.6 : i === 0 ? 0 : 0.42 * (i % 2 ? 1 : -1);
-        out.push({ model, kind: 'duck', groups: [[KIND.duck, rand(), (sp.size ?? 1) * (0.96 + 0.08 * rand()), 0], [0, sp.y, 0, 0], loop, [dTh, ph + (raft ? (rand() - 0.5) * 0.2 : 0), rot, k], [along, across, Tc, raft ? grp + (rand() - 0.5) * 0.15 : grp]] });
+        const raft = sp.raft, along = raft ? (rand() - 0.5) * 2.4 : i === 0 ? 0.24 : -0.2, across = raft ? (rand() - 0.5) * 1.1 : i === 0 ? 0 : 0.42 * (i % 2 ? 1 : -1);
+        out.push({ model, kind: 'duck', groups: [[KIND.duck, rand(), (sp.size ?? 1) * (0.96 + 0.08 * rand()), 0], [raft ? 1 : 0, sp.y, 0, 0], loop, [dTh, ph + (raft ? (rand() - 0.5) * 0.2 : 0), rot, k], [along, across, Tc, raft ? grp + (rand() - 0.5) * 0.15 : grp]] });
       });
       continue;
     }
@@ -72,7 +72,7 @@ export function expandCritters(list, site) {
     else if (kind === 'cat') c = [...(sp.range ?? [7, 2.5]), 0, 0];
     else if (kind === 'dog') c = [...(sp.range ?? [9, 3.5]), 0, 0];
     else if (kind === 'cormorant') c = [sp.cycle ?? 52, 0, 0, 0];
-    else if (kind === 'swallow') c = [sp.cycle ?? 36, sp.flight ?? 9, sp.radius ?? 6, sp.side ?? 1];
+    else if (kind === 'swallow') { c = [sp.cycle ?? 36, sp.flight ?? 9, sp.radius ?? 6, sp.side ?? 1]; d = [sp.rise ?? 1.6, 0, 0, 0]; }
     else if (kind === 'kingfisher') { c = [sp.water[0], sp.water[1], sp.cycle ?? 34, 0]; d = [sp.water[2], 0, 0, 0]; }
     out.push({ model: sp.model, kind, groups: [a, b, c, d, [0, 0, 0, 0]] });
   }
@@ -119,8 +119,9 @@ function critterMaterial(kinds) {
   const ctx = context(U.t, [U.cam.x, U.cam.y, U.cam.z], grp), R = {};
   for (const f of RIG_FIELDS) R[f] = float(0);
   for (const k of kinds) {
-    const p = POSES[KIND[k]](ctx), m = eqk(KIND[k]);
-    for (const f of RIG_FIELDS) R[f] = R[f].add(nd(p[f].v).mul(m));
+    // (selected, not multiplied: another kind's pose on this kind's numbers may be a NaN, which must not leak)
+    const p = POSES[KIND[k]](ctx), m = eqk(KIND[k]).greaterThan(0.5);
+    for (const f of RIG_FIELDS) R[f] = select(m, nd(p[f].v), R[f]);
   }
   const isProp = eqp(10).add(eqp(12)), nonProp = float(1).sub(isProp);
   const pi = Math.PI;
@@ -179,8 +180,9 @@ function critterMaterial(kinds) {
 }
 
 /** Build the critters of a settlement: { mesh, update(dt, camera in the site's frame, sun y, winter) } or null. */
-export function buildCritters(list, site) {
-  const inst = expandCritters(list, site);
+export function buildCritters(list, site) { return buildFromInstances(expandCritters(list, site)); }
+/** The same from instances already expanded (tools/critter-shot.mjs keeps its own). */
+export function buildFromInstances(inst) {
   if (!inst.length) return null;
   const kinds = [...new Set(inst.map((i) => i.kind))];
   const mesh = new THREE.Mesh(buildGeometry(inst), critterMaterial(kinds));

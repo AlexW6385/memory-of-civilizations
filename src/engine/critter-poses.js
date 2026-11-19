@@ -39,7 +39,9 @@ function duck(c) {
   const cr = D[2].cos(), sr = D[2].sin();
   const px = lx.mul(cr).sub(lz.mul(sr)), pz = lx.mul(sr).add(lz.mul(cr)), vx = dx.mul(cr).sub(dz.mul(sr)), vz = dx.mul(sr).add(dz.mul(cr));
   const s = sgn(D[0]), psi = vz.mul(s).atan2(vx.mul(s));
-  const X = C[0].add(px).add(E[0].mul(psi.cos())).sub(E[1].mul(psi.sin())), Z = C[1].add(pz).add(E[0].mul(psi.sin())).add(E[1].mul(psi.cos()));
+  // (a raft keeps its places in the loop's own axes: on a narrow canal the ducks must not swing round at the loop's ends)
+  const oa = x(b[0]).ge(0.5).pick(D[2], psi), oc = oa.cos(), os = oa.sin();
+  const X = C[0].add(px).add(E[0].mul(oc)).sub(E[1].mul(os)), Z = C[1].add(pz).add(E[0].mul(os)).add(E[1].mul(oc));
   // the pause that ends each cycle: preening, dipping the head, looking about
   const r = f.sub(0.64).div(0.36).clamp(0, 1), env = r.smooth(0, 0.12).mul(r.smooth(1, 0.86));
   const beh = kc.mul(1.7).add(seed.mul(13)).hash(), side = sgn(kc.mul(2.3).add(seed.mul(5)).hash().sub(0.5));
@@ -71,7 +73,7 @@ function walker(c, speedScale = 1) {
   };
   const pp = target(k.sub(2)), pr = target(k.sub(1)), cu = target(k);
   const dx = cu[0].sub(pr[0]), dz = cu[1].sub(pr[1]), dl = hyp(dx, dz), wk = dl.div(C[3].mul(tau).mul(speedScale)).clamp(0.04, 0.8);
-  const m = f.div(wk).clamp(0, 1).smooth(0, 1);
+  const lin = f.div(wk).clamp(0, 1), m = lin.mul(0.5).add(lin.smooth(0, 1).mul(0.5));      // (half eased: a bird starts and stops quickly)
   const moving = f.lt(wk).mul(dl.ge(0.05)).mul(m.mul(Math.PI).sin().abs().pow(0.4));
   const hin = dz.atan2(dx), pdx = pr[0].sub(pp[0]), pdz = pr[1].sub(pp[1]), hprev = hyp(pdx, pdz).ge(0.05).pick(pdz.atan2(pdx), b[3]);
   const hcur = dl.ge(0.05).pick(hin, hprev);
@@ -83,19 +85,19 @@ function walker(c, speedScale = 1) {
 
 function crane(c) {
   const W = walker(c), { t } = c, { r, k, seed, moving } = W;
-  const env = r.smooth(0, 0.1).mul(r.smooth(1, 0.9)).mul(x(1).sub(moving));
+  const cam = toCam(c, W.X, W.Z), al = cam.d.smooth(4.5, 2.2), turn = cam.ang.sub(W.psi).wrap().clamp(-1.2, 1.2);
+  const env = r.smooth(0, 0.1).mul(r.smooth(1, 0.9)).mul(x(1).sub(moving)).mul(x(1).sub(al.mul(0.8)));      // (near the visitor it neither bows nor preens)
   const kb = k.mul(3.3).add(seed.mul(5)).hash(), side = sgn(k.mul(1.9).add(seed.mul(3)).hash().sub(0.5));
   const mLook = kb.lt(0.3), mBow = kb.ge(0.3).mul(kb.lt(0.55)), mPreen = kb.ge(0.55).mul(kb.lt(0.8));
   const bow = x(0.5).sub(r.mul(TAU * 2).cos().mul(0.5));
   const nib = r.mul(70).sin();
-  const cam = toCam(c, W.X, W.Z), al = cam.d.smooth(4.5, 2.2), turn = cam.ang.sub(W.psi).wrap().clamp(-1.2, 1.2);
   const bobWalk = W.lp.sin().mul(moving);
   return rig({
     X: W.X, Z: W.Z, psi: W.psi, Y: x(c.b[1]).sub(W.lp.mul(2).sin().abs().mul(0.012).mul(moving)),
-    n1p: bow.mul(env).mul(mBow).mul(0.95).add(env.mul(mPreen).mul(0.55)).add(bobWalk.mul(0.07)).sub(al.mul(0.22)),
-    n1y: env.mul(mPreen).mul(side).mul(1.05).add(env.mul(mLook).mul(r.mul(TAU * 1.5).sin()).mul(0.7)).add(turn.mul(al).mul(0.55)),
-    n2p: bow.mul(env).mul(mBow).mul(0.55).add(env.mul(mPreen).mul(nib.mul(0.15).add(0.95))).add(bobWalk.mul(0.1)).sub(al.mul(0.1)),
-    n2y: env.mul(mPreen).mul(side).mul(0.7).add(env.mul(mLook).mul(r.mul(TAU * 2).add(1).sin()).mul(0.55)).add(turn.mul(al).mul(0.45)),
+    n1p: bow.mul(env).mul(mBow).mul(1.2).sub(env.mul(mPreen).mul(1.1)).add(bobWalk.mul(0.07)).sub(al.mul(0.22)),
+    n1y: env.mul(mPreen).mul(side).mul(0.4).add(env.mul(mLook).mul(r.mul(TAU * 1.5).sin()).mul(0.7)).add(turn.mul(al).mul(0.55)),
+    n2p: bow.mul(env).mul(mBow).mul(0.45).add(env.mul(mPreen).mul(nib.mul(0.12).add(1.25))).add(bobWalk.mul(0.1)).sub(al.mul(0.1)),
+    n2y: env.mul(mPreen).mul(side).mul(0.3).add(env.mul(mLook).mul(r.mul(TAU * 2).add(1).sin()).mul(0.55)).add(turn.mul(al).mul(0.45)),
     bp: bow.mul(env).mul(mBow).mul(0.12), lp: W.lp, la: x(0.3).mul(moving), tp: bobWalk.mul(0.02),
     breath: t.mul(TAU * 0.3).sin().mul(0.01),
   });
@@ -168,7 +170,7 @@ function cormorant(c) {
   const look = t.mul(0.45).add(seed.mul(6)).sin().mul(0.7).mul(x(1).sub(pe)).mul(x(1).sub(al));
   return rig({
     X: b[0], Y: b[1], Z: b[2], psi: b[3],
-    ws: dry.mul(1.15).add(dry.mul(t.mul(2.4).sin()).mul(0.04)), wf: dry.mul(0.28),
+    ws: dry.mul(1.3).add(dry.mul(t.mul(2.4).sin()).mul(0.04)), wf: dry.mul(0.45),
     n1y: pe.mul(1.1).mul(side).add(turn.mul(al).mul(0.4)).add(look.mul(0.3)), n2p: pe.mul(0.75).add(pe.mul(t.mul(11).sin()).mul(0.08)).add(dry.mul(0.15)), n2y: look.mul(0.5).add(turn.mul(al).mul(0.6)),
     n1p: dry.mul(-0.1), breath: t.mul(TAU * 0.4).sin().mul(0.012),
   });
@@ -195,13 +197,13 @@ function cagebird(c) {
 // ═════════ the swallow at its nest: perched, then a loop over the pond, then back with food ═════════
 function swallow(c) {
   const { a, b, c: C, t } = c, seed = a[1];
-  const T = C[0], Tf = C[1], R = C[2], sg = C[3];
+  const T = C[0], Tf = C[1], R = C[2], sg = C[3], H = x(c.d[0]);
   const secs = t.div(T).add(seed).fract().mul(T), s = secs.div(Tf).clamp(0, 1), inFlight = secs.lt(Tf);
   const u = s.sub(s.mul(TAU).sin().div(TAU));                                 // eased: slow to leave, slow to land
-  const A = R.mul(1.0), B = R.mul(0.55), H = 1.6;
+  const A = R.mul(1.0), B = R.mul(0.55);
   const path = (uu) => ({
     F: A.mul(uu.mul(Math.PI).sin()), S: B.mul(uu.mul(TAU).sin()).mul(sg), Yh: uu.mul(Math.PI).sin().abs().pow(2).mul(H),
-    dF: A.mul(Math.PI).mul(uu.mul(Math.PI).cos()), dS: B.mul(TAU).mul(uu.mul(TAU).cos()).mul(sg), dY: x(H).mul(Math.PI).mul(uu.mul(TAU).sin()),
+    dF: A.mul(Math.PI).mul(uu.mul(Math.PI).cos()), dS: B.mul(TAU).mul(uu.mul(TAU).cos()).mul(sg), dY: H.mul(Math.PI).mul(uu.mul(TAU).sin()),
   });
   const p0 = path(u), p1 = path(u.add(0.02));
   const cr = x(b[3]).cos(), sr = x(b[3]).sin();
