@@ -643,6 +643,7 @@ function make(spec) {
       m.emissiveNode = glowC.mul(f.mul(float(spec.power ?? 0.5))).mul(night).mul(flick);
       m.opacityNode = float(0.004);
       m.lights = false;
+      m.fog = false;                       // (fog added to an added light would be a haze of the fog's colour over everything the halo covers, by day too)
       m.transparent = true;
       m.depthWrite = false;
       m.side = DoubleSide;
