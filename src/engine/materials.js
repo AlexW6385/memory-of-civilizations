@@ -17,6 +17,7 @@ import { waterSky } from './water-reflect.js';
 
 const cache = new Map();
 const WIND = '+wind';
+const NIGHT = '+night';
 /** The colour of oil-lamp light through paper or from a room within (linear): a warm orange. */
 const LAMPLIGHT = vec3(1.0, 0.43, 0.13);
 const PLAIN = typeof location !== 'undefined' && new URLSearchParams(location.search).get('plain') === '1';
@@ -32,15 +33,18 @@ export function useGI(gi) { GI = gi; }
 
 /**
  * Material for a palette key. A key ending in "+wind" is that material on cloth hung in the wind
- * (a shop's banner, washing on a pole): the same look, its vertices swayed (clothSway below).
+ * (a shop's banner, washing on a pole): the same look, its vertices swayed (clothSway below). A key ending in "+night" is
+ * that material present at night only.
  */
 export function material(key) {
   if (cache.has(key)) return cache.get(key);
-  const wind = key.endsWith(WIND), base = wind ? key.slice(0, -WIND.length) : key;
+  const wind = key.endsWith(WIND), night = key.endsWith(NIGHT), base = wind ? key.slice(0, -WIND.length) : night ? key.slice(0, -NIGHT.length) : key;
   const spec = MATERIALS[base] || MATERIALS.sandstone;
   // ?plain=1 (benchmark only): flat materials, to measure what the procedural detail costs
   const m = PLAIN ? plainMaterial(spec) : make(spec);
   if (wind) clothSway(m);
+  // "+night": the same material, there only at night (cut away by day, as the halo is lit only at night): shutters put up for the night
+  if (night) { m.opacityNode = smoothstep(0.3, 0.7, ENV.night); m.alphaTest = 0.5; }
   m.name = key;
   if (GI && !m.userData.water) {
     const spec2 = GI.radianceNode();

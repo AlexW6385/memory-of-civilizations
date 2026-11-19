@@ -350,9 +350,11 @@ export class SiteMovers {
     let w = null; for (const q of this.W) if (!q.on) { w = q; break; }
     if (!w) return false;
     // who: by the street (the market's people where the shops are)
-    let tot = 0; for (const k2 of this.kindsW) tot += k2.weight * (e.market > 0.3 ? k2.market : 1);
+    // (a kind with `night` set walks only at night: the watchman with his clapper and lantern)
+    const nk = (k2) => (k2.night && night < 0.6 ? 0 : 1);
+    let tot = 0; for (const k2 of this.kindsW) tot += k2.weight * (e.market > 0.3 ? k2.market : 1) * nk(k2);
     let rr = rand() * tot, K = this.kindsW[0];
-    for (const k2 of this.kindsW) { rr -= k2.weight * (e.market > 0.3 ? k2.market : 1); if (rr <= 0) { K = k2; break; } }
+    for (const k2 of this.kindsW) { rr -= k2.weight * (e.market > 0.3 ? k2.market : 1) * nk(k2); if (rr <= 0) { K = k2; break; } }
     const h = K.h ? lerp(K.h[0], K.h[1], rand()) : 0.95 + rand() * 0.1, girth = 0.93 + rand() * 0.14;
     w.on = true; w.K = K; w.e = e; w.dir = dir; w.x = x; w.z = z; w.y = y; w.yaw = Math.atan2(-e.ux * dir, -e.uz * dir); w.v = 0.5;
     w.vT = w.cruise = lerp(K.speed[0], K.speed[1], rand()); w.prefR = prefR; w.bias = 0; w.ph = rand() * TAU;
@@ -392,6 +394,7 @@ export class SiteMovers {
       const d = len2(w.x - _cam.x, w.z - _cam.z);
       // let go of: far, or too many (unseen)
       if (d > P.reach || (n > N + 2 && d > 40 && !this.seen(w.x, w.y + 1, w.z) && this.t - w.born > 4)) { w.on = false; n--; continue; }
+      if (w.K.night && night < 0.3 && d > 30 && !this.seen(w.x, w.y + 1, w.z)) { w.on = false; n--; continue; }     // (the night's kinds go with the day, out of sight)
       // the wet: umbrellas and capes, each in its own moment
       const wantWet = this.wetness > 0.5;
       if (wantWet !== w.wet) { if (!w.wetAt) w.wetAt = this.t + rand() * 12; else if (this.t > w.wetAt) { w.wet = wantWet; w.wetAt = 0; } } else w.wetAt = 0;
