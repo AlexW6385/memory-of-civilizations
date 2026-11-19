@@ -12,6 +12,7 @@ import '../../styles/ming/index.js';
 import '../../styles/song/index.js';
 import { beamTris, rectRoof } from '../../styles/ming/index.js';
 import { templeWare } from './templework.js';
+import { templeFigure } from './templehall.js';
 import { LEVEL, RADIUS, TEMPLE_COURT, NORTH_KEEP as KEEP } from './layout.js';
 
 // ── where things stand (m, +x east, +z south; the north is −z) ──────────────
@@ -187,8 +188,10 @@ function beisiPagoda(el, ctx) {
   // (the song style's own eaves are thin plates: they are left out here, their tile and soffit
   // materials dropped, and replaced by deep eaves of our own)
   const fb = Object.create(bag);
-  fb.add = (m, g) => { if (m !== 'tile_dark' && m !== 'lacquer_red') bag.add(m, g); };
-  STYLES.song.elements.pagoda_oct({ c: el.c, y: y0 + hC + 0.34 - 0.05, base: { r: 0.3, h: 0.05 }, tiers, spire: 5.6, bells: null, core: 'brick_grey', frame: 'timber_red', eave: 'tile_dark' }, { ...ctx, bag: fb });
+  // (the song style's walkable inside is on: its stair, floors and chambers are kept; its big eave pieces are dropped, the offering table's small red is kept)
+  const small = (g) => { g.computeBoundingBox(); const b = g.boundingBox; return Math.max(b.max.x - b.min.x, b.max.z - b.min.z) < 3; };
+  fb.add = (m, g) => { if ((m !== 'tile_dark' && m !== 'lacquer_red') || (m === 'lacquer_red' && small(g))) bag.add(m, g); };
+  STYLES.song.elements.pagoda_oct({ c: el.c, y: y0 + hC + 0.34 - 0.05, base: { r: 0.3, h: 0.05 }, tiers, spire: 5.6, bells: null, core: 'brick_grey', frame: 'timber_red', eave: 'tile_dark', interior: true, images: true }, { ...ctx, bag: fb });
   let y = y0 + hC + 0.34;
   tiers.forEach((t, i) => {
     const g = t.r + 2.4, top = y + t.h;
@@ -465,7 +468,7 @@ function moatPool({ rect, y, gaps = [] }, { bag }) {
 
 registerStyle('suzhou-north', {
   ...STYLES.ming,
-  elements: { ...STYLES.ming.elements, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare },
+  elements: { ...STYLES.ming.elements, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare, temple_figure: templeFigure },
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
