@@ -4,6 +4,7 @@
 // yards; the shopkeepers at their counters, monks, samurai.
 import { RADIUS, STREAM, BRIDGES, SHRINE, TEA, GINKAKU, RYOAN, lots, yards, isOpen, inRect, mirrored, frontOf } from './layout.js';
 import { lifeTiles } from './life.js';
+import { stoneHalos } from './nightlight.js';
 import { gutters, furniture, yardWork, streamWork, templeWork } from './streetwork.js';
 
 const base = (id, elements, style = 'muromachi') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [190, 100], facing: 'n' } });
@@ -38,6 +39,7 @@ function civic() {
     E.push({ t: 'ido', at: [cx + (r() - 0.5) * 8, cz + (r() - 0.5) * 8], y: 0, rot: 0 });
     E.push({ t: 'bamboo_fence', a: [y[0] + 1, cz - 3], b: [y[0] + 1 + (y[2] - y[0]) * 0.35, cz - 3], h: 1.5 });
   }
+  E.push(...stoneHalos(E, (e) => Math.hypot(e.at[0] - TEA.hut[0], e.at[1] - TEA.hut[1]) < 12));   // lit at night: the shrine's lanterns (the tea garden's is a later fashion)
   return E;
 }
 

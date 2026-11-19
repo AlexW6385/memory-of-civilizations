@@ -1,6 +1,7 @@
 // Ryōan-ji about 1490 (docs/settlements/muromachi-kyoto.md §4): the hōjō with its veranda, the rock garden of fifteen stones in
 // five groups on raked gravel inside its clay wall, the pond Kyōyōchi, the gate and the walls.
 import { RYOAN } from './layout.js';
+import { stoneHalos } from './nightlight.js';
 
 const E = [];
 const [x0, z0, x1, z1] = RYOAN.rect, [gx, gz] = RYOAN.gate, [hx, hz] = RYOAN.hojo, P = RYOAN.pond;
@@ -19,6 +20,7 @@ const rooms = [room('hojo', [hx - 13, hz - 6, hx + 13, hz + 6], 0.85, 'hall'), r
 const walks = [[[gx, gz + 6], [gx, gz - 4], [gx, hz + 14], [hx - 19, hz + 14], [hx - 19, hz - 7.5], [hx - 14.6, hz - 7.5], [hx - 11, hz - 7.5], [hx - 4, hz - 7.5], [hx + 3.3 - 0.0, hz - 5], [hx + 3.3, hz - 1]]];
 walks[0].y0 = 0;
 
+E.push(...stoneHalos(E));                                    // the stone lanterns lit at night (nightlight.js)
 export const ryoanji = {
   id: 'muromachi-ryoanji',
   name: { en: 'Ryōan-ji', zh: '龙安寺' },

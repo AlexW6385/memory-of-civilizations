@@ -2,6 +2,7 @@
 // with the Dōjinsai, the gate and the earthen walls, stone lanterns, the court of white gravel. The landmark.
 import { GINKAKU, RADIUS, lots } from './layout.js';
 import { dims } from '../../styles/muromachi/machiya.js';
+import { stoneHalos } from './nightlight.js';
 import { upWindows, stairAt } from '../../styles/muromachi/upper.js';
 
 const E = [];
@@ -63,6 +64,7 @@ for (const l of lots()) {
   walks.push(r);
 }
 
+E.push(...stoneHalos(E));                                    // the stone lanterns lit at night (nightlight.js)
 export const ginkaku = {
   id: 'muromachi-ginkaku',
   name: { en: 'Ginkaku-ji (Jishō-ji)', zh: '银阁寺（慈照寺）' },

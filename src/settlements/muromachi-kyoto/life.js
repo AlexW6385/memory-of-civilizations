@@ -3,7 +3,8 @@
 // old men, water jars, firewood, hens and dogs, the family at the counter and in the doma; at the stream the women washing and
 // the punts. Elements of the shared `life` style, placed from layout.js; tiles of 100 m as at Suzhou so that the viewer draws
 // them by distance.
-import { lots, isOpen, mirrored, yards, STREAM, BRIDGES, RADIUS, streets, inRect, onBridge, GINKAKU, RYOAN, SHRINE } from './layout.js';
+import { hangHalo, spillHalo } from './nightlight.js';
+import { lots, isOpen, frontOf, mirrored, yards, STREAM, BRIDGES, RADIUS, streets, inRect, onBridge, GINKAKU, RYOAN, SHRINE } from './layout.js';
 import { dims } from '../../styles/muromachi/machiya.js';
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -31,7 +32,8 @@ export function fronts() {
     const put = (e) => L.push({ y, seed: id(), ...e });
     const P = F.P, out = F.rot + Math.PI;
     // the lantern at the eave, the banner on its bracket at the corner post
-    if (open || R() < 0.3) put({ t: 'hang_lantern', at: P(hw - 0.8, 0.95), y: hook, kind: tr === 'sake' || tr === 'food' || tr === 'tea' ? 'paper' : 'white', drop: 0.25 });
+    if (open || R() < 0.3) { const hl = { t: 'hang_lantern', at: P(hw - 0.8, 0.95), y: hook, kind: tr === 'sake' || tr === 'food' || tr === 'tea' ? 'paper' : 'white', drop: 0.25 }; put(hl); put(hangHalo(hl, out)); }
+    if (open && frontOf(l) === 'shop') { const sp = spillHalo(P(hw - 0.8, 0.2), out); if (sp) put(sp); }
     if (open && R() < 0.55) put({ t: 'shop_sign', at: P(-hw + 0.02, 0.15), rot: out, h: D.two ? D.H - 0.5 : 2.75, cloth: BANNER[tr] || 'cloth_indigo', len: 1.2 + R() * 0.4, out: 0.95, letters: 2 + Math.floor(R() * 2) });
     // the trade's goods in front
     const gx = -hw + 0.9 + R() * Math.max(0.1, l.w - 3.2) * (l.up ? 0.4 : 1);      // (the opened houses keep the way to the passage clear)
