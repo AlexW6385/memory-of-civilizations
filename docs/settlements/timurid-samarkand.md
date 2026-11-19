@@ -143,3 +143,14 @@ Sources: Archnet, Madrasah-i Ulugh Beg (https://archnet.org/sites/2123: the pish
 | Minarets | Eight lapis-in-turquoise pointed panels round the octagonal foot, three rings of muqarnas cells under the gallery, a lantern with eight ribs and a ribbed cap | [inferred]; the minaret height 33 m is the dossier's measure |
 
 Arrival frame (tools/draw-count.mjs): main draws 758 before and after; main triangles 3.66 M before, 3.75 M after.
+
+## 19. Upstairs (2026-11-18): the houses' upper floors
+
+Found shut: the merchant's (rich) houses had a street wing of solid brick to 7 m (a balcony with a painted-on door, no rooms); every other house had only a bare flat roof. The stair of the court (mud brick, to the roof) already climbed. Built: [inferred from the traditional Central Asian dwelling, Orexca (§15): the upper room on the roof (balakhona), the upper aivan and the lattice-windowed reception room of a well-off house; Samarkand's craft quarters for the trades' stores]. Sources as §15 and §17; the 15th-century forms are [inferred] from later houses.
+
+| Where | What is upstairs | Basis |
+|---|---|---|
+| Merchant's house (rich: near the Registan and the bazaar) | The street wing's upper floor at the roof's level, entered by a door from the terrace at the stair's head: three rooms with doors between — a bedroom (bedding on a kilim, chest with a stack of quilts), the reception room (mehmonkhona: a carpet, a cloth spread for the meal, bolsters along the wall, a stand with a book, niches) and a store (sacks, bales, rolled carpets, a strong-box); painted ceilings; windows with open reveals toward the lane and the court; the timber balcony over the lane is a deck level with the floor, reached by a door, with rails; a loggia (deck on brackets, rails, two columns) over the court | [inferred] |
+| Every other house | A balakhona on the street wing's roof, at the end by the stair, reached from the roof terrace through a door under a porch of two posts (or, at the far end, through its inner wall); inside, bedding, a chest with quilts, niches and a lamp, and the stores of the house's trade: the potter's shelves of ware, the baker's flour, the smith's iron bars and charcoal, the weaver's bolts and hanks, the joiner's boards and column blanks, the grocer's strings of dried fruit and sacks, the papermaker's sheets drying on lines | [inferred]; [stated] Samarkand paper, §17 |
+
+The way up: the door of the street, the passage, round the privacy screen to the foot of the mud-brick stair, up to the roof, along the terrace to the door. `walks` in plan.js: three merchant's houses and one house of each trade nearest the arrival. Upper floors are in the near form of the houses only (the far form gets the mass of the balakhona). Still shut: the ground floor of the street wing (solid), the upper floors beyond the near ring, the balakhona's own roof.
