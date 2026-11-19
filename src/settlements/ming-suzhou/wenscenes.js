@@ -242,22 +242,39 @@ function smallTree(P, col, x, z, h, blossom, seed) {
   }
   col.circle(x, z, 0.14, y, y + h * 0.7);
 }
-/** A banana plant: a pseudostem and six drooping leaves. */
+/**
+ * A banana plant: a pseudostem of overlapping leaf sheaths (a dry brown base, green above, each sheath a little wider than the one
+ * over it), a furled new leaf standing at the crown, and five broad leaves arching out and hanging: each a midrib with the two halves
+ * folded down and cut into pinnae by the wind (every pinna a parallelogram swept toward the tip, some torn short, a slit between).
+ */
 function banana(P, col, x, z, seed, s = 1) {
-  const y = H(x, z), hh = (1.5 + 0.5 * hs(x, z, 2)) * s;
-  P.add('lotus_leaf', lathe([[0.1 * s, y], [0.07 * s, y + hh]], 6, null, x, 0, z));
-  for (let k = 0; k < 6; k++) {
-    const a = k / 6 * TAU + seed + 0.5 * hs(x, z, k), out = [], cen = [x, y + hh, z], L = (1.5 + 0.6 * hs(x, z, 10 + k)) * s, wd = 0.28 * s;
-    const px = Math.cos(a), pz = Math.sin(a), qx = -pz, qz = px;
-    const mid = (t) => [x + px * L * t, y + hh + Math.sin(t * 2.4) * 0.45 * s - t * t * 0.55 * s, z + pz * L * t];
-    for (let i = 0; i < 4; i++) {
-      const t0 = i / 4, t1 = (i + 1) / 4, w0 = wd * Math.sin(Math.PI * (0.18 + 0.82 * t0)) , w1 = wd * Math.sin(Math.PI * (0.18 + 0.82 * t1)) * (i === 3 ? 0.3 : 1);
-      const a0 = mid(t0), a1 = mid(t1);
-      const A = [a0[0] + qx * w0, a0[1] - w0 * 0.25, a0[2] + qz * w0], B = [a0[0] - qx * w0, a0[1] - w0 * 0.25, a0[2] - qz * w0], C = [a1[0] - qx * w1, a1[1] - w1 * 0.25, a1[2] - qz * w1], D = [a1[0] + qx * w1, a1[1] - w1 * 0.25, a1[2] + qz * w1];
-      out.push(...A, ...B, ...C, ...A, ...C, ...D, ...A, ...C, ...B, ...A, ...D, ...C);
+  const y = H(x, z), hh = (1.5 + 0.5 * hs(x, z, 2)) * s, rings = 6, T = [];
+  const stem = (k0, k1, mat) => {
+    const pr = [];
+    for (let k = k0; k < k1; k++) {
+      const r = (0.155 - 0.045 * k / rings) * s, y0 = y + hh * k / rings, y1 = y + hh * (k + 0.9) / rings;
+      pr.push([r * 1.05, y0], [r * 0.96, y1]);
     }
-    void cen; P.add('lotus_leaf', fromTri(out));
+    P.add(mat, lathe(pr, 8, null, x, 0, z));
+  };
+  stem(0, 2, 'bark_olive'); stem(2, rings, 'lotus_leaf');
+  // the furled new leaf: a narrow cone, a little bent
+  const fa = seed * 1.3 + 4 * hs(x, z, 40);
+  P.add('lotus_leaf', lathe([[0.045 * s, y + hh - 0.05], [0.04 * s, y + hh + 0.3 * s], [0.001, y + hh + 0.62 * s]], 5, null, x + Math.cos(fa) * 0.02, 0, z + Math.sin(fa) * 0.02));
+  const NP = 7;
+  for (let k = 0; k < 5; k++) {
+    const a = k / 5 * TAU + seed + 0.6 * hs(x, z, k), L = (1.7 + 0.6 * hs(x, z, 10 + k)) * s, wd = 0.4 * s;
+    const px = Math.cos(a), pz = Math.sin(a), qx = -pz, qz = px, up = 0.35 + 0.8 * hs(x, z, 20 + k);
+    const mid = (t) => [x + px * L * t * 0.92, y + hh - 0.04 + L * (up * t - 0.95 * t * t), z + pz * L * t * 0.92];
+    const wing = (t, w, sd) => { const m = mid(Math.min(1, t)); return [m[0] + qx * w * sd * 0.88, m[1] - w * 0.34 - 0.03 * s * (w / wd), m[2] + qz * w * sd * 0.88]; };
+    for (const sd of [-1, 1]) for (let i = 0; i < NP; i++) {
+      const t0 = 0.2 + 0.8 * i / NP, t1 = 0.2 + 0.8 * (i + 1) / NP, tm = (t0 + t1) / 2, u = hs(x + i, z + sd * k, 30);
+      const w = wd * Math.pow(Math.sin(Math.PI * (0.08 + 0.88 * tm)), 0.7) * (u < 0.25 ? 0.5 : 0.78 + 0.22 * u) * (i === NP - 1 ? 0.7 : 1);
+      const i0 = mid(t0), i1 = mid(t1), o0 = wing(t0 + 0.05, w, sd), o1 = wing(t1 + 0.05 - 0.03, w * 0.92, sd);
+      T.push(...i0, ...i1, ...o1, ...i0, ...o1, ...o0, ...i0, ...o1, ...i1, ...i0, ...o0, ...o1);
+    }
   }
+  P.add('lotus_leaf', fromTri(T));
   col.circle(x, z, 0.22 * s, y, y + hh);
 }
 /** A ribbon path draped on the ground: bluestone slabs between irregular edge stones. */

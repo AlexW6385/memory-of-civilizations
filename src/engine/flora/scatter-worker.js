@@ -12,7 +12,10 @@ const cover = (x, z, h, ny) => (G ? G.cover(x, z, h, ny) : groundCover(x, z, h, 
 const densities = (x, z, p) => (G ? G.planting(x, z, p) : legacyDensities(x, z, p));
 const waterDist = (x, z) => (G ? (G.fromWater ? G.fromWater(x, z) : 999) : fromWater(x, z));
 
-const SPECIES = Object.keys(MAX_DENSITY);
+// species that grow only where a settlement's ground lists them in `grows` (appended last, so the indices of the others do not move): the camphor and
+// the tea were asked for by several grounds but never scattered, as the species list is that of MAX_DENSITY; only the grounds that name them here get them
+const OPT_IN = ['camphor', 'tea'];
+const SPECIES = [...Object.keys(MAX_DENSITY), ...OPT_IN.filter((s) => !(s in MAX_DENSITY))];
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 function place(x, z) {
@@ -40,6 +43,7 @@ self.onmessage = (e) => {
   };
   SPECIES.forEach((sp, si) => {
     if (NEAR_ONLY.has(sp) !== !!near) return;
+    if (OPT_IN.includes(sp) && !(G && G.grows && G.grows.includes(sp))) return;
     const max = (G && G.maxDensity && G.maxDensity[sp]) || MAX_DENSITY[sp];
     let pts = [];
     if (ROWS[sp]) {

@@ -16,6 +16,8 @@ import music from './music.js';
 import { houses } from './town.js';
 import '../../styles/gothic/court.js';
 import { courtGround, courtLife } from './court.js';
+import { nightPlan } from './nightlight.js';
+import { RADIUS } from './layout.js';
 export { music };
 export const landmarks = [{ plan: chapel, music }];
-export async function town() { return [city, river, ...bridges, ...chatelets, bridgeHouses(), boats, ...streetLife(), ...lifePlans(), courtGround(), courtLife(), ...(await houses())]; }
+export async function town() { return [city, river, ...bridges, ...chatelets, bridgeHouses(), boats, ...streetLife(), ...lifePlans(), courtGround(), courtLife(), nightPlan(RADIUS), ...(await houses())]; }

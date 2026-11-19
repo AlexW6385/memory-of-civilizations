@@ -21,6 +21,34 @@ export const MEDRESES = [
   { id: 'rabi', rect: [95.8, -6.8, 95.8 + MW, -6.8 + MW], out: 'e' },
 ];
 export const ARASTA = { w: -95.8, e: 95.8, z0: -56, z1: -6.8 + MW, d: 4.4 };
+/**
+ * The two rows of vaulted shops (docs/settlements/ottoman-istanbul.md §4.9, §18) as plain data: { f, x (the line of the backs), z0, z1, face, d, gaps, goods }, and every shop
+ * of them: { f, sg (the way its front looks: +1 east), xb, d, za, zb, zc (the clear opening between the piers), goods, sk (the keeper's side) } — the maths of
+ * styles/ottoman/kulliye.js `arastaShops` (a test holds the two equal), without the style, so that the sound map and the walk can use it.
+ */
+export function arastaRows() {
+  return ['w', 'e'].map((f) => {
+    const gates = MEDRESES.filter((q) => (q.out === 'w') === (f === 'w')).map((q) => [q.rect[1] + 5 * 4.2 - 1.6, q.rect[1] + 6 * 4.2 + 1.6]);
+    return { f, x: ARASTA[f], z0: ARASTA.z0, z1: ARASTA.z1, face: f === 'w' ? 'e' : 'w', d: ARASTA.d, gaps: [...gates, [-9.8, -6.8]], goods: f === 'w' ? 'cloth' : 'copper' };
+  });
+}
+const hashAt = (x, z, s = 0) => { let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+let ARASTA_SHOPS = null;
+export function arastaShopData(w = 3.3) {
+  if (ARASTA_SHOPS) return ARASTA_SHOPS;
+  ARASTA_SHOPS = [];
+  for (const el of arastaRows()) {
+    const runs = []; let s = el.z0;
+    for (const [g0, g1] of el.gaps.slice().sort((p, q) => p[0] - q[0])) { runs.push([s, g0]); s = g1; }
+    runs.push([s, el.z1]);
+    for (const [r0, r1] of runs) {
+      const k = Math.floor((r1 - r0 - 0.5) / w); if (k < 1) continue;
+      const z0 = r0 + (r1 - r0 - k * w) / 2;
+      for (let i = 0; i < k; i++) { const za = z0 + i * w + 0.28, zb = z0 + (i + 1) * w - 0.28, zc = (za + zb) / 2; ARASTA_SHOPS.push({ f: el.f, sg: el.face === 'w' ? -1 : 1, xb: el.x, d: el.d, za, zb, zc, hw: (zb - za) / 2, goods: el.goods, sk: hashAt(el.x, zc, 4) < 0.5 ? -1 : 1 }); }
+    }
+  }
+  return ARASTA_SHOPS;
+}
 export const DARUSSIFA = [-96 - 12 * 4.4, -107, -96, -107 + 10 * 4.4];
 export const IMARET = [100, -107, 100 + 10 * 4.4, -107 + 10 * 4.4];
 export const HAMAM = [98, 58, 141.6, 74];

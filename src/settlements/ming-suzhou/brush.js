@@ -213,7 +213,8 @@ export function weightOf(strokes, thick = 1) {
     const n = ({ hz: 6, hzg: 6, sz: 6, hp: 6 })[kind] ?? (kind === 'wg' || kind === 'z' || kind === 'c' ? v.length : 4);
     for (let i = 2; i + 1 < n; i += 2) L += hyp(v[i] - v[i - 2], v[i + 1] - v[i - 1]);
   }
-  return Math.max(0.036, Math.min(0.066, 0.155 / Math.sqrt(L / 100 + 1e-3))) * thick;
+  // the densest characters (19 pieces or more: 瓏 麵 藥) are drawn lighter so that their counters stay open
+  return Math.max(0.036, Math.min(0.066, 0.155 / Math.sqrt(L / 100 + 1e-3))) * thick * (strokes.length >= 19 ? 0.82 : 1);
 }
 
 // ── outlines and relief ──────────────────────────────────────────────────────────────────────────────

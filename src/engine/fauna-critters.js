@@ -22,6 +22,7 @@ const MODEL_KIND = {
   mandarin_drake: 'duck', mandarin_hen: 'duck', duck_white: 'duck', duck_brown: 'duck', crane: 'crane', hen_brown: 'hen', hen_white: 'hen', rooster: 'rooster',
   cat_tabby: 'cat', cat_orange: 'cat', dog: 'dog', cormorant: 'cormorant', fishing_craft: 'craft', cagebird: 'cagebird', swallow_nest: 'swallow', kingfisher: 'kingfisher',
 };
+Object.assign(MODEL_KIND, { pigeon_grey: 'hen', pigeon_white: 'hen', pigeon_dark: 'hen', goose_white: 'hen', goose_grey: 'hen' });      // (the town's birds on the ground walk and peck as the fowl do)
 /** Out at night too (a cat and a dog asleep, a cage hung out, the craft)? */
 const NIGHT = { cat: 1, dog: 1, cagebird: 1, craft: 1 };
 const REACH = 95;

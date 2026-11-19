@@ -13,6 +13,7 @@
 // instruments and calls are in docs/settlements/ming-suzhou.md §22.]
 
 import { ENV } from './env.js';
+import { OTTOMAN_VOICES } from './voices-ottoman.js';
 
 const R = Math.random;
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -615,6 +616,7 @@ export const VOICES = {
    * listener's place. Each source has its own next time, drawn at random between its gaps, so that nothing repeats evenly.
    */
   placed(L, t) {
+    if (L.map.schedule) return this[L.map.schedule](L, t);     // a map with its own scheduler (Istanbul: voices-ottoman.js)
     const P = this.plc, M = L.map, l = this.lis(), r = R;
     const hour = l.hour ?? (P.birds > 0.05 ? 12 : P.dawn ? 6 : 1), doy = this.seasonDoy(), rain = P.rain || 0;
     P.hourNow = hour;
@@ -673,6 +675,7 @@ export const VOICES = {
     const trade = day || hour < 23 ? pickTrade(hour, doy) : null;
     track('vendor', 'vendor', 1.0, 10, [34, 80], trade && rain < 0.4 && hour >= 5.5 && hour < 23, () => M.streetTrack(l.x, l.z, r, 80, 30), 1, () => trade);
     track('watch', 'watchman', 1.0, 12, [34, 70], night && rain < 0.5, () => M.streetTrack(l.x, l.z, r, 90, 34));
+    for (const x of M.TRACKS || []) track(x.key, x.voice, x.speed, x.r50, x.gap, x.ok(hour, rain), () => x.get(l.x, l.z, r));   // a place's own passing sounds (Venice's gondolas, bridges, hawkers, patrol)
 
     // the waters: the canals' walls, the pond's stones, the fish; the eaves' drips
     const cs = M.canalSpot(l.x, l.z);
@@ -831,5 +834,6 @@ export const VOICES = {
 /** Put the voices on Music's prototype (audio.js does it once). */
 export function installVoices(Music) {
   for (const [k, v] of Object.entries(VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
+  for (const [k, v] of Object.entries(OTTOMAN_VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
   Music.prototype.seasonDoy = function seasonDoy() { return this.doyOverride ?? doyOf(ENV.seasonWinter.value, ENV.seasonAutumn.value); };
 }

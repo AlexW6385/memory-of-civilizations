@@ -17,6 +17,7 @@ import { gateTowerIn, wallWeather, wallWalks, courtWork, courtLife } from './wal
 import { templeFigure, templeMainIn, templeSutraIn, templeRefectoryIn, templeKings } from './templehall.js';
 import { LEVEL, RADIUS, TEMPLE_COURT, NORTH_KEEP as KEEP } from './layout.js';
 import { tabletText } from './corework.js';
+import { boardElement } from './boardel.js';
 
 // ── where things stand (m, +x east, +z south; the north is −z) ──────────────
 /** The pagoda's centre: north of the garden, in the temple's court. */
@@ -473,7 +474,7 @@ function moatPool({ rect, y, gaps = [] }, { bag }) {
 
 registerStyle('suzhou-north', {
   ...STYLES.ming,
-  elements: { ...STYLES.ming.elements, tablet_text: tabletText, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare, temple_figure: templeFigure, temple_main_in: templeMainIn, temple_sutra_in: templeSutraIn, temple_refectory_in: templeRefectoryIn, temple_kings: templeKings, pagoda_wear: pagodaWear, pagoda_finial: pagodaFinial, gate_tower_in: gateTowerIn, wall_weather: wallWeather, court_work: courtWork, court_life: courtLife },
+  elements: { ...STYLES.ming.elements, plaque: boardElement, tablet_text: tabletText, beisi_pagoda: beisiPagoda, suzhou_hall: suzhouHall, north_wall: northWall, moat_pool: moatPool, temple_ware: templeWare, temple_figure: templeFigure, temple_main_in: templeMainIn, temple_sutra_in: templeSutraIn, temple_refectory_in: templeRefectoryIn, temple_kings: templeKings, pagoda_wear: pagodaWear, pagoda_finial: pagodaFinial, gate_tower_in: gateTowerIn, wall_weather: wallWeather, court_work: courtWork, court_life: courtLife },
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -484,7 +485,8 @@ const base = (id, elements, style = 'suzhou-north') => ({ id, style, origin: [0,
 /** The pagoda on its terraces. */
 export const TIERS = Array.from({ length: 9 }, (_, i) => ({ r: TIER_R0 - 0.3 * i, h: 9.2 - 0.5 * i }));
 function pagodaPlan() {
-  return base('ming-suzhou-pagoda', [{ t: 'beisi_pagoda', c: PAGODA_AT, y: 0 },     { t: 'pagoda_finial', c: PAGODA_AT, y: 2.2 + 0.34 + TIERS.reduce((a, t) => a + t.h, 0) + 5.55, r: TIERS[8].r + 3.6, yr: 2.2 + 0.34 + TIERS.reduce((a, t) => a + t.h, 0) + 0.2 }]);
+  const D = TIER_R0 * Math.cos(Math.PI / 8) + 0.06, q = Math.SQRT1_2;                 // (the south-west door's face: its name board, §30)
+  return base('ming-suzhou-pagoda', [{ t: 'plaque', at: [PAGODA_AT[0] - D * q, PAGODA_AT[1] + D * q], y: 5.45, facing: [-q, q], w: 2.2, h: 0.8, text: '北寺塔', finish: 'gilt' }, { t: 'beisi_pagoda', c: PAGODA_AT, y: 0 },     { t: 'pagoda_finial', c: PAGODA_AT, y: 2.2 + 0.34 + TIERS.reduce((a, t) => a + t.h, 0) + 5.55, r: TIERS[8].r + 3.6, yr: 2.2 + 0.34 + TIERS.reduce((a, t) => a + t.h, 0) + 0.2 }]);
 }
 
 /** The routes walk-check follows (plan.walks, hooked into the landmark's in index.js): from the street up the pagoda to its top. */
@@ -508,6 +510,11 @@ function templePlan() {
   E.push({ t: 'stair', rect: [cx - 3, -116.6, cx + 3, -114.6], y0: 0.04, y1: 1.15, dir: 'n', riser: 0.18, mat: 'granite_block' });
   E.push({ t: 'suzhou_hall', rect: [-72, -128, -63, -120], y: 0.4, H: 4.4, front: 'e', four: false, roof: 'xieshan', plat: 0.4 });
   E.push({ t: 'suzhou_hall', rect: [-17, -128, -8, -120], y: 0.4, H: 4.4, front: 'w', four: false, roof: 'xieshan', plat: 0.4 });
+  E.push({ t: 'plaque', at: [cx, z1 - 0.295], y: 3.62, facing: [0, -1], w: 2.4, h: 0.8, text: '天王殿', finish: 'gilt' });      // the gate is the Hall of the Heavenly Kings from the court: its board hangs over the inner face, covering the gate tablet's reverse
+  // the halls' name boards (§30): the main hall over its middle bay, the sutra store and the refectory over their doors, the pagoda over its lowest door (the south-west one)
+  E.push({ t: 'plaque', at: [cx, -117.3], y: 6.45, facing: [0, 1], w: 3.4, h: 1.2, text: '大雄寶殿', finish: 'gilt' });
+  E.push({ t: 'plaque', at: [-62.8, -122], y: 3.75, facing: [1, 0], w: 2.1, h: 0.75, text: '藏經閣', finish: 'gilt' });
+  E.push({ t: 'plaque', at: [-17.2, -122], y: 3.75, facing: [-1, 0], w: 1.4, h: 0.75, text: '齋堂', finish: 'gilt' });
   E.push({ t: 'temple_ware', gate: [cx, z1], burner: [cx, z1 - 1.75], w: 3.2, h: 3.5, zt: -114.6, y: LEVEL.street + 0.04 });
   return base('ming-suzhou-temple', E);
 }
