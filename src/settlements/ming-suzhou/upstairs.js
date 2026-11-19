@@ -49,6 +49,13 @@ export function houseUp(el, { bag, col }) {
   let floor0 = -99, floor1 = -99;
   const B = (a0, b0, a1, b1, ya, yb, mat) => { if (a1 - a0 < 1e-4 || b1 - b0 < 1e-4 || yb - ya < 1e-4) return; const r = wr(a0, b0, a1, b1); put(mat, boxT(r[0], ya, r[1], r[2], yb, r[3], Math.abs(ya - floor0) < 1e-4 || Math.abs(ya - floor1) < 1e-4)); };
   const blk = (a0, b0, a1, b1, ya, yb) => col.rect(wr(a0, b0, a1, b1), ya, yb);
+  /** A fine piece (a bowl, a shoe, a book, a tool: under 0.4 m): its own geometry, so that it is drawn only near, in the detail mesh of its material. */
+  const FP = (a0, b0, a1, b1, ya, yb, mat) => { if (a1 - a0 < 1e-4 || b1 - b0 < 1e-4 || yb - ya < 1e-4) return; const r = wr(a0, b0, a1, b1); bag.add(mat, fromTriangles(boxT(r[0], ya, r[1], r[2], yb, r[3], Math.abs(ya - floor0) < 1e-4 || Math.abs(ya - floor1) < 1e-4))); };
+  const latF = (mat, profile, seg, a, b, yy, sx = 1, sz = 1) => {
+    const p = W(a, b, yy), g = lathe(profile, seg, null, 0, 0, 0), arr = g.attributes.position.array, o = [];
+    for (let i = 0; i < arr.length; i += 3) o.push(p[0] + arr[i] * sx, p[1] + arr[i + 1], p[2] + arr[i + 2] * sz);
+    bag.add(mat, fromTriangles(o));
+  };
   const flr = (a0, b0, a1, b1, yy) => col.floor(wr(a0, b0, a1, b1), yy);
   const quad4 = (mat, P, dir) => put(mat, facing([...P[0], ...P[1], ...P[2], ...P[0], ...P[2], ...P[3]], dir));
   /** A vertical film in the plane b, facing the street (−1) or the back. */
@@ -259,7 +266,7 @@ export function houseUp(el, { bag, col }) {
     quad4('timber', [W(r0, vbE, Y2 - 0.14), W(r1, vbE, Y2 - 0.14), W(r1, vb, Y2 - 0.14), W(r0, vb, Y2 - 0.14)], [0, -1, 0]); }
 
   // ── the rooms ──
-  const ctx = { B, blk, flr, put, lat, qF, W, wr, slab, quad4, rand, L, D, y0, Y1, Y2, lay, vb, ibB, ibU, S, bh0, use, el, wallMat, mir };
+  const ctx = { B, F: FP, latF, blk, flr, put, lat, qF, W, wr, slab, quad4, rand, L, D, y0, Y1, Y2, lay, vb, ibB, ibU, S, bh0, use, el, wallMat, mir };
   if (lay.pa !== null) {
     const pa = lay.pa, [d0b, d1b] = lay.door;
     for (const [b0, b1] of [[ibU, d0b], [d1b, ibB]]) { B(pa - 0.06, b0, pa + 0.06, b1, Y1, Y2, 'timber'); blk(pa - 0.06, b0, pa + 0.06, b1, Y1, Y2); }

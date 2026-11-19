@@ -155,9 +155,11 @@ export function backDoor(L, D) {
   const bc = L - 1.0, vb = D - 0.15;
   return { a0: bc - 0.6, a1: bc + 0.6, bc, vb, deck: [bc - 0.75, bc + 0.75, 1.3], n: 6, run: 0.26, slab: 0.8, aS: bc - 0.75, land: -0.61 };
 }
+/** In the wide waterside houses the way to the back door runs through the doorway in the partition (or past the hall's last table) and along this b (rooms3.js keeps it clear). */
+const LANE = { lodging: 6.0, scholar: 6.0, teahouse: 5.6 };
 function backWay(F, lay, u) {
-  void lay; void u;
-  const bd = backDoor(F.L, F.D), ib = bd.vb - 0.25, pts = [[1.5, 1.4], [1.5, 1.9], [1.9, 1.9], [1.9, STAIR.b1 + 0.6], [bd.bc, ib - 1.2], [bd.bc, bd.vb - 0.12], [bd.bc, bd.vb + 0.5], [bd.bc, bd.vb + 0.85]];
+  void lay;
+  const bd = backDoor(F.L, F.D), ib = bd.vb - 0.25, pts = [[1.5, 1.4], [1.5, 1.9], [1.9, 1.9], [1.9, STAIR.b1 + 0.6], ...(LANE[u.use] && F.L >= 5.5 ? [[2.05, LANE[u.use] - 0.6], [2.05, LANE[u.use]], [bd.bc, LANE[u.use]]] : []), [bd.bc, ib - 1.2], [bd.bc, bd.vb - 0.12], [bd.bc, bd.vb + 0.5], [bd.bc, bd.vb + 0.85]];
   for (let k = 0; k < bd.n; k++) pts.push([bd.aS - (k + 0.5) * bd.run, bd.vb + 0.85]);
   pts.push([bd.aS - bd.n * bd.run - bd.slab / 2, bd.vb + 0.85]);
   return pts;
