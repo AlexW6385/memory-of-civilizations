@@ -200,6 +200,16 @@ Open houses (about 120 now, within 330 m of the terrace, shops by preference) ta
 
 **Not built.** The attics under the hips (too low to stand in), a han with its courtyard gallery (the lots are 10 m deep; the inn is a lodging house of cells off a hall instead), and the upper floors of the other open houses (about 130) and of the 3-storey shops of the farther rows.
 
+## 18. Bringing the settlement to the reference (Suzhou): the visitor's walk (`walk.js`, `kulliye.js`, `court-life.js`)
+
+**The walk.** The arrival stands inside the outer court's north gate (0, −91). The visitor's way: south along the marble way through the court to the mosque and the courtyard's portal (the central route of `plan.js`); out by the north gate and round the court's wall into the two avenues (x about ±83, between the wall and the shops), where the vaulted shops (arasta) of §4.9 front the medreses; and north through the 12 m gate in the terrace's retaining wall to the lanes of the timber quarter, whose nearest shops and houses are already open and furnished (§13–§17) [inferred: the order of the walk, from the plan and the arrival].
+
+**What was missing.** The 40 vaulted shops of the two avenues were drawn open (arch, shutters, goods) but could not be entered: the raised floor stood 0.6 m above the avenue, higher than a walker's step (0.5 m), and the let-down shutter ran the whole width of each arch.
+
+**Built.** Each of the 40 shops can now be entered to its back wall: two steps of stone (0.3 m each) in the middle of the front, a gap 1.7 m wide in the let-down shutter (its two halves stay as the counter, on their brackets), the plank floor a real floor, the aisle clear; the goods stand along the two side walls (copper: pots in rows; cloth: bolts on the floor and on the back shelf) and the basin of the coppersmith's shop stands by a pier, never in the way in; the shopkeeper sits cross-legged on the plank at the back on his side (`keepers()`, a figure of the street life; the cloth merchant in sash and robe, the coppersmith in an apron), the side chosen by the hash of the shop's place; the goods, benches and baskets that the avenues' street life had set before the shops are moved to the piers (`offLane`). The variation of goods is by the hash of each shop's own position, not by a counter. [inferred: the steps, the gap, the keeper's seat and the goods' places; stated for the type: §4.9, the raised floor on which the shopkeeper sits, shutter leaves as awning and counter]
+
+**Not done.** The shops of the market lanes (§11: 2.4 m wide stalls, too narrow for a door of 1.5 m) stay counters with goods; the medreses' cells and the hamam are not opened beyond what §4 built.
+
 ## Sources
 
 - [Strolling through Istanbul — Freely and Sumner-Boyd, the Süleymaniye](https://erenow.org/common/strolling-through-istanbul-classic-guide-to-the-city/11.php) (the interior's piers, arcades, mihrab, minbar, glass, tiles)

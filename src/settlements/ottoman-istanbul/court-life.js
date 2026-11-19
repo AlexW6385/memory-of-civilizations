@@ -5,6 +5,7 @@
 
 import { PRECINCT, ARASTA, TOP, MEDRESES, CARSI, TERRACE, RADIUS, lanes, height } from './layout.js';
 import { subtractRects } from '../../core/build.js';
+import { offLane } from './walk.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const [p0, q0, p1, q1] = PRECINCT;
@@ -73,11 +74,11 @@ export function courtLife() {
     for (let z = ARASTA.z0 + 2.1; z < ARASTA.z1 - 1; z += 4.2, n++) {
       if (gates.some(([a, b]) => z > a - 0.5 && z < b + 0.5) || (z > -10.5 && z < -6)) continue;
       const x = f + out * 0.75, r = n % 5;
-      if (r === 0) L.push({ t: 'basket', n: 3, at: [x, z + 1.2], y: TOP, seed: n * 3 + 1 });
-      else if (r === 1) L.push({ t: 'pot', kind: pick(['blue_jar', 'glazed_jar', 'water_pot']), n: 3, at: [x, z + 1.0], y: TOP, seed: n * 3 + 2 });
-      else if (r === 2) L.push({ t: 'goods_mat', at: [x - out * 0.1, z], y: TOP, rot, goods: 'cloth', seed: n * 3 + 3 });
-      else if (r === 3) L.push({ t: 'crates', n: 2, at: [x, z - 1.1], y: TOP, seed: n * 3 + 4 });
-      else { L.push({ t: 'bench', at: [x - out * 0.1, z], y: TOP, rot, len: 1.6, seed: n }); man(x - out * 0.1, z, rot + S, { pose: 'sit', y: TOP + 0.5 }); }
+      if (r === 0) L.push({ t: 'basket', n: 3, at: [x, offLane(-sg, z + 1.2, 0.5)], y: TOP, seed: n * 3 + 1 });
+      else if (r === 1) L.push({ t: 'pot', kind: pick(['blue_jar', 'glazed_jar', 'water_pot']), n: 3, at: [x, offLane(-sg, z + 1.0, 0.5)], y: TOP, seed: n * 3 + 2 });
+      else if (r === 2) L.push({ t: 'goods_mat', at: [x - out * 0.1, offLane(-sg, z, 0.7)], y: TOP, rot, goods: 'cloth', seed: n * 3 + 3 });
+      else if (r === 3) L.push({ t: 'crates', n: 2, at: [x, offLane(-sg, z - 1.1, 0.5)], y: TOP, seed: n * 3 + 4 });
+      else { L.push({ t: 'bench', at: [x - out * 0.1, offLane(-sg, z, 0.8)], y: TOP, rot, len: 1.6, seed: n }); man(x - out * 0.1, offLane(-sg, z, 0.8), rot + S, { pose: 'sit', y: TOP + 0.5 }); }
       if (rand() < 0.45) man(f + out * (1.6 + rand() * 1.4), z + (rand() - 0.5) * 2, rot + S + (rand() - 0.5), { pose: rand() < 0.4 ? 'talk' : 'stand' });
     }
     // a donkey with its panniers and a porter in the avenue

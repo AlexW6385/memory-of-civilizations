@@ -8,6 +8,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, disc, place } from '../../core/geom.js';
 import '../qing/index.js';
 import { KULLIYE } from './kulliye.js';
+export { arastaShops } from './kulliye.js';
 import { prayerHall } from './prayerhall.js';
 import { kahvehane } from './kahve.js';
 import { carsi } from './bazaar.js';
