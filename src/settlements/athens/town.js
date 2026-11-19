@@ -9,6 +9,7 @@ import { summitLife } from './summit.js';
 import { acropolisWorks, acropolisLife } from './works.js';
 import { fronts, crossings, openLife } from './fronts.js';
 import { stallSites, steleSites } from './wayside.js';
+import { walkDist } from './walk.js';
 import { cfg } from './houses.js';
 import { frame } from '../../styles/greek/agora.js';
 import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
@@ -55,11 +56,11 @@ export async function town() {
   ), rooms: [{ id: 'palaestra', rect: PALAESTRA, y: 0, kind: 'open' }] });
   // the street: what stands before the fronts, the herms at the lane crossings, the wells, the people of the fronts and of the walk-in houses
   { const { herms, wells } = crossings();
-    plans.push(base('athens-herms', herms.map((h) => ({ t: 'herm', ...h }))));
+    // the herms' plan also carries the visitor's walk (§18): the roadside stalls with their keepers, the stelae of decrees, the conical pillar of Apollo Agyieus before each walk-in house's door (one plan: fewer draws)
+    plans.push(base('athens-herms', [...herms.map((h) => ({ t: 'herm', ...h })), ...stallSites().map((s) => ({ t: 'athens_stall', ...s })), ...steleSites().map((s) => ({ t: 'athens_stele', ...s })),
+      ...opened.filter((l) => l.kind).sort((a, b) => walkDist(a.rect[0], a.rect[1]) - walkDist(b.rect[0], b.rect[1])).slice(0, 10).map((l) => { const F = frame(l.rect, l.front), pc = cfg(l.kind, F.L, l.seed).front.find((c) => c.k === 'passage'), [x, z] = F.P((pc.u0 + pc.u1) / 2 - 1.35, -0.7); return { t: 'athens_agyieus', at: [x, z], y: l.y }; })]));
     plans.push({ ...lifePlan(), id: 'athens-fronts', elements: [...fronts(), ...wells, ...openLife()] }); }
   // the visitor's walk (§18): the roadside stalls with their keepers, the stelae of decrees, the conical pillar of Apollo Agyieus before each walk-in house's door
-  plans.push(base('athens-walk', [...stallSites().map((s) => ({ t: 'athens_stall', ...s })), ...steleSites().map((s) => ({ t: 'athens_stele', ...s })),
-    ...opened.filter((l) => l.kind).map((l) => { const F = frame(l.rect, l.front), pc = cfg(l.kind, F.L, l.seed).front.find((c) => c.k === 'passage'), [x, z] = F.P((pc.u0 + pc.u1) / 2 - 1.35, -0.7); return { t: 'athens_agyieus', at: [x, z], y: l.y }; })]));
   plans.push({ ...lifePlan(), id: 'athens-summit-life', elements: [...summitLife(), ...acropolisLife()] });
   plans.push(...acropolisWorks());
   plans.push(lifePlan());

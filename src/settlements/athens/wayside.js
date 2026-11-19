@@ -170,10 +170,11 @@ function stele(el, { bag, col }) {
 // ── Apollo Agyieus ──────────────────────────────────────────────────────────────
 /** athens_agyieus: { at, y } — the conical pillar of Apollo Agyieus before a door: a tapering stone on a small base, a fillet of wool tied round it. */
 function agyieus(el, { bag, col }) {
-  const [x, z] = el.at, y = el.y ?? 0, h = 1.15 + 0.12 * hashAt(x, z, 3);
-  bag.add('limestone', lathe([[0.001, 0], [0.26, 0], [0.26, 0.08], [0.22, 0.08], [0.2, 0.1], [0.001, 0.1]], 10, null, x, y, z));
-  bag.add('marble', lathe([[0.001, 0.1], [0.17, 0.1], [0.12, h * 0.6], [0.06, h * 0.92], [0.001, h]], 10, null, x, y, z));
-  bag.add('cloth_red', lathe([[0.15, 0.55], [0.155, 0.6], [0.145, 0.62], [0.14, 0.58]], 10, null, x, y, z));
+  // six shapes by the place's hash (height, belly, segments), so that none repeats twelve times and nothing is made as a copy
+  const [x, z] = el.at, y = el.y ?? 0, k = Math.floor(hashAt(x, z, 3) * 6), h = 1.05 + 0.05 * k, w = 0.15 + 0.008 * (k % 3), seg = 8 + (k % 3);
+  bag.add('limestone', lathe([[0.001, 0], [0.26, 0], [0.26, 0.08], [0.22, 0.08], [0.2, 0.1], [0.001, 0.1]], seg, null, x, y, z));
+  bag.add('marble', lathe([[0.001, 0.1], [w + 0.02, 0.1], [w - 0.03, h * 0.6], [0.06, h * 0.92], [0.001, h]], seg, null, x, y, z));
+  bag.add('cloth_red', lathe([[w, 0.55], [w + 0.005, 0.6], [w - 0.005, 0.62], [w - 0.01, 0.58]], seg, null, x, y, z));
   col.circle(x, z, 0.24, y, y + h);
 }
 
