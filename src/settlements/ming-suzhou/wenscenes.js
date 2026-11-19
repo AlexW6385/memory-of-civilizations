@@ -1,5 +1,5 @@
 // Ming Suzhou — the scenes of Wen Zhengming's record and album that the garden did not yet hold
-// (docs/settlements/ming-suzhou.md §22): the flower bank before the hall, the stone seat and the
+// (docs/settlements/ming-suzhou.md §25): the flower bank before the hall, the stone seat and the
 // fishing rock, the terrace, the plain thatched and tiled pavilions, the rose path and the rose
 // hedge, the locust pavilion with its banana rail, the bamboo brook, the jade plot, the spring.
 // Small and plain, as the Ming garden was; every piece is built in the garden's own coordinates and
