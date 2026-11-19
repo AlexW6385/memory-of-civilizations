@@ -37,6 +37,7 @@ import {
 } from 'three/tsl';
 import { ENV } from './env.js';
 import { registerSystem } from './systems.js';
+import { buildCritters } from './fauna-critters.js';
 
 const TAU = Math.PI * 2;
 const FISH_REACH = 58, BIRD_REACH = 150, CROW_REACH = 230;
@@ -569,6 +570,8 @@ async function attach(site, world) {
   S.birdsSmall = small; S.birdsBig = big;
   for (const P of B.perchRecs) { const list = P.big ? B.big : B.small; P.idx = list.indexOf(P.rec); P.mesh = P.big ? big : small; S.perch.push(P); }
   if (small) S.meshes.push(small); if (big) S.meshes.push(big);
+  // the garden-and-street animals (ducks, crane, cat …: fauna-critters.js), one more mesh, only for a settlement that lists them
+  if (data.critters?.length) { S.critters = buildCritters(data.critters, site); if (S.critters) S.meshes.push(S.critters.mesh); }
   S.rand = rng(77 + site.id.length);
   S.radius = (site.S?.radius ?? 250) + 320;
   // the herons come "now and then": some are away at first
@@ -609,6 +612,7 @@ function update(dt, camera, world) {
     U.cam.value.copy(_cam);
     // the hours: the sun's height; rain keeps the small birds in
     const sun = ENV.sunDir.value.y, rain = ENV.rain.value;
+    if (S.critters) S.critters.update(T, _cam, sun, ENV.seasonWinter.value);
     const target0 = sm(0.02, 0.14, sun), tw = sm(0.22, 0.1, sun) * sm(-0.16, -0.05, sun);
     const a = S.act, k = Math.min(1, dt / 2.5), act = U.act.value;
     const k2 = S.first ? 1 : k;
