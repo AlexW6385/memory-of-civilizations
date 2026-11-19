@@ -63,6 +63,17 @@ for (const l of lots()) {
   r.y0 = 0;
   walks.push(r);
 }
+// the open houses of the walk without an upper room (the gate-town's and the keepers'): from the street along the earth passage and up onto the
+// shop's mats, to the counter (docs §12: the visitor may enter every shop he passes)
+for (const l of lots()) {
+  if (l.open !== true || l.up) continue;
+  const th = TH[l.facing], co = Math.round(Math.cos(th)), si = Math.round(Math.sin(th)), mir = ((l.seed >>> 4) & 1) === 1;
+  const P = ([x, z]) => { if (mir) x = -x; return [l.at[0] + x * co + z * si, l.at[1] - x * si + z * co]; };
+  const hw = l.w / 2, xl = hw - 1.6 - 0.7;
+  const r = [[hw - 1.25, 3.5], [hw - 1.25, -1.0], [hw - 1.25, -3.0], [xl, -3.0], [xl - 1.0, -2.2]].map(P);
+  r.y0 = 0;
+  walks.push(r);
+}
 
 E.push(...stoneHalos(E));                                    // the stone lanterns lit at night (nightlight.js)
 export const ginkaku = {
