@@ -69,6 +69,8 @@
 //   Constantinople in the 9th century) [inferred; the semantron is in the dossier's music].
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
+import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
+
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
  * water), animals (voices and weights), roof (what rain falls on), bells (the schedule's kind),
@@ -168,7 +170,7 @@ export const PROFILES = {
   maori: T({ warbler: 1, tropic: 0.5 }, { cicadas: 0.6, animals: { dog: 0.3 }, roof: 'thatch' }),
   'ming-suzhou': T(EAS, {
     cicadas: 0.7, frogs: 0.8, roof: 'xiaoqing', bells: 'suzhou',
-    animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1 }),
+    animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: SUZHOU }),
   }),
   'mughal-agra': T(IND, { cicadas: 0.5, animals: { cattle: 0.4, horse: 0.3, rooster: 0.3, dog: 0.3 }, roof: 'flat', adhan: 2 }),
   muscovy: T({ crow: 1, sparrow: 0.8, warbler: 0.4 }, { animals: { horse: 0.7, dog: 0.4, rooster: 0.4, cattle: 0.2 }, roof: 'shingle', bells: 'zvon' }),

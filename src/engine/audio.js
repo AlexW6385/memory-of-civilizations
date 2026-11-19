@@ -5,6 +5,7 @@
 import { impulseResponse } from './acoustics.js';
 import { LIFE } from './soundscape.js';
 import { THUNDER } from './env.js';
+import { installVoices } from './voices.js';
 
 const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 // the first three formants (Hz) of the vowels a male voice sings, for the street calls and chants
@@ -114,7 +115,8 @@ export class Music {
     while (THUNDER.length) { const th = THUNDER.shift(); this.thunder(t + th.delay, th.dist, th.pan); }
     a.rainG.gain.setTargetAtTime(rain * 0.09, t, 1.5);
     a.windG.gain.setTargetAtTime(0.004 + wind * 0.05, t, 2.5);
-    a.muffle.frequency.setTargetAtTime(indoors ? 900 : 18000, t, 0.8);
+    this.wind = wind;
+    a.muffle.frequency.setTargetAtTime(indoors ? (this.roomCut || 900) : 18000, t, 0.8);   // (roomCut: a place's own rooms' colour, voices.js)
   }
 
   /**
@@ -152,7 +154,7 @@ export class Music {
    * knock, a cart, hooves) or, in a modern city, the hum of traffic, and rain on the roofs. Levels
    * 0…1; indoors muffles them with the weather. voices, animals: { name: weight }.
    */
-  place({ water = 0, birds = 0, crickets = 0, town = 0, traffic = 0, voices = null, cicadas = 0, frogs = 0, animals = null, dawn = 0, roof = 'tile', rain = 0, indoors = false } = {}) {
+  place({ water = 0, birds = 0, crickets = 0, town = 0, traffic = 0, voices = null, cicadas = 0, frogs = 0, animals = null, dawn = 0, roof = 'tile', rain = 0, indoors = false, at = null } = {}) {
     const ctx = this.ctx;
     if (!ctx || !this.amb) return;
     if (!this.plc) {
@@ -209,7 +211,9 @@ export class Music {
     }
     // under a roof one hears the rain on it above all; outside, on the roofs and the paving round
     P.patG.gain.setTargetAtTime(rain * (indoors ? 0.16 : 0.07), t, 1.5);
-    Object.assign(P, { birds, crickets, town, traffic, voices, animals, frogs, dawn, water, rain, life: animals?.[LIFE] || null });
+    Object.assign(P, { birds, crickets, town, traffic, voices, animals, frogs, dawn, water, rain, indoors, at, life: animals?.[LIFE] || null });
+    // the room one is in (a place's own map says which kind), for what is heard inside
+    P.room = indoors && at && P.life?.map ? P.life.map.roomAt(at.x, at.z, at.y) : null;
     this.lifeLayers(P.life, t);
   }
 
@@ -219,6 +223,7 @@ export class Music {
    */
   lifeLayers(L, t) {
     const ctx = this.ctx, P = this.plc;
+    if (L?.map) this.placedLayers(L, t);
     const day = Math.max(0, Math.min(1, (P.town - 0.4) / 0.5)), hubWant = L?.market ? L.market * day : 0;
     if (hubWant > 0.01 && !P.hub) {
       // three bands of noise, each swelling at a syllable's rate (3–6 Hz) out of step with the rest:
@@ -441,7 +446,7 @@ export class Music {
       this.bird(P.voices ? Music.pick(P.voices) : 'warbler', t + 0.05, P.birds);
       P.nextBird = t + (1.5 + Math.random() * 6) / (0.3 + P.birds);
     }
-    if (P.crickets > 0.02 && t > P.nextCricket) {
+    if (P.crickets > 0.02 && t > P.nextCricket && !P.life?.map) {
       const f = 4200 + Math.random() * 600;
       for (let k = 0; k < 3; k++) {
         const o = ctx.createOscillator(), g = ctx.createGain(), w = t + k * 0.06;
@@ -450,7 +455,7 @@ export class Music {
       }
       P.nextCricket = t + 0.35 + Math.random() * 0.9;
     }
-    if (P.frogs > 0.02 && t > P.nextFrog) {
+    if (P.frogs > 0.02 && t > P.nextFrog && !P.life?.map) {
       // a frog's croak: a quick train of pulses round a few hundred hertz
       const f = 220 + Math.random() * 380, n = 2 + Math.floor(Math.random() * 5);
       for (let k = 0; k < n; k++) this.tone(t + k * 0.11, [[0, f], [0.06, f * 0.85]], 0.07, 0.012 * P.frogs, P.out, 'sawtooth', ['bandpass', f * 2.5, 4]);
@@ -470,6 +475,7 @@ export class Music {
       P.nextHooves = t + 15 + Math.random() * 40;
     }
     this.drainCues(t);
+    this.aimAll(t);
     if (P.life) this.lifeEvents(P.life, t);
     if (P.town > 0.05 && t > P.nextKnock) {
       // a knock: a hammer, a door, a pot set down — a short filtered click
@@ -506,6 +512,7 @@ export class Music {
 
   /** The events of a place's life, by what is near and the hour (day: the town's din is up). */
   lifeEvents(L, t) {
+    if (L.map) { this.placed(L, t); return; }       // a place with a map has its sounds placed in it (voices.js)
     const P = this.plc, r = Math.random;
     const day = P.town > 0.5, night = P.crickets > 0.02 && P.town > 0.05, wet = P.water, calm = P.rain < 0.6;
     const due = (k, gap) => { if (!P[k]) P[k] = t + gap * (0.2 + 0.8 * r()); return t > P[k]; };   // the first falls soon
@@ -536,18 +543,18 @@ export class Music {
   }
 
   /** The water slapping a stone wall: a wet slap and, often, the hollow glug of the wall's hollow. */
-  lap(t, w) {
-    const out = this.plc.out, r = Math.random;
+  lap(t, w, dest = this.plc.out) {
+    const out = dest, r = Math.random;
     this.burst(t, 0.16 + r() * 0.12, 500 + r() * 700, 1.3, 0.05 * w * (0.5 + r() * 0.5), out);
     if (r() < 0.6) this.tone(t + 0.03, [[0, 240 + r() * 120], [0.07, 520 + r() * 200]], 0.12, 0.01 * w, out);
   }
 
   /** A drip from the eaves into a stone gutter or the canal: a small bright plink, or a bubble. */
-  drip(t, lv) {
+  drip(t, lv, dest = this.plc.out) {
     const ctx = this.ctx, r = Math.random, f = 1200 + r() * 1400, o = ctx.createOscillator(), g = ctx.createGain();
     o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(r() < 0.35 ? f * 1.8 : f * 0.7, t + 0.05);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.011 * lv, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
-    o.connect(g); g.connect(this.plc.out); o.start(t); o.stop(t + 0.1);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.1);
   }
 
   /** A hollow wooden knock (a clapper, a wooden fish): the board's note, falling, and a click. */
@@ -1068,6 +1075,7 @@ export class Music {
    */
   surround(dists) {
     if (!this.ctx) return;
+    this.walls = dists;
     const t = this.ctx.currentTime;
     dists.forEach((d, i) => {
       const tap = this.taps[i];
@@ -1406,3 +1414,5 @@ export class Music {
     }
   }
 }
+
+installVoices(Music);
