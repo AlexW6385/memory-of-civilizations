@@ -261,6 +261,10 @@ Open houses (about 120 now, within 330 m of the terrace, shops by preference) ta
 
 **Writing: not made.** The only writing this place would carry is Arabic script (the hall's inscription bands, the great door's panel, the fountains' kitabe, the tombs' stones). This repository has no verified Arabic-script glyph set (Suzhou's characters were each drawn and checked stroke by stroke with `tools/script-sheet.mjs`; nothing like that exists for naskh or thuluth), and an invented band of letter-like shapes would be read as text by someone who can read it. So the inscription panels (§4, §15) stay plain marble fields, as drawn. To do: a stroke-built thuluth for the Kalima and the Süleymaniye's inscribed verses, checked by a reader of the script, after which the panels and the çeşme's kitabe can carry them.
 
+## 23. The remaining gaps of the külliye (looked at again, not built)
+
+**[stated]** (Rabi, *Süleymaniye Complex*, TÜBA, https://www.tuba.gov.tr/files/KurumsalDosyalar/rabiEng.pdf): the medical medrese (Tıp medresesi) lies between the dar'ül-hadis and the Salis medrese, was added in 1552 and sits on top of shops; "not enough information about its original condition", only one row of cells along the Tiryaki bazaar survives. The same page lists the sıbyan mektebi (primary school) without place, dimensions, plan or roof. **Decision:** neither is built, since a plan drawn from nothing would be an invention; both stay recorded for later (status line above), as does the tabhane and caravanserai. Süleyman's own tomb (1566) is after the moment shown. The Golden Horn and the Grand Bazaar lie beyond the class radius (§10–§11).
+
 ## Sources
 
 - [Strolling through Istanbul — Freely and Sumner-Boyd, the Süleymaniye](https://erenow.org/common/strolling-through-istanbul-classic-guide-to-the-city/11.php) (the interior's piers, arcades, mihrab, minbar, glass, tiles)
