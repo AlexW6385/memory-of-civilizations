@@ -30,7 +30,7 @@ export function rectWalkDist(r) {
   return best;
 }
 /** How far from the walk the houses keep their full near form (m): beyond it they are drawn in the far-lite form (house.js, `lite: 2`). */
-export const FULL_WITHIN = 50;
+export const FULL_WITHIN = 42;
 export const onWalk = (l) => rectWalkDist(l.rect) <= FULL_WITHIN;
 /** The lots along the walk, nearest the arrival first. */
 export function walkLots(d = 30) { return lots().filter((l) => rectWalkDist(l.rect) <= d); }

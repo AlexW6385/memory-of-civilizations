@@ -2,7 +2,7 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 // The houses and palaces of the streets (docs/settlements/florence.md §5).
 import { RADIUS, MERCATO, lots } from './layout.js';
 import { insidePlans } from './inside.js';
-import { onWalk } from './walk.js';
+import { onWalk, rectWalkDist } from './walk.js';
 import './house.js';
 
 // The houses in two levels of detail as src/settlements/lod.js makes them, but in tiles of TILE m
@@ -34,6 +34,8 @@ function tiles(id, style, elements) {
  * by the Mercato Vecchio and on the Via Calzaiuoli and the Via Larga: one of each trade where the lots allow.
  * Returns a map from lot to its use ('inn', 'home' or the trade).
  */
+/** How far from the walk (m) the shop-houses are all open. */
+export const OPEN_ALONG = 24;
 export function enterable(all) {
   const ok = all.filter((l) => l.kind !== 'torre' && l.kind !== 'palazzo' && (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] >= 5.2 && l.rect[3] - l.rect[1] >= 8 : l.rect[3] - l.rect[1] >= 5.2 && l.rect[2] - l.rect[0] >= 8) && l.storeys >= 2);
   const out = new Map(), A = ARRIVALS['florence'];
@@ -49,6 +51,9 @@ export function enterable(all) {
   seen.clear();
   for (const l of [...botteghe].sort((a, b) => Math.min(dist(a, mc[0], mc[1]), dist(a, A[0], A[2]) + 40) - Math.min(dist(b, mc[0], mc[1]), dist(b, A[0], A[2]) + 40))) { if (out.has(l) || seen.has(l.trade) || out.size >= 18) continue; seen.add(l.trade); out.set(l, l.trade); }
   take([...ok].filter((l) => l.kind === 'casa').sort((a, b) => dist(a, mc[0], mc[1]) - dist(b, mc[0], mc[1])), 2, 'home');
+  // the streets the visitor walks (walk.js, docs/settlements/florence.md §16): every shop-house within OPEN_ALONG m of the walk is open, with its goods at the door and
+  // its keeper at the bench, and one house in three of the casas beside them is lived in (the door ajar on the hearth room, the table, the cupboard)
+  { let k = 0; for (const l of [...ok].sort(byArrival)) { if (out.has(l) || rectWalkDist(l.rect) > OPEN_ALONG) continue; if (l.kind === 'bottega') out.set(l, l.trade); else if (l.kind === 'casa' && k++ % 3 === 0) out.set(l, l.seed % 2 ? 'kitchen' : 'home'); } }
   // beyond the first 120 m: a house or workshop in about every 40 m cell of the town, so that the streets away from the arrival
   // are lived in too (homes with a hearth room or a kitchen; the spice shops as apothecaries or spice sellers, the cloth shops as weavers' or drapers'; the other trades as they are)
   const cells = new Map(), far = [...ok].filter((l) => !out.has(l) && dist(l, A[0], A[2]) >= 120 && dist(l, A[0], A[2]) < 340 && Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) < 330);
