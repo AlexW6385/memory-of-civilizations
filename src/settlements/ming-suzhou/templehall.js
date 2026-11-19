@@ -62,7 +62,7 @@ function cushion(P, r, seed) {
 
 // ── the hall's large things ──────────────────────────────────────────────────
 /** A drum on its stand (gu): a barrel of hide on lacquered staves, studded, between two posts on a base with a crossbar; 1.9 m high, facing +z. */
-function drum(P) {
+export function drum(P) {
   P.add('lacquer_chestnut', box(-0.75, 0, -0.45, 0.75, 0.1, 0.45));
   for (const s of [-1, 1]) { P.add('lacquer_red', box(s * 0.62 - 0.07, 0.1, -0.07, s * 0.62 + 0.07, 1.78, 0.07)); P.add('gilt_bronze', T(ball(0.1, 0.07, 0.1, 8, 5), s * 0.62, 1.82, 0)); P.add('lacquer_red', box(s * 0.62 - 0.1, 0.1, -0.35, s * 0.62 + 0.1, 0.18, 0.35)); }
   P.add('lacquer_red', box(-0.62, 0.38, -0.05, 0.62, 0.46, 0.05));
@@ -72,7 +72,7 @@ function drum(P) {
   P.add('iron', limb([0.5, 0.52, 0.3], [0.52, 0.52, 0.5], 0.01, 0.01, 4));      // a stick
 }
 /** A bronze bell hung in its frame (zhong): two posts and a beam, the bell with its dragon loop, bands and bosses, a striking log on chains; 2.1 m, facing +z. */
-function bell(P) {
+export function bell(P) {
   for (const s of [-1, 1]) { P.add('lacquer_red', box(s * 0.7 - 0.08, 0, -0.08, s * 0.7 + 0.08, 2.1, 0.08)); P.add('lacquer_red', box(s * 0.7 - 0.12, 0, -0.4, s * 0.7 + 0.12, 0.12, 0.4)); P.add('lacquer_red', limb([s * 0.7, 0.4, 0.3], [s * 0.7, 1.4, 0.05], 0.045, 0.04, 5)); }
   P.add('lacquer_red', box(-0.82, 1.98, -0.1, 0.82, 2.1, 0.1));
   P.add('iron', limb([0, 1.98, 0], [0, 1.75, 0], 0.02, 0.02, 5));

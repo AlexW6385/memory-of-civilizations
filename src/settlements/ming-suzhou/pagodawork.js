@@ -3,8 +3,8 @@
 // landings. The shaft's geometry is the song style's (src/styles/song/index.js `shaft`, interiorStorey), reproduced here
 // from its formulas so that the route and the wear follow it.
 
-import { Acc } from './townwork.js';
-import { hash } from './townwork.js';
+import { Acc, hash } from './townwork.js';
+import { lathe, limb, ball } from './props.js';
 
 const C8 = Math.cos(Math.PI / 8), T8 = Math.tan(Math.PI / 8);
 /** The shaft of the song style's inside from the tiers: { aw (the corridor's outer apothem), ac, ai (the chamber's), sw (half the side) }. */
@@ -65,4 +65,20 @@ export function pagodaWear(el, { bag }) {
     }
   });
   acc.flush(bag);
+}
+
+/**
+ * pagoda_finial { c, y }: the crown on the song style's spire: a lotus bowl (fuyue) on the spire's top, seven rings (xianglun) of gilt bronze tapering,
+ * the water-flame (shuiyan) and the pearl (baozhu) at the point, and eight iron chains from the crown to the corners of the roof under it.
+ * It is seen from far: one geometry, a few hundred triangles.
+ */
+export function pagodaFinial(el, { bag }) {
+  const [cx, cz] = el.c, y = el.y, G = 'gilt_bronze';
+  bag.add(G, lathe([[0.001, 0], [0.16, 0], [0.34, 0.12], [0.3, 0.3], [0.2, 0.36], [0.001, 0.36]], 12, null, cx, y, cz));
+  for (let k = 0; k < 7; k++) { const r = 0.4 - k * 0.035, yy = y + 0.36 + k * 0.2; bag.add(G, lathe([[0.001, 0], [r, 0], [r * 1.02, 0.03], [r * 0.5, 0.06], [0.001, 0.07]], 12, null, cx, yy, cz)); bag.add(G, lathe([[0.04, 0.07], [0.04, 0.2]], 5, null, cx, yy, cz)); }
+  const yf = y + 0.36 + 7 * 0.2;
+  bag.add(G, lathe([[0.001, 0], [0.2, 0], [0.24, 0.1], [0.2, 0.3], [0.1, 0.6], [0.001, 0.8]], 10, null, cx, yf, cz));
+  bag.add(G, ball(0.12, 0.12, 0.12, 8, 5).translate(cx, yf + 0.9, cz));
+  const R = el.r, yr = el.yr;
+  for (let k = 0; k < 8; k++) { const a = (k + 0.5) * Math.PI / 4, ex = cx + Math.cos(a) * R, ez = cz + Math.sin(a) * R; bag.add('iron', limb([cx, yf - 0.1, cz], [ex, yr, ez], 0.014, 0.014, 4)); }
 }
