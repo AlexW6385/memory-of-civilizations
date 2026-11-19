@@ -232,3 +232,17 @@ export async function houses() {
   const sq = square();
   return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life'), base('london-river-folk', riverFolk(), 'life')];
 }
+
+/** For the night (nightlight.js): the places of the gas lamps and of the costers' stalls, as the plans above put them; [x, z, y]. */
+export function nightSites() {
+  const lamps = [], stalls = [];
+  for (const p of [...traffic(), ...furniture(), base('london-square', square()), base('london-street-folk', streetFolk(), 'life')]) {
+    for (const e of p.elements) {
+      if (e.t === 'gas_lamp') lamps.push([e.at[0], e.at[1], e.y ?? GROUND]);
+      else if (e.t === 'trestle_stall' || e.t === 'handcart') stalls.push([e.at[0], e.at[1], e.y ?? GROUND]);
+    }
+  }
+  return { lamps, stalls };
+}
+/** The lots with the doors' sides set, which are open and which have their upper floors open (as houses() builds them). */
+export function nightLots() { const all = lots(); mirrors(all); const open = openSet(all); return { all, open, ups: upSet(all, open) }; }

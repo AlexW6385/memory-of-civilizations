@@ -4,7 +4,8 @@ import '../../styles/ming/index.js';
 import { westminster, bridge } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';
+import { nightPlan } from './nightlight.js';
 export { music };
 export const landmarks = [{ plan: westminster, music }];
 // (the Thames is the planet's sea: ground.js, sea)
-export async function town() { return [bridge, ...(await houses())]; }
+export async function town() { return [bridge, nightPlan(), ...(await houses())]; }
