@@ -833,3 +833,4 @@ export function installVoices(Music) {
   for (const [k, v] of Object.entries(VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
   Music.prototype.seasonDoy = function seasonDoy() { return this.doyOverride ?? doyOf(ENV.seasonWinter.value, ENV.seasonAutumn.value); };
 }
+import { ATHENS_VOICES, ATHENS_GAIN } from './voices-athens.js'; Object.assign(VOICES, ATHENS_VOICES); Object.assign(GAIN, ATHENS_GAIN);   // Athens' voices (docs/settlements/athens.md §20)

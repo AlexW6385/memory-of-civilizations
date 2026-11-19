@@ -70,6 +70,7 @@
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
+import * as ATHENS from '../settlements/athens/soundmap.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -101,7 +102,7 @@ const withLife = (animals, life) => ({ ...animals, [LIFE]: life });
 export const PROFILES = {
   amsterdam: T({ ...EU, gull: 0.8 }, { animals: { dog: 0.3, horse: 0.3 }, roof: 'tile', bells: 'carillon' }),
   angkor: T(TROP, { cicadas: 0.8, frogs: 0.9, animals: { rooster: 1, cattle: 0.5, dog: 0.4 }, roof: 'thatch' }),
-  athens: T(MED, { cicadas: 0.9, animals: { rooster: 0.6, donkey: 0.5, sheepbell: 0.4, dog: 0.3 } }),
+  athens: T(MED, { cicadas: 0.9, animals: withLife({ rooster: 0.6, donkey: 0.5, sheepbell: 0.4, dog: 0.3 }, { market: 0.8, map: ATHENS }) }),
   babylon: T({ ...NEAR, gull: 0 }, { frogs: 0.4, animals: { donkey: 0.7, dog: 0.4, rooster: 0.2 }, roof: 'flat' }),
   barcelona: T(MED, { cicadas: 0.3, animals: { dog: 0.3, horse: 0.4 }, bells: 'angelus' }),
   'baroque-rome': T(MED, { cicadas: 0.4, animals: { horse: 0.5, dog: 0.3, donkey: 0.2 }, bells: 'angelus' }),
