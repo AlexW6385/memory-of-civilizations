@@ -99,7 +99,7 @@ export function houseUp(el, { bag, col }) {
     B(0.25, vb - 0.25, L - 0.25, vb, Y1, Y2, wallMat); blk(0.25, vb - 0.25, L - 0.25, vb, Y1, Y2 + 0.2);
   } else { wall(0.25, vb - 0.25, L - 0.25, vb, y0, Y1); B(0.25, vb - 0.25, L - 0.25, vb, Y1, Y2, wallMat); blk(0.25, vb - 0.25, L - 0.25, vb, y - 0.4, Y2 + 0.2); }
   // a window high in the back wall, to the lane, downstairs and up (a waterside house: the door lights the ground floor)
-  for (const [yy0, yy1, a] of [[y0 + 1.5, y0 + 2.3, bk ? -9 : L * 0.55], [Y1 + 0.8, Y1 + 2.0, L * 0.5]]) { if (a < 0) continue; B(a - 0.5, vb, a + 0.5, vb + 0.05, yy0, yy1, 'lattice'); B(a - 0.58, vb, a + 0.58, vb + 0.08, yy0 - 0.08, yy0, 'granite_grey'); }
+  for (const [yy0, yy1, a] of [[y0 + 1.5, y0 + 2.3, bk ? -9 : L * 0.55], [Y1 + 0.8, Y1 + 2.0, L * 0.5]]) { if (a < 0) continue; B(a - 0.5, vb + 0.06, a + 0.5, vb + 0.11, yy0, yy1, 'lattice'); B(a - 0.58, vb, a + 0.58, vb + 0.12, yy0 - 0.08, yy0, 'granite_grey'); }
   if (bk) {
     // the doorway: jambs, lintel, a worn sill, the leaf folded back against the wall inside; outside, the deck over the canal wall and the water
     // on posts to the canal's bed, its rail, and the flight of granite steps laid along the wall down to the slab just above the water

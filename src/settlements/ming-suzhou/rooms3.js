@@ -194,7 +194,7 @@ export function groundHouse(c, k) {
     // the storyteller's table: no performer, no instrument (pingtan as a stage art is no earlier than the late Ming); a cloth, a fan, a block of wood, a cup, a stool, on a platform 15 cm high
     const sa = 2.7, sb = 7.0;
     B(sa - 1.1, sb - 0.5, sa + 1.1, sb + 1.2, y0, y0 + 0.15, 'timber'); c.flr(sa - 1.1, sb - 0.5, sa + 1.1, sb + 1.2, y0 + 0.15); blk(sa - 1.1, sb - 0.5, sa + 1.1, sb + 1.2, y0, y0 + 0.15);
-    k.table(sa - 0.5, sb - 0.1, sa + 0.5, sb + 0.4, y0 + 0.15, 0.82, 'lacquer_chestnut', false); B(sa - 0.48, sb - 0.08, sa + 0.48, sb + 0.38, y0 + 0.97, y0 + 0.98, 'cloth_red');
+    k.table(sa - 0.5, sb - 0.1, sa + 0.5, sb + 0.4, y0 + 0.15, 0.82, 'lacquer_chestnut', false); B(sa - 0.48, sb - 0.08, sa + 0.48, sb + 0.38, y0 + 0.96, y0 + 0.985, 'cloth_red');
     F(sa - 0.3, sb + 0.05, sa - 0.1, sb + 0.2, y0 + 0.98, y0 + 1.0, 'bamboo_culm'); F(sa + 0.05, sb + 0.1, sa + 0.2, sb + 0.2, y0 + 0.98, y0 + 1.06, 'timber'); t.cup(sa + 0.3, sb + 0.15, y0 + 0.98);
     k.stool(sa, sb + 0.8, y0 + 0.15, 0.46, 0.17, false);
     t.washstand(0.6, 7.6, y0);
