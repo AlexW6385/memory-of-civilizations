@@ -199,9 +199,9 @@ function agraCells(el, { bag, col }) {
     // beams under the ceiling, and from the middle one a brass lamp on a chain
     for (const v of [0.7, 1.85, 2.95]) ob(-hw, v - 0.07, hw, v + 0.07, y0 + H - PY - 0.3, y0 + H - PY - 0.12, 'wood_dark');
     { const [lx, lz] = at(0, 1.85); const top = y0 + H - PY - 0.3;
-      bag.add('wood_dark', rod([lx, top, lz], [lx, top - 0.55, lz], 0.006, 3));
-      bag.add('bronze', lathe([[0.001, 0], [0.07, 0], [0.11, 0.05], [0.12, 0.09], [0.09, 0.1], [0.001, 0.04]], 10, null, lx, top - 0.68, lz));
-      bag.add('flame', lathe([[0.001, 0], [0.012, 0.015], [0.001, 0.05]], 6, null, lx, top - 0.6, lz)); }
+      bag.add('wood_dark', rod([lx, top, lz], [lx, top - 1.72, lz], 0.006, 3));
+      bag.add('bronze', lathe([[0.001, 0], [0.07, 0], [0.11, 0.05], [0.12, 0.09], [0.09, 0.1], [0.001, 0.04]], 10, null, lx, top - 1.87, lz));
+      bag.add('lamp_white', lathe([[0.012, 0], [0.018, 0.025], [0.01, 0.07], [0.001, 0.09]], 6, null, lx, top - 1.8, lz)); }
   }
   // the keepers, built in (a life figure's reach is 170 m): after the cells, as each cell recorded its own
   if (STYLES.life?.elements?.figure) for (const k of keepers) STYLES.life.elements.figure({ ...k }, { bag, col });

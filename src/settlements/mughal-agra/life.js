@@ -8,6 +8,8 @@ import { frameOf, layoutOf } from '../../styles/mughal/townhouse.js';
 import { householdOf } from '../../styles/mughal/household.js';
 import { boatFloat } from '../../objects/index.js';
 import { rows as cellRows } from './cells.js';
+import { nightElements } from './nightlight.js';
+import './lamps.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const PIH = Math.PI / 2;
@@ -244,4 +246,4 @@ export function life() {
   };
   return L.map(aside);
 }
-export const lifePlan = () => ({ id: 'mughal-agra-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: life(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 245], facing: 'n' } });
+export const lifePlan = () => ({ id: 'mughal-agra-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [...life(), ...nightElements((p) => Math.hypot(p[0], p[1]) < RADIUS - 14)], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 245], facing: 'n' } });
