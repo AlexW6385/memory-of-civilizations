@@ -37,6 +37,7 @@ import {
 } from 'three/tsl';
 import { ENV } from './env.js';
 import { registerSystem } from './systems.js';
+import { buildCritters } from './fauna-critters.js';
 
 const TAU = Math.PI * 2;
 const FISH_REACH = 58, BIRD_REACH = 150, CROW_REACH = 230;
@@ -267,7 +268,7 @@ function ringMaterial() {
 //   id (y low, y rise, lane (−1: none), size)
 //   ie (flew off at, comes back at, away x, away z) — set by the CPU
 //   icol (back rgb, tail length), icol2 (belly rgb, stance: how far the feet are below the centre / size), ig (leg and beak rgb)
-const KIND = { swallow: 0, crow: 1, sparrow: 2, egret: 3, heron: 3, pigeon: 2, raven: 1, kite: 1, gull: 1, vulture: 1, stork: 3, ibis: 3 };
+const KIND = { swallow: 0, crow: 1, sparrow: 2, egret: 3, heron: 3, pigeon: 2, raven: 1, kite: 1, gull: 1, vulture: 1, stork: 3, ibis: 3, pica: 2 };
 // (the kinds the settlements name beyond these: drawn as the nearest look)
 const BIRD_ALIAS = { dove: 'pigeon', rock_dove: 'pigeon', jackdaw: 'crow', chough: 'crow', rook: 'crow', magpie: 'crow', myna: 'sparrow', finch: 'sparrow', martin: 'swallow', swift: 'swallow',
   hawk: 'kite', falcon: 'kite', eagle: 'kite', buzzard: 'kite', tern: 'gull', duck: 'egret', goose: 'egret', crane: 'heron', flamingo: 'heron', parrot: 'sparrow' };
@@ -490,6 +491,8 @@ const BIRD_LOOK = {
   gull: { back: [0.7, 0.73, 0.77], belly: [0.95, 0.95, 0.95], leg: [0.85, 0.6, 0.3], size: 0.44, span: 1.2, hz: [2.4, 3.2], tail: 1.0 },
   vulture: { back: [0.2, 0.16, 0.12], belly: [0.32, 0.26, 0.2], leg: [0.4, 0.38, 0.35], size: 0.75, span: 1.35, hz: [1.2, 1.6], tail: 1.0 },
   stork: { back: [0.93, 0.93, 0.92], belly: [0.95, 0.95, 0.94], leg: [0.8, 0.3, 0.2], size: 0.7, span: 0.95, hz: [1.6, 2.1], tail: 1.0 },
+  // the Eurasian magpie (a hopper of the sparrow's template, bigger, with the long tail): black-blue above, white below
+  pica: { back: [0.05, 0.07, 0.13], belly: [0.9, 0.9, 0.88], leg: [0.05, 0.05, 0.05], size: 0.3, span: 0.9, hz: [5, 6.5], tail: 2.3 },
   ibis: { back: [0.85, 0.85, 0.83], belly: [0.9, 0.9, 0.88], leg: [0.1, 0.1, 0.1], size: 0.5, span: 0.85, hz: [2.0, 2.6], tail: 1.0 },
 };
 
@@ -569,6 +572,8 @@ async function attach(site, world) {
   S.birdsSmall = small; S.birdsBig = big;
   for (const P of B.perchRecs) { const list = P.big ? B.big : B.small; P.idx = list.indexOf(P.rec); P.mesh = P.big ? big : small; S.perch.push(P); }
   if (small) S.meshes.push(small); if (big) S.meshes.push(big);
+  // the garden-and-street animals (ducks, crane, cat …: fauna-critters.js), one more mesh, only for a settlement that lists them
+  if (data.critters?.length) { S.critters = buildCritters(data.critters, site); if (S.critters) S.meshes.push(S.critters.mesh); }
   S.rand = rng(77 + site.id.length);
   S.radius = (site.S?.radius ?? 250) + 320;
   // the herons come "now and then": some are away at first
@@ -609,6 +614,7 @@ function update(dt, camera, world) {
     U.cam.value.copy(_cam);
     // the hours: the sun's height; rain keeps the small birds in
     const sun = ENV.sunDir.value.y, rain = ENV.rain.value;
+    if (S.critters) S.critters.update(T, _cam, sun, ENV.seasonWinter.value);
     const target0 = sm(0.02, 0.14, sun), tw = sm(0.22, 0.1, sun) * sm(-0.16, -0.05, sun);
     const a = S.act, k = Math.min(1, dt / 2.5), act = U.act.value;
     const k2 = S.first ? 1 : k;

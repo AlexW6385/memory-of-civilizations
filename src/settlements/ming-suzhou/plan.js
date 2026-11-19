@@ -11,6 +11,7 @@ import {
 } from './layout.js';
 import { ground } from './ground.js';
 import { lots } from './layout.js';
+import { nearScene } from './wen.js';
 import { upOf, routeOf } from './uphouses.js';
 import { SHORE, hash2 } from './taihu.js';
 
@@ -56,7 +57,7 @@ for (const sh of shore) {
   let arc = [];
   for (let k = 0; k <= n; k++) {
     const a = k / n * TAU, x = sh.c[0] + Math.cos(a) * sh.r[0], z = sh.c[1] + Math.sin(a) * sh.r[1];
-    const ok = Math.abs(pondDistance(x, z)) < 0.12 && !nearBuilding(x, z, 1.1) && !nearBridge(x, z, 1.5) && !nearRockPath(x, z, 1.3);
+    const ok = Math.abs(pondDistance(x, z)) < 0.12 && !nearBuilding(x, z, 1.1) && !nearBridge(x, z, 1.5) && !nearRockPath(x, z, 1.3) && !nearScene(x, z, 1.2);
     if (ok) arc.push([x, z]); else { if (arc.length > 2) arcs.push(arc); arc = []; }
   }
   if (arc.length > 2) arcs.push(arc);
@@ -86,6 +87,7 @@ for (const [si, sh] of shore.entries()) {
 const nNear = stones.filter((q) => q.near).length, nFar = stones.length - nNear;
 const useNear = NEAR.slice(0, Math.max(1, Math.min(NEAR.length, Math.floor(nNear / 12)))), useFar = FAR.slice(0, Math.max(1, Math.min(FAR.length, Math.floor(nFar / 12))));
 for (const q of stones) {
+  if (nearScene(q.x, q.z, 1.6)) { rand(); rand(); rand(); continue; }   // (a scene of Wen's record stands here; the same random draws as the stone)
   // (the shape by a hash of the stone's own place: no two neighbours alike, and the same plan builds the same stones)
   const near = q.near, hq = hashAt(q.x, q.z), v = near ? useNear[Math.floor(hq * useNear.length)] : useFar[Math.floor(hq * useFar.length)];
   E.push({ t: 'taihu', c: [q.x, q.z], y: H(q.x, q.z) + 0.12, v, s: q.s, lod: near ? 0 : 1, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.12, tz: (rand() - 0.5) * 0.12 });
@@ -100,6 +102,7 @@ for (const [i, s] of [...ISLANDS.slice(0, 2), ...MOUNDS].entries()) {
     const feature = tall < 2 && i < 2;
     if (feature) tall++;
     const v = feature ? 2 + ((i + tall) % 2) : [5, 6, 7, 8, 9, 10][(i + k) % 6];
+    if (nearScene(x, z, 2.4)) { rand(); rand(); rand(); rand(); continue; }   // (a scene of Wen's record stands here; the same random draws as the stone)
     E.push({ t: 'taihu', c: [x, z], y: H(x, z) - 0.05, v, s: feature ? 0.8 + rand() * 0.35 : 0.7 + rand() * 0.5, lod: feature ? 0 : 2, hero: feature, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.08, tz: (rand() - 0.5) * 0.08, solid: true });
   }
 }

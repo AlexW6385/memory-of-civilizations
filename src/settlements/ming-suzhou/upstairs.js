@@ -11,7 +11,7 @@
 
 import { fromTriangles, lathe, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../../styles/ming/index.js';
-import { D_FRONT as V0, U_FRONT as UF, GALLERY, RISERS, TREAD, STAIR, layoutOf } from './uphouses.js';
+import { D_FRONT as V0, U_FRONT as UF, GALLERY, RISERS, TREAD, STAIR, layoutOf, frameOf, backDoor } from './uphouses.js';
 import { groundFit, upperFit } from './rooms.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -28,24 +28,26 @@ function facing(arr, dir) {
   return o;
 }
 /** The 12 triangles of an axis-aligned box. */
-function boxT(x0, y0, z0, x1, y1, z1) {
+function boxT(x0, y0, z0, x1, y1, z1, noBottom = false) {
   const c = (x, y, z) => [x, y, z], q = [], f = (a, b, d, e) => q.push(...a, ...b, ...d, ...a, ...d, ...e);
   const p = [c(x0, y0, z0), c(x1, y0, z0), c(x1, y0, z1), c(x0, y0, z1), c(x0, y1, z0), c(x1, y1, z0), c(x1, y1, z1), c(x0, y1, z1)];
-  f(p[4], p[7], p[6], p[5]); f(p[0], p[1], p[2], p[3]); f(p[0], p[4], p[5], p[1]); f(p[2], p[6], p[7], p[3]); f(p[1], p[5], p[6], p[2]); f(p[3], p[7], p[4], p[0]);
+  f(p[4], p[7], p[6], p[5]); if (!noBottom) f(p[0], p[1], p[2], p[3]); f(p[0], p[4], p[5], p[1]); f(p[2], p[6], p[7], p[3]); f(p[1], p[5], p[6], p[2]); f(p[3], p[7], p[4], p[0]);
   return orientOutward(q);
 }
 
 export function houseUp(el, { bag, col }) {
   const rand = rng(el.seed || 1);
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, L = x1 - x0, D = z1 - z0, mir = !!el.mir, use = el.use;
-  const lay = layoutOf(L);
-  const W = (a, b, yy) => [x1 - (mir ? L - a : a), yy, z1 - b];
-  const dirU = (s) => [s * (mir ? 1 : -1), 0, 0], dirV = (s) => [0, 0, -s];
+  const y = el.y ?? 0, mir = !!el.mir, use = el.use, F = frameOf(el.rect, mir, el.front || 's'), L = F.L, D = F.D;
+  const lay = layoutOf(L), water = !!el.water;
+  const W = (a, b, yy) => { const p = F.at(a, b); return [p[0], yy, p[1]]; };
+  const dirU = (s) => [s * F.u[0], 0, s * F.u[1]], dirV = (s) => [s * F.v[0], 0, s * F.v[1]];
   const acc = new Map();
   const put = (mat, arr) => { let A = acc.get(mat); if (!A) acc.set(mat, A = []); for (let i = 0; i < arr.length; i++) A.push(arr[i]); };
   const wr = (a0, b0, a1, b1) => { const p = W(a0, b0, 0), q = W(a1, b1, 0); return [Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])]; };
   /** A box in the house's frame. */
-  const B = (a0, b0, a1, b1, ya, yb, mat) => { if (a1 - a0 < 1e-4 || b1 - b0 < 1e-4 || yb - ya < 1e-4) return; const r = wr(a0, b0, a1, b1); put(mat, boxT(r[0], ya, r[1], r[2], yb, r[3])); };
+  // (a box standing on a floor has no bottom face to draw: floor0 and floor1 are the two floors' heights, set below)
+  let floor0 = -99, floor1 = -99;
+  const B = (a0, b0, a1, b1, ya, yb, mat) => { if (a1 - a0 < 1e-4 || b1 - b0 < 1e-4 || yb - ya < 1e-4) return; const r = wr(a0, b0, a1, b1); put(mat, boxT(r[0], ya, r[1], r[2], yb, r[3], Math.abs(ya - floor0) < 1e-4 || Math.abs(ya - floor1) < 1e-4)); };
   const blk = (a0, b0, a1, b1, ya, yb) => col.rect(wr(a0, b0, a1, b1), ya, yb);
   const flr = (a0, b0, a1, b1, yy) => col.floor(wr(a0, b0, a1, b1), yy);
   const quad4 = (mat, P, dir) => put(mat, facing([...P[0], ...P[1], ...P[2], ...P[0], ...P[2], ...P[3]], dir));
@@ -68,10 +70,12 @@ export function houseUp(el, { bag, col }) {
   };
 
   const y0 = y + 0.45, Hf = el.Hf ?? 3.3, Hu = el.Hu ?? 2.75, Y1 = y0 + Hf, Y2 = Y1 + Hu;
+  floor0 = y0; floor1 = Y1;
   const vb = D - 0.15, ibB = vb - 0.25, ibU = UF + 0.22;
   const [wallMat, bandMat] = TONES[el.tone || 'white'] || TONES.white;
   const roofMat = rand() < 0.22 ? 'tile_grey' : 'tile_dark';
-  const shopFront = el.shopFront !== false && ['rice', 'inn', 'cloth', 'medicine', 'books', 'lacquer', 'wine', 'pawn', 'food', 'silk', 'pottery', 'iron', 'fans'].includes(use);
+  const shopFront = el.shopFront !== false && ['rice', 'inn', 'cloth', 'medicine', 'books', 'lacquer', 'wine', 'pawn', 'food', 'silk', 'pottery', 'iron', 'fans', 'teahouse', 'lodging', 'grocer', 'tinsmith', 'jade', 'printer'].includes(use);
+  const openFront = use === 'inn' || use === 'teahouse' || use === 'lodging';                  // (the tea room and the inn's hall are open to the street, a counter at one end)
   const wall = (a0, b0, a1, b1, ya, yb) => { const m = Math.min(yb, ya + 0.95); B(a0, b0, a1, b1, ya, m, bandMat); if (yb > m) B(a0, b0, a1, b1, m, yb, wallMat); };
 
   // ── the ground: plinth, brick floor, doorstep ──
@@ -87,9 +91,40 @@ export function houseUp(el, { bag, col }) {
 
   // ── walls: both sides and the back, to the eaves ──
   for (const [a0, a1] of [[0, 0.25], [L - 0.25, L]]) { wall(a0, V0, a1, vb, y0, Y1); B(a0, UF, a1, vb, Y1, Y2, wallMat); blk(a0, V0, a1, vb, y - 0.4, Y2 + 0.2); }
-  wall(0.25, vb - 0.25, L - 0.25, vb, y0, Y1); B(0.25, vb - 0.25, L - 0.25, vb, Y1, Y2, wallMat); blk(0.25, vb - 0.25, L - 0.25, vb, y - 0.4, Y2 + 0.2);
-  // a window high in the back wall, to the lane, downstairs and up
-  for (const [yy0, yy1, a] of [[y0 + 1.5, y0 + 2.3, L * 0.55], [Y1 + 0.8, Y1 + 2.0, L * 0.5]]) { B(a - 0.5, vb, a + 0.5, vb + 0.05, yy0, yy1, 'lattice'); B(a - 0.58, vb, a + 0.58, vb + 0.08, yy0 - 0.08, yy0, 'granite_grey'); }
+  // a waterside house has its back door on the canal (backDoor, uphouses.js): the wall is cut for it
+  const bk = water ? backDoor(L, D) : null;
+  if (bk) {
+    for (const [a0, a1] of [[0.25, bk.a0], [bk.a1, L - 0.25]]) { wall(a0, vb - 0.25, a1, vb, y0, Y1); blk(a0, vb - 0.25, a1, vb, y - 0.4, Y1 + 0.2); }
+    B(bk.a0, vb - 0.25, bk.a1, vb, y0 + 2.2, Y1, wallMat); blk(bk.a0, vb - 0.25, bk.a1, vb, y0 + 2.2, Y1 + 0.2); blk(bk.a0, vb - 0.25, bk.a1, vb, y - 0.4, y0);
+    B(0.25, vb - 0.25, L - 0.25, vb, Y1, Y2, wallMat); blk(0.25, vb - 0.25, L - 0.25, vb, Y1, Y2 + 0.2);
+  } else { wall(0.25, vb - 0.25, L - 0.25, vb, y0, Y1); B(0.25, vb - 0.25, L - 0.25, vb, Y1, Y2, wallMat); blk(0.25, vb - 0.25, L - 0.25, vb, y - 0.4, Y2 + 0.2); }
+  // a window high in the back wall, to the lane, downstairs and up (a waterside house: the door lights the ground floor)
+  for (const [yy0, yy1, a] of [[y0 + 1.5, y0 + 2.3, bk ? -9 : L * 0.55], [Y1 + 0.8, Y1 + 2.0, L * 0.5]]) { if (a < 0) continue; B(a - 0.5, vb + 0.06, a + 0.5, vb + 0.11, yy0, yy1, 'lattice'); B(a - 0.58, vb, a + 0.58, vb + 0.12, yy0 - 0.08, yy0, 'granite_grey'); }
+  if (bk) {
+    // the doorway: jambs, lintel, a worn sill, the leaf folded back against the wall inside; outside, the deck over the canal wall and the water
+    // on posts to the canal's bed, its rail, and the flight of granite steps laid along the wall down to the slab just above the water
+    for (const a of [bk.a0 - 0.1, bk.a1]) B(a, vb - 0.28, a + 0.1, vb + 0.03, y0, y0 + 2.2, 'lacquer_chestnut');
+    B(bk.a0 - 0.1, vb - 0.28, bk.a1 + 0.1, vb + 0.03, y0 + 2.2, y0 + 2.32, 'lacquer_chestnut');
+    B(bk.a0, vb - 0.27, bk.a1, vb + 0.02, y0, y0 + 0.04, 'granite_grey');
+    B(bk.a1 + 0.02, vb - 0.33, bk.a1 + 0.6, vb - 0.3, y0 + 0.04, y0 + 2.1, 'lacquer_chestnut');
+    const dk = y0 - 0.03, dx0 = bk.deck[0], dx1 = bk.deck[1], db0 = vb + 0.02, db1 = vb + bk.deck[2];
+    B(dx0, db0, dx1, db1, dk - 0.1, dk, 'timber'); flr(dx0, db0, dx1, db1, dk);
+    B(dx0, db1 - 0.12, dx1, db1, dk - 0.32, dk - 0.1, 'lacquer_chestnut');
+    for (const a of [dx0 + 0.07, dx1 - 0.07]) { B(a - 0.06, db1 - 0.1, a + 0.06, db1 + 0.02, y - 2.6, dk - 0.1, 'lacquer_chestnut'); blk(a - 0.06, db1 - 0.1, a + 0.06, db1 + 0.02, y - 2.6, dk); }
+    // the rail round the deck's water side and its east end (the west end is open to the steps): a rail, a lattice panel, posts
+    const rl = (a0, b0, a1, b1) => { B(a0, b0, a1, b1, dk + 0.84, dk + 0.92, 'lacquer_chestnut'); B(a0 + 0.015, b0 + 0.02, a1 - 0.015, b1 - 0.02, dk + 0.22, dk + 0.84, 'lattice_ice'); B(a0, b0, a1, b1, dk + 0.14, dk + 0.22, 'lacquer_chestnut'); blk(a0, b0, a1, b1, dk, dk + 1.0); };
+    rl(dx0, db1 - 0.08, dx1, db1); rl(dx1 - 0.08, db0 + 0.05, dx1, db1 - 0.08);
+    for (const [a, b] of [[dx0 + 0.04, db1 - 0.04], [dx1 - 0.04, db1 - 0.04], [dx1 - 0.04, db0 + 0.1]]) B(a - 0.05, b - 0.05, a + 0.05, b + 0.05, dk, dk + 0.98, 'lacquer_chestnut');
+    // the steps: n treads from the deck's level to the slab, each a block from the foot of the wall up, a run of bk.run along the wall, going down toward a = 0
+    const n = bk.n, land = bk.land - y, rise = (dk - (y + land)) / n, wf = -1.45;
+    const b0 = vb + 0.5, b1 = vb + 1.55;
+    for (let k = 0; k < n; k++) {
+      const top = dk - rise * (k + 1), s1 = bk.aS - k * bk.run, s0 = s1 - bk.run;
+      B(s0, b0, s1, b1, wf, top, 'granite_grey'); flr(s0, b0, s1, b1, top);
+    }
+    const sl0 = bk.aS - n * bk.run - bk.slab, sl1 = bk.aS - n * bk.run;
+    B(sl0, b0, sl1, b1, wf, y + land, 'granite_grey'); flr(sl0, b0, sl1, b1, y + land);
+  }
 
   // ── the ground floor's front ──
   const dc = lay.dc, d0 = dc - 0.6, d1 = dc + 0.6;
@@ -100,7 +135,7 @@ export function houseUp(el, { bag, col }) {
   blk(d0 - 0.1, V0 - 0.04, d0, V0 + 0.2, y0, Y1); blk(d1, V0 - 0.04, d1 + 0.1, V0 + 0.2, y0, Y1);
   const span0 = 0.25, span1 = d0 - 0.1, sw = span1 - span0;
   if (shopFront) {
-    const cEnd = use === 'inn' ? Math.min(span1, 3.0) : span1;
+    const cEnd = openFront ? Math.min(span1, 3.0) : span1;
     B(span0, V0, cEnd, V0 + 0.14, y0, y0 + 0.95, 'timber'); B(span0, V0 - 0.1, cEnd, V0 + 0.2, y0 + 0.95, y0 + 1.0, 'wood_dark');
     B(span0, V0 - 0.02, cEnd, V0, y0 + 0.2, y0 + 0.9, 'wood_dark');
     blk(span0, V0 - 0.1, cEnd, V0 + 0.2, y0, y0 + 1.0);
@@ -224,7 +259,7 @@ export function houseUp(el, { bag, col }) {
     quad4('timber', [W(r0, vbE, Y2 - 0.14), W(r1, vbE, Y2 - 0.14), W(r1, vb, Y2 - 0.14), W(r0, vb, Y2 - 0.14)], [0, -1, 0]); }
 
   // ── the rooms ──
-  const ctx = { B, blk, flr, put, lat, qF, W, wr, slab, quad4, rand, L, D, y0, Y1, Y2, lay, vb, ibB, ibU, S, bh0, use, el, wallMat, mir };
+  const ctx = { B, F: B, latF: lat, blk, flr, put, lat, qF, W, wr, slab, quad4, rand, L, D, y0, Y1, Y2, lay, vb, ibB, ibU, S, bh0, use, el, wallMat, mir };
   if (lay.pa !== null) {
     const pa = lay.pa, [d0b, d1b] = lay.door;
     for (const [b0, b1] of [[ibU, d0b], [d1b, ibB]]) { B(pa - 0.06, b0, pa + 0.06, b1, Y1, Y2, 'timber'); blk(pa - 0.06, b0, pa + 0.06, b1, Y1, Y2); }
@@ -257,7 +292,7 @@ export function houseUp(el, { bag, col }) {
     const rd = [];
     beamTris(rd, W(ra0, vm, yR - 0.04), W(ra1, vm, yR - 0.04), 0.1, 0.22);
     const du = dirU(1);
-    if (!hip) for (const [a, sg] of [[ra0, -1], [ra1, 1]]) { const c = W(a + sg * 0.1, vm, yR); beamTris(rd, [c[0] - du[0] * sg * 0.22, yR + 0.1, c[2]], [c[0] + du[0] * sg * 0.12, yR + 0.34, c[2]], 0.07, 0.1); }
+    if (!hip) for (const [a, sg] of [[ra0, -1], [ra1, 1]]) { const c = W(a + sg * 0.1, vm, yR); beamTris(rd, [c[0] - du[0] * sg * 0.22, yR + 0.1, c[2] - du[2] * sg * 0.22], [c[0] + du[0] * sg * 0.12, yR + 0.34, c[2] + du[2] * sg * 0.12], 0.07, 0.1); }
     if (hip) for (const [a0h, ra] of [[a0, ra0], [a1, ra1]]) for (const bb of [vfx, vbx]) beamTris(rd, W(ra, vm, yR - 0.04), W(a0h, bb, yE + 0.02), 0.07, 0.1);
     put(roofMat, rd);
     const prof = (vv) => { const t = vv <= vm ? (vv - vfx) / (vm - vfx) : (vbx - vv) / (vbx - vm); return yE + riseX * Math.pow(Math.max(0, Math.min(1, t)), 1.35); };
