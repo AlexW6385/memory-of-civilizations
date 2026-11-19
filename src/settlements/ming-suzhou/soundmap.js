@@ -251,7 +251,7 @@ export const ROOMS = {
   house: { tone: [260, 0.2], roof: 1.0, hush: 0.8, work: [['broom', 70]] },
 };
 /** The study and the bedroom above the merchant's hall, the upper floors: nearly silent, close under the tiles (the rain loud). */
-export const UPPER = { tone: [200, 0.12], roof: 1.7, hush: 0.6, work: [['brush', 18], ['paper', 30]] };
+export const UPPER = { tone: [200, 0.12], roof: 1.3, hush: 0.6, work: [['brush', 18], ['paper', 30]] };
 
 // ── the emitters in the open (the engine's placed sounds) ─────────────────────
 /**
