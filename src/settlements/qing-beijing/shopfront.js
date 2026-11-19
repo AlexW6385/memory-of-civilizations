@@ -193,7 +193,7 @@ export function qingShop(el, ctx) {
   // the fascia board under the eave
   fascia(bag, F, s0, s1, dF + 0.78, roofY - 0.08, 0.5);
   // a mat awning (pengzi) sloping from the front's eave, on two poles, over the goods on the apron
-  if (st === 1 && r() < 0.5) {
+  if (st === 1 && r() < 0.5 && !enter) {          // (never over an opened shop's door bay: the walker reads an awning over steps as a wall)
     const A = [F.P(s0 + 0.7, dF + 0.95, roofY - 0.2), F.P(s1 - 0.7, dF + 0.95, roofY - 0.2), F.P(s1 - 0.7, dF + 2.5, y + 2.45), F.P(s0 + 0.7, dF + 2.5, y + 2.45)];
     const tri = [];
     for (const [a, b, c] of [[0, 1, 2], [0, 2, 3]]) tri.push(...A[a], ...A[b], ...A[c]);

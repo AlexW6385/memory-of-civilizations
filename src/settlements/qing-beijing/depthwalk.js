@@ -29,6 +29,13 @@ export function compoundWalks() {
     const sd = -L / 2 + 0.5 + bw * (db + 0.5), aS = L / 2 - 0.5 - 0.575, f = t.front, z = (a) => cz - a;
     routes.push([[f + 3.0, z(sd)], [f - 1.4, z(sd)], [f - 1.4, z(aS)], [f - 0.9, z(aS)], [f - 2.5, z(aS)], [f - 4.2, z(aS)], [f - 5.3, z(aS)], [f - 5.6, z(aS - 1.0)], [f - 3.5, z(sd)], [f - 1.0, z(sd)], [f + 0.5, z(sd)]]);
   }
+  // the other furnished shops (§30: pharmacy, cloth, grain, pawn, wine, lantern, shoes): from the avenue through the door bay (two stone steps), in to the room's middle line and back
+  for (const t of interiorShops().filter((q) => q.kind !== 'teahouse')) {
+    const L = t.z1 - t.z0, cz = (t.z0 + t.z1) / 2, bays = Math.max(2, Math.round(L / 3.2)), bw = (L - 1.0) / bays, db = Math.floor(bays / 2);
+    const sd = -L / 2 + 0.5 + bw * (db + 0.5), f = t.front, zd = t.side === 'w' ? cz - sd : cz + sd, o = t.side === 'w' ? 1 : -1;
+    const sh = t.side === 'w' ? 0.9 : -0.9;                           // inside the door the counters and tables leave the aisle a little to one side of the door's middle
+    routes.push([[f + o * 3.0, zd], [f + o * 1.4, zd], [f - o * 0.8, zd], [f - o * 1.4, zd + sh], [f - o * 3.0, zd + sh], [f - o * 1.4, zd + sh], [f - o * 0.8, zd], [f + o * 1.5, zd]]);
+  }
   for (const r of routes) r.y0 = 0;
   return routes;
 }
