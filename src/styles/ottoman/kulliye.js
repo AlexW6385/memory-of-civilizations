@@ -468,6 +468,45 @@ function prism(bag, mat, pts, y0, y1) {
 }
 
 /**
+ * The shops of an arasta element, by run between its gaps: [{ za, zb, zc, hw, r0, r1 }] (the clear opening between the piers, its centre and half width).
+ * Pure: the walk, the keepers and the checks read the same list as the builder.
+ */
+export function arastaShops(el) {
+  const w = el.w ?? 3.3, out = [], runs = [];
+  let s = el.z0;
+  for (const [g0, g1] of (el.gaps || []).slice().sort((p, q) => p[0] - q[0])) { runs.push([s, g0]); s = g1; }
+  runs.push([s, el.z1]);
+  for (const [r0, r1] of runs) {
+    const k = Math.floor((r1 - r0 - 0.5) / w); if (k < 1) continue;
+    const z0 = r0 + (r1 - r0 - k * w) / 2;
+    for (let i = 0; i < k; i++) { const za = z0 + i * w + 0.28, zb = z0 + (i + 1) * w - 0.28; out.push({ za, zb, zc: (za + zb) / 2, hw: (zb - za) / 2, r0, r1 }); }
+  }
+  return out;
+}
+/**
+ * A worn sill: a stone threshold along (ux, uz) from `o`, u0 to u1, `dep` deep, its top 5.5 cm above `y` at the ends and dipped to 3 cm in the middle (the
+ * hollow of the feet of centuries), the arrises bevelled. Pattern of Suzhou's wear.js (copied: that file reads Suzhou's pieces).
+ */
+export function wornSill(out, o, ux, uz, u0, u1, dep, y, dip = 0.026) {
+  const nx = -uz, nz = ux, N = 12, hz = dep / 2, bev = 0.016;
+  const P = (u, v, h) => [o[0] + ux * u + nx * v, y + h, o[1] + uz * u + nz * v];
+  const top = (u) => { const m = (u - (u0 + u1) / 2) / ((u1 - u0) / 2); return 0.055 - dip * Math.exp(-m * m * 5); };
+  const q = (p0, p1, p2, p3) => out.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);
+  for (let i = 0; i < N; i++) {
+    const ua = u0 + (u1 - u0) * i / N, ub = u0 + (u1 - u0) * (i + 1) / N, ha = top(ua), hb = top(ub);
+    q(P(ua, -hz + bev, ha), P(ub, -hz + bev, hb), P(ub, hz - bev, hb), P(ua, hz - bev, ha));
+    q(P(ua, -hz, ha - bev), P(ub, -hz, hb - bev), P(ub, -hz + bev, hb), P(ua, -hz + bev, ha));
+    q(P(ua, hz - bev, ha), P(ub, hz - bev, hb), P(ub, hz, hb - bev), P(ua, hz, ha - bev));
+    q(P(ua, -hz, 0), P(ub, -hz, 0), P(ub, -hz, hb - bev), P(ua, -hz, ha - bev));
+    q(P(ub, hz, 0), P(ua, hz, 0), P(ua, hz, ha - bev), P(ub, hz, hb - bev));
+  }
+  q(P(u0, hz, 0), P(u0, -hz, 0), P(u0, -hz, top(u0) - bev), P(u0, hz, top(u0) - bev));
+  q(P(u1, -hz, 0), P(u1, hz, 0), P(u1, hz, top(u1) - bev), P(u1, -hz, top(u1) - bev));
+}
+/** A hash in [0, 1) of a position (variation by place, never by a counter). */
+const hashAt = (x, z, s = 0) => { let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+
+/**
  * arasta: { x (the line of the shops' backs), z0, z1, face ('e' | 'w': where they open), y, w (a shop's width),
  * d (its depth), gaps ([[z0, z1]…]), goods ('copper' | 'cloth') } — a row of vaulted shops (§4.9): each under a
  * pointed barrel vault opening by a pointed arch on the street, the raised stone floor where the shopkeeper
@@ -502,30 +541,46 @@ function arasta(el, ctx) {
       // the raised floor, its plank top
       bag.add(S, box(Math.min(X(0.02), X(d - 0.45)), y - 0.3, za, Math.max(X(0.02), X(d - 0.45)), y + 0.55, zb));
       bag.add('timber', box(Math.min(X(0.02), X(d - 0.5)), y + 0.55, za + 0.02, Math.max(X(0.02), X(d - 0.5)), y + 0.6, zb - 0.02));
-      col.rect([Math.min(X(0), X(d - 0.45)), za, Math.max(X(0), X(d - 0.45)), zb], y, y + 0.6);
+      // the floor is walked on (in by two steps from the avenue through the gap in the counter); the opening is 1.7 m clear between the counter's halves
+      col.floor([Math.min(X(0), X(d - 0.45)), za, Math.max(X(0), X(d - 0.45)), zb], y + 0.6);
+      const gap = 0.85, sk = hashAt(X(0), zc, 4) < 0.5 ? -1 : 1;         // the keeper's side of the shop, by the shop's place
+      bag.add(S, box(Math.min(X(d - 0.45), X(d + 0.75)), y - 0.3, zc - gap, Math.max(X(d - 0.45), X(d + 0.75)), y + 0.3, zc + gap));
+      col.floor([Math.min(X(d - 0.45), X(d + 0.75)), zc - gap, Math.max(X(d - 0.45), X(d + 0.75)), zc + gap], y + 0.3);
+      // worn: a hollowed sill on the doorway's line, the step's outer edge rounded
+      { const sill = []; wornSill(sill, [X(d - 0.15), 0], 0, 1, zc - gap + 0.05, zc + gap - 0.05, 0.34 + 0.04 * hashAt(X(0), zc, 8), y + 0.3, 0.014 + 0.02 * hashAt(X(0), zc, 9)); bag.add(S, fromTriangles(sill)); }
+      bag.add(S, rod([X(d + 0.72), y + 0.285, zc - gap + 0.02], [X(d + 0.72), y + 0.285, zc + gap - 0.02], 0.026 + 0.008 * hashAt(X(0), zc, 10), 6));
       // the shutter frame: a beam across the arch at the springing, the fixed lattice above it
       bag.add('wood_dark', box(Math.min(X(d - 0.62), X(d - 0.42)), ys - 0.2, za, Math.max(X(d - 0.62), X(d - 0.42)), ys, zb));
       for (let v = za + 0.25; v < zb - 0.1; v += 0.25) { const top2 = ys + Math.sqrt(Math.max(0, 1 - ((v - zc) / hw) ** 2)) * hw * 1.2 - 0.1; if (top2 > ys + 0.05) bag.add('wood_dark', box(Math.min(X(d - 0.56), X(d - 0.5)), ys, v - 0.02, Math.max(X(d - 0.56), X(d - 0.5)), Math.min(top2, ys + 1.5), v + 0.02)); }
-      // the upper leaf propped out as an awning; the lower let down as a counter on its brackets
+      // the upper leaf propped out as an awning (its lower edge 2.0 m up); the lower let down as a counter on its brackets, in two halves with the way in between
       const lw = zb - za - 0.1;
       const up = box(0, -0.03, -lw / 2, 1.1, 0.03, lw / 2).rotateZ(-0.45);
       if (sg < 0) up.rotateY(Math.PI);
       bag.add('wood_dark', up.translate(X(d), ys - 0.22, zc));
-      bag.add('wood_dark', box(Math.min(X(d - 0.3), X(d + 0.5)), y + 0.75, za + 0.05, Math.max(X(d - 0.3), X(d + 0.5)), y + 0.81, zb - 0.05));
-      for (const s2 of [-1, 1]) bag.add('wood_dark', rod([X(d), y + 0.35, zc + s2 * (hw - 0.3)], [X(d + 0.45), y + 0.74, zc + s2 * (hw - 0.3)], 0.03, 4));
-      // the goods
+      for (const [c0, c1] of [[za + 0.05, zc - gap], [zc + gap, zb - 0.05]]) {
+        bag.add('wood_dark', box(Math.min(X(d - 0.3), X(d + 0.5)), y + 0.75, c0, Math.max(X(d - 0.3), X(d + 0.5)), y + 0.81, c1));
+        col.rect([Math.min(X(d - 0.3), X(d + 0.5)), c0, Math.max(X(d - 0.3), X(d + 0.5)), c1], y, y + 0.81);
+        bag.add('wood_dark', rod([X(d), y + 0.35, (c0 + c1) / 2], [X(d + 0.45), y + 0.74, (c0 + c1) / 2], 0.03, 4));
+      }
+      // the goods: along the two side walls, the aisle (the middle 1.7 m) kept clear; the keeper's side holds less (he sits there)
+      const side = (k) => zc + k * 1.08, nk = (k) => (k === sk ? 2 : 4);
       if (el.goods === 'copper') {
-        for (let g = 0; g < 4; g++) {
-          const gz = za + 0.35 + g * (zb - za - 0.7) / 3, gx = X(1.0 + (g % 2) * 0.9), sc = 0.8 + ((n + g) % 3) * 0.25;
-          bag.add('bronze', lathe([[0.001, 0], [0.18 * sc, 0.02], [0.26 * sc, 0.16 * sc], [0.22 * sc, 0.34 * sc], [0.12 * sc, 0.42 * sc], [0.14 * sc, 0.5 * sc]], 12, null, gx, y + 0.6, gz));
+        for (const k of [-1, 1]) for (let g = 0; g < nk(k); g++) {
+          const gx = X(0.8 + g * 0.8), sc = 0.8 + Math.floor(hashAt(gx, side(k), 6 + g) * 3) * 0.2;
+          bag.add('bronze', lathe([[0.001, 0], [0.18 * sc, 0.02], [0.26 * sc, 0.16 * sc], [0.22 * sc, 0.34 * sc], [0.12 * sc, 0.42 * sc], [0.14 * sc, 0.5 * sc]], 12, null, gx, y + 0.6, side(k)));
         }
         for (let g = 0; g < 3; g++) { const gz = za + 0.5 + g * (zb - za - 1.0) / 2; bag.add('bronze', lathe([[0.001, 0], [0.32, 0.01], [0.34, 0.08], [0.3, 0.09], [0.001, 0.03]], 14).rotateZ(sg > 0 ? -Math.PI / 2 : Math.PI / 2).translate(X(0.06), y + 1.9, gz)); }
-        bag.add('bronze', lathe([[0.001, 0], [0.55, 0.02], [0.6, 0.28], [0.55, 0.3], [0.001, 0.06]], 16, null, X(d + 0.9), y, zc));
+        // the big basin before the shop, by a pier (never in the way in)
+        const pz = hashAt(X(0), zc, 8) < 0.5 ? za - 0.28 : zb + 0.28;
+        bag.add('bronze', lathe([[0.001, 0], [0.45, 0.02], [0.5, 0.24], [0.45, 0.26], [0.001, 0.05]], 16, null, X(d + 1.05), y, pz));
       } else {
         bag.add('timber', box(Math.min(X(0.02), X(0.5)), y + 1.5, za + 0.02, Math.max(X(0.02), X(0.5)), y + 1.54, zb - 0.02));
         const cl = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white'];
-        for (let g = 0; g < 4; g++) { const gz = za + 0.2 + g * (zb - za - 0.4) / 4; bag.add(cl[(n + g) % 4], box(Math.min(X(0.06), X(0.44)), y + 1.54, gz, Math.max(X(0.06), X(0.44)), y + 1.54 + 0.16 * (1 + (g + n) % 3), gz + (zb - za - 0.4) / 4 - 0.03)); }
-        for (let g = 0; g < 3; g++) { const gz = za + 0.4 + g * (zb - za - 0.8) / 2; bag.add(cl[(n + g + 1) % 4], box(Math.min(X(1.2), X(2.0)), y + 0.6, gz - 0.25, Math.max(X(1.2), X(2.0)), y + 0.6 + 0.12 * (1 + (g + n) % 2), gz + 0.25)); }
+        for (let g = 0; g < 4; g++) { const gz = za + 0.2 + g * (zb - za - 0.4) / 4, hh = 1 + Math.floor(hashAt(X(0), gz, 9) * 3); bag.add(cl[Math.floor(hashAt(X(0), gz, 10) * 4)], box(Math.min(X(0.06), X(0.44)), y + 1.54, gz, Math.max(X(0.06), X(0.44)), y + 1.54 + 0.16 * hh, gz + (zb - za - 0.4) / 4 - 0.03)); }
+        for (const k of [-1, 1]) for (let g = 0; g < nk(k) - 1; g++) {
+          const gx0 = 1.0 + g * 0.9, gc = side(k), cm = cl[Math.floor(hashAt(X(gx0), gc, 11) * 4)], hh = 1 + Math.floor(hashAt(X(gx0), gc, 12) * 3);
+          bag.add(cm, box(Math.min(X(gx0), X(gx0 + 0.7)), y + 0.6, gc - 0.22, Math.max(X(gx0), X(gx0 + 0.7)), y + 0.6 + 0.12 * hh, gc + 0.22));
+        }
       }
     }
   }

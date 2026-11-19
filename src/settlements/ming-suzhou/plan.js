@@ -279,13 +279,15 @@ board([B.linglong.rect[0] - 0.2, -3.375], G + B.linglong.y + 3.9 - 0.98, [-1, 0]
 board([0, 40.4], G + 0.45 + 5.0 - 1.02, [0, 1], 2.4, 4, 15);
 board([-21.8, 34.5], G + 0.35 + 3.8 - 0.98, [1, 0], 1.6, 3, 16, { h: 0.55 });
 // the pavilions' boards (§23): hung on the outer face of the beam at each open side, in plain wood and black ink; the Snowy Fragrance board carries a seal (Wang Ji's inscription hangs there [stated])
-for (const [id, text, w, h] of [['hefeng', '荷風四面亭', 2.0, 0.5], ['xuexiang', '雪香雲蔚亭', 2.0, 0.5], ['daishuang', '待霜亭', 1.4, 0.46]]) {
-  const b = B[id], H0 = 3.3, hex = b.kind === 'hex', ap = hex ? b.r * Math.cos(Math.PI / 6) : b.d / 2;
+for (const [id, text, w, h] of [['hefeng', '荷風四面亭', 2.0, 0.5], ['xuexiang', '雪香雲蔚亭', 2.0, 0.5], ['daishuang', '待霜亭', 1.4, 0.46], ['lvyi', '綠漪亭', 1.4, 0.46]]) {
+  const b = B[id], H0 = 3.3, hex = b.kind === 'hex', ap = hex ? b.r * Math.cos(Math.PI / 6) : (b.d ?? b.w) / 2;
   for (const k of hex ? [1, 4] : [0, 2]) {
     const a = hex ? (k + 1) / 6 * Math.PI * 2 : 0, n = hex ? [Math.cos(a), Math.sin(a)] : [0, k === 0 ? -1 : 1];
     E.push({ t: 'plaque', at: [b.c[0] + n[0] * (ap + 0.13), b.c[1] + n[1] * (ap + 0.13)], y: G + b.y + H0 - 0.38 - h, facing: n, w, h, n: [...text].length, seed: 30 + k, text, finish: 'wood', seal: id === 'xuexiang' });
   }
 }
+// the Wutong and Bamboo Retreat (§30): its four walls are shut but for a round opening each, so the name hangs as a tall board on the wall beside the opening, on the north and the south faces
+for (const sg of [-1, 1]) E.push({ t: 'plaque', at: [B.wuzhu.c[0] + 2.4, B.wuzhu.c[1] + sg * (B.wuzhu.w / 2 + 0.15)], y: G + B.wuzhu.y + 0.9, facing: [0, sg], w: 0.5, h: 2.1, n: 4, seed: 40 + sg, text: '梧竹幽居', finish: 'wood', vertical: true });
 // Little Canglang (on its north front) and Small Flying Rainbow (over each end of the bridge)
 E.push({ t: 'plaque', at: [(B.xiaocanglang.rect[0] + B.xiaocanglang.rect[2]) / 2, B.xiaocanglang.rect[1] - 0.2], y: G + B.xiaocanglang.y + 3.4 - 0.98, facing: [0, -1], w: 1.5, h: 0.5, n: 3, seed: 34, text: '小滄浪', finish: 'wood' });
 for (const [x, f] of [[B.xiaofeihong.rect[0] + 0.1, -1], [B.xiaofeihong.rect[2] - 0.1, 1]]) E.push({ t: 'plaque', at: [x, (B.xiaofeihong.rect[1] + B.xiaofeihong.rect[3]) / 2], y: G + B.xiaofeihong.y + 2.7 - 0.84, facing: [f, 0], w: 1.4, h: 0.44, n: 3, seed: 35 + f, text: '小飛虹', finish: 'wood' });

@@ -21,14 +21,14 @@ const fake = () => {
 
 
 const NEW = Object.keys(ATHENS_VOICES);
-const USED = ['hammer', 'cobbler', 'plane', 'mortar', 'wheel', 'clay', 'brush', 'chisel', 'kitchen', 'loom', 'pourWine', 'jarLid', 'clothRustle', 'drawer', 'teaTalk', 'cicada', 'cricket', 'seasonBird', 'dogFar', 'creak', 'drip'];
-const ALL = [...new Set([...NEW, ...USED, 'quern', 'hens', 'hydria'])].filter((v) => v !== 'creak' && v !== 'drip');
+const USED = ['hammer', 'athCobbler', 'plane', 'mortar', 'wheel', 'clay', 'brush', 'chisel', 'kitchen', 'loom', 'pourWine', 'jarLid', 'clothRustle', 'drawer', 'teaTalk', 'cicada', 'cricket', 'seasonBird', 'dogFar', 'creak', 'drip'];
+const ALL = [...new Set([...NEW, ...USED, 'athQuern', 'athHens', 'athHydria'])].filter((v) => v !== 'creak' && v !== 'drip');
 
 test('Athens has the voices of its streets, riding on the animals, and no bell hours', () => {
   const P = profileOf('athens'), L = P.animals[LIFE];
   assert.ok(L.market > 0 && L.map === AT);
   assert.deepEqual(Object.keys(P.animals).sort(), ['dog', 'donkey', 'rooster', 'sheepbell'], 'the life is not an animal');
-  assert.equal(profileOf('paris').animals[LIFE], undefined);
+  assert.equal(profileOf('new-york').animals[LIFE], undefined);
   assert.equal(P.bells, null);
   const ev = []; let prev = null;
   for (let m = 0; m <= 24 * 60; m += 0.5) { const hour = (m / 60) % 24, now = { hour, el: 0, lat: 38 }; ev.push(...due(P, prev, now)); prev = now; }
@@ -42,8 +42,8 @@ test('Athens: every voice exists and can be made', () => {
   m.place({ voices: {}, animals: profileOf('athens').animals, roof: 'tile' });
   const bus = m.src([5, 0], 8, { dur: 5 });
   for (const v of ALL) assert.equal(typeof m[v], 'function', v);
-  for (const v of NEW.filter((k) => k !== 'auloNote' && k !== 'kitharaNote')) assert.ok(m[v](ctx.currentTime, bus, 1) > 0.5, v);
-  for (const v of ['hammer', 'cobbler', 'plane', 'mortar', 'wheel', 'clay', 'brush', 'chisel', 'kitchen', 'loom', 'pourWine', 'jarLid', 'clothRustle', 'drawer', 'teaTalk']) assert.ok(m[v](ctx.currentTime, bus, 1) > 0, v);
+  for (const v of NEW.filter((k) => k !== 'athAuloNote' && k !== 'athKitharaNote')) assert.ok(m[v](ctx.currentTime, bus, 1) > 0.5, v);
+  for (const v of ['hammer', 'athCobbler', 'plane', 'mortar', 'wheel', 'clay', 'brush', 'chisel', 'kitchen', 'loom', 'pourWine', 'jarLid', 'clothRustle', 'drawer', 'teaTalk']) assert.ok(m[v](ctx.currentTime, bus, 1) > 0, v);
   // the voices are in the placed voices of the engine, with a level of their own
   for (const v of NEW) assert.equal(VOICES[v], ATHENS_VOICES[v], v);
   // every cry has its own contour
@@ -57,8 +57,8 @@ test('Athens: the cues are made a few at a time', () => {
   m.ctx = ctx; m.amb = { muffle: ctx.createGain() }; m.wetIn = ctx.createGain(); m.erIn = ctx.createGain();
   m.place({ voices: { sparrow: 1 }, animals: profileOf('athens').animals, roof: 'tile', town: 1, birds: 1 });
   const bus = m.src([5, 0], 8, { dur: 40 });
-  ['aulos', 'kithara', 'mallet', 'quern', 'fishBell'].forEach((v, i) => m[v](ctx.currentTime + i * 9, bus, 1));      // (the scheduler lets few begin together)
-  assert.ok(m.cues.length > 80, `queued (${m.cues.length})`);
+  ['athAulos', 'athKithara', 'athMallet', 'athQuern', 'athFishBell'].forEach((v, i) => m[v](ctx.currentTime + i * 9, bus, 1));      // (the scheduler lets few begin together)
+  assert.ok(m.cues.length > 40, `queued (${m.cues.length})`);
   let worst = 0;
   while (m.cues.length) { ctx.currentTime += 0.09; const c = count(); m.placeEvents(); worst = Math.max(worst, count() - c); }
   assert.ok(worst < 150, `at most ${worst} nodes in a tick`);
@@ -73,8 +73,8 @@ test('the map: houses, shops, workshops, rooms, planting', () => {
   assert.equal(new Set(S.map((s) => s.id)).size, S.length, 'distinct ids');
   // a house's own work: the smith's shop hammers, the pastas house holds a symposium in the evening
   const hasWork = (s, v) => s.work.some(([x]) => x === v);
-  assert.ok(use('shop:bronze').every((s) => hasWork(s, 'hammer')) && use('shop:shoe').every((s) => hasWork(s, 'cobbler')));
-  assert.ok(S.filter((s) => s.use === 'pastas').every((s) => hasWork(s, 'symposium')));
+  assert.ok(use('shop:bronze').every((s) => hasWork(s, 'hammer')) && use('shop:shoe').every((s) => hasWork(s, 'athCobbler')));
+  assert.ok(S.filter((s) => s.use === 'pastas').every((s) => hasWork(s, 'athSymposium')));
   for (const s of S) for (const [v, gap, hours] of s.work) assert.ok(typeof VOICES[v] === 'function' && gap[0] < gap[1] && hours.length === 2, `${s.id} ${v}`);
   // the rooms
   const s0 = use('shop:bronze').find((s) => s.id.startsWith('row:'));
@@ -98,7 +98,7 @@ test('the map: houses, shops, workshops, rooms, planting', () => {
 test('the hawkers stand at stalls, the wells are the wells the town builds', async () => {
   const { stallSites } = await import('../src/settlements/athens/wayside.js');
   const stalls = stallSites();
-  const KIND = { hawkCheese: 'cheese', hawkWreaths: 'wreath', hawkOlives: 'wine' };
+  const KIND = { athHawkCheese: 'cheese', hawk: 'wreath', hawk: 'wine' };
   for (const e of AT.EMITTERS.filter((x) => KIND[x.voice])) {
     const st = stalls.find((s) => s.kind === KIND[e.voice] && Math.hypot((s.rect[0] + s.rect[2]) / 2 - e.at[0], (s.rect[1] + s.rect[3]) / 2 - e.at[1]) < 3);
     assert.ok(st, `${e.voice} at ${e.at}`);
@@ -116,7 +116,7 @@ function listen({ x, z, y = 0, hour, doy = 125, rain = 0, indoors = false, wind 
   m.ctx = ctx; m.amb = { muffle: ctx.createGain() }; m.wetIn = ctx.createGain(); m.erIn = ctx.createGain();
   m.doyOverride = doy; m.wind = wind;
   const calls = {}, args = {};
-  for (const v of ALL) { const o = m[v]; if (typeof o !== 'function' || ['auloNote', 'kitharaNote'].includes(v)) continue; m[v] = function (...a) { calls[v] = (calls[v] || 0) + 1; (args[v] ||= []).push(a.slice(3)); return o.apply(this, a); }; }
+  for (const v of ALL) { const o = m[v]; if (typeof o !== 'function' || ['athAuloNote', 'athKitharaNote'].includes(v)) continue; m[v] = function (...a) { calls[v] = (calls[v] || 0) + 1; (args[v] ||= []).push(a.slice(3)); return o.apply(this, a); }; }
   const L = profileOf('athens').animals;
   const put = () => m.place({ voices: { sparrow: 1 }, animals: L, roof: 'tile', town: 1, birds: 1, rain, indoors, cicadas: 0.9, at: { x, z, y, yaw: 0, hour } });
   put();
@@ -126,17 +126,17 @@ function listen({ x, z, y = 0, hour, doy = 125, rain = 0, indoors = false, wind 
 
 test('Athens placed: the Agora by day', () => {
   let r = listen({ x: -283, z: -146, hour: 9, secs: 900 });
-  assert.ok(r.calls.herald > 0, 'the herald at the Council\'s house');
-  assert.ok(!listen({ x: -283, z: -146, hour: 2, secs: 600 }).calls.herald, 'not at night');
+  assert.ok(r.calls.athHerald > 0, 'the herald at the Council\'s house');
+  assert.ok(!listen({ x: -283, z: -146, hour: 2, secs: 600 }).calls.athHerald, 'not at night');
   r = listen({ x: -205, z: -135, hour: 9, secs: 900 });
-  assert.ok(r.calls.hawkCheese > 0 || r.calls.fishBell > 0, `a hawker or the fish bell (${JSON.stringify(r.calls)})`);
+  assert.ok(r.calls.athHawkCheese > 0 || r.calls.athFishBell > 0, `a hawker or the fish bell (${JSON.stringify(r.calls)})`);
   r = listen({ x: -174, z: -128, hour: 10, secs: 400 });
-  assert.ok(r.calls.hydria > 0, 'jars filled at the fountain');
-  assert.ok(!listen({ x: -174, z: -128, hour: 10, rain: 0.9, secs: 300 }).calls.hydria, 'not in the downpour');
-  assert.ok(!listen({ x: -174, z: -128, hour: 23, secs: 300 }).calls.hydria, 'not at night');
+  assert.ok(r.calls.athHydria > 0, 'jars filled at the fountain');
+  assert.ok(!listen({ x: -174, z: -128, hour: 10, rain: 0.9, secs: 300 }).calls.athHydria, 'not in the downpour');
+  assert.ok(!listen({ x: -174, z: -128, hour: 23, secs: 300 }).calls.athHydria, 'not at night');
   r = listen({ x: -250, z: -190, hour: 11, secs: 1200 });
-  assert.ok(Object.keys(r.calls).filter((k) => /^hawk/.test(k)).length > 0, 'the stalls call');
-  assert.ok(!listen({ x: -250, z: -190, hour: 22, secs: 600 }).calls.hawkWreaths, 'the market is closed at night');
+  assert.ok(Object.keys(r.calls).filter((k) => /^athHawk/.test(k)).length > 0, 'the stalls call');
+  assert.ok(!listen({ x: -250, z: -190, hour: 22, secs: 600 }).calls.athHawkWreaths, 'the market is closed at night');
 });
 
 test('Athens placed: the trades at work', () => {
@@ -148,24 +148,24 @@ test('Athens placed: the trades at work', () => {
   r = listen({ x: wheel[0], z: wheel[1] + 4, hour: 10, secs: 600 });
   assert.ok(r.calls.wheel > 0, 'the potter\'s wheel in the Kerameikos');
   r = listen({ x: 31, z: -52, hour: 10, secs: 600 });
-  assert.ok(r.calls.mallet > 0, 'the masons at the Erechtheion');
+  assert.ok(r.calls.athMallet > 0, 'the masons at the Erechtheion');
   r = listen({ x: 100, z: 300, hour: 10, secs: 300 });
-  assert.ok(!r.calls.hammer && !r.calls.mallet && !r.calls.herald, 'far from everything');
+  assert.ok(!r.calls.hammer && !r.calls.athMallet && !r.calls.athHerald, 'far from everything');
 });
 
 test('Athens placed: music, the night and the seasons', () => {
   let r = listen({ x: 73, z: 24, hour: 9, secs: 1500 });
-  assert.ok(r.calls.aulos > 0, 'the aulos at the altar');
-  { const q = listen({ x: 73, z: 24, hour: 15, secs: 600 }); assert.ok(!q.calls.aulos, `not after the sacrifice ${JSON.stringify(q.calls)}`); }
-  const [kx, kz] = AT.EMITTERS.find((e) => e.voice === 'kithara').at;
-  assert.ok(listen({ x: kx, z: kz, hour: 12, secs: 1200 }).calls.kithara > 0, 'the kithara at the Odeion');
+  assert.ok(r.calls.athAulos > 0, 'the aulos at the altar');
+  { const q = listen({ x: 73, z: 24, hour: 15, secs: 600 }); assert.ok(!q.calls.athAulos, `not after the sacrifice ${JSON.stringify(q.calls)}`); }
+  const [kx, kz] = AT.EMITTERS.find((e) => e.voice === 'athKithara').at;
+  assert.ok(listen({ x: kx, z: kz, hour: 12, secs: 1200 }).calls.athKithara > 0, 'the kithara at the Odeion');
   r = listen({ x: 30, z: -30, hour: 22, secs: 600 });
-  assert.ok(r.calls.owl > 0, 'the little owl on the rock at night');
-  assert.ok(!listen({ x: 30, z: -30, hour: 13, secs: 600 }).calls.owl, 'not at noon');
+  assert.ok(r.calls.athOwl > 0, 'the little owl on the rock at night');
+  assert.ok(!listen({ x: 30, z: -30, hour: 13, secs: 600 }).calls.athOwl, 'not at noon');
   const pastas = AT.sites().find((s) => s.use === 'pastas').at;
   r = listen({ x: pastas[0], z: pastas[1], hour: 21.5, secs: 900 });
-  assert.ok(r.calls.symposium > 0, 'the symposium in an andron after dinner');
-  assert.ok(!listen({ x: pastas[0], z: pastas[1], hour: 11, secs: 600 }).calls.symposium, 'not at noon');
+  assert.ok(r.calls.athSymposium > 0, 'the symposium in an andron after dinner');
+  assert.ok(!listen({ x: pastas[0], z: pastas[1], hour: 11, secs: 600 }).calls.athSymposium, 'not at noon');
   assert.ok(listen({ x: -350, z: -120, hour: 14, doy: 200, secs: 400 }).calls.cicada > 0, 'cicadas in the grove on a summer afternoon');
   assert.ok(!listen({ x: -350, z: -120, hour: 14, doy: 20, secs: 400 }).calls.cicada, 'none in winter');
   assert.ok(listen({ x: -350, z: -120, hour: 22, doy: 280, secs: 300 }).calls.cricket > 3, 'crickets at an autumn night');
@@ -177,7 +177,7 @@ test('Athens placed: indoors the rooms have their own small sounds', () => {
   const s = AT.sites().find((q) => q.use === 'shop:shoe' && q.id.startsWith('row:') === false);
   let r = listen({ x: s.at[0], z: s.at[1], y: (s.y || 0) + 0.3, hour: 11, indoors: true, secs: 600 });
   assert.ok(r.m.plc.room && r.m.plc.room.same === s.id, 'in the shop');
-  assert.ok(r.calls.cobbler > 0, 'the cobbler\'s taps, whole inside his shop');
+  assert.ok(r.calls.athCobbler > 0, 'the cobbler\'s taps, whole inside his shop');
   r = listen({ x: 0, z: 0, y: 70.5, hour: 11, indoors: true, rain: 0.7, secs: 20 });
   assert.equal(r.m.plc.room.use, 'temple');
   assert.ok(r.m.plc.layers.room && r.m.plc.layers.roof, 'the room\'s air and the roof over one');

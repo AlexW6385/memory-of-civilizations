@@ -8,6 +8,8 @@ import { openSet } from './town.js';
 import { lots as allLots } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
 import { upperWalks } from './court-houses.js';
+import { shopWalks, shopRoute, nearLane } from './shoproutes.js';
+import './wear.js';
 
 const g = RIVER.ground;
 export const city = {
@@ -21,6 +23,7 @@ export const city = {
     { t: 'palace_tower', at: [-262, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.0, h: 24.5, roof: 11, face: -Math.PI / 2 },     // Tour Bonbec
     { t: 'palace_tower', at: [-236, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.3, h: 27.5, roof: 13, face: -Math.PI / 2 },     // Tour César
     { t: 'palace_tower', at: [-222, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.3, h: 27.5, roof: 13, face: -Math.PI / 2 },     // Tour d'Argent
+    { t: 'paris_wear', at: [-112, 0], y: g, len: 3.4, w: 3.6 },                                                                      // the gate's passage, worn by wheels and feet (docs §6e)
     { t: 'palace_wall', a: [-112, -100], b: [-112, 58], y: g, h: 8, th: 1.6, gates: [{ at: 100, w: 4 }] },
     { t: 'palace_tower', at: [-112, -6.5], y: g, r: 3.2, h: 14, roof: 7, face: 0 }, { t: 'palace_tower', at: [-112, 6.5], y: g, r: 3.2, h: 14, roof: 7, face: 0 },
     { t: 'palace_tower', at: [-112, 58], y: g, r: 3.0, h: 12, roof: 6.5, face: Math.PI / 4 },
@@ -122,7 +125,8 @@ export function streetLife() {
       const at = [sp.at[0] + sp.out[1] * (rand() - 0.5) * 0.6, sp.at[1] + sp.out[0] * (rand() - 0.5) * 0.6], rot = 0;
       fig(at, 1.0, faceTo(at, [at[0] - sp.out[0], at[1] - sp.out[1]]), { pose: rand() < 0.5 ? 'talk' : 'stand' });
       void rot; n++;
-      if (rand() < 0.5) { const q = [sp.at[0] + sp.out[1] * 1.7 + sp.out[0] * 0.5, sp.at[1] + sp.out[0] * 1.7 + sp.out[1] * 0.5]; L.push({ t: rand() < 0.5 ? 'barrel' : 'basket', at: q, y: 1.0, rot: rand() * 6, n: 2, seed: Math.floor(rand() * 1e6) }); }
+      if (rand() < 0.5) { let q = [sp.at[0] + sp.out[1] * 1.7 + sp.out[0] * 0.5, sp.at[1] + sp.out[0] * 1.7 + sp.out[1] * 0.5]; if (nearLane(q, shopRoute(l))) q = [sp.at[0] - sp.out[1] * 1.7 + sp.out[0] * 0.5, sp.at[1] - sp.out[0] * 1.7 + sp.out[1] * 0.5];   // (never in the door's lane: moved to the counter's other side)
+       L.push({ t: rand() < 0.5 ? 'barrel' : 'basket', at: q, y: 1.0, rot: rand() * 6, n: 2, seed: Math.floor(rand() * 1e6) }); }
     }
   }
   // pigs rooting loose on the strands and by the bridges' feet (one tripped a king's son's horse on a quay in 1131); dogs
@@ -156,6 +160,6 @@ export const river = {
 };
 void ISLAND;
 // the ways up in the court's houses (docs/settlements/paris.md §5e) are walked as routes of the chapel's plan, in its local frame (yaw 0)
-const houseWalks = upperWalks().map((r) => { const w = r.map(([x, z]) => [x - CHAPEL.origin[0], z - CHAPEL.origin[1]]); w.y0 = 0; return w; });
+const houseWalks = [...upperWalks(), ...shopWalks(10)].map((r) => { const w = r.map(([x, z]) => [x - CHAPEL.origin[0], z - CHAPEL.origin[1]]); w.y0 = 0; return w; });
 export const chapel = { ...chapelPlan, walks: [...(chapelPlan.walks || []), ...houseWalks], origin: CHAPEL.origin, base: g, district: undefined, view: [CHAPEL.origin[0] - 20, CHAPEL.origin[1] - 12, CHAPEL.origin[0] + 38, CHAPEL.origin[1] + 12] };
 export default chapel;

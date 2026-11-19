@@ -71,6 +71,13 @@
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
+import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
+import * as FLORENCE from '../settlements/florence/soundmap.js';
+import * as VENICE from '../settlements/venice/soundmap.js';
+import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
+import * as PARIS from '../settlements/paris/soundmap.js';
+import './voices-paris.js';
+import * as ROME from '../settlements/rome/soundmap.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -113,11 +120,11 @@ export const PROFILES = {
   constantinople: T({ ...MED, gull: 0.7 }, { cicadas: 0.5, animals: { rooster: 0.4, donkey: 0.4, dog: 0.5 }, bells: 'semantron' }),
   djenne: T({ dove: 1, sparrow: 0.6, kite: 0.5, tropic: 0.3 }, { frogs: 0.6, animals: { goat: 0.6, donkey: 0.5, rooster: 0.6, cattle: 0.4 }, roof: 'flat', adhan: 1 }),
   'edo-himeji': T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { rooster: 0.4, dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'toki' }),
-  florence: T(MED, { cicadas: 0.3, animals: { horse: 0.4, donkey: 0.3, dog: 0.3 }, bells: 'angelus-hours' }),
+  florence: T(MED, { cicadas: 0.3, animals: withLife({ horse: 0.4, donkey: 0.3, dog: 0.3 }, { market: 1, eaves: 1, map: FLORENCE }), bells: 'angelus-hours' }),
   shaolin: T({ warbler: 0.5, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.2 }, roof: 'tile', bells: 'monastery' }),
   'timurid-samarkand': T(NEAR, { animals: { donkey: 0.5, horse: 0.3, dog: 0.2 }, roof: 'flat', adhan: 1 }),
   dunhuang: T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: { dog: 0.3, donkey: 0.3, camel: 0.2 }, roof: 'flat', bells: 'monastery' }),
-  'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, animals: { dog: 0.2, crow: 0.2 }, roof: 'flat', bells: 'bonsho' }),
+  'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, roof: 'shingle', bells: null, animals: withLife({ dog: 0.2, crow: 0.2, rooster: 0.25 }, { canal: 1, market: 0.8, eaves: 1, map: KYOTO }) }),
   'abu-simbel': T(NEAR, { animals: { donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
   'qin-xianyang': T(NEAR, { animals: { cattle: 0.5, dog: 0.3, horse: 0.3 }, roof: 'tile' }),
   thebes: T(NEAR, { animals: { donkey: 0.5, dog: 0.3, cattle: 0.3 }, roof: 'flat' }),
@@ -178,13 +185,13 @@ export const PROFILES = {
   nara: T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { dog: 0.2 }, roof: 'tile', bells: 'bonsho' }),
   'new-york': T({ sparrow: 0.8 }, { animals: {}, roof: 'flat' }),
   'norse-borgund': T({ warbler: 1, crow: 0.5 }, { animals: { sheepbell: 0.7, cattle: 0.6, dog: 0.3, horse: 0.2 }, roof: 'shingle', bells: 'parish' }),
-  'ottoman-istanbul': T({ ...MED, gull: 0.8 }, { cicadas: 0.4, animals: { dog: 0.5, donkey: 0.3, horse: 0.3 }, roof: 'tile', adhan: 2 }),
-  paris: T(EU, { animals: { horse: 0.5, rooster: 0.3, dog: 0.3 }, roof: 'slate', bells: 'office' }),
+  'ottoman-istanbul': T({ ...MED, gull: 0.8 }, { cicadas: 0.4, animals: withLife({ dog: 0.5, donkey: 0.3, horse: 0.3 }, { market: 1, map: ISTANBUL }), roof: 'tile', adhan: 2 }),
+  paris: T(EU, { roof: 'slate', bells: 'paris', animals: withLife({ horse: 0.5, rooster: 0.3, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: PARIS }) }),
   persepolis: T(NEAR, { animals: { horse: 0.5, donkey: 0.4, dog: 0.3 }, roof: 'flat' }),
   petra: T({ dove: 1, kite: 0.4, sparrow: 0.5 }, { animals: { goat: 0.6, donkey: 0.4 }, roof: 'flat' }),
   'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, animals: { dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'drumbell' }),
   'rapa-nui': T({ gull: 1, tropic: 0.2 }, { animals: { rooster: 0.4 }, roof: 'thatch' }),
-  rome: T(MED, { cicadas: 0.5, animals: { donkey: 0.4, horse: 0.3, dog: 0.3 } }),
+  rome: T(MED, { cicadas: 0.5, frogs: 0.3, animals: withLife({ donkey: 0.4, horse: 0.3, dog: 0.3, rooster: 0.3 }, { canal: 1, market: 1, eaves: 1, map: ROME }) }),
   sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: { cattle: 0.6, goat: 0.4, rooster: 0.3 }, roof: 'thatch' }),
   'song-hangzhou': T(EAS, { cicadas: 0.7, frogs: 0.6, animals: { rooster: 0.4, dog: 0.3 }, roof: 'tile', bells: 'monastery' }),
   'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, animals: { donkey: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'tile', bells: 'monastery' }),
@@ -195,7 +202,7 @@ export const PROFILES = {
   tenochtitlan: T({ warbler: 0.8, tropic: 0.5 }, { frogs: 0.7, animals: { dog: 0.3 }, roof: 'flat' }),
   teotihuacan: T({ warbler: 0.8, dove: 0.5 }, { cicadas: 0.4, animals: { dog: 0.3 }, roof: 'flat' }),
   ur: T({ ...NEAR, gull: 0 }, { frogs: 0.5, animals: { donkey: 0.6, goat: 0.4, dog: 0.3 }, roof: 'flat' }),
-  venice: T({ ...MED, gull: 1 }, { cicadas: 0.2, animals: { dog: 0.2 }, roof: 'tile', bells: 'venice' }),
+  venice: T({ ...MED, gull: 1 }, { cicadas: 0.2, animals: withLife({ dog: 0.2 }, { canal: 1, market: 1, map: VENICE }), roof: 'tile', bells: 'venice' }),
   versailles: T(EU, { animals: { horse: 0.8, dog: 0.4 }, roof: 'slate', bells: 'angelus' }),
 };
 const DEFAULT = T({ warbler: 1, sparrow: 0.5 });
@@ -224,6 +231,8 @@ const HOURS = {
   // Suzhou: Hanshan's bell at midnight, far off; the Bao'en Temple's bell and drum at the fifth
   // watch's end and at dusk; the watchman's five watches (戌 7 pm, 亥 9, 子 11, 丑 1, 寅 3)
   suzhou: [[0, 'hanshan'], [4.6, 'temple-am'], [5, 'tower:am'], [18.5, 'temple-pm'], [18.75, 'tower:pm'], [19, 'watch:1'], [21, 'watch:2'], [23, 'watch:3'], [1, 'watch:4'], [3, 'watch:5']],
+  // Paris 1248: the canonical hours from Notre-Dame's north tower and the parish churches, the curfew bell at 7:30 (the equinox between seven in winter and eight in summer)
+  paris: [[2, 'paris:matins'], [5, 'paris:lauds'], [6, 'paris:prime'], [9, 'paris:terce'], [12, 'paris:sext'], [15, 'paris:none'], [17.5, 'paris:vespers'], [19.5, 'paris:curfew']],
   monastery: [[5, 'zhong'], [18.5, 'gu']],
   bonsho: [[5.5, 'bonsho'], [18.2, 'bonsho']],
   zvon: [[6.5, 'zvon'], [17, 'zvon']],

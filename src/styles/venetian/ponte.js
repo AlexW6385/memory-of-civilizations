@@ -39,7 +39,9 @@ export function ponte(el, { bag, col }) {
     const u0 = edges[i], u1 = edges[i + 1], um = (u0 + u1) / 2, yt = y + deckAt(um) - 0.0, sb0 = soffit(u0), sb1 = soffit(u1);
     if (yt - Math.max(sb0, sb1) < 0.05) continue;
     mk('brick', u0, u1, sb0, sb1, yt - 0.1, yt - 0.1, -W / 2, W / 2);
-    mk('limestone', u0, u1, yt - 0.1, yt - 0.1, yt, yt, -W / 2 - 0.05, W / 2 + 0.05);       // the stone tread, a hair wider than the body
+    // the stone tread, a hair wider than the body, worn to a dish where the feet fall (the middle 1.8 m 1.8 cm lower, from a few decades' use) [inferred: stone steps wear so]
+    mk('limestone', u0, u1, yt - 0.1, yt - 0.1, yt, yt, -W / 2 - 0.05, -0.9); mk('limestone', u0, u1, yt - 0.1, yt - 0.1, yt, yt, 0.9, W / 2 + 0.05);
+    mk('limestone', u0, u1, yt - 0.1, yt - 0.1, yt - 0.018, yt - 0.018, -0.9, 0.9);
   }
   // the ring of the arch in white stone on both faces
   for (const s of [-1, 1]) for (let u = ua; u < ub - 1e-6; u += 0.5) {
@@ -63,6 +65,11 @@ export function pozzo(el, { bag }) {
   bag.add('iron', box(x - 0.55, y + 1.15, z - 0.02, x + 0.55, y + 1.18, z + 0.02));
   for (const s of [-1, 1]) bag.add('iron', box(x + s * 0.5 - 0.02, y + 1.15, z - 0.02, x + s * 0.5 + 0.02, y + 1.0, z + 0.02));
   bag.add('iron', lathe([[0.06, 0], [0.06, 0.1], [0.001, 0.1]], 6, null, x, y + 1.05, z));                                      // the pulley
+  // the ropes' wear: two grooves in the lip, dark arcs where the bucket's rope has run over it for generations [inferred]
+  for (const a0 of [0.4 + (Math.abs(Math.round(x * 7 + z * 3)) % 7) * 0.3, 3.5 + (Math.abs(Math.round(x * 5 - z * 11)) % 5) * 0.3]) for (let k = 0; k < 4; k++) {
+    const a = a0 + k * 0.09, b = a0 + (k + 1) * 0.09, rr = 0.5;
+    bag.add('iron', rod([x + Math.cos(a) * rr, y + 0.955, z + Math.sin(a) * rr], [x + Math.cos(b) * rr, y + 0.955, z + Math.sin(b) * rr], 0.012, 4));
+  }
   for (const [dx, dz] of [[1.5, 0], [-1.5, 0], [0, 1.5], [0, -1.5]]) bag.add('limestone', box(x + dx - 0.35, y + 0.0, z + dz - 0.35, x + dx + 0.35, y + 0.035, z + dz + 0.35));     // the drains (pilelle) in the paving
 }
 

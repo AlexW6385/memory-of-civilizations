@@ -26,7 +26,7 @@ const OPEN_TRADES = ['bronze', 'shoe', 'cloth', 'wine', 'perfume', 'carpenter'];
 /** The work heard from each trade's shop: [voice, gap in seconds [min, max], hours [from, to]]. [inferred from the trade] */
 const TRADE_WORK = {
   bronze: [['hammer', [12, 30], [6.5, 17.5]]],
-  shoe: [['cobbler', [8, 20], [6.5, 18]]],
+  shoe: [['athCobbler', [8, 20], [6.5, 18]]],
   cloth: [['clothRustle', [18, 40], [7, 18]]],
   wine: [['pourWine', [30, 70], [9, 21]]],
   perfume: [['mortar', [18, 40], [7, 17.5]]],
@@ -38,9 +38,9 @@ const TRADE_WORK = {
 };
 /** The household's own sounds (the women's loom and quern, the kitchen, the court's hens), by the kind of house. */
 const HOUSE_WORK = {
-  small: [['kitchen', [14, 30], [5.5, 20]], ['quern', [40, 90], [5.5, 10]], ['hens', [30, 80], [6, 18.5]]],
-  pastas: [['kitchen', [12, 26], [5.5, 21]], ['loom', [24, 50], [6.5, 18.5]], ['symposium', [60, 140], [19.5, 24.5]]],
-  workshop: [['chisel', [14, 30], [7, 17.5]], ['kitchen', [20, 40], [6, 20]], ['hens', [40, 90], [6, 18.5]]],
+  small: [['kitchen', [14, 30], [5.5, 20]], ['athQuern', [40, 90], [5.5, 10]], ['athHens', [30, 80], [6, 18.5]]],
+  pastas: [['kitchen', [12, 26], [5.5, 21]], ['loom', [24, 50], [6.5, 18.5]], ['athSymposium', [60, 140], [19.5, 24.5]]],
+  workshop: [['chisel', [14, 30], [7, 17.5]], ['kitchen', [20, 40], [6, 20]], ['athHens', [40, 90], [6, 18.5]]],
   simon: [['kitchen', [14, 30], [5.5, 20]], ['loom', [26, 60], [6.5, 18.5]]],
 };
 
@@ -75,7 +75,7 @@ export function sites() {
 export const WELLS = [[128.6, -173.0], [-136.3, 168.0], [27.9, 199.0]];
 
 /** The stalls' hawkers, at the stalls of wayside.js stallSites() (the test checks each against it): [voice, [x, z]]. */
-const HAWKERS = [['hawkCheese', [-205, -129.7]], ['hawkWreaths', [-249, -182]], ['hawkOlives', [-253.3, -190.5]], ['hawkCheese', [-291.7, -237.4]], ['hawkWreaths', [-282.4, -248.4]]];
+const HAWKERS = [['athHawkCheese', [-205, -129.7]], ['athHawkWreaths', [-249, -182]], ['athHawkOlives', [-253.3, -190.5]], ['athHawkCheese', [-291.7, -237.4]], ['athHawkWreaths', [-282.4, -248.4]]];
 
 const THOLOS = [-280, -133];
 export const FAR = {};
@@ -103,11 +103,11 @@ export function roomAt(x, z, y = 0) {
 const R0 = { tone: [300, 0.25], roof: 1.0, hush: 0.8, work: [['clothRustle', 50]] };
 export const ROOMS = {
   house: { ...R0, work: [['kitchen', 40]] },
-  small: { ...R0, work: [['kitchen', 36], ['hens', 70]] },
+  small: { ...R0, work: [['kitchen', 36], ['athHens', 70]] },
   pastas: { tone: [330, 0.3], roof: 1.0, hush: 0.8, work: [['kitchen', 30], ['clothRustle', 60]] },
   workshop: { tone: [380, 0.35], roof: 1.0, hush: 0.9, work: [['chisel', 40]] },
   'shop:bronze': { tone: [420, 0.4], roof: 1.0, hush: 1.0, work: [['drawer', 120]] },
-  'shop:shoe': { tone: [300, 0.3], roof: 1.0, hush: 0.8, work: [['cobbler', 22]] },
+  'shop:shoe': { tone: [300, 0.3], roof: 1.0, hush: 0.8, work: [['athCobbler', 22]] },
   'shop:cloth': { tone: [280, 0.2], roof: 1.0, hush: 0.7, work: [['clothRustle', 26]] },
   'shop:wine': { tone: [300, 0.3], roof: 1.0, hush: 0.8, work: [['jarLid', 40]] },
   'shop:perfume': { tone: [260, 0.2], roof: 1.0, hush: 0.7, work: [['jarLid', 60]] },
@@ -118,7 +118,7 @@ export const ROOMS = {
   'workshop:coroplast': { tone: [300, 0.25], roof: 1.0, hush: 0.8, work: [['clay', 16]] },
   temple: { tone: [130, 0.3], roof: 0.6, hush: 0.45, work: [['clothRustle', 90]] },
   hall: { tone: [160, 0.25], roof: 0.7, hush: 0.55, work: [['kitchen', 50]] },
-  fountain: { tone: [520, 0.3], roof: 0.6, hush: 0.95, work: [['hydria', 18]] },
+  fountain: { tone: [520, 0.3], roof: 0.6, hush: 0.95, work: [['athHydria', 18]] },
 };
 export const UPPER = { tone: [210, 0.12], roof: 1.3, hush: 0.6, work: [['clothRustle', 40]] };
 
@@ -172,25 +172,25 @@ export const frogGround = () => 0;
  */
 export const EMITTERS = [
   // the Agora by day: the herald at the Council's house (by the Tholos), the fish-market's bell, the hawkers at their stalls
-  { voice: 'herald', at: [-283, -151], r50: 30, gap: [70, 170], hours: [7.5, 12.5], rainMax: 0.7 },
-  { voice: 'fishBell', at: [-200, -150], r50: 30, gap: [120, 260], hours: [7.5, 11], rainMax: 0.7 },
+  { voice: 'athHerald', at: [-283, -151], r50: 30, gap: [70, 170], hours: [7.5, 12.5], rainMax: 0.7 },
+  { voice: 'athFishBell', at: [-200, -150], r50: 30, gap: [120, 260], hours: [7.5, 11], rainMax: 0.7 },
   ...HAWKERS.map(([voice, at], i) => ({ voice, at, r50: 16, gap: [26 + i * 4, 70 + i * 6], hours: [7, 14], rainMax: 0.5 })),
   // the South-East Fountain House: women filling their jars (§11b)
-  { voice: 'hydria', at: mid(FOUNTAIN), r50: 14, gap: [18, 46], hours: [5.5, 18.5], dry: true },
+  { voice: 'athHydria', at: mid(FOUNTAIN), r50: 14, gap: [18, 46], hours: [5.5, 18.5], dry: true },
   // the smith at the Hephaisteion on the Kolonos hill, the bronze-workers' quarter about it
   { voice: 'hammer', at: [KOLONOS.c[0] + 14, KOLONOS.c[1] + 12], r50: 15, gap: [14, 34], hours: [6.5, 17.5], dry: true },
   // the masons at the Erechtheion, not yet finished (the accounts of 409/8, dossier §20)
-  { voice: 'mallet', at: [31, -56], r50: 15, gap: [12, 30], hours: [6.5, 17], dry: true },
+  { voice: 'athMallet', at: [31, -56], r50: 15, gap: [12, 30], hours: [6.5, 17], dry: true },
   // the flute at the altar of Athena, the sacrifice's music (§14)
-  { voice: 'aulos', at: [73, 24], r50: 20, gap: [80, 200], hours: [7, 11.5], rainMax: 0.3, after: true },
+  { voice: 'athAulos', at: [73, 24], r50: 20, gap: [80, 200], hours: [7, 11.5], rainMax: 0.3, after: true },
   // the Odeion, built for music: a kithara and an aulos in practice
-  { voice: 'kithara', at: mid(ODEION.rect), r50: 22, gap: [70, 160], hours: [8, 17.5], rainMax: 0.5, after: true },
-  { voice: 'aulos', at: [mid(ODEION.rect)[0] + 6, mid(ODEION.rect)[1] - 4], r50: 20, gap: [120, 280], hours: [9, 17], rainMax: 0.4, after: true },
+  { voice: 'athKithara', at: mid(ODEION.rect), r50: 22, gap: [70, 160], hours: [8, 17.5], rainMax: 0.5, after: true },
+  { voice: 'athAulos', at: [mid(ODEION.rect)[0] + 6, mid(ODEION.rect)[1] - 4], r50: 20, gap: [120, 280], hours: [9, 17], rainMax: 0.4, after: true },
   // the Academy's palaestra: a kithara with the lessons
-  { voice: 'kithara', at: mid(PALAESTRA), r50: 16, gap: [80, 180], hours: [8, 16.5], rainMax: 0.5, after: true },
+  { voice: 'athKithara', at: mid(PALAESTRA), r50: 16, gap: [80, 180], hours: [8, 16.5], rainMax: 0.5, after: true },
   // the little owl on the rock at night
-  { voice: 'owl', at: [30, -30], r50: 45, gap: [25, 70], hours: [20, 4.5], rainMax: 0.5 },
-  { voice: 'owl', at: [-100, 20], r50: 45, gap: [40, 100], hours: [20.5, 4], rainMax: 0.5 },
+  { voice: 'athOwl', at: [30, -30], r50: 45, gap: [25, 70], hours: [20, 4.5], rainMax: 0.5 },
+  { voice: 'athOwl', at: [-100, 20], r50: 45, gap: [40, 100], hours: [20.5, 4], rainMax: 0.5 },
   // hens by the lanes at the Kerameikos' edge
-  { voice: 'hens', at: [KERAMEIKOS[0] + 12, KERAMEIKOS[3] + 4], r50: 9, gap: [40, 100], hours: [6, 18.5], dry: true },
+  { voice: 'athHens', at: [KERAMEIKOS[0] + 12, KERAMEIKOS[3] + 4], r50: 9, gap: [40, 100], hours: [6, 18.5], dry: true },
 ];

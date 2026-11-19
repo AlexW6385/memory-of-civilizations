@@ -190,3 +190,42 @@ The eleven enterable houses within 70 m of the arrival (osteria, merchant's hous
 
 ## Round 5: houses to enter
 - Eleven houses within 120 m of the arrival are open (the osteria, five homes, botteghe of cloth, wine, goldsmith, smith and candles), with the innkeeper and customers, the craftsman at his counter or bench, the wife at the hearth (`src/settlements/florence/inside.js`).
+
+## 16. The visitor's walk, and the slimming it paid for
+- The walk is the arrival's streets plus the routes of `walk.js`. Houses within 42 m of a route keep the full near form; the others take a flat, far-lite near form (flat window and door frames, fewer arc segments, no goods or signs on counters, a coarser rustication). The full form is unchanged. [inferred: a walker cannot see the difference beyond a few metres; the geometry saved is 131 MB to 103 MB]
+- Every shop-house (bottega) within 24 m of a walk route is open, with its trade's goods at the door and its keeper at the bench; one casa in three beside them is lived in (hearth room or kitchen). [stated: workshop and shop fronts opened onto the street as counters under the shutter — yourwaytoflorence.com/db/brunell/houses.htm; the hearth room as the heart of the workers' home — hiddenflorence.org/stories/giovanni/3-the-workers-home] The 46 routes of `openwalk.js` pass the door and enter the front room.
+- The first frame holds its draws: near the arrival the walk's extra homes and the goldsmith are not opened (they would bring new goods materials into the first view). [inferred, a budget decision]
+
+## 17. Night
+- There was no public street lighting. Light at night came from what the houses and the shrines carried. [stated: torch brackets (porta-torcia) held flaming torches "before the advent of gas and electric street lighting"; "nighttime Florence depended on firelight mounted directly onto buildings" — travelbinger.com, the hardware of a Renaissance city]
+- Palaces carried wrought-iron lanterns and torch-stands, and rings, at the corners and on the facade (Palazzo Strozzi, by Niccolo Grosso, il Caparra); a lantern was lit by firing "tangled oiled rags" on the central spike. [stated: en.wikipedia.org/wiki/Palazzo_Strozzi; yourwaytoflorence.com/db/brunell/facade.htm] Built: the torch-holder at the palazzo corner and the lantern brackets of the casas glow (the `lamp_glass` pieces) and throw a pool on the paving, a wash on the wall and a glow ball (the `halo` material, additive, at night only).
+- The street tabernacles had candles lit "to provide light during the night". [stated: firenze-oltrarno.net/english/arte/tabernacoli.php] Built: each tabernacolo lamp has a small wash on its wall and a glow.
+- Lit windows: about one house window in five on the near houses shows a dim lamp-lit sheet where the shutters are open. [inferred: oil lamps and candles in rooms; a sheet of dull brightness, not a glare. The spread by hash of the house's seed]
+- Not built: any lamp on a street with no wall fixture, any lit shop at night (the shops closed with the light; [inferred]).
+- Wear: the soot of the forge and the oven draws up the wall above the open arch of a smith's or a baker's shop, a dark tongue 0.7 to 1.4 m high; the doorstep of each house has a darker hollow where feet cross it. [inferred: forges and ovens burnt at an open front; stone treads wear — DESIGN §5 asks for both. The dark is the wood_dark of the tile, to add no draw]
+- Light by the door: the osteria and the homes with a fire, when open, throw a warm pool on the street before the door. [inferred: the inn kept open into the evening; a hearth room lit through an open door]
+
+## 18. Sound
+A placed map (`soundmap.js`, `src/engine/voices-florence.js`): each sound has a place, and the engine puts it there.
+- The Mercato Vecchio: the chain on the column of Abundance hung for the opening and closing of the market, so the market has its bell-like clink of the chain at the hours of opening and closing. [stated: dossier §4 and the sources of "Colonna dell'Abbondanza" (Wikipedia; Dovizia (Donatello)); the sound itself is inferred]
+- The Ponte Vecchio's shops were given to butchers and greengrocers in 1442: the chop and the call from the bridge. [stated: dossier §4, Ponte Vecchio; the sound is inferred]
+- The Arno's weirs (pescaie) make a steady fall of water at their places. [stated: Museo Galileo itineraries, dossier §10; the loudness is inferred]
+- The dyers' yard on the Corso dei Tintori: vats, the slap of wet cloth. [stated: dossier §5, voicemap and refashioningrenaissance; the sound is inferred]
+- The workshops of the walk's open houses, each by its trade and its hours: the smith's hammer, the joiner's plane, the goldsmith's chisel, the clip of shears at the draper's, the loom, the mortar of the spice-seller, the pour of wine, the sack and the oven of the baker (before dawn), the candle-maker's pour. [inferred: the work of each trade; the guilds' day hours]
+- The streets carry no Chinese passing-voices (sedan-bearers, the rattle-drum of the pedlar, the watchman's clapper): the engine's `streetTrack` is returned empty for Florence. [inferred: Florentine street cries are not documented here; silence is better than a wrong sound]
+- The wells, and the rooms of the open houses, with the muffling of a room indoors. [inferred]
+
+## 19. Animals
+- Cats at the doors of the open houses on the walk, by the hash of the lot, and dogs at the butchers' and bakers' fronts. [inferred: ordinary town animals about the food trades; DESIGN §5 lists them]
+- Hens and a rooster at the Mercato Vecchio, by the stalls. [inferred: a market that sold food, poultry among it]
+- Two cages of songbirds at first-floor sills of the houses on the walk: rings and hooks on the upper floors held "clothes, curtains, animals, or bird cages". [stated: yourwaytoflorence.com/db/brunell/facade.htm; the goldfinch is inferred]
+- Mallards on the Arno between the weirs. [inferred]
+- Not built: the cattle of the butchers' shops, pigeons beyond the sparrows already there.
+
+## 20. What still falls short
+- Wear is thin: the stains on the stucco, the damp and the streaks were there already; no moss or lichen on the shady side, no dust, no handrails worn.
+- Writing: no shop signs bear words (the emblems are painted tools and wares, true to a largely unlettered customer [inferred]); the only inscription is that of Santa Maria Novella's frieze. Latin or Tuscan on lintels, arms or sign boards would need a letterer's check, and is left plain.
+- Night: only the near houses have lit windows and lamps; the landmark's interior has no candles or lamps in the halo material, and the Signoria and the Medici palace have no torch-holder light yet.
+- The walk's first 100 m: its extra homes and the nearest goldsmith are closed to hold the first frame's draws.
+- The Calzaiuoli view costs about 4.8 M triangles a frame, mostly the pietra_serena of the near tile (338 k in one mesh).
+- The kitchen at the Via de' Gori lot (-46.5, -147) has no route in: the walker stops short of its step for a reason not found.
