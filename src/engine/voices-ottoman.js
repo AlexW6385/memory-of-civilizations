@@ -42,7 +42,7 @@ export function pickIst(hour, doy, rnd = R()) {
 const RAST = [392, 440, 480, 523.3, 587.3, 641, 740, 784];
 
 /** Levels of the voices (relative to their own scale), set by measurement. */
-export const GAIN_IST = { copperBeat: 0.55, goldTap: 1.0, ladle: 0.6, recite: 1.0, fountain: 1.0, tavla: 0.8, ney: 0.55, swifts: 1.6, gull: 1.0, catCry: 1.0 };
+export const GAIN_IST = { copperBeat: 0.55, ottGoldTap: 1.0, ladle: 0.6, recite: 1.0, ottFountain: 1.0, tavla: 0.8, ney: 0.55, swifts: 1.6, gull: 1.0, catCry: 1.0 };
 
 export const OTTOMAN_VOICES = {
   // ── the work of the shops and kitchens ──────────────────────────────────────
@@ -61,7 +61,7 @@ export const OTTOMAN_VOICES = {
     return w - t;
   },
   /** The goldsmith's small hammer in the jewellers' lane: light taps, high and quick, in short runs. */
-  goldTap(t, bus, lv) {
+  ottGoldTap(t, bus, lv) {
     let w = t;
     for (let k = 0, n = 6 + Math.floor(R() * 10); k < n; k++) { const x = w; this.cue(x, (y) => this.struck(y, 2600 * (0.95 + R() * 0.1), 0.02 * lv, bus, [[1, 1, 0.08], [2.7, 0.4, 0.04]])); w += 0.13 + R() * 0.1; }
     return w - t + 0.3;
@@ -110,7 +110,7 @@ export const OTTOMAN_VOICES = {
 
   // ── water ───────────────────────────────────────────────────────────────────
   /** The şadırvan of the courtyard: water falling from its taps into the basin, a few seconds of broken hiss and the plink of drops under it. */
-  fountain(t, bus, lv) {
+  ottFountain(t, bus, lv) {
     const dur = 4 + R() * 3;
     this.rasp(t, dur, 2600, 0.45, 0.014 * lv, bus, 28, 0.5);
     this.rasp(t, dur, 1100, 0.6, 0.012 * lv, bus, 9, 0.7);

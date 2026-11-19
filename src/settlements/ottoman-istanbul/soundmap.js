@@ -58,10 +58,10 @@ export function emitters() {
   EM = [];
   const add = (e) => EM.push(e);
   // water: the şadırvan of the courtyard, the street fountains, the pools of the medreses' courts, the hospital's, the mescit's ablution basins
-  add({ voice: 'fountain', at: SADIRVAN, r50: 9, gap: [4, 8], hours: [3.5, 23.5], id: 'sadirvan' });
+  add({ voice: 'ottFountain', at: SADIRVAN, r50: 9, gap: [4, 8], hours: [3.5, 23.5], id: 'sadirvan' });
   TAPS.forEach((p, i) => add({ voice: 'tap', at: p, r50: 5, gap: [7, 16], hours: [4, 23], id: 'cesme' + i }));
-  for (const q of MEDRESES) add({ voice: 'fountain', at: mid(q.rect), r50: 6, gap: [12, 26], hours: [5, 21], lv: 0.5, id: 'pool:' + q.id });
-  add({ voice: 'fountain', at: [DARUSSIFA[0] + 4.4 * 3.5, mid(DARUSSIFA)[1]], r50: 6, gap: [14, 30], hours: [5, 21], lv: 0.5, id: 'pool:hospital' });
+  for (const q of MEDRESES) add({ voice: 'ottFountain', at: mid(q.rect), r50: 6, gap: [12, 26], hours: [5, 21], lv: 0.5, id: 'pool:' + q.id });
+  add({ voice: 'ottFountain', at: [DARUSSIFA[0] + 4.4 * 3.5, mid(DARUSSIFA)[1]], r50: 6, gap: [14, 30], hours: [5, 21], lv: 0.5, id: 'pool:hospital' });
   add({ voice: 'tap', at: [MESCIT.rect[0] + 1, MESCIT.rect[1] - 1], r50: 4, gap: [10, 24], hours: [4, 23], lv: 0.8, id: 'ablution:a' }, { voice: 'tap', at: [MESCIT.rect[2] - 1, MESCIT.rect[1] - 1], r50: 4, gap: [12, 28], hours: [4, 23], lv: 0.8, id: 'ablution:b' });
   // the hamam: drops and bowls in the hot room (heard whole inside, through the walls from outside)
   add({ voice: 'hamamDrip', at: mid(HAMAM), r50: 7, gap: [4, 9], hours: [6, 22], inside: 'hamam', id: 'hamam' });
@@ -86,7 +86,7 @@ export function emitters() {
   // the market's lanes: the goldsmiths' taps in the jewellers' lane, murmur in the bedesten, the booksellers' paper, cloth, the shoe lane's last-taps
   const L = Object.fromEntries(CARSI.lanes.map((l) => [l.id, l]));
   const pt = (l, k) => (l.horiz ? [l.a + (l.b - l.a) * k, l.c] : [l.c, l.a + (l.b - l.a) * k]);
-  for (const k of [0.25, 0.7]) add({ voice: 'goldTap', at: pt(L.kuyumcular, k), r50: 6, gap: [9, 24], hours: [8, 17.5], id: 'gold' + k });
+  for (const k of [0.25, 0.7]) add({ voice: 'ottGoldTap', at: pt(L.kuyumcular, k), r50: 6, gap: [9, 24], hours: [8, 17.5], id: 'gold' + k });
   add({ voice: 'lastTap', at: pt(L.haffaflar, 0.5), r50: 6, gap: [14, 30], hours: [8, 17.5], id: 'shoes' });
   add({ voice: 'paper', at: pt(L.sahaflar, 0.5), r50: 4, gap: [18, 40], hours: [8, 17.5], id: 'books' });
   add({ voice: 'clothRustle', at: pt(L.zenneciler, 0.6), r50: 5, gap: [14, 34], hours: [8, 17.5], id: 'cloth' });

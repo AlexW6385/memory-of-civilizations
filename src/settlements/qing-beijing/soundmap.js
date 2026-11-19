@@ -39,7 +39,7 @@ const WORK = {
   pawn: [['abacus', [20, 50], [8, 18]]],
   wine: [['pourWine', [30, 70], [9, 22]]],
   lantern: [['splitBamboo', [20, 45], [8, 17.5]]],
-  shoes: [['awl', [14, 32], [8, 18]]],
+  shoes: [['qingAwl', [14, 32], [8, 18]]],
 };
 const HOUSE_WORK = [['kitchen', [16, 34], [5.5, 20]]];
 
@@ -223,7 +223,7 @@ export const ROOMS = {
   pawn: { tone: [240, 0.2], roof: 0.9, hush: 0.6, work: [['coin', 34]] },
   wine: { tone: [300, 0.3], roof: 1.0, hush: 0.8, work: [['jarLid', 40]] },
   lantern: { tone: [260, 0.2], roof: 1.0, hush: 0.7, work: [['paper', 36]] },
-  shoes: { tone: [260, 0.2], roof: 1.0, hush: 0.7, work: [['awl', 22]] },
+  shoes: { tone: [260, 0.2], roof: 1.0, hush: 0.7, work: [['qingAwl', 22]] },
   hall: { tone: [150, 0.22], roof: 0.7, hush: 0.5, work: [] },                       // the great halls: high, empty, the air in them
   gate: { tone: [200, 0.2], roof: 0.8, hush: 0.6, work: [] },
   duty: { tone: [300, 0.25], roof: 1.0, hush: 0.7, work: [['paper', 40], ['teaClink', 70]] },

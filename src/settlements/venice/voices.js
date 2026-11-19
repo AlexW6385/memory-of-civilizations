@@ -3,7 +3,7 @@
 // choir of San Marco, the caulkers' mallets, the Arsenal's yard heard far off, the trades of the Procuratie's shops, the night patrol. Synthesised from
 // the engine's own tools (noise, oscillators, struck partials, the formant `cry`); no samples. Each is `name(t, bus, lv[, track])`, made from `t` into `bus`,
 // returning how long it lasts. [inferred throughout: no recording of Venice about 1500 exists; what each sound is of is sourced in the dossier §5f.3.]
-import { VOICES, GAIN } from '../../engine/voices.js';
+import { addVoices } from '../../engine/voices.js';
 
 const R = Math.random;
 const pick = (a) => a[Math.floor(R() * a.length)];
@@ -105,6 +105,5 @@ const V = {
     return dur;
   },
 };
-for (const [k, v] of Object.entries(V)) if (!VOICES[k]) VOICES[k] = v;
-Object.assign(GAIN, { venGondola: 1.3, venChoir: 1.1, venShipyard: 1.3 });
+addVoices('venice/voices.js', V, { venGondola: 1.3, venChoir: 1.1, venShipyard: 1.3 });
 export const VENICE_VOICES = Object.keys(V);

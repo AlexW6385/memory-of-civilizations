@@ -5,7 +5,7 @@
 // contours are [inferred]: no recording of ancient Rome exists; what each sound is, and when, rests on the sources
 // of §4.19 (Seneca's list of the noises about a bath, Juvenal's night, the vigiles, the baths' bronze).
 
-import { VOICES, GAIN } from './voices.js';
+import { addVoices } from './voices.js';
 
 const R = Math.random;
 const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
@@ -131,5 +131,4 @@ export const ROMAN_VOICES = {
     return this.teaTalk(t, bus, lv * 0.35);
   },
 };
-Object.assign(VOICES, ROMAN_VOICES);
-Object.assign(GAIN, { fountain: 1.0, bathNoise: 1.2, bathGong: 1.0, millstone: 1.0, fullerTread: 1.0, clothBeat: 1.0, craneCreak: 1.0, tibia: 1.0, hawkerRome: 1.0, cartPass: 1.0, vigilesPatrol: 1.0, footfall: 1.0, murmur: 1.0 });
+addVoices('voices-rome.js', ROMAN_VOICES, { fountain: 1.0, bathNoise: 1.2, bathGong: 1.0, millstone: 1.0, fullerTread: 1.0, clothBeat: 1.0, craneCreak: 1.0, tibia: 1.0, hawkerRome: 1.0, cartPass: 1.0, vigilesPatrol: 1.0, footfall: 1.0, murmur: 1.0 });

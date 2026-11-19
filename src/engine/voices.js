@@ -74,6 +74,25 @@ export function pickTrade(hour, doy, rnd = R()) {
 /** How loud each voice is made relative to its own scale (set by measuring the render: tools/sound-render.mjs). */
 export const GAIN = { loom: 0.6, hammer: 0.8, qin: 0.4, cicada: 2.2, frog: 1.4, scissors: 2.2, teaBlock: 0.7 };
 
+/** Who defined each voice / gain entry (name -> module label), and every refused duplicate, so a test can list all of them. */
+export const VOICE_OWNER = new Map();
+export const GAIN_OWNER = new Map();
+export const VOICE_CONFLICTS = [];
+/** The one way a module adds voices to the engine's shared table (VOICES, and GAIN for its levels). A name already defined, by any module,
+ *  is NEVER overwritten: every such name is recorded in VOICE_CONFLICTS and the call throws, naming the name and both modules. Give each
+ *  settlement's voices its short prefix (athX, ottX, qingX ...) so names stay unique. `owner` is the module's file name. */
+export function addVoices(owner, voices, gain = {}) {
+  const bad = [];
+  for (const k of Object.keys(voices)) if (k in VOICES || VOICE_OWNER.has(k)) bad.push(['voice', k, VOICE_OWNER.get(k) || 'voices.js']);
+  for (const k of Object.keys(gain)) if (k in GAIN || GAIN_OWNER.has(k)) bad.push(['gain', k, GAIN_OWNER.get(k) || 'voices.js']);
+  if (bad.length) {
+    for (const [kind, name, first] of bad) VOICE_CONFLICTS.push({ kind, name, modules: [first, owner] });
+    throw new Error(`voice name(s) defined twice, refusing to overwrite: ${bad.map(([kind, name, first]) => `${kind} '${name}' (${first} and ${owner})`).join('; ')}`);
+  }
+  for (const [k, v] of Object.entries(voices)) { VOICES[k] = v; VOICE_OWNER.set(k, owner); }
+  for (const [k, v] of Object.entries(gain)) { GAIN[k] = v; GAIN_OWNER.set(k, owner); }
+}
+
 export const VOICES = {
   // ── the place of a sound ────────────────────────────────────────────────────
   /** The listener: the engine's `at`, else the way in. */
@@ -835,9 +854,13 @@ export const VOICES = {
 /** Put the voices on Music's prototype (audio.js does it once). */
 export function installVoices(Music) {
   for (const [k, v] of Object.entries(VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
-  for (const [k, v] of Object.entries(QING_VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;     // Beijing's (voices-qing.js)
-  for (const [k, v] of Object.entries(OTTOMAN_VOICES)) if (!Music.prototype[k]) Music.prototype[k] = v;
   Music.prototype.seasonDoy = function seasonDoy() { return this.doyOverride ?? doyOf(ENV.seasonWinter.value, ENV.seasonAutumn.value); };
 }
-import { ATHENS_VOICES, ATHENS_GAIN } from './voices-athens.js'; Object.assign(VOICES, ATHENS_VOICES); Object.assign(GAIN, ATHENS_GAIN);   // Athens' voices (docs/settlements/athens.md §20)
-import { VOICES_FLORENCE } from './voices-florence.js'; Object.assign(VOICES, VOICES_FLORENCE);       // (Florence's own: the market's cries, the chain, the cleaver, the weirs)
+// The base voices (above) and the settlements' own, all through addVoices (a name defined twice throws). Modules that import voices.js
+// (kyoto, paris, rome, venice) add theirs from their own file.
+for (const k of Object.keys(VOICES)) VOICE_OWNER.set(k, 'voices.js');
+for (const k of Object.keys(GAIN)) GAIN_OWNER.set(k, 'voices.js');
+import { ATHENS_VOICES, ATHENS_GAIN } from './voices-athens.js'; addVoices('voices-athens.js', ATHENS_VOICES, ATHENS_GAIN);   // Athens' voices (docs/settlements/athens.md §20)
+import { VOICES_FLORENCE } from './voices-florence.js'; addVoices('voices-florence.js', VOICES_FLORENCE);       // (Florence's own: the market's cries, the chain, the cleaver, the weirs)
+addVoices('voices-qing.js', QING_VOICES);         // Beijing's
+addVoices('voices-ottoman.js', OTTOMAN_VOICES);   // Istanbul's

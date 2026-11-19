@@ -73,7 +73,7 @@ test('Florence: its own voices can be made, and every voice its map names exists
   const { ctx } = fake(), m = music(ctx);
   m.place({ voices: {}, animals: profileOf('florence').animals, roof: 'tile' });
   const bus = m.src([5, 0], 8, { dur: 5 });
-  for (const v of ['marketCry', 'chainRattle', 'cleaver', 'weir']) assert.ok(m[v](ctx.currentTime, bus, 1) > 0.3, v);
+  for (const v of ['marketCry', 'chainRattle', 'floCleaver', 'weir']) assert.ok(m[v](ctx.currentTime, bus, 1) > 0.3, v);
   for (const e of FL.EMITTERS) assert.equal(typeof m[e.voice], 'function', e.voice);
   for (const s of FL.sites()) for (const [v] of s.work) assert.equal(typeof m[v], 'function', v);
   for (const R0 of [...Object.values(FL.ROOMS), FL.UPPER]) for (const [v] of R0.work) assert.equal(typeof m[v], 'function', v);

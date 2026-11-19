@@ -49,8 +49,8 @@ test('Beijing has its map and its life', () => {
 test('Beijing: its own voices exist and can be made', () => {
   const { m, ctx } = music();
   const bus = m.src([5, 262], 8, { dur: 5 });
-  for (const v of ['camelString', 'bjPeddler', 'huantou', 'pigeonWhistle', 'awl']) assert.equal(typeof m[v], 'function', v);
-  for (const v of ['huantou', 'pigeonWhistle', 'awl']) assert.ok(m[v](ctx.currentTime, bus, 1) > 0.5, v);
+  for (const v of ['camelString', 'bjPeddler', 'huantou', 'pigeonWhistle', 'qingAwl']) assert.equal(typeof m[v], 'function', v);
+  for (const v of ['huantou', 'pigeonWhistle', 'qingAwl']) assert.ok(m[v](ctx.currentTime, bus, 1) > 0.5, v);
   assert.ok(m.camelString(ctx.currentTime, bus, 1) > 20, 'a string of camels passes in half a minute or more');
   assert.ok(m.bjPeddler(ctx.currentTime, bus, 1) > 5, 'a pedlar walks his round');
 });
