@@ -2,6 +2,8 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 // The houses and palaces of the streets (docs/settlements/florence.md §5).
 import { RADIUS, MERCATO, lots } from './layout.js';
 import { insidePlans } from './inside.js';
+import { onWalk } from './walk.js';
+import './house.js';
 
 // The houses in two levels of detail as src/settlements/lod.js makes them, but in tiles of TILE m
 // rather than 100 m: every house wears one of six stuccoes, so each tile costs a mesh per stucco per
@@ -68,12 +70,10 @@ export function upper(l) {
   return Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]) <= UPPER_REACH;
 }
 
-/** Houses far from the arrival are drawn with less fine detail in their near form (quoins, rain streaks, shutters, every other eave bracket): the geometry budget is kept for the floors a visitor climbs. */
-const far = (l) => { const A = ARRIVALS['florence']; return Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]) > LITE_FROM; };
-export const LITE_FROM = 340;
+/** Houses away from the visitor's walk (walk.js) are drawn in their far-lite near form (house.js, `lite: 2`): the stone surrounds as flat frames, no quoins, shutters or rain streaks, every third eave bracket, no goods on the counters. The geometry budget is kept for the streets walked. */
 
 export async function houses() {
   const all = lots(), open = enterable(all);
-  const mine = all.map((l) => ({ t: 'casa', ...l, ...(!open.has(l) && far(l) ? { lite: true } : {}), ...(open.has(l) ? { open: true, use: open.get(l), ...(upper(l) ? { upper: true } : {}) } : {}) }));
+  const mine = all.map((l) => ({ t: 'casa_f', ...l, ...(!open.has(l) && !onWalk(l) ? { lite: 2 } : {}), ...(open.has(l) ? { open: true, use: open.get(l), ...(upper(l) ? { upper: true } : {}) } : {}) }));
   return [...tiles('florence-houses', 'renaissance', mine), ...insidePlans(mine.filter((l) => l.open))];
 }
