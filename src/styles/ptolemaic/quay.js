@@ -3,6 +3,7 @@
 // horreum (a warehouse of open bays), a fountain house, a shrine of Isis at a crossing, a stele, washing across the alleys.
 // Registered into the `ptolemaic` style (index.js). All [inferred] in form from Hellenistic and Roman harbours.
 
+import { inscribe } from './script.js';
 import { STYLES } from '../../core/build.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import { frame } from '../greek/agora.js';
@@ -114,9 +115,11 @@ function shrine({ at: [x, z], y = 0, rot = 0 }, { bag, col, lights }) {
   const a = P(-0.7, -0.5), b = P(0.7, 0.5); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y, y + 2.6); void lights;
 }
 /** stele: { at, y, rot, h } — an inscribed stele on a base (decrees, dedications). */
-function stele({ at: [x, z], y = 0, rot = 0, h = 2.0 }, { bag, col }) {
+function stele({ at: [x, z], y = 0, rot = 0, h = 2.0, lines = null }, { bag, col }) {
   bag.add('limestone', box(-0.4, y, -0.3, 0.4, y + 0.3, 0.3).rotateY(rot).translate(x, 0, z));
   const g = box(-0.3, 0.3, -0.1, 0.3, h, 0.1); g.rotateY(rot); bag.add('marble_smooth', g.translate(x, y, z)); col.circle(x, z, 0.45, y, y + h);
+  // the head of the decree on both faces (the text from el.lines: Greek capitals, script.js)
+  if (lines) for (const s of [-1, 1]) { const n = [Math.sin(rot) * s, Math.cos(rot) * s]; inscribe(bag, lines, { at: [x + n[0] * 0.1, z + n[1] * 0.1], n, y: y + h - 0.25, h: 0.06, mat: 'bronze', pitch: 0.2 }); }
 }
 /** ptol_wash: { a [x, z], b [x, z], y, seed } — a line of washing across an alley between the upper windows. */
 function wash({ a, b, y = 4.6, g = 0, seed = 1 }, { bag, col }) {

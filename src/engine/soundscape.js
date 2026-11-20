@@ -75,6 +75,7 @@ import * as AGRA from '../settlements/mughal-agra/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
 import * as ANGKOR from '../settlements/angkor/soundmap.js';
 import './voices-angkor.js';
+import * as ALEXANDRIA from '../settlements/alexandria/soundmap.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
 import * as BABYLON from '../settlements/babylon/soundmap.js';
 import * as BARCELONA from '../settlements/barcelona/soundmap.js';
@@ -186,7 +187,7 @@ export const PROFILES = {
   delphi: T(MED, { cicadas: 0.7, animals: { sheepbell: 0.7, donkey: 0.3, dog: 0.25, rooster: 0.3 }, roof: 'tile' }),
   mycenae: T(MED, { cicadas: 0.9, animals: { goat: 0.5, sheepbell: 0.5, donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
   'abbasid-baghdad': T(NEAR, { animals: withLife({ donkey: 0.6, dog: 0.3, rooster: 0.2 }, { market: 1, map: BAGHDAD }), frogs: 0.3, roof: 'flat', adhan: 1 }),
-  alexandria: T({ ...MED, gull: 1, kite: 0.3 }, { cicadas: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'flat' }),
+  alexandria: T({ ...MED, gull: 1, kite: 0.3 }, { cicadas: 0.3, animals: withLife({ donkey: 0.4, dog: 0.4, rooster: 0.3 }, { market: 0.8, map: ALEXANDRIA }), roof: 'flat' }),
   'han-changan': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3, camel: 0.2 }, roof: 'tile' }),
   'tang-changan': T(EAS, { cicadas: 0.4, animals: withLife({ rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, { market: 1, eaves: 1, map: TANGCA }), roof: 'tile', bells: 'tang-changan' }),
   'wei-ye': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),

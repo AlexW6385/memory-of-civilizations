@@ -5,8 +5,9 @@ import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { streetPlans } from './streets.js';
+import { fires } from './nightlight.js';
 import { houseRooms, egyptianRooms } from '../../styles/ptolemaic/house.js';
-import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, PHAROS, ISLAND, inRect, wet, height, lots, isle } from './layout.js';
+import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, PHAROS, ISLAND, inRect, wet, height, lots, isle, shopRuns } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'ptolemaic', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [100, -86], facing: 'e' }, ...extra });
 const g = GROUND;
@@ -20,6 +21,7 @@ function harbour() {
   for (const x of [SOMA[0] - 3.5, SOMA[2] + 3.5]) E.push({ t: 'obelisk', at: [x, -85.6], y: g + 0.05, h: 11 });
   for (let x = -200; x < 420; x += 26) if (wet(x, -89) > 1 && ![-128, -35, 114, 190, 298].some((q) => Math.abs(q - x) < 6) && Math.abs(x - 61) > 22 && Math.abs(x - 80) > 6) E.push({ t: 'quay_lamp', at: [x + 0.7, QUAYS[0][1] + 2.8], y: g + 0.05 });
   for (let z = -245; z < -100; z += 32) E.push({ t: 'quay_lamp', at: [MOLE[0] + 1.2, z], y: g + 0.05 });
+  E.push(...fires().sea);                                              // the Pharos' fire on the water (nightlight.js)
   E.push({ t: 'harbour_gate', c: [(SOMA[0] + SOMA[2]) / 2, -77], y: g, face: 'n', gw: 12, tower: 6, h: 13 });
   // the promenade and the great streets paved in slabs of limestone
   E.push({ t: 'floor', rect: [QUAY[0], QUAY[1], QUAY[2], QUAY[3]], y: g + 0.04, th: 0.2, mat: 'travertine' });
@@ -36,22 +38,12 @@ function harbour() {
  */
 function shopStoas() {
   const els = [], rooms = [];
-  for (const north of [true, false]) {
-    const z0 = north ? 46 : 82, z1 = north ? 58 : 94, front = north ? 's' : 'n';
-    // the runs of the street's side between the great crossing and the open ground of the agora and the Gymnasium
-    const spans = north ? [[-440, SOMA[0] - 4], [SOMA[2] + 4, 440]] : [[-440, SOMA[0] - 4], [GYM[2] + 72, 440]];
-    for (const [a, b] of spans) {
-      const n = Math.max(1, Math.round((b - a) / 50)), len = (b - a) / n;
-      for (let i = 0; i < n; i++) {
-        const x = a + i * len, x1 = x + len, cx = x + len / 2;
-        if (wet(x + 3, z0) < 3 || wet(x1 - 3, z0) < 3 || Math.hypot(cx, z0) > RADIUS - 70) continue;
-        const full = Math.abs(cx - 60) < 190;
-        els.push({ t: 'stoa', rect: [x, z0, x1, z1], front, y: g, h: 4.4, d: 0.6, sp: 2.5, flutes: 0, simple: true, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', ...(full ? { rooms: { n: 5, depth: 6, trades: TRADES } } : {}), seed: 40 + Math.round(x / 10) });
-        if (full) {
-          const F = frame([x, z0, x1, z1], front), wt = 0.7, rw = (len - 2 * wt) / 5;
-          for (let r = 0; r < 5; r++) rooms.push({ id: `shop: ${TRADES[r]} ${rooms.length}`, rect: F.R(wt + r * rw + 0.3, 12 - 6 + 0.55, wt + (r + 1) * rw - 0.1, 12 - 0.8), y: g, kind: 'inner', market: false, _c: [cx, (z0 + z1) / 2] });
-        }
-      }
+  for (const { rect: [x, z0, x1, z1], front, full, cx } of shopRuns()) {
+    const len = x1 - x;
+    els.push({ t: 'stoa', rect: [x, z0, x1, z1], front, y: g, h: 4.4, d: 0.6, sp: 2.5, flutes: 0, simple: true, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', ...(full ? { rooms: { n: 5, depth: 6, trades: TRADES } } : {}), seed: 40 + Math.round(x / 10) });
+    if (full) {
+      const F = frame([x, z0, x1, z1], front), wt = 0.7, rw = (len - 2 * wt) / 5;
+      for (let r = 0; r < 5; r++) rooms.push({ id: `shop: ${TRADES[r]} ${rooms.length}`, rect: F.R(wt + r * rw + 0.3, 12 - 6 + 0.55, wt + (r + 1) * rw - 0.1, 12 - 0.8), y: g, kind: 'inner', market: false, _c: [cx, (z0 + z1) / 2] });
     }
   }
   const plans = lodTiles('alexandria-shops', 'ptolemaic', els, { R: RADIUS });
