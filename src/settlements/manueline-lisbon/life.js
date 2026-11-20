@@ -173,8 +173,8 @@ export function lifeElements() {
     noble([cxm - 2.5, cz0 + 10], cy + 0.04, faceTo(S_), { pose: 'talk' }); noble([cxm - 1.7, cz0 + 10.6], cy + 0.04, faceTo(N_), { pose: 'talk' });
     merchant([cxm + 1.0, czm - 2.0], cy + 0.04 + 5.6, faceTo(W_), { pose: 'stand' }); labourer([cx0 + 11, czm + 17], cy + 0.04, faceTo(E_), { pose: 'stand' });
   }
-  // the doors of the houses whose upper floors are open: nobody stands, and nothing is set, in the way in (3 m wide, from 4.5 m out to the first metre in)
-  { const lanes = lots().filter((l) => l.up).map((l) => { const F = frame(l.rect, l.front); return [F.R(F.L / 2 - 2.6, -4.5, F.L / 2 + 2.6, 1.0), l]; });
+  // the doors of the open houses and of those whose upper floors are open: nobody stands, and nothing is set, in the way in (3 m wide, from 4.5 m out to the first metre in)
+  { const lanes = lots().filter((l) => l.up || l.open).map((l) => { const F = frame(l.rect, l.front); return [F.R(F.L / 2 - 2.6, -4.5, F.L / 2 + 2.6, 1.0), l]; });
     for (let i = L.length - 1; i >= 0; i--) { const e = L[i]; if (e.t === 'shop_sign') continue; if (lanes.some(([r]) => e.at[0] > r[0] && e.at[0] < r[2] && e.at[1] > r[1] && e.at[1] < r[3])) L.splice(i, 1); } }
   // tile them
   const tiles = new Map();

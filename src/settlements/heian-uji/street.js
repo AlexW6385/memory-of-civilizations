@@ -4,19 +4,20 @@
 // river with its steps, boats, washers and fishermen. Everything derives from layout.js. Instances of the life style.
 import { STREETS, MARKET, LANDING, RIVER, lots, height, inRect, streetRect, onStreet } from './layout.js';
 import { RADIUS } from './layout.js';
+import { traits } from './house.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 const riverX = (z) => RIVER.x + 15 * Math.sin(z / 110);
 const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
 const base = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], elements, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'e' }, ...extra });
-const tiled = (id, style, list, near = 230) => {
+export const tiled = (id, style, list, near = 230) => {
   const tiles = new Map();
   for (const e of list) { const [x, z] = e.at ?? [(e.a[0] + e.b[0]) / 2, (e.a[1] + e.b[1]) / 2]; const k = `${Math.floor(x / 100)},${Math.floor(z / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, l]) => { const [i, j] = k.split(',').map(Number); return { ...base(`${id}-${k}`, style, l), center: [i * 100 + 50, j * 100 + 50], near }; });
 };
 
-/** A lot's front: P(t, off) a point at fraction t along it, off out into the lane; rot turns an object's +z outward. */
+/** A lot's front: P(t, off) a point at fraction t along it, off out into the lane (positive: out; negative: inside the lot); rot turns an object's +z outward. */
 function frontOf(l) {
   const [x0, z0, x1, z1] = l.rect, f = l.front, n = FR[f], along = f === 'n' || f === 's';
   const P = (t, off) => (along ? [x0 + (x1 - x0) * t, (f === 'n' ? z0 : z1) + n[1] * off] : [(f === 'e' ? x1 : x0) + n[0] * off, z0 + (z1 - z0) * t]);
@@ -31,14 +32,17 @@ function laneLife() {
     const f = frontOf(l), [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     if (Math.hypot(cx, cz) > RADIUS - 40) continue;
     const back = [-f.n[0], -f.n[1]], side = (t, off) => f.P(t, off);
+    // what stands before the front keeps out of the door's way (the opened houses' door lane: the door 1.6 m wide and the walker's width): moved along the front, never removed
+    const door = traits({ ...l, open: true }).door;
+    const clear = (t, half) => { const m = 0.8 + half + 0.25, u = t * f.L; if (Math.abs(u - door) >= m) return t; const side = u < door ? -1 : 1, v = door + side * m; return v > 0.2 && v < f.L - 0.2 ? v / f.L : (door - side * m) / f.L; };
     // the wash on its line in the yard behind the house, firewood against the side
     if (rand() < 0.38) { const p = [cx + back[0] * ((f.n[0] ? x1 - x0 : z1 - z0) / 2 + 2.6), cz + back[1] * ((f.n[1] ? z1 - z0 : x1 - x0) / 2 + 2.6)]; L.push({ t: 'laundry', at: p, y: 0, rot: f.rot + Math.PI / 2, len: 3 + rand(), seed: seed() }); }
-    if (rand() < 0.4) L.push({ t: 'firewood', at: f.P(0.1 + rand() * 0.8, -0.75), y: 0, rot: f.rot, len: 1.4, seed: seed() });
-    if (rand() < 0.3) L.push({ t: 'drying_tray', at: f.P(0.2 + rand() * 0.6, -1.5), y: 0, rot: rand() * 6.28, seed: seed() });
-    if (rand() < 0.22) L.push({ t: 'chickens', at: f.P(rand(), -2.2), y: 0, rot: rand() * 6.28, seed: seed() });
-    if (rand() < 0.07) L.push({ t: 'animal', kind: 'dog', at: f.P(rand(), -2.6), y: 0, rot: rand() * 6.28, seed: seed() });
+    if (rand() < 0.4) L.push({ t: 'firewood', at: f.P(clear(0.1 + rand() * 0.8, 0.8), 1.9), y: 0, rot: f.rot, len: 1.4, seed: seed() });
+    if (rand() < 0.3) L.push({ t: 'drying_tray', at: f.P(clear(0.2 + rand() * 0.6, 0.6), 1.45), y: 0, rot: rand() * 6.28, seed: seed() });
+    if (rand() < 0.22) L.push({ t: 'chickens', at: f.P(clear(rand(), 1.0), 2.5), y: 0, rot: rand() * 6.28, seed: seed() });
+    if (rand() < 0.07) L.push({ t: 'animal', kind: 'dog', at: f.P(clear(rand(), 0.8), 2.85), y: 0, rot: rand() * 6.28, seed: seed() });
     if (l.trade === 'farmer' && rand() < 0.35) L.push({ t: 'haystack', at: [cx + back[0] * ((f.n[0] ? x1 - x0 : z1 - z0) / 2 + 4.5), cz + back[1] * ((f.n[1] ? z1 - z0 : x1 - x0) / 2 + 4.5)], y: 0, kind: 'pole', seed: seed(), s: 0.6 });
-    if (rand() < 0.1) L.push({ t: 'barrel', at: f.P(0.9, -0.8), y: 0, rot: 0, n: 2, seed: seed() });
+    if (rand() < 0.1) L.push({ t: 'barrel', at: f.P(clear(0.9, 0.6), 1.2), y: 0, rot: 0, n: 2, seed: seed() });
   }
   // fences in the gaps between fronts that are not cross-lanes
   const bySide = new Map();

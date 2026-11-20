@@ -4,6 +4,7 @@ import { RADIUS, WALL_R, RIVER, SITES, SOUKS, BRIDGES, lots, fabric, fountains, 
 import { lifePlans } from './life.js';
 import { houseList, laneElements } from './houses.js';
 import { streetPlans } from './street.js';
+import { nightTiles, NIGHT_NEAR, NIGHT_TILE } from './nightlight.js';
 
 // The houses in two levels of detail as src/settlements/lod.js makes them, but in tiles of 150 m rather than 100 m: every house wears one of
 // eight stuccoes, so each tile costs a mesh per material and level, and fewer, larger tiles keep the mesh count in budget (DESIGN §8). A tile is
@@ -66,6 +67,8 @@ export async function town() {
   plans.push(base('fez-civic', 'marinid', civic()));
   plans.push(...lifePlans());
   plans.push(...streetPlans());
+  // the night: halos and the lamps' bodies in 48 m tiles shown within 55 m (nightlight.js; docs §16.3)
+  for (const t of nightTiles()) plans.push({ ...base('fez-night-' + t.id, 'marinid', [t.el]), center: t.center, near: NIGHT_NEAR + NIGHT_TILE * 0.71, nocollide: true });
   return plans;
 }
 void quayY;

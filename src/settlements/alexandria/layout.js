@@ -143,3 +143,27 @@ export function isle() {
   ISLE = { houses, store: STORE, palms, nets };
   return ISLE;
 }
+
+/**
+ * The runs of colonnaded shops along both sides of the Canopic Way (each 50 m long, five rooms a run): { rect, front, full (its rooms are furnished: within 190 m of the Soma
+ * street), cx }. Shared by the town (town.js builds them) and the walk (walk.js routes into them).
+ */
+let RUNS = null;
+export function shopRuns() {
+  if (RUNS) return RUNS;
+  RUNS = [];
+  for (const north of [true, false]) {
+    const z0 = north ? 46 : 82, z1 = north ? 58 : 94, front = north ? 's' : 'n';
+    // the runs of the street's side between the great crossing and the open ground of the agora and the Gymnasium
+    const spans = north ? [[-440, SOMA[0] - 4], [SOMA[2] + 4, 440]] : [[-440, SOMA[0] - 4], [GYM[2] + 72, 440]];
+    for (const [a, b] of spans) {
+      const n = Math.max(1, Math.round((b - a) / 50)), len = (b - a) / n;
+      for (let i = 0; i < n; i++) {
+        const x = a + i * len, x1 = x + len, cx = x + len / 2;
+        if (wet(x + 3, z0) < 3 || wet(x1 - 3, z0) < 3 || Math.hypot(cx, z0) > RADIUS - 70) continue;
+        RUNS.push({ rect: [x, z0, x1, z1], front, full: Math.abs(cx - 60) < 190, cx });
+      }
+    }
+  }
+  return RUNS;
+}

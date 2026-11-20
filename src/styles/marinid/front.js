@@ -29,13 +29,17 @@ export function dukkan(bag, col, rr, e, y, trade, rand, o = {}) {
   bag.add('wood_dark', I(0.05, L - 0.05, y + 2.5, y + 2.72, 0.02, 0.07));
   // the awning: striped cloth from the wall above the lintel out over the lane, held on two poles
   const [c1, c2] = AWN[Math.floor(rand() * AWN.length)], ext = Math.min(1.2, Math.max(0.25, ((o.laneW ?? 3) - 1.6) / 2)), n = Math.max(3, Math.round((L + 0.4) / 0.28));
-  const yTop = y + 3.35, yLow = y + 2.45, T = [[], []];
+  const yTop = y + 3.35, yLow = y + 2.45, T = [[], []], T2 = [[], []];
   for (let i = 0; i < n; i++) {
     const u0 = -0.2 + (L + 0.4) * i / n, u1 = -0.2 + (L + 0.4) * (i + 1) / n;
     const a = P(u0, -0.05), b = P(u1, -0.05), c = P(u1, -ext), d = P(u0, -ext);
     q4(T[i % 2], [a[0], yTop, a[1]], [b[0], yTop, b[1]], [c[0], yLow, c[1]], [d[0], yLow, d[1]]);
+    q4(T2[i % 2], [a[0], yTop - 0.09, a[1]], [b[0], yTop - 0.09, b[1]], [c[0], yLow - 0.09, c[1]], [d[0], yLow - 0.09, d[1]]);
   }
   bag.add(c1, dbl(T[0])); bag.add(c2, dbl(T[1]));
+  // the awning's lining, a hand's breadth under the cloth: the cloth alone is a sheet with no underside, which the walker's collision takes for a solid
+  // slope from the ground up (the dukkan could not be entered); with the lining the space under it is free
+  bag.add(c1, dbl(T2[0])); bag.add(c2, dbl(T2[1]));
   for (const u of [-0.15, L + 0.15]) { const a = P(u, -ext), b = P(u, -0.05); bag.add('cedar', rod([a[0], yLow - 0.01, a[1]], [b[0], yTop - 0.7, b[1]], 0.018, 4)); }
   // the goods, the keeper's cushion
   GOODS[trade]?.(bag, fr, P, I, fy, L, D, rand, o);
@@ -124,12 +128,15 @@ export function roofTop(bag, r, yT, court, rand, rich, gable) {
   }
 }
 /** A bitter-orange tree in a terracotta tub (the courts' planting), its crown of three blobs; fruit when `fruit`. */
+const fr1 = (x, z, k = 0) => { const h = Math.sin(x * 12.9898 + z * 78.233 + k * 37.719) * 43758.5453; return h - Math.floor(h); };
 export function orangeTree(bag, col, x, z, y, r = 1.0, fruit = false, seed = 1) {
-  bag.add('terracotta', lathe([[0.001, 0], [0.3, 0], [0.36, 0.5], [0.4, 0.55], [0.34, 0.57], [0.001, 0.5]], 10, null, x, y, z));
-  bag.add('bark_olive', lathe([[0.07, 0], [0.05, 1.0], [0.001, 1.02]], 6, null, x, y + 0.5, z));
+  // (every size and shape turned by the tree's own place: identical pots, trunks and oranges would each be an instanced draw)
+  const sp = 0.92 + 0.16 * fr1(x, z), st = 0.9 + 0.2 * fr1(x, z, 1);
+  bag.add('terracotta', lathe([[0.001, 0], [0.3 * sp, 0], [0.36 * sp, 0.5], [0.4 * sp, 0.55], [0.34 * sp, 0.57], [0.001, 0.5]], 10, null, x, y, z));
+  bag.add('bark_olive', lathe([[0.07 * st, 0], [0.05 * st, 1.0], [0.001, 1.02 * st]], 6, null, x, y + 0.5, z));
   const blob = (cx, cy, cz, rr) => bag.add('palm_leaf', lathe(Array.from({ length: 7 }, (_, i) => { const t = i / 6 * Math.PI; return [Math.max(0.001, Math.sin(t) * rr), rr - Math.cos(t) * rr * 0.85]; }), 8, null, cx, cy, cz));
   blob(x, y + 1.35, z, r); blob(x + r * 0.45, y + 1.15, z + r * 0.2, r * 0.7); blob(x - r * 0.4, y + 1.2, z - r * 0.3, r * 0.65);
-  if (fruit) for (let k = 0; k < 6; k++) { const a = seed * 1.7 + k * 1.05; bag.add('glaze_yellow', lathe([[0.001, 0], [0.07, 0.07], [0.001, 0.14]], 6, null, x + Math.cos(a) * r * 0.85, y + 1.6 + (k % 3) * 0.28, z + Math.sin(a) * r * 0.85)); }
+  if (fruit) for (let k = 0; k < 6; k++) { const a = seed * 1.7 + k * 1.05; bag.add('glaze_yellow', lathe([[0.001, 0], [0.07 * (0.85 + 0.3 * fr1(x, z, 2 + k)), 0.07], [0.001, 0.14]], 6, null, x + Math.cos(a) * r * 0.85, y + 1.6 + (k % 3) * 0.28, z + Math.sin(a) * r * 0.85)); }
   col.circle(x, z, 0.36, y, y + 0.5);
 }
 /** Pots along a wall: geranium and basil (leaf-green blobs on terracotta). */

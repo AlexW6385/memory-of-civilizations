@@ -96,7 +96,7 @@ export function town() {
   for (let x = -150; x < 220; x += 11) for (let z = 236; z < 350; z += 11) {
     const skip = rand() < 0.25;
     if (Math.hypot(x, z) > RADIUS - 28) continue;
-    const w = 7 + rand() * 3, d = 7 + rand() * 3;
+    const w = 7 + rand() * 1.8, d = 7 + rand() * 1.8;      // (8.8 m at most on the 11 m grid: every lane between the houses is 2.2 m wide or more, a lane a visitor walks)
     // (an empty lot is a yard: pen, brickyard, silo, midden or threshing floor)
     if (skip) { TOWNS.push({ kind: 'yard', yk: YARDS[Math.floor(rand() * YARDS.length)], rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) }); continue; }
     TOWNS.push({ kind: 'house', rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6) });

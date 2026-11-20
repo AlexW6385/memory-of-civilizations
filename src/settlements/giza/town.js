@@ -6,6 +6,8 @@ import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOA
 import { ground } from './ground.js';
 import { RAMP, haulRoad } from './works.js';
 import { LODGES, lodgeLife } from './lodges.js';
+import { STALLS, rationLife } from './rations.js';
+import { STANDS } from './nightlight.js';
 import { housePlan } from '../../styles/oldkingdom-giza/houses.js';
 import { CAMP_ITEMS, CHIPS, HAUL, HAUL_ITEMS, YARD, campLife, haulLife, yardLife } from './camps.js';
 
@@ -255,6 +257,9 @@ export async function town() {
   const Q = quarryWorks();
   plans.push(base('giza-quarry', [{ t: 'ok_quarry', blocks: Q.blocks }, { t: 'ok_track', pts: Q.pts, w: 3.6 }, { t: 'ok_tools', at: Q.toolAt }, { t: 'stone_sledge', at: [116, 122], y: Q.sledgeY + 0.1, rot: 0, w: 1.15, len: 1.7 }]));
   plans.push({ ...base('giza-quarry-life', quarryLife(Q)), style: 'life' });
+  // the ration stalls with their keepers (docs/settlements/giza.md §19)
+  plans.push(base('giza-rations', STALLS.map((S) => ({ t: 'ok_ration', at: S.at, y: S.y, rot: S.rot, seed: S.seed }))), { ...base('giza-ration-life', rationLife()), style: 'life' });
+  plans.push(base('giza-night', [{ t: 'giza_halo' }, ...STANDS.map(([x, z, y]) => ({ t: 'giza_stand', at: [x, z], y }))]));
   plans.push(base('giza-boat-pits', BOAT_PITS.map((p) => ({ t: 'boat_pit', ...p }))));
   plans.push(base('giza-wall', [{ t: 'crow_wall', ...CROW_WALL }], -2.5));
   const lots = townLots();

@@ -15,6 +15,8 @@ import { khafre } from './statue.js';
 import { Sculpt } from './anatomy.js';
 import { haul } from './haulers.js';
 import { roomThings, courtCraft } from './houses.js';
+import { gizaHouse, gizaBakery } from './walkhouse.js';
+import { rationStall } from './ration.js';
 
 const OK = STYLES.oldkingdom;
 /** Khafre's valley temple's alabaster floor in slabs over the halls and rooms (docs §17): a grey joint layer, the slabs on it. */
@@ -62,8 +64,10 @@ registerStyle('oldkingdom-giza', {
       }
       if (el.backDoor && el.court[2] - el.court[0] > 20 && el.door === 'e') falseDoor(c.bag, c.col, { rect: el.rect, th: 2.2, s: (el.rect[3] - el.rect[1]) / 2 - 7 });
     },
+    bakery: gizaBakery,
+    ok_ration: rationStall,
     mud_house: (el, c) => {
-      OK.elements.mud_house(el, c);
+      gizaHouse(el, c);
       if (!el.furnish) return;
       roomThings(c.bag, c.col, el); courtCraft(c.bag, c.col, el);
     },

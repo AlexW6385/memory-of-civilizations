@@ -141,6 +141,44 @@ Sources added:
 - **The Nandi.** The bull before Sundareswarar's flagstaff, seated, the humped back, folded legs, raised head with horns, dewlap, collar of bells, cloth on his back, 1.8 m long on a pedestal of three courses; he stands in the pillared corridor from the east gate, which is his pavilion (the pavilion itself is not added) [inferred].
 - **What was cut to pay for it (arrival frame: main 5.51 M triangles / 581 draws before, 3.40 M / 444 after).** The houses and shops are built twice, as in the other cities: in full (interiors, goods, doors, carved posts) within 210 m of the visitor, simple (solid, a thatch or tile roof, plain posts) beyond: this removes the furnished interiors behind the temple and the far rings from the frame. Gopuram pots and the far figures as above.
 
+## 18. Sound (2026-11 match pass: the sound map)
+
+Every sound below is [inferred] unless marked; the hours follow the temple's daily services (the reed and drum at the opening at dawn, noon, dusk and the closing of the shrines) and the market's day. All calls and chants are wordless: no Tamil or Sanskrit text is sung or written.
+
+- **Where.** `src/settlements/madurai/soundmap.js` (the map the engine reads, as for Suzhou and Agra) and `src/engine/voices-madurai.js` (voices prefixed `mdu`), test `tests/madurai-sound.test.mjs`.
+- **The temple.** The nadaswaram (the double-reed pipe) with the tavil (the barrel drum) at the two shrines' gopurams at dawn, noon, dusk and the closing, over the raga of music.js; the hand bell and a monotone priest's chant before each sanctum through the services; the conch at the opening and the closing [inferred: the six daily services of the Agamic temple; Nayaka-period practice taken as the same]. The bell and the conch already in the profile (`bells: 'puja'`) stay.
+- **Water.** Bathers on the Golden Lotus tank's steps by day (water poured, the slap on stone), the lap of the pool in the cloister at all hours; no frogs or fish in it [stated: tamilnadu-favtourism, "neither fish or other lives are found in this miraculous sacred pond"].
+- **The streets.** The jasmine sellers' calls (a woman's rising and falling contour) from their mats before the south gopuram and a seller walking the ring streets; bullock carts creaking with bells on the ring streets by day; brass-smiths' hammers on the Masi streets [stated: metalworkers on the processional routes, aimsr.edu.in]; stone grinders in the kitchens of the early morning; cows with brass bells lying in the lanes at night; dogs far off at night.
+- **The market and the hall.** The murmur of buyers in the Pudhu Mandapam with bangles shaken on trays [stated: tailors, cloth and bangle sellers, maduraitourism]; pilgrims fed at noon in the Ashta Shakti hall [stated: built to feed pilgrims, templesyatra]; a chant in the stone-roofed Thousand-Pillar Hall.
+- **The elephants.** The two temple elephants by the south gate: the bell at the neck, the chain, a rumble, rarely a trumpet [stated: elephants kept at the temple, §10].
+- **Rooms.** Hall, mandapa, shop, court house and house tones (stone roofs take no rain) [inferred].
+
+## 19. Animals with behaviour (2026-11 match pass: `critters` in `fauna.js`)
+
+Rigged small animals of the engine's models (one mesh, one draw), all [inferred] as to place; test `tests/madurai-critters.test.mjs`.
+
+- **Rock pigeons** (six, grey, dark and one white) walking and pecking on the paving of the outer court south of the Sundareswarar enclosure, clear of the elephants' stand; the dossier §13 already has pigeons round the gopurams [inferred: the temple's pigeons come down to the court].
+- **Street dogs** (three) lying at the verge of the Chitrai street and the east ring street, "ownerless and fed by the quarter" as the street dogs of the old cities [inferred]; **goats** (one black, one white) at the outer ring streets' verge, the goat being the poor household's beast in the Tamil country [inferred].
+- **Fowl** (a cock and two hens) scratching in the apron of the Chitrai street [inferred].
+- **Cats** (orange and tabby) on the thinnais of two houses by the arrival, at the platform's end, looking to the street [inferred].
+- Not added: nests under the eaves (no verified place), squirrels and crows as critters (no model; crows stay as flights); the elephants stay the `elephant` element of §10.
+
+## 20. Night (2026-11 match pass: `nightlight.js`)
+
+What was lit at night about 1650 [inferred: oil lamps and the temple's wicks; no electric light, no street lamps; the temple's own lamps are in §11, the thousand lamp holders of the Thousand-Pillar Hall stated by come2india, §4].
+
+- **The temple.** The lamp stands (kuttuvilakku, five wicks) before the passages of the two shrines' gopurams, the five lamps before each flagstaff, the two rows of clay lamps on the tank's top steps, the two stands before the Nataraja in the Thousand-Pillar Hall: the flames were already built (material `flame`, glowing of themselves); each now throws a glow ball and a pool on the paving in the engine's additive `halo` material, so that it reads at the low preset (no real light needed).
+- **The streets.** The lamp by the door of 45 % of the houses and of half the shops of the first rings (to 175 m from the wall, 70 % of that beyond 100 m): its glow, a pool on the thinnai or the shop's platform and a spill on the street; the trades of the temple streets kept to the lamp until the shrines closed [inferred; the shares are ours].
+- **How.** One street-life plan `madurai-night` of `madurai_halo` elements (four shapes, instanced, drawn within 60 m of the eye): +1 main draw at the arrival. The day picture is unchanged (the material shows at night only).
+- Not lit: windows (the houses have shuttered fronts; the hollow rooms are seen through their doors), the gopuram passages and the processional car (no source for lamps there in 1650).
+
+## 21. The visitor's walk, make-room and wear (2026-11 match pass)
+
+- **Make room** [inferred, engineering only]. The vessel of the shelves, shops and thinnais is now one unit shape per material placed with a scale (`styles/dravidian/vessel.js`): every size shares one prototype (126 to 63 MB); the far house tiles' boxes and posts are varied by up to 2 cm from a hash of their own place so that they join the tiles' batches (`unshare.js`, as Versailles did): the arrival's main draws fell from 444 to 406, with the picture unchanged.
+- **The walk.** `openwalk.js`: twelve routes from the street over the thinnai or the shop's platform, through the doorway into the furnished front room of five houses, five shops, two narrow-lot agraharam houses and a court house nearest the arrival, in `walks` of the temple plan (walk-check: 13 routes, 51 legs). To make them passable the doorways of the hollow rooms are 1.6 m wide (were 1.1 m for houses and 1.3 m for shops) and their lintels 2.65 m (were 2.35 m, under the walker's head on the 0.55–0.72 m platform); the cream jambs, the lintel timber and the shop's header follow [inferred: the carved portals of the merchant houses were taller than a man; Studio Matrx, §12].
+- **Wear.** A worn, dark hollow of feet across the granite sill of every opened door (plaster_damp, 6 mm thick); damp, streaks and fallen plaster already in §14.
+- **Writing: none added.** The name boards keep their abstract chalk strokes (§14), which stand in for Tamil script; no Tamil glyph was written because none could be verified here glyph by glyph.
+
 ## Sources
 
 - [Meenakshi Temple — Wikipedia](https://en.wikipedia.com/wiki/Meenakshi_Temple)

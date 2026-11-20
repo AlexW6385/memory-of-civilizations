@@ -6,5 +6,7 @@ import alhambra from './plan.js';
 import generalife from './generalife.js';
 import music from './music.js';
 export { town } from './town.js';
+import { registerNight } from './nightlight.js';
+registerNight();                  // (after trim.js, which town.js imports: the wrapped style must exist)
 export { music };
 export const landmarks = [{ plan: alhambra, music }, { plan: generalife, music }];

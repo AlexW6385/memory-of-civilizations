@@ -5,6 +5,9 @@
 
 import { frame } from '../../styles/greek/agora.js';
 import { houseLayout } from '../../styles/ptolemaic/house.js';
+import { laneClear } from './walk.js';
+import { WELLS } from './soundmap.js';
+import { DECREE } from '../../styles/ptolemaic/script.js';
 import { RADIUS, GROUND, SEA, QUAY, PIER, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, PHAROS, lots, isle, wet, inRect, inLot } from './layout.js';
 
 const g = GROUND;
@@ -81,7 +84,8 @@ function quayLife() {
   for (const [x, z, rot] of [[SOMA[0] - 1.6, CANOPIC[1] - 1.2, 0], [SOMA[2] + 1.6, CANOPIC[3] + 1.2, Math.PI], [-300, CANOPIC[1] - 1.2, 0], [330, CANOPIC[3] + 1.2, Math.PI], [AGORA[0] + 4, AGORA[3] + 1, Math.PI]]) E.push({ t: 'shrine', at: [x, z], y: g + 0.04, rot });
   // the agora: the fountain house, stelae with decrees, a herm already built (town.js); goods heaped about
   E.push({ t: 'nymphaeum', c: [AGORA[2] - 7, (AGORA[1] + AGORA[3]) / 2], y: g + 0.04, rot: Math.PI / 2 });
-  for (const dz of [-5, 5]) E.push({ t: 'stele', at: [AGORA[0] + 12, (AGORA[1] + AGORA[3]) / 2 + dz], y: g + 0.04, rot: 0.2 * dz, h: 2.1 });
+  for (const dz of [-5, 5]) E.push({ t: 'stele', at: [AGORA[0] + 12, (AGORA[1] + AGORA[3]) / 2 + dz], y: g + 0.04, rot: 0.2 * dz, h: 2.1, lines: DECREE });
+  for (const x of [43.4, 76.6]) E.push({ t: 'stele', at: [x, -42], y: g + 0.04, rot: x < 60 ? Math.PI / 2 : -Math.PI / 2, h: 2.1, lines: DECREE });      // the king's decrees on the Soma street's edges
   E.push({ t: 'cargo_pile', at: [AGORA[0] + 40, AGORA[1] + 28], y: g + 0.04, rot: 0.3, kind: 'amphorae', n: 3, seed: 8 });
   E.push({ t: 'cargo_pile', at: [AGORA[0] + 14, AGORA[1] + 26], y: g + 0.04, rot: 0, kind: 'sacks', n: 3, seed: 9 });
   // date palms along the promenade and in the agora, fig trees in the agora's corners
@@ -98,6 +102,7 @@ function quayLife() {
     E.push({ t: 'cargo_pile', at: [px1 - 1.4, -112], y: py, rot: Math.PI / 2, kind: 'crates', n: 3, seed: 504 });
     E.push({ t: 'cargo_pile', at: [px0 + 1.5, -117], y: py, rot: Math.PI / 2, kind: 'ingots', n: 3, seed: 505 });
     E.push({ t: 'crane', at: [pc + 1.2, pz0 + 3.2], y: py, rot: 0 });
+    E.push({ t: 'quay_lamp', at: [px0 + 2.4, pz0 + 0.8], y: py });                     // the brazier at the pier's head: the night's fire for the ships coming in
     for (const z of [-96, -104, -114, -122]) for (const x of [px0 + 0.35, px1 - 0.35]) E.push({ t: 'mooring', at: [x, z], y: py, rot: z * 3 + x, seed: Math.round(-z * 7 + x) });
     E.push({ t: 'net_rack', at: [px1 + 1.2, -92.5], y: g + 0.04, rot: Math.PI / 2, len: 3.0, seed: 506 });
     const f = (at, o) => FIG.push({ at, rot: fa(at), dress: 'tunic', hair: 'short', skin: 'skin_medium', seed: Math.round(at[0] * 13 - at[1] * 7), ...o });
@@ -157,10 +162,13 @@ export function streetLife() {
     if (rand() < 0.14) L.push({ t: 'animal', kind: 'cat', at: pt(F.L * rand(), 0.7), y, rot: rand() * 6, seed: Math.floor(rand() * 1e9) });
     if (rand() < 0.1) L.push({ t: 'chickens', n: 3, at: pt(F.L * rand(), 1.2), y, rot: rand() * 6, seed: Math.floor(rand() * 1e9) });
   }
+  // the wells of the Soma street's edges (a stone curb with its bucket) and a trough for the beasts by the gate: the water of the walk, sounded in soundmap.js
+  for (const at of WELLS) L.push({ t: 'well', at, y: g + 0.04, kind: 'open', mat: 'limestone' });
   // beasts at the quay's work: donkeys under their loads by the piles, carts with a donkey in the shafts, a pair of camels resting
   for (const [x, z, k, r] of [[68, -83.6, 'donkey', 0.2], [-30, -83.8, 'donkey', 3.3], [-120, -83.6, 'donkey', 0.1], [-176, -83.8, 'donkey', 3.0], [210, -84, 'donkey', 0.3], [258, -83.8, 'camel', 1.57], [264, -83.5, 'camel', 1.4]]) if (dry(x, z, 1)) L.push({ t: 'animal', kind: k, at: [x, z], y: g + 0.04, rot: r, seed: Math.round(x * 7), gear: k === 'donkey' });
-  for (const [x, z] of [[-90, -83.5], [124, -83.5], [-190, -83.5]]) if (dry(x, z, 1)) L.push({ t: 'cart', at: [x, z], y: g + 0.04, rot: Math.PI / 2, beast: 'donkey', seed: Math.round(x * 5) });
+  for (const [x, z] of [[-90, -83.5], [112, -83.5], [-190, -83.5]]) if (dry(x, z, 1)) L.push({ t: 'cart', at: [x, z], y: g + 0.04, rot: Math.PI / 2, beast: 'donkey', seed: Math.round(x * 5) });
   for (const f of FIG) L.push({ t: 'figure', y: g + 0.04, ...f });
+  for (const e of L) e.at = laneClear(e.at);                     // nothing stands in the lane of a door that is walked through (walk.js)
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`alexandria-streetlife-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 200 }; });

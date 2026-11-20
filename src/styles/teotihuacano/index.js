@@ -16,6 +16,7 @@ import { kiln, dyeYard } from './craft.js';
 import { streetFront, fig, inst } from './street.js';
 import { gateKind, gateFront, dado, FINISH } from './gate.js';
 import { householdYard } from './yard.js';
+import { ttHalo } from './halo.js';
 import { drainKit } from './avenue.js';
 import { ttHouse } from './houses.js';
 import { ttAvenue, ttPuma, weatherPyramid, paintBands } from './avenue.js';
@@ -269,7 +270,9 @@ function ttFloor(el, { bag, col }) {
  */
 function compound(el, ctx) {
   const { bag, col } = ctx;
-  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 3.2, gate = Math.floor(rand() * 4), gw = 0.9;
+  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 3.2, gate0 = Math.floor(rand() * 4), gw = 0.9;
+  // an opened compound (the visitor can walk into it: walk.js): the gate on the east or the west side, and the room block facing it left out, so that the gate opens on an entry court beside the main patio
+  const open = !!el.open, gate = open ? (el.gate ?? 3) : gate0, dropK = open && !el.simple ? { 3: 7, 2: 1 }[gate] : -1;
   // the outer wall, a doorway in the middle of one side
   const xm = (x0 + x1) / 2, zm = (z0 + z1) / 2, { kind: gk, finish } = gateKind(el.seed || 1, xm), WS = FINISH[finish];
   const sides = [[[x0, z0, x1, z0 + 1], 'x'], [[x0, z1 - 1, x1, z1], 'x'], [[x0, z0 + 1, x0 + 1, z1 - 1], 'z'], [[x1 - 1, z0 + 1, x1, z1 - 1], 'z']];
@@ -317,7 +320,7 @@ function compound(el, ctx) {
       if (k !== 4 && el.workshop) midden(bag, col, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
       if (k !== 4 && el.craft === 'potter') kiln(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
       if (k !== 4 && el.craft === 'weaver') dyeYard(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
-      if (k !== 4 && !el.workshop && !el.craft) householdYard(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, (el.seed || 1) + k);
+      if (k !== 4 && !el.workshop && !el.craft) householdYard(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, (el.seed || 1) + k, { open });
       if (k === 4) {
         // the altar: a talud and a framed tablero, a little shrine in miniature
         const ax = cx0 + cw / 2, az = cz0 + cd / 2;
@@ -328,6 +331,11 @@ function compound(el, ctx) {
         inst(bag, drainKit(), ax - 3.0, 0.06, az + 0.4, 0, 1, 70);
         if (rand() < 0.4) fig(ctx, { who: 'woman', at: [ax + 3.2, az - 2.6], y: 0.06, rot: rand() * 6.28, seed: (el.seed || 1) + 71, pose: 'stand', carry: 'broom' });
       }
+      continue;
+    }
+    if (k === dropK) {                                                                        // the entry court: a plastered floor with the household's things
+      bag.add('stucco', frustum([cx0 + 0.5, cz0 + 0.5, cx0 + cw - 0.5, cz0 + cd - 0.5], -0.2, 0.06, 0, 0, 0, 0, { noBottom: true }));
+      householdYard(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, (el.seed || 1) + k, { open: true, gate });
       continue;
     }
     // which side of the room faces the main patio (rooms beside it), and how far
@@ -348,7 +356,7 @@ function compound(el, ctx) {
     const back = fx ? (fx > 0 ? [r[0], r[1], r[2] - pd, r[3]] : [r[0] + pd, r[1], r[2], r[3]]) : (fz > 0 ? [r[0], r[1], r[2], r[3] - pd] : [r[0], r[1] + pd, r[2], r[3]]);
     // the rooms behind it, each with its doorway on the portico, furnished (rooms.js)
     const across = fx ? back[3] - back[1] : back[2] - back[0], nr = across > 11 ? 3 : 2;
-    const roles = principal ? (nr === 3 ? ['sleep', 'shrine', 'sleep'] : ['shrine', 'sleep']) : Array.from({ length: nr }, (_, j) => (k === 1 && j === 0 ? 'kitchen' : ['sleep', 'store', 'kitchen', 'sleep'][Math.floor(rand() * 4)]));
+    const roles = principal ? (nr === 3 ? ['sleep', 'shrine', 'sleep'] : ['shrine', 'sleep']) : Array.from({ length: nr }, (_, j) => (k === (dropK === 1 ? 7 : 1) && j === 0 ? 'kitchen' : ['sleep', 'store', 'kitchen', 'sleep'][Math.floor(rand() * 4)]));
     if (el.mural && principal) roles[nr === 3 ? 0 : 1] = 'mural';
     if (el.workshop && face === 'e') roles[roles.length - 1] = 'workshop';
     if (el.craft && face === 'n') roles[roles.length - 1] = el.craft;
@@ -368,6 +376,6 @@ function compound(el, ctx) {
 
 registerStyle('teotihuacano', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_lodge_platform: ttHouse, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, tt_market: ttMarket, meso_plants: ttPlants, tt_avenue: ttAvenue, tt_puma: ttPuma },
+  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_lodge_platform: ttHouse, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, tt_market: ttMarket, meso_plants: ttPlants, tt_avenue: ttAvenue, tt_puma: ttPuma, tt_halo: ttHalo },
   objects: {},
 });

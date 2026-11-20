@@ -1,6 +1,7 @@
 // Heian Uji — the animals (src/engine/fauna.js; docs/settlements/heian-uji.md §13): carp and a few red carp in the Aji pond,
 // dark carp in the Uji River, swallows over the pond and the river, crows over the village at dusk, sparrows on the
 // gravel of the courts and the lanes, a grey heron on the pond's shore and a little egret on the river's bank.
+import { walkSet, keeperLot, frontPoint } from './openwalk.js';
 import { MARKET, lots, POND, POND_LEVEL, RIVER, GARDEN, VILLA, height, pondDistance, inRiver } from './layout.js';
 
 const riverX = (z) => RIVER.x + 15 * Math.sin(z / 110);
@@ -34,4 +35,30 @@ function shore(hint) {
 }
 for (const [hint, kind] of [[[-75, -62], 'heron'], [[-30, 64], 'egret']]) { const q = shore(hint); if (q) perches.push({ kind, ...q, stay: [80, 240], gone: [40, 150], alert: 10 }); }
 void POND;
-export default { fish, flights, perches };
+
+// ── the critters: animals with a rig of their own (src/engine/fauna-critters.js; dossier §19.4) ──
+const critters = [];
+// a pair of mandarin ducks on the pond in front of the hall, a little off the pier's way: the hen leads
+critters.push({ type: 'floaters', models: ['mandarin_drake', 'mandarin_hen'], area: [-6, -22, 24, -6], dist: pondDistance, a: [8, 4], ratio: 0.5, margin: 1.4, y: POND_LEVEL, speed: 0.22, cycle: [18, 24] });
+// a crane on the island of the pond, walking along it and stopping
+critters.push({ model: 'crane', at: [-52, 0.3, -53], rot: 1.2, range: [2.2, 1.0], tau: 50, speed: 0.4 });
+// the fishers' craft moored by the west bank of the river, cormorants resting on its rails (that cormorant fishing was done at Uji in 1053 is not attested: they rest), and two on the trap platform of the upper weir
+{
+  const z = -58, bx = riverX(z) - 26.5, by = RIVER.level, bz = z;
+  critters.push({ model: 'fishing_craft', at: [bx, by, bz], rot: 0 });
+  [[-1.0, -1], [0.1, 1], [1.05, -1]].forEach(([u, sd], i) => critters.push({ model: 'cormorant', at: [bx + u, by + 0.296, bz + sd * 0.29], rot: sd * (Math.PI / 2) + (i - 1) * 0.25, cycle: 46 + 7 * i }));
+  const zc = -128, tip = [riverX(zc) - 12, zc - 9];
+  [[-0.9, -1.8, 0.4], [0.9, -1.9, -0.5]].forEach(([dx, dz, r], i) => critters.push({ model: 'cormorant', at: [tip[0] + dx, RIVER.level + 1.05, tip[1] + dz], rot: r + Math.PI, cycle: 52 + 9 * i }));
+}
+// a dog and hens at the fronts of walked houses beyond the arrival's reach (positions by the lots' own seeds)
+{
+  const OUT = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }, ALONG = { n: [1, 0], s: [1, 0], e: [0, 1], w: [0, 1] };
+  const far = [...walkSet().keys()].filter(keeperLot).sort((a, b) => a.seed - b.seed);
+  far.slice(0, 6).forEach((l, i) => {
+    const p = frontPoint(l), o = OUT[l.front], a = ALONG[l.front], len = l.rect[2] - l.rect[0] > l.rect[3] - l.rect[1] && (l.front === 'n' || l.front === 's') ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
+    const at = (u, d) => [p[0] + o[0] * d + a[0] * u, p[1] + o[1] * d + a[1] * u];
+    if (i % 2 === 0) { const q = at(len * 0.38 + 1.2, 2.4); critters.push({ model: 'dog', at: [q[0], height(q[0], q[1]) + 0.02, q[1]], rot: Math.atan2(o[0], o[1]), range: [3, 1.5] }); }
+    else for (const [m, u, d, sz] of [['rooster', len * 0.35, 2.2, 1], ['hen_brown', len * 0.35 + 0.9, 2.6, 1], ['hen_white', len * 0.35 - 0.8, 2.5, 0.96]]) { const q = at(u, d); critters.push({ model: m, at: [q[0], height(q[0], q[1]) + 0.02, q[1]], rot: i + u, range: [2.4, 1.2], size: sz }); }
+  });
+}
+export default { fish, flights, perches, critters };

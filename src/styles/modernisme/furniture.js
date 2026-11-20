@@ -62,4 +62,12 @@ export function fanal(el, { bag, col }) {
   bag.add('iron', lathe([[0.3, 4.15], [0.27, 4.26], [0.12, 4.5], [0.001, 4.62]], 6, null, x, y, z));
   col.circle(x, z, 0.24, y, y + 4.6);
 }
-export const FURNITURE = { terrace_set: terraceSet, kiosk, fanal };
+/** brazier: { at: [x, z], y } — a watchman's iron fire-basket on three legs with its coals (the works' gate at night, docs/settlements/barcelona.md §14.2). */
+export function brazier(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0;
+  bag.add('iron', lathe([[0.001, 0.56], [0.14, 0.58], [0.3, 0.7], [0.36, 0.84], [0.32, 0.86], [0.27, 0.8], [0.001, 0.62]], 10, null, x, y, z));
+  for (let k = 0; k < 3; k++) { const a = k * 2.094 + 0.5; bag.add('iron', rod([x + Math.cos(a) * 0.12, y + 0.6, z + Math.sin(a) * 0.12], [x + Math.cos(a) * 0.3, y, z + Math.sin(a) * 0.3], 0.018, 5)); }
+  bag.add('lamp_paper', lathe([[0.001, 0.83], [0.26, 0.82], [0.2, 0.88], [0.001, 0.9]], 8, null, x, y, z));
+  col.circle(x, z, 0.38, y, y + 0.9);
+}
+export const FURNITURE = { terrace_set: terraceSet, kiosk, fanal, brazier };

@@ -3,6 +3,7 @@
 import { RADIUS, AVENUE, KEEP_CLEAR, PALACE_CLEAR, MARKET, MARKET_PLATFORM, compounds, emptyLots, inCompound, inRect, lodges } from './layout.js';
 import { ground } from './ground.js';
 import { lodTiles } from '../lod.js';
+import { lights } from './nightlight.js';
 const base = (id, elements) => ({ id, style: 'teotihuacano', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -80], facing: 'e' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /**
@@ -60,6 +61,8 @@ export async function town() {
   // the Great Compound's market and its central platform with a small temple
   plans.push(base('teotihuacan-market', [{ t: 'tt_market', rect: MARKET, seed: 450, hole: MARKET_PLATFORM },
     { t: 'tt_pyramid', c: [(MARKET_PLATFORM[0] + MARKET_PLATFORM[2]) / 2, (MARKET_PLATFORM[1] + MARKET_PLATFORM[3]) / 2], y: 0.04, w: 24, d: 24, tw: 14, td: 14, h: 3.6, levels: 2, tablero: 0.5, stair: 'n', stairW: 5, talud: 'stucco_red', temple: { w: 6, d: 6, h: 3 } }]));
+  // the light of the night, one mesh of the additive halo material for the whole city (nightlight.js)
+  plans.push(base('teotihuacan-night', [{ t: 'tt_halo', lights: lights() }]));
   plans.push(base('teotihuacan-plants', [{ t: 'meso_plants', plants: plants() }]));
   return plans;
 }

@@ -168,3 +168,55 @@ Sources: [Tōdai-ji Daibutsu — ancient-history-sites](https://www.ancient-hist
 - [Tōdai-ji — FUN! JAPAN](https://www.fun-japan.jp/en/articles/10408)
 - [Nandaimon, Tōdai-ji — tabi-mag](https://tabi-mag.jp/na0114/)
 - [Deer — Nara Visitors Bureau](https://narashikanko.or.jp/en/deer)
+
+## 19. Match pass (to the Suzhou reference standard): walk, night, sound, animals, wear
+
+Marks: [stated: source] for what a source says, [inferred] for what is built on the reasoning given. Counts are added at the end of the section as each item lands.
+
+### 19.1 The visitor's walk
+- **Doors that can be reached.** Of the capital's lots near the axis, the houses whose eave leaves 1.9 m of headroom at the door (computed from the shared house's own roof, walk.js `eaveOf`) are opened; the others stay shut, so that no opened door is one a walker cannot enter [inferred: a modelling limit, not a fact of 752]. Each open house keeps a clear lane from the street to the door; the noren hangs as a valance over the door and a strip down each jamb, leaving the doorway open (a noren in this form is [inferred]; the doorway curtain of the vernacular house is of the Heian and later periods).
+- **Keepers.** A shopkeeper stands behind the counter of each open shop within 215 m of the arrival [inferred: the stalls of the East Market were run by their sellers; the market's existence is [stated: Wikipedia "Heijō-kyō"]].
+- **Wells** at the crossing of the service lane and the avenue: a well-curb with a bucket [inferred: wells served each ward of the capital; wells are found in the excavated lots of Heijō-kyō (from memory; not re-sourced)].
+
+### 19.2 Night
+What lit the capital in 752, and what is built of it (halo material only; no lights are added, day is unchanged except where a day object replaces another):
+- **Lamps (tōmyō).** A lamp was a dish of plant oil with a rush-pith wick [stated: Nara Prefecture, "tōmyō" leaflet: the oil goes in a lamp dish (灯明皿), the wick is the pith of the rush]. At Heijō Palace bowls over 15 cm across served as lamps; the oil was sesame oil or an oil of Zanthoxylum [stated: Nara National Research Institute for Cultural Properties, note on Nara-period embers and lamps, sitereports.nabunken.go.jp/ja/article/15355]. A lamp stand (燈台) has been found in the Left Capital, early 9th c. [same note]. Built: the two lamps on the altar before the Buddha glow; the lamp in each furnished room of the service quarter glows (the room lamp keeps the shared paper-shaded model; the shade is [inferred]); the lamp dish in the octagonal lantern's fire box glows [stated: the lantern is a lamp, Wikipedia "Tōdai-ji"/ tabi-mag, as in §4].
+- **Lamp stands in the court.** The white paper lanterns on posts of the court (the Edo kind, [inferred] out of place in 752) are replaced by lamp stands: a wooden post with a dish of oil and a small wooden shade (`tomyo`) [inferred from the stand found at Heijō-kyō and the altar lamps].
+- **Fire baskets (kagaribi).** Iron baskets on tripods with pine billets stand in the court, either side of the way, where the court's glass-lamp posts were [inferred: a basket fire is the usual light of an open yard before lamps; its use at Nara is not sourced; the glass of the earlier lanterns is not of 752]. One pair stands at each gate.
+- **Torches.** Torches (taimatsu, tebi) were carried in procession; at the funeral of Prince Shiki in 715 many people carried them, and the tradition of torches to escort the dead is noted [stated: same note, Man'yōshū]. Built as torch posts on the avenue's crossing [inferred].
+- **Lit houses.** Lamplight shows through the lattice windows of the houses, a share of them (ordinary houses 0.25, service quarter 0.6: oil was dear [inferred]); a hearth glow in each open house (the sunken hearth of §5) and a pool of it on the street before the open door [inferred]. Lattice windows (renji-mado) are of the architecture of the period [inferred; not re-sourced].
+- **Kitchen hearth** of the service quarter's kitchen: flame at the open stone hearth at the front [inferred].
+- Nothing is lit by electric or glass lamps.
+
+### 19.7 Measurements
+- Night (arrival, draw-count): main draws 255 -> 260, total 661 -> 673 (the halo material in the landmark, the tiles and the near detail; over the +2 aim, within the 800 limit); main tris 1.92 M -> 1.93 M. geo-one 84.4 MB / 2426 meshes (limit 130 MB / 2800). surface-check ok, plan-check ok, walk-check ok (30 routes, 67 legs).
+- Lights built: 6+4 fire baskets, 22 lamp stands, 4 torch posts, lit lattice windows and room lamps in the houses, the altar's two lamps, the octagonal lantern.
+- Not verified: the 752 forms of the lamp stand, basket and torch post (inferred); the night render was looked at from the court only.
+
+### 19.3 Sound
+Nothing of Nara in 752 was recorded; every voice is synthesised and [inferred] from the instruments and hours named. Map: `src/settlements/nara/soundmap.js`; voices: `src/engine/voices-nara.js` (names prefixed `nara`), with the sutra chant, the saws, loom, hammer, wheel, straw and the bird and insect voices of `voices-kyoto.js` used as they are.
+- **The great bell** of Tōdai-ji, five slow strokes at about 80 Hz, at dawn and dusk from the bell tower (108, -92) [stated: the bell is the temple's; its date and the tower's place are as built, §10]; the engine's own bell schedule is off.
+- **Drum at the Great South Gate** at dusk, slow strokes closing the gates [inferred: drums marked the closing of the gates of Chinese-model capitals; for Heijō-kyō not sourced].
+- **Sutra chant** in the Great Buddha Hall at the morning and evening service [inferred: the daily offices of a great temple].
+- **Court music (gagaku)** rehearsed at the dance stage: a chord of mouth-organ tone, a reed's slow line, a drum [stated: music and dance at the 752 ceremony, §10; the rehearsal is inferred].
+- **Service quarter and trades**: the scribes' brush and paper in the scriptorium, the kitchen's bowls and the carpenters' adze in their houses, and the sounds of the weavers, smiths, potters and straw-workers in the open craft houses; heard by day [inferred from the uses of §16-§17].
+- **Pedlars** crying salt, greens, fish and oil in the streets (wordless contours) [inferred from the goods of the East Market].
+- **Birds and insects** by season and hour: bush warbler (spring), lesser cuckoo (summer nights), evening cicada (late summer), bell cricket (autumn nights), owl; **stags** calling from the hills in the autumn rut [stated in general: the Man'yōshū has many poems of the calling stag and the cuckoo; the voices' contours are ours].
+- **Rooms**: the open houses by use (their own tone, small sounds), the Great Buddha Hall (low, vast, hushed). Wells (16: one in each yard and two at the service lane) are the engine's `wellBucket` places.
+- Measured (tools/sound-render.mjs): bell centroid 77 Hz peak 63 Hz before raising to 80 Hz; gagaku centroid 461 Hz; drum 98 Hz, 14 onsets in 14 s; adze 15 onsets; scribe centroid 4.3 kHz. Test `tests/nara-sound.test.mjs` (8 tests, 10 s).
+
+### 19.4 Animals (critters)
+`critters` in `src/settlements/nara/fauna.js`, run by the engine's rigs (no new models): 21 in all, with a black-kite flight over the temple and hills added to the flights [inferred].
+- **Fowl**: a cock and two hens (brown, white) beside the well of each of the three yards nearest the avenue (9) [inferred: households kept fowl; the cock and hen are old domestic animals of Japan].
+- **Dogs**: one lying at the wardens' lodge's door, one at the market's corner on the avenue (2) [inferred].
+- **Cats**: one on the scriptorium's step, one at the foot of the storehouse (2). Cats are said to have come to Japan with Buddhist sutras to keep rats off the scrolls [stated in popular histories; not re-sourced here; treat as [inferred]].
+- **Swallows' nests** on the walls under the eaves of eight open houses (the birds go out over the street and come home) [inferred: house swallows nest on houses wherever they are kept].
+- Test `tests/nara-critters.test.mjs` (4 tests). Not seen: the cats and dogs in a render (the camera put in the lane saw only house fronts); draw-count unchanged (main 260).
+
+### 19.5 Writing
+- **Name board of the Middle Gate**: 東大寺 in gilt characters raised on a black lacquer board with a gilt rim, hung by two straps in the central bay, on both faces, read from the right (`nara_plaque`, `src/styles/nara/plaque.js`). Tōdai-ji is the temple's name in the period [stated: Wikipedia "Tōdai-ji"]; that the gate carried a name board in 752 and what it read is [inferred] (gates of Chinese-model temples carried boards; the present Nandaimon board reads 大華嚴寺, which is not written here because 華 and 嚴 are not in the verified brush data).
+- Characters: 東 from `src/styles/muromachi/script.js`, 大 and 寺 from `src/settlements/ming-suzhou/brush-data.js`, all read unchanged through `canWrite`; they were verified by their authors against a typeface stroke by stroke, and were not re-verified here (only the render at the gate was looked at, from 70 m: the three characters read). No new characters were drawn; no data file of Nara's own was needed.
+- Not done: signboards of the shops (a shop's goods are shown by the goods; no characters written), the Great South Gate's board.
+
+### 19.6 Not done in this pass
+- Wear and weathering of the court's stone (worn steps and thresholds, grass in the joints); the bell in the tower; the landmark gaps of §14-§18 beyond what is listed there.

@@ -3,6 +3,7 @@
 // on the paving of the lanes, the courts and the souk. (No fish: the Darro's water is drawn but not swum in.)
 import { gardens } from './layout.js';
 import { HILL, MYRTLES, LIONS, COMARES, SOUK, GREAT_MOSQUE, SITES, DARRO, height } from './layout.js';
+import { openedHouses, frameOf } from './walk.js';
 
 const fish = [];
 const flights = [
@@ -23,4 +24,32 @@ for (const [x, z] of [[-30, -150], [20, -176], [60, -210], [-60, -240], [90, -16
 for (const g of gardens().slice(0, 8)) sparrow((g.rect[0] + g.rect[2]) / 2 + 1.5, (g.rect[1] + g.rect[3]) / 2, g.y + 0.08);   // in the huertas
 for (const x of [-60, -20, 20, 60, 100, 140]) for (const z of [-23.75, 1.25, 26.25]) sparrow(x + z / 10, z, HILL.top + 0.1);   // on the medina's lanes
 void COMARES; void GREAT_MOSQUE; void SITES;
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §23) ──
+// A cat on the floor of each bakery (by the warm oven), one in a potter's, a dog asleep in the lane before a kitchen's door, hens and a cock in the walled
+// huertas, pigeons on the paving of the Great Mosque's sahn and in the Court of the Lions. All in the medina (or in the courts) where the walk goes;
+// the shop floor is the room's own (houses.js: fy = y + 0.15).
+const critters = [];
+const FY = HILL.top + 0.15;
+const kindsSeen = {};
+for (const h of openedHouses(2)) {
+  const n = (kindsSeen[h.kind] = (kindsSeen[h.kind] || 0) + 1), { F } = frameOf(h.lot), rot = (h.lot.front === 's' ? -1 : 1) * Math.PI / 2;
+  const at = (u, v, y = FY) => { const p = F(u, v); return [p[0], y, p[1]]; };
+  if (h.kind === 'shop:baker') critters.push({ model: n % 2 ? 'cat_orange' : 'cat_tabby', at: at(1.2, 1.2), rot, range: [7, 2.5] });
+  else if (h.kind === 'shop:potter' && n === 1) critters.push({ model: 'cat_tabby', at: at(8.2, 1.3), rot: rot + 2.4, range: [7, 2.5] });
+  else if (h.kind === 'house:kitchen' && n === 1) critters.push({ model: 'dog', at: at(1.6, -0.85, HILL.top + 0.05), rot, range: [9, 3.5] });
+}
+const huertas = gardens();
+for (const [k, g] of huertas.slice(0, 2).entries()) {
+  const cx = (g.rect[0] + g.rect[2]) / 2, cz = (g.rect[1] + g.rect[3]) / 2, y = g.y + 0.04;
+  critters.push({ model: 'rooster', at: [cx - 1.1, y, cz + k], rot: 0.4 + k, range: [2.2, 1.1] }, { model: 'hen_brown', at: [cx + 0.2, y, cz - 0.8 + k], rot: 2.1, range: [2.2, 1.1], size: 0.97 }, { model: 'hen_white', at: [cx + 1.3, y, cz + 0.9], rot: 4.0 + k, range: [2.2, 1.1] });
+}
+{
+  const [mx0, mz0, mx1, mz1] = [GREAT_MOSQUE[0], GREAT_MOSQUE[1], GREAT_MOSQUE[2], GREAT_MOSQUE[3] - 20];
+  const cx = (mx0 + mx1) / 2, cz = (mz0 + mz1) / 2;
+  for (const [dx, dz, m] of [[3.2, 1.0, 'pigeon_grey'], [4.2, 2.1, 'pigeon_white'], [2.4, 2.6, 'pigeon_grey']]) critters.push({ model: m, at: [cx + dx, 0.05, cz + dz], rot: dx * 3, range: [3.0, 1.4] });
+  const [lx0, lz0, lx1, lz1] = LIONS;
+  for (const [dx, dz, m] of [[-3.5, 2.5, 'pigeon_grey'], [-4.5, 3.3, 'pigeon_dark']]) critters.push({ model: m, at: [lx1 + dx - 6, HILL.top + 0.05, lz1 + dz - 7], rot: dz * 2, range: [3.0, 1.4] });
+  void lx0; void lz0;
+}
+export default { fish, flights, perches, critters };

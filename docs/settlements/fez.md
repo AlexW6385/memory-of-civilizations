@@ -140,3 +140,70 @@ Ten open houses nearest the arrival and along the main walk (merchant's, craftsm
 - **Street.** [stated] Upper rooms look to the lane over projecting bays. [inferred] One room per house has a cedar balcony on corbels with rail that can be stepped onto, and windows as open reveals.
 - **Roof terrace.** [stated] The roof is the women's working and resting place, with high parapets. [inferred] A mat with cushions, a washing line, water jars and a charcoal pot, a low wall round the stair well and a rail round the court's opening.
 - **Still shut.** The other open riads, every closed house, and the funduq's upper gallery (§4 funduq stays as built).
+
+## 16. Match-to-reference pass (2026-11-20): sound, animals, night, the walk, wear
+
+The reference is Suzhou (docs/suzhou-method.md; its §22–§29). No source could be fetched in this pass (the shell reaches few sites); everything below is [inferred] from the dossier's own sections and general knowledge of a Maghribi medina, and marked so. What is [stated] is stated in §4–§9 and repeated here only to say where it lands.
+
+### 16.1 Sound, placed (`src/settlements/fez/soundmap.js`, `src/engine/voices-fez.js`)
+
+Each sound is made at a place of the settlement and heard from the listener's (the engine's `LIFE.map` interface, as Suzhou's and Cairo's). All synthesised from the engine's tools, nothing sampled. Every call, chant and murmur is WORDLESS (vowel contours): no text is recited or sung. Modes: a Maghribi mode on D with a flat second and a flat sixth, used as a gesture, after the Andalusi tradition of §9 [inferred].
+
+| Voice | Where (map) | When | Basis |
+|---|---|---|---|
+| adhan | the engine's call from the minarets (profile `adhan: 1`) | five times | [stated] §8 |
+| basin / fountains | the madrasa's basin, the Qarawiyyin's sahn, twelve wall fountains near the core (`fountains()`) | always, by day louder | [stated] basin §4.1, fountain §4.2; wall fountains [stated] §5 |
+| `fezLesson` | the two classrooms east and west of the court; three circles at the pillars of the Qarawiyyin's north gallery; the naves | 6–17 | [stated] classrooms §4.1, students round a master (life.js) [inferred]; unison answering a master's line [inferred] |
+| `recite` | the Bou Inania's prayer hall, the Qarawiyyin's hall | 4.5–21.5 | [inferred] |
+| `copperBeat` | five anvils on the Place Seffarine | 7.5–17.5, dry | [stated] coppersmiths §4.3, §9 |
+| `fezTannery` | four vats of the Chouara | 6.5–18 | [stated] hand work, treading by bare feet §4.4; slapped hides [inferred] |
+| `fezWeir` | the Oued Fes at each of its four bridges | always | [stated] the river runs through the medina §2; the weirs and quays' rush [inferred] |
+| `fezWash` | the wash-places of the quays | 7–16, dry | [inferred] (`washPlaces()`, §9 quay wash-place women) |
+| `fezHawk`, `fezVend` | twelve points on the Talaa Kebira, the Talaa Seghira, the souks; a hawker walking the lane | 6.5–19 | [inferred] the "make way" call, mint, hot bread, eggs and herbs |
+| `fezMule` | a string of mules along a street: hooves, iron bell, pack frames, the muleteer's short cry | 6–18.5 | [stated] muleteers with donkeys §7; the bell and cry [inferred] |
+| `fezGerrab` | a water seller walking a street, brass cups struck together | 8–18 | [inferred] |
+| dukkans by trade | each dukkan bay (121 rooms): bread (`fezBake`), slippers (`fezSlipper`), leather (`fezLeather`), brass, spice (mortar), cloth, pottery, books, candles, henna | 7–18.5 | [stated] trades §9 (dukkan goods); sounds [inferred] |
+| `loom` | the craftsmen's houses (`up === 'craft'`) | 7–17 | [inferred] §15 loom or wool in a craftsman's workroom |
+| `fezPigeons` | the madrasa's court, the Qarawiyyin sahn, the tannery (the cotes' dung [stated] §4.4), two roofs | 6–18.5 | |
+| `fezSwift` | round the Qarawiyyin and the Bou Inania minarets | 16.5–19.5, dry | [stated] swifts §8 |
+| `fezRabab` | a bowed fiddle from five rich houses' courts | 19–22.5 | [stated] music: rabab and oud §9 |
+| night | cats' cries, dogs far off, a patrol's steps on the streets | 22–4.5 | [inferred] |
+
+Rooms (from inside): prayer halls and naves (170 Hz, quiet), the covered souks (open to the din), each dukkan by trade, the open riads, an upper floor. Rain on flat roofs is the profile's (`roof: 'flat'`). Not made: bells (a Marinid medina had none for the hours); the water clock's strokes (reported in 1357, after the moment shown, §4.1 [stated]); Ramadan sounds (no season fixed).
+
+Measured, not heard (tools/sound-render.mjs, one event at gain 1 over 14 s): peaks 4.8e-3 to 1.8e-2 of full scale for every voice; centroids: steps 99 Hz, wash 372 Hz, tannery 421 Hz, hawk 880 Hz, rabab 868 Hz, weir 2.0 kHz, gerrab 1.9 kHz, swifts 5.4 kHz; the hawk's contour falls G4 to C4 as written. Not checked: whether any voice is convincing as its source; the density of the whole at a listener's level.
+
+### 16.2 Animals with behaviour (`fauna.js` `critters`, `src/engine/fauna-critters.js`; test `tests/fez-critters.test.mjs`)
+
+One mesh (`fauna:critters`, one draw, not counted by `draw-count`), 42 animals, all existing models (nothing added to the engine). [stated] §8: swifts, martins, jackdaws, sparrows, an egret (the engine's old system keeps them); pigeons and their dung in the tannery §4.4; donkeys with muleteers §7 (still street-life figures: no donkey rig exists). The rest is [inferred]:
+- **House martins' nests.** Two cups of mud on the cedar corbels under the canopy of the Bou Inania's prayer-hall front, open to the court, from which the birds sweep out over the court and back (radius 7 m, dipping 3 m). [inferred: martins nest under eaves; the corbels' places are taken from `hallfront.js`/`kit.js canopy`, 0.55 m apart from the gallery's west end.]
+- **Cats** (6 orange, 11 tabby) asleep on the floor of a share of the dukkans' cells by the jamb, lifting their heads as the visitor comes near. [inferred: the cats of a Muslim city's markets; no source for Marinid Fez.]
+- **Hens and a cock** in the funduq court's south-west corner. [inferred: the funduq kept fowl with its animals.]
+- **Pigeons** (18) on the paving of the Place Seffarine, the Qarawiyyin's sahn and the tannery's north walk. [stated for the tannery's use of pigeon dung §4.4; the flocks' places inferred.]
+- **Three caged songbirds** hung from the lintels of dukkans on the Talaa Kebira, swaying and hopping. [inferred: caged birds are a commonplace of Maghribi shopfronts; none is documented for 1350.]
+The cats keep out of the cells the visitor enters (§16.4), so there are a few fewer. Not done: a donkey and a mule rig (the muleteers' donkeys are still still figures); storks on the walls (§8: not in our sources); the egret and swifts stay as the old flocks.
+
+### 16.3 Night (`nightlight.js`, night plans in `town.js`)
+
+Light added over what is behind it, in the engine's one additive `halo` material, in 48 m night tiles shown within 55 m of the walker (the pattern of Suzhou and Cairo); no light, no shadow, no collision, nothing by day. One halo mesh is one draw wherever a lit tile is near. The lamps' bodies are not made in the night tiles (a fine piece there would be a detail mesh of its own per material); they are in the builders: the dukkan's cell lamp (`house.js`) and the souk's lantern (`souk.js`) are new small pieces of iron and bronze, the door lamp was already there. [stated] only the use of oil lamps, braziers and the lamp-lit mosque: brass lamps and the chandelier cast from a church bell in the Qarawiyyin (§4.3); a lit market at night is not documented for 1350. Everything else is [inferred] and meant as plausible.
+
+| Light | Where | Share | Basis |
+|---|---|---|---|
+| door lamp | beside every house door where `house.js` hangs the bracket lamp (402 lit of 646 doors): glow, a pool on the lane, a wash on the wall | 0.6 | [inferred] a lamp at a door was a wealth; [stated] wall lamps §6 |
+| dukkan lamp | one hung in each dukkan cell, a pool in the lane | 0.5 | [inferred] the souks shut at dusk, the lanes' shops kept a lamp for late buyers |
+| bakers' oven | the mouth of the oven in every bread dukkan, warm, wide | all (9) | [stated] communal ovens §9; the glow [inferred] |
+| souk lantern | bronze lanterns on hooks from the roof beams of the four covered souks, every 9 m | all (20) | [inferred] |
+| coppersmiths' braziers | before every second shop of the Place Seffarine (8), coals under the pots | all | [stated] the braziers are in the square's builder; glow [inferred] |
+| madrasa court | the ten brass lamps hung from the lintels of the galleries | all | [stated] brass lamps hung in the galleries §4.1 |
+| room lamps | the brass lamps of the open houses' salons and side rooms, the Bou Inania's hall and cells, the funduq, the quarter mosque, the Qarawiyyin's aisles and its three great chandeliers (read from the builders' own `lights`) | all | [stated] §4.3 |
+| lit windows | cedar lattices of 10 % of the houses, 45 % of their lattices (732 panes), and the ten open upper floors | | [inferred] |
+
+Not done: lanterns carried by the night patrol (no figure carries a light); the gates' watch fires; lit panes of the houses that are not in the 10 %. Time of the night plans: 2.2 s at load (the houses with open upper floors, the landmarks and the window houses are run once into a recording bag to read their lights).
+
+### 16.4 The visitor's walk (`openwalk.js`, `front.js`, `house.js`, `souk.js`)
+
+What the visitor meets was already in place: the dukkans of the lanes with their goods and keeper, the open houses (68 furnished, ten with the upper floor open §15), the street's people and animals (§8). This pass makes them enterable and adds the small furniture of a door.
+- **Dukkan cells entered.** Nineteen cells and five open houses near the stations (arrival, Talaa Kebira, the souk, Place Seffarine, funduq) have a route in `plan.walks` (`openwalk.js`): lane, the 0.3 m step, 0.4 m into the cell (1.45 m deep, the keeper's cushion at the back); or the door, the passage and the middle of the court. walk-check follows each with the viewer's own body. The cells that pass are listed by their house's rect: of 78 cells tried 39 pass; the rest have goods that the walker's stair rule reads as a wall in the step's first half metre, and are left as fronts to look into. [inferred: the dukkan as a 1.5 m deep alcove, a standing buyer at the sill; §9 gives the type, not the dimensions.]
+- **Awning with a lining.** The striped cloth over each dukkan was a single sheet; to the walker's collision a sheet with no underside is a solid slope from the ground up, so it shut the sill on lanes wider than 3 m. A second sheet a hand's breadth under the first gives it an underside; 27 cells pass without it, 39 with.
+- **Door furniture.** A water jar (turned by the house's seed, four sizes, terracotta or dark pottery) by a quarter of the doors of lanes 2.4 m or wider, on the side away from the lamp; a hanging brass lamp in every dukkan but the bakers' (§16.3); lanterns under the souk roofs. [inferred]
+Not done: interiors with figures in the cells beyond the keepers already there; benches and mounting blocks beyond those in `house.js`; laundry across more lanes than the derbs'; goods rearranged so every cell can be entered.

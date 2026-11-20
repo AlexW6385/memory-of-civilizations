@@ -235,10 +235,10 @@ export function naraRake(el, { bag }) {
  * each long edge, ending 5.5 m short of the crossings.
  */
 export function naraGutter(el, { bag }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, alongX = x1 - x0 >= z1 - z0, e = 5.5;
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, alongX = x1 - x0 >= z1 - z0, e = el.end ?? 5.5, ins = el.inset ?? 1.2;      // (`inset`: where houses' deep eaves hang over the lane's edge, the gutters lie further in, clear of the low eave edge and the doors' lanes)
   const a0 = (alongX ? x0 : z0) + e, a1 = (alongX ? x1 : z1) - e;
   if (a1 - a0 < 8) return;
-  for (const t of [(alongX ? z0 : x0) + 1.2, (alongX ? z1 : x1) - 1.2]) {
+  for (const t of [(alongX ? z0 : x0) + ins, (alongX ? z1 : x1) - ins]) {
     for (const [d0, d1, h, m] of [[-0.3, 0.3, 0.03, 'bluestone'], [-0.38, -0.3, 0.12, 'granite_block'], [0.3, 0.38, 0.12, 'granite_block']]) {
       if (alongX) bag.add(m, box(a0, y, t + d0, a1, y + h, t + d1)); else bag.add(m, box(t + d0, y, a0, t + d1, y + h, a1));
     }

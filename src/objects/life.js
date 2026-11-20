@@ -158,7 +158,7 @@ const KIT_OVER = {
   stonehenge: { stall: [], mats: 0, door: [['firewood', 3], ['basket', 1.5], ['sweeper', 0.2]], street: [['animal:sheep', 1.5], ['animal:dog', 0.6], ['firewood', 0.6], ['figure', 2]] },
   // Minoan Knossos: the men's loincloth and kilt, bare above the waist, long-haired, beardless; the women's
   // long robes (the frescoes: the Cupbearer, the Prince of the Lilies)
-  knossos: { figures: F(['loincloth', 'shendyt', 'robe', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_indigo'], ['skin_medium'], ['none'], { hair: ['long', 'long', 'bun'], beard: 0, feet: 'bare', over: ['sash', 'none', 'cape'], overs: { shendyt: ['belt'], loincloth: ['none'] }, hairs: [['hide_black', 0.7], ['hide_brown', 0.6]] }) },
+  knossos: { fronts: [], door: [['pot:amphora', 3], ['pot:pithos', 1], ['basket', 2], ['stool', 0.8], ['sweeper', 0.3], ['firewood', 1], ['laundry', 0.6]], street: [['animal:donkey', 2], ['animal:goat', 1], ['animal:dog', 0.8], ['animal:cat', 0.4], ['chickens:pigeon', 0.4], ['sacks', 1], ['well', 0.2], ['figure', 2.5]], figures: F(['loincloth', 'shendyt', 'robe', 'robe'], ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_indigo'], ['skin_medium'], ['none'], { hair: ['long', 'long', 'bun'], beard: 0, feet: 'bare', over: ['sash', 'none', 'cape'], overs: { shendyt: ['belt'], loincloth: ['none'] }, hairs: [['hide_black', 0.7], ['hide_brown', 0.6]] }) },
   // Great Zimbabwe: aprons and loincloths of hide, bare above the waist, a hide cloak on some
   'great-zimbabwe': { figures: F(['loincloth', 'loincloth', 'wrap'], ['hide_tan', 'hide_brown', 'cloth_ochre'], ['skin_dark'], ['none'], { hair: ['short', 'short', 'bun'], beard: 0.3, feet: 'bare', over: ['none'], tops: { wrap: ['bare', ''] }, overs: { loincloth: ['none', 'none', 'cape'], wrap: ['none'] } }) },
   // the Māori of the later 18th century (docs/settlements/maori.md): men's and women's garments much alike —
@@ -169,12 +169,16 @@ const KIT_OVER = {
   // Wikipedia, "Māori traditional textiles": https://en.wikipedia.org/wiki/M%C4%81ori_traditional_textiles). Unlike Rapa
   // Nui's hami and bark cloth (the pacific kit): no loincloths in sight, a cloak on most, the topknot.
   maori: { street: [['animal:dog', 0.8], ['basket', 1], ['figure', 2.5]], figures: F(['strands', 'strands', 'wrap'], ['cloth_ochre', 'cloth_brown', 'linen', 'cloth_ochre'], ['skin_medium'], ['none'], { hair: ['topknot', 'topknot', 'long', 'long'], comb: 0.4, beard: 0.15, feet: 'bare', tops: { wrap: ['bare', ''] }, cloths2: ['linen', 'cloth_ochre', 'cloth_brown', 'cloth_black', 'hide_white', 'linen'], overs: { strands: ['cloak', 'cloak', 'cloak', 'none'], wrap: ['cloak', 'cloak', 'none'] }, hairs: [['hide_black', 0.7], ['hide_black', 0.6]] }) },
+  // Heian Uji (1053): no paper lanterns or shop signs on the fronts (chōchin and signboards are later), the pots, baskets, firewood and bench at the doors (docs/settlements/heian-uji.md §19)
+  'heian-uji': { fronts: [], door: [['pot:dark_pot', 2], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.5], ['sweeper', 0.5], ['laundry', 0.5]] },
   // Joseon Seoul: the men's jige (A-frame) on the back; the women carrying on the head, the water jar (dongi) and the basket
   // on a ring pad (https://en.wikipedia.org/wiki/Jige)
   'joseon-seoul': { fig: { carry: ['jige', 'jige', 'jige', 'basket', 'pot', 'none', 'none', 'none', 'none'] } },
   // the Polynesians brought the chicken and the rat to Rapa Nui, and no dog; to Aotearoa the dog (kurī) and the rat,
   // and no chicken (https://en.wikipedia.org/wiki/Easter_Island; https://en.wikipedia.org/wiki/Kur%C4%AB)
   'rapa-nui': { street: [['chickens', 1.4], ['basket', 1], ['figure', 2.5]] },
+  // Babylon c. 570 BC (docs/settlements/babylon.md §18): no hanging paper lanterns on the fronts (a clay lamp stood in a niche over the door) and no turbans (the men long-haired and bearded in a long robe or a short belted tunic, the women veiled); donkeys, camels (the caravans), sheep and goats, dogs, a few hens and pigeons
+  babylon: { fronts: [['laundry_pole', 0.5, 2]], door: [['pot:water_pot', 2], ['pot:zir', 1.4], ['pot:pithos', 0.8], ['basket', 2], ['sacks', 1], ['bench', 1], ['stool', 0.5], ['sweeper', 0.3], ['firewood', 0.6]], street: [['animal:donkey', 2.5], ['animal:camel', 0.6], ['animal:goat', 1.2], ['animal:sheep', 1], ['animal:dog', 0.8], ['chickens', 0.3], ['chickens:pigeon', 0.5], ['sacks', 1], ['figure', 2.5]], figures: F(['robe', 'robe', 'tunic'], ['cloth_white', 'linen', 'cloth_ochre', 'cloth_brown', 'cloth_indigo', 'cloth_red'], ['skin_medium', 'skin_light'], ['none', 'none', 'veil'], { carry: ['none', 'none', 'none', 'none', 'sack', 'pot', 'bundle'], broom: 'broom', hair: ['long', 'long', 'bun'], beard: 0.9, over: ['cape', 'sash', 'none', 'cape'], feet: 'shod' }) },
   amsterdam: { street: [['sledge', 2], ['animal:horse', 0.8], ['animal:dog', 0.6], ['barrel', 1.2], ['sacks', 0.8], ['figure', 3]] },
 };
 // the draw-well of each kit (src/objects/index.js well): its kind, its curb, a roof over it
@@ -281,6 +285,7 @@ const rectOf = (plan, [x0, z0, x1, z1]) => { const a = toSettle(plan, x0, z0), b
 // landmarks whose plan is the town itself (their elements are read like a townscape's)
 const OWN_FRONTS = new Set(['ming-suzhou']);          // settlements that dress their own house fronts (their town.js)
 OWN_FRONTS.add('song-kaifeng');      // (Kaifeng's shops and houses carry their own signs, lantern boxes and washing: houses.js, shops.js; a generic lantern hung in a door bay is lower than the plinth's headroom)
+OWN_FRONTS.add('nara');            // (Nara's houses dress their own fronts (nara_house: noren, trestle, signboard); a generic lantern hung at a lot's middle is in the doorway's lane)
 const TOWN_LANDMARKS = new Set(['machu-picchu-town', 'taos-pueblo']);
 const isFull = (plan, R) => TOWN_LANDMARKS.has(plan.id) || (plan.bounds && plan.bounds[2] - plan.bounds[0] >= R * 1.5);
 

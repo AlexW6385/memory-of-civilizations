@@ -123,7 +123,9 @@ function chooseOpen(all) {
   nova.filter((l) => !l.open).forEach((l) => { l.open = true; l.use = MORE[m++ % MORE.length]; });
   all.filter((l) => l.kind === 'merchant' && !l.nova && !l.open && ok(l) && l.rect[0] > -150 && l.rect[2] < 215).sort((a, b) => a.rect[0] - b.rect[0] || a.rect[1] - b.rect[1]).filter((l, i) => i % 3 === 1).forEach((l) => { l.open = true; l.use = MORE[m++ % MORE.length]; });
   const dist = (l, p) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - p[0], (l.rect[1] + l.rect[3]) / 2 - p[1]);
-  all.filter((l) => l.kind === 'fisher' && l.plinth < 0.9 && l.w >= 7 && !l.open).sort((a, b) => dist(a, [-206, 60]) - dist(b, [-206, 60])).filter((l, i) => i < 3 || i % 2 === 1).slice(0, 12).forEach((l) => { l.open = true; l.use = 'home'; });
+  // (not a home whose front is on the monastery's range wall: no street runs there)
+  const walled = (l) => { const z = l.front === 'n' ? l.rect[1] - 3 : l.rect[3] + 3; return inRect(MONASTERY, (l.rect[0] + l.rect[2]) / 2, z, 1); };
+  all.filter((l) => l.kind === 'fisher' && l.plinth < 0.9 && l.w >= 7 && !l.open && !walled(l)).sort((a, b) => dist(a, [-206, 60]) - dist(b, [-206, 60])).filter((l, i) => i < 3 || i % 2 === 1).slice(0, 12).forEach((l) => { l.open = true; l.use = 'home'; });
   all.filter((l) => l.kind === 'alfama' && l.plinth < 1.6 && l.w >= 5.5 && !l.open).sort((a, b) => dist(a, [60, -30]) - dist(b, [60, -30])).slice(0, 4).forEach((l) => { l.open = true; l.use = 'home'; });
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

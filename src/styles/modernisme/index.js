@@ -247,7 +247,7 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   const opened = !!opt.open, tb2 = opened ? door : tb;       // (an opened house has its gallery over the door)
   if (!own) {
     { // the plinth, in pieces round the shops' doors
-      const gaps = shops.map((q) => { const d = q.door === 'L' ? q.s0 + q.bw / 2 : q.s1 - q.bw / 2; return [d - 0.9, d + 0.9]; });
+      const gaps = shops.map((q) => { const d = q.door === 'L' ? q.s0 + q.bw / 2 : q.s1 - q.bw / 2; return [d - 1.06, d + 1.06]; });
       if (opt.portal) gaps.push([opt.portal.pc - POW, opt.portal.pc + POW]);                // (the doorway of a portal with a vestibule: portal.js)
       gaps.sort((p, q) => p[0] - q[0]);
       let c0 = s0; for (const [g0, g1] of gaps) { if (g0 > c0 + 0.05) bag.add('granite_grey', F(c0, g0, -0.04, 0.1, y - 1.25, y + 0.45)); c0 = g1; }
@@ -392,7 +392,7 @@ export function blockShops(el) {
     const nb = Math.max(1, Math.round((p.b - p.a) / 3.4));
     for (const sh of plotShops(p, nb, (p.b - p.a) / nb, true, [CORNER_CLEAR, 2 * ((el.s ?? 70) / 2 - (el.ch ?? 12)) - CORNER_CLEAR])) {
       const yS = y + (el.dz ?? 0) * (fr.at((sh.s0 + sh.s1) / 2, 0)[1] - el.c[1]);
-      out.push({ ...sh, y: yS, people: shopPeople(sh).map((q) => ({ role: q.role, at: fr.at(q.at[0], q.at[1]), face: [fr.u[0] * q.face[0] + fr.n[0] * q.face[1], fr.u[1] * q.face[0] + fr.n[1] * q.face[1]] })), door: fr.at(sh.door === 'L' ? sh.s0 + sh.bw / 2 : sh.s1 - sh.bw / 2, 0), n: fr.n });
+      out.push({ ...sh, y: yS, people: shopPeople(sh).map((q) => ({ role: q.role, at: fr.at(q.at[0], q.at[1]), face: [fr.u[0] * q.face[0] + fr.n[0] * q.face[1], fr.u[1] * q.face[0] + fr.n[1] * q.face[1]] })), door: fr.at(sh.door === 'L' ? sh.s0 + sh.bw / 2 : sh.s1 - sh.bw / 2, 0), n: fr.n, u: fr.u, flip: sh.door === 'R', ends: [fr.at(sh.s0, 0), fr.at(sh.s1, 0)] });
     }
   }
   return out;
@@ -403,6 +403,33 @@ export function blockChimneys(el) {
     const h = pickH(rng(p.seed)), fr = frame(P8[2 * p.k], P8[2 * p.k + 1]);
     const I = el.open && el.open.includes(p.seed) ? plotInfo(el, p, fr) : null;
     for (const [s, t] of chimneyAt(p.seed, p.a, p.b, I && I.portal ? I.pc : null)) { const q = fr.at(s, t); out.push([q[0], y + h + 1.82, q[1]]); }
+  }
+  return out;
+}
+/**
+ * The windows of a block's street fronts that a light can show in (the night, docs/settlements/barcelona.md §14.2), as streetFront() builds them: for each plot
+ * { seed, k, wins: [{ p: [x, z] (on the wall, 0.04 out), n, u (along the front), w (half width), y0, y1, f (the floor: 1 the entresol, 2 the principal, 3 and up), bay }] };
+ * the bay of a glazed gallery (the corner houses', or a plot's mirador, drawn from the same stream as streetFront's) has none; an opened house's two floors that are
+ * built by upstairs.js none. Pure.
+ */
+export function blockWindows(el) {
+  const { P8, plots } = blockPlan(el), y = el.y ?? 0, out = [];
+  for (const p of plots) {
+    const fr = frame(P8[2 * p.k], P8[2 * p.k + 1]); if (!fr.axis) continue;
+    const h = pickH(rng(p.seed)), top = LV.findIndex((l) => l >= h - 0.01), nb = Math.max(1, Math.round((p.b - p.a) / 3.4)), bw = (p.b - p.a) / nb;
+    const dr = rng(((Math.round(p.a * 37 + y * 11 + h * 101 + fr.at(0, 0)[0] * 3 + fr.at(0, 0)[1] * 7) >>> 0) || 1));
+    const mirador = nb >= 4 && dr() < 0.2, tb = mirador ? (dr() < 0.5 ? 0 : nb - 1) : -1;
+    const open = el.open && el.open.includes(p.seed), wins = [];
+    for (let i = 0; i < nb; i++) {
+      const sc = p.a + (i + 0.5) * bw, at = (yy0, yy1, w, f) => wins.push({ p: fr.at(sc, 0.04), n: fr.n, u: fr.u, w, y0: y + yy0, y1: y + yy1, f, bay: i });
+      at(5.3, 6.9, 0.6, 1);
+      for (let f = 2; f < top; f++) {
+        if (i === tb || (open && f <= 3)) continue;
+        const k = f === 2 ? 2 : f === top - 1 ? 'last' : 'mid';
+        at(LV[f] + 0.06, LV[f] + 0.06 + WIN[k][1], WIN[k][0] / 2, f);
+      }
+    }
+    out.push({ seed: p.seed, k: p.k, bw, nb, wins });
   }
   return out;
 }
@@ -439,7 +466,7 @@ export function blockPortals(el) {
     const sh = plotShops(p, nb, (p.b - p.a) / nb, !!el.shops && fr.axis, [CORNER_CLEAR, 2 * ((el.s ?? 70) / 2 - (el.ch ?? 12)) - CORNER_CLEAR]), po = plotPortal(el, p, fr, sh);
     if (!po) continue;
     const yS = y + (el.dz ?? 0) * (fr.at(po.pc, 0)[1] - el.c[1]);
-    out.push({ at: fr.at(po.pc + 0.45, -1.7), face: fr.n, y: yS + 0.12, seed: p.seed });
+    out.push({ at: fr.at(po.pc + 0.45, -1.7), face: fr.n, y: yS + 0.12, seed: p.seed, door: fr.at(po.pc, 0), u: fr.u, lamp: po.lamp, yS });
   }
   return out;
 }

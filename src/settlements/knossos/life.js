@@ -5,6 +5,7 @@
 
 import { ROAD, LANE, STREAM, STREAM_LEVEL, WESTCOURT, lanes, lots, openHouses, upstairsHouses, height, inRect, onStream } from './layout.js';
 import { dwellingFrame, dwellingStoreys } from '../../styles/minoan/town.js';
+import { walkRoutes } from './walkroutes.js';
 import { stairLayout, onStair } from '../../styles/minoan/upstairs.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -129,7 +130,7 @@ export function life() {
   }
   // the lanes: people by the doors and on the way, a donkey with its driver, children at play, dogs and cats
   let n = 0;
-  const doors = [...upH].map((l) => { const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }); return F.P(F.du, -1.0); });
+  const doors = [...openKinds.keys()].map((l) => { const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }); return F.P(F.du, -1.0); });
   for (const Ln of lanes()) {
     if (Math.hypot((Ln.x0 + Ln.x1) / 2, Ln.z) > 230) continue;
     for (let x = Ln.x0 + 4 + rand() * 10; x < Ln.x1 - 2; x += 14 + rand() * 20) {
@@ -137,7 +138,7 @@ export function life() {
       for (const d of doors) if (Math.abs(x - d[0]) < 2.4 && Math.abs(Ln.z - d[1]) < 3) x = d[0] + (x < d[0] ? -1 : 1) * 2.6 * 1.0 + (x < d[0] ? -1 : 1) * 0.2;
       const near = Math.hypot(x, Ln.z) < 170, p = rand();
       if (!near && (p < 0.8 || Math.hypot(x, Ln.z) > 220)) continue;
-      const z = Ln.z + (rand() - 0.5) * 1.8, y = height(x, z) + 0.08, dir = rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2;
+      const o = rand(), z = Ln.z + (o < 0.5 ? -1 : 1) * (1.05 + (o % 0.5) * 0.8), y = height(x, z) + 0.08, dir = rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2;
       if (p < 0.15) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y, rot: dir, seed: seed(), gear: true }); man([x + (dir < 0 ? 1.7 : -1.7), z + 0.5], dir, { y, carry: 'staff' }); }
       else if (p < 0.3) { for (let k = 0; k < 2; k++) man([x + k * 0.8, z + (k ? 0.5 : 0)], k ? 2.4 : 0.8, { y, pose: 'sit_ground', child: true, h: 1.05 - 0.06 * k }); }
       else if (p < 0.55) woman([x, z], dir, { y, carry: rand() < 0.6 ? 'pot' : 'sack' });
@@ -169,9 +170,32 @@ export function life() {
   });
   L.push({ t: 'well', kind: 'open', at: [-114, 33.6], y: Y0, seed: seed() }, { t: 'trough', at: [-113.2, 27.4], y: Y0, rot: Math.PI / 2, seed: seed() });
   woman([-112.2, 34.6], Math.PI + 0.5, { y: Y0, carry: 'pot' });
+  // ── the fronts of the walk's lots (§20.1): what stands out at each open door by day, by its trade, set clear of the door's lane (a goods mat is 1.6 m across, a
+  //    pot with its fellows 1 m: nothing nearer than 1.3 m of the door's line, where the walker's body and the raster of its collision pass) ──
+  const walkLots = new Set(walkRoutes().map((r) => r.l));
+  for (const { l, kind } of walkRoutes()) {
+    const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }), out = { n: Math.PI, s: 0, w: -Math.PI / 2, e: Math.PI / 2 }[l.front] ?? 0, f = out + Math.PI;
+    const at = (u, v) => F.P(u, v), y = (a) => height(a[0], a[1]) + 0.06;
+    const room = F.du >= 3.5, uM = F.du - 2.4, uP = F.du - 1.75;           // (the mat's centre, a pot's: on the side away from the bench, if the lot has room there)
+    const pot = (k, n = 1, uu = uP) => { if (F.du < 2.7) return; const a = at(uu, -0.95); L.push({ t: 'pot', kind: k, at: a, y: y(a), n, seed: seed() }); };
+    const mat = (goods) => { pot(goods[0], 1); if (room) pot(goods[1], 1, uM); };            // (pots only: a new kind of life object near the arrival costs a draw)
+    if (kind === 'shop') mat(['amphora', 'water_pot']);
+    else if (kind === 'store') { pot('pithos', 1); }
+    else if (kind === 'potter') mat(['water_pot', 'amphora']);
+    else if (kind === 'weaver') { if (room) { const a = at(uM, -0.95); woman(a, f, { y: y(a), pose: 'sit_low', cloth: 'cloth_red' }); } else pot('water_pot'); }
+    else if (kind === 'press') pot('amphora', 1);
+    else if (kind === 'dyer') pot('water_pot', 1);
+    else if (kind === 'smith') pot('amphora', 1);
+    else if (kind === 'sealcutter') { if (room) { const a = at(uM, -0.95); man(a, f, { y: y(a), pose: 'sit_ground', child: true, h: 1.1 }); } }
+    else pot('water_pot', 1);
+  }
+  // the well at the west end of the first lane (§20.1): a curb with its trough, a woman filling a jar, a donkey waiting
+  L.push({ t: 'well', kind: 'open', at: [-70.5, 64.2], y: height(-70.5, 64.2), seed: seed() }, { t: 'trough', at: [-72.8, 66.8], y: height(-72.8, 66.8), rot: 0, seed: seed() });
+  woman([-70.5, 62.4], 0, { y: height(-70.5, 62.4), carry: 'pot' });
+  L.push({ t: 'animal', kind: 'donkey', at: [-74.5, 66.6], y: height(-74.5, 66.6) + 0.12, rot: Math.PI / 2, seed: seed(), gear: true });
   // the doorsteps of the outer town: a pair of water pots, an amphora, sacks or a stack of firewood beside the door, on the side away from the bench
   for (const l of lots()) {
-    if (l.r < 105 || l.r > 235 || rand() > 0.24) continue;
+    if (l.r < 105 || l.r > 235 || rand() > 0.24 || walkLots.has(l)) continue;
     const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }), [x, z] = F.P(F.du - 1.35, -0.4), y = height(x, z) + 0.07, k = Math.floor(rand() * 4);
     if (k === 0) L.push({ t: 'pot', kind: 'water_pot', at: [x, z], y, n: 2, seed: seed() });
     else if (k === 1) L.push({ t: 'pot', kind: 'amphora', at: [x, z], y, n: 2, seed: seed() });

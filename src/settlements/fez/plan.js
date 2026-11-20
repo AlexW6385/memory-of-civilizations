@@ -4,6 +4,7 @@ import { houseList } from './houses.js';
 import { planOf } from '../../styles/marinid/house.js';
 import { upWalks } from '../../styles/marinid/upper.js';
 import { frame } from '../../styles/mamluk/kit.js';
+import { openWalks } from './openwalk.js';
 
 const b = SITES.bou, y = siteY('bou'), cx = (b[0] + b[2]) / 2;
 const E = [];
@@ -40,6 +41,6 @@ export const bouInania = {
     room('cell east', [gx1 + 1.2, zN + 7.3, b[2] - 1.6, zN + 9.7], yu, 'hall'),
     room('prayer hall', [b[0] + 6.4, cz1 + 0.7, b[2] - 6.4, b[3] - 1], y, 'hall'),
   ],
-  walks: [Object.assign([[cx, b[1] - 3], [cx, zN + 1], [cx + 1.45, zN + 1.3], [cx + 1.45, cz0 + 3], [cx, cz0 + 8]], { y0: y }), ...houseWalks],   // (the gallery's middle pillar stands on the axis: the way passes between it and the next)
+  walks: [Object.assign([[cx, b[1] - 3], [cx, zN + 1], [cx + 1.45, zN + 1.3], [cx + 1.45, cz0 + 3], [cx, cz0 + 8]], { y0: y }), ...houseWalks, ...openWalks()],   // (the gallery's middle pillar stands on the axis: the way passes between it and the next)
 };
 export default bouInania;

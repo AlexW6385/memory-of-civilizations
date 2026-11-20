@@ -1,9 +1,9 @@
 // The capital of 752 around Tōdai-ji (docs/settlements/nara.md §11–§12): the blocks of the grid with their earthen
 // walls, gates, the houses in rows on their lanes and a well in each garden; Kōfuku-ji's precinct with its five-storey
 // pagoda and golden hall; the East Market's square with stalls, mats, carts, sellers and buyers.
-import { lodTiles, openLots } from '../lod.js';
-import { ARRIVALS } from '../../planet/arrivals.js';
+import { lodTiles } from '../lod.js';
 import { craftOf, WORKING } from '../../styles/nara/crafts.js';
+import { laneRect, openedLots } from './walk.js';
 import { RADIUS, streets, lots, walls, yards, blocks, fences, gardens, MARKET, KOFUKU, height, serviceLots, lotPoint, SERVICE_LANE } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -36,7 +36,7 @@ function market() {
     if (rand() < 0.55) person([x + (rand() - 0.5) * 2, z + side * (1.8 + rand() * 1.2)], [0, -side], { pose: rand() < 0.3 ? 'talk' : 'stand', dress: 'robe', hat: rand() < 0.5 ? 'cap' : 'none' });
   }
   // the outer rows: sellers sitting on mats with their goods (grain, vegetables, pots, salt), the aisle to the outer lanes
-  for (const [side, z] of [[1, z0 + 9], [-1, z1 - 9]]) for (let x = x0 + 5; x < x1 - 4; x += 5.2) {
+  for (const [side, z] of [[1, z0 + 14], [-1, z1 - 14]]) for (let x = x0 + 5; x < x1 - 4; x += 5.2) {      // (the mats and their sellers 3.5 m and more from the shop houses' doors on the square's edges)
     if (rand() < 0.2) continue;
     L.push({ t: 'goods_mat', at: [x, z], y: 0, rot: faceTo([0, side]), seed: seed(), goods: ['heap', 'baskets', 'heap'], produce: ['cloth_white', 'cloth_ochre', 'cloth_green'] });
     person([x, z - side * 1.1], [0, side], { pose: 'sit_ground' });
@@ -95,6 +95,21 @@ function service() {
   return L;
 }
 
+/** The shopkeeper behind the counter of each open shop within reach of the walk (the counter's place in nara_house: u from 0.5 to the door's side, v 1.55-2.15; the raised floor at 0.85). */
+function keepers(open) {
+  const L = [], rand = rng(7534), seed = () => Math.floor(rand() * 1e9);
+  const CL = ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_ochre', 'cloth_white', 'cloth_green'];
+  for (const l of lots()) {
+    const shop = l.use ? !!l.shop : l.shop || l.seed % 4 === 0;
+    if (!open.has(l) || !shop || Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 - 20) > 215) continue;
+    const Lw = l.rect[2] - l.rect[0], nb = Math.max(2, Math.floor(Lw / 3.2)), du = (Math.floor(nb / 2) + 0.5) * Lw / nb, cu0 = 0.5, cu1 = Math.max(cu0 + 1.4, du - 1.2);
+    if (cu1 >= Lw - 1.3) continue;
+    const [x, z] = lotPoint(l, (cu0 + cu1) / 2, 2.95), dz = l.front === 's' ? 1 : -1;
+    L.push({ t: 'figure', at: [x, z], y: 0.85, rot: Math.atan2(0, -dz), seed: seed(), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', hair: rand() < 0.5 ? 'topknot' : 'bun', over: 'sash', cloth: CL[Math.floor(rand() * 6)], cloth2: 'cloth_white', pose: 'stand' });
+  }
+  return L;
+}
+
 /** The trades at work (docs/settlements/nara.md §17): a worker in the room of each open house of a trade, by a rule of its seed, and people at the wells. */
 function workers(open) {
   const L = [], rand = rng(7533), seed = () => Math.floor(rand() * 1e9);
@@ -120,14 +135,15 @@ function workers(open) {
 }
 
 export async function town() {
-  const all = lots(), open = openLots(all, [ARRIVALS['nara'][0], ARRIVALS['nara'][2]], 150);
-  for (const l of serviceLots()) if (l.use) open.set(l, l.use);                                  // the eight houses of the temple's service quarter are always open
+  const all = lots(), open = openedLots();
   const houses = all.map((l) => ({ t: 'nara_house', ...l, shop: l.use ? !!l.shop : l.shop || l.seed % 4 === 0, ...(open.has(l) ? { open: true } : {}) }));
-  const wells = yards().map(([x, z]) => ({ t: 'well', at: [x, z], y: height(x, z) }));
-  const plans = [...lodTiles('nara-houses', 'nara', houses, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } }), ...lodTiles('nara-wells', 'vernacular', wells, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
+  const wells = [...yards(), ...[[-9, 105.3], [9, 105.3]]].map(([x, z]) => ({ t: 'well', at: [x, z], y: height(x, z) }));      // (and the two wells at the service lane's crossing with the way, for the kitchen and the inns)
+  // the doorway lanes of the opened houses, read by the street life as footprints (nothing of it stands in a doorway: src/objects/life.js)
+  const lanes = houses.filter((h) => h.open).map((h) => ({ t: 'door_clear', rect: laneRect(h) }));
+  const plans = [...lodTiles('nara-houses', 'nara', [...houses, ...lanes], { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } }), ...lodTiles('nara-wells', 'vernacular', wells, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
   plans.push(...lodTiles('nara-plots', 'nara', [...fences().map((f) => ({ t: 'nara_fence', y: 0, ...f, at: f.pts[0] })), ...gardens().map((g) => ({ t: 'nara_garden', y: 0, ...g })), ...streets().map((r) => ({ t: 'nara_gutter', rect: r, y: 0 }))], { R: RADIUS, near: 130, entrance: { at: [0, 180], facing: 'n' } }));
-  plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()), base('nara-beasts', 'life', beasts()), base('nara-service', 'life', service()), base('nara-workers', 'life', workers(open)));
-  plans.push(base('nara-lane', 'nara', [[14, SERVICE_LANE[1], SERVICE_LANE[2], SERVICE_LANE[3]], [SERVICE_LANE[0], SERVICE_LANE[1], -14, SERVICE_LANE[3]]].map((rect) => ({ t: 'nara_gutter', rect, y: 0 }))));
+  plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()), base('nara-beasts', 'life', beasts()), base('nara-service', 'life', service()), base('nara-workers', 'life', workers(open)), base('nara-keepers', 'life', keepers(open)));
+  plans.push(base('nara-lane', 'nara', [[14, SERVICE_LANE[1], SERVICE_LANE[2], SERVICE_LANE[3]], [SERVICE_LANE[0], SERVICE_LANE[1], -14, SERVICE_LANE[3]]].map((rect) => ({ t: 'nara_gutter', rect, y: 0, inset: 2.6 }))));
   void blocks;
   return plans;
 }

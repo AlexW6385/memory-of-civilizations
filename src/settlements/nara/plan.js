@@ -3,6 +3,7 @@
 // lecture hall and the monks' quarters.
 
 import { HALL, COURT, SOUTH_GATE, PAGODAS } from './layout.js';
+import { ARRIVAL, WALK, walkLots, routeInto } from './walk.js';
 
 const E = [];
 // the Great Buddha Hall: eleven bays by seven, two roofs, about 49 m high to the ridge (§1)
@@ -49,6 +50,19 @@ const rooms = [room('court', COURT, 0, 'open'), room('great buddha hall', HALL, 
 E.push({ t: 'obj', kind: 'hakkaku_toro', fig: 'none', at: [0, -16], y: 0 });
 const walks = [[[0, 180], [0, 146], [0, 60], [0, 40], [0, -8], [2.8, -12], [2.8, -20]]];
 walks[0].y0 = 0;
+// the name board over the Middle Gate's central bay, on both faces (plaque.js, docs §19.5)
+E.push({ t: 'nara_plaque', at: [0, cz1], y: 5.2, w: 3.2, h: 1.0, text: '東大寺' });
+// the lamps of the court and the gates (nightlight.js, docs §19.2): iron fire-baskets on tripods either side of the flagged way and before the two gates,
+// lamp stands in a row across the court before the hall and along the way's edge, torch posts where the avenue crosses the service lane; cold by day
+for (const z of [10, -2, -14]) for (const s of [-1, 1]) E.push({ t: 'kagaribi', at: [s * 3.4, z], y: 0 });
+for (const s of [-1, 1]) for (const z of [54, 158]) E.push({ t: 'kagaribi', at: [s * 8, z], y: 0 });
+for (let x = -38; x <= 38; x += 6.4) if (Math.abs(x) > 10) E.push({ t: 'tomyo', at: [x, -27], y: 0 });
+for (const s of [-1, 1]) for (const z of [24, 6, -8, -20]) E.push({ t: 'tomyo', at: [s * 7.4, z], y: 0 });
+for (const s of [-1, 1]) for (const z of [99.4, 108.6]) E.push({ t: 'taimatsu', at: [s * 4.5, z], y: 0 });
+// the visitor's walk (walk.js, docs §19): from the arrival down the axis through the gates to the avenue and the market, and into the opened houses and shops along it
+walks.push(WALK[0].map(([x, z]) => [x, z]));
+for (const l of walkLots().slice(0, 40)) { const r = routeInto(l); r.y0 = 0; walks.push(r); }
+void ARRIVAL;
 
 export const todaiji = {
   id: 'nara-todaiji',
