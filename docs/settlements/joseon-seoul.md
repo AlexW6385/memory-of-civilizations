@@ -220,3 +220,9 @@ Each item is marked [stated] (with its source) or [inferred]. Code: `src/settlem
 - **Pedlars' cries** (salted shrimp, fish, brushwood in winter, water in summer, bean curd early), the **taffy seller's shears**, the **ox's wooden bell**, the **night watch** (slow blows on a clapper, a falling call), the **pestle** in the yards [inferred: the trades and hours are Seoul's, no recording of 1888 exists].
 - **Shops' goods:** silk, raw silk, cotton, paper, ramie and fish (the six goods of the licensed market, §12) as the sounds of cloth, paper, abacus and bowls [stated: the six goods; the sounds are [inferred]].
 - **Birds:** the engine's cuckoo, oriole, magpie and tit are Korea's own [inferred]. Court music (aak) is not made: §9 stays [inferred].
+
+### 19.4 Animals (critters)
+
+- **Mandarin ducks** in a pair on Gyeonghoeru's pond and on Hyangwonji [inferred: the ducks; the ponds are §6]. **A crane** on the pond's south-east bank [inferred: a bird of palace gardens]. **A kingfisher** on Hyangwonji's south bank [inferred].
+- **Swallows' nests** under the head beam of the two shops of Jongno nearest the avenue, the birds sweeping down the street; **a caged songbird** at a one-bay shop [inferred].
+- **Hens, a rooster, a dog at the gate and a cat on the wall** of the first hanok yard on the walk [inferred: household animals]. **Magpies** (kkachi) on the palace walls as perches [inferred].

@@ -358,7 +358,7 @@ export function sijeon(el, { bag, col }) {
   bag.add('plaster_white', box(x0, 0.42, back[0], x1, 0.42 + h, back[1]));
   bag.add('plaster_damp', box(x0 - 0.01, 0.42, back[0] - 0.01, x1 + 0.01, 1.0, back[1] + 0.01));
   col.rect([x0, back[0], x1, back[1]], 0, 0.42 + h);
-  // el.wide: the bays k whose shop takes bay k + 1 as well (no party wall between): a shop of two bays, 5 m, with a way in of 1.7 m beside its maru (the walk, docs §18)
+  // el.wide: the bays k whose shop takes bay k + 1 as well (no party wall between): a shop of two bays, 5 m, with a way in of 1.7 m beside its maru (the walk, docs §19.1)
   const wide = new Set(el.wide ?? []);
   for (let k = 0; k <= nb; k++) {
     if (wide.has(k - 1)) continue;
