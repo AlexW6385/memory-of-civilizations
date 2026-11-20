@@ -4,10 +4,13 @@
 import { RADIUS, GROUND, WATER, WAAG, DAMRAK, VOC, HALL, lots } from './layout.js';
 import { SLEDGES, BOATS } from './plan.js';
 import { profile, routes } from '../../styles/dutch/upper.js';
+import { onWalk } from './openwalk.js';
 export const ARRIVAL = [20, -210];
 const base = (id, elements) => ({ id, style: 'dutch', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' } });
-/** Is this lot built open (a furnished ground floor you can walk into)? The Dam's south row, and one house in four near the Dam (one in three beyond 190 m); of the warehouses (spout gables) one in two. */
-export const isOpen = (l) => (l.front === 'n' && l.rect[1] === -203) || l.seed % (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 230) < 190 ? 4 : 3) === 0;
+/** Is this lot built open (a furnished ground floor you can walk into)? The Dam's south row, and one house in four near the Dam (one in three beyond 190 m), and every lot on the visitor's walk (openwalk.js); of the warehouses (spout gables) one in two. */
+export const isOpen = (l) => isOpenBase(l) || onWalk(l);
+/** The rule before the walk's lots were added (the upper floors' set is chosen by it). */
+const isOpenBase = (l) => (l.front === 'n' && l.rect[1] === -203) || l.seed % (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 230) < 190 ? 4 : 3) === 0;
 /**
  * The open houses whose upper floors are open too (docs §5.20): the eleven nearest the arrival that the stair fits in
  * (the Dam's south row, but not the lot at the Town Hall's corner, whose stoop lies in the hall's 2 m gap and is blocked by its plinth, then the houses round the Damrak and the first canal rows) — merchants', an inn, craftsmen's, lodgings,
@@ -17,7 +20,7 @@ let UPPER = null;
 export function upperSet() {
   if (!UPPER) {
     const dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVAL[0], (l.rect[1] + l.rect[3]) / 2 - ARRIVAL[1]);
-    UPPER = new Set(lots().filter((l) => isOpen(l) && profile(l).ok && !(l.rect[0] <= HALL[2] + 0.5 && l.rect[1] - HALL[3] < 3)).sort((a, b) => dist(a) - dist(b)).slice(0, 11));
+    UPPER = new Set(lots().filter((l) => isOpenBase(l) && profile(l).ok && !(l.rect[0] <= HALL[2] + 0.5 && l.rect[1] - HALL[3] < 3)).sort((a, b) => dist(a) - dist(b)).slice(0, 11));
   }
   return UPPER;
 }
