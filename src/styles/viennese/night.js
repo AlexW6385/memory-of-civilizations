@@ -95,6 +95,8 @@ function recorder(H, lot) {
       const t = [(e[0] - p[0]) / (w || 1), (e[1] - p[1]) / (w || 1)];
       H.floor(p[0], y + 0.14, p[1], w + 0.5, 1.9, t, 10, 0.55 * k);
     },
+    /** The bracket lamp of a Durchhaus: its glow and the pool on the flagstones of the passage. */
+    passageLamp(x, y, z) { H.ball(x, y, z, 1.0, 0.62); H.floor(x, 0.14, z, 2.6, 2.6, [1, 0], 8, 0.6); },
     /** An opal globe hung in a shop room: its glow, and its pool on the floor (seen from inside the shop). */
     lamp(x, y, z, trade) {
       const big = trade === 'kaffeehaus' || trade === 'konditorei';
@@ -122,11 +124,21 @@ function cafeLight(H, rect) {
   void W; void D;
 }
 
+/** A standing tram's lit windows (street.js tram: the band of glass 1.95 to 2.75 m, 9.6 m long, 2.2 m wide): the electric bulbs of the car, on both sides. */
+function tramLight(H, { at: [cx, cz], rot = 0, y = 0 }) {
+  const c = Math.cos(rot), s = Math.sin(rot), P = (p, q) => [cx + p * c + q * s, cz - p * s + q * c], L = 9.6;
+  for (const sg of [-1, 1]) for (const [p0, p1] of [[-L / 2 + 0.45, -0.6], [0.6, L / 2 - 0.45]]) {
+    const a = P(p0, sg * 1.14), b = P(p1, sg * 1.14);
+    H.quad([a[0], y + 2.0, a[1]], [b[0], y + 2.0, b[1]], [b[0], y + 2.7, b[1]], [a[0], y + 2.7, a[1]], [s * sg, c * sg], 0.6);
+  }
+}
+
 /** vienna_night: { lamps: [[x, z, y, ring]…], lots: [mietshaus elements], cafe: rect } — all the town's halo, one mesh. */
 export function viennaNight(el, { bag }) {
   const H = new Halo();
   for (const [x, z, y, ring] of el.lamps || []) lampLight(H, x, y ?? 0, z, !!ring);
   if (el.cafe) cafeLight(H, el.cafe);
+  for (const t of el.trams || []) tramLight(H, t);
   for (const lot of el.lots || []) mietshaus({ ...lot, night: true, simple: false }, { bag: recorder(H, lot), col: NO_COL, lights: [] });
   H.flush(bag);
 }

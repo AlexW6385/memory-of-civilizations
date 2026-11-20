@@ -45,6 +45,7 @@ export function shopFront(bag, F, y, { w, g, bays, trade, seed, lod }) {
       const dw = 1.7;
       A('wood_dark', u - dw / 2 - 0.12, u - dw / 2, 0, 3.0, 0, 0.14); A('wood_dark', u + dw / 2, u + dw / 2 + 0.12, 0, 3.0, 0, 0.14); A('wood_dark', u - dw / 2 - 0.12, u + dw / 2 + 0.12, 3.0, 3.14, 0, 0.14);
       A('limestone', u - dw / 2 - 0.3, u + dw / 2 + 0.3, 0.0, 0.1, 0, 0.5);
+      if (!lod) { A('granite_grey', u - 0.5, u + 0.5, 0.1, 0.104, 0.1, 0.42); A('granite_grey', u - 0.28, u + 0.28, 0.1, 0.108, 0.16, 0.34); }   // the worn middle of the step, where every foot lands (a darker, polished patch)
     } else {
       A('wood_dark', u0 + 0.28, u1 - 0.28, sill - 0.12, sill, 0, 0.14); A('wood_dark', u0 + 0.28, u1 - 0.28, top, top + 0.12, 0, 0.14);
       A('wood_dark', u0 + 0.28, u0 + 0.38, sill, top, 0, 0.12); A('wood_dark', u1 - 0.38, u1 - 0.28, sill, top, 0, 0.12);

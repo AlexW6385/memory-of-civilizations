@@ -65,6 +65,8 @@ function furniture() {
   // the garden behind the Secession
   for (const [x, z, rot] of [[-30, -4, Math.PI / 2], [-22, -4, -Math.PI / 2], [30, 6, Math.PI / 2], [22, 6, -Math.PI / 2], [-10, 3.4, 0], [10, -1.4, 0], [-10, 12, 0], [10, 12, 0]]) E.push({ t: 'park_bench', at: [x, z], y: 0.03, rot });
   for (const x of [-26, 26]) E.push({ t: 'gaslamp', at: [x + 1.8, 5], y: 0.03 });
+  // two gas lamps in the Secession's forecourt, either side of the way to the door (docs/settlements/vienna.md §15.1)
+  E.push({ t: 'gaslamp', at: [-11, SEC[1] - 5.5], y: 0.03 }, { t: 'gaslamp', at: [11, SEC[1] - 5.5], y: 0.03 });
   // advertising columns and newspaper kiosks at the busy corners
   const cs = [];
   for (const e of EW) for (const n of NS) if (n.z0 <= e.z && n.z1 >= e.z && e.name !== 'ring') cs.push([n.x + n.w / 2 + 2.0, e.z - e.w / 2 + 1.5, n.x, e.z]);
@@ -77,6 +79,8 @@ function furniture() {
   // the Ring: two tracks, two trams standing at the stops, benches under the trees, the Fiaker rank before the Opera
   E.push({ t: 'tram_rails', z: -230, x0: -326, x1: 326, tracks: RING_TRACKS, y: 0.03 });
   E.push({ t: 'tram', at: [-95, RING_TRACKS[0]], rot: 0, y: 0.03, seed: 1 }, { t: 'tram', at: [118, RING_TRACKS[1]], rot: Math.PI, y: 0.03, seed: 2 });
+  // the tram stops: a plate on a post at the kerb of the promenade, by the cars standing at them (docs/settlements/vienna.md §15.4)
+  E.push({ t: 'tram_stop', at: [-88, -212.6], y: 0.11, rot: 0 }, { t: 'tram_stop', at: [112, -212.6], y: 0.11, rot: 0 });
   for (const x of [-150, -100, -50, 0, 50, 100, 150]) { E.push({ t: 'park_bench', at: [x + 6, -207.4], y: 0.11, rot: 0 }, { t: 'park_bench', at: [x - 6, -252.6], y: 0.11, rot: Math.PI }); }
   const rank = [[-44, -216], [-33, -216], [-22, -216], [-11, -216]];
   rank.forEach(([x, z], i) => {
@@ -177,9 +181,10 @@ function extras() {
 
 /** The night: the halo of every street lamp (the Ring's are the arc lamps of 1902), the lit shop windows and flats of the lots, the Café Museum: one plan, one mesh (styles/viennese/night.js). */
 function night(furn, houses) {
-  const lamps = [...furn.filter((e) => e.t === 'gaslamp').map((e) => [e.at[0], e.at[1], e.y ?? 0, Math.abs(e.at[1] + 230) < 26]), [-11, SEC[1] - 5.5, 0.03, false], [11, SEC[1] - 5.5, 0.03, false]];   // (the last two: the Secession's forecourt, plan.js)
+  const lamps = [...furn.filter((e) => e.t === 'gaslamp').map((e) => [e.at[0], e.at[1], e.y ?? 0, Math.abs(e.at[1] + 230) < 26])];
   const lotsLit = houses.filter((e) => e.lod <= 1 && Math.hypot((e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2) < LIT_R);
-  return base('vienna-night', [{ t: 'vienna_night', lamps, lots: lotsLit, cafe: CAFE }], { nocollide: true });
+  const trams = furn.filter((e) => e.t === 'tram').map((e) => ({ at: e.at, rot: e.rot, y: e.y }));
+  return base('vienna-night', [{ t: 'vienna_night', lamps, lots: lotsLit, cafe: CAFE, trams }], { nocollide: true });
 }
 const LIT_R = 250;
 
