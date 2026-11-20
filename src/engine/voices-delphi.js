@@ -92,6 +92,6 @@ export const DL_VOICES = {
   },
 };
 /** Loudness relative to each voice's own scale: tuned by tools/sound-render.mjs (about 4.5e-3 RMS at the source). */
-export const DL_GAIN = { dlSpring: 1.0, dlPaean: 1.0, dlGoat: 1.0, dlBell: 1.0, dlChough: 1.0, dlLoom: 1.0, dlFire: 1.0, dlMurmur: 1.0, dlRunners: 1.0 };
+export const DL_GAIN = { dlSpring: 3.2, dlPaean: 1.0, dlGoat: 3.0, dlBell: 1.5, dlChough: 3.2, dlLoom: 1.8, dlFire: 3.5, dlMurmur: 3.0, dlRunners: 2.5 };
 
 addVoices('voices-delphi.js', DL_VOICES, DL_GAIN);
