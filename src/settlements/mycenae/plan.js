@@ -1,6 +1,8 @@
 // The citadel of Mycenae as the landmark (docs/settlements/mycenae.md §4.1–§4.4): the Cyclopean circuit, the Lion Gate with its bastion and approach court,
 // the north gate, Grave Circle A, the granary, the palace round its Great Court on the summit and the megaron with its hall (the enterable interior).
 
+import { walkRoutes } from './walkroutes.js';
+import { lotPoint } from './layout.js';
 import { CIRCUIT, GATE_Y, PAL_Y, LION, BASTION, STUB, GCA, GRANARY, PALACE, TH, approachY, yIn, wallRuns, NORTH_GATE, RAMP, terrain } from './layout.js';
 
 const E = [];
@@ -17,7 +19,7 @@ E.push({ t: 'ramp', pts: along([[-107, 0], [-92, 0]], -107, -92).map(([x, z]) =>
 E.push({ t: 'ramp', pts: along(RAMP, -85, 22), w: 4.6, kerb: true, seed: 42 });
 // the passage's floor inside the gate
 E.push({ t: 'floor', rect: [-86, -1.55, -82, 1.55], y: GATE_Y, th: 0.4, mat: 'flagstone' });
-E.push({ t: 'granary', rect: GRANARY, y: GATE_Y + 0.1, face: 'n', seed: 7 });
+E.push({ t: 'granary', rect: GRANARY, y: GATE_Y + 0.1, face: 'n', seed: 7, du: 5, dw: 2.2, dh: 2.45 });
 E.push({ t: 'grave_circle', c: [GCA.x, GCA.z], r: GCA.r, y: GCA.y, entrance: Math.atan2(0 - GCA.z, LION.x - GCA.x), seed: 9 });
 
 // ── the palace ──
@@ -27,7 +29,10 @@ E.push({ t: 'court', rect: PALACE.court, y: PY, altar: [43.5, 3] });
 E.push({ t: 'wall', a: [29.6, -28], b: [29.6, 30], th: 0.8, y0: PY - 0.3, y1: PY + 4.4, mat: 'lime_plaster', openings: [{ at: 31, w: 2.6, h: 3.4 }] });
 E.push({ t: 'propylon', rect: PALACE.propylon, y: PY });
 // the wings are houses of the palace you can enter from the Great Court: the magazines of oil and wine with the archive above, the suites with a workshop, a bath and a loft
-const wing = (rect, face, du, kind, o = {}) => E.push({ t: 'house', rect, face, du, kind, y: PY, gd: PY, storeys: 2, sh: 3.3, dw: 2.2, dh: 2.9, lit: true, ...o });
+let wing = (rect, face, du, kind, o = {}) => E.push({ t: 'house', rect, face, du, kind, y: PY, gd: PY, storeys: 2, sh: 3.3, dw: 2.2, dh: 2.9, lit: true, ...o });
+const wings = [];
+const wing0 = wing;
+wing = (rect, face, du, kind, o = {}) => { wings.push({ rect, face, du }); wing0(rect, face, du, kind, o); };
 wing([30, 16, 56, 30], 'n', 11, 'magazine', { seed: 2 });
 wing([30, -28, 56, -10], 's', 11, 'suite', { seed: 1, trade: 'ivory' });
 wing([56, -28, 84, M.z0], 'w', -6 - -28, 'magazine', { seed: 3 });
@@ -59,6 +64,12 @@ const rooms = [
 ];
 const walks = [[[-150, 0], [-107, 0], [-89, 0], [-80, -2], [-60, -6], [-30, -8], [-10, -4], [8, 0], [27, 3], [45, 3], [58, 3], [64, 3], [75, 3]]];
 walks[0].y0 = approachY(-150);
+for (const r of walkRoutes()) { const w = r.route; w.y0 = r.y0; walks.push(w); }
+// into the four wings of the palace by their doors on the Great Court: the magazines and the suites
+for (const { rect, face, du } of wings) {
+  const P = (u, v) => lotPoint({ rect, face }, u, v), w = [P(du, -2.4), P(du, 0.3), P(du, 1.2), P(du, 1.9)];
+  w.y0 = PAL_Y - 0.2; walks.push(w);
+}
 void CIRCUIT; void cx0; void cz0; void cx1; void cz1;
 
 export const citadel = {

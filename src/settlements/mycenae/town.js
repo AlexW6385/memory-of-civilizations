@@ -1,7 +1,7 @@
 // Mycenae — the townscape (docs/settlements/mycenae.md §5, §9): the houses of the citadel and the lower town, the workshops with their yards,
 // the people at the gate, on the ramp, in the Great Court and the megaron, in the lanes; the herds and the donkeys.
 
-import { RADIUS, LANES, RAMP, lots, PALACE, PAL_Y, GATE_Y, GCA, TREAS, rng, terrain, onLane, BASTION, STUB, inHouse, sdCircuit } from './layout.js';
+import { lotPoint, RADIUS, LANES, RAMP, lots, PALACE, PAL_Y, GATE_Y, GCA, TREAS, rng, terrain, onLane, BASTION, STUB, inHouse, sdCircuit } from './layout.js';
 import { ground } from './ground.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-107, 0], facing: 'e' } });
@@ -46,10 +46,11 @@ function dress() {
     if (rand() < 0.55 && !porch) { const uu = du - side * (dw / 2 + 1.9); if (near(uu)) put('bench', at(uu, v0 - 0.1), fr.rot, { len: 1.5, mat: 'mudbrick' }); }
     if (rand() < 0.5) { const uu = side > 0 ? W - 1.1 : 1.1; if (near(uu)) put('firewood', at(uu, v0 + 0.1), fr.rot, { len: 1.2 }); }
     if (rand() < 0.5) { const uu = du + side * (dw / 2 + 2.0); if (near(uu)) put(rand() < 0.5 ? 'basket' : 'sacks', at(uu, v0), fr.rot, { n: 2 }); }
-    if (W > 7 && rand() < 0.3 && !porch) put('laundry', at(W / 2 + (rand() - 0.5), -1.25), fr.rot, { len: 3 });
+    { const cu = W / 2 + (rand() - 0.5); if (W > 7 && rand() < 0.3 && !porch && Math.abs(cu - du) >= dw / 2 + 1.5 + 0.4) put('laundry', at(cu, -1.25), fr.rot, { len: 3 }); }
     if (rand() < 0.28) { const uu = du + side * (dw / 2 + 3.0); if (near(uu)) put('chickens', at(uu, -1.0), rand() * 6, { kind: 'hen' }); }
     if (rand() < 0.2) { const uu = du - side * (dw / 2 + 2.9); if (near(uu)) put('drying_tray', at(uu, -0.9), rand() * 6); }
     // the trade's goods before the shop
+    if (l.open && (l.kind === 'workshop' || l.kind === 'store')) continue;       // the open shops' goods are on their counters (house.js) and beside the door (below)
     if (l.kind === 'workshop') {
       const g = { potter: () => { for (let k = 0; k < 5; k++) put('pot', at(du + (k - 2) * 0.7, -1.5 - (k % 2) * 0.45), 0, { kind: ['water_pot', 'amphora', 'dark_pot', 'water_pot', 'pithos'][k], n: 2 }); },
         smith: () => { put('crates', at(du - 1.3, -1.2), fr.rot, { n: 2 }); put('barrel', at(du + 1.4, -1.1), 0, { n: 1 }); },
@@ -66,7 +67,7 @@ function dress() {
   cp('pot', 38.4, 15.35, 0, { kind: 'pithos', n: 3 }); cp('pot', 44.2, 15.3, 0, { kind: 'amphora', n: 4 }); cp('pot', 50.5, 15.4, 0, { kind: 'pithos', n: 2 });
   cp('bench', 34.2, 15.45, 0, { len: 2.2, mat: 'limestone_yellow' }); cp('bench', 47.8, 15.45, 0, { len: 2.2, mat: 'limestone_yellow' });
   cp('pot', 38.2, -9.5, 0, { kind: 'amphora', n: 3 }); cp('pot', 44.6, -9.5, 0, { kind: 'pithos', n: 2 }); cp('sacks', 48.5, -9.4, 0, { n: 4 });
-  cp('pot', 56.9, -6.0, 0, { kind: 'pithos', n: 2 }); cp('pot', 56.9, 12.5, 0, { kind: 'water_pot', n: 3 }); cp('basket', 31.5, 4.0, 0, { n: 3 });
+  cp('pot', 55.3, -8.7, 0, { kind: 'pithos', n: 2 }); cp('pot', 55.3, 15.1, 0, { kind: 'water_pot', n: 3 });       // (beside the wings' doors, not in them) cp('basket', 31.5, 4.0, 0, { n: 3 });
   cp('stool', 43.2, 14.8, 0, {}); cp('stool', 44.4, 14.9, 0, {});
   // offerings at the shaft graves of the circle: jars and bowls at the stelae's feet, a basket of grain
   for (const [gx, gz] of [[-5.2, -3.4], [0.3, -6.4], [5.0, -1.8], [-2.2, 2.6], [3.6, 5.6], [-6.0, 4.6]]) E.push({ t: 'pot', at: [GCA.x + gx + 0.4, GCA.z + gz + 1.5], y: GCA.y + 0.03, rot: 0, seed: Math.floor(rand() * 1e9), kind: rand() < 0.5 ? 'water_pot' : 'amphora', n: 2 });
@@ -224,8 +225,8 @@ function nearLane(x, z) {
   return false;
 }
 function laneWalls() {
-  const E = [], rand = rng(606), courts = lots().filter((l) => l.court).map((l) => l.court);
-  const free = (x, z) => !((x > -136 && x < -111 && Math.abs(z) < 12) || inHouse(x, z, 1.1) || courts.some((c) => x > c[0] - 1.2 && x < c[2] + 1.2 && z > c[1] - 1.2 && z < c[3] + 1.2) || nearLane(x, z) || sdCircuit(x, z) < 8
+  const E = [], rand = rng(606), courts = lots().filter((l) => l.court).map((l) => l.court), doors = lots().filter((l) => l.open).map((l) => lotPoint(l, l.du, -2.0));    // (the open doors' lanes stay clear of wall)
+  const free = (x, z) => !(doors.some(([a, b]) => Math.hypot(a - x, b - z) < 3.6) || (x > -136 && x < -111 && Math.abs(z) < 12) || inHouse(x, z, 1.1) || courts.some((c) => x > c[0] - 1.2 && x < c[2] + 1.2 && z > c[1] - 1.2 && z < c[3] + 1.2) || nearLane(x, z) || sdCircuit(x, z) < 8
     || Math.hypot(x, z) > RADIUS - 24 || (x > TREAS.x0 - 10 && x < TREAS.xf + 6 && Math.abs(z - TREAS.z) < 16) || Math.hypot(x - TREAS.x, z - TREAS.z) < 30);
   LANES.forEach((lane, li) => {
     for (let i = 0; i < lane.length - 1; i++) {
@@ -298,7 +299,7 @@ export async function town() {
     const els = [], rooms = [];
     for (const l of list) {
       const fr = frame(l), door = fr.P(l.du, -1.3), gd = ground.height(...door);
-      els.push({ t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, trade: l.trade, du: l.du, gd, lit: l.lit, front: l.front, ...(l.inside ? { low: l.y - 2.5 } : {}) });
+      els.push({ t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, trade: l.trade, du: l.du, gd, lit: l.lit, front: l.front, ...(l.open ? { open: true, dw: l.dw, dh: l.dh } : {}), ...(l.inside ? { low: l.y - 2.5 } : {}) });
       if (l.court) els.push({ t: 'forecourt', rect: l.court, face: l.face, y: l.y, du: l.du, seed: l.seed });
       const [x0, z0, x1, z1] = l.rect, st = l.kind === 'house' ? l.storeys : 1;
       const name = l.kind === 'store' ? 'a storehouse' : l.kind === 'workshop' ? `a ${l.trade}'s workshop` : l.kind === 'cult' ? 'a shrine' : l.kind === 'guard' ? 'the guard-room' : 'a house';
