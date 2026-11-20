@@ -182,3 +182,28 @@ One mesh (`fauna:critters`, one draw, not counted by `draw-count`), 42 animals, 
 - **Pigeons** (18) on the paving of the Place Seffarine, the Qarawiyyin's sahn and the tannery's north walk. [stated for the tannery's use of pigeon dung §4.4; the flocks' places inferred.]
 - **Three caged songbirds** hung from the lintels of dukkans on the Talaa Kebira, swaying and hopping. [inferred: caged birds are a commonplace of Maghribi shopfronts; none is documented for 1350.]
 Not done: a donkey and a mule rig (the muleteers' donkeys are still still figures); storks on the walls (§8: not in our sources); the egret and swifts stay as the old flocks.
+
+### 16.3 Night (`nightlight.js`, night plans in `town.js`)
+
+Light added over what is behind it, in the engine's one additive `halo` material, in 48 m night tiles shown within 55 m of the walker (the pattern of Suzhou and Cairo); no light, no shadow, no collision, nothing by day. One halo mesh is one draw wherever a lit tile is near. The lamps' bodies are not made in the night tiles (a fine piece there would be a detail mesh of its own per material); they are in the builders: the dukkan's cell lamp (`house.js`) and the souk's lantern (`souk.js`) are new small pieces of iron and bronze, the door lamp was already there. [stated] only the use of oil lamps, braziers and the lamp-lit mosque: brass lamps and the chandelier cast from a church bell in the Qarawiyyin (§4.3); a lit market at night is not documented for 1350. Everything else is [inferred] and meant as plausible.
+
+| Light | Where | Share | Basis |
+|---|---|---|---|
+| door lamp | beside every house door where `house.js` hangs the bracket lamp (402 lit of 646 doors): glow, a pool on the lane, a wash on the wall | 0.6 | [inferred] a lamp at a door was a wealth; [stated] wall lamps §6 |
+| dukkan lamp | one hung in each dukkan cell, a pool in the lane | 0.5 | [inferred] the souks shut at dusk, the lanes' shops kept a lamp for late buyers |
+| bakers' oven | the mouth of the oven in every bread dukkan, warm, wide | all (9) | [stated] communal ovens §9; the glow [inferred] |
+| souk lantern | bronze lanterns on hooks from the roof beams of the four covered souks, every 9 m | all (20) | [inferred] |
+| coppersmiths' braziers | before every second shop of the Place Seffarine (8), coals under the pots | all | [stated] the braziers are in the square's builder; glow [inferred] |
+| madrasa court | the ten brass lamps hung from the lintels of the galleries | all | [stated] brass lamps hung in the galleries §4.1 |
+| room lamps | the brass lamps of the open houses' salons and side rooms, the Bou Inania's hall and cells, the funduq, the quarter mosque, the Qarawiyyin's aisles and its three great chandeliers (read from the builders' own `lights`) | all | [stated] §4.3 |
+| lit windows | cedar lattices of 10 % of the houses, 45 % of their lattices (732 panes), and the ten open upper floors | | [inferred] |
+
+Not done: lanterns carried by the night patrol (no figure carries a light); the gates' watch fires; lit panes of the houses that are not in the 10 %. Time of the night plans: 2.2 s at load (the houses with open upper floors, the landmarks and the window houses are run once into a recording bag to read their lights).
+
+### 16.4 The visitor's walk (`openwalk.js`, `front.js`, `house.js`, `souk.js`)
+
+What the visitor meets was already in place: the dukkans of the lanes with their goods and keeper, the open houses (68 furnished, ten with the upper floor open §15), the street's people and animals (§8). This pass makes them enterable and adds the small furniture of a door.
+- **Dukkan cells entered.** Nineteen cells and five open houses near the stations (arrival, Talaa Kebira, the souk, Place Seffarine, funduq) have a route in `plan.walks` (`openwalk.js`): lane, the 0.3 m step, 0.4 m into the cell (1.45 m deep, the keeper's cushion at the back); or the door, the passage and the middle of the court. walk-check follows each with the viewer's own body. The cells that pass are listed by their house's rect: of 78 cells tried 39 pass; the rest have goods that the walker's stair rule reads as a wall in the step's first half metre, and are left as fronts to look into. [inferred: the dukkan as a 1.5 m deep alcove, a standing buyer at the sill; §9 gives the type, not the dimensions.]
+- **Awning with a lining.** The striped cloth over each dukkan was a single sheet; to the walker's collision a sheet with no underside is a solid slope from the ground up, so it shut the sill on lanes wider than 3 m. A second sheet a hand's breadth under the first gives it an underside; 27 cells pass without it, 39 with.
+- **Door furniture.** A water jar (turned by the house's seed, four sizes, terracotta or dark pottery) by a quarter of the doors of lanes 2.4 m or wider, on the side away from the lamp; a hanging brass lamp in every dukkan but the bakers' (§16.3); lanterns under the souk roofs. [inferred]
+Not done: interiors with figures in the cells beyond the keepers already there; benches and mounting blocks beyond those in `house.js`; laundry across more lanes than the derbs'; goods rearranged so every cell can be entered.

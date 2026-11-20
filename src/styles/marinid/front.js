@@ -29,13 +29,17 @@ export function dukkan(bag, col, rr, e, y, trade, rand, o = {}) {
   bag.add('wood_dark', I(0.05, L - 0.05, y + 2.5, y + 2.72, 0.02, 0.07));
   // the awning: striped cloth from the wall above the lintel out over the lane, held on two poles
   const [c1, c2] = AWN[Math.floor(rand() * AWN.length)], ext = Math.min(1.2, Math.max(0.25, ((o.laneW ?? 3) - 1.6) / 2)), n = Math.max(3, Math.round((L + 0.4) / 0.28));
-  const yTop = y + 3.35, yLow = y + 2.45, T = [[], []];
+  const yTop = y + 3.35, yLow = y + 2.45, T = [[], []], T2 = [[], []];
   for (let i = 0; i < n; i++) {
     const u0 = -0.2 + (L + 0.4) * i / n, u1 = -0.2 + (L + 0.4) * (i + 1) / n;
     const a = P(u0, -0.05), b = P(u1, -0.05), c = P(u1, -ext), d = P(u0, -ext);
     q4(T[i % 2], [a[0], yTop, a[1]], [b[0], yTop, b[1]], [c[0], yLow, c[1]], [d[0], yLow, d[1]]);
+    q4(T2[i % 2], [a[0], yTop - 0.09, a[1]], [b[0], yTop - 0.09, b[1]], [c[0], yLow - 0.09, c[1]], [d[0], yLow - 0.09, d[1]]);
   }
   bag.add(c1, dbl(T[0])); bag.add(c2, dbl(T[1]));
+  // the awning's lining, a hand's breadth under the cloth: the cloth alone is a sheet with no underside, which the walker's collision takes for a solid
+  // slope from the ground up (the dukkan could not be entered); with the lining the space under it is free
+  bag.add(c1, dbl(T2[0])); bag.add(c2, dbl(T2[1]));
   for (const u of [-0.15, L + 0.15]) { const a = P(u, -ext), b = P(u, -0.05); bag.add('cedar', rod([a[0], yLow - 0.01, a[1]], [b[0], yTop - 0.7, b[1]], 0.018, 4)); }
   // the goods, the keeper's cushion
   GOODS[trade]?.(bag, fr, P, I, fy, L, D, rand, o);
