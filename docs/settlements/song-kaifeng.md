@@ -254,3 +254,35 @@ The engine's own bell schedule is off for Kaifeng (`bells: null`); the bells are
 - **The river and the roads.** Boats sculled on the Bian (the engine's `boat`, `canalTrack` on the river's lanes), walkers on the Rainbow Bridge, pack-donkey trains (`kfPackTrain`) and ox carts (`kfCart`) on the streets by day [stated: the scroll's donkey trains and ox carts, rujiazg 14532, qlwb 2022-01-21], the trackers' work-song on the towpath at the place the scene puts them (`kfHaul`), porters at the grain landing (`kfLanding`), the crew lowering the mast before the bridge (`kfMast`) [stated: the scene, §10; inferred: the sounds], camel bells at the gate (`kfCamelBell`), donkeys bray where the scene puts them (`kfDonkey`).
 - **Tea houses and wine houses.** The tea houses' story-teller (`kfStory`: declaimed phrases and the clapper boards) and the wine houses' singing girls (`kfClapSong`) [stated: story-telling and singing in the tea houses, wine houses and pleasure quarters of the capital, Dongjing meng hua lu, rujiazg 14649; inferred: the sound]. Music zones stay those of `music.js`.
 - Measured with `tools/sound-render.mjs` (RMS and spectrum of seven voices): the wind bells and story 3e-3, the cart and haul 2.4–4e-3, the plate 6.5e-3, the bell 2.7e-2, as the base voices.
+
+### 19.2 The visitor's walk (`walkroute.js`, `interiors.js`, `plan.js`, `street.js`, `town.js`)
+
+- **The walk** [inferred from the layout]: from the arrival in the Kaibao monastery down the approach to the shop street, west along it to the city gate, down the main street over the Rainbow Bridge, and along the two river streets (`walkroute.js`). Every shop, wine house, tea house and house whose front is within 9 m of it is opened: 130 lots furnished (112 shops, 5 wine houses, 13 houses; before 31). Their rooms are the same furnished rooms as before (counter, shelves by trade, tables and benches, a keeper or customers: `interiors.js`) [stated for the open fronts and trades: the Qingming scroll; furniture inferred].
+- **Door lanes.** A lane 1.4 m wide, 3.4 m deep, from each door is kept clear of furniture (`upper.js` holdOf) and of the street's carts and the wine houses' standing customers (`town.js`, `street.js`): a walker steps up the 0.28 m plinth and under the lintel (1.67 m of headroom) without meeting a table.
+- **Opened rooms are shown near the visitor only.** The rooms are built in 64 m cells, each shown within 64 m of its middle (`near`); the draws at the arrival are unchanged.
+- **Proof.** `walk-check --sites song-kaifeng`: 133 routes (the 12 upper-floor houses, the bridge walk, and one route into each of 120 other opened shops and houses, from the street through the door and 2.4 m in). One rice shop's front is solid at its door and has no route.
+- **Generic fronts off.** The settlement dresses its own fronts (sign poles, lantern boxes, standing signboards, the houses' washing: `shops.js`, `houses.js`), as Suzhou does (`OWN_FRONTS` in `src/objects/life.js`, one added line): the generic paper lanterns hung in the door bays at 1.95 m shut the doors to a walker on the plinth.
+- **Still shut:** the houses' rooms behind the shops (the second court), most houses' doors (they are closed, 1.15 m wide: below the walker's 1.5 m raster rule), the keepers of the far lots.
+
+### 19.3 Night (`nightlight.js`)
+
+What lit Bianjing at night [stated: Dongjing meng hua lu, via rujiazg 14649 and 20547: the night markets to the third watch and from the fifth, food shops lighting many lamps and candles; tea houses open from the fifth watch; the wine houses' red gardenia lamps and colour gates (the scroll shows lantern boxes at inns and tea houses)]:
+- **Lantern boxes** on the poles before tea houses, inns and wine houses: 68 halos (a glow ball, a pool of light on the paving) [stated: lantern boxes of inns and tea houses on the scroll; the halo's size inferred].
+- **Red gardenia lamps** along the wine houses' colour gates: three per front (36) [stated: the zhengdian's gardenia lamps at the gate, Dongjing meng hua lu; their number inferred].
+- **Counter lamps of the shops open into the evening:** 40 % of the other shops by the hash of their place, a pool of light across the doorstep (132) [inferred share].
+- **Monastery:** lamps at the doors of the main, sutra and guanyin halls and at the pagoda's door (7) [inferred: temple lamps burn through the night; the number inferred]; the camel train's torches at the city gate (2) [inferred].
+- **Lit lattices:** the lattice windows of the houses (`lattice`) glow in 40 % of the rooms (30 % in the outer quarters) by the hash of the room [inferred: a lamp or candle behind paper-lined lattice].
+- All in the engine's additive `halo` material, instanced within 60 m of the eye, readable at the low preset; the day view is unchanged. **Not done:** boat lamps on the Bian; hearth glow through house doors; stone lamps in the monastery court (no geometry of their own to light).
+
+### 19.4 Animals (`fauna.js` critters, `tests/kaifeng-critters.test.mjs`)
+
+36 critters, all [inferred] placements (the animals themselves are those of a Song town: the scroll shows donkeys, oxen, camels, dogs and fowl; the street life's donkeys, oxen and camels stay as they were): a cat on the Iron Pagoda's base (SE diagonal, 1.2 m), six dogs and cats lying at shop fronts near the walk (off the door lanes, away from the sign pole), a rooster and hens before two houses, ten pigeons in the monastery court and at the bridge's foot, three geese on the earth strip of the north bank, two rafts of ducks on the Bian (east of the bridge by the north bank, and below the south bank), a fisherman's punt under the north bank with three cormorants on its rails [cormorant fishing: stated for China, Song-period painting; the punt's place inferred].
+
+### 19.5 Writing and wear (`brush-data.js`, `shops.js`)
+
+- **Writing.** The sign and flag characters were hand-made, unverified strokes in part simplified (药 书): now Suzhou's brush model (`ming-suzhou/brush.js`, read-only) with traditional forms from `brush-data.js`: 酒 茶 米 藥 書 金 (Suzhou's, verified) and 店 肉 (ours, laid over Noto Serif CJK TC stroke by stroke with `tools/script-sheet.py`, 8 and 6 strokes). Wine and food flags carry 酒 and 店 [stated: wine flags and 正店/脚店 signs on the scroll]; each standing signboard carries its trade's character in gilt (藥 for the physician's, 店 for inns, 茶 for tea houses) [inferred: the scroll's boards are mostly illegible]. **Not written:** 孫羊正店, 趙太丞家, 十千腳店 (孫 趙 丞 家 腳 not drawn: not verified), the shops' name plaques (the shared style's abstract strokes), the monastery's plaque.
+- **Wear.** The plastered walls' damp foot, rain streaks and patches, the worn thresholds and the hollows in the beaten earth are earlier work (§12; damp 0.4). **Not done in this pass:** worn steps, moss at the pagoda's foot.
+
+### 19.6 The landmark
+
+Not worked in this pass (the remaining gaps in §17: bracket proportions, door leaves, the boats' masts).
