@@ -34,7 +34,7 @@ export function unshare(bag, amp = 0.0015, rel = 0.03, only = null) {
 }
 
 /** The near tiles' materials whose repeated pieces are merged into the tiles' batches (each is a few kilobytes a tile; the big ones, timber, bronze, clay, granite, stay instanced). */
-const NEAR = new Set((process.env.NEARMATS ?? '').split(',').filter(Boolean));
+const NEAR = new Set();                 // (none for now: the near tiles keep their instancing)
 const { tamil_house, court_house } = STYLES.dravidian.elements;
 /** { t: 'md_house' } / { t: 'md_court' }: the Tamil house and the merchant's court house, their pieces varied (far tiles by up to 2 cm, near ones by 1.5 mm). */
 const wrap = (fn) => (el, ctx) => fn(el, { ...ctx, bag: unshare(ctx.bag, el.simple ? 0.02 : 0.0015, el.simple ? 0.06 : 0.03, el.simple ? null : NEAR) });
