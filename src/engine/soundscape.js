@@ -76,6 +76,7 @@ import * as ANGKOR from '../settlements/angkor/soundmap.js';
 import './voices-angkor.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
 import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
+import * as BHAKTAPUR from '../settlements/bhaktapur/soundmap.js';
 import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as HIMEJI from '../settlements/edo-himeji/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
@@ -168,7 +169,7 @@ export const PROFILES = {
   'han-changan': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3, camel: 0.2 }, roof: 'tile' }),
   'tang-changan': T(EAS, { cicadas: 0.4, animals: withLife({ rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, { market: 1, eaves: 1, map: TANGCA }), roof: 'tile', bells: 'tang-changan' }),
   'wei-ye': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
-  bhaktapur: T(IND, { cicadas: 0.2, animals: { dog: 0.4, rooster: 0.4, cattle: 0.3, goat: 0.2 }, roof: 'tile', bells: 'puja' }),
+  bhaktapur: T(IND, { cicadas: 0.2, animals: withLife({ dog: 0.4, rooster: 0.4, cattle: 0.3, goat: 0.2 }, { market: 1, eaves: 1, map: BHAKTAPUR }), roof: 'tile', bells: null }),
   nalanda: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.5, goat: 0.3, rooster: 0.3, dog: 0.2 }, roof: 'flat', bells: 'puja' }),
   'hakka-tulou': T(EAS, { cicadas: 0.7, frogs: 0.9, animals: { rooster: 0.7, dog: 0.4, cattle: 0.3 }, roof: 'tile' }),
   ajanta: T(IND, { cicadas: 0.4, frogs: 0.3, animals: { goat: 0.4, cattle: 0.3, dog: 0.3 }, roof: 'thatch', bells: 'monastery' }),
