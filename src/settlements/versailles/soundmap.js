@@ -74,7 +74,7 @@ export const GATE = [150, 0];
 export const CHAPEL_AT = mid(CHAPEL);
 export const MIRRORS = STATE_ROOMS[0];
 export const MIRRORS_AT = mid(MIRRORS[1]);
-/** The great stables' yards (the Grande and Petite Écurie, 1679–82 [stated: dossier §1a]) and the farrier's forge. */
+/** The great stables' yards (the Grande and Petite Écurie, dossier §1f) and the farrier's forge. */
 export const STABLE_AT = STABLES.map((s) => [s.x + 22, s.z + s.side * 8]);
 export const FORGE = [STABLE_AT[1][0] + 18, STABLE_AT[1][1] + 6];
 /** The kitchens of the ministers' wing (the south wing's service end) [inferred position]. */
@@ -96,9 +96,9 @@ export const EMITTERS = [
   { voice: 'verFarrier', at: FORGE, r50: 14, gap: [18, 46], hours: [7, 17.5], dry: true },
   // the Cent-Suisses at the gate: a drum and a fife at the changing of the guard and between [inferred hours]
   { voice: 'verDrum', at: GATE, r50: 26, gap: [160, 380], hours: [8, 22], after: true, rainMax: 0.7 },
-  // the King's Mass at ten, in the chapel [stated: dossier §1a: the King heard Mass daily at ten]; heard whole inside, through the walls from outside
+  // the King's Mass at ten, in the chapel [inferred: recalled, not sourced here (the web was not reachable): the King heard Mass daily at ten; dossier §11.4]; heard whole inside, through the walls from outside
   { voice: 'verMass', at: CHAPEL_AT, r50: 14, gap: [30, 70], hours: [10, 10.75], after: true, rainMax: 1, inside: 'chapel' },
-  // the evenings of the apartment (soirées d'appartement, three evenings a week, seven to ten [inferred: stated in the dossier §11.4]): violins in the Hall of Mirrors
+  // the evenings of the apartment (soirées d'appartement, three evenings a week, seven to ten [inferred; dossier §11.4]): violins in the Hall of Mirrors
   { voice: 'verStrings', at: [MIRRORS_AT[0], MIRRORS_AT[1] - 16], r50: 18, gap: [18, 45], hours: [19, 22], after: true, rainMax: 1, inside: 'mirrors' },
   { voice: 'verStrings', at: [MIRRORS_AT[0], MIRRORS_AT[1] + 16], r50: 18, gap: [24, 55], hours: [19.3, 22], after: true, rainMax: 1, inside: 'mirrors' },
   { voice: 'kitchen', at: KITCHEN, r50: 10, gap: [10, 24], hours: [4.5, 21], rainMax: 1 },

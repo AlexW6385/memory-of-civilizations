@@ -8,6 +8,7 @@ import music from './music.js';
 import { houses } from './town.js';
 import { gardenPlans } from './garden.js';
 import { nightPlans } from './nightlight.js';
+import { wearPlans } from './wear.js';
 export { music };
 export const landmarks = [{ plan: chateau, music }];
-export async function town() { return [canal, ...gardenPlans(), ...nightPlans(), ...(await houses())]; }
+export async function town() { return [canal, ...gardenPlans(), ...nightPlans(), ...wearPlans(), ...(await houses())]; }
