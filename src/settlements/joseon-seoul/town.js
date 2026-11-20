@@ -10,22 +10,15 @@ import { officePlans } from './offices.js';
 import { RADIUS, lots, SHOPS, BELL, JONGNO, AVENUE, YANGBAN } from './layout.js';
 import { ground } from './ground.js';
 import { homeLayout, classOf } from '../../styles/joseon/home.js';
+import { blocksOf, shopsOf, enterable } from './openwalk.js';
 import { rangeFrame } from '../../styles/joseon/house.js';
 const base = (id, elements) => ({ id, style: 'joseon', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 70], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-// Jongno's shop rows, cut into blocks by the lanes running south, and the bell pavilion at the corner
-const blocksOf = () => {
-  const out = [];
-  for (const [x0, z0, x1, z1] of SHOPS) {
-    let x = x0, k = 0;
-    while (x < x1 - 8) { const xe = Math.min(x1, x + 20.8), nb = Math.max(1, Math.round((xe - x) / 2.6)); out.push({ rect: [x, z0, xe, z1], k: k++, nb, bw: (xe - x) / nb }); x = xe + 3.2; }
-  }
-  return out;
-};
+// Jongno's shop rows, cut into blocks by the lanes running south, and the bell pavilion at the corner (blocksOf: openwalk.js)
 function jongno() {
   const L = [];
-  for (const b of blocksOf()) L.push({ t: 'sijeon', rect: b.rect, front: 'n', seed: 1880 + 7 * b.k + Math.round(b.rect[0]) });
+  for (const b of blocksOf()) L.push({ t: 'sijeon', rect: b.rect, front: 'n', seed: 1880 + 7 * b.k + Math.round(b.rect[0]), wide: b.wide });
   L.push({ t: 'bell_pavilion', rect: BELL });
   return { ...base('joseon-seoul-jongno', L), feature: false };
 }
@@ -36,11 +29,12 @@ function shopfronts() {
   const rand = rng(1894), L = [];
   for (const b of blocksOf()) {
     const [x0, z0] = b.rect;
-    for (let k = 0; k <= b.nb; k++) if (k % 3 === 0 && k < b.nb) L.push({ t: 'shop_sign', at: [x0 + k * b.bw + 0.12, z0 - 0.1], y: 0.42, rot: Math.PI, h: 2.0, len: 0.95, out: 0.85, cloth: ['cloth_indigo', 'cloth_white', 'cloth_red', 'cloth_ochre'][Math.floor(rand() * 4)], letters: 2 + Math.floor(rand() * 2) });
+    const wd = new Set(b.wide);
+    for (let k = 0; k <= b.nb; k++) if (k % 3 === 0 && k < b.nb && !wd.has(k - 1)) L.push({ t: 'shop_sign', at: [x0 + k * b.bw + 0.12, z0 - 0.1], y: 0.42, rot: Math.PI, h: 2.0, len: 0.95, out: 0.85, cloth: ['cloth_indigo', 'cloth_white', 'cloth_red', 'cloth_ochre'][Math.floor(rand() * 4)], letters: 2 + Math.floor(rand() * 2) });
     for (let k = 0; k < b.nb; k++) {
-      const xa = x0 + k * b.bw + 0.12;
+      const xa = x0 + k * b.bw + 0.12, wayK = wd.has(k - 1);      // (the second bay of a two-bay shop: its right end is the way in, kept clear)
       if (rand() < 0.5) L.push({ t: 'hang_lantern', at: [xa + 0.35, z0 - 0.3], y: 0.42 + 2.08, rot: 0, kind: rand() < 0.6 ? 'paper' : 'white', drop: 0.15, seed: 1 });
-      const r = rand(), px = xa + 0.4 + rand() * 0.9, pz = z0 - 1.25 - rand() * 0.4;
+      const r = rand(), px = xa + 0.4 + rand() * 0.9 - (wayK ? 0.9 : 0), pz = z0 - 1.25 - rand() * 0.4;
       if (r < 0.28) L.push({ t: 'pot', kind: rand() < 0.5 ? 'dark_pot' : 'vat', at: [px, pz], y: 0.03, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: Math.floor(rand() * 1e9) });
       else if (r < 0.5) L.push({ t: 'basket', at: [px, pz], y: 0.03, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: Math.floor(rand() * 1e9) });
       else if (r < 0.62) L.push({ t: 'sacks', at: [px, pz], y: 0.03, rot: Math.PI, n: 2 + Math.floor(rand() * 4), seed: Math.floor(rand() * 1e9) });
@@ -122,10 +116,10 @@ function street() {
   // Jongno: merchants on their shop floors, buyers before them, people walking both ways
   const [jx0, jz0, jx1, jz1] = JONGNO;
   const shopx = [];
-  for (const b of blocksOf()) for (let k = 0; k < b.nb; k++) shopx.push([b.rect[0] + k * b.bw + 0.12 + (b.bw - 0.24 - 0.95) / 2, b.rect[1], b.rect[0] + (k + 1) * b.bw - 0.12 - 0.5]);
-  for (const [x, z0, xin] of shopx) {
+  for (const b of blocksOf()) for (const sh of shopsOf(b)) shopx.push([sh.x, b.rect[1], sh.xin, sh.open]);
+  for (const [x, z0, xin, opened] of shopx) {
     // the shopkeeper on his maru (seen over the goods), a customer or two before it, a boy by the bay's way in now and then
-    if (rand() < 0.15) P.push({ t: 'figure', at: [xin, z0 + 2.2], y: 0.42, rot: Math.PI, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', skin: skin(), hat: 'brim', hatMat: 'lacquer_black', beard: rand() < 0.6, h: 1.62, pose: 'stand' });
+    if (rand() < 0.15 && !opened) P.push({ t: 'figure', at: [xin, z0 + 2.2], y: 0.42, rot: Math.PI, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', skin: skin(), hat: 'brim', hatMat: 'lacquer_black', beard: rand() < 0.6, h: 1.62, pose: 'stand' });
     if (rand() < 0.45) P.push({ t: 'figure', at: [x, z0 + 0.75], y: 0.88, rot: 0, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', skin: skin(), hat: 'brim', hatMat: 'lacquer_black', pose: 'cross', beard: rand() < 0.6, h: 1.62 });
     if (rand() < 0.3) (rand() < 0.65 ? man : woman)(x + (rand() - 0.5), z0 - 1.1 - rand() * 0.5, Math.PI + (rand() - 0.5) * 0.6);
   }
@@ -150,9 +144,6 @@ function street() {
   ox(7, 300, Math.PI);
   return [{ ...base('joseon-seoul-street', P), style: 'life', center: [0, 330], near: 260 }, { ...base('joseon-seoul-loads', J), feature: false, center: [0, 330], near: 260 }];
 }
-
-// which hanok can be entered: every gentry house and every other lot by its seed (half of them), where the ground is level
-const enterable = (l) => { const [a, b, c, d] = l.rect; return [[a, b], [c, b], [a, d], [c, d]].every(([x, z]) => ground.height(x, z) < 0.05) && (classOf(l) === 'gentry' || l.seed % 2 === 0); };
 
 // the households: in some houses a woman at the kitchen's stove, an old man on his cushion in the men's room or the main room, a child in the yard
 function homefolk() {

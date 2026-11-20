@@ -358,7 +358,10 @@ export function sijeon(el, { bag, col }) {
   bag.add('plaster_white', box(x0, 0.42, back[0], x1, 0.42 + h, back[1]));
   bag.add('plaster_damp', box(x0 - 0.01, 0.42, back[0] - 0.01, x1 + 0.01, 1.0, back[1] + 0.01));
   col.rect([x0, back[0], x1, back[1]], 0, 0.42 + h);
+  // el.wide: the bays k whose shop takes bay k + 1 as well (no party wall between): a shop of two bays, 5 m, with a way in of 1.7 m beside its maru (the walk, docs §18)
+  const wide = new Set(el.wide ?? []);
   for (let k = 0; k <= nb; k++) {
+    if (wide.has(k - 1)) continue;
     const x = x0 + k * bw, za = Math.min(Zf(1.0), Zf(D)), zc = Math.max(Zf(1.0), Zf(D));
     bag.add('plaster_white', box(x - 0.1, 0.42, za, x + 0.1, 0.42 + h - 0.04, zc));
     bag.add('timber', box(x - 0.11, 0.42, Math.min(Zf(0.12), Zf(0.36)), x + 0.11, 0.42 + h - 0.32, Math.max(Zf(0.12), Zf(0.36))));
@@ -368,9 +371,11 @@ export function sijeon(el, { bag, col }) {
   bag.add('timber', box(x0 - 0.2, 0.42 + h - 0.3, Math.min(Zf(0.08), Zf(0.4)), x1 + 0.2, 0.42 + h, Math.max(Zf(0.08), Zf(0.4))));
   rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A: (x1 - x0) / 2 + 1.0, B: D / 2 + 1.0, y: 0.42 + h - 0.1, rise: (D / 2 + 1) * 0.55, kind: 'xieshan', sweep: 0.5, p: 1.5, alongZ: false, mat: 'tile_grey', soffit: 'timber', curl: false }, bag);
   for (let k = 0; k < nb; k++) {
-    const xa = x0 + k * bw + 0.12, xb = x0 + (k + 1) * bw - 0.12, good = el.goods ?? GOODS[Math.floor(rand() * GOODS.length)];
+    if (wide.has(k - 1)) continue;
+    const kk = wide.has(k) ? k + 1 : k, xa = x0 + k * bw + 0.12, xb = x0 + (kk + 1) * bw - 0.12, good = el.goods ?? GOODS[Math.floor(rand() * GOODS.length)];
     // the maru at the front, on short posts, across the left part of the bay; the right 0.95 m is the way in (earth floor at the stone's level)
-    const xm = xb - 0.95, mz = [Math.min(Zf(0.15), Zf(1.15)), Math.max(Zf(0.15), Zf(1.15))];
+    // (a shop of two bays: the way in 1.7 m)
+    const xm = xb - (kk > k ? 1.7 : 0.95), mz = [Math.min(Zf(0.15), Zf(1.15)), Math.max(Zf(0.15), Zf(1.15))];
     bag.add('timber', box(xa, 0.42 + 0.38, mz[0], xm, 0.42 + 0.46, mz[1]));
     for (const xx of [xa + 0.1, xm - 0.1]) bag.add('wood_dark', box(xx - 0.05, 0.42, Zf(0.25) - 0.05, xx + 0.05, 0.42 + 0.38, Zf(0.25) + 0.05));
     col.rect([xa, mz[0], xm, mz[1]], 0.42, 0.42 + 0.46);
@@ -414,7 +419,7 @@ export function sijeon(el, { bag, col }) {
     bag.add('wood_dark', box(xm - 0.27, 0.42 + 0.33, dz[0] + 0.04, xm - 0.14, 0.42 + 0.37, dz[0] + 0.2));   // the abacus (jupan)
     bag.add('timber', box(xm - 0.55 + 0.05, 0.42, dz[0] + 0.03, xm - 0.5 + 0.05, 0.42 + 0.28, dz[0] + 0.08));
     col.rect([xm - 0.55, dz[0], xm - 0.1, dz[1]], 0.42, 0.42 + 0.34);
-    const st = zr(1.9, 2.2); bag.add('timber', box(xm + 0.05, 0.42, st[0], xm + 0.35, 0.42 + 0.3, st[1]));
+    const st = zr(1.9, 2.2), sx = kk > k ? xm - 1.05 : xm + 0.05; bag.add('timber', box(sx, 0.42, st[0], sx + 0.3, 0.42 + 0.3, st[1]));   // (in a shop of two bays the stool stands off the way in)
     const rz = zr(1.7, 1.78), ry = 0.42 + h - 0.45;
     bag.add('timber', box(xa, ry, rz[0], xb, ry + 0.05, rz[1]));
     for (let q = 0; q < 3; q++) {
