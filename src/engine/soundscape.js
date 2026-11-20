@@ -76,6 +76,8 @@ import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
 import * as ISFAHAN from '../settlements/isfahan/soundmap.js';
 import './voices-isfahan.js';
+import * as NEWYORK from '../settlements/new-york/soundmap.js';
+import './voices-ny.js';
 import * as VENICE from '../settlements/venice/soundmap.js';
 import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
 import * as PARIS from '../settlements/paris/soundmap.js';
@@ -188,7 +190,7 @@ export const PROFILES = {
   'mughal-agra': T(IND, { cicadas: 0.5, animals: { cattle: 0.4, horse: 0.3, rooster: 0.3, dog: 0.3 }, roof: 'flat', adhan: 2 }),
   muscovy: T({ crow: 1, sparrow: 0.8, warbler: 0.4 }, { animals: { horse: 0.7, dog: 0.4, rooster: 0.4, cattle: 0.2 }, roof: 'shingle', bells: 'zvon' }),
   nara: T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { dog: 0.2 }, roof: 'tile', bells: 'bonsho' }),
-  'new-york': T({ sparrow: 0.8 }, { animals: {}, roof: 'flat' }),
+  'new-york': T({ sparrow: 0.8 }, { animals: withLife({ horse: 0.2 }, { market: 1, map: NEWYORK }), roof: 'flat' }),
   'norse-borgund': T({ warbler: 1, crow: 0.5 }, { animals: { sheepbell: 0.7, cattle: 0.6, dog: 0.3, horse: 0.2 }, roof: 'shingle', bells: 'parish' }),
   'ottoman-istanbul': T({ ...MED, gull: 0.8 }, { cicadas: 0.4, animals: withLife({ dog: 0.5, donkey: 0.3, horse: 0.3 }, { market: 1, map: ISTANBUL }), roof: 'tile', adhan: 2 }),
   paris: T(EU, { roof: 'slate', bells: 'paris', animals: withLife({ horse: 0.5, rooster: 0.3, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: PARIS }) }),
