@@ -154,3 +154,74 @@ Found shut: the merchant's (rich) houses had a street wing of solid brick to 7 m
 | Every other house | A balakhona on the street wing's roof, at the end by the stair, reached from the roof terrace through a door under a porch of two posts (or, at the far end, through its inner wall); inside, bedding, a chest with quilts, niches and a lamp, and the stores of the house's trade: the potter's shelves of ware, the baker's flour, the smith's iron bars and charcoal, the weaver's bolts and hanks, the joiner's boards and column blanks, the grocer's strings of dried fruit and sacks, the papermaker's sheets drying on lines | [inferred]; [stated] Samarkand paper, §17 |
 
 The way up: the door of the street, the passage, round the privacy screen to the foot of the mud-brick stair, up to the roof, along the terrace to the door. `walks` in plan.js: three merchant's houses and one house of each trade nearest the arrival. Upper floors are in the near form of the houses only (the far form gets the mass of the balakhona). Still shut: the ground floor of the street wing (solid), the upper floors beyond the near ring, the balakhona's own roof.
+
+## 20. Match pass (2026-11-19): night, sound, animals, wear
+
+Brought toward the reference (Ming Suzhou) in the order of docs/suzhou-method.md. Houses stay built near and far in tiles (`NEAR` 140 m in town.js): interiors, lamps and lit windows exist in the near form only. Everything below is what this place at this date could have had; each line is [stated] with its source or [inferred]. Sources: Clavijo, "Embassy to Tamerlane 1403–1406" (via https://origins.osu.edu/milestones/september-2012-castilian-samarkand-1404: gardens, markets, feasts under tents in Timur's gardens); Wikipedia, Registan, Samarkand paper and Ulugh Beg Observatory (above); Orexca on the traditional dwelling (§15: wall niches for utensils, latticed windows, the tandoor in the court); no source gives the lamps themselves, so the kinds are taken from the Central Asian and Persian usage of oil lamps (chiragh) of clay and brass.
+
+### 20.1 Night (nightlight.js)
+
+| Light | Where | Basis |
+|---|---|---|
+| Oil lamps in houses, halls, shops, the mosques | every lamp and brazier the style's rooms already hold gets its glow and its pool of light (halo, the added-light material, which shows at the low preset); the great hanging lamps of Bibi-Khanym, Gur-e Amir, the khanqah and the madrasa's halls throw a wide pool | [inferred] lamp oil (sesame, cotton-seed) in clay and bronze lamps; the hanging mosque lamp of glass is the style's kit |
+| Lit windows | a share of the latticed windows (houses' lane fronts, the madrasa's grilles over the cell doors) show a sheet of lamp-light on both faces: a student at his lamp, a family at the evening meal | [inferred]; the madrasa's cells were lived in by students [stated: Archnet 2123, student rooms] |
+| Lamp by a house door | a clay lamp on a bracket beside the street door of every rich house and one in three of the others, the pool on the lane | [inferred] |
+| Lanterns at shop fronts | a brass hanging lantern at the lintel of about one in three of the Registan's shops (the rest shut with the dusk), and in every second bay of the bazaar streets | [inferred] the bazaar closing at dusk with a few lit stalls and the tea-houses |
+| Iron lamp stands | six on the Registan: a pair either side of the way to the pishtaq, four where the aisle meets the shop rows | [inferred] a public square lit by stands of oil dishes |
+| Braziers | three: the cameleers' camp on the east side and the khanqah's portal | [inferred] caravans camped on the square (§5) |
+| Tray lamps | a lamp on the tray of each tea-house platform | [inferred] |
+Not lit: the minarets, the domes, the pishtaq (no light was kept on them); the observatory's upper floors (shut).
+
+### 20.2 The visitor's walk (plan.js `walks`)
+
+Every route below is a line of the plan's `walks`, walked by tools/walk-check.mjs with the viewer's own body (radius 0.3 m, step 0.5 m). 34 routes in all: the arrival's way along the aisle, the upper-room routes of §19, and the new ones, from the aisle or the lane into the places opened to the visitor.
+
+| Opened place | How the route goes | Basis |
+|---|---|---|
+| The ten entered shops (five on each row) | from the aisle, through the one gap of the stalls' rows that lies nearest, along the shop row's front, in at the side of the sill's tray table, to the back of the shop | [inferred] the rows of booths leave gaps; the sill platform is 0.5 m, the first step of the shopkeeper's seat |
+| The classroom and the library (the madrasa's two east corner halls) | through the pishtaq passage into the court, along the gallery to the hall's door | [stated] §17: the classroom is entered from the court's gallery |
+| The khanqah's hall | through its portal passage on the Registan's side | [stated] §2 |
+| Ten furnished houses nearest the arrival | lane, the street door's passage, the court's edge, then alternately the talar (the porch of the court) or the room of the trade at the wing's door | [inferred] §17 plan of the house; the room door is 1.1 m wide |
+| Upper rooms (§19) | stair, roof, room, for the merchants' houses and one of each trade | [inferred] §19 |
+
+Three courts (seeds 954925, 423350, 725441) have the side path shut by the furniture of their trade; they are left out of the routes (not opened to the walk by design), and the smith's room 395356 is reached only to its talar. [inferred] Nothing of this is a source fact; it is the walk made checkable.
+
+### 20.3 Sound (soundmap.js, src/engine/voices-timurid.js, tests/samarkand-sound.test.mjs)
+
+The call to prayer stays the engine's (profile `adhan`: five a day from the madrasa's and the mosques' minarets; no bells, none in a Muslim city). The rest is placed where it is made, by hour, season and weather (rain stops the open-air trades and the tea-house music). All voices are synthesised (`tim…`); levels set by measuring renders (tools/sound-render.mjs). [inferred throughout: no recording of 1420 exists]
+
+| Sound | Where / when | Basis |
+|---|---|---|
+| Hawkers' cries (wordless): melon, bread, cloth | at every third booth of those trades on the Registan, by day (bread in the morning); at the chorsu a cloth broker | [inferred] the booths of §16; melons, bread (nan) and cloth after Clavijo's markets |
+| Tea-house talk and cups; at evening the dutar and the doira | the six platforms of the Registan, 6.5–22.5 h; the music from about 16 h | [inferred] the dutar (two-stringed long-necked lute) and the frame drum as the instruments of the region; the melodies are ours, in a seven-note maqam-type mode on D |
+| The nawbat (kettledrums and long trumpets) at dusk | far, from the citadel off the disc to the north-west, 17.9–18.6 h | [inferred] the naqqara-khana of a Timurid court (the state drums and trumpets) |
+| Coppersmiths | five places in the bazaar streets and the shop rows, 7.5–17.5 h | [inferred] |
+| The trades of the houses: potter's wheel, baker's work at the tandoor, smith's hammer, loom, plane, grocer's drawer and coins, the papermaker's pounding | each trade room (life.js / houses.js), by its own hours | [stated] Samarkand paper from mulberry bark (Wikipedia, Samarkand paper); the rest [inferred] |
+| Lecture in the classroom, recitation in the mosques and at the tomb | inside the halls, by day (the mosques from dawn to the evening) | [stated] teaching in the madrasa (Ulugh Beg taught mathematics and astronomy); recitation [inferred] |
+| The aryk's trickle | along every lane with a channel, all day and night | [inferred] §6 |
+| Doves on the cornices | the madrasa's front and court, Bibi-Khanym, Gur-e Amir, 5.5–19 h | [inferred] |
+| A camel's groan with its bell; a donkey; a caravan passing in the bazaar's streets; the water carrier in the lanes; the night watch | the camp on the Registan's east side; the bazaar streets 6–18 h; lanes 6.5–18.5 h; lanes 20.5–4 h | [stated] caravans in Samarkand (Clavijo, §1); the rest [inferred] |
+Rooms (inside): the walls hush the street, the flat mud roof dulls rain; the vaulted bazaar passes a murmur and no rain.
+
+### 20.4 Animals (fauna.js `critters`, tests/samarkand-critters.test.mjs)
+
+Rigged small animals (src/engine/fauna-critters.js), existing models only, each placed from the plan's own numbers. [inferred] throughout, except where noted: the keeping of fowl in town courts and of cats and dogs is general to Central Asian towns; the rock dove is the dove of the towns' cornices.
+
+| Animal | Where | Behaviour |
+|---|---|---|
+| Doves on the ground | five flocks of four on the Registan's paving where grain and crumbs fall: before the pishtaq's apron, between the aisle and the booths, by the tea-houses | walk and peck within a metre or two, take fright at the visitor |
+| Doves in the air and on the parapets | two flocks wheeling over the madrasa's front and the square's east; three on the parapets of the madrasa's wings (sparrows already there) | flights and perches of the fauna system |
+| Cats | on the sill carpets of the two nearest shops each row that nobody sits in, among the wares | sleep, wash, lift the head toward the visitor |
+| Dogs | asleep against the walls of the two nearest houses beyond 40 m, one by the camp | lie, stand when the visitor is near |
+| Hens and a cock | in the courts of the six furnished houses nearest the arrival, in the free half of the court between the pool and the south wing (the pool, tandoor, charpoy, washing line and stair are at the court's middle and edges) | scratch and peck within a metre |
+Working animals (camels and donkeys at the camp, donkeys at doors) are still the street life's still figures, not rigged: no critter model of either yet.
+
+### 20.5 Wear and writing (wear.js)
+
+Wear [inferred, from the general character of sun-dried-brick and stone towns]: at every street door of a furnished house the limestone sill is hollowed by use, and the lane outside is trodden; at the back wall of the madrasa's and the khanqah's pishtaq passages, the same hollowed sill; over the lamp at a door a smoke-dark patch (the dark of the timber material) on the brick above the lamp's flame. Each is a thin additive piece on the plan's own mesh, not a new texture.
+
+Writing: none added. No Arabic-script inscription was written, because none could be verified here, joined letter by letter, from a source in hand; the banna'i bands (kufic in lapis, cream and turquoise, §17) stay pattern, as the earlier passes left them, and the dossier does not claim they read. A named verified phrase (a basmala or the like) would come only with a source checked and a joined shaping shown in the engine's renderer.
+
+### 20.6 Level statement
+
+Brought to the match standard in item order: the walk (34 routes, ten shops, three halls, ten houses and their upper rooms), the night (halo lamps of every building, lit lattice windows, door lamps, hung lanterns, braziers, at the low preset), the sound (a placed map with rooms, tracks and fifteen `tim` voices), the animals (doves, cats, dogs, hens as critters), the wear. Short of the Suzhou standard: the madrasa's upper storeys and three corner halls stay shut; the minaret stairs, the Gur-e Amir crypt, the observatory's upper floors are not entered; no script; no rigged camel or donkey; the houses' room doors are 1.1 m (the walker passes, the guideline asks 1.5 m).

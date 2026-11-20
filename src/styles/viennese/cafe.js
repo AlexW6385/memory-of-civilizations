@@ -5,6 +5,7 @@
 import { box, lathe, rod } from '../../core/geom.js';
 import { faceFrame, fbox } from '../dutch/facade.js';
 import { facade, rng } from './mietshaus.js';
+import { lettering } from './lettering.js';
 import { FURNITURE } from '../modernisme/furniture.js';
 
 const GH = 4.5, T = 0.5;
@@ -39,9 +40,9 @@ export function cafeHouse(el, ctx) {
   col.floor([x0 + T, z0 + T, x1 - T, z1 - T], y + FL);
   // the ground floor's face: the white band with the gold lettering, the plinth, the window frames (dark)
   const A = (F, m, ...q) => bag.add(m, fbox(F, y, ...q));
-  for (const [F, len, lett] of [[Ff, W, 'CAFEMUSEUM'], [Fs, D, 'CAFEMUSEUM']]) {
+  for (const [F, len, lett] of [[Ff, W, 'CAFÉ MUSEUM'], [Fs, D, 'CAFÉ MUSEUM']]) {
     A(F, 'plaster_white', 0.0, len, 4.0, 4.5, 0, 0.08); A(F, 'granite_grey', 0, len, 0, 0.5, 0, 0.06);
-    const c = len / 2; for (let k = 0; k < lett.length; k++) { const u = c - lett.length * 0.3 + k * 0.6; A(F, 'gold', u, u + 0.4, 4.1, 4.4, 0.08, 0.12); }
+    lettering(bag, F, y, len / 2, 4.07, lett, 0.34, 'gold', len - 1.5, 0.08);                                   // the gold lettering on white: Café Museum
   }
   for (const c of front) if (c.v0 > 0.5) { const F = Ff, u = c.c - x0; A(F, 'wood_dark', u - c.w / 2 - 0.06, u + c.w / 2 + 0.06, c.v0 - 0.08, c.v0, 0, 0.1); A(F, 'wood_dark', u - c.w / 2 - 0.06, u + c.w / 2 + 0.06, c.v1, c.v1 + 0.08, 0, 0.1); A(F, 'opening', u - c.w / 2, u + c.w / 2, c.v0, c.v1, -0.02, 0.03); A(F, 'wood_dark', u - 0.03, u + 0.03, c.v0, c.v1, 0, 0.06); }
   for (const c of side) if (c.v0 > 0.5) { const F = Fs, u = z1 - c.c; A(F, 'wood_dark', u - c.w / 2 - 0.06, u + c.w / 2 + 0.06, c.v0 - 0.08, c.v0, 0, 0.1); A(F, 'wood_dark', u - c.w / 2 - 0.06, u + c.w / 2 + 0.06, c.v1, c.v1 + 0.08, 0, 0.1); A(F, 'opening', u - c.w / 2, u + c.w / 2, c.v0, c.v1, -0.02, 0.03); A(F, 'wood_dark', u - 0.03, u + 0.03, c.v0, c.v1, 0, 0.06); }

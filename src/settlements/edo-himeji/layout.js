@@ -68,7 +68,10 @@ export function lots() {
   return LOTS;
 }
 /** Which houses are open inside: a machiya in two (its shop), a samurai compound in two (reception room and retainers' row). */
-export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 2 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 2 === 0);
+const baseOpen = (l) => (l.t === 'machiya' ? l.seed % 2 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 2 === 0);
+/** ... and every machiya within 60 m of the middle of the street, where the avenue meets it: the walk's shops are all open (docs §10.4). */
+export const isOpen = (l) => baseOpen(l) || (l.t === 'machiya' && Math.abs((l.rect[0] + l.rect[2]) / 2) < WALK_OPEN);
+export const WALK_OPEN = 60;
 const KIND_OF = { cloth: 'merchant', pottery: 'merchant', medicine: 'dwelling', rice: 'store', sake: 'store', dye: 'craft', oil: 'craft', bucket: 'craft', tea: 'inn', sandals: 'tenement', paper: 'tenement', fish: 'tenement', tofu: 'tenement' };
 let UPPER = null;
 /** The open machiya whose upper floors are open: the twelve nearest the middle of the merchants' street, where the avenue from the main gate meets it (lot -> kind). */
@@ -77,7 +80,7 @@ export function upperHouses() {
   const A = [0, STREET.z0], d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]);
   UPPER = new Map();
   let stores = 0;
-  for (const l of lots().filter((l) => l.t === 'machiya' && isOpen(l)).sort((a, b) => d(a) - d(b)).slice(0, 12)) {
+  for (const l of lots().filter((l) => l.t === 'machiya' && baseOpen(l)).sort((a, b) => d(a) - d(b)).slice(0, 12)) {
     let k = KIND_OF[l.trade] || 'merchant';
     if (k === 'store' && stores++ === 1) k = 'tenement';   // (the lodgers' rooms over a rice dealer's)
     UPPER.set(l, k);
@@ -114,7 +117,9 @@ export function streets() {
 /** Street furniture: wells in the merchants' street, sake barrels by the brewer, boats and landings on the middle moat. */
 export function furniture() {
   const F = [], rand = rng(404);
-  for (let x = -270; x < 270; x += 78) { const wx = x + rand() * 20; if (Math.abs(wx) > 10) F.push({ t: 'ido', at: [wx, STREET.z0 + 1.6], rot: 0 }); }
+  // (a well stands clear of the passage of an open shop: the walk's routes go in there, docs §10.4)
+  const lanes = lots().filter((l) => l.t === 'machiya' && l.front === 's' && isOpen(l)).map((l) => l.rect[0] + 0.95);
+  for (let x = -270; x < 270; x += 78) { let wx = x + rand() * 20; while (lanes.some((u) => Math.abs(wx - u) < 1.9)) wx += 1.4; if (Math.abs(wx) > 10) F.push({ t: 'ido', at: [wx, STREET.z0 + 1.6], rot: 0 }); }
   const xs = Math.sqrt(RADIUS ** 2 - MIDDLE.z1 ** 2) - 36;
   for (const sx of [-1, 1]) for (const k of [0.3, 0.62]) {
     const x = sx * xs * k + sx * MIDDLE.gap / 2 + sx * 6;
