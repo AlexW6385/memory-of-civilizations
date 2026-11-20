@@ -2,6 +2,8 @@
 // mudbricks drying, straw, tethering posts, roadside chapels and benches along every street (thick near the quay and the temple, thin in
 // the outskirts); the cargo on the quay (sacks, logs, a block on its sledge, rope, nets on poles); braziers, offering tables, statues, basins,
 // stelae and palms on the avenue and in the forecourt.
+import { lots } from './layout.js';
+import { doorPoint } from '../../styles/newkingdom/doorsite.js';
 import { QUAY, QUAY_STAIRS, AVENUE, ENCL, ENCL_TH, PYLON2, STREET_ZS, LANES_X, TEMPLE_STREETS, WORKSHOP_Z, MARKET, streets, sphinxes, inRect } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -9,6 +11,12 @@ const pickW = (rand, list) => { const t = list.reduce((a, [, w]) => a + w, 0); l
 const STREET_KINDS = [['jars', 0.22], ['bricks', 0.13], ['straw', 0.08], ['post', 0.1], ['bench', 0.14], ['well', 0.07], ['stack', 0.09], ['logs', 0.04], ['chapel', 0.03], ['bricks', 0.03], ['jars', 0.04], ['loom', 0.05], ['bread', 0.05], ['brickyard', 0.03]];
 const dist = (x, z) => Math.hypot(x + 120, z);
 
+/** The doors of the lots (the entered ones and the closed): is (x, z) within the lane in front of one? */
+let DOORS = null;
+function doorLane(x, z) {
+  DOORS ||= lots().map(doorPoint).filter(Boolean);
+  return DOORS.some((d) => Math.abs(x - d.x) < d.w / 2 + 1.5 && Math.abs(z - d.z) < 2.6);
+}
 /** Items along one east–west street rectangle. */
 function alongStreet(rect, rand, out, keep) {
   const [x0, z0, x1, z1] = rect, zc = (z0 + z1) / 2;
@@ -19,7 +27,9 @@ function alongStreet(rect, rand, out, keep) {
     if (x > x1 - 4) break;
     if (LANES_X.some((l) => Math.abs(x - l) < 3.2)) continue;
     if (keep && !keep(x, zc)) continue;
-    const side = rand() < 0.5 ? -1 : 1;
+    let side = rand() < 0.5 ? -1 : 1;
+    if (doorLane(x, zc + side * 1.2)) side = -side;                    // nothing stands in a doorway's lane (§15a)
+    if (doorLane(x, zc + side * 1.2)) continue;
     let k = pickW(rand, STREET_KINDS);
     if (k === 'chapel' && x - lastChapel < 70) k = 'jars';
     if (k === 'chapel') lastChapel = x;

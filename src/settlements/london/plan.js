@@ -60,7 +60,7 @@ export const bridge = {
     ...embankments(),
     { t: 'iron_bridge', x0: RIVER.x0 - 10, x1: RIVER.x1 + 12, z: BRIDGE.z, w: BRIDGE.w, y: GROUND + 0.4, water: RIVER.level, bed: RIVER.bed, spans: 7 }],
 };
-function embankments() {
+export function embankments() {
   const inside = (x, z) => Math.hypot(x, z) < RADIUS - 64, out = [];
   const run = (z0, z1, k, side) => { const path = []; for (let z = z0; z <= z1; z += 3) { const x = bank(z)[k] + (k ? 0.6 : -0.6); if (inside(x, z)) path.push([x, z]); } if (path.length > 1) out.push({ t: 'embankment', path, y: GROUND, bed: RIVER.bed, side, lamps: 18 }); };
   run(-RADIUS, BRIDGE.z - BRIDGE.w / 2 - 1, 0, 1);
