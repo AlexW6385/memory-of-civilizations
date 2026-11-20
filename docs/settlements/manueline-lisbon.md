@@ -135,5 +135,9 @@ Method: docs/suzhou-method.md; code in src/settlements/manueline-lisbon/ (nightl
 ### 13.3 Animals [inferred from the town's trades and the ports of the age]
 Cats at the shop piers and the quay's warehouses (rats on a port), dogs at the doors of the Alfama homes and the yard's gate, hens and a cock in the quintais (yards) and the Alfama lanes, pigeons on the Terreiro and the plaza, geese in the quintais, ducks on the shore at Belém by the boats, a goat on the Alfama slope, a caged songbird at the tavern door; a kingfisher on a boat's rail [src/settlements/manueline-lisbon/fauna.js `critters`].
 
-### 13.4 The walk, wear and writing: see the end of this section as built
-(filled in at the end of the round)
+### 13.4 The walk (built)
+- [inferred] Every open house (64 in all: the ten plaza houses with upper floors have their own routes) has a walked way in: from the street, over the doorstep, through the arch to the front room (src/settlements/manueline-lisbon/openwalk.js, 53 routes, all walked by walk-check). To make them passable: the front shelves of the narrow spice, porcelain, cloth and similar shops now leave 2.2 m clear about the door (styles/manueline/interiors.js `sh`); the street dressing (stalls, crates, laundry, figures) is kept out of every open house's door lane, not only of those with upper floors (life.js); open fishermen's homes are no longer chosen where their front is the monastery's range wall (layout.js `walled`), where no street runs.
+- The plaza precinct is closed on its east side from x about −112 (walkers cannot leave it toward the Terreiro or the Rua Nova): found, not fixed; the visitor's walk to the Rua Nova shops is by no route from the arrival yet.
+
+### 13.5 Wear and writing
+Not done this round: no worn steps, soot or inscriptions were added. No Latin text was written, because no inscription of this place and date could be checked here (the shell reaches no website); the trades' signs stay pictorial, as they are.
