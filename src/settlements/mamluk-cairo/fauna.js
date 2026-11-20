@@ -36,7 +36,7 @@ for (const S of [SUQ, SUQ2, SUQ3]) {
   }
 }
 for (const [x, z] of [[-158.6, -142], [-162.4, -101], [-90, -118.8], [20, -121], [-30.5, -3], [-150, -203], [-120, -285], [-61, -190]]) critters.push({ model: 'dog', at: [x, 0.04, z], rot: hash(x, z) * 6.28, range: [8, 3] });
-for (const [x, z, n] of [[0, 40, 5], [-7, 47, 3], [-31, -1, 3], [-160, -240, 5], [-152, -270, 4], [-125, -286, 5], [-31, -118.4, 3]]) {
+for (const [x, z, n] of [[0, 40, 5], [-7, 47, 3], [-31, -1, 3], [-160, -240, 5], [-152, -270, 4], [-125, -286, 5], [-20, -121, 3]]) {
   for (let k = 0; k < n; k++) { const px = x + (hash(x + k, z) - 0.5) * 5, pz = z + (hash(x, z + k) - 0.5) * 4; critters.push({ model: ['pigeon_grey', 'pigeon_white', 'pigeon_dark', 'pigeon_grey'][k % 4], at: [px, 0.06, pz], rot: hash(pz, px) * 6.28, range: [2.4, 1.6] }); }
 }
 { let k = 0; for (const r of yards()) {
