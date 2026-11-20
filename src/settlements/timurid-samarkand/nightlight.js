@@ -158,7 +158,7 @@ function wrapElement(name, o = {}) {
 function doorLamp(el, { bag }) {
   const h = el.h;
   if (!h || el.simple || h.garden || (!h.rich && hashAt(h.seed, 5, 41) > 0.34)) return;
-  const G = houseGeom(h), side = hashAt(h.seed, 3, 7) < 0.5 ? -1 : 1, u = h.xd + side * 1.45, v = G.D / 2;
+  const G = houseGeom(h), side = hashAt(h.seed, 3, 7) < 0.5 ? -1 : 1, u = Math.max(-G.W / 2 + 3.2, Math.min(G.W / 2 - 3.2, h.xd)) + side * 1.45, v = G.D / 2;
   const p = G.toWorld(u, v), q = G.toWorld(u, v + 1), nx = q[0] - p[0], nz = q[1] - p[1];
   const H = new Halo(), y = 1.95;
   H.ball(p[0] + nx * 0.22, y + 0.1, p[1] + nz * 0.22, 0.55);

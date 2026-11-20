@@ -17,6 +17,8 @@ E.push({ t: 'shop_row', rect: SHOPS_S, front: 'n', unit: 3.6, enter: [5, 11, 17,
   E.push({ t: 'tim_market', rect: SQUARE, seed: 5, stalls, spreads, litter: 260 });
   for (const [x, z, yaw] of TAPCHANS) E.push({ t: 'tim_tapchan', at: [x, z], yaw, seed: Math.floor(x * 7 + z) });
 }
+// worn sills at the doors of the madrasa's and the khanqah's portal passages (wear.js; the back wall of each iwan, pishtaq() in the style's index.js)
+E.push({ t: 'tim_wear', doors: [{ at: [-54.4, 0], axis: 'z', w: 4.5, dep: 0.5 }, { at: [KHANQAH.rect[0] + 0.6 + 5.8, 0], axis: 'z', w: 3.5, dep: 0.5 }] });
 // the night's lamps of the square: stands, braziers, hung lanterns, the tea-houses' lamps (nightlight.js)
 E.push({ t: 'tim_night', part: 'square' });
 // a paved apron of limestone flags before the pishtaq, worn in the middle (the students' and the faithful's way), edged with a kerb of dressed stone
