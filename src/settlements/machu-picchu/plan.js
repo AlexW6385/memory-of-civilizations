@@ -5,7 +5,7 @@
 
 import { SITE, NECK, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, KALLANKA, SACRED_ROCK, PLAZA_STAIRS, waterworks } from './layout.js';
 import { walkRoutes } from './walkroutes.js';
-import { OPEN_DOOR, OPEN_WALL_H } from './walk.js';
+import { OPEN_DOOR, OPEN_WALL_H, FIRES } from './walk.js';
 import { ground } from './ground.js';
 
 const E = [];
@@ -155,6 +155,10 @@ E.push(...waterworks(ground.height));
 // the Sacred Rock at the north end, between two wayronas facing each other across its court [stated: Tierras Vivas]
 E.push({ t: 'sacred_rock', c: SACRED_ROCK.c, y: 0, yaw: 0, w: 6.8, h: 3.0 });
 for (const [r, open] of SACRED_ROCK.wayronas) E.push({ t: 'inca_temple', rect: r, y: 0.3, h: 2.8, th: 0.8, open, roof: 'thatch', niches: { n: 2, s: 2, e: 4, w: 4 }, seed: r[0] + 50 });
+
+// the fires of the night (nightlight.js, docs §14): the torches and braziers, and the whole night's glow in one element (one halo draw)
+for (const f of FIRES) E.push({ t: 'mp_fire', at: f.at, y: f.y ?? ground.height(f.at[0], f.at[1]), kind: f.kind || 'torch' });
+E.push({ t: 'mp_glow' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('sacred-plaza', [-52, -62, -18, -24], 0.6, 'open'),

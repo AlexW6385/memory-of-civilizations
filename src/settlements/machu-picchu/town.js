@@ -3,9 +3,8 @@ import { inHouse, houseKind, laneLevel, STAIRS, STORES, RADIUS, TERRACE, SITE, T
 import { ground } from './ground.js';
 import { people } from './people.js';
 import { openKanchas, openHouse } from './walkroutes.js';
-import { OPEN_DOOR, OPEN_WALL_H } from './walk.js';
+import { OPEN_DOOR, OPEN_WALL_H, litHouse } from './walk.js';
 
-const ARRIVAL = [-21, 129.8];
 const base = (id, elements) => ({ id, style: 'inca', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [2, 110], facing: 'n' } });
 export async function town() {
   const all = houses(), plans = [];
@@ -14,7 +13,7 @@ export async function town() {
     // the front by rule, from the house's rank (layout houseKind): the nobles' of fine ashlar with the double jamb, the lintel, the threshold stone and the two small
     // windows; the middling of rough stones with a lintel, now and then a step, a window, the newly thatched pale ichu or a tall house; the humble at the town's edge
     // lower, the door narrower, a woodpile by it. The uses inside by rule too. Every lived-in house within 140 m of the arrival has its hearth lit.
-    const near = Math.hypot((x0 + x1) / 2 - ARRIVAL[0], (z0 + z1) / 2 - ARRIVAL[1]) < 140, s = h.seed, { rank, use } = houseKind(h);
+    const near = litHouse(h), s = h.seed, { rank, use } = houseKind(h);
     const v = rank === 0 ? { mat: 'granite_inca', jamb: true, lintel: true, step: true, frontWin: true, tall: s % 3 === 0 }
       : rank === 1 ? { lintel: true, step: s % 2 === 0, frontWin: s % 3 === 0, ...(s % 7 === 0 ? { mat: 'granite_inca', jamb: true } : {}), ...(s % 3 === 1 ? { roofMat: 'ichu' } : {}), tall: s % 11 === 0 }
       : { humble: true, ...(s % 4 === 1 ? { roofMat: 'ichu' } : {}) };
