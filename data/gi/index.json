@@ -349,8 +349,8 @@
    }
   ],
   "bytes": 1245922,
-  "seconds": 184,
-  "baked": "2026-11-18"
+  "seconds": 218,
+  "baked": "2026-11-20"
  },
  "ananda-temple": {
   "site": "bagan",
@@ -455,7 +455,7 @@
    }
   ],
   "bytes": 165807,
-  "seconds": 116,
+  "seconds": 44,
   "baked": "2026-11-20"
  },
  "ayutthaya-wat": {
@@ -1346,8 +1346,8 @@
    }
   ],
   "bytes": 45429,
-  "seconds": 12,
-  "baked": "2026-11-18"
+  "seconds": 23,
+  "baked": "2026-11-20"
  },
  "dunhuang-mogao": {
   "site": "dunhuang",
@@ -1388,7 +1388,7 @@
  },
  "edo-himeji-castle": {
   "site": "edo-himeji",
-  "hash": "e86c19bf97be0cb8",
+  "hash": "427d0fdff4c89fa4",
   "rays": 128,
   "probes": 77299,
   "boxes": [
@@ -1467,9 +1467,9 @@
     ]
    }
   ],
-  "bytes": 1245796,
-  "seconds": 116,
-  "baked": "2026-11-17"
+  "bytes": 1245764,
+  "seconds": 232,
+  "baked": "2026-11-20"
  },
  "fez-bou-inania": {
   "site": "fez",
@@ -4792,7 +4792,7 @@
  },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
-  "hash": "24bab2834f20c5ac",
+  "hash": "8f8950fbf7b2ed2b",
   "rays": 128,
   "probes": 28237,
   "boxes": [
@@ -4835,9 +4835,9 @@
     ]
    }
   ],
-  "bytes": 437022,
-  "seconds": 43,
-  "baked": "2026-11-18"
+  "bytes": 436961,
+  "seconds": 51,
+  "baked": "2026-11-20"
  },
  "song-kaifeng-iron-pagoda": {
   "site": "song-kaifeng",
@@ -5318,7 +5318,7 @@
  },
  "vienna-cafe-museum": {
   "site": "vienna",
-  "hash": "4d26f01aa2af74c6",
+  "hash": "1e1709ef2695802e",
   "rays": 128,
   "probes": 11592,
   "boxes": [
@@ -5339,9 +5339,9 @@
     ]
    }
   ],
-  "bytes": 177189,
-  "seconds": 13,
-  "baked": "2026-11-18"
+  "bytes": 177247,
+  "seconds": 24,
+  "baked": "2026-11-20"
  },
  "vienna-secession": {
   "site": "vienna",
@@ -5372,8 +5372,8 @@
    }
   ],
   "bytes": 380596,
-  "seconds": 43,
-  "baked": "2026-11-18"
+  "seconds": 102,
+  "baked": "2026-11-20"
  },
  "wei-ye-bronze-sparrow": {
   "site": "wei-ye",
