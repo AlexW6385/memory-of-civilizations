@@ -32,7 +32,7 @@ export function homeFolk() {
     const P = (u, v) => (f === 's' ? [x0 + u, z1 - v] : f === 'n' ? [x1 - u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
     const T = 0.2, earth = Math.min(D - 2.4, 2.6), g0 = T + earth, ry = 0.45 + 0.4, hu = L * 0.5, hv = g0 + (D - T - g0) * 0.45;
     const face = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
-    const mir = traits({ ...l, rect: l.rect }).mir, at = P(hu + (mir ? -1.35 : 1.35), hv), hearth = P(hu, hv), woman = k % 4 === 0;
+    const mir = traits({ ...l, open: true }).mir, at = P(hu + (mir ? -1.35 : 1.35), hv), hearth = P(hu, hv), woman = k % 4 === 0;
     const cloth = ['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_ochre'][k % 4];
     out.push({ t: 'figure', at, y: ry, rot: face(at, hearth), seed: 7700 + k * 53, dress: woman ? 'robe' : 'trousers', hair: woman ? 'long' : 'topknot', hat: 'none', cloth, cloth2: 'cloth_white', skin: 'skin_medium', carry: 'none', pose: 'cross' });
   }

@@ -11,25 +11,29 @@ import '../../styles/japanese/index.js';
 import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
-import { dressHouse, furnishTrade } from '../../styles/japanese/village.js';
+import { dressHouse, furnishTrade } from './dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const pot = (bag, m, x, y, z, r, h) => bag.add(m, lathe([[r * 0.6, 0], [r, h * 0.45], [r * 0.75, h * 0.85], [r * 0.55, h], [0.001, h]], 10, null, x, y, z));
-const MISE = 4.1;                                                // a shop front: the door 1.1 m between two display bays of 1.5 m
+const BAY = 1.5;                                                 // a shop front: the door between two display bays of 1.5 m
+const DOOR = 1.6, DOOR_SHUT = 1.1;                               // the door of a house that can be entered is wide enough for the walker (1.6 m), a shut house's is 1.1 m
 
 /** The front, the roof's direction, the plan's mirroring and the door's kind of a lot, decided from its seed, street, trade and width. */
 export function traits(el) {
   const [x0, z0, x1, z1] = el.rect, f = el.front || 's', along = f === 's' || f === 'n', L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
   const r = rng((el.seed || 1) * 13 + 7), a = r(), b = r(), c = r(), d = r(), e = r();
   const par = b < 0.55;                                           // the ridge parallel to the front (eaves toward the lane), else the gable faces the lane
+  const dwid = el.open ? DOOR : DOOR_SHUT, MI = dwid + 2 * BAY;
   let ft = 'plain';
   if (el.kind === 'road' && L >= 6.6) ft = a < 0.7 ? 'mise' : 'lattice';
   else if (['weaver', 'brewer', 'potter'].includes(el.trade) && L >= 5.4) ft = a < 0.6 ? 'lattice' : (par ? 'porch' : 'plain');
   else if (el.trade === 'fisher' || el.trade === 'porter') ft = a < 0.6 && par ? 'porch' : 'plain';
   else if (a < 0.3 && par) ft = 'porch';
-  let door = Math.min(L - 1.2, Math.max(1.2, L * (0.35 + c * 0.3)));
-  if (ft === 'mise') door = Math.min(L - MISE / 2 - 0.45, Math.max(MISE / 2 + 0.45, L * (0.3 + c * 0.4)));
-  return { ft, par, mir: d < 0.5, mat: e < 0.4, door, L, D };
+  let door = Math.min(L - dwid / 2 - 0.5, Math.max(dwid / 2 + 0.5, L * (0.35 + c * 0.3)));
+  if (ft === 'mise') door = Math.min(L - MI / 2 - 0.45, Math.max(MI / 2 + 0.45, L * (0.3 + c * 0.4)));
+  void d;
+  // the plan is mirrored so that the stove and the chest stand on the side away from the door (the way in from the door to the hearth stays free)
+  return { ft, par, mir: door > L / 2, mat: e < 0.4, door, L, D, dw: dwid, MI };
 }
 
 /** A gabled roof of real thickness (as heian_house's), with thick bargeboards and, for a gable that faces the lane, its timber. */
@@ -99,7 +103,7 @@ function ujiHouse(el, { bag, col }) {
   const rc = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   const B = (m, u0, v0, u1, v1, ya, yb, c = false) => { const r = rc(u0, v0, u1, v1); bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya - 0.3, yb); };
   const wallMat = rand() < 0.5 ? 'timber' : 'plaster_white';
-  const T = 0.2, dw = 1.1, door = tr.door, mise = tr.ft === 'mise' && !simple;
+  const T = 0.2, dw = tr.dw, MISE = tr.MI, door = tr.door, mise = tr.ft === 'mise' && !simple;
   const open = el.open && !simple;
   B('limestone', -0.08, -0.08, L + 0.08, D + 0.08, el.foot !== undefined ? y + el.foot : y - 0.2, fy);
   const bays = mise ? [[door - MISE / 2, door - dw / 2], [door + dw / 2, door + MISE / 2]] : [];
@@ -162,9 +166,9 @@ function ujiHouse(el, { bag, col }) {
     // the door: boards, or a hanging mat of straw (mushiro); a lintel
     if (!tr.mat) { if (!open) { B('timber', door - dw / 2, -0.05, door + dw / 2, 0.0, fy, fy + 1.9); for (let k = 1; k < 5; k++) B('wood_dark', door - dw / 2 + k * dw / 5 - 0.01, -0.07, door - dw / 2 + k * dw / 5 + 0.01, -0.05, fy + 0.03, fy + 1.87); } }
     else {
-      B('reed_mat', door - dw / 2 + 0.03, -0.075, door + dw / 2 - 0.03, -0.05, open ? fy + 1.05 : fy, fy + 1.88);
+      B('reed_mat', door - dw / 2 + 0.03, -0.075, door + dw / 2 - 0.03, -0.05, open ? fy + 1.78 : fy, fy + 1.88);           // (an opened house's mat is rolled up under the lintel, clear of the walker's head)
       B('wood_dark', door - dw / 2 - 0.02, -0.09, door + dw / 2 + 0.02, -0.065, fy + 1.86, fy + 1.93);
-      for (const k of [0.25, 0.75]) B('rope_fibre', door - dw / 2 + dw * k - 0.01, -0.08, door - dw / 2 + dw * k + 0.01, -0.07, open ? fy + 1.05 : fy + 0.1, fy + 1.86);
+      for (const k of [0.25, 0.75]) B('rope_fibre', door - dw / 2 + dw * k - 0.01, -0.08, door - dw / 2 + dw * k + 0.01, -0.07, open ? fy + 1.78 : fy + 0.1, fy + 1.86);
     }
     B('wood_dark', door - dw / 2 - 0.1, -0.08, door + dw / 2 + 0.1, 0.02, fy + 1.9, fy + 2.05);
     const win = (a, b) => { B('opening', a, -0.012, b, 0.0, fy + 0.85, y + H - 0.4); B('koshi', a, -0.05, b, -0.012, fy + 0.85, y + H - 0.4); B('wood_dark', a - 0.06, -0.07, b + 0.06, -0.02, y + H - 0.4, y + H - 0.32); B('wood_dark', a - 0.06, -0.07, b + 0.06, -0.02, fy + 0.78, fy + 0.85); };
@@ -219,7 +223,7 @@ function ujiHouse(el, { bag, col }) {
       }
     }
   }
-  col.rect([x0, z0, x1, z1], y - 0.3, y + H);
+  if (!open) col.rect([x0, z0, x1, z1], y - 0.3, y + H);       // (an opened house's walls, posts and furniture carry their own colliders: the room is walked)
   if (simple) return;
   // the yard behind and beside: as the shared houses (a wattle fence, a woodpile, jars, a drying rack, a granary)
   const yp = (u, v) => P(u, v);
@@ -235,7 +239,9 @@ function ujiHouse(el, { bag, col }) {
     const u = 0.6 + rand() * Math.max(0.1, L - 3), p = P(u, D + 0.4), q = P(u + 1.3, D + 0.9);
     bag.add('wood_dark', box(Math.min(p[0], q[0]), y, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y + 0.7, Math.max(p[1], q[1])));
   }
-  for (let i = 0; i < 2; i++) if (!mise && rand() < 0.6) { const p = yp(1 + rand() * (L - 2), -0.9 - rand() * 0.5); pot(bag, 'pottery_dark', p[0], y, p[1], 0.3, 0.8); }
+  // (a thing of the yard in front of the door stands beside the door's lane: the door and 0.4 m each side)
+  const lane = (u, w) => { const a = door - dw / 2 - 0.4, b = door + dw / 2 + 0.4; if (u + w <= a || u >= b) return u; const lo = a - w, hi = b; return lo >= 0.15 ? lo : Math.min(hi, Math.max(0.15, L - w - 0.15)); };
+  for (let i = 0; i < 2; i++) if (!mise && rand() < 0.6) { const p = yp(lane(1 + rand() * (L - 2) - 0.3, 0.6) + 0.3, -0.9 - rand() * 0.5); pot(bag, 'pottery_dark', p[0], y, p[1], 0.3, 0.8); }
   if (rand() < 0.45) {
     const u0 = rand() * Math.max(0.1, L - 3.2), v = -1.8, a = P(u0, v), b = P(u0 + 3.0, v);
     for (const p of [a, b]) bag.add('bamboo_culm', rod([p[0], y, p[1]], [p[0], y + 2.3, p[1]], 0.045, 5));
@@ -253,4 +259,5 @@ function ujiHouse(el, { bag, col }) {
 }
 
 STYLES.japanese.elements.uji_house = ujiHouse;
+STYLES.japanese.elements.uji_door_clear = () => {};              // (a door's lane: a footprint for the street life, nothing built; openwalk.js)
 export { ujiHouse };
