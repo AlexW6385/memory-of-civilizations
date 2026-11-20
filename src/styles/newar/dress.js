@@ -88,3 +88,38 @@ export function bunting(el, { bag }) {
     }
   }
 }
+
+/** The places of the Nyatapola's oil lamps [x, y, z], as `offerings` stands them (the same stream of the seed): the rows on the stages' treads and the tray at the door. Pure. */
+export function offeringLamps(el) {
+  const P = el.pagoda, [cx, cz] = P.c, sx = P.front === 'w' ? -1 : 1, pl = P.plinth, h = pl.h, n = pl.hw.length, rand = rng(el.seed ?? 11), out = [];
+  const X = (u) => cx + sx * u;
+  const uFace = []; for (let k = n - 1, u = pl.hw[n - 1] + (pl.top ?? 1); k >= 0; k--, u += pl.tread) uFace[k] = u;
+  const W = pl.stair ?? 4.4;
+  for (let k = 0; k < n - 1; k++) {
+    const y = (k + 1) * h;
+    for (const side of [-1, 1]) for (let v = W / 2 + 0.7; v < pl.hw[k] - 0.5; v += 0.52) if (rand() < 0.78) out.push([X(uFace[k] - 0.3), y, cz + side * v]);
+  }
+  const yT = n * h;
+  for (let j = 0; j < 7; j++) out.push([X(uFace[n - 1] - 0.6), yT, cz - 1.2 + j * 0.4]);
+  return out;
+}
+
+/**
+ * newar_wear { pagoda, seed }: the wear of daily puja on the Nyatapola's stair [inferred: worshippers go barefoot over the treads]: on every step a worn,
+ * paler middle (a stone slab 1.5 cm proud, as the inlay is, so nothing underfoot), and on a few steps smears of red tika powder and a scatter of rice at
+ * the edge. The materials are those the landmark's plan already draws (sandstone_floor, cloth_red, cloth_white): no new draw.
+ */
+export function wear(el, { bag }) {
+  const P = el.pagoda, [cx, cz] = P.c, sx = P.front === 'w' ? -1 : 1, pl = P.plinth, h = pl.h, n = pl.hw.length, m = 4, W = pl.stair ?? 4.4;
+  const X = (u) => cx + sx * u;
+  const uFace = []; for (let k = n - 1, u = pl.hw[n - 1] + (pl.top ?? 1); k >= 0; k--, u += pl.tread) uFace[k] = u;
+  const hash = (a, b) => { const q = Math.sin(a * 12.9898 + b * 78.233 + (el.seed ?? 0) * 3.7) * 43758.5453; return q - Math.floor(q); };
+  const slab = (mat, u0, u1, v0, v1, t, th) => { const a = X(u0), b = X(u1); bag.add(mat, bx(Math.min(a, b), t, cz + v0, Math.max(a, b), t + th, cz + v1)); };
+  for (let k = 0; k < n; k++) for (let j = 1; j <= m; j++) {
+    const t = k * h + j * h / m, u0 = uFace[k] + (m - j) * 0.35 + 0.03, u1 = uFace[k] + (m - j + 1) * 0.35 - 0.03;
+    const c = (hash(k, j) - 0.5) * 0.5, hw = 0.55 + 0.35 * hash(j, k);
+    slab('sandstone_floor', u0, u1, c - hw, c + hw, t, 0.012);                              // the worn middle
+    if (hash(k * 7 + j, 3) < 0.3) { const v = (hash(j, k * 5) - 0.5) * (W - 1.2); slab('cloth_red', u0 + 0.05, u0 + 0.05 + 0.1 + 0.08 * hash(v, k), v - 0.08, v + 0.1 + 0.1 * hash(k, v), t + 0.012, 0.004); }   // a smear of tika
+    if (hash(k * 3 + j, 9) < 0.22) for (let q = 0; q < 5; q++) { const v = (hash(q, k + j * 3) - 0.5) * (W - 1.0), u = u0 + 0.05 + 0.2 * hash(k + q, j); slab('cloth_white', u, u + 0.03, v, v + 0.03, t + 0.012, 0.005); }   // rice
+  }
+}

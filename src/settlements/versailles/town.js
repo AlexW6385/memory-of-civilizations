@@ -2,6 +2,7 @@ import { lodTiles } from '../lod.js';
 // The town (docs/settlements/versailles.md §5); the court in the gardens (§5a): courtiers walking and talking on
 // the terrace before the garden front and down the walk between the basins of the water parterre, others at the
 // Latona basin; on the Grand Canal the gondolas sent by Venice (1674) with their gondoliers, and the King's rowing boats.
+import './unshare.js';
 import { streetPlans } from './streets.js';
 import { servicePlans } from './service.js';
 import { RADIUS, RISE, LATONA, LATONA_Y, CANAL, STABLES, PLACE, lots } from './layout.js';
@@ -88,11 +89,11 @@ function place() {
 
 export async function houses() {
   const all = lots(), plans = [];
-  const tiles = lodTiles('versailles-houses', 'classical_fr', all.map((l) => ({ t: 'fr_house', ...l, shop: false })), { R: RADIUS });
+  const tiles = lodTiles('versailles-houses', 'classical_fr', all.map((l) => ({ t: 'vs_house', ...l, shop: false })), { R: RADIUS });
   // the open houses' rooms (their sound is the chamber's: a lute, the street muffled)
   for (const p of tiles) if (!p.far) p.rooms = p.elements.filter((e) => e.open).map((e) => ({ id: `${e.use} ${Math.round(e.rect[0])},${Math.round(e.rect[1])}`, rect: [e.rect[0] + 0.4, e.rect[1] + 0.4, e.rect[2] - 0.4, e.rect[3] - 0.4], y: e.y + 0.14, kind: e.use === 'hotel' ? 'hall' : 'chamber' }));
   plans.push(...tiles);
   plans.push({ id: 'versailles-stables', style: 'classical_fr', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [180, 0], facing: 'w' }, bounds: [150, -100, 300, 100], rooms: [], center: [240, 0], near: 320,
-    elements: STABLES.map((s) => ({ t: 'ecurie', ...s, y: RISE })) });
+    elements: STABLES.map((s) => ({ t: 'vs_ecurie', ...s, y: RISE })) });
   return [...plans, ...place(), court(), canal(), ...streetPlans(), ...servicePlans()];
 }
