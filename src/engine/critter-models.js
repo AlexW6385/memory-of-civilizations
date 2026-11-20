@@ -575,7 +575,6 @@ export function goat(variant) {
 MODELS.goat_black = () => goat('black');
 MODELS.goat_white = () => goat('white');
 
-<<<<<<< HEAD
 /** A Tibetan mastiff (on the dog's rig: parts 1 neck, 2 head, 3 tail, 4–7 legs, 13 the paws' shadow): black with tan points over the eyes, on the muzzle and the legs; a heavy head, a thick ruff round the neck, a bushy tail curled over the back (Lhasa, docs/settlements/lhasa.md §19; placed at about 1.3 of the dog's size). */
 export function mastiff() {
   const m = new Model(), blk = [0.07, 0.06, 0.055], tan = [0.5, 0.3, 0.12], lite = [0.16, 0.13, 0.1];
@@ -607,7 +606,6 @@ export function mastiff() {
   return m;
 }
 MODELS.mastiff = mastiff;
-=======
 // ═════════════ the silver gull (Sydney's quay) ═════════════
 /** A silver gull standing, 0.4 m long: white head, body and tail, a pale grey back and folded wings with black tips, a red bill and red legs (the fowl's parts: 1 neck, 2 head, 3 tail, 4 5 legs). */
 export function silverGull() {
@@ -637,4 +635,3 @@ export function silverGull() {
   return m;
 }
 MODELS.gull_silver = silverGull;
->>>>>>> master
