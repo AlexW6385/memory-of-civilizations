@@ -5,7 +5,8 @@
 // walked by tools/walk-check.mjs from the landmark's `walks` (plan.js).
 import { STYLES, Colliders } from '../../core/build.js';
 import '../../styles/aztec/index.js';
-import { houses, houseNoble, houseTrade, priestHouses } from './layout.js';
+import { houses, houseNoble, houseTrade, priestHouses, MARKET } from './layout.js';
+import { GEOM, aisles, spots } from './market.js';
 
 /** The ways walked: polylines (the avenue west of the precinct's gate, the market's quay, the priests' lane). */
 export const WALK = [
@@ -104,4 +105,30 @@ export function figureSpot(h, k = 0) {
     if (s < bd) { bd = s; best = p; }
   }
   return best;
+}
+
+// ---- the tianguis: along its row aisles and cross aisles, steering clear of the people who stand in them
+const AIS = () => aisles().slice(0, GEOM.rows + 1).map((a) => (a[1] + a[3]) / 2);   // z of the row aisles' middle lines
+/** An offset (m, across the aisle) at which the line z = zc + d from xa to xb passes 0.95 m clear of everyone standing in the aisles. */
+function lane(zc, xa, xb) {
+  const lo = Math.min(xa, xb) - 0.9, hi = Math.max(xa, xb) + 0.9, S = spots().filter((p) => p[0] > lo && p[0] < hi);
+  for (const d of [0, -0.5, 0.5, -1.0, 1.0, -1.25, 1.25]) if (S.every((p) => Math.abs(p[1] - zc - d) > 0.95)) return zc + d;
+  return zc;
+}
+/**
+ * The walks through the market: in from the street at the east side by a row aisle, west to the cross aisle, along it, and out by another row (A);
+ * west to the canal's quay by a row aisle and north along the quay to the top of the landing stair (B).
+ */
+export function marketRoutes() {
+  const Z = AIS(), [X0, , X1] = MARKET, xc = GEOM.xCross, xw = GEOM.xWest, out = X1 + 4, a0 = 1;
+  const vlane = (za, zb) => { const S = spots().filter((p) => p[1] > Math.min(za, zb) - 0.9 && p[1] < Math.max(za, zb) + 0.9); for (const d of [0, -0.4, 0.4, -0.7, 0.7]) if (S.every((p) => Math.abs(p[0] - xc - d) > 0.9)) return xc + d; return null; };
+  // A: row aisle 1 west to the cross aisle, down it to the first lower row whose crossing is free of people, and out by that row
+  let A = null;
+  for (let r = 6; r > 2 && !A; r--) {
+    const x = vlane(Z[a0], Z[r]); if (x === null) continue;
+    const za = lane(Z[a0], out, x), zb = lane(Z[r], x, out);
+    A = [[out - 8, 0], [out, 8], [out, za], [x, za], [x, Z[r] - 1.3], [x, zb], [out, zb]];
+  }
+  const z3 = lane(Z[3], out, xw), B = [[out - 8, 0], [out, 8], [out, z3], [xw, z3], [X0 - 2, z3], [X0 - 2, 36.2]];
+  return [A, B];
 }
