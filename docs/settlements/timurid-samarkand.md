@@ -154,3 +154,20 @@ Found shut: the merchant's (rich) houses had a street wing of solid brick to 7 m
 | Every other house | A balakhona on the street wing's roof, at the end by the stair, reached from the roof terrace through a door under a porch of two posts (or, at the far end, through its inner wall); inside, bedding, a chest with quilts, niches and a lamp, and the stores of the house's trade: the potter's shelves of ware, the baker's flour, the smith's iron bars and charcoal, the weaver's bolts and hanks, the joiner's boards and column blanks, the grocer's strings of dried fruit and sacks, the papermaker's sheets drying on lines | [inferred]; [stated] Samarkand paper, §17 |
 
 The way up: the door of the street, the passage, round the privacy screen to the foot of the mud-brick stair, up to the roof, along the terrace to the door. `walks` in plan.js: three merchant's houses and one house of each trade nearest the arrival. Upper floors are in the near form of the houses only (the far form gets the mass of the balakhona). Still shut: the ground floor of the street wing (solid), the upper floors beyond the near ring, the balakhona's own roof.
+
+## 20. Match pass (2026-11-19): night, sound, animals, wear
+
+Brought toward the reference (Ming Suzhou) in the order of docs/suzhou-method.md. Houses stay built near and far in tiles (`NEAR` 140 m in town.js): interiors, lamps and lit windows exist in the near form only. Everything below is what this place at this date could have had; each line is [stated] with its source or [inferred]. Sources: Clavijo, "Embassy to Tamerlane 1403–1406" (via https://origins.osu.edu/milestones/september-2012-castilian-samarkand-1404: gardens, markets, feasts under tents in Timur's gardens); Wikipedia, Registan, Samarkand paper and Ulugh Beg Observatory (above); Orexca on the traditional dwelling (§15: wall niches for utensils, latticed windows, the tandoor in the court); no source gives the lamps themselves, so the kinds are taken from the Central Asian and Persian usage of oil lamps (chiragh) of clay and brass.
+
+### 20.1 Night (nightlight.js)
+
+| Light | Where | Basis |
+|---|---|---|
+| Oil lamps in houses, halls, shops, the mosques | every lamp and brazier the style's rooms already hold gets its glow and its pool of light (halo, the added-light material, which shows at the low preset); the great hanging lamps of Bibi-Khanym, Gur-e Amir, the khanqah and the madrasa's halls throw a wide pool | [inferred] lamp oil (sesame, cotton-seed) in clay and bronze lamps; the hanging mosque lamp of glass is the style's kit |
+| Lit windows | a share of the latticed windows (houses' lane fronts, the madrasa's grilles over the cell doors) show a sheet of lamp-light on both faces: a student at his lamp, a family at the evening meal | [inferred]; the madrasa's cells were lived in by students [stated: Archnet 2123, student rooms] |
+| Lamp by a house door | a clay lamp on a bracket beside the street door of every rich house and one in three of the others, the pool on the lane | [inferred] |
+| Lanterns at shop fronts | a brass hanging lantern at the lintel of about one in three of the Registan's shops (the rest shut with the dusk), and in every second bay of the bazaar streets | [inferred] the bazaar closing at dusk with a few lit stalls and the tea-houses |
+| Iron lamp stands | six on the Registan: a pair either side of the way to the pishtaq, four where the aisle meets the shop rows | [inferred] a public square lit by stands of oil dishes |
+| Braziers | three: the cameleers' camp on the east side and the khanqah's portal | [inferred] caravans camped on the square (§5) |
+| Tray lamps | a lamp on the tray of each tea-house platform | [inferred] |
+Not lit: the minarets, the domes, the pishtaq (no light was kept on them); the observatory's upper floors (shut).
