@@ -3,9 +3,9 @@
 import { RADIUS, LEVEL, ISLAND, PRECINCT, TM, SITES, houses, yards, priestHouses, houseGate, houseTrade, houseNoble, chinampaHouses, inLake, inLakeWater } from './layout.js';
 import { ground } from './ground.js';
 import { sculptPlans } from './sculpt.js';
-import { lodTiles } from '../lod.js';
+import { tiles } from './tiles.js';
 /** How far from the visitor the houses are built in full (m); the arrival (the Templo Mayor's twin shrines, 160 m and more from the nearest) sees the simple form. */
-const NEAR = 150;
+const NEAR = 190;
 const base = (id, elements) => ({ id, style: 'aztec', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-60, 0], facing: 'e' } });
 /**
  * The precinct's floor and the life before the Templo Mayor (docs/settlements/tenochtitlan.md §13): the plaza's plaster worn, stained and painted
@@ -85,9 +85,9 @@ function sectors(id, elements, n, reach) {
 
 export async function town() {
   const all = houses(), plans = [];
-  // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full within NEAR of the visitor, simple (solid rooms, the wall, no furniture)
+  // the houses in tiles of 150 m, each built twice (tiles.js): in full within NEAR of the visitor, simple (solid rooms, the wall, no furniture)
   // beyond: the arrival frame shows the far form only, a tile's meshes are batched per material and culled by their own bounds
-  plans.push(...lodTiles('tenochtitlan-houses', 'aztec', all.flatMap((h) => {
+  plans.push(...tiles('tenochtitlan-houses', 'aztec', all.flatMap((h) => {
     const c = [(h.rect[0] + h.rect[2]) / 2, (h.rect[1] + h.rect[3]) / 2], r = Math.hypot(c[0], c[1]), lod = r < 170 ? 2 : r < 250 ? 1 : 0;
     const noble = houseNoble(h);
     return [{ t: 'calli', ...h, noble }, { t: 'calli_front', rect: h.rect, seed: h.seed, gate: houseGate(h), trade: noble ? null : houseTrade(h), lod }];
