@@ -1,7 +1,7 @@
 // Mamluk Cairo — the animals (src/engine/fauna.js draws them; docs/settlements/mamluk-cairo.md §12): kites (drawn as crows)
 // wheeling high over the lanes and the Citadel's spur, pigeons (drawn as sparrows) on the roofs and the Bayn's paving
 // and the khan's court, swifts over the roofs at the evening, sparrows at the shop fronts and the fountains.
-import { BAYN, KHAN, SQUARE, HAMMAM, CITADEL, lanes, yards } from './layout.js';
+import { BAYN, KHAN, SQUARE, HAMMAM, CITADEL, SUQ, SUQ2, SUQ3, lanes, yards } from './layout.js';
 import { ground } from './ground.js';
 
 const fish = [];
@@ -20,4 +20,29 @@ for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: ground.heig
   for (const r of yards().filter((_, k) => k % 4 === 0)) { const x = (r[0] + r[2]) / 2, z = (r[1] + r[3]) / 2; if (Math.hypot(x, z) < 300) perches.push({ kind: 'sparrow', x, z, y: 0, rot: x % 3, range: [2, 2] }); } }
 for (const c of [[-100, -60], [-220, -80], [-60, -330], [40, 200], [-250, 120]]) flights.push({ kind: 'swallow', n: 6, loop: { c, a: [35, 25], rot: c[0] * 0.01 }, y: [9, 18], speed: 6 });
 void BAYN; void KHAN; void HAMMAM;
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; docs/settlements/mamluk-cairo.md §18.4) ──
+// Cats on the mastabas of the covered streets (the cats of Cairo's markets, fed by the sellers), dogs asleep in the lanes' shade and at the
+// portal, pigeons on the paving of the court, the Bayn and the khan, hens and a cock in the walled yards. None within the Rumayla (the arrival's
+// budget; life.js has its dogs and pigeons there). [inferred; Lane, 1830s, for the dogs and cats of the streets and the pigeons of the roofs]
+const critters = [];
+const hash = (x, z, s = 0) => { const k = Math.sin(x * 12.9898 + z * 78.233 + s * 37.719) * 43758.5453; return k - Math.floor(k); };
+for (const S of [SUQ, SUQ2, SUQ3]) {
+  const D = (S[2] - S[0] - 5) / 2, n = Math.floor((S[3] - S[1]) / 3), w = (S[3] - S[1]) / n;
+  for (let i = 1; i < n - 1; i++) {
+    if (hash(S[0], i, 7) > 0.12) continue;
+    const side = hash(S[0], i, 9) < 0.5 ? -1 : 1, x = side < 0 ? S[0] + D + 0.4 : S[2] - D - 0.4, z = S[1] + i * w + 0.7;
+    critters.push({ model: hash(x, z) < 0.5 ? 'cat_tabby' : 'cat_orange', at: [x, 0.74, z], rot: side < 0 ? -Math.PI / 2 : Math.PI / 2, range: [7, 2.5] });
+  }
+}
+for (const [x, z] of [[-158.6, -142], [-162.4, -101], [-90, -118.8], [20, -121], [-30.5, -3], [-150, -203], [-120, -285], [-61, -190]]) critters.push({ model: 'dog', at: [x, 0.04, z], rot: hash(x, z) * 6.28, range: [8, 3] });
+for (const [x, z, n] of [[0, 40, 5], [-7, 47, 3], [-31, -1, 3], [-160, -240, 5], [-152, -270, 4], [-125, -286, 5], [-20, -121, 3]]) {
+  for (let k = 0; k < n; k++) { const px = x + (hash(x + k, z) - 0.5) * 5, pz = z + (hash(x, z + k) - 0.5) * 4; critters.push({ model: ['pigeon_grey', 'pigeon_white', 'pigeon_dark', 'pigeon_grey'][k % 4], at: [px, 0.06, pz], rot: hash(pz, px) * 6.28, range: [2.4, 1.6] }); }
+}
+{ let k = 0; for (const r of yards()) {
+    const x = (r[0] + r[2]) / 2, z = (r[1] + r[3]) / 2;
+    if (Math.hypot(x, z) > 300 || Math.hypot(x - 116, z - 104) < 130 || hash(x, z, 3) > 0.12 || k >= 6) continue;
+    k++;
+    for (const [m, dx, dz, sz] of [['rooster', 0, 0, 1], ['hen_brown', 1.0, 0.7, 1], ['hen_white', -0.9, 0.9, 1], ['hen_brown', 0.4, -1.0, 0.96]]) critters.push({ model: m, at: [x + dx, 0.04, z + dz], rot: hash(x + dx, z) * 6.28, range: [3.4, 1.4], size: sz });
+  } }
+export default { fish, flights, perches, critters };

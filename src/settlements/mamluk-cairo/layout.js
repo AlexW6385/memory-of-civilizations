@@ -40,7 +40,7 @@ export const SUQ3 = [-74, -300, -59, -190];
 export const CROSS = [-150, -195, -50, -185];
 export const HAMMAM = [-155.5, -166, -131.5, -142];
 export const SHOP = [-173, -165, -164, -156.5];
-export const STALLS = [{ at: [-143.6, -240], face: 'w' }, { at: [92, 30], face: 'n' }];
+export const STALLS = [{ at: [-148.2, -245.7], face: 'w' }, { at: [92, 30], face: 'n' }];
 export const STREETS = [[-164, -440, -156, 440], [-440, -125, 170, -115], [-45, -16, 100, -6], BAYN, SUQ, SUQ2, SUQ3, CROSS, SQUARE];
 const KEEP = [BAYN, QALAWUN, NASIR, BARQUQ, KHAN, SUQ2, SUQ3, CROSS, HAMMAM, SHOP];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
