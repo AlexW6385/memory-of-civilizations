@@ -1,4 +1,4 @@
-// The visitor's walk in Hanyang, c. 1888 (docs/settlements/joseon-seoul.md §18): from the arrival in the throne court south through
+// The visitor's walk in Hanyang, c. 1888 (docs/settlements/joseon-seoul.md §19.1): from the arrival in the throne court south through
 // Heungnyemun, over Yeongjegyo, through Geunjeongmun and Gwanghwamun, down the avenue of the ministries to Jongno, the bell street, and
 // along it east and west to the lanes of the hanok quarters. What is opened along it: the shops of Jongno that are two bays wide (a way
 // in of 1.7 m beside the maru, the keeper on his floor, the goods on the shelves), the bell pavilion, the yangban house and the hanok

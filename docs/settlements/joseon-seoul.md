@@ -195,3 +195,28 @@ Sources: Gangnyeongjeon has "fourteen rectangular chambers and corridors", seven
 - **Rank stones** (`rank_stone`): base slab with moulded edge, upright stone with a sloping top and a framed recessed panel with cut characters, facing the royal path [inferred: form].
 - **Tiled roofs** (`roof.js`): rows of convex tiles down every slope of Geunjeongjeon and Gwanghwamun (on the skirt only up to the upper storey), and rows of round end-tiles on the eaves; also on Sajeongjeon and the two gate halls (`ribs`) [inferred: tile pitch].
 - **Gwanghwamun's base** (`gate_base`, `gate.js`): three semi-elliptical vaulted ways (6 m and two of 5.6 m) in place of flat lintels, rings of voussoirs and keystones on both faces, battered ends, a coping, painted boards under each crown [stated: three arched openings in a high stone foundation, Korea Times 2010; ceilings with pairs of phoenix, dragon-horses and turtles, cavac.at Gwanghwamun; dimensions inferred].
+
+## 19. Match pass (walk, night, sound, animals, writing; the Suzhou standard)
+
+Each item is marked [stated] (with its source) or [inferred]. Code: `src/settlements/joseon-seoul/openwalk.js`, `nightlight.js`, `streetwork.js`, `soundmap.js`, `src/engine/voices-seoul.js`.
+
+### 19.1 The visitor's walk
+
+- **Jongno's shops that can be walked into.** Two shops of two bays (kan) in each block of eight bays; a way in of 1.7 m beside the maru (the raised shop floor), the keeper on his floor, goods on the shelves, a stool by the way in. The other shops are of one bay, as the street had shops of one and two kan [inferred: the licensed market's shops were of government-set size (dossier §12); the two widths are ours].
+- **A route into the yangban house and six hanok houses** (gate open, flagstones across the yard, the step to the veranda, the hall), from the court by Heungnyemun and Gwanghwamun, down the avenue, along Jongno [inferred: the planning; the house forms are §13 and §14].
+- **Hamabi** (`hamabi`, `streetwork.js`): a pair of granite dismount stelae before Gwanghwamun, a hipped cap, a two-step base and a framed panel for the characters 下馬 (officials left their horses and chairs there) [stated: Google Arts & Culture, "Hamabi (dismount marker)", https://artsandculture.google.com/asset/hamabi-dismount-marker/cQEMswKzuZlW1A; the place before the gate is [inferred]].
+- **Two public wells** of granite curb with rope and bucket on the north edge of Jongno, at x = -84 and 74 [inferred: Hanyang's streets had public wells].
+
+### 19.2 Night
+
+- **The light is added geometry in the engine's `halo` material** (additive, night only, no collision): a disc on the floor under each lantern and fire, a ball at each flame, a pane over each lit paper window [inferred: the rules of the material].
+- **Sources.** Lit paper windows in a share of the hanok houses, the yangban house, the shops and the palace halls; silk lanterns (sachorong) at the palace's halls and gates; fire baskets of the guards at the gates; paper and white lanterns hung at the lots' gates and shop fronts; kitchen fires at the stoves' mouths [inferred: lamplit rooms behind paper doors, lantern forms, pine-knot fire baskets for watches].
+- **Electric lamps at Geoncheonggung.** The first electric lamps lit there in 1887: bare bulbs on flex in the king's private halls [stated: Asiae, "Special Opening of Geoncheonggung Palace in Gyeongbokgung Where the Eulmi Incident Occurred", https://www.asiae.co.kr/en/article/2023081409171098920; the fittings are [inferred]].
+- **The great bell of Jongno** was struck 33 times at 4 and at 22 h, opening and closing the gates (the engine's own schedule) [stated: https://en.wikipedia.org/wiki/Bosingak]. The name Bosingak is from 1895; before it the pavilion was Jonggak, and we keep the name the dossier already uses [inferred: naming].
+
+### 19.3 Sound
+
+- **Beating of cloth (dadeumi):** women striking damp cloth on a stone with paired clubs in the evening and late at night, in rounds [stated: a regular sound of Seoul heard by Allen and Bird, in the Korea Times, "Joseon women and their manifest destiny II", https://www.koreatimes.co.kr/opinion/blogs/aboutthepast/20210912/joseon-women-and-their-manifest-destiny-ii]. The rhythm and the pitches are [inferred].
+- **Pedlars' cries** (salted shrimp, fish, brushwood in winter, water in summer, bean curd early), the **taffy seller's shears**, the **ox's wooden bell**, the **night watch** (slow blows on a clapper, a falling call), the **pestle** in the yards [inferred: the trades and hours are Seoul's, no recording of 1888 exists].
+- **Shops' goods:** silk, raw silk, cotton, paper, ramie and fish (the six goods of the licensed market, §12) as the sounds of cloth, paper, abacus and bowls [stated: the six goods; the sounds are [inferred]].
+- **Birds:** the engine's cuckoo, oriole, magpie and tit are Korea's own [inferred]. Court music (aak) is not made: §9 stays [inferred].

@@ -8,7 +8,7 @@ import { registerNight, palaceLamps, officeGlow, lanternHalos } from './nightlig
 import { OFFICES } from './layout.js';
 import { officePlans } from './offices.js';
 import { PALACE } from './layout.js';
-// the routes into the opened places of the visitor's walk (openwalk.js, docs §18)
+// the routes into the opened places of the visitor's walk (openwalk.js, docs §19.1)
 palace.walks.push(...seoulWalks());
 // the hamabi before Gwanghwamun: the stone that told those on horseback to dismount
 for (const s of [-1, 1]) palace.elements.push({ t: 'hamabi', at: [s * 25, PALACE[3] + 12], face: [0, 1], y: 0.03 });

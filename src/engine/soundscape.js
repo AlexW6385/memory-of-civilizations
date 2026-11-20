@@ -78,6 +78,7 @@ import * as ATHENS from '../settlements/athens/soundmap.js';
 import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
 import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as HIMEJI from '../settlements/edo-himeji/soundmap.js';
+import * as SEOUL from '../settlements/joseon-seoul/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
 import * as ISFAHAN from '../settlements/isfahan/soundmap.js';
@@ -194,7 +195,7 @@ export const PROFILES = {
   'heian-uji': T(EAS, { cicadas: 0.5, frogs: 0.8, animals: { dog: 0.2 }, roof: 'shingle', bells: 'bonsho' }),
   isfahan: T(NEAR, { cicadas: 0.4, animals: withLife({ donkey: 0.5, horse: 0.3, dog: 0.2 }, { market: 1, map: ISFAHAN }), roof: 'flat', adhan: 1 }),
   jerusalem: T(NEAR, { cicadas: 0.6, animals: withLife({ donkey: 0.5, goat: 0.4, rooster: 0.4, dog: 0.3 }, { market: 1, map: JERUSALEM }), roof: 'flat', adhan: 1 }),
-  'joseon-seoul': T(EAS, { cicadas: 0.6, frogs: 0.5, animals: { rooster: 0.6, dog: 0.4, cattle: 0.2 }, roof: 'tile', bells: 'bosingak' }),
+  'joseon-seoul': T(EAS, { cicadas: 0.6, frogs: 0.5, animals: withLife({ rooster: 0.6, dog: 0.4, cattle: 0.2 }, { canal: 1, market: 0.7, eaves: 1, map: SEOUL }), roof: 'tile', bells: 'bosingak' }),
   khajuraho: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.6, rooster: 0.4, goat: 0.4, dog: 0.3 }, roof: 'tile', bells: 'puja' }),
   kilwa: T({ ...TROP, gull: 0.6 }, { cicadas: 0.6, animals: { goat: 0.5, rooster: 0.5, dog: 0.2 }, roof: 'flat', adhan: 1 }),
   knossos: T(MED, { cicadas: 0.9, animals: { goat: 0.5, sheepbell: 0.4, donkey: 0.3, dog: 0.2 }, roof: 'flat' }),

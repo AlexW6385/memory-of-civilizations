@@ -1,4 +1,4 @@
-// The street furniture of Gojong's Hanyang that the shared life elements do not have (docs/settlements/joseon-seoul.md §18): the hamabi,
+// The street furniture of Gojong's Hanyang that the shared life elements do not have (docs/settlements/joseon-seoul.md §19.1): the hamabi,
 // the stone that told those who came on horse to dismount before the palace gate. An element of the joseon style, registered here (the style
 // file stays as it was); placed in the palace plan by index.js. Built facing +z, placed by `at` and `face`.
 import { STYLES } from '../../core/build.js';

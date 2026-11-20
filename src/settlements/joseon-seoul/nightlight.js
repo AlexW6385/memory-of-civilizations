@@ -1,11 +1,11 @@
-// Hanyang by night, c. 1888: the light its lanterns, watch fires, hearths, lit rooms and the first electric lamps throw (docs/settlements/joseon-seoul.md §19).
+// Hanyang by night, c. 1888: the light its lanterns, watch fires, hearths, lit rooms and the first electric lamps throw (docs/settlements/joseon-seoul.md §19.2).
 // The shades (lamp_paper, lamp_white) are lit from within by their own material; what they lack, where the pool of real lamps is off
 // (the low preset), is the light they give the things round them. It is made here of geometry in one material, `halo` (palette.js, materials.js
 // 'halo'): light ADDED over what is behind it, at night only, with no light, no shadow and no collision, so the day view is unchanged. The shape of
 // each piece is carried by its normals (y: 1 at a disc's middle, 0 at its rim): a glow round each flame (three crossed discs), a pool on the ground
 // or a floor, a sheet in front of the paper of a lit window. The method is that of the Suzhou reference (the same material), written here for
 // Hanyang's lamps; nothing of Suzhou's is imported. Everything is a function of the lamp's own place (hashAt): no counters, no Math.random.
-// What lit Hanyang at night is in the dossier §19: oil lamps behind the hanji of the windows, silk lanterns (sachorong) at the palace gates, the
+// What lit Hanyang at night is in the dossier §19.2: oil lamps behind the hanji of the windows, silk lanterns (sachorong) at the palace gates, the
 // guards' fire baskets, the hearths of the kitchens and the ondol, paper lanterns at the shops until the bell; and, from 1887, the electric lamps
 // of Geoncheonggung.
 
@@ -265,7 +265,7 @@ registerNight();
 // ── where the palace's lamps hang ────────────────────────────────────────────────────────────────
 /**
  * The silk lanterns of the palace at night [inferred: the gates, the cloister of the throne court and the guard posts were lit by silk lanterns and
- * fire baskets; the dossier §19]: under the vaults of Gwanghwamun (a pair in each of the three ways), along the inner side of the throne court's
+ * fire baskets; the dossier §19.2]: under the vaults of Gwanghwamun (a pair in each of the three ways), along the inner side of the throne court's
  * cloister under its eave; and the electric lamps of Geoncheonggung (1887) under the eaves of the king's and the queen's halls [stated: Asiae 2023].
  * Returns { lanterns: [...], fires: [...] } for the palace plan's `seoul_lanterns` and `seoul_fires`.
  */
