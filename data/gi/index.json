@@ -385,7 +385,7 @@
  },
  "angkor-wat": {
   "site": "angkor",
-  "hash": "e9e7a5c27e7a95e8",
+  "hash": "4664661bb9c91719",
   "rays": 128,
   "probes": 10034,
   "boxes": [
@@ -455,8 +455,8 @@
    }
   ],
   "bytes": 165807,
-  "seconds": 24,
-  "baked": "2026-11-18"
+  "seconds": 116,
+  "baked": "2026-11-20"
  },
  "ayutthaya-wat": {
   "site": "ayutthaya",
@@ -2318,7 +2318,7 @@
  },
  "isfahan-maidan": {
   "site": "isfahan",
-  "hash": "9786ceac853a6336",
+  "hash": "65dfa5ce1a34a549",
   "rays": 128,
   "probes": 60467,
   "boxes": [
@@ -2388,9 +2388,9 @@
     ]
    }
   ],
-  "bytes": 1034625,
-  "seconds": 177,
-  "baked": "2026-11-18"
+  "bytes": 1034626,
+  "seconds": 438,
+  "baked": "2026-11-20"
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
@@ -2873,9 +2873,9 @@
     ]
    }
   ],
-  "bytes": 1226623,
-  "seconds": 119,
-  "baked": "2026-11-18"
+  "bytes": 1227085,
+  "seconds": 216,
+  "baked": "2026-11-20"
  },
  "lu-qufu-temple": {
   "site": "lu-qufu",
@@ -4959,7 +4959,7 @@
  },
  "tang-changan-daci-en": {
   "site": "tang-changan",
-  "hash": "9e75a95cd60cb741",
+  "hash": "aefe52cb89558de3",
   "rays": 128,
   "probes": 22929,
   "boxes": [
@@ -5028,9 +5028,9 @@
     ]
    }
   ],
-  "bytes": 382931,
-  "seconds": 34,
-  "baked": "2026-11-17"
+  "bytes": 382933,
+  "seconds": 138,
+  "baked": "2026-11-20"
  },
  "taos-pueblo": {
   "site": "taos",
@@ -5156,8 +5156,8 @@
    }
   ],
   "bytes": 1128167,
-  "seconds": 161,
-  "baked": "2026-11-18"
+  "seconds": 173,
+  "baked": "2026-11-20"
  },
  "ur-ziggurat": {
   "site": "ur",
