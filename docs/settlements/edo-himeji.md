@@ -198,3 +198,77 @@ The settlement's position in `src/planet/sites.js` may be nudged inland so that 
 - **Upstairs:** a floor of boards under tatami (boards bare in the craftsman's, store and apothecary's family room), the walls plastered with a wooden band at head height, a ceiling of boards with battens and cross beams under the tiled roof (the upper storey is low, about 2.4 m clear), a front room over the shop and a room behind, parted by paper doors (fusuma) with a doorway; by use: guest room with low tables, tea things, cushions, scroll and chest (merchant, inn), the sunken hearth with its hanging kettle, drug chests, jars and herbs drying (apothecary), drying poles hung with indigo cloth, jars or hooped tubs and a bench (craftsman), sacks, chests and casks (store), a brazier, laundry on a pole and bedding behind paper walls (tenement), bedding, paper lamps, folding screens and chests of drawers in the rooms behind. [inferred: furnishing after general Edo townsmen's practice]
 - **Street side:** two slatted windows (mushiko-mado) as open reveals with the slats before them and a paper door half across; merchants' and teahouses' houses carry in place of the pent roof a balcony 0.85 m deep on cantilevered joists with a railing of lattice and a bench, reached through a sliding door that stands open, a lantern on the corner post [inferred]. A yard window in the back wall.
 - **Not built:** the roof space and any roof terrace (a machiya has none), the samurai houses' and retainers' rows (single-storey), the other machiya (still shut above).
+
+## 10. Night, sound, animals, wear and writing (round "match Suzhou", 2026-11-19)
+
+Scope of this round: bring the settlement toward the Suzhou reference (docs/suzhou-method.md). The sections below are written before the code; each thing is marked [stated] with its source or [inferred] with its reason. Nothing is claimed that is not built; what was not reached is listed at the end of the section.
+
+### 10.1 The night (`src/settlements/edo-himeji/nightlight.js`; the `halo` material)
+
+**What lit the castle town at night, c. 1620** [inferred from general Edo practice; the sources below are what could be consulted; the shell reaches few sites, so the first two are from memory of their content and marked so]:
+- Oil lamps (andon) of paper on a wooden frame, lit with rapeseed or fish oil in a dish with a rush wick, were the room lamp of townsmen and samurai alike; the wax candle (rōsoku) was dear and the lord's and temples' [stated in general terms: Wikipedia "Andon (lantern)"; Wikipedia "Chōchin"; the exact cost and date of rapeseed oil's spread to commoners is not checked and is left out].
+- Paper lanterns (chōchin) hung at eaves, inns, teahouses and the gates of samurai compounds [stated for their use as shop and inn signs after dark: Wikipedia "Chōchin"; the samurai gate's lantern is [inferred] and already stands in dossier §5.7].
+- Watch fires (kagaribi): iron baskets on legs holding burning pine billets, set at castle gates and in camps; the word and the object are standard for castles and the military [stated in general: JAANUS "kagaribi" was not opened here; the use at gates is [inferred]]. Ours: one pair at the foot of the main gate's stair on the causeway, one pair at the head of the stair to the Hishi gate, one pair inside the keep base's gate, one pair north of the middle moat's gate.
+- Ward gates (kido) shut and the fire-watch towers (hinomi-yagura) kept at night [stated: dossier §5.7, JAANUS "hi-no-mi yagura"]; the watch kept a lantern [inferred].
+- Lit rooms: the paper of a window (shoji) or the lattice of a machiya front glows with the lamp inside [inferred; the light of an andon through paper is the commonplace of Edo prints].
+- Votive lamps (tōmyō) before roadside Jizō and Inari shrines [inferred].
+- No electric light.
+
+**Built.** All by the one `halo` material (light added over what lies behind it, at night only, by the glow shades' own switch; no light, no shadow, no collision; invisible by day):
+- every paper lantern and andon that any builder of the style makes (found by their shade's material, `lamp_paper` / `lamp_white`) gets a glow, and an eave or gate lantern (1.9–3.1 m up) a pool on the ground; a hash of its place keeps 65–100 % lit;
+- the latticed (koshi) and paper (shoji) leaves of the machiya, samurai compounds, the lord's halls, the stores and the turrets get a pane of lamp-light in front of them on both faces, a share of the rooms by hash (machiya 42 %, yashiki 40 %, halls 60 %), each at its own strength;
+- the watch fires (kagaribi) of the four gates, with their glow and pool, and the main gate's two with a streak on the moat beside them;
+- a paper lantern under the roof of each fire-watch tower; a votive glow at each Jizō and the Inari shrine.
+
+**Not done:** the keep's own windows (nothing lit in the great keep at night: a castle's keep stood dark and empty [inferred]); a lantern on the moored boats; the watchman; lit hearths seen through the open shops' passages; shutters drawn at night (the engine has no day/night geometry switch for this settlement's fronts).
+
+### 10.2 The sound of the place, placed (`src/settlements/edo-himeji/soundmap.js`, `src/engine/voices-himeji.js`, `tests/himeji-sound.test.mjs`)
+
+As in Suzhou (§22 of its dossier) each sound is made at a position of the settlement and heard from the listener's; the profile now carries the town's `LIFE` with its map. All synthesised; nothing is heard by this agent (the sounds were measured with `tools/sound-render.mjs`, not listened to). The hours of the time bell stay the engine's (`bells: 'toki'`: nine, eight, seven … strokes at the koku; a bell in the castle town [inferred], see soundscape.js).
+
+| Voice | Where | When | Source mark |
+|---|---|---|---|
+| Lap of the moats; a carp rising | nearest point of the inner or middle moat within 24 m (`canalSpot`, `pondSpot`) | always; carp by day, fewer in the cold | [inferred] from the moats of §2 and the carp of §5.5 |
+| Wells (pulley bucket, pour) | the town's public wells of the merchants' street and the three wells of the baileys | 6-19 h, dry | [inferred]; the engine's windlass voice stands for the rope-and-bucket |
+| Pedlars' cries (`hjPedlar`): greens (a stepwise climb), fish (high to low), lamp oil (low, long), charcoal and firewood (cold months), cold water (the heat, a boy's high call), the tofu seller's two-note horn | a walker on the street nearest the listener, ~1 m/s | by trade and hour, 6-17:30 | [inferred] from the street trades of Edo castle towns; none is dated to Himeji, the tofu horn's date c. 1620 not checked |
+| Palanquin (`hjKago`): bearers' quick steps in sandals, the pole's creak, "ei" answered by "ho" | a street walker, 1.5 m/s | 8-17 h, dry, rare | [stated] the kago and its bearers: Wikipedia "Kago" (§5.2); [inferred] the call |
+| Night watch (`hjHyoshigi`): two blows of wooden clappers, a pause, and now and then the call against fire | a street walker | 19:30-4:30, not in heavy rain | [inferred]: the clapper-and-call watch of Edo-period towns; the fire-watch towers are in §5.7 |
+| Fulling block (`hjKinuta`): a wooden mallet on a block, a slow even rhythm | the yards of the four open samurai compounds nearest the avenue | autumn nights, 19-23:30 | [inferred]: the sound of the autumn night in Japanese verse; its placement in these yards is ours |
+| The trades: shears (cloth), wheel (pottery), pestle (rice), washing (dye), wedge press (`hjWedge`, oil), straw beaten (sandals), kettle and cups (tea), mortar (medicine), paper dipped (paper), board and knife (fish), water and kitchen (tofu), hoop driven (`hjHoop`, cooper), vat stirred (sake) | a third of the open machiya of each trade | each trade's hours | [inferred] from the trades of §5.3 |
+| Inari shrine (`hjSuzu`): rope shaken, the bell rattled, two claps | the shrine on the avenue (14, 262) | 7-17 h, dry | [inferred]; the shrine itself is §5.7 |
+| Horse at its post (`hjHorse`): stamp, snort, a short neigh | the horse at the Honmaru wall (22.5, -12.2), as props.js | 5-19 h | [inferred] |
+| The Honmaru's broom on the gravel | where the servant stands (-12, -14.5) | 6-9 h, dry | [inferred] §4.1 |
+| Komusō's shakuhachi | the middle moat's bridge | dusk, dry | [inferred]: wandering shakuhachi monks (komusō) of the Edo period; the date for Himeji c. 1620 not checked |
+| Birds and insects (the engine's Japanese voices from Kyoto's set, reused): evening cicada, bush warbler, cuckoo, bell cricket, owl; cicadas, frogs, crickets by the engine's seasons | trees of the hill and yards (`treeSpot`, 41 m), the moats' banks | by season and hour | [inferred] |
+| The women washing at the moat landings | the four landings of the middle moat | 6:30-16:30, dry | [inferred] §5.7 |
+| The lord's kitchens | behind the residence | 5-20 h | [inferred] |
+
+**Rooms.** From inside (`roomAt`): each trade's house by its lot, a samurai house, the guards' hall and the lord's residence (`hall`: dull and quiet), a storehouse (`kura`: thick earthen walls, the street almost gone), the great keep (`keep`: timber on timber, high and dark); each with its tone, its rain on the tiles and its small sounds.
+
+**Not done.** The poled boats of the moats make no sound (nothing is sculled in the map); the tower of the fire watch has no bell stroke; the castle's drums and conch horn are not made (no source read); the grunt of horses at other hitching posts; footsteps of the visitor; the keep's creaks in wind.
+
+### 10.3 Animals with behaviour (`src/settlements/edo-himeji/fauna.js` `critters`, `src/engine/fauna-critters.js`, `tests/himeji-critters.test.mjs`)
+
+The static figures of cats, dogs and horses (`props.js`, §5.7) stay; the rigged `critters` mesh (one draw, behaviour in the vertex shader) adds what moves. No model was added to the engine: the existing rigs stand in. Marks: [inferred] reasoned from the place and period; [placed] our own choice of where.
+- **Ducks on the moats.** [inferred] The spot-billed duck (karugamo) is Japan's resident duck, the mandarin (oshidori) a duck of Japanese ponds and moats; the dossier's moats of §2 are 20 m wide and 2.7 m deep. Ours: four pairs of the brown duck's model and two pairs of mandarins (drake leading the hen), on loops fitted to the water with a margin of 1.3 m from either bank (north, east and south reaches of the inner moat, the west reach for mandarins, the middle moat on both sides). The same fit now serves the carp: `ringDist` had taken the nearer bank wrongly (the larger of the two negative distances is the nearer), which let the fish loops touch the inner rampart [fixed].
+- **Fowl in the samurai yards.** [inferred] a household of a retainer kept hens; [placed] a cock and two hens in the free yard (clear of every part of the compound, `yardFree`) of each of the three open compounds nearest the avenue, in a patch of 1.3 × 0.8 m.
+- **Caged songbirds.** [inferred] keeping a bush warbler or white-eye in a cage was an Edo townsman's pleasure (the date c. 1620 not checked); [placed] one cage hung 0.55 m out from the pent roof's eave on each of the three teahouses nearest the avenue, at the end of the front opposite the entrance.
+- **House swallows' nests.** [inferred] swallows (tsubame) nest under the eaves of houses and bring luck; the swallows over the moats and the avenue are in §5.5. [placed] five nests on the fronts of open machiya (not the twelve with open upper floors) in the middle stretch of the merchants' street, at the end of the front opposite the entrance, the birds sweeping out over the street.
+- **Kingfisher.** [inferred] the kawasemi hunts from the stone edge of a moat; [placed] one on the south bank of the middle moat, at the first of -60, -100, 60, 100 m clear of the landings, diving into the water 1.7 m out.
+- **Cats at the storehouses.** [inferred] storehouses kept cats against rats; [placed] a tabby in the gap between the two Honmaru storehouses and an orange on the Ninomaru by its storehouses, each waking as the visitor comes within 7 m.
+- **Not done.** A rigged horse (the horses at the hitching posts and the Honmaru wall are static figures); cranes in the lord's garden; carp that scatter from the visitor; the heron and egret stay the old perched birds.
+- **Checked.** `tests/himeji-critters.test.mjs` steps the poses in Node: ducks afloat on the moats and close, fowl inside their free yard, nests toward the street, the kingfisher diving into the moat and back, cats waking by degrees. **Not seen:** the headless showroom does not run fauna, so none of this was looked at in the town; the cage and nest heights come from the front's numbers (pent roof 3.2 m, head beam at 2.75-2.92 m), not from a close look.
+
+### 10.4 The visitor's walk, opened (`layout.js` `isOpen`, `plan.js` walks, `props.js`)
+
+**Finding.** The arrival stands in the Honmaru; the walk down through the baileys, over the causeway of the main gate and along the avenue meets the merchants' street 130 m south of the gate. On the street half the machiya were open (34 of 64) and 12 climbable, but only the 12 climbable ones and the main route had walk routes; the others were checked by nothing.
+**Built.** Every machiya within 60 m of the middle of the street (where the avenue meets it) is now open as a shop (the earth-floored passage from the street, the raised mats with the trade's goods, the keeper, as §5.1): 64 machiya, 49 open now. The pots and tubs set before the fronts are kept out of the passage's lane of every open shop (as the climbable ones were), and a street well that stood in a passage's lane is moved along the street (the sound map reads the same furniture). **35 new walk routes**: from the street into the passage of every open machiya within 130 m of the avenue's foot that has no stair route (22), and from the lane through the gate-house into the yard of every open samurai compound on the avenue's blocks (13). [inferred: the passage's place on the left of the shop, 1.55 m wide, is the style's own, rooms.js]
+**Not done.** The shops are not entered beyond the passage and the front of the shop floor (no route climbs onto the raised mats); the keepers and customers are the street life's figures as before; shutters at night; the shops beyond 60 m keep their half.
+
+### 10.5 Writing on the signs (wear is not done)
+
+- [stated] Edo shops hung kanban boards naming the trade by one or two characters (rice 米, sake 酒, tea 茶, medicine 藥, oil 油, dye 染, paper 紙, fish 魚, tofu 豆, cloth 布, pottery 瓷); source: general Edo-period practice of kanban and noren, no Himeji-specific board is documented. Which character each trade shows is [inferred].
+- [inferred] Trades whose character is not verified (sandals, buckets) keep a plain board rather than a made-up scrawl.
+- Characters: 酒 茶 米 布 藥 瓷 are read unchanged from the Suzhou/Kyoto data (already verified). 油 染 魚 豆 紙 are Himeji's own in `src/styles/edo/script.js`, standard (traditional) forms and stroke counts 8, 9, 11, 7, 10. Each was laid over Noto Serif CJK TC stroke by stroke (`tools/script-sheet-himeji.mjs` then `tools/script-sheet.py`) and corrected until every stroke sat on its stroke. 油 takes the 氵 of Suzhou's 酒 and 紙 the 糸 of its 綠; the typeface draws the third stroke of 氵 longer than that regular-script form, as it does for 酒.
+- Boards: the hanging two-faced board at the corner of each closed machiya front (foot at 1.95 m) and the standing board of each open shop carry the character in lacquer black.
+- Not done: worn stair treads, thresholds, moss.

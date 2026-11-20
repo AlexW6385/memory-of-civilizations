@@ -1,7 +1,7 @@
 // Vienna, spring 1902: the two landmarks (docs/settlements/vienna.md §1, §4–§5) — Olbrich's Secession building with the
 // Beethoven exhibition inside (Klinger's statue in the main hall, Klimt's frieze in the aisle), and Loos's Café Museum.
 import { SEC, SEC_COURT, CAFE } from './layout.js';
-import { upWalks } from './upwalks.js';
+import { upWalks, shopWalks } from './upwalks.js';
 
 const cx = (SEC[0] + SEC[2]) / 2, z0 = SEC[1], FLR = 0.35;
 const Z = (b) => z0 + b;
@@ -37,6 +37,8 @@ export const secession = {
     Object.assign([[cx, Z(6)], [cx + 9, Z(6.1)], [cx + 13.5, Z(6.1)], [cx + 13.5, Z(12)], [cx + 13.5, Z(22)]], { y0: FLR }),
     // the houses whose stair and upper floors can be climbed (styles/viennese/upper.js): street to the first floor's room, the second floor's flat and the gallery
     ...upWalks(),
+    // the opened shops: the door, the aisle before the counter and back
+    ...shopWalks(),
   ],
 };
 

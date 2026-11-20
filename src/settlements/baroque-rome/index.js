@@ -7,6 +7,7 @@ import { stpeter, vatican, passetto, bridge, river, tiberworks } from './plan.js
 import music from './music.js';
 import { houses } from './town.js';
 import { streetPlans } from './street.js';
+import { nightPlan } from './nightlight.js';
 export { music };
 export const landmarks = [{ plan: stpeter, music }];
-export async function town() { return [vatican, passetto, bridge, river, tiberworks, ...streetPlans(), ...(await houses())]; }
+export async function town() { return [vatican, passetto, bridge, river, tiberworks, ...streetPlans(), nightPlan(), ...(await houses())]; }
