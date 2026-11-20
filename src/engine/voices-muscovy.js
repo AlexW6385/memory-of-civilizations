@@ -29,24 +29,24 @@ export const MOS_VOICES = {
   /** The blagovest: three slow strokes on the great bell, then measured strokes (about 2.6 s apart). */
   mosBlagovest(t, bus, lv) {
     const n = 12, wf = winterNow(this) ? 1.15 : 1;
-    for (let k = 0; k < n; k++) this.cue(t + (k < 3 ? k * 4.2 : 12.6 + (k - 3) * 2.7), (x) => this.strike(x, 92 * (1 + 0.003 * (k % 2)), 0.06 * lv * wf, bus, 1.8));
+    for (let k = 0; k < n; k++) this.cue(t + (k < 3 ? k * 4.2 : 12.6 + (k - 3) * 2.7), (x) => this.strike(x, 150 * (1 + 0.003 * (k % 2)), 0.06 * lv * wf, bus, 1.8));
     return 12.6 + 9 * 2.7 + 4;
   },
   /** The trezvon: three slow tolls on the blagovestnik, then all three groups of bells in a four-beat, three rounds, closed by three chords. */
   mosTrezvon(t, bus, lv) {
     const wf = winterNow(this) ? 1.15 : 1;
-    for (let k = 0; k < 3; k++) this.cue(t + k * 3.4, (x) => this.strike(x, 98, 0.06 * lv * wf, bus, 1.6));
+    for (let k = 0; k < 3; k++) this.cue(t + k * 3.4, (x) => this.strike(x, 160, 0.06 * lv * wf, bus, 1.6));
     const w0 = t + 11, beat = 0.34;
     for (let round = 0; round < 3; round++) for (let k = 0; k < 16; k++) {
       const w = w0 + (round * 16 + k) * beat;
       this.cue(w, (x) => {
-        if (k % 4 === 0) this.strike(x, 98, 0.045 * lv * wf, bus, 1.4);
+        if (k % 4 === 0) this.strike(x, 160, 0.045 * lv * wf, bus, 1.4);
         if (k % 2 === 0) this.strike(x, [294, 330, 392][(k >> 1) % 3], 0.03 * lv, bus, 0.7);
         this.strike(x + 0.04, [587, 659, 784, 880][(k + round) % 4], 0.016 * lv, bus, 0.35);
       });
     }
     const e = w0 + 48 * beat + 0.4;
-    for (let c = 0; c < 3; c++) this.cue(e + c * 0.9, (x) => { for (const f of [98, 294, 392, 784]) this.strike(x, f, 0.04 * lv * wf, bus, 1.8); });
+    for (let c = 0; c < 3; c++) this.cue(e + c * 0.9, (x) => { for (const f of [160, 294, 392, 784]) this.strike(x, f, 0.04 * lv * wf, bus, 1.8); });
     return e + 8 - t;
   },
   /** The perebor: each bell once, smallest to largest, then all together. */
@@ -72,7 +72,7 @@ export const MOS_VOICES = {
     const f0 = 98, phr = [[0, 1.6, 'o'], [2, 1.2, 'a'], [3, 1.4, 'o'], [2, 1.0, 'e'], [0, 2.4, 'o'], [-2, 1.4, 'u'], [0, 2.6, 'o'], [2, 1.2, 'a'], [0, 3.0, 'o']];
     const dur = phr.reduce((s, p) => s + p[1], 0) + 2;
     this.cry(t, f0, phr, 0.03 * lv, bus, { cutoff: 1800 });
-    this.cue(t, (x) => this.tone(x, [[0, f0 / 2], [dur, f0 / 2]], dur, 0.012 * lv, bus, 'triangle', ['lowpass', 300]));
+    this.cue(t, (x) => this.tone(x, [[0, f0], [dur, f0]], dur, 0.012 * lv, bus, 'triangle', ['lowpass', 300]));
     return dur + 4;
   },
   /** A horse-drawn sledge passing: the runners' hiss (snow in winter, dry grit in summer), muffled hoofs, harness bells, the driver's word. */
