@@ -15,6 +15,8 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 const jarG = (r, h) => lathe([[0.001, 0], [r * 0.55, 0], [r, h * 0.35], [r * 0.95, h * 0.7], [r * 0.5, h * 0.92], [r * 0.55, h], [0.001, h]], 10);
 const cupG = lathe([[0.001, 0], [0.03, 0], [0.05, 0.07], [0.045, 0.07], [0.025, 0.01], [0.001, 0.01]], 7);
 const SH = 2.9, T = 0.5;
+/** Half the width of the doorway of a house that is entered: 1.6 m clear, so that the walker's body and the raster of its collision pass (the doors of the houses kept shut are narrower). */
+const DW = 0.8;
 /** A storage jar of the house, light: the narrow foot, the swelling body with two raised bands, the thick rim (s: 1 is about 1.5 m high). */
 const bigJars = new Map();
 const bigJar = (s) => { const k = Math.round(s * 20); if (!bigJars.has(k)) bigJars.set(k, lathe([[0.001, 0], [0.24 * s, 0], [0.4 * s, 0.4 * s], [0.47 * s, 0.8 * s], [0.5 * s, 0.82 * s], [0.47 * s, 0.86 * s], [0.46 * s, 1.05 * s], [0.34 * s, 1.47 * s], [0.38 * s, 1.52 * s], [0.3 * s, 1.55 * s], [0.001, 1.5 * s]], 10)); return bigJars.get(k).clone(); };
@@ -61,7 +63,7 @@ function dwelling(el, ctx) {
   if (enter) {
     const fl = y + 0.2, ceil = y + 2.75;
     for (const k of 'nesw') {
-      const W = face(k), a = k === f ? [[0, du - 0.55], [du + 0.55, W.L]] : (k === 'n' || k === 's') ? [[0, W.L]] : [[T, W.L - T]];
+      const W = face(k), a = k === f ? [[0, du - DW], [du + DW, W.L]] : (k === 'n' || k === 's') ? [[0, W.L]] : [[T, W.L - T]];
       for (const [u0, u1] of a) {
         W.at(PL, u0, u1, fl, ceil, 0, -(T - 0.08)); W.at('lime_plaster', u0, u1, fl, ceil, -(T - 0.08), -T);
         const q = W.alongX ? [x0 + u0, W.fp - (W.sg > 0 ? T : 0), x0 + u1, W.fp + (W.sg > 0 ? 0 : T)] : [W.fp - (W.sg > 0 ? T : 0), z0 + u0, W.fp + (W.sg > 0 ? 0 : T), z0 + u1];
@@ -69,9 +71,9 @@ function dwelling(el, ctx) {
       }
     }
     // above the door: the lintel and the wall over it
-    F.at(PL, du - 0.55, du + 0.55, y + 2.25, ceil, 0, -(T - 0.08)); F.at('lime_plaster', du - 0.55, du + 0.55, y + 2.25, ceil, -(T - 0.08), -T);
-    F.at('timber', du - 0.7, du + 0.7, y + 2.2, y + 2.5, 0, 0.1); F.at('timber', du - 0.62, du - 0.5, fl, y + 2.2, 0, 0.08); F.at('timber', du + 0.5, du + 0.62, fl, y + 2.2, 0, 0.08);
-    { const q = F.alongX ? [x0 + du - 0.55, F.fp - (F.sg > 0 ? T : 0), x0 + du + 0.55, F.fp + (F.sg > 0 ? 0 : T)] : [F.fp - (F.sg > 0 ? T : 0), z0 + du - 0.55, F.fp + (F.sg > 0 ? 0 : T), z0 + du + 0.55]; col.rect(q, y + 2.25, ceil); }
+    F.at(PL, du - DW, du + DW, y + 2.25, ceil, 0, -(T - 0.08)); F.at('lime_plaster', du - DW, du + DW, y + 2.25, ceil, -(T - 0.08), -T);
+    F.at('timber', du - DW - 0.15, du + DW + 0.15, y + 2.2, y + 2.5, 0, 0.1); F.at('timber', du - DW - 0.07, du - DW + 0.05, fl, y + 2.2, 0, 0.08); F.at('timber', du + DW - 0.05, du + DW + 0.07, fl, y + 2.2, 0, 0.08);
+    { const q = F.alongX ? [x0 + du - DW, F.fp - (F.sg > 0 ? T : 0), x0 + du + DW, F.fp + (F.sg > 0 ? 0 : T)] : [F.fp - (F.sg > 0 ? T : 0), z0 + du - DW, F.fp + (F.sg > 0 ? 0 : T), z0 + du + DW]; col.rect(q, y + 2.25, ceil); }
     col.floor([x0 + T, z0 + T, x1 - T, z1 - T], fl);
     bag.add(el.floor ?? 'mud_plaster', box(x0 + T, fl - 0.035, z0 + T, x1 - T, fl, z1 - T));
     // the ceiling: planks on joists under the upper floor (an opening in it where the stair comes up)
@@ -111,8 +113,8 @@ function dwelling(el, ctx) {
     F.at('timber', du - 0.75, du + 0.75, y + 2.25, y + 2.5, 0.06, 0.1);
     F.at(G, du - 0.7, du + 0.7, y, y + 0.5, -0.05, 0.45);
   } else {
-    const q = F.at('wood_dark', du + 0.52, du + 0.6, y + 0.2, y + 2.2, 0.0, 0.95); void q;
-    F.at(G, du - 0.7, du + 0.7, y - 0.4, y + 0.2, -0.05, 0.4);
+    const q = F.at('wood_dark', du + DW - 0.08, du + DW, y + 0.2, y + 2.2, 0.0, 0.95); void q;
+    F.at(G, du - DW - 0.15, du + DW + 0.15, y - 0.4, y + 0.2, -0.05, 0.4);
   }
   if (elite && !far) { for (const [a, b] of [[-1.0, -0.88], [0.88, 1.0]]) F.at(RED, du + a, du + b, enter ? y + 0.2 : y + 0.5, y + 2.55, 0.0, 0.08); if (!enter) F.at(G, du - 1.0, du + 1.0, y - 0.1, y + 0.18, 0.4, 0.62); }
   if (far) return;
@@ -154,7 +156,7 @@ function dwelling(el, ctx) {
   if (rand() < (elite ? 0.9 : poor ? 0.04 : 0.4)) { const m = Math.floor(F.L / 0.6); for (let i = 0; i < m; i++) F.at(i % 3 === 0 ? 'egyptian_blue' : i % 3 === 1 ? RED : 'paint_ochre', i * F.L / m, (i + 1) * F.L / m - 0.04, y + H - 0.85, y + H - 0.35, 0, 0.04); }
   // ── eye level: bench, shade, balcony, hung goods ──
   if (rand() < 0.5) { const u0 = du + 0.95, w = Math.min(1.8, F.L - u0 - 0.4); if (w > 0.8) { const q = F.at(G, u0, u0 + w, y, y + 0.46, 0.0, 0.5); const r = F.alongX ? [q[0], q[1], q[2], q[3]] : q; col.rect(r, y, y + 0.46); } }
-  if ((rand() < 0.35 || poor) && n >= 1 && !upOn) {
+  if ((rand() < 0.35 || poor) && n >= 1 && !upOn && !enter) {      // (no awning over the door of a house that is entered: a thin sheet over a door shuts it to the walker)
     const w = Math.min(F.L - 0.6, 2.6 + rand() * 1.4), u0 = Math.max(0.3, du - w / 2), out = 1.0;
     F.at('cloth_ochre', u0, u0 + w, y + 2.62, y + 2.66, 0.06, out); F.at('timber', u0, u0 + w, y + 2.5, y + 2.62, 0.05, 0.1);
     for (const u of [u0 + 0.1, u0 + w - 0.1]) { const q = F.at('timber', u - 0.05, u + 0.05, y - 0.2, y + 2.62, out - 0.1, out); col.rect(q, y, y + 2.62); }

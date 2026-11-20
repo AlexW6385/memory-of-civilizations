@@ -231,6 +231,35 @@ Fact: the lions, bulls and dragons are moulded reliefs of glazed brick, "made fr
 
 Ours (`src/styles/babylonian/sculpt.js`): each beast is a height field over the wall made of round-sectioned capsules (limbs, shoulder, haunch, mane, horns) united by a maximum, with the open mouth cut out and fangs, claws and eye laid over, then meshed with its own normals so it stands 5-10 cm proud with a rounded edge sunk into the wall. Lion: mane in rows of locks with a scalloped edge, open jaws with fangs, muscled shoulder and thigh, tail with tuft; aurochs: hump, dewlap, forward-curved horns, hooves, the row of curled belly hair; dragon: scaled body and neck, horned head with open mouth and forked tongue, lion forelegs, eagle hind legs with talons, scorpion tail in rings. Levels by distance from the arrival (plan.js `LOD`): full (grid 3 cm) within 62 m, i.e. the Way's lions and the gate's northern fronts and first passage; reduced (6 cm) beyond on the Way's walls and within 76 m at the gate; far (11 cm) elsewhere; faces turned from the Way are always far. Rosettes are real: 12 white petals with a ridge, a second ring of yellow petals and a domed boss (full), 8 petals (reduced), 6 (far); the piers' boxes of rosettes are the same, larger. The palace's throne facade now has a dado of lions walking toward the central door (between two enamelled bands), columns of a palm trunk with diamond scales on a base, two tiers of volutes of turquoise glaze over a capital block, and a frieze of double palmettes modelled as fans of seven leaves [inferred: all forms and proportions; the lions' number and direction, the colours of the alternate lions after Koldewey's white/yellow and yellow/red]. Everything of these elements is put in one soup of triangles per material (`Soup`), which the viewer merges, so the arrival frame's glaze draws fell from about 45 to 17; variation between figures comes from a hash of their place.
 
+## 18. The visitor's walk (match pass)
+
+- [inferred] A goat from the street-life pass stood in the doorway of the furnished house at lot [-27,-352,-14,-338]; the "shell" 1.8 m out from its wall was that animal's footprint. Fixed with `door_clear` rects (a no-op element whose rect keeps street life out of each open or shop door lane) and a Babylon-only `KIT_OVER` (laundry poles on fronts; water pots, baskets, benches at doors; donkeys, goats, sheep, dogs, hens, pigeons in the street; robes and tunics, no turbans).
+- Shop doors widened from 1.2 m to 1.6 m (walker needs 1.5 m). [inferred]
+- Fifteen walk-check routes run into opened places (shops and furnished houses), nearest the arrival first. Flaw: about ten open row houses have doors facing the inner wall of the lane.
+
+## 19. Night (match pass)
+
+- [inferred] Every lamp the builders push gets an additive `halo` ball and a floor pool. Door lamps on open houses, lit shop windows with spill, braziers, offering lamps and shrine lamps. Oil lamps and braziers are [stated] in the existing sections for Esagila; the house placement is [inferred].
+
+## 20. Sound (match pass)
+
+- [stated] Temple singers and lamenters, and meals offered several times a day (ancient-history-sites.com, ?p=155952). The Akitu festival is not built, so no procession sounds.
+- [inferred] Everything else: hawkers on the Way and in the market, quay porters, shadufs, geese, doves, camels and donkeys, jackals and owls at night, trade work by shop kind (quern, loom, adze), lyre and recitation in school and houses. Nineteen voices prefixed `bab`; a sound map with rooms for houses, school, shops, cella, throne room and the six Esagila chambers, and two tracks (river, the Way).
+
+## 21. Animals (match pass)
+
+- [stated] Chickens were kept in Mesopotamia by the early first millennium BC (PNAS, PMC9214543).
+- [inferred] Dogs at doors, geese on the quay, ducks on the river, pigeons, a kingfisher, a crane on the west bank: 24 critters, one draw. Cats left out (no secure evidence for Babylon).
+
+## 22. Wear and writing (match pass)
+
+- [inferred] Soot fans over door-lamp niches, salt bloom on the wall foot, dust drifts either side of house doors.
+- Cuneiform: wedge pattern only. A sign font could not be fetched (403), so no verified signs were written; the gate inscription is a wedge pattern, not text.
+
+## 23. Still below the Suzhou reference
+
+No real cuneiform; no near/far split for opened interiors; no Akitu procession; no stair wear on Etemenanki; no hollowed thresholds; upper storeys shut.
+
 ## Sources
 
 - [Ishtar Gate — World History Encyclopedia](https://www.worldhistory.org/Ishtar_Gate/)

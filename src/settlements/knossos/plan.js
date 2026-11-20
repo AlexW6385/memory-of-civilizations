@@ -7,6 +7,7 @@
 import { COURT, THEATRAL, upstairsHouses, openHouses } from './layout.js';
 import { dwellingFrame, dwellingStoreys } from '../../styles/minoan/town.js';
 import { stairLayout, B0 } from '../../styles/minoan/upstairs.js';
+import { walkRoutes } from './walkroutes.js';
 
 const E = [];
 // the Central Court's paving
@@ -99,6 +100,14 @@ E.push({ t: 'steps', rect: [T0 + 14, T1 - 0.4, T0 + 22, T1 + 10], n: 18, rise: 0
 E.push({ t: 'block', rect: [T0 + 15.5, T1 + 10, T0 + 22, T1 + 16], y0: -0.5, y1: 2.16, mat: 'gypsum_minoan', walk: true });
 E.push({ t: 'portico', a: [T0 + 16.2, T1 + 15.4], b: [T0 + 16.2, T1 + 10.6], n: 2, depth: 5, side: 1, y: 2.16, h: 2.8 });
 
+// the lamps of the night (nightlight.js, §20.2): stone lamps on their tall feet along the south passage and the North Entrance passage, either side of the Tripartite Shrine's table
+for (const z of [38, 52]) for (const x of [-2.3, 2.3]) E.push({ t: 'kn_lampstand', at: [x, z], y: 0.0, h: 1.1 });
+for (const z of [-52, -38]) for (const x of [-2.3, 2.3]) E.push({ t: 'kn_lampstand', at: [x, z], y: 0.0, h: 1.1 });
+for (const z of [1.3, 7.2]) E.push({ t: 'kn_lampstand', at: [-17.4, z], y: 0.05, h: 1.2 });
+// the wayside shrine at the south passage's mouth (§20.1): a stand of gypsum carrying the horns of consecration, jar stands and a tub either side of the propylon, a torch post
+E.push({ t: 'court_dress', y: 0.0, seed: 6, horns: [[-6.4, 62.4, 1], [6.4, 62.4, 1]], tubs: [[-8.2, 63.4], [8.2, 63.4]], stands: [[-4.6, 62.6], [4.6, 62.6]], torches: [[-9.6, 62.2], [9.6, 62.2]] });
+E.push({ t: 'court_shrubs', at: [[-8.2, 63.4], [8.2, 63.4]], y: 0.0, seed: 8 });
+
 // the West Court furnished (docs/settlements/knossos.md §4e): the raised causeways of limestone slabs that cross it (the way from the west entrance
 // out to the Royal Road and the theatral area), the three stone-lined pits (kouloures) at its north-west, benches of gypsum along the façade between
 // the setbacks, tubs of plants and jar stands along the causeways, torch stands either side of the west entrance, a cult stand with horns
@@ -165,7 +174,9 @@ for (const l of upstairsHouses()) {
   else pts.push([c(0), B0 + 0.35], [c(0), B0 + R - 0.15], [c(0), B0 + R + 0.5], [uM, D * 0.5]);
   const w = pts.map(([u, v]) => F.P(u, v)); w.y0 = 0; walks.push(w); void sgn; void mid; void openHouses;
 }
-for (const w of walks) w.y0 = 0;
+// the opened lots of the visitor's walk (walk.js, §20.1): in at the door and along the front room (the upstairs houses have routes of their own above)
+for (const r of walkRoutes()) if (!r.up) { const w = r.route; w.y0 = r.y0; walks.push(w); }
+for (const w of walks) if (w.y0 === undefined) w.y0 = 0;
 walks[2].y0 = 0;
 walks[1].y0 = 0;
 walks[0].y0 = 0;
