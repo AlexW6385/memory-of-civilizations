@@ -117,7 +117,10 @@ export function houseVar(h, entry) {
   const pr = [cx - pw - 0.8, cz - pd - 0.8, cx + pw + 0.8, cz + pd + 0.8];
   if (r() > 0.55 || !(takht[2] < pr[0] || takht[0] > pr[2] || takht[3] < pr[1] || takht[1] > pr[3])) takht = null;
   const hb = Math.min(1.0, (half - pw - 0.3 - 0.45) / 2), bx = pw + 0.3 + 0.2 + hb;           // beds beside the pool, clear of its rim and the wings
-  const beds = hb < 0.55 ? [] : [[cx - bx, cz, hb], [cx + bx, cz, hb]].filter((b) => !(takht && ((entry === 'w' && b[0] < cx) || (entry === 'e' && b[0] > cx) || (entry === 's' && b[0] < cx))));
+  // (and a bed never stands in the lane from the vestibule's inner door into the court: the wall's strip 2.6 m deep either side of the door)
+  const alongX = entry === 's', lo = alongX ? court[0] : court[1], Lf = alongX ? court[2] - court[0] : court[3] - court[1], dB = lo + Lf * 0.3 + Lf * 0.42 * 0.76;
+  const lane = entry === 'w' ? [court[0], dB - 1.0, court[0] + 2.6, dB + 1.0] : entry === 'e' ? [court[2] - 2.6, dB - 1.0, court[2], dB + 1.0] : [dB - 1.0, court[3] - 2.6, dB + 1.0, court[3]];
+  const beds = hb < 0.55 ? [] : [[cx - bx, cz, hb], [cx + bx, cz, hb]].filter((b) => !(takht && ((entry === 'w' && b[0] < cx) || (entry === 'e' && b[0] > cx) || (entry === 's' && b[0] < cx)))).filter((b) => !(b[0] + b[2] > lane[0] && b[0] - b[2] < lane[2] && b[1] + b[2] > lane[1] && b[1] - b[2] < lane[3]));
   return {
     rect: h.rect, seed: h.seed, entry,
     v: { d, wings, H: 4.6 + r() * 1.2, hallH: 7 + r() * 0.8, triple, hall: ['tray', 'sufra', 'rahle', 'hookah'][Math.floor(r() * 4)], carpet: ['persian', 'blue', 'maroon', 'persian'][Math.floor(r() * 4)],
@@ -210,6 +213,36 @@ export function upWalk(h) {
   const path = []; for (let i = 1; i >= 0; i = prev[i]) path.unshift(nodes[i]);
   const tL = pl.uF + pl.run, vm = (0.35 + pl.dw - 0.47) / 2;
   return [...out, ...path, upP(pl, pl.uF + pl.run / 2, -STRIP / 2), upP(pl, tL + 0.5, -STRIP / 2), upP(pl, tL + 0.5, 0.8), upP(pl, pl.Lr + 0.5, 0.7), upP(pl, pl.Lr + 0.5, vm), upP(pl, pl.Lr - 0.9, vm), upP(pl, pl.Lr - 1.5, vm)];
+}
+
+/**
+ * The walk from the lane into a walk-in house and across its court to the talar's arch (walk-check): through the street door and the vestibule (the inner
+ * door set off to one side), into the court, round the pool, the beds, the takht and the people to the middle of the court's north edge, and one step under the arch.
+ */
+export function houseWalk(h) {
+  const [x0, z0, x1, z1] = h.rect, d = h.v.d, c = [x0 + d.w, z0 + d.n, x1 - d.e, z1 - d.s], sp = houseSpots(h);
+  const side = h.entry, alongX = side === 's', lo = alongX ? c[0] : c[1], Lf = alongX ? c[2] - c[0] : c[3] - c[1];
+  const a = lo + Lf * 0.3, L2 = Lf * 0.42, dA = a + L2 * 0.32, dB = a + L2 * 0.76;
+  const Wd = (k, u) => (side === 'w' ? [x0 + k, u] : side === 'e' ? [x1 - k, u] : [u, z1 - k]);
+  const out = [Wd(-2.5, dA), Wd(1.4, dA), Wd(1.4, dB)];
+  const into = side === 'w' ? d.w + 1.0 : side === 'e' ? d.e + 1.0 : d.s + 1.0, start = Wd(into, dB);
+  const [pcx, pcz, pw, pd] = h.v.pool, goal = [(c[0] + c[2]) / 2 + 0.0, c[1] + 0.9];
+  const rects = [[pcx - pw - 0.45, pcz - pd - 0.45, pcx + pw + 0.45, pcz + pd + 0.45]];
+  if (h.v.takht) { const k = h.v.takht; rects.push([k[0] - 0.3, k[1] - 0.3, k[2] + 0.3, k[3] + 0.3]); }
+  for (const [bx, bz, hb = 1] of h.v.beds) rects.push([bx - hb - 0.15, bz - hb - 0.15, bx + hb + 0.15, bz + hb + 0.15]);
+  const hit = (p) => rects.some((r) => p[0] > r[0] && p[0] < r[2] && p[1] > r[1] && p[1] < r[3]) || sp.people.some((q) => q.y < 0.1 && Math.hypot(p[0] - q.at[0], p[1] - q.at[1]) < 0.75);
+  const clear = (p, q) => { const n = Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / 0.2); for (let i = 0; i <= n; i++) if (hit([p[0] + (q[0] - p[0]) * i / n, p[1] + (q[1] - p[1]) * i / n])) return false; return true; };
+  const nodes = [start, goal];
+  for (let x = c[0] + 0.45; x <= c[2] - 0.45; x += 0.4) for (let z = c[1] + 0.45; z <= c[3] - 0.45; z += 0.4) if (!hit([x, z])) nodes.push([x, z]);
+  const dist = nodes.map(() => Infinity), prev = nodes.map(() => -1), done = nodes.map(() => false); dist[0] = 0;
+  for (;;) {
+    let u = -1; for (let i = 0; i < nodes.length; i++) if (!done[i] && (u < 0 || dist[i] < dist[u])) u = i;
+    if (u < 0 || u === 1 || dist[u] === Infinity) break;
+    done[u] = true;
+    for (let v = 0; v < nodes.length; v++) if (!done[v] && clear(nodes[u], nodes[v])) { const w = dist[u] + Math.hypot(nodes[u][0] - nodes[v][0], nodes[u][1] - nodes[v][1]); if (w < dist[v]) { dist[v] = w; prev[v] = u; } }
+  }
+  const path = []; for (let i = 1; i >= 0; i = prev[i]) path.unshift(nodes[i]);
+  return [...out, ...path, [goal[0], goal[1] - 1.3]];
 }
 
 /** The shops of the arcade with a room over them (stair behind the shop's back wall, room, loggia on the square): the open bays within ARCADE_OPEN.up m of the arrival. */

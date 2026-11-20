@@ -138,6 +138,8 @@ export function marketRows() {
   }
   return out;
 }
+/** The critters' reach: wards within this many metres of the origin have animated dogs (fauna.js), the rest keep dress.js's static ones. */
+export const CRIT = 360;
 export const marketYards = () => MARKET_BLOCKS.filter((b) => BLOCK_KIND(b) !== 'office').map((b) => ({ ...b, kind: BLOCK_KIND(b), yard: [b.rect[0] + SH + 0.5, b.rect[1] + SH + 0.5, b.rect[2] - SH - 0.5, b.rect[3] - SH - 0.5] }));
 export const OFFICE = MARKET_BLOCKS.find((b) => BLOCK_KIND(b) === 'office').rect;
 /** Is (x, z) a lane of the market? */

@@ -4,7 +4,7 @@
 // market's lanes (wells, notice boards, barrows, carts), at the avenue's ditches (washers, ducks), in the temple courts (pilgrims kneeling,
 // monks sweeping, lamps) and the Daoist court. Every position is derived from layout.js.
 import { YAW, rng } from '../../styles/tang/kit.js';
-import { lots, STREETS, AVE, DITCH, MARKET_LANES, MARKET_INNER, DACI, DACI_AX, DACI_MAIN, DAO_AX, PAGODA, RADIUS, WARDS, ARRIVE } from './layout.js';
+import { lots, STREETS, AVE, DITCH, MARKET_LANES, MARKET_INNER, DACI, DACI_AX, DACI_MAIN, DAO_AX, PAGODA, RADIUS, WARDS, ARRIVE, CRIT } from './layout.js';
 
 const ext = (rect, f) => { const w = rect[2] - rect[0], d = rect[3] - rect[1]; return f === 'n' || f === 's' ? [w, d] : [d, w]; };
 const frameOf = (c, front) => { const yaw = YAW[front], cs = Math.round(Math.cos(yaw)), sn = Math.round(Math.sin(yaw)); return { P: ([x, z]) => [c[0] + x * cs + z * sn, c[1] - x * sn + z * cs], D: ([x, z]) => [x * cs + z * sn, -x * sn + z * cs] }; };
@@ -109,7 +109,7 @@ export function dressLife() {
     fig([cx - 3.6, cz + 3.2], faceTo([1, 0]), { pose: 'sit', beard: true, hat: pick(['cap', 'none']), cloth: pick(CLOTH) }); fig([cx - 3.6, cz + 4.1], faceTo([1, 0]), { pose: 'sit', beard: r() < 0.5, hat: 'none', cloth: pick(CLOTH) });
     L.push({ t: 'barrow', at: [cx - 2.6, cz - 3.6], y: 0, rot: 0.2 + r(), seed: Math.round(cx + cz) });
     L.push({ t: 'cart', kind: 'two', beast: 'ox', load: 'barrels', at: [cx + 1.2, cz - 22], y: 0, rot: 0.1, seed: Math.round(cz) });
-    L.push({ t: 'animal', kind: 'dog', at: [cx + 5.5, cz - 3], y: 0, rot: r() * 6.28, seed: Math.round(cx) + 3 });
+    if (Math.hypot(cx, cz) > CRIT) L.push({ t: 'animal', kind: 'dog', at: [cx + 5.5, cz - 3], y: 0, rot: r() * 6.28, seed: Math.round(cx) + 3 });     // (within CRIT the dog is a critter: fauna.js)
   }
   // ── Daci'en: pilgrims kneeling before the main hall, monks sweeping and passing, lamps and benches along the court ──
   const ax = DACI_AX, mh = DACI_MAIN[1];
