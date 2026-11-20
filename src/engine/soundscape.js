@@ -86,6 +86,7 @@ import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as NARA from '../settlements/nara/soundmap.js';
 import * as FEZ from '../settlements/fez/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
+import * as GIZA from '../settlements/giza/soundmap.js';
 import * as GRANADA from '../settlements/granada/soundmap.js';
 import './voices-granada.js';
 import * as UJI from '../settlements/heian-uji/soundmap.js';
@@ -201,7 +202,7 @@ export const PROFILES = {
   'bauhaus-dessau': T(NEAR, { animals: { dog: 0.3, rooster: 0.1 }, roof: 'flat' }),
   'sgang-gwaay': T({ gull: 1, crow: 0.8, warbler: 0.2 }, { animals: { dog: 0.3 }, roof: 'shingle' }),
   'nan-madol': T(NEAR, { animals: { pig: 0.3, rooster: 0.4, tern: 0.5 }, roof: 'thatch' }),
-  giza: T(NEAR, { animals: { donkey: 0.5, cattle: 0.4, dog: 0.3 }, roof: 'flat' }),
+  giza: T(NEAR, { frogs: 0.2, animals: withLife({ donkey: 0.5, cattle: 0.4, dog: 0.3 }, { market: 0.5, canal: 0.5, map: GIZA }), roof: 'flat' }),
   granada: T(MED, { cicadas: 0.7, animals: withLife({ donkey: 0.4, rooster: 0.4, horse: 0.2 }, { market: 1, eaves: 1, map: GRANADA }), roof: 'tile', adhan: 1 }),
   'great-zimbabwe': T({ dove: 1, tropic: 0.7, kite: 0.3 }, { cicadas: 0.7, frogs: 0.4, animals: { cattle: 0.8, goat: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'thatch' }),
   'heian-uji': T(EAS, { cicadas: 0.5, frogs: 0.8, animals: withLife({ dog: 0.2 }, { market: 0.5, canal: 0.6, eaves: 1, map: UJI }), roof: 'shingle', bells: 'bonsho' }),
