@@ -5088,6 +5088,54 @@
   "seconds": 13,
   "baked": "2026-11-17"
  },
+ "tenochtitlan-precinct": {
+  "site": "tenochtitlan",
+  "hash": "37b2ee7a3e215809",
+  "rays": 128,
+  "probes": 27168,
+  "boxes": [
+   {
+    "min": [
+     82.4,
+     0.9,
+     -139.6
+    ],
+    "n": [
+     56,
+     6,
+     38
+    ],
+    "spacing": 1,
+    "rooms": [
+     "eagle-house north-west",
+     "eagle-house portico",
+     "eagle-house north-east",
+     "eagle-house east"
+    ]
+   },
+   {
+    "min": [
+     -141.6,
+     0.7,
+     -141.6
+    ],
+    "n": [
+     60,
+     6,
+     40
+    ],
+    "spacing": 1,
+    "rooms": [
+     "calmecac north",
+     "calmecac west",
+     "calmecac east"
+    ]
+   }
+  ],
+  "bytes": 429702,
+  "seconds": 247,
+  "baked": "2026-11-20"
+ },
  "teotihuacan-centre": {
   "site": "teotihuacan",
   "hash": "3fcfb4874c06000d",
