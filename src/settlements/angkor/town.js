@@ -8,6 +8,7 @@ import { ENC_PATHS, inShop } from './layout.js';
 import { useOf, frontOf } from './uses.js';
 import { ROSETTES, CARVED } from './plan.js';
 import './far.js';
+import { stands, templeItems, workItems } from './nightlight.js';
 
 const NEAR_HOUSES = 170, NEAR_PALMS = 260;   // m: the village's tiles are drawn in full within this of the visitor (from the tile's middle), simple beyond
 /** Elements in tiles (200 m, or `size`), each tile twice (as src/settlements/lod.js): in full near, and by `farOf(element)` (a list) beyond, no colliders. */
@@ -206,10 +207,11 @@ function village() {
     const e = [{ t: 'stilt_house', ...h }], u = far(h) ? useOf(h) : null, f = far(h) ? frontOf(h) : null;
     if (u) e.push({ t: 'ak_use', ...h, use: u });
     if (f) e.push({ t: 'ak_front', ...h, dress: f });
+    e.push({ t: 'ak_halo', rect: h.rect, house: h });                     // (its night light, nightlight.js)
     return e;
   });
   // (each tile's houses in full, with the dressing of their fronts, near; the solid form of the house beyond)
-  plans.push(...tiled('angkor-village', els, NEAR_HOUSES, (e) => (e.t === 'stilt_house' ? [{ ...e, t: 'ak_far_house' }] : [])));
+  plans.push(...tiled('angkor-village', els, NEAR_HOUSES, (e) => (e.t === 'stilt_house' ? [{ ...e, t: 'ak_far_house' }] : e.t === 'ak_halo' ? [{ ...e, far: true }] : [])));
   const E = [];
   for (const g of granaries) E.push({ t: 'k_granary', ...g });
   for (const s of salas) E.push({ t: 'k_sala', ...s });
@@ -294,6 +296,8 @@ export async function town() {
   ROSETTES.forEach((r, i) => plans.push({ ...base(`angkor-rosettes-${i}`, [r.el]), center: r.center, near: r.near }));
   // the carving of the galleries and the cloister, built instanced in plans near each piece (plan.js CARVED)
   CARVED.forEach((r, i) => plans.push({ ...base(`angkor-carved-${i}`, r.els), center: r.center, near: r.near }));
+  // the night: the temple's lamp-stands and the glow of its lamps, the forges' and the kilns' glow (nightlight.js)
+  plans.push(base('angkor-night', [...stands().map((q) => ({ t: 'ak_lampstand', ...q })), { t: 'ak_halo', items: templeItems() }]), base('angkor-night-work', [{ t: 'ak_halo', items: workItems() }]));
   plans.push(base('angkor-road', K), { ...base('angkor-market', L), style: 'life', center: [-222, 10], near: 260 });
   const PD = paddyPlans();
   plans.push({ ...base('angkor-paddy-tools', PD.K), center: [0, 0], near: 460 }, { ...base('angkor-farmers', PD.L), style: 'life', center: [0, 0], near: 230 });

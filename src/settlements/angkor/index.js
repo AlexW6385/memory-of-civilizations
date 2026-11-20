@@ -4,6 +4,7 @@ import './library.js';
 import './dress.js';
 import './relief.js';
 import './uses.js';
+import './nightlight.js';
 import temple from './plan.js';
 import music from './music.js';
 import { walkRoutes } from './walk.js';
