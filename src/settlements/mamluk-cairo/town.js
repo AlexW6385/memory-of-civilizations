@@ -4,6 +4,7 @@ import { RADIUS, ARRIVAL, lots, yards, sabats, shops, tradeOf, SQUARE, SABILS, S
 import { lifePlan } from './life.js';
 import { houseRooms } from './house.js';
 import { pickHomes } from './homes.js';
+import { nightTiles, NIGHT_NEAR, NIGHT_TILE } from './nightlight.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });
 const dist = (l, [x, z]) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
 const TILE = 160;
@@ -83,6 +84,8 @@ export async function town() {
   plans.push({ ...base('mamluk-cairo-shop', [{ t: 'cairo_shop', rect: SHOP, face: 'e', y: 0, seed: 1360 }]), style: 'mamluk', bounds: [SHOP[0] - 2, SHOP[1] - 2, SHOP[2] + 2, SHOP[3] + 2],
     rooms: [{ id: 'shop', rect: [SHOP[0] + 0.5, SHOP[1] + 0.5, SHOP[2] - 0.5, SHOP[3] - 0.5], y: 0.2, kind: 'hall' }] });
   STALLS.forEach((s, i) => plans.push({ ...base('mamluk-cairo-stall' + i, [{ t: 'sharbat_stall', ...s, y: 0 }]), style: 'mamluk', bounds: [s.at[0] - 6, s.at[1] - 6, s.at[0] + 6, s.at[1] + 6] }));
+  // the night: halos and lamp bodies in 48 m tiles shown within 55 m (nightlight.js; docs §18.2)
+  for (const t of nightTiles()) plans.push({ ...base('mamluk-cairo-night-' + t.id, [t.el]), style: 'mamluk-cairo', center: t.center, near: NIGHT_NEAR + NIGHT_TILE * 0.71, nocollide: true });
   plans.push(lifePlan());
   return plans;
 }

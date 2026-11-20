@@ -2,6 +2,10 @@
 import '../../styles/timurid/index.js';
 import registan from './plan.js';
 import music from './music.js';
+import { registerNight } from './nightlight.js';
+import { registerWear } from './wear.js';
 export { town } from './town.js';
+registerNight();                  // lamps, lit windows (nightlight.js); after the style's own registration
+registerWear();                   // worn sills and smoke-black (wear.js)
 export { music };
 export const landmarks = [{ plan: registan, music }];

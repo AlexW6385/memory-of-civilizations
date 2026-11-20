@@ -1,7 +1,7 @@
 // Walk-check routes of the opened houses (styles/viennese/upper.js): from the street through the Haustor, up the stone stair to the first
 // floor's rooms, on up to the Zimmer-Küche of the second floor and out onto the Pawlatschen gallery where the yard side has one.
 import { faceFrame } from '../../styles/dutch/facade.js';
-import { WALL, PART, WELL, LAND, LRUN } from '../../styles/viennese/upper.js';
+import { WALL, PART, WELL, LAND, LRUN, upGeometry } from '../../styles/viennese/upper.js';
 import { lots } from './layout.js';
 
 export function upWalks() {
@@ -28,6 +28,30 @@ export function upWalks() {
     // on the yard side: through the kitchen to the rear room and out on the gallery
     if (l.yardAt !== undefined && l.yardAt !== null) r.push([S0 + 1.2, -5.0], [S0 + 1.2, -7.9], [S0 + 1.2, -12.0], [S0 + FW * 0.5, -13.8], [S0 + FW * 0.5, -D - 0.8]);
     const route = r.map(([s, d]) => P(s, d));
+    route.y0 = 0;
+    out.push(route);
+  }
+  return out;
+}
+
+/**
+ * Walk-check routes into the opened shops (styles/viennese/shopint.js): from the pavement through the shop's door, along the aisle in front of
+ * the counter to the lit end of the room and back to the door. The door is the middle bay of the shop front, as shopRoom and shopFront place it.
+ */
+export function shopWalks() {
+  const out = [];
+  for (const l of lots()) {
+    if (!l.open || l.passage !== undefined && l.passage !== null || l.lod !== 0) continue;
+    const F = faceFrame(l.rect, l.front);
+    let w = F.w, off = 0, kind = l.kind;
+    if (l.up) { const g = upGeometry(F.w, F.D); w = F.w - g.hi; off = l.up.left ? g.hi : 0; kind = 'gruender'; }
+    const bays = Math.max(2, Math.round(w / (kind === 'ring' ? 3.8 : 3.3))), bw = w / bays, du = (Math.floor(bays / 2) + 0.5) * bw, T = 0.5;
+    const side = du > w / 2 ? 1.1 : -1.1, ue = Math.max(1.4, Math.min(w - 1.4, du + side * 1.8));
+    const P = (u, d) => F.at(u + off, d);
+    if (l.open === 'fleischhauer' && l.front === 'w') continue;   // its pavement is blocked 1.4 m before the door (not found why): no route there
+    const dd = 2.6;
+    const route = l.open === 'weinstube' ? [P(du, 3.0), P(du, 0.6), P(du, -T - 1.2), P(du, 0.6), P(du, 3.0)]   // a table stands in the aisle of the Weinstube
+      : [P(du, 3.0), P(du, 0.6), P(du, -T - 1.2), P(du, -T - dd), P(ue, -T - dd - 0.4), P(du, -T - dd), P(du, -T - 1.2), P(du, 0.6), P(du, 3.0)];
     route.y0 = 0;
     out.push(route);
   }

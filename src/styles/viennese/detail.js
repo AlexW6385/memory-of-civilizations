@@ -159,6 +159,7 @@ export function passage(ctx, F, y, { u0, u1, D, PH, seed }) {
   A('iron', u1 - 0.35, u1, 2.55, 2.6, -D * 0.45 - 0.03, -D * 0.45 + 0.03);
   bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.3], [0.001, 0.38]], 8, null, lampAt[0], y + 2.58, lampAt[1]));
   lights?.push({ at: [lampAt[0], y + 2.9, lampAt[1]], color: '#ffd08a', intensity: 5, distance: 11 });
+  bag.passageLamp?.(lampAt[0], y + 2.77, lampAt[1]);                                                   // (night.js: its glow and the pool on the floor)
   // a hand-cart left at the wall by the second bay
   const cart = F.at(u0 + 0.9, -D * 0.7);
   bag.add('wood_dark', box(cart[0] - 0.45, y + 0.45, cart[1] - 0.8, cart[0] + 0.45, y + 0.55, cart[1] + 0.8));

@@ -14,6 +14,8 @@ export function hofWing(el, { bag, col }) {
   const H = floors[n - 1] + 3.3, mat = ['stucco_pale', 'plaster_grey', 'stucco_cream', 'stucco_ochre'][Math.floor(r() * 4)];
   bag.add(mat, box(x0, y - 0.6, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.6, y + H);
   if (!el.simple) rearFace(bag, F, y, { n, floors, H, r, lod: 1, gallery: true }, sashWindow);
+  // the damp at the foot of a wall that the sun never dries: rising salts, a darker lower metre, patches by the gutter
+  if (!el.simple) for (let u = 0.3 + r() * 1.0; u < F.w - 0.6; u += 0.8 + r() * 2.2) bag.add('plaster_damp', fbox(F, y, u, Math.min(F.w - 0.1, u + 0.6 + r() * 1.5), 0.0, 0.5 + r() * 0.9, 0.0, 0.03));
   const along = f === 'n' || f === 's', D = F.D, rh = Math.min(3.4, D * 0.5);
   bag.add(r() < 0.8 ? 'roof_tile' : 'slate', frustum([x0 - (along ? 0 : 0.3), z0 - (along ? 0.3 : 0), x1 + (along ? 0 : 0.3), z1 + (along ? 0.3 : 0)], y + H, y + H + rh, ...(along ? [0, 0, D / 2 + 0.2, D / 2 + 0.2] : [D / 2 + 0.2, D / 2 + 0.2, 0, 0])));
   const c = F.at(F.w * (0.2 + r() * 0.6), -D / 2);
