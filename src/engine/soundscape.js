@@ -135,10 +135,8 @@ export const LIFE = Symbol('life');
 const withLife = (animals, life) => ({ ...animals, [LIFE]: life });
 
 export const PROFILES = {
-  amsterdam: T({ ...EU, gull: 0.8 }, { animals: { dog: 0.3, horse: 0.3 }, roof: 'tile', bells: 'carillon' }),
   angkor: T(TROP, { cicadas: 0.8, frogs: 0.9, animals: withLife({ rooster: 1, cattle: 0.5, dog: 0.4 }, { market: 0.7, canal: 0.5, map: ANGKOR }), roof: 'thatch' }),
   amsterdam: T({ ...EU, gull: 0.8 }, { animals: withLife({ dog: 0.3, horse: 0.3 }, { canal: 1, market: 1, eaves: 1, map: AMSTERDAM }), roof: 'tile', bells: 'carillon' }),
-  angkor: T(TROP, { cicadas: 0.8, frogs: 0.9, animals: { rooster: 1, cattle: 0.5, dog: 0.4 }, roof: 'thatch' }),
   athens: T(MED, { cicadas: 0.9, animals: withLife({ rooster: 0.6, donkey: 0.5, sheepbell: 0.4, dog: 0.3 }, { market: 0.8, map: ATHENS }) }),
   babylon: T({ ...NEAR, gull: 0 }, { frogs: 0.4, animals: { donkey: 0.7, dog: 0.4, rooster: 0.2 }, roof: 'flat' }),
   barcelona: T(MED, { cicadas: 0.3, animals: { dog: 0.3, horse: 0.4 }, bells: 'angelus' }),
