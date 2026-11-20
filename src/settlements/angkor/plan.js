@@ -6,6 +6,7 @@
 // size; the enclosure and the moat drawn in (see §2).
 
 import { LEVEL, CX, T, ENCLOSURE, CAUSEWAY, BASINS, LIBRARIES } from './layout.js';
+import { galleryPieces } from './dress.js';
 
 const E = [];
 const [ex0, ez0, ex1, ez1] = ENCLOSURE;
@@ -115,13 +116,30 @@ for (const el of E) {
   el.rosettes = false;
 }
 
-// the carving laid over the style's masses (dress.js, docs §27): the same parameters, the same places
+// the carving laid over the style's masses (dress.js, docs §27–§28): the same parameters, the same places. What lies within 150 m of
+// the arrival's stand (the enclosure's gate, the third gallery's west pieces) is built here, merged, as it was (each copy a hair
+// different). The rest — the other pieces of the galleries' carving, the whole bas-relief, the cloister's — is built apart, in plans
+// drawn only within reach of the piece (CARVED, town.js; docs §30): its repeated figures and mouldings are instances of one shape
+// each (a few megabytes in place of the dozens that every copy carved apart took), and no draw is added at the arrival.
+export const CARVED = [];
+const AR = [-178, 1.5];
 for (const el of E.slice()) {
-  if (el.t === 'k_gallery' && el.reliefMap) E.push({ ...el, t: 'ak_relief' });
-  if (el.t === 'k_gallery') E.push({ ...el, t: 'ak_gdress', dress: el.reliefMap ? { win: true, dev: true } : el.devatas ? { pil: true } : el.windows ? { dev: true } : { dev: true } });
-  else if (el.t === 'k_tower') E.push({ ...el, t: 'ak_tdress' });
+  if (el.t === 'k_gallery') {
+    const dress = el.reliefMap ? { win: true, dev: true } : el.devatas ? { pil: true } : el.windows ? { dev: true } : { dev: true };
+    const { pieces } = galleryPieces(el), main = [];
+    pieces.forEach((pc, i) => {
+      const c = [(pc.A[0] + pc.B[0]) / 2, (pc.A[1] + pc.B[1]) / 2], near = pc.len / 2 + 70, els = [];
+      if (Math.hypot(c[0] - AR[0], c[1] - AR[1]) > 150) els.push({ ...el, t: 'ak_gdress_wall', dress, dpieces: [i], inst: true }); else main.push(i);
+      if (el.reliefMap) els.push({ ...el, t: 'ak_relief_wall', rpieces: [i], inst: true });
+      if (els.length) CARVED.push({ els, center: c, near });
+    });
+    E.push({ ...el, t: 'ak_gdress', dress, dpieces: main, dtowers: true });
+  } else if (el.t === 'k_tower') E.push({ ...el, t: 'ak_tdress' });
   else if (el.t === 'naga_rail') { E.push({ ...el, t: 'ak_ndress' }); if (el.hoods) E.push({ ...el, t: 'ak_nhood' }); }
-  else if (el.t === 'k_cloister') E.push({ ...el, t: 'ak_cdress' });
+  else if (el.t === 'k_cloister') {
+    const [x0, z0, x1, z1] = el.rect;
+    CARVED.push({ els: [{ ...el, t: 'ak_cdress_wall', inst: true }], center: [(x0 + x1) / 2, (z0 + z1) / 2], near: Math.max(x1 - x0, z1 - z0) / 2 + 80 });
+  }
 }
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
