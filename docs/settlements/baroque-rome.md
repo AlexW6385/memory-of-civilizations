@@ -133,6 +133,29 @@ The sounds of the place and date, placed where they are made and heard by hour a
 - *Bells:* the profile's Angelus at dawn, noon and dusk [stated: Wikipedia "Angelus", cited in `soundscape.js`]. Nothing is made for the Chinese tracks (sedan chant, rattle-drum, clapper).
 - *Season and weather:* cicadas in the gardens and the hill in summer; the rain on tile roofs and the eaves; frogs by the Tiber's reeds in the warm nights [inferred: Latium's summer].
 
+### 6c. Night
+
+What lit Rome at night in 1670, and nothing else (`src/settlements/baroque-rome/nightlight.js`; the lights are geometry of the engine's additive `halo` material, so they show at the low preset; day view unchanged). Rome had no street lighting; the lamps before the madonnelle were the lights of the streets [inferred: the common account of Rome's street lighting before the 18th century; the dossier's earlier pointer is Wikipedia "Edicola sacra"/"Madonnella", not re-read here].
+- *The madonnelle:* each street shrine has its lantern (the shrines are drawn since this round: see 6f), a glow with the wash on the wall and a pool on the paving; 22 of them in the Borgo's fronts [inferred: the lantern on its bracket, built in `borgo.js`].
+- *Windows:* a share of the upper windows shows a candle or an oil lamp behind it, by hash of the window's place — more at the palazzi's piano nobile than in the casas' upper floors (138 windows in the Borgo) [inferred]; some windows of the Apostolic Palace's south and east faces and of the papal apartments in Castel Sant'Angelo [inferred: the palace and the fortress were inhabited at night].
+- *Fires and lamps in the open:* the baker's oven glows at the open front (bakers fired their ovens in the small hours) and the osteria and the inn are lit into the evening, their street fronts washed and the paving pooled [inferred]; two cressets at the Apostolic Palace's gate and one at each Swiss post at the colonnade's mouths [inferred: a watched gate kept a fire]; fires on the four bastions of Castel Sant'Angelo [inferred]; a lantern at each moored ship-mill [inferred: the mills worked on]; the lanterns of the three coaches left standing (two on each) [inferred: coaches carried lanterns].
+- *Inside St Peter's:* the Confessio's ninety-five lamps burning day and night, their glow along the four sides of the rail and the pool over the sunk floor [stated: stpetersbasilica.info, Confessio, cited in §5b].
+- *Not shown:* the illumination of the dome and the colonnade on the great feasts, and fireworks from Castel Sant'Angelo (festival lighting is attested for later centuries and not checked for 1670 here).
+
+### 6d. Animals
+
+`fauna.js` `critters` (the engine's rigs, one draw): sixteen pigeons, grey with a few white and dark, walking and pecking on the paving of the oval, the retta and the foot of the steps (the town's pigeons, as the dossier's earlier sparrows-for-pigeons stand-in); a cock and three hens scratching in the alley of the spina, where the scraps of the baker and the osteria fall; cats asleep at the doorsteps of the open shops and a dog at the baker's and the osteria's fronts (the open shops' own list, `openShops()`); five mallards on the Tiber's slack water above the bridge [inferred: all, the animals of a papal city's streets as in the other settlements' dossiers; geese and a goat's flock not placed]. The horses of the coaches and the donkey of the cart stay as street-life figures; a critter model for a mule or horse (with behaviour) is not yet in the engine. Tests: `tests/baroque-rome-critters.test.mjs`.
+
+### 6e. Writing
+
+Latin capitals from the verified set of Rome's `lettering.js` (read-only; V for U): the four tablets of the obelisk's pedestal in raised bronze letters — CHRISTVS VINCIT, CHRISTVS REGNAT, CHRISTVS IMPERAT, CHRISTVS AB OMNI MALO PLEBEM SVAM DEFENDAT [stated: the acclamation is cut on the obelisk's pedestal, stpetersbasilica.info "The obelisk" as cited in §4; which phrase stands on which face is ours, inferred]; the words on the open shops' hanging signs, in dark raised capitals on both faces of the board: OLIO (grocer), PANE (baker), DRAPPI (cloth), VINO (wine), ERBE (apothecary), OSTERIA, SCARPE (cobbler), CORONE (rosaries and medals) [inferred: ordinary Italian trade words; painted signs in Roman capitals]. Not written: the dedications of Sixtus V and the Augustan dedications on the pedestal (the exact wording is not certain here), street-name plaques (later than 1670), the notices on the walls (plain paper, no text). The façade's inscription to Paul V is as in §4.
+
+### 6f. Wear and gaps closed on the way
+
+- *Worn doorsteps:* the middle of every house's doorstep is dished 1.8 cm (a three-piece slab) [inferred: stone worn by feet; as the sagrato's steps, §5].
+- *The street shrines are now built:* the madonnella's placing rule in `borgo.js` (a window-free span 3.7 m wide) was never satisfied, so no shrine, with its lantern and flame, had been drawn since they were added; each now takes the first-floor bay above the shop (the other end bay in a climbed house) and that bay's window is left out [inferred: the rule was a bug, not a decision; the dossier §5b describes madonnelle].
+- *Open fronts:* the folded counter board with its goods, drawn floating across the opening of the open shops, is now two stubs at the jambs with the goods on them (the room's own counter is inside); the lane through the opening is kept clear of goods, gear and figures (`clearU`, `lanes` in `openwalk.js`); an open lot needs 3.6 m of free street before its front (`clearFront`). Walk-check routes run into all 21 open bottegas.
+
 ## Sources
 
 - [Sistine Chapel — Wikipedia](https://en.wikipedia.org/wiki/Sistine_Chapel) (fetch refused this session; used for the entries under the Sistine Chapel from general knowledge, to be checked)
