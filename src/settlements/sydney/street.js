@@ -157,15 +157,29 @@ export function streets() {
   // the doors of the shops whose upper floors are open (modern/upper.js): nobody and nothing stands on the way in
   const DOOR = { pub: 0.5, newsagent: 0.3, milkbar: 0.3, butcher: 0.7, chemist: 0.5, barber: 0.3, greengrocer: 0.5 };
   const gates = [];
+  // (a gate: a point of the door's lane, from the face out to the kerb, and the direction along the face)
+  const TANG = { n: [1, 0], s: [1, 0], w: [0, 1], e: [0, 1] };
   for (const l of city) {
     if (!l.up) continue;
     const Wd = FACE_LEN(l.rect, l.front), k = DOOR[l.kind], du = l.t === 'espresso_bar' ? Wd * 0.62 : Wd * (k ?? 0.3) + (k > 0.4 ? 0 : 0.3);
-    for (let d = 0; d <= 3.4; d += 0.6) gates.push(onFace(l.rect, l.front, du, d));
+    for (let d = 0; d <= 2.9; d += 0.6) gates.push({ p: onFace(l.rect, l.front, du, d), tan: TANG[l.front] });
   }
-  for (const l of rocks) if (l.up) for (let d = 0; d <= 3.4; d += 0.6) gates.push(onFace(l.rect, l.front, 0.85, d));
-  const near = (e, r) => gates.some((g) => Math.hypot(e.at[0] - g[0], e.at[1] - g[1]) < r);
+  for (const l of rocks) if (l.up) for (let d = 0; d <= 2.9; d += 0.6) gates.push({ p: onFace(l.rect, l.front, 0.85, d), tan: TANG[l.front] });
+  const near = (e, r) => gates.some((g) => Math.hypot(e.at[0] - g.p[0], e.at[1] - g.p[1]) < r);
   for (const t of tiles.values()) { t.items = t.items.filter((e) => !near(e, 1.1)); t.kit = t.kit.filter((e) => !near(e, 1.3)); }
-  for (const [k, list] of life) life.set(k, list.filter((e) => !near(e, 1.9)));
+  // The street life is moved aside, along the face of the shop, not taken away (the upstairs work deleted every figure within 1.9 m of a
+  // door's lane, 3.4 m out, with the cars at the kerb): a figure or a thing stands 1.6 m off the lane's line (a door is 1.5 m wide), a
+  // car at the kerb is not on the footpath and stays where it is.
+  for (const [k, list] of life) life.set(k, list.map((e) => {
+    if (e.t === 'car') return e;
+    const R0 = e.t === 'figure' ? 1.6 : 1.4, g = gates.find((q) => Math.hypot(e.at[0] - q.p[0], e.at[1] - q.p[1]) < R0);
+    if (!g) return e;
+    const lat = (e.at[0] - g.p[0]) * g.tan[0] + (e.at[1] - g.p[1]) * g.tan[1], sg = lat < 0 ? -1 : 1, mv = sg * (R0 + 0.15) - lat;
+    const at = [e.at[0] + g.tan[0] * mv, e.at[1] + g.tan[1] * mv];
+    // (kept off another lot and off the other gates; else left out as before)
+    if (L.some((o) => hit(o.rect, [at[0] - 0.3, at[1] - 0.3, at[0] + 0.3, at[1] + 0.3])) || near({ at }, R0 - 0.05)) return null;
+    return { ...e, at, y: e.t === 'figure' ? Math.min(e.y, height(at[0], at[1]) + 0.15) : e.y };
+  }).filter(Boolean));
   CACHE = { tiles, life };
   return CACHE;
 }

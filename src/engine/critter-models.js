@@ -574,3 +574,33 @@ export function goat(variant) {
 }
 MODELS.goat_black = () => goat('black');
 MODELS.goat_white = () => goat('white');
+
+// ═════════════ the silver gull (Sydney's quay) ═════════════
+/** A silver gull standing, 0.4 m long: white head, body and tail, a pale grey back and folded wings with black tips, a red bill and red legs (the fowl's parts: 1 neck, 2 head, 3 tail, 4 5 legs). */
+export function silverGull() {
+  const m = new Model(), C = { back: [0.72, 0.75, 0.79], breast: [0.97, 0.97, 0.96], tip: [0.09, 0.09, 0.11], red: [0.82, 0.14, 0.1] };
+  const S = [[0.15, 0.2, 0.03, 0.028], [0.09, 0.215, 0.058, 0.052], [0.0, 0.21, 0.07, 0.062], [-0.09, 0.2, 0.058, 0.05], [-0.18, 0.195, 0.02, 0.02]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 8, col: ({ p, n }) => lerp(C.back, C.breast, sm(0.5, -0.2, n[1]) * (1 - sm(-0.02, 0.08, -p[0]) * 0.4)) });
+  for (const z of [-1, 1]) {
+    m.ball([-0.03, 0.245, z * 0.062], [0.14, 0.03, 0.026], C.back, { nu: 5, nv: 5 });
+    m.ball([-0.17, 0.238, z * 0.05], [0.07, 0.016, 0.016], C.tip, { nu: 4, nv: 5 });
+  }
+  m.as(3, [-0.17, 0.2, 0], null, () => m.poly([[-0.15, 0.2, -0.025], [-0.15, 0.2, 0.025], [-0.24, 0.19, 0.04], [-0.26, 0.185, 0], [-0.24, 0.19, -0.04]], [C.breast, C.breast, C.breast, C.breast, C.breast]));
+  const NP = [0.1, 0.225, 0], HP = [0.135, 0.285, 0];
+  m.as(1, NP, null, () => m.tube([[0.095, 0.225, 0], [0.12, 0.26, 0], [0.135, 0.29, 0]], [0.034, 0.028, 0.024], { sides: 6, ref: [1, 0, 0], col: C.breast }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.155, 0.305, 0], [0.03, 0.027, 0.025], C.breast);
+    m.tube([[0.18, 0.3, 0], [0.215, 0.292, 0]], [[0.01, 0.011], [0.003, 0.004]], { sides: 4, col: C.red });
+    m.ball([0.17, 0.312, 0], [0.007, 0.006, 0.007], [0.08, 0.07, 0.07], { nu: 3, nv: 4 });
+    eyes(m, 0.168, 0.314, 0.022, 0.006, [0.12, 0.08, 0.05]);
+  });
+  for (const [part, z] of [[4, -1], [5, 1]]) {
+    const hip = [0.0, 0.16, z * 0.035];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [0.0, 0.08, z * 0.035], [0.006, 0.012, z * 0.035]], [0.012, 0.007, 0.006], { sides: 4, col: C.red });
+      for (const a of [-0.5, 0, 0.5]) m.tube([[0.006, 0.012, z * 0.035], [0.035, 0.005, z * 0.035 + a * 0.02], [0.06, 0.002, z * 0.035 + a * 0.035]], [0.0035, 0.003, 0.002], { sides: 3, col: C.red });
+    });
+  }
+  return m;
+}
+MODELS.gull_silver = silverGull;
