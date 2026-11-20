@@ -140,3 +140,35 @@ Ten open houses nearest the arrival and along the main walk (merchant's, craftsm
 - **Street.** [stated] Upper rooms look to the lane over projecting bays. [inferred] One room per house has a cedar balcony on corbels with rail that can be stepped onto, and windows as open reveals.
 - **Roof terrace.** [stated] The roof is the women's working and resting place, with high parapets. [inferred] A mat with cushions, a washing line, water jars and a charcoal pot, a low wall round the stair well and a rail round the court's opening.
 - **Still shut.** The other open riads, every closed house, and the funduq's upper gallery (§4 funduq stays as built).
+
+## 16. Match-to-reference pass (2026-11-20): sound, animals, night, the walk, wear
+
+The reference is Suzhou (docs/suzhou-method.md; its §22–§29). No source could be fetched in this pass (the shell reaches few sites); everything below is [inferred] from the dossier's own sections and general knowledge of a Maghribi medina, and marked so. What is [stated] is stated in §4–§9 and repeated here only to say where it lands.
+
+### 16.1 Sound, placed (`src/settlements/fez/soundmap.js`, `src/engine/voices-fez.js`)
+
+Each sound is made at a place of the settlement and heard from the listener's (the engine's `LIFE.map` interface, as Suzhou's and Cairo's). All synthesised from the engine's tools, nothing sampled. Every call, chant and murmur is WORDLESS (vowel contours): no text is recited or sung. Modes: a Maghribi mode on D with a flat second and a flat sixth, used as a gesture, after the Andalusi tradition of §9 [inferred].
+
+| Voice | Where (map) | When | Basis |
+|---|---|---|---|
+| adhan | the engine's call from the minarets (profile `adhan: 1`) | five times | [stated] §8 |
+| basin / fountains | the madrasa's basin, the Qarawiyyin's sahn, twelve wall fountains near the core (`fountains()`) | always, by day louder | [stated] basin §4.1, fountain §4.2; wall fountains [stated] §5 |
+| `fezLesson` | the two classrooms east and west of the court; three circles at the pillars of the Qarawiyyin's north gallery; the naves | 6–17 | [stated] classrooms §4.1, students round a master (life.js) [inferred]; unison answering a master's line [inferred] |
+| `recite` | the Bou Inania's prayer hall, the Qarawiyyin's hall | 4.5–21.5 | [inferred] |
+| `copperBeat` | five anvils on the Place Seffarine | 7.5–17.5, dry | [stated] coppersmiths §4.3, §9 |
+| `fezTannery` | four vats of the Chouara | 6.5–18 | [stated] hand work, treading by bare feet §4.4; slapped hides [inferred] |
+| `fezWeir` | the Oued Fes at each of its four bridges | always | [stated] the river runs through the medina §2; the weirs and quays' rush [inferred] |
+| `fezWash` | the wash-places of the quays | 7–16, dry | [inferred] (`washPlaces()`, §9 quay wash-place women) |
+| `fezHawk`, `fezVend` | twelve points on the Talaa Kebira, the Talaa Seghira, the souks; a hawker walking the lane | 6.5–19 | [inferred] the "make way" call, mint, hot bread, eggs and herbs |
+| `fezMule` | a string of mules along a street: hooves, iron bell, pack frames, the muleteer's short cry | 6–18.5 | [stated] muleteers with donkeys §7; the bell and cry [inferred] |
+| `fezGerrab` | a water seller walking a street, brass cups struck together | 8–18 | [inferred] |
+| dukkans by trade | each dukkan bay (121 rooms): bread (`fezBake`), slippers (`fezSlipper`), leather (`fezLeather`), brass, spice (mortar), cloth, pottery, books, candles, henna | 7–18.5 | [stated] trades §9 (dukkan goods); sounds [inferred] |
+| `loom` | the craftsmen's houses (`up === 'craft'`) | 7–17 | [inferred] §15 loom or wool in a craftsman's workroom |
+| `fezPigeons` | the madrasa's court, the Qarawiyyin sahn, the tannery (the cotes' dung [stated] §4.4), two roofs | 6–18.5 | |
+| `fezSwift` | round the Qarawiyyin and the Bou Inania minarets | 16.5–19.5, dry | [stated] swifts §8 |
+| `fezRabab` | a bowed fiddle from five rich houses' courts | 19–22.5 | [stated] music: rabab and oud §9 |
+| night | cats' cries, dogs far off, a patrol's steps on the streets | 22–4.5 | [inferred] |
+
+Rooms (from inside): prayer halls and naves (170 Hz, quiet), the covered souks (open to the din), each dukkan by trade, the open riads, an upper floor. Rain on flat roofs is the profile's (`roof: 'flat'`). Not made: bells (a Marinid medina had none for the hours); the water clock's strokes (reported in 1357, after the moment shown, §4.1 [stated]); Ramadan sounds (no season fixed).
+
+Measured, not heard (tools/sound-render.mjs, one event at gain 1 over 14 s): peaks 4.8e-3 to 1.8e-2 of full scale for every voice; centroids: steps 99 Hz, wash 372 Hz, tannery 421 Hz, hawk 880 Hz, rabab 868 Hz, weir 2.0 kHz, gerrab 1.9 kHz, swifts 5.4 kHz; the hawk's contour falls G4 to C4 as written. Not checked: whether any voice is convincing as its source; the density of the whole at a listener's level.
