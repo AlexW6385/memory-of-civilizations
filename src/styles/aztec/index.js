@@ -22,6 +22,7 @@ import { tianguis } from './market.js';
 import { mxDress } from './dress.js';
 import * as CV from './carve.js';
 import { Carver, serpentHead as carvedHead } from './carve.js';
+import { tnHalo } from './halo.js';
 import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes, strip, tlalocBrazier } from './precinct.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue';
@@ -469,6 +470,6 @@ function mxCarve(el, { bag }) {
 
 registerStyle('aztec', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, mx_serpent_head: mxSerpentHead, mx_carve: mxCarve, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse2, mx_pyramid: mxPyramid, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople, calli_front: calliFront, landing, fisher_canoe: fisherCanoe, tule_beds: tuleBeds, plaza_dress: plazaDress, mx_dress: mxDress, huerto, chinampa_house: chinampaHouse, meso_plants: mesoPlants },
+  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, mx_serpent_head: mxSerpentHead, mx_carve: mxCarve, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse2, mx_pyramid: mxPyramid, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople, calli_front: calliFront, landing, fisher_canoe: fisherCanoe, tule_beds: tuleBeds, plaza_dress: plazaDress, mx_dress: mxDress, huerto, chinampa_house: chinampaHouse, meso_plants: mesoPlants, tn_halo: tnHalo },
   objects: {},
 });

@@ -2,6 +2,7 @@
 // channels of the lake, swallows over the avenues and canals, egrets and herons standing in the shallows by the chinampas
 // (the lake's waders), sparrows on the plaza and the lanes, and the black birds that gather over the temples at dusk.
 import { RADIUS, LEVEL, ISLAND, CANALS, CAUSEWAY, GAP, TM, inLake } from './layout.js';
+import { openSet, figureSpot } from './walk.js';
 
 const clipEnd = (v) => Math.sqrt(Math.max(0, (ISLAND - 8) ** 2 - v * v));
 /** Negative inside the water of a canal (its distance from the nearer bank), positive outside. */
@@ -46,4 +47,22 @@ for (const [x, z, kind] of [[-100, 197, 'egret'], [120, -197, 'heron'], [-80, -2
 for (const [x, z] of [[10, 60], [-20, 30], [-10, -40], [30, -28], [-100, 3], [-180, 55], [-190, 78], [-176, 30], [-80, 80], [60, 140], [100, 160], [-60, 210], [180, 60], [-150, -200], [140, -190], [-18, 140], [0, -150]])
   perches.push({ kind: 'sparrow', x, z, y: 0.04, rot: 0.3 + (x * 7 % 3), range: [1.3, 1.2] });
 void GAP;
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §23) ──
+const critters = [];
+// the compounds the visitor can enter along the avenue and the market (the priests' lane keeps no yard animals): a turkey or two in the patio, kept out of
+// the lane from the gate to the hearth room's door and away from the people there, and a dog asleep at the far side of some
+const west = [...openSet()].filter((h) => (h.rect[0] + h.rect[2]) / 2 < -150).sort((a, b) => a.seed - b.seed);
+west.forEach((h, i) => {
+  const people = figureSpot(h, i), first = figureSpot(h, i + 7, people ? [people] : []);
+  if (first) critters.push({ model: 'turkey', at: [first[0], 0.42, first[1]], rot: (i * 2.1) % 6.28, range: [1.6, 1.3], tau: 12, speed: 0.4, stride: 0.26 });
+  if (i % 3 === 0) { const second = figureSpot(h, i + 13, [...(people ? [people] : []), ...(first ? [first] : [])]); if (second) critters.push({ model: 'turkey', at: [second[0], 0.42, second[1]], rot: (i * 1.3) % 6.28, range: [1.6, 1.3], tau: 12, speed: 0.4, stride: 0.26, size: 0.94 }); }
+  if (i % 4 === 1) { const third = figureSpot(h, i + 3, [...(people ? [people] : []), ...(first ? [first] : [])]); if (third) critters.push({ model: 'dog', at: [third[0], 0.42, third[1]], rot: (i * 0.9) % 6.28, range: [3.2, 2.2] }); }
+});
+// a raft of ducks (the farm's, white and dark) on the west canal south of the market, and another north of the avenue's bridge, among the canoes
+{
+  const dist = canalDist(CANALS[3]);
+  critters.push({ type: 'floaters', models: ['duck_brown', 'duck_white', 'duck_brown', 'duck_brown', 'duck_white'], raft: true, area: [-222.5, 104, -217.5, 150], dist, a: [10, 0.9], ratio: 0.12, margin: 1.7, y: LEVEL.water, speed: 0.2, cycle: [18, 30] });
+  critters.push({ type: 'floaters', models: ['duck_brown', 'duck_brown', 'duck_brown', 'duck_white'], raft: true, area: [-222.5, -56, -217.5, -16], dist, a: [10, 0.9], ratio: 0.12, margin: 1.7, y: LEVEL.water, speed: 0.2, cycle: [18, 30] });
+}
+export default { fish, flights, perches, critters };
