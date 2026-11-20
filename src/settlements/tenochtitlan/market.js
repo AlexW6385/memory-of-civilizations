@@ -55,6 +55,12 @@ export function aisles() {
   out.push([X0 - 3.6, Z0, X0 - 0.4, Z1]);                                     // the quay along the canal
   return out;
 }
+/** The people standing in the row aisles (five to an aisle, off its middle line by up to 0.8 m): read by plan.js (the figures) and walk.js (the routes steer clear of them). */
+export function spots() {
+  const rp = rng(3), out = [];
+  for (const [ax0, az0, ax1, az1] of aisles().slice(0, GEOM.rows + 1)) for (let i = 0; i < 5; i++) out.push([ax0 + 3 + rp() * (ax1 - ax0 - 6), (az0 + az1) / 2 + (rp() - 0.5) * 1.6]);
+  return out;
+}
 /** The pavilion where the market's judges sat (Díaz: "three judges"; Cortés: ten or twelve), on the south side. */
 export const JUDGES = [X0 + 8, Z1 - 7.4, X0 + 17, Z1 - 3.4];
 /** The landing stairs to the canal (z of their centres) and the canoes at them. */
