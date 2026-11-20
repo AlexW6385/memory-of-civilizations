@@ -8,9 +8,8 @@
 // house door. Everything is a function of its own place (no counters, no Math.random).
 
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { box, lathe, rod } from '../../core/geom.js';
+import { lathe, rod } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
-import * as F from '../../styles/mughal/furnish.js';
 import { SHOPS_N, SHOPS_S, TAPCHANS, BAZAAR, CHORSU, houseGeom, inRect, SQUARE } from './layout.js';
 
 /** A number in [0, 1) from a position alone. */
@@ -155,37 +154,38 @@ function wrapElement(name, o = {}) {
 }
 
 // ── the lamp in the niche by a house's street door ───────────────────────────────────────────────────────
-/** A clay oil lamp in a small niche beside the street door of a rich house, and of one in three of the others; its glow and the pool on the lane. */
+/** The light of a clay oil lamp in a niche beside the street door of a rich house, and of one in three of the others: its glow, a wash on the wall, the pool on the lane (no lamp body: the flame sits in a niche, and a fine piece of a new material in every plan would be a draw of its own). */
 function doorLamp(el, { bag }) {
   const h = el.h;
   if (!h || el.simple || h.garden || (!h.rich && hashAt(h.seed, 5, 41) > 0.34)) return;
   const G = houseGeom(h), side = hashAt(h.seed, 3, 7) < 0.5 ? -1 : 1, u = h.xd + side * 1.45, v = G.D / 2;
   const p = G.toWorld(u, v), q = G.toWorld(u, v + 1), nx = q[0] - p[0], nz = q[1] - p[1];
   const H = new Halo(), y = 1.95;
-  // the lamp stands on a little bracket against the wall (a niche's worth), flame outward
-  const bx = p[0] + nx * 0.07, bz = p[1] + nz * 0.07;
-  bag.add('wood_dark', box(bx - 0.07, y - 0.05, bz - 0.07, bx + 0.07, y - 0.02, bz + 0.07));
-  F.oilLamp(bag, null, bx, y - 0.02, bz, 'terracotta', 0);
-  H.ball(bx + nx * 0.2, y + 0.1, bz + nz * 0.2, 0.55);
+  H.ball(p[0] + nx * 0.22, y + 0.1, p[1] + nz * 0.22, 0.55);
   H.floor(p[0] + nx * 1.1, 0.04, p[1] + nz * 1.1, 1.7, 0.7);
   H.wall(p[0] + nx * 0.03, y + 0.1, p[1] + nz * 0.03, [nx, nz], 0.9, 0.8, 0.5);
   H.flush(bag);
 }
 
 // ── the night of the square, the shop rows and the bazaar ───────────────────────────────────────────────
-/** A brass lantern hung on a short chain at (x, y, z) (its top): the cap, a body of pierced glow-glass, the base. */
+// (every piece of these is 0.4 m or more in its largest side, so that it joins the plan's main mesh of its material: a fine piece of a material not yet there
+// would be a mesh, and a draw, of its own: dossier §20.1)
+/** A brass lantern hung on a short chain at (x, y, z) (its hook): one bronze piece (chain, cap, a column inside the glass, the base), the 0.42 m body of glow-glass. */
 function hungLantern(bag, x, y, z) {
-  bag.add('iron', rod([x, y, z], [x, y - 0.14, z], 0.006, 3));
-  bag.add('bronze', lathe([[0.001, -0.14], [0.05, -0.15], [0.09, -0.2], [0.001, -0.2]], 8, null, x, y, z));
-  bag.add('lamp_glass', lathe([[0.075, -0.2], [0.095, -0.27], [0.095, -0.38], [0.07, -0.44]], 8, null, x, y, z));
-  bag.add('bronze', lathe([[0.001, -0.44], [0.07, -0.44], [0.055, -0.48], [0.001, -0.48]], 8, null, x, y, z));
+  // (the shape varies by the hash of its own place, so that no twelve are alike and none is drawn instanced: a radius in four steps, six to nine sides)
+  const k = 0.88 + 0.12 * Math.floor(hashAt(x, z, 61) * 4), n = 6 + Math.floor(hashAt(z, x, 62) * 4), w = (r, h) => [r * k, h];
+  bag.add('bronze', lathe([[0.003, 0], [0.003, -0.16], [0.05 * k, -0.17], [0.12 * k, -0.24], [0.1 * k, -0.265], [0.012, -0.28], [0.012, -0.68], [0.09 * k, -0.69], [0.11 * k, -0.72], [0.001, -0.74]], n, null, x, y, z));
+  bag.add('lamp_glass', lathe([w(0.1, -0.265), w(0.12, -0.34), w(0.12, -0.55), w(0.1, -0.69)], n, null, x, y, z));
 }
-/** An iron lamp stand 1.7 m tall: three legs, a pole, a dish of oil with a wick's flame (the lamp of a gate or a square). */
+/** An iron lamp stand 1.7 m tall (in bronze, the style's metal): three legs, a pole, a broad dish of oil (the flame is the halo's glow). */
 function lampStand(bag, x, z, y0 = 0) {
-  for (let i = 0; i < 3; i++) { const a = i / 3 * TAU + 0.4; bag.add('iron', rod([x + Math.cos(a) * 0.3, y0, z + Math.sin(a) * 0.3], [x, y0 + 0.5, z], 0.014, 4)); }
-  bag.add('iron', rod([x, y0 + 0.45, z], [x, y0 + 1.62, z], 0.018, 5));
-  bag.add('iron', lathe([[0.001, 1.6], [0.07, 1.62], [0.15, 1.72], [0.16, 1.78], [0.13, 1.76], [0.001, 1.68]], 10, null, x, y0, z));
-  bag.add('flame', lathe([[0.001, 0], [0.04, 0.05], [0.025, 0.2], [0.001, 0.3]], 7, null, x, y0 + 1.7, z));
+  for (let i = 0; i < 3; i++) { const a = i / 3 * TAU + 0.4; bag.add('bronze', rod([x + Math.cos(a) * 0.3, y0, z + Math.sin(a) * 0.3], [x, y0 + 0.5, z], 0.014, 4)); }
+  bag.add('bronze', rod([x, y0 + 0.45, z], [x, y0 + 1.62, z], 0.018, 5));
+  bag.add('bronze', lathe([[0.001, 1.6], [0.08, 1.62], [0.2, 1.72], [0.22, 1.78], [0.19, 1.76], [0.001, 1.68]], 10, null, x, y0, z));
+}
+/** A fire basket 0.84 m across on its foot, one bronze piece. */
+function fireBasket(bag, x, z) {
+  bag.add('bronze', lathe([[0.001, 0], [0.14, 0], [0.06, 0.12], [0.05, 0.4], [0.3, 0.52], [0.42, 0.62], [0.4, 0.66], [0.34, 0.64], [0.2, 0.56], [0.001, 0.52]], 14, null, x, 0, z));
 }
 
 /** The places of the night's lamps on the square and along the shop rows and bazaar streets: { hang: [[x, y, z, nx, nz]], stands: [[x, z]], fire: [[x, z]], tray: [[x, y, z]] }. */
@@ -229,8 +229,8 @@ function timNight(el, { bag, col }) {
   }
   if (part !== 'square') { H.flush(bag); return; }
   for (const [x, z] of S.stands) { lampStand(bag, x, z); col?.circle(x, z, 0.3, 0, 1.8); H.ball(x, 2.0, z, 1.0, 0.66); H.floor(x, 0.04, z, 3.4, 0.8, 12); }
-  for (const [x, z] of S.fire) { F.brazier(bag, null, x, 0, z, 0.3); col?.circle(x, z, 0.4, 0, 0.3); H.ball(x, 0.55, z, 1.1, 0.72); H.floor(x, 0.04, z, 3.0, 0.85, 12); }
-  for (const [x, y, z] of S.tray) { F.oilLamp(bag, null, x + 0.1, y + 0.1, z + 0.18, 'bronze', 0); H.ball(x + 0.1, y + 0.3, z + 0.18, 0.6); H.floor(x, 0.69, z, 1.8, 0.7, 10); }
+  for (const [x, z] of S.fire) { fireBasket(bag, x, z); col?.circle(x, z, 0.45, 0, 0.7); H.ball(x, 0.75, z, 1.1, 0.72); H.floor(x, 0.04, z, 3.0, 0.85, 12); }
+  for (const [x, y, z] of S.tray) { H.ball(x + 0.1, y + 0.3, z + 0.18, 0.6); H.floor(x, 0.69, z, 1.8, 0.7, 10); }
   H.flush(bag);
 }
 
