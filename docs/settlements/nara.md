@@ -192,3 +192,15 @@ What lit the capital in 752, and what is built of it (halo material only; no lig
 - Night (arrival, draw-count): main draws 255 -> 260, total 661 -> 673 (the halo material in the landmark, the tiles and the near detail; over the +2 aim, within the 800 limit); main tris 1.92 M -> 1.93 M. geo-one 84.4 MB / 2426 meshes (limit 130 MB / 2800). surface-check ok, plan-check ok, walk-check ok (30 routes, 67 legs).
 - Lights built: 6+4 fire baskets, 22 lamp stands, 4 torch posts, lit lattice windows and room lamps in the houses, the altar's two lamps, the octagonal lantern.
 - Not verified: the 752 forms of the lamp stand, basket and torch post (inferred); the night render was looked at from the court only.
+
+### 19.3 Sound
+Nothing of Nara in 752 was recorded; every voice is synthesised and [inferred] from the instruments and hours named. Map: `src/settlements/nara/soundmap.js`; voices: `src/engine/voices-nara.js` (names prefixed `nara`), with the sutra chant, the saws, loom, hammer, wheel, straw and the bird and insect voices of `voices-kyoto.js` used as they are.
+- **The great bell** of Tōdai-ji, five slow strokes at about 80 Hz, at dawn and dusk from the bell tower (108, -92) [stated: the bell is the temple's; its date and the tower's place are as built, §10]; the engine's own bell schedule is off.
+- **Drum at the Great South Gate** at dusk, slow strokes closing the gates [inferred: drums marked the closing of the gates of Chinese-model capitals; for Heijō-kyō not sourced].
+- **Sutra chant** in the Great Buddha Hall at the morning and evening service [inferred: the daily offices of a great temple].
+- **Court music (gagaku)** rehearsed at the dance stage: a chord of mouth-organ tone, a reed's slow line, a drum [stated: music and dance at the 752 ceremony, §10; the rehearsal is inferred].
+- **Service quarter and trades**: the scribes' brush and paper in the scriptorium, the kitchen's bowls and the carpenters' adze in their houses, and the sounds of the weavers, smiths, potters and straw-workers in the open craft houses; heard by day [inferred from the uses of §16-§17].
+- **Pedlars** crying salt, greens, fish and oil in the streets (wordless contours) [inferred from the goods of the East Market].
+- **Birds and insects** by season and hour: bush warbler (spring), lesser cuckoo (summer nights), evening cicada (late summer), bell cricket (autumn nights), owl; **stags** calling from the hills in the autumn rut [stated in general: the Man'yōshū has many poems of the calling stag and the cuckoo; the voices' contours are ours].
+- **Rooms**: the open houses by use (their own tone, small sounds), the Great Buddha Hall (low, vast, hushed). Wells (18 of the yards and two at the service lane) are the engine's `wellBucket` places.
+- Measured (tools/sound-render.mjs): bell centroid 77 Hz peak 63 Hz before raising to 80 Hz; gagaku centroid 461 Hz; drum 98 Hz, 14 onsets in 14 s; adze 15 onsets; scribe centroid 4.3 kHz. Test `tests/nara-sound.test.mjs` (8 tests, 10 s).
