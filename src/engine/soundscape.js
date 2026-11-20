@@ -70,6 +70,7 @@
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
+import * as AGRA from '../settlements/mughal-agra/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
@@ -190,7 +191,7 @@ export const PROFILES = {
     cicadas: 0.7, frogs: 0.8, roof: 'xiaoqing', bells: 'suzhou',
     animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: SUZHOU }),
   }),
-  'mughal-agra': T(IND, { cicadas: 0.5, animals: { cattle: 0.4, horse: 0.3, rooster: 0.3, dog: 0.3 }, roof: 'flat', adhan: 2 }),
+  'mughal-agra': T(IND, { cicadas: 0.5, animals: withLife({ cattle: 0.4, horse: 0.3, rooster: 0.3, dog: 0.3 }, { market: 1, eaves: 1, map: AGRA }), roof: 'flat', adhan: 2 }),
   muscovy: T({ crow: 1, sparrow: 0.8, warbler: 0.4 }, { animals: { horse: 0.7, dog: 0.4, rooster: 0.4, cattle: 0.2 }, roof: 'shingle', bells: 'zvon' }),
   nara: T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { dog: 0.2 }, roof: 'tile', bells: 'bonsho' }),
   'new-york': T({ sparrow: 0.8 }, { animals: withLife({ horse: 0.2 }, { market: 1, map: NEWYORK }), roof: 'flat' }),

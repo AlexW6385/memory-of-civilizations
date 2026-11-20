@@ -4,6 +4,7 @@
 // pool; the walls and their octagonal towers; the great gate; the forecourt.
 
 import { upWalks } from './walks.js';
+import { rows, cellRoutes } from './cells.js';
 import { TERRACE, PLINTH, GARDEN, GATE, FORECOURT, POOL, GWALKS, GW, GRIM } from './layout.js';
 
 const E = [];
@@ -67,7 +68,7 @@ wall([fx0, fz0], [fx0, BZ - GTW / 2]); wall([fx0, BZ + GTW / 2], [fx0, fz1]); wa
 wall([fx0, fz1], [-GTW / 2, fz1]); wall([GTW / 2, fz1], [fx1, fz1]);
 for (const sx of [-1, 1]) {
   E.push({ t: 'bazaar_gate', c: [sx * fx1, BZ], axis: 'x', w: GTW, d: 8, h: 11 });
-  for (const sz of [-1, 1]) E.push({ t: 'bazaar_row', x0: sx < 0 ? fx0 + 4.2 : 48, x1: sx < 0 ? -48 : fx1 - 4.2, z: BZ + sz * BW, facing: sz < 0 ? 's' : 'n', cell: 3.2, deep: 4, ver: 3 });
+  for (const sz of [-1, 1]) { const r = rows().find((q) => q.sx === sx && q.sz === sz); E.push({ t: 'agra_row', x0: r.x0, x1: r.x1, z: r.z, facing: r.facing, cell: 3.2, deep: 4, ver: 3, open: r.open }); }
   E.push({ t: 'lane', rect: sx < 0 ? [-170, BZ - BW, fx0 - 4, BZ + BW] : [fx1 + 4, BZ - BW, 170, BZ + BW], y: 0.04, mat: 'sandstone_red' });
 }
 E.push({ t: 'bazaar_gate', c: [0, fz1], axis: 'z', w: GTW, d: 8, h: 11 });
@@ -99,6 +100,6 @@ export const taj = {
   bakeTop: 80,
   elements: E,
   rooms,
-  walks: [...walks, ...upWalks()],
+  walks: [...walks, ...upWalks(), ...cellRoutes()],
 };
 export default taj;
