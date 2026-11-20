@@ -227,3 +227,9 @@ The pass brings Giza to the standard of the reference settlement (docs/suzhou-me
 ## 21. Animals with behaviour (2026-11-20)
 
 Critters (rigged small animals that walk, lie, stand and look up as the visitor comes; src/settlements/giza/fauna.js, engine models only): dogs at the lodgings' doors, by two of the camps' fires and at four houses of the gate street; goats in five of the town's pens (AERA's "A View from the Herd: Cattle, Sheep, Goats, and Pigs" names the stock of the site [stated: §5c]); five geese on the quay, a crane stalking the south quay (cranes were kept and fattened, as tomb scenes of the Old Kingdom show), brown and white ducks afloat in the basin, a kingfisher at the quay's edge, two cats at houses [inferred: species general to the Memphite region and period; the cat is the least certain, domestic cats being shown in Old Kingdom tombs from the Fifth Dynasty, a little later]. Not here: hens and cocks (the fowl reached Egypt in the New Kingdom), pigeons. Oxen, donkeys and sheep stay the street-life figures of §12–§15 (no critter model).
+
+## 22. Writing, wear and budget
+
+Writing: Khufu's prenomen (Khufu, the sign group x-w-f-w: Aa1 G43 I9 G43) was checked against pharaoh.se, but the sign shapes are not certain enough to draw, so no hieroglyphs are drawn anywhere at Giza. Worn things already present: soot over house lamps, ash beds at the bakeries, worn thresholds and bench ends.
+
+Budget at the building date (main draws at the arrival 220 -> 222; arrival triangles 2.98 -> 3.03 M; geo-one 31.7 MB / 771 meshes -> 32.5 MB / 791). The lodge doorway lamps and the works temple's lamp-stands have no night halo, to hold the arrival's draw count. Along the walk the town positions still exceed 450 draws (583 at x 140, z 150; 686 at x 10, z 215); master is higher at the same points (724 and 848). The quay stays at 335.
