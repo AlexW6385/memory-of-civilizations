@@ -172,3 +172,13 @@ Each sound is made at a place of the settlement and heard from the listener's (t
 Rooms (from inside): prayer halls and naves (170 Hz, quiet), the covered souks (open to the din), each dukkan by trade, the open riads, an upper floor. Rain on flat roofs is the profile's (`roof: 'flat'`). Not made: bells (a Marinid medina had none for the hours); the water clock's strokes (reported in 1357, after the moment shown, §4.1 [stated]); Ramadan sounds (no season fixed).
 
 Measured, not heard (tools/sound-render.mjs, one event at gain 1 over 14 s): peaks 4.8e-3 to 1.8e-2 of full scale for every voice; centroids: steps 99 Hz, wash 372 Hz, tannery 421 Hz, hawk 880 Hz, rabab 868 Hz, weir 2.0 kHz, gerrab 1.9 kHz, swifts 5.4 kHz; the hawk's contour falls G4 to C4 as written. Not checked: whether any voice is convincing as its source; the density of the whole at a listener's level.
+
+### 16.2 Animals with behaviour (`fauna.js` `critters`, `src/engine/fauna-critters.js`; test `tests/fez-critters.test.mjs`)
+
+One mesh (`fauna:critters`, one draw, not counted by `draw-count`), 42 animals, all existing models (nothing added to the engine). [stated] §8: swifts, martins, jackdaws, sparrows, an egret (the engine's old system keeps them); pigeons and their dung in the tannery §4.4; donkeys with muleteers §7 (still street-life figures: no donkey rig exists). The rest is [inferred]:
+- **House martins' nests.** Two cups of mud on the cedar corbels under the canopy of the Bou Inania's prayer-hall front, open to the court, from which the birds sweep out over the court and back (radius 7 m, dipping 3 m). [inferred: martins nest under eaves; the corbels' places are taken from `hallfront.js`/`kit.js canopy`, 0.55 m apart from the gallery's west end.]
+- **Cats** (6 orange, 11 tabby) asleep on the floor of a share of the dukkans' cells by the jamb, lifting their heads as the visitor comes near. [inferred: the cats of a Muslim city's markets; no source for Marinid Fez.]
+- **Hens and a cock** in the funduq court's south-west corner. [inferred: the funduq kept fowl with its animals.]
+- **Pigeons** (18) on the paving of the Place Seffarine, the Qarawiyyin's sahn and the tannery's north walk. [stated for the tannery's use of pigeon dung §4.4; the flocks' places inferred.]
+- **Three caged songbirds** hung from the lintels of dukkans on the Talaa Kebira, swaying and hopping. [inferred: caged birds are a commonplace of Maghribi shopfronts; none is documented for 1350.]
+Not done: a donkey and a mule rig (the muleteers' donkeys are still still figures); storks on the walls (§8: not in our sources); the egret and swifts stay as the old flocks.
