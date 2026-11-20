@@ -232,3 +232,8 @@ Sources added:
 ## 26. Animals as critters (round 7; `fauna.js`)
 
 - Rigged animals with behaviour [inferred: that these species stood at these places in AD 50; the black goat after the black goat-hair tents, §18]: dogs at two Outer Siq houses and at the tents; black and white goats at two tents' yards and three pens; a rooster and three hens before one Outer Siq house; a cat on each of two benches of the south portico; rock doves on the paving by the Nymphaeum, the forecourt's basin and the altar's stair; house swallows' nests under the cornices of four Outer Siq houses, birds sweeping out from them. 28 critters; none enters a house or a walk route (tests/petra-critters.test.mjs). Camels, donkeys and the caravan's dog remain static life figures (no camel rig exists).
+
+## 27. Wear and writing (round 7; `wear.js`)
+
+- **Wear** [inferred]: in a dry stone country the marks of use are polish and wear, not moss or damp: the doorstep of every house, the gate sill and flags of a court house, the way across the floor to the range's door, and each shop's threshold and the way in, laid as a patch of the paler, smoother dressed stone of a few hundredths of a metre, its width varying by the hash of the place. The style's existing dress (§18: runnels under windows, soot over doors, drifted sand and stones at the foot, mud and lime patches) is kept.
+- **Writing:** none added. The shop signs and the steles' lines remain plain strokes (§22). Nabataean Aramaic could be written only from a checked glyph table (Unicode block 10880), which could not be fetched here; a wrong letter is worse than none.
