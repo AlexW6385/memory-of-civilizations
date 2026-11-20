@@ -116,7 +116,7 @@ const wrap = (name, fn) => function haloed(el, ctx) {
   if (dw && el.enter) {
     // the door ajar: the lamp's light spilling over the step into the lane
     const F = dwellingFrame(el), [px, pz] = F.P(F.du, -1.1);
-    H.floor(px, (el.y ?? 0) + 0.06, pz, 1.7, 1.2, 8, 0.4);
+    H.floor(px, (el.y ?? 0) + 0.06, pz, 2.2, 1.6, 8, 0.7);
   }
   H.flush(ctx.bag);
   return r;
