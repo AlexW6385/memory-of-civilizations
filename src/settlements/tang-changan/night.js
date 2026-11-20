@@ -73,11 +73,10 @@ const hall = (el) => { // door of an element of the Tang hall family
   return { dw, dh, y: (el.y ?? 0) + (el.plat ?? 0) };
 };
 
-const SKIP = (k) => typeof process !== 'undefined' && (process.env?.TC_SKIP || '').split(',').includes(k);
 let DONE = false;
 /** Wrap the elements of the style `tang-changan` for the night. Idempotent. */
 export function registerNight() {
-  if (DONE || (typeof process !== 'undefined' && process.env?.TC_NONIGHT)) return;
+  if (DONE) return;
   const S = STYLES['tang-changan'];
   if (!S) return;
   DONE = true;
