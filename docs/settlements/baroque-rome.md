@@ -112,6 +112,27 @@ Gaps found against Ming Suzhou, and what closed them (`src/styles/baroque/{borgo
 
 Still below Suzhou: the upper storeys of the shops cannot be entered (the stair door is shut: the shop is one vaulted room with 2–6 m of solid mass behind it, too shallow for a stair); the outer ring beyond 115 m is still the shared Roman house with little eye-level detail; no music zone for the Borgo streets (the engine keys zones to the landmark's rooms; a non-open room would also add indoor reverb).
 
+## 6. Matching the reference (round 7): the walk, sound, night, animals, wear and writing
+
+Every line is [stated] with its source or [inferred]. Code: `src/settlements/baroque-rome/{openwalk,soundmap,voices}.js`; the test `tests/baroque-rome-sound.test.mjs`.
+
+### 6a. The walk
+
+- The arrival (110, 0) stands at the oval's mouth, facing west to the steps; the Borgo's two streets lie behind, east. The open bottegas are the casas of the three rows that can be entered (`rows()` units with `open`) and now the fourteen fronted lots nearest the arrival (`BOTTEGHE` in `openwalk.js`, was eight): each a vaulted room six metres deep with its counter, scales, shelves, goods, lantern and a keeper behind the counter [inferred: the Borgo's shops were small street-front rooms under the house; the trades are those of the dossier's §5b].
+- `openShops()` is the one list of the shops that can be entered; town.js, the sound map and the walk-check routes all read it so that they cannot disagree.
+
+### 6b. Sound
+
+The sounds of the place and date, placed where they are made and heard by hour and weather (`soundmap.js`; voices in `voices.js`, all named `brm…`).
+- *Water:* the piazza's two fountains, a steady broad rush heard across the oval at every hour (`brmFountain`); Maderno's fountain throws its water from an upper bowl into a wide basin [stated: vatican.va, §4 above]; the wall fountains of the Borgo's houses (the engine's `fountain`) [inferred: placing]; the floating ship-mills of the Tiber, their paddle-wheels slapping the stream and the hulls creaking, day and night (`brmMill`) [stated: the ship-mills, Wikipedia "Ship mill"; their sound inferred]; washerwomen pouring and wringing cloth on the west bank by day [inferred: §5b]; the lap of the bank's stones.
+- *Voices:* the market's cries at the Borgo's mouth by morning (the engine's wordless `marketCry`), the water-seller's and the pedlars' calls along the streets (`brmCry`: a fall held low, a climb, two notes repeated) [inferred: Rome's street cries are well documented as a genre (Ambrogio Brambilla's and Annibale Carracci's "Arti di Bologna" series show the cries' trades; no contour survives, so ours are invented]; pilgrims murmuring a litany at the steps and the obelisk; a confraternity's procession with its leader's phrase and the brothers' answer on one recitation note and a hand-bell (`brmLitany`), passing along the streets by day [inferred from the dossier's §5b procession; the Holy Years' confraternities processed to St Peter's: stated, History Today "Pilgrims and Poverty in Renaissance Rome"].
+- *Guard and watch:* the Swiss at the colonnade's mouths grounding their halberds at the change of guard (`brmHalberd`) [stated: the Swiss Guard has served the pope since 1506; the drill inferred]; the night patrol of the Borgo, two men's steps, a scabbard, a lantern's chain, a low challenge (`brmPatrol`) [inferred: a papal city had watchmen by night].
+- *Traffic:* a gala coach at a walk over the setts, the pair's iron-shod hoofs in four beats, the rumble of the wheels and the creak of the body on its leather braces, the harness (`brmCoach`) [inferred: §5, the coaches]; walkers on the Ponte Sant'Angelo.
+- *Work in the shops, by trade and hour:* the baker's sacks and kitchen before noon; the grocer's sacks and coin; cloth, scissors; the apothecary's mortar; the cobbler's tacks; the wine shop's pouring; the osteria's talk and cups into the evening; the medal-seller's rosary beads (`brmBeads`, the Holy Years' trade) [inferred from the trades; the baker's early hours from the dossier §5b].
+- *Rooms:* the basilica (a hush, footfalls, murmur, a long reverb), the Sistine Chapel, the open shops and the inns by trade.
+- *Bells:* the profile's Angelus at dawn, noon and dusk [stated: Wikipedia "Angelus", cited in `soundscape.js`]. Nothing is made for the Chinese tracks (sedan chant, rattle-drum, clapper).
+- *Season and weather:* cicadas in the gardens and the hill in summer; the rain on tile roofs and the eaves; frogs by the Tiber's reeds in the warm nights [inferred: Latium's summer].
+
 ## Sources
 
 - [Sistine Chapel — Wikipedia](https://en.wikipedia.org/wiki/Sistine_Chapel) (fetch refused this session; used for the entries under the Sistine Chapel from general knowledge, to be checked)

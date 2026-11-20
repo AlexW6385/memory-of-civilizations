@@ -73,6 +73,7 @@ import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
 import * as AGRA from '../settlements/mughal-agra/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
+import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
 import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
@@ -125,7 +126,7 @@ export const PROFILES = {
   athens: T(MED, { cicadas: 0.9, animals: withLife({ rooster: 0.6, donkey: 0.5, sheepbell: 0.4, dog: 0.3 }, { market: 0.8, map: ATHENS }) }),
   babylon: T({ ...NEAR, gull: 0 }, { frogs: 0.4, animals: { donkey: 0.7, dog: 0.4, rooster: 0.2 }, roof: 'flat' }),
   barcelona: T(MED, { cicadas: 0.3, animals: { dog: 0.3, horse: 0.4 }, bells: 'angelus' }),
-  'baroque-rome': T(MED, { cicadas: 0.4, animals: { horse: 0.5, dog: 0.3, donkey: 0.2 }, bells: 'angelus' }),
+  'baroque-rome': T(MED, { cicadas: 0.4, animals: withLife({ horse: 0.5, dog: 0.3, donkey: 0.2 }, { market: 0.9, eaves: 1, map: BAROQUEROME }), bells: 'angelus' }),
   borobudur: T(TROP, { cicadas: 1, frogs: 1, animals: { rooster: 1, dog: 0.3, cattle: 0.3 }, roof: 'thatch' }),
   cahokia: T(AMER, { cicadas: 0.6, frogs: 0.8, animals: { dog: 0.6 }, roof: 'thatch' }),
   'chichen-itza': T(TROP, { cicadas: 1, frogs: 0.5, animals: { dog: 0.4 }, roof: 'thatch' }),
