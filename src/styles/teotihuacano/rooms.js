@@ -17,6 +17,8 @@ import { fig, rng as prng } from './street.js';
 
 const el_seed = (j, a) => Math.floor(Math.abs(a) * 7 + j * 13) + 1;
 const S = 'stucco_ochre', RD = 'stucco_red', WH = 'stucco_pale';
+import { DOOR_HALF } from './doors.js';
+export { DOOR_HALF, roomDoors } from './doors.js';
 
 /**
  * The rooms in `back` (the block behind a portico, [x0, z0, x1, z1]) from floor ph to ceiling ceil, their front
@@ -31,7 +33,7 @@ export function porticoRooms(ctx, back, [fx, fz], ph, ceil, roles, rand) {
   const P = (u, v) => (fx ? [front - s * v, u] : [u, front - s * v]);
   const inward = Math.atan2(-fx, -fz);                                    // yaw of a thing facing into the room, away from the door
   const W = (r, y0 = ph, y1 = ceil + 0.02) => { bag.add(S, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
-  const n = roles.length, cell = (U1 - U0) / n, dh = Math.min(1.9, ceil - ph - 0.25), dw = 0.5;
+  const n = roles.length, cell = (U1 - U0) / n, dh = Math.min(2.0, ceil - ph - 0.25), dw = DOOR_HALF;
   W(R(U0, U1, D - t, D));                                                 // the back wall
   W(R(U0, U0 + t, t, D - t)); W(R(U1 - t, U1, t, D - t));                 // the end walls
   for (let j = 1; j < n; j++) W(R(U0 + j * cell - t / 2, U0 + j * cell + t / 2, t, D - t));   // the partitions
