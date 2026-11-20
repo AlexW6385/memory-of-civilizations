@@ -4,6 +4,7 @@ import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots, lotMa
 import { pudhuMandapam } from './plan.js';
 import { frontage } from './frontage.js';
 import './unshare.js';
+import { nightElements } from './nightlight.js';
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } });
 /** How far from the temple wall the houses and shops are hollow and furnished (the first four streets' rows). */
 export const RICH = 200;
@@ -24,6 +25,7 @@ export async function town() {
     plans.push({ ...base(`madurai-houses-${k}-far`, list.map((e) => ({ ...e, simple: true, rich: false }))), far: NEAR, center, nocollide: true });
   }
   plans.push(...shopLife(), ...frontage());
+  plans.push({ ...base('madurai-night', nightElements()), style: 'life' });
   plans.push(amenities(), festival(), pudhuMandapam, { ...street(), style: 'life', center: [0, 60], near: 260 });
   return plans;
 }

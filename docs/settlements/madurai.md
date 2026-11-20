@@ -163,6 +163,15 @@ Rigged small animals of the engine's models (one mesh, one draw), all [inferred]
 - **Cats** (orange and tabby) on the thinnais of two houses by the arrival, at the platform's end, looking to the street [inferred].
 - Not added: nests under the eaves (no verified place), squirrels and crows as critters (no model; crows stay as flights); the elephants stay the `elephant` element of §10.
 
+## 20. Night (2026-11 match pass: `nightlight.js`)
+
+What was lit at night about 1650 [inferred: oil lamps and the temple's wicks; no electric light, no street lamps; the temple's own lamps are in §11, the thousand lamp holders of the Thousand-Pillar Hall stated by come2india, §4].
+
+- **The temple.** The lamp stands (kuttuvilakku, five wicks) before the passages of the two shrines' gopurams, the five lamps before each flagstaff, the two rows of clay lamps on the tank's top steps, the two stands before the Nataraja in the Thousand-Pillar Hall: the flames were already built (material `flame`, glowing of themselves); each now throws a glow ball and a pool on the paving in the engine's additive `halo` material, so that it reads at the low preset (no real light needed).
+- **The streets.** The lamp by the door of 45 % of the houses and of half the shops of the first rings (to 175 m from the wall, 70 % of that beyond 100 m): its glow, a pool on the thinnai or the shop's platform and a spill on the street; the trades of the temple streets kept to the lamp until the shrines closed [inferred; the shares are ours].
+- **How.** One street-life plan `madurai-night` of `madurai_halo` elements (four shapes, instanced, drawn within 60 m of the eye): +1 main draw at the arrival. The day picture is unchanged (the material shows at night only).
+- Not lit: windows (the houses have shuttered fronts; the hollow rooms are seen through their doors), the gopuram passages and the processional car (no source for lamps there in 1650).
+
 ## Sources
 
 - [Meenakshi Temple — Wikipedia](https://en.wikipedia.com/wiki/Meenakshi_Temple)

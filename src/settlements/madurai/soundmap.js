@@ -13,7 +13,7 @@ export const FAR = {};
 export const WELLS = [];
 const sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
-export const ASHTA = [103, 6, 127, 18];                      // the Ashta Shakti Mandapam inside the east wall, south of the east gopuram
+export const ASHTA = [104, 34, 128, 46];                      // the Ashta Shakti Mandapam inside the east wall (plan.js)
 
 // ── the streets (rects of the ring streets and the axial ones) ─────────────────────────────
 const ring = ({ off, w }) => [
