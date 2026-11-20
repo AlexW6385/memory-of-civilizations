@@ -153,6 +153,16 @@ Every sound below is [inferred] unless marked; the hours follow the temple's dai
 - **The elephants.** The two temple elephants by the south gate: the bell at the neck, the chain, a rumble, rarely a trumpet [stated: elephants kept at the temple, §10].
 - **Rooms.** Hall, mandapa, shop, court house and house tones (stone roofs take no rain) [inferred].
 
+## 19. Animals with behaviour (2026-11 match pass: `critters` in `fauna.js`)
+
+Rigged small animals of the engine's models (one mesh, one draw), all [inferred] as to place; test `tests/madurai-critters.test.mjs`.
+
+- **Rock pigeons** (six, grey, dark and one white) walking and pecking on the paving of the outer court south of the Sundareswarar enclosure, clear of the elephants' stand; the dossier §13 already has pigeons round the gopurams [inferred: the temple's pigeons come down to the court].
+- **Street dogs** (three) lying at the verge of the Chitrai street and the east ring street, "ownerless and fed by the quarter" as the street dogs of the old cities [inferred]; **goats** (one black, one white) at the outer ring streets' verge, the goat being the poor household's beast in the Tamil country [inferred].
+- **Fowl** (a cock and two hens) scratching in the apron of the Chitrai street [inferred].
+- **Cats** (orange and tabby) on the thinnais of two houses by the arrival, at the platform's end, looking to the street [inferred].
+- Not added: nests under the eaves (no verified place), squirrels and crows as critters (no model; crows stay as flights); the elephants stay the `elephant` element of §10.
+
 ## Sources
 
 - [Meenakshi Temple — Wikipedia](https://en.wikipedia.com/wiki/Meenakshi_Temple)
