@@ -4,6 +4,7 @@
 import '../../styles/manueline/index.js';
 import { lodTiles } from '../lod.js';
 import { lifeElements } from './life.js';
+import { haloElements } from './nightlight.js';
 import { RADIUS, GROUND, SEA, QUAY, PALACE, TERREIRO, YARD, SE, CASTLE, SQUARE, SHIPS, SLIPS, PLAZA, RUA_NOVA, ZS, ALLEYS, shore, height, lots, onStreet, inRect, wet } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -68,7 +69,7 @@ function yard() {
 export async function town() {
   const plans = [harbour(), civic(), yard(), streets()];
   const els = lots().map((l) => (l.kind === 'yard' ? { t: 'manu_yard', rect: l.rect, seed: l.seed, y: l.y, front: l.front } : { t: 'manu_house', rect: l.rect, seed: l.seed, y: l.y, plinth: l.plinth, front: l.front, kind: l.kind, ...(l.storeys ? { storeys: l.storeys } : {}), ...(l.open ? { open: true, use: l.use } : {}), ...(l.up ? { up: l.up } : {}) }));
-  plans.push(...lodTiles('lisbon-houses', 'manueline', els, { R: RADIUS }));
+  plans.push(...lodTiles('lisbon-houses', 'manueline', [...els, ...haloElements()], { R: RADIUS }));
   plans.push(...streetLife());
   return plans;
 }

@@ -177,6 +177,8 @@ const KIT_OVER = {
   // the Polynesians brought the chicken and the rat to Rapa Nui, and no dog; to Aotearoa the dog (kurī) and the rat,
   // and no chicken (https://en.wikipedia.org/wiki/Easter_Island; https://en.wikipedia.org/wiki/Kur%C4%AB)
   'rapa-nui': { street: [['chickens', 1.4], ['basket', 1], ['figure', 2.5]] },
+  // Babylon c. 570 BC (docs/settlements/babylon.md §18): no hanging paper lanterns on the fronts (a clay lamp stood in a niche over the door) and no turbans (the men long-haired and bearded in a long robe or a short belted tunic, the women veiled); donkeys, camels (the caravans), sheep and goats, dogs, a few hens and pigeons
+  babylon: { fronts: [['laundry_pole', 0.5, 2]], door: [['pot:water_pot', 2], ['pot:zir', 1.4], ['pot:pithos', 0.8], ['basket', 2], ['sacks', 1], ['bench', 1], ['stool', 0.5], ['sweeper', 0.3], ['firewood', 0.6]], street: [['animal:donkey', 2.5], ['animal:camel', 0.6], ['animal:goat', 1.2], ['animal:sheep', 1], ['animal:dog', 0.8], ['chickens', 0.3], ['chickens:pigeon', 0.5], ['sacks', 1], ['figure', 2.5]], figures: F(['robe', 'robe', 'tunic'], ['cloth_white', 'linen', 'cloth_ochre', 'cloth_brown', 'cloth_indigo', 'cloth_red'], ['skin_medium', 'skin_light'], ['none', 'none', 'veil'], { carry: ['none', 'none', 'none', 'none', 'sack', 'pot', 'bundle'], broom: 'broom', hair: ['long', 'long', 'bun'], beard: 0.9, over: ['cape', 'sash', 'none', 'cape'], feet: 'shod' }) },
   amsterdam: { street: [['sledge', 2], ['animal:horse', 0.8], ['animal:dog', 0.6], ['barrel', 1.2], ['sacks', 0.8], ['figure', 3]] },
 };
 // the draw-well of each kit (src/objects/index.js well): its kind, its curb, a roof over it

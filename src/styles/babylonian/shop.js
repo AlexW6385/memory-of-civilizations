@@ -46,7 +46,7 @@ export function babylonShop(el, { bag, col, lights }) {
     seg(a, Bn, -0.3, h);
   };
   // the front: a door and the counter window
-  const door = { a: 0.55, b: 1.75, y0: 0, y1: 2.2 }, win = { a: 3.0, b: U - 1.0, y0: 0.95, y1: 2.45 };
+  const door = { a: 0.4, b: 2.0, y0: 0, y1: 2.2 }, win = { a: 3.0, b: U - 1.0, y0: 0.95, y1: 2.45 };
   wall(0, 0, U, t, [door, win], H, true);
   wall(0, V - t, U, V, [], H, true); wall(0, t, t, V - t, [], H, true); wall(U - t, t, U, V - t, [], H, true);
   // the partition between the room and the yard, with the door

@@ -7,6 +7,7 @@ import { lifePlans } from './life.js';
 import { height as ground0 } from './layout.js';
 import { QUFFAS } from './plan.js';
 import './trim.js';
+import { doorClear } from './openwalk.js';
 import { esagilaStatue } from '../../styles/babylonian/temple.js';
 
 const base = (id, elements) => ({ id, style: 'babylonian-g', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, -370], facing: 's' } });
@@ -75,7 +76,7 @@ function people() {
 }
 
 /** Standards of Marduk and braziers along the Processional Way, between its paving and the glazed walls. */
-function wayProps() {
+export function wayProps() {
   const P = [];
   for (const [z0, z1] of [[-368, -318], [-262, -166], [-152, -70]]) for (let z = z0; z <= z1; z += 24) for (const s of [-1, 1]) P.push({ kind: 'standard', at: [WAY.x + s * 9.0, z + (s > 0 ? 6 : 0)], rot: s > 0 ? Math.PI / 2 : -Math.PI / 2, y: 0.12, seed: 1 });
   for (const [dx, z] of [[-5, -64], [5, -64], [-5, -266], [5, -266], [-5, -322], [5, -322]]) P.push({ kind: 'brazier', at: [WAY.x + dx, z], rot: 0, y: 0.12, seed: 2 });
@@ -89,7 +90,7 @@ function wayProps() {
  * foot offering tables, water stands, benches, the altar of burnt offerings and the washing basin. [inferred]
  */
 export const COURT_PAVING = [[-90, -40, 90, 130], [-52, -62, -28, -40], [-14, 130, 14, 148]];
-function courtProps() {
+export function courtProps() {
   const P = [], y = 0.045;
   for (const z of [-50, -30, -14]) for (const s of [-1, 1]) P.push({ kind: 'standard', at: [WAY.x + s * 9.0, z], rot: s > 0 ? Math.PI / 2 : -Math.PI / 2, y, seed: 50 + z });
   for (const s of [-1, 1]) P.push({ kind: 'brazier', at: [WAY.x + s * 5, -38], rot: 0, y, seed: 60 + s });
@@ -121,6 +122,7 @@ export async function houses() {
       : { t: 'babylon_house', rect: l.rect, seed: l.seed, door: l.door, open: !!l.open, school: !!l.school, white: l.open && l.seed % 3 === 0, storeys: l.open ? 1 : storeysOf(l.seed), front: l.door, lite, grade };
     if (!tiles.has(key)) tiles.set(key, []);
     tiles.get(key).push(e);
+    if (l.open || l.shop) tiles.get(key).push({ t: 'door_clear', rect: doorClear(l) });     // (the lane before a door: no animal or thing of the street life stands in it)
   }
   let n = 0;
   for (const E of tiles.values()) for (let i = 0; i < E.length; i += 120) {
@@ -131,10 +133,26 @@ export async function houses() {
   plans.push(base('babylon-yards', yards().map((y) => ({ t: 'babylon_yard', rect: y.rect, door: y.door, kind: y.kind, seed: y.seed, front: y.door }))));
   // the paving of the lanes in the core, the alleys' gutters, the street shrines, troughs, benches and water stands
   plans.push(base('babylon-lanes', [{ t: 'babylon_lanes', rects: [...laneRects(), ...COURT_PAVING], alleys: alleys().filter((r) => Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 60) < 250), props: [...laneProps(), ...wayProps(), ...courtProps(), ...bankProps()] }]));
+  // the night: the glow of the door lamps, the shops' lit windows, the braziers, the offering tables' and shrines' lamps (nightlight.js)
+  plans.push(base('babylon-night', [{ t: 'babylon_night', doors: all.filter((l) => l.open).map((l) => ({ rect: l.rect, door: l.door })), windows: all.filter((l) => l.shop).map((l) => ({ rect: l.rect, door: l.door })), fires: fires([...laneProps(), ...wayProps(), ...courtProps()]) }]));
   plans.push(...lifePlans(base));
   // the market (a market room: the generic life pass adds to it) and the scribes' mats on the quay
   const z = 103, x = riverX(z) + QUAY.d0 + 6.5;
   plans.push({ ...base('babylon-market', [{ t: 'scribe_kit', at: [x, z - 0.8], y: QUAY.y, rot: Math.PI / 2 }, { t: 'scribe_kit', at: [x, z + 0.8], y: QUAY.y, rot: Math.PI / 2, scroll: true }]), rooms: [{ id: 'market', rect: MARKET, y: 0, kind: 'open', market: true }] });
   return plans;
+}
+/**
+ * The fires of the night that no builder lights (docs/settlements/babylon.md §19): each brazier of the Way and the court, the lamp on each offering table, the lamp in each street
+ * shrine's niche: { at, y, h (the flame's height above y), r (the glow's radius) }. The props' own frames: a local point (lx, lz) turned by `rot`.
+ */
+export function fires(props) {
+  const out = [];
+  for (const p of props) {
+    const [x, z] = p.at, Y = p.y || 0, c = Math.cos(p.rot || 0), s = Math.sin(p.rot || 0), at = (lx, lz) => [x + lx * c + lz * s, z - lx * s + lz * c];
+    if (p.kind === 'brazier') out.push({ at: [x, z], y: Y, h: 1.25, r: 0.85 });
+    else if (p.kind === 'offering') out.push({ at: at(-0.4, 0.15), y: Y, h: 1.05, r: 0.35 });
+    else if (p.kind === 'shrine') out.push({ at: at(0.19, -0.66), y: Y, h: 1.15, r: 0.35 });
+  }
+  return out;
 }
 export { people };

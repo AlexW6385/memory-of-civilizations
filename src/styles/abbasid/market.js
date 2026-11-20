@@ -102,6 +102,36 @@ function goods(bag, col, trade, xa, xb, zf, s, rand, y) {
   }
 }
 
+
+/**
+ * An open bay (docs/settlements/abbasid-baghdad.md §19): a bag and a collider that drop whatever would stand in the aisle beside the shortened counter
+ * (x from xa + OPEN_AT to xb, from 1.6 m in front of the front line to 2.7 m inside, between 0.08 and 2.2 m high: flat things such as rugs stay, the
+ * threshold stone goes: a 0.1 m step the walker takes for a wall), and `counter()` which then builds the short counter (0.85 m of board on two trestles, a collider) on the xa side. The aisle is 1.65 m
+ * clear. The calls to rand() are not changed: the pieces are made and then left out, so the other bays come out as they did.
+ */
+export const OPEN_AT = 1.1;
+function openBay(bag, col, xa, xb, zf, s, y) {
+  const lo = Math.min(zf - s * 1.6, zf + s * 2.7), hi = Math.max(zf - s * 1.6, zf + s * 2.7), ax = xa + OPEN_AT;
+  const inLane = (g) => {
+    const a = g.attributes?.position;
+    if (!a) return false;
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, z0 = 1e9, z1 = -1e9;
+    for (let i = 0; i < a.count; i++) { const x = a.getX(i), yy = a.getY(i), z = a.getZ(i); if (x < x0) x0 = x; if (x > x1) x1 = x; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; if (z < z0) z0 = z; if (z > z1) z1 = z; }
+    return x1 > ax && x0 < xb && z1 > lo && z0 < hi && y1 > y + 0.08 && y0 < y + 2.2;
+  };
+  const Z = (v) => zf + s * v;
+  return {
+    bag: { add: (mat, g) => { if (g && !inLane(g)) bag.add(mat, g); }, addInstance: (...a) => bag.addInstance?.(...a) },
+    col: { ...col, rect: (r, y0, y1) => { if (r[2] > ax && r[0] < xb && Math.max(r[1], r[3]) > lo && Math.min(r[1], r[3]) < hi) return; col.rect(r, y0, y1); } /* (the 0.1 m threshold's collider too: a step the walker's raster takes for a wall) */, floor: (...a) => col.floor?.(...a), ramp: (...a) => col.ramp?.(...a), segment: (...a) => col.segment?.(...a), circle: (...a) => col.circle?.(...a) },
+    counter() {
+      const a = Math.min(Z(0.35), Z(0.85)), b = Math.max(Z(0.35), Z(0.85)), a2 = Math.min(Z(0.4), Z(0.8)), b2 = Math.max(Z(0.4), Z(0.8));
+      bag.add('cedar', box(xa + 0.25, y + 0.84, a, ax, y + 0.9, b));
+      bag.add('brick_buff', box(xa + 0.8, y, a2, ax - 0.05, y + 0.84, b2));
+      col.rect([xa + 0.25, a, ax, b], y, y + 0.9);
+    },
+  };
+}
+
 /**
  * suq_row: { rect, axis ('x'|'z'), street (m, 6), trades: [..] (cycled by bay), seed, gates ('both'|'none') }
  * The long side of the rect is the street; shops on both sides, bays 3.2 m.
@@ -124,8 +154,11 @@ function suqRow(el, ctx) {
       bag.add('brick_buff', box(x0 - 0.3, y + 3.64, Math.min(zb, zb - s * 0.3), x0 + nb * bw + 0.3, y + 4.2, Math.max(zb, zb - s * 0.3)));
       for (let k = 0; k < nb; k++) {
         const xa = x0 + k * bw + 0.22, xb = x0 + (k + 1) * bw - 0.22, trade = trades[(k + (s > 0 ? 3 : 0) + Math.floor(rand() * 2)) % trades.length];
-        goods(bag, col, el.trade || trade, xa, xb, zf, s, rand, y);
-        frontDress(bag, col, xa, xb, zf, s, rand, y, el.trade || trade, k);
+        // every fourth bay (k % 4 === 1) is open to the visitor: its counter is shortened to the xa side and everything that stood in the aisle beside it is left out (openBay)
+        const o = k % 4 === 1 ? openBay(bag, col, xa, xb, zf, s, y) : null;
+        goods(o ? o.bag : bag, o ? o.col : col, el.trade || trade, xa, xb, zf, s, rand, y);
+        frontDress(o ? o.bag : bag, o ? o.col : col, xa, xb, zf, s, rand, y, el.trade || trade, k);
+        if (o) o.counter();
         // the shutter folded up as an awning (0.9 m out, sloping), in a coloured cloth; the bay's ceiling beam
         const cl = BOLT[Math.floor(rand() * BOLT.length)];
         bag.add(cl, fromTriangles([xa, y + 2.9, zf, xb, y + 2.9, zf, xb, y + 2.55, zf - s * 0.95, xa, y + 2.9, zf, xb, y + 2.55, zf - s * 0.95, xa, y + 2.55, zf - s * 0.95, xa, y + 2.9, zf, xb, y + 2.55, zf - s * 0.95, xb, y + 2.9, zf, xa, y + 2.9, zf, xa, y + 2.55, zf - s * 0.95, xb, y + 2.55, zf - s * 0.95]));
@@ -153,7 +186,7 @@ export function suqKeepers(el) {
   const [cx, cz] = mid(el.rect), axis = el.axis ?? ((el.rect[2] - el.rect[0]) >= (el.rect[3] - el.rect[1]) ? 'x' : 'z'), L = axis === 'x' ? el.rect[2] - el.rect[0] : el.rect[3] - el.rect[1];
   const S = el.street ?? 6, nb = Math.max(1, Math.floor((L - 4) / 3.2)), bw = (L - 4) / nb, out = [];
   for (const s of [-1, 1]) for (let k = 0; k < nb; k++) {
-    const u = -L / 2 + 2 + (k + 0.5) * bw, v = s * (S / 2 + 1.9);
+    const u = k % 4 === 1 ? -L / 2 + 2 + k * bw + 0.22 + 0.55 : -L / 2 + 2 + (k + 0.5) * bw, v = s * (S / 2 + 1.9);       // (in an open bay, behind the short counter)
     // local (u, v) → world: axis x: (cx + u, cz + v); axis z: rotateY(π/2): (u, v) → (v, −u)
     out.push({ at: axis === 'x' ? [cx + u, cz + v] : [cx + v, cz - u], toward: axis === 'x' ? [0, -s] : [-s, 0], k, side: s });
   }
