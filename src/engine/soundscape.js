@@ -76,6 +76,7 @@ import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
 import * as ANGKOR from '../settlements/angkor/soundmap.js';
 import './voices-angkor.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
+import * as BABYLON from '../settlements/babylon/soundmap.js';
 import * as BARCELONA from '../settlements/barcelona/soundmap.js';
 import './voices-barcelona.js';
 import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
@@ -157,7 +158,7 @@ export const PROFILES = {
   angkor: T(TROP, { cicadas: 0.8, frogs: 0.9, animals: withLife({ rooster: 1, cattle: 0.5, dog: 0.4 }, { market: 0.7, canal: 0.5, map: ANGKOR }), roof: 'thatch' }),
   amsterdam: T({ ...EU, gull: 0.8 }, { animals: withLife({ dog: 0.3, horse: 0.3 }, { canal: 1, market: 1, eaves: 1, map: AMSTERDAM }), roof: 'tile', bells: 'carillon' }),
   athens: T(MED, { cicadas: 0.9, animals: withLife({ rooster: 0.6, donkey: 0.5, sheepbell: 0.4, dog: 0.3 }, { market: 0.8, map: ATHENS }) }),
-  babylon: T({ ...NEAR, gull: 0 }, { frogs: 0.4, animals: { donkey: 0.7, dog: 0.4, rooster: 0.2 }, roof: 'flat' }),
+  babylon: T({ ...NEAR, gull: 0 }, { cicadas: 0.4, frogs: 0.4, animals: withLife({ donkey: 0.7, dog: 0.4, rooster: 0.2 }, { market: 0.8, canal: 0.5, map: BABYLON }), roof: 'flat' }),
   barcelona: T(MED, { cicadas: 0.3, animals: withLife({ dog: 0.3, horse: 0.4 }, { market: 0.9, eaves: 1, map: BARCELONA }), bells: 'angelus' }),
   'baroque-rome': T(MED, { cicadas: 0.4, animals: withLife({ horse: 0.5, dog: 0.3, donkey: 0.2 }, { market: 0.9, eaves: 1, map: BAROQUEROME }), bells: 'angelus' }),
   borobudur: T(TROP, { cicadas: 1, frogs: 1, animals: { rooster: 1, dog: 0.3, cattle: 0.3 }, roof: 'thatch' }),

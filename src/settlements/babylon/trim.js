@@ -7,6 +7,7 @@ import { Matrix4 } from '../../core/three.js';
 
 import { registerStyle, STYLES } from '../../core/build.js';
 import '../../styles/babylonian/index.js';
+import { lit, NIGHT_ELEMENTS } from './nightlight.js';
 
 // the size under which a piece is varied: fine detail (under DETAIL), and larger for the materials whose merged mesh stays small
 const BIG = { sacking: 1.5, reed_mat: 1.5 };
@@ -46,4 +47,14 @@ export function varied(fn) {
 
 
 /** The Babylonian style with every element's small turned pieces varied (the houses, shops, yards and lanes use it; the landmark keeps the style itself). */
-registerStyle('babylonian-g', { ...STYLES.babylonian, elements: Object.fromEntries(Object.entries(STYLES.babylonian.elements).map(([k, fn]) => [k, varied(fn)])) });
+registerStyle('babylonian-g', {
+  ...STYLES.babylonian,
+  elements: {
+    ...Object.fromEntries(Object.entries(STYLES.babylonian.elements).map(([k, fn]) => [k, lit(varied(fn))])),
+    // a door's lane: nothing is built; the street-life pass of src/objects/life.js reads its rectangle as a footprint, so that none of its animals, people or things is put in front of a door (openwalk.js)
+    door_clear: () => {},
+    ...NIGHT_ELEMENTS,
+  },
+});
+/** The landmark's style: the Babylonian style with the glow of every light its elements push (Esagila's cella and chambers, the throne room's lampstands). */
+registerStyle('babylonian-n', { ...STYLES.babylonian, elements: Object.fromEntries(Object.entries(STYLES.babylonian.elements).map(([k, fn]) => [k, lit(fn)])) });
