@@ -6,6 +6,7 @@ import { C, PALACE, MOSQUE, LIBRARY, ESPLANADE } from './layout.js';
 import { workshopWalk } from '../../styles/abbasid/khan.js';
 import { palaceRooms } from '../../styles/abbasid/palace.js';
 import '../../styles/abbasid/index.js';
+import { bayRoutes } from './walk.js';
 
 const E = [
   { t: 'golden_palace', rect: PALACE, face: 's', y: 0, seed: 762 },
@@ -28,6 +29,8 @@ const walks = [[[px, pz + 150], [px, pz + 40], [px, pz + 35], [px + 8.5, pz + 31
 walks[0].y0 = 0;
 // the stairs of the esplanade's dwellings, walked from the street to the balcony (docs §15)
 ESPLANADE.forEach((b, i) => { if (!b.upper) return; const r = workshopWalk({ t: 'abbasid_workshop', rect: b.rect, face: b.face, front: b.front, seed: 120 + i * 7 }); r.y0 = 0; walks.push(r); });
+// the open bays of the suq rows (docs §19)
+walks.push(...bayRoutes());
 export const baghdad = {
   id: 'abbasid-baghdad',
   name: { en: 'The Palace of the Golden Gate and the Round City', zh: '金门宫与圆城' },

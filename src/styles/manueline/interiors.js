@@ -79,23 +79,24 @@ const BIRDS = ['cloth_green', 'cloth_red', 'cloth_ochre', 'cloth_blue'];
 export function shop(K, F, L, vb, t, rand, T = 0.5) {
   const { A, Lh, jar, barrel, sack, crate, coil, bolt, book, shelves, counter, table, stool, scales, cage, tusk, ham, herbs, pick, Rod } = K;
   const w = L - 2 * T, vs = T + 0.1, mid = L / 2;
+  const sh = (n) => Math.min(n, (L - 2 * T - 2.2) / 2);             // the front shelves leave 2.2 m clear about the door in a narrow shop (the way in)
   const counterAt = (u0, u1, v) => { counter(u0, u1, v, v + 0.7); };
   if (t === 'spice') {
-    shelves(T, T + 3.4, vs, 0.45, [0.55, 1.15, 1.75], (u, v, h) => jar(u, v, h, 0.11 + rand() * 0.03, 0.3, pick(['terracotta', 'glaze_green', 'pottery_dark', 'glaze_white'])));
-    shelves(L - T - 3.4, L - T, vs, 0.45, [0.55, 1.15, 1.75], (u, v, h) => jar(u, v, h, 0.11 + rand() * 0.03, 0.3, pick(['terracotta', 'glaze_blue', 'pottery_dark'])));
+    shelves(T, T + sh(3.4), vs, 0.45, [0.55, 1.15, 1.75], (u, v, h) => jar(u, v, h, 0.11 + rand() * 0.03, 0.3, pick(['terracotta', 'glaze_green', 'pottery_dark', 'glaze_white'])));
+    shelves(L - T - sh(3.4), L - T, vs, 0.45, [0.55, 1.15, 1.75], (u, v, h) => jar(u, v, h, 0.11 + rand() * 0.03, 0.3, pick(['terracotta', 'glaze_blue', 'pottery_dark'])));
     counterAt(mid - 1.4, mid + 1.4, 2.6); scales(mid - 0.6, 2.95, 1.06);
     for (const [u, c] of [[mid - 0.4, 'cloth_ochre'], [mid + 0.4, 'cloth_red'], [mid + 1.0, 'cloth_brown']]) Lh(c, [[0.001, 0], [0.16, 0], [0.12, 0.09], [0.001, 0.16]], u, 2.95, 1.06, 8);
     for (let k = 0; k < 6; k++) sack(T + 0.45 + (k % 3) * 0.55, vb - 0.5 - Math.floor(k / 3) * 0.5, 0, 'sacking', true);
     for (let k = 0; k < 3; k++) sack(L - T - 0.5 - k * 0.55, vb - 0.5, 0, 'sacking', true);
     barrel(mid, vb - 0.5);
   } else if (t === 'porcelain') {
-    for (const [a, b] of [[T, T + 3.6], [L - T - 3.6, L - T]]) shelves(a, b, vs, 0.5, [0.5, 1.1, 1.7], (u, v, h, row) => { if (rand() < 0.2) return; Lh(row === 1 ? 'glaze_white' : 'glaze_blue', jarP(0.12, 0.32), u, v, h, 10); if (rand() < 0.5) Lh('glaze_white', [[0.001, 0], [0.1, 0.01], [0.1, 0.05], [0.001, 0.04]], u + 0.2, v, h, 10); }, 0.42);
+    for (const [a, b] of [[T, T + sh(3.6)], [L - T - sh(3.6), L - T]]) shelves(a, b, vs, 0.5, [0.5, 1.1, 1.7], (u, v, h, row) => { if (rand() < 0.2) return; Lh(row === 1 ? 'glaze_white' : 'glaze_blue', jarP(0.12, 0.32), u, v, h, 10); if (rand() < 0.5) Lh('glaze_white', [[0.001, 0], [0.1, 0.01], [0.1, 0.05], [0.001, 0.04]], u + 0.2, v, h, 10); }, 0.42);
     counterAt(mid - 1.2, mid + 1.2, 2.5);
     for (let k = 0; k < 4; k++) Lh(k % 2 ? 'glaze_white' : 'glaze_blue', jarP(0.14, 0.34), mid - 0.9 + k * 0.6, 2.85, 1.06, 10);
     for (let k = 0; k < 5; k++) crate(T + 0.5 + (k % 3) * 0.65, vb - 0.5 - Math.floor(k / 3) * 0.65, k > 2 ? 0.5 : 0, 0.55);
     for (let k = 0; k < 3; k++) { jar(L - T - 0.6 - k * 0.55, vb - 0.6, 0, 0.26, 0.9, 'glaze_blue'); }
   } else if (t === 'cloth') {
-    for (const [a, b] of [[T, T + 3.8], [L - T - 3.8, L - T]]) shelves(a, b, vs, 0.5, [0.45, 1.0, 1.55, 2.1], (u, v, h) => { bolt(u + 0.18, v - 0.1, h, 0.34, pick(CLOTHS)); }, 0.42);
+    for (const [a, b] of [[T, T + sh(3.8)], [L - T - sh(3.8), L - T]]) shelves(a, b, vs, 0.5, [0.45, 1.0, 1.55, 2.1], (u, v, h) => { bolt(u + 0.18, v - 0.1, h, 0.34, pick(CLOTHS)); }, 0.42);
     counterAt(mid - 1.5, mid + 1.5, 2.4);
     for (let k = 0; k < 4; k++) A(pick(CLOTHS), mid - 1.35 + k * 0.7, 2.45, mid - 0.85 + k * 0.7, 2.95, 1.06, 1.06 + 0.08 + (k % 2) * 0.08);
     A('timber', mid + 0.9, 2.5, mid + 2.1, 2.54, 1.07, 1.1);   // the ell rod laid along the counter
@@ -132,7 +133,7 @@ export function shop(K, F, L, vb, t, rand, T = 0.5) {
     for (let k = 0; k < 3; k++) Lh('wicker', [[0.2, 0], [0.26, 0.2], [0.22, 0.2], [0.001, 0.04]], mid + 0.9 + k * 0.35, 3.1, 1.06, 9);
     shelves(T, T + 3.0, vb - 0.55, 0.4, [0.5, 1.1, 1.7], (u, v, h) => jar(u, v, h, 0.1, 0.26, pick(['terracotta', 'glaze_green'])), 0.35);
   } else if (t === 'apothecary') {
-    for (const [a, b] of [[T, T + 3.6], [L - T - 3.6, L - T]]) shelves(a, b, vs, 0.4, [0.55, 1.1, 1.65, 2.2], (u, v, h) => Lh(pick(['glaze_white', 'glaze_blue', 'glaze_white']), [[0.001, 0], [0.09, 0], [0.065, 0.1], [0.06, 0.2], [0.075, 0.25], [0.001, 0.25]], u, v, h, 8), 0.3);
+    for (const [a, b] of [[T, T + sh(3.6)], [L - T - sh(3.6), L - T]]) shelves(a, b, vs, 0.4, [0.55, 1.1, 1.65, 2.2], (u, v, h) => Lh(pick(['glaze_white', 'glaze_blue', 'glaze_white']), [[0.001, 0], [0.09, 0], [0.065, 0.1], [0.06, 0.2], [0.075, 0.25], [0.001, 0.25]], u, v, h, 8), 0.3);
     counterAt(mid - 1.0, mid + 1.0, 2.6);
     Lh('bronze', [[0.001, 0], [0.12, 0.02], [0.14, 0.12], [0.001, 0.12]], mid - 0.4, 2.95, 1.06, 10); scales(mid + 0.5, 2.95, 1.06);
     for (let k = 0; k < 6; k++) herbs(T + 0.6 + k * (w - 1.2) / 5, vs + 2.0, 2.1, k % 2 ? 'palm_leaf' : 'flax_leaf');
@@ -149,7 +150,7 @@ export function shop(K, F, L, vb, t, rand, T = 0.5) {
     A('opening', L - T - 1.65, vb - 2.45, L - T - 0.75, vb - 2.38, 0.98, 1.4); A('limestone', L - T - 1.75, vb - 2.47, L - T - 0.65, vb - 2.4, 0.9, 0.98); A('limestone', L - T - 1.75, vb - 2.47, L - T - 1.65, vb - 2.4, 0.98, 1.45); A('limestone', L - T - 0.75, vb - 2.47, L - T - 0.65, vb - 2.4, 0.98, 1.45);
     A('bark_dark', L - T - 3.5, vb - 1.7, L - T - 2.6, vb - 0.15, 0, 0.8, true);
     K.Rod('wood_dark', [L - T - 2.5, vb - 0.6, 0.02], [L - T - 2.5, vb - 0.9, 2.1], 0.03, 4); A('wood_dark', L - T - 2.62, vb - 1.0, L - T - 2.38, vb - 0.8, 1.9, 2.15);   // the peel
-    shelves(T, T + 3.4, vs, 0.45, [0.85, 1.35, 1.85], (u, v, h) => { if (rand() < 0.15) return; Lh('hide_tan', [[0.001, 0], [0.12, 0.01], [0.16, 0.07], [0.12, 0.13], [0.001, 0.15]], u, v, h, 9); }, 0.34);
+    shelves(T, T + sh(3.4), vs, 0.45, [0.85, 1.35, 1.85], (u, v, h) => { if (rand() < 0.15) return; Lh('hide_tan', [[0.001, 0], [0.12, 0.01], [0.16, 0.07], [0.12, 0.13], [0.001, 0.15]], u, v, h, 9); }, 0.34);
     counterAt(mid - 1.4, mid + 1.0, 2.6);
     for (let k = 0; k < 7; k++) Lh('hide_tan', [[0.001, 0], [0.13, 0.01], [0.18, 0.08], [0.14, 0.15], [0.001, 0.17]], mid - 1.2 + k * 0.32, 2.95, 1.06, 9);
     Lh('wicker', [[0.2, 0], [0.26, 0.18], [0.22, 0.18], [0.001, 0.04]], mid + 0.65, 2.95, 1.06, 9);
