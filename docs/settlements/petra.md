@@ -212,3 +212,9 @@ Sources added:
 
 Sources added:
 - [Petra — ASCE Historic Landmarks](https://www.asce.org/about-civil-engineering/history-and-heritage/historic-landmarks/petra)
+
+## 23. Match to the reference (round 7, 2026-11-20): the visitor's walk
+
+- **The walk** [inferred from arrivals.js and the layout]: from the arrival at the Siq's mouth (146, −160) across the forecourt to the Khazneh's great door and hall; up the Outer Siq past the Street of Façades, the theatre and the eight houses of its east edge (§19); out into the valley at the colonnaded street's east end by the Nymphaeum; west along the south portico past its shops, the Great Temple's propylaeum and the garden's stair; the triclinium on the north slope; the nearest houses of the valley. Petra's shops, houses, yards and street furniture were opened and furnished in earlier rounds (§15, §16, §18, §19); nothing there is only a closed front.
+- **Routes** (`walkroutes.js`, on the landmark plan's `walks`): into every shop of the street (28), the eight houses of the Outer Siq, four houses of the valley (room houses to the middle of the room, court houses through the gate into the court), the Khazneh's hall and the triclinium: 37 routes walked by `walk-check`. A customer standing in the door's lane of three shops (the figures of shops.js and dressing.js) was moved 1.5–1.7 m to the side of the door [inferred: nothing of history changes].
+- **Not done:** shop signs and tablets carry no letters (§22 of the style's `stele` is plain strokes): Nabataean Aramaic can be written correctly only with a checked glyph list, which the shell could not fetch.

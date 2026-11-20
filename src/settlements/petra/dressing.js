@@ -95,8 +95,8 @@ export function life() {
     else if (trade === 'oil') { L.push({ t: 'pot', kind: 'amphora', n: 4, at: [xl, zz], y: YP, seed: k + 8 }); L.push({ t: 'pot', kind: 'zir', at: [xr, zz], y: YP, seed: k + 9 }); }
     else { L.push({ t: 'sacks', n: 5, at: [xl, zz], y: YP, rot: -0.2, seed: k + 10 }); L.push({ t: 'basket', n: 2, at: [xr, zz + 0.1], y: YP, seed: k + 11 }); L.push({ t: 'pot', kind: 'vat', at: [xr + 0.6, zz - 0.3], y: YP, seed: k + 12 }); }
     // a customer, a passer-by stopped at the door, a woman haggling, a boy at the step
-    if (s.i % 4 === 0) { person([s.m + 0.9, wallS - 1.9], YP, face([s.m + 0.9, wallS - 1.9], [s.m, wallS]), { pose: 'talk', beard: true }); }
-    if (s.i % 5 === 2) woman([s.m - 1.0, wallS - 2.4], YP, face([s.m - 1.0, wallS - 2.4], [s.m + 0.6, wallS - 2.0]), { pose: 'talk', carry: rand() < 0.5 ? 'basket' : 'none' });
+    if (s.i % 4 === 0) { person([s.m + 1.6, wallS - 1.9], YP, face([s.m + 1.6, wallS - 1.9], [s.m, wallS]), { pose: 'talk', beard: true }); }
+    if (s.i % 5 === 2) woman([s.m - 1.7, wallS - 2.4], YP, face([s.m - 1.7, wallS - 2.4], [s.m + 0.6, wallS - 2.0]), { pose: 'talk', carry: rand() < 0.5 ? 'basket' : 'none' });
     if (s.i % 6 === 3) child([s.m + 1.2, wallS - 1.2], YP, rand() * 6.28, { pose: 'sit_ground' });
   }
   // the north portico: stalls against the back wall (the awning's front to the street), their keepers, and the goods on mats between
