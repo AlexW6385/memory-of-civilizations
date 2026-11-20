@@ -41,6 +41,8 @@ function shopfronts() {
       else if (r < 0.7) L.push({ t: 'stool', at: [px, pz], y: 0.03, rot: rand() * 6.28 });
     }
   }
+  // the public wells of Jongno (stone curb, rope and bucket) on the street's north edge, clear of the way along it [inferred: Hanyang's streets had public wells]
+  for (const x of [-84, 74]) L.push({ t: 'well', kind: 'open', mat: 'granite_korea', at: [x, JONGNO[1] + 1.4], y: 0.03 });
   for (const x of [-112, -48, 60, 118]) L.push({ t: 'animal', kind: 'dog', at: [x, JONGNO[1] + 1.6], y: 0.03, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: false, mat: rand() < 0.5 ? 'hide_tan' : 'hide_white' });
   return { ...base('joseon-seoul-shopfronts', L), style: 'life', feature: false, center: [0, 357], near: 260 };
 }
