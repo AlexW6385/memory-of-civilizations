@@ -654,7 +654,7 @@
  },
  "baroque-rome-stpeter": {
   "site": "baroque-rome",
-  "hash": "8e3a0279d7a5bf25",
+  "hash": "1000584d2f67ee06",
   "rays": 128,
   "probes": 73584,
   "boxes": [
@@ -675,9 +675,9 @@
     ]
    }
   ],
-  "bytes": 1143343,
-  "seconds": 167,
-  "baked": "2026-11-18"
+  "bytes": 1143347,
+  "seconds": 1001,
+  "baked": "2026-11-20"
  },
  "bauhaus-school": {
   "site": "bauhaus-dessau",
@@ -3020,8 +3020,8 @@
    }
   ],
   "bytes": 1045438,
-  "seconds": 140,
-  "baked": "2026-11-18"
+  "seconds": 463,
+  "baked": "2026-11-20"
  },
  "manueline-belem": {
   "site": "manueline-lisbon",
@@ -4366,7 +4366,7 @@
  },
  "samarkand-registan": {
   "site": "timurid-samarkand",
-  "hash": "350ce9e7a5cd36f7",
+  "hash": "83b0b37a1933af6c",
   "rays": 128,
   "probes": 70642,
   "boxes": [
@@ -4423,9 +4423,9 @@
     ]
    }
   ],
-  "bytes": 1200675,
-  "seconds": 151,
-  "baked": "2026-11-17"
+  "bytes": 1200706,
+  "seconds": 492,
+  "baked": "2026-11-20"
  },
  "sgang-gwaay-house": {
   "site": "sgang-gwaay",

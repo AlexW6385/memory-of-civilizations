@@ -6,6 +6,7 @@
 import { RADIUS, GROUND, DAM, HALL, WAAG, NIEUWE_KERK, VOC, IJ_Z, QUAY, lots, inLot, inRect } from './layout.js';
 import { faceFrame } from '../../styles/dutch/facade.js';
 import { person, rng } from './town.js';
+import { nudge } from './shops.js';
 
 const Y = GROUND + 0.05;
 const OUT = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -13,7 +14,7 @@ const faceRot = (nx, nz) => Math.atan2(-nx, -nz);
 const ARR = [20, -210];
 
 export function damDress() {
-  const rand = rng(1672), E = [], P = (k, x, z, rot, ex) => E.push(person(rand, k, [x, z], rot, ex));
+  const rand = rng(1672), E = [], P = (k, x, z, rot, ex) => E.push(person(rand, k, nudge([x, z]), rot, ex));
   const clear = (x, z) => Math.hypot(x - ARR[0], z - ARR[1]) > 6.5;
   // the fronts round the Dam: every house gets something at its door, and most two
   for (const l of lots()) {
@@ -21,7 +22,7 @@ export function damDress() {
     if (!inRect(DAM, cx, cz, 14) || Math.hypot(cx, cz) > RADIUS - 76) continue;
     const F = faceFrame(l.rect, l.front), [nx, nz] = OUT[l.front], w = F.w, ro = faceRot(nx, nz), rs = faceRot(-nx, -nz), at = (u, d) => F.at(u, d);
     const alongRot = Math.atan2(-nz, nx) + Math.PI / 2;
-    const put = (e) => { if (clear(e.at[0], e.at[1])) E.push(e); };
+    const put = (e) => { e.at = nudge(e.at); if (clear(e.at[0], e.at[1])) E.push(e); };
     const a = rand();
     if (a < 0.25) put({ t: 'bench', at: at(w * 0.5 + (rand() - 0.5) * 2, 1.6), y: Y, rot: ro, len: 1.7, back: true });
     else if (a < 0.45) put({ t: 'barrel', at: at(w * (0.15 + rand() * 0.7), 1.3), y: Y, n: 2 + (rand() < 0.4 ? 1 : 0), seed: Math.floor(rand() * 1e6), rot: rand() });

@@ -43,7 +43,7 @@ export function stiltHouse(el, { bag, col, lights }) {
   const up = houseUp(el), wallH = kind === 'small' ? 2.0 : variant === 'tile' ? 2.45 : 2.25, top = up + wallH;
   rand();                                                                       // (the floor's height, drawn above)
   const w0 = rand() < 0.5, wall = variant === 'tile' ? 'timber_red' : variant === 'porch' ? 'planks_grey' : variant === 'shop' ? 'wood_ochre' : w0 ? 'reed_mat' : 'timber';
-  const th = 0.07, deck = kind === 'small' ? 0 : 0.95, doorW = 0.5, doorH = 1.85;
+  const th = 0.07, deck = kind === 'small' ? 0 : 0.95, doorW = 0.75, doorH = 1.85;
   // ── the posts: the perimeter ones rise to the eaves, the inner ones carry the floor
   const nu = hS > 2.3 ? 3 : 2, nv = hF > 3 ? 4 : 3;
   for (let i = 0; i <= nv; i++) for (let j = 0; j <= nu; j++) {
@@ -234,7 +234,7 @@ export function stiltHouse(el, { bag, col, lights }) {
         else bag.add(['cloth_green', 'cloth_ochre', 'cloth_red'][k % 3], boxR(R(u - 0.13, u + 0.13, vd - 0.42, vd - 0.18), up + 0.91, up + 1.03)); }
     }
     const u1 = hS + 0.1, v1 = vd + 1.5, yh = up + 2.25, yl = up + 1.75, n = 6, w = 2 * u1 / n;
-    for (let k = 0; k < n; k++) sheetQ(k % 2 ? cl[1] : cl[0], P3(-u1 + k * w, hF - 0.05, yh), P3(-u1 + (k + 1) * w, hF - 0.05, yh), P3(-u1 + (k + 1) * w, v1, yl), P3(-u1 + k * w, v1, yl));
+    for (let k = 0; k < n; k++) for (const dy of [0, -0.05]) sheetQ(k % 2 ? cl[1] : cl[0], P3(-u1 + k * w, hF - 0.05, yh + dy), P3(-u1 + (k + 1) * w, hF - 0.05, yh + dy), P3(-u1 + (k + 1) * w, v1, yl + dy), P3(-u1 + k * w, v1, yl + dy));   // (two sheets, so that the cloth has an underside and the stair can be walked under it)
     for (const sg of [-1, 1]) { const [x, z] = W(sg * (u1 - 0.05), v1 - 0.05); bag.add('bamboo_culm', lathe([[0.04, 0], [0.035, yl - 0.05]], 5, null, x, 0, z)); col.circle(x, z, 0.06, 0, yl); }
     for (let k = 0; k < 3; k++) { const u = -0.9 + k * 0.9, [x, z] = W(u, v1 - 0.25); bag.add('rope_fibre', boxR([x - 0.004, z - 0.004, x + 0.004, z + 0.004], yl - 0.55, yl)); bag.add(k % 2 ? 'wicker' : 'sacking', lathe([[0.001, 0], [0.09, 0.02], [0.11, 0.14], [0.001, 0.2]], 7, null, x, yl - 0.75, z)); }
     bag.add('lacquer_red', boxR(R(hS - 0.95, hS - 0.2, v1 - 0.05, v1 - 0.01), yl - 0.8, yl - 0.05)); bag.add('clay_gilt', boxR(R(hS - 0.8, hS - 0.35, v1 - 0.06, v1 - 0.04), yl - 0.65, yl - 0.2));
@@ -277,7 +277,8 @@ export function granary(el, { bag, col }) {
  */
 export function sala(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, up = 0.7, hgt = 2.6, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-  const nx = Math.max(2, Math.round((x1 - x0) / 2.6)), nz = Math.max(2, Math.round((z1 - z0) / 2.6));
+  let nx = Math.max(2, Math.round((x1 - x0) / 2.6)); if (nx % 2 === 0) nx++;      // (an odd number of bays: no post in the middle of the steps)
+  const nz = Math.max(2, Math.round((z1 - z0) / 2.6));
   for (let i = 0; i <= nx; i++) for (let j = 0; j <= nz; j++) {
     if (!(i === 0 || i === nx || j === 0 || j === nz)) continue;
     const x = x0 + (x1 - x0) * i / nx, z = z0 + (z1 - z0) * j / nz;
@@ -293,8 +294,8 @@ export function sala(el, { bag, col }) {
   col.segment([x0, z0 + 0.18], [x1, z0 + 0.18], 0.1, up, up + 1.0);
   // steps on the south side
   for (let k = 1; k <= 2; k++) {
-    const zz = z1 + 0.2 + (2 - k) * 0.35 + 0.25, y = up * (3 - k) / 3 - 0.0;
-    bag.add('timber', box(cx - 0.9, y - 0.06, zz - 0.17, cx + 0.9, y, zz + 0.17)); col.floor([cx - 0.9, zz - 0.17, cx + 0.9, zz + 0.17], y);
+    const zz = z1 + 0.2 + (k - 1) * 0.35 + 0.175, y = up * (3 - k) / 3 - 0.0;     // (the higher step next to the floor)
+    bag.add('timber', box(cx - 0.9, y - 0.06, zz - 0.17, cx + 0.9, y, zz + 0.17)); col.floor([cx - 0.9, zz - 0.19, cx + 0.9, zz + 0.19], y);     // (overlapping, no gap for a foot to fall through)
   }
   // a water jar and its coconut-shell dipper at the foot of the steps, as at the rest houses of the roads
   jar(bag, x0 + 0.4, z1 + 0.9, 0, 0.9); col.circle(x0 + 0.4, z1 + 0.9, 0.3, 0, 0.7);

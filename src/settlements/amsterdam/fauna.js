@@ -1,7 +1,13 @@
 // Amsterdam about 1670 — the animals (src/engine/fauna.js; docs/settlements/amsterdam.md §11): carp and bream in the canals and
 // the IJ's harbour, swifts and swallows over the water, gulls over the IJ and the Damrak, rooks round the Westerkerk's tower at
 // dusk, sparrows on the paving of the Dam and the quays, a grey heron on the quay by the IJ.
-import { C, RINGS, IJ_Z, GROUND, WATER, RADIUS, DAMRAK, DAM, wet, westerkerk } from './layout.js';
+import { C, RINGS, IJ_Z, GROUND, WATER, RADIUS, DAMRAK, DAM, VOC, wet, westerkerk } from './layout.js';
+import { shopSites, dice } from './dice.js';
+
+/** A point on a lot's front frame (src/styles/dutch/facade.js faceFrame, pure here): u along the front, d outward. */
+const frontAt = ({ rect: [x0, z0, x1, z1], front: f }, u, d) => (f === 's' ? [x0 + u, z1 + d] : f === 'n' ? [x1 - u, z0 - d] : f === 'e' ? [x1 + d, z1 - u] : [x0 - d, z0 + u]);
+/** The shop's counter bay (shopfront.js shopBay: the middle bay of three, else the one away from the door) and the bay's width. */
+const shopBay = (l) => { const w = ['n', 's'].includes(l.front) ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], bays = w >= 6.4 ? 3 : 2, bw = w / bays, bay = bays === 3 ? 1 : dice(l).left ? 1 : 0; return { uw: (bay + 0.5) * bw, bw }; };
 
 const wk = westerkerk();
 const fish = [];
@@ -39,4 +45,21 @@ flights.push({ kind: 'crow', n: 6, loop: { c: [59, -238], a: [24, 20], rot: 0.3 
   { kind: 'swallow', n: 4, loop: { c: [0, -120], a: [90, 40], rot: 0.2 }, y: [10, 5], speed: 8 });
 perches.push({ kind: 'heron', x: 70, z: IJ_Z + 1.4, y: GROUND, rot: -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 void DAM;
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; docs/settlements/amsterdam.md §10.4) ──
+// Pigeons on the Dam's paving (clear of the doors' lanes on its south side), domestic ducks on the Singel and the Herengracht, cats at the open shop fronts
+// (they kept the rats from the goods), dogs at the VOC's warehouse doors on the IJ quay. [inferred: no census of 1670; every kind is in the dossier's own animals or in the paintings of the time.]
+const critters = [];
+[[-12, -216, 'grey'], [-9, -218, 'white'], [6, -222, 'grey'], [10, -220, 'dark'], [24, -226, 'grey'], [30, -222, 'grey'], [2, -232, 'white'], [-4, -229, 'grey']]
+  .forEach(([x, z, v], i) => critters.push({ model: 'pigeon_' + v, at: [x, GROUND, z], rot: 0.8 + i * 1.7, range: [2.4, 1.6], tau: 10, speed: 0.33, stride: 0.1, size: 0.97 + 0.05 * (i % 3) }));
+for (const [R, x] of [[RINGS[0], 20], [RINGS[1], 24], [RINGS[2], -20]]) {
+  const z = C[1] + Math.sqrt(R * R - (x - C[0]) ** 2);
+  critters.push({ type: 'floaters', models: ['duck_white', 'duck_brown', 'duck_brown'], area: [x - 14, z - 5, x + 14, z + 5], dist: (px, pz) => wet(px, pz) + 0.0, a: [5, 3], ratio: 0.5, margin: 1.5, y: WATER, speed: 0.25, cycle: [18, 24] });
+}
+shopSites().slice(0, 4).forEach(({ lot: l }, i) => {
+  if (i % 2) return;
+  const B = shopBay(l), [x, z] = frontAt(l, B.uw - B.bw * 0.3, 1.35);
+  critters.push({ model: i % 4 ? 'cat_orange' : 'cat_tabby', at: [x, (l.y ?? GROUND) + 0.02, z], rot: i * 1.3, range: [1.2, 0.9] });
+});
+for (const v of VOC.filter((q) => q[4]).slice(0, 2)) critters.push({ model: 'dog', at: [(v[0] + v[2]) / 2 + 3, GROUND + 0.02, v[1] - 2.2], rot: Math.PI, range: [6, 2.5] });
+export default { fish, flights, perches, critters };

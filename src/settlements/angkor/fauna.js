@@ -1,6 +1,8 @@
 // Angkor — the animals (src/engine/fauna.js draws them; docs/settlements/angkor.md §17): carp in the
 // moat and the village ponds, swallows over the moat, the road and the paddies, egrets standing at the
 // pond edges and the moat's bank, crows over the temple's towers at dusk, sparrows on the road.
+import { walkHouses } from './walk.js';
+import { frame, houseUp } from '../../styles/khmer/village.js';
 import { LEVEL, MOAT, CAUSEWAY, ponds, ROAD, MARKET, ENC_PATHS, moatLotus } from './layout.js';
 
 const [a0, b0, a1, b1] = MOAT.outer, [c0, d0, c1, d1] = MOAT.inner;
@@ -50,4 +52,21 @@ moatLotus().forEach((p, i) => { if (i % 3) return; const [x0, z0, x1, z1] = p.re
 for (let k = 0; k < 8; k++) perches.push({ kind: 'sparrow', x: MARKET[0] + 3 + k * 3.6, z: MARKET[1] + 3.2 + (k % 3) * 6.3, y: 0.02, rot: k, range: [1.6, 1.4] });
 for (const [i, p] of ENC_PATHS.entries()) perches.push({ kind: 'sparrow', x: (p[0] + p[2]) / 2 + (i % 3) * 5, z: (p[1] + p[3]) / 2, y: 0.03, rot: i, range: [1.6, 1.2] });
 void ROAD;
-export default { fish, flights, perches };
+// ── the critters (src/engine/fauna-critters.js; dossier §34): the animals of the village yards and the moat, beside the visitor's walk ──
+const critters = [];
+// ducks of the village on the moat's water by the causeway's foot (the western arm), a pair of them and a raft of farm ducks
+critters.push({ type: 'floaters', models: ['duck_brown', 'duck_white', 'duck_brown', 'duck_brown'], raft: true, area: [-186, 8, -160, 70], dist: moatDistance, a: [18, 5], ratio: 0.3, margin: 1.0, y: LEVEL.moat, speed: 0.2, cycle: [24, 32] });
+critters.push({ type: 'floaters', models: ['duck_brown', 'duck_brown'], area: [-186, -70, -160, -8], dist: moatDistance, a: [16, 4], ratio: 0.3, margin: 1.2, y: LEVEL.moat, speed: 0.22, cycle: [20, 26] });
+// the yards of the houses the visitor can enter: hens, a cock, a dog under the house's stair side, a cat on the ground by a post, each off the stair's and the door's lane
+walkHouses(8).forEach((h, i) => {
+  const { W, hF } = frame(h.rect, h.front), up = houseUp(h), foot = hF + 0.95 + Math.ceil(up / 0.3) * 0.34, sd = i % 2 ? 1 : -1;
+  const rot = (h.front === 'e' ? 0 : h.front === 's' ? Math.PI / 2 : h.front === 'w' ? Math.PI : -Math.PI / 2) + sd * 0.7;
+  const at = (u, v) => { const q = W(u, v); return [q[0], 0.02, q[1]]; };
+  if (i % 3 === 0) {
+    critters.push({ model: 'rooster', at: at(sd * 3.0, foot + 0.7), rot, range: [2.6, 1.6], size: 0.95 });
+    critters.push({ model: 'hen_brown', at: at(sd * 2.4, foot + 1.5), rot: rot + 1, range: [2.6, 1.6], size: 0.92 });
+    critters.push({ model: 'hen_white', at: at(sd * 3.6, foot + 1.9), rot: rot + 2, range: [2.6, 1.6], size: 0.92 });
+  } else if (i % 3 === 1) critters.push({ model: 'dog', at: at(sd * 2.6, foot + 0.6), rot, range: [4, 2] });
+  else critters.push({ model: 'cat_orange', at: at(sd * 2.2, foot + 0.9), rot, range: [3, 1.5] });
+});
+export default { fish, flights, perches, critters };

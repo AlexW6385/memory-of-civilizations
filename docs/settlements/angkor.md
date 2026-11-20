@@ -308,3 +308,40 @@ No new subject: the same carving, built lighter, so that the visitor's walk can 
 
 - The carving of the galleries (devatas, windows, pillars, pilasters), of the cloister and the whole bas-relief are built in plans drawn only within reach of each piece of wall (`CARVED` in plan.js, built in town.js), their repeated figures and mouldings as instances of one shape each (the files of soldiers, apsaras, fish of the panels: `relief.js`, `panels.js` groups). What lies within 150 m of the arrival (the enclosure's gate, the third gallery's west pieces) stays merged as before. [inferred: engineering only; the carving itself is unchanged]
 - The far forms of the village houses and sugar palms are lighter (corner posts only, no ridge roll, finials or door frame; tile roofs as four planes; twelve fans on the far palm): details of a pixel or less from 170 m or 260 m. [inferred]
+
+## 31. The visitor's walk (match-up pass, item 1)
+
+Code: `walk.js` (routes), `yards.js`, `src/styles/khmer/village.js`. Walk-check follows 14 routes from `temple.walks`: 8 houses, 4 open workshops and 1 rest house nearest the arrival (within 125 m), and the two libraries. [inferred: the houses, workshops and their fronts were already placed by §24; this pass makes them enterable]
+
+- A house is entered by the foot of its stair, the stair, the deck, the door (0.75 m wide) and into the room; the figures on the deck and in the yard stand to one side of that lane. Houses stood on stilts reached by a ladder or stair [stated: Zhou Daguan, c. 1296, on houses of thatch with raised floors; the stair itself is [inferred]].
+- An open workshop: a front lane 2 m wide and 6 m out is kept free (no fence or house across it), the keeper and customers to the sides, its awning in two sheets so that the walker is not shut out by a zero-thickness shell.
+- The rest house (sala) has an odd bay count, so that no post stands at the middle of its steps; the tread floors overlap, so that there is no gap to fall through.
+- The libraries are entered at the west end and left at the east, with a jog round the homa fire pit.
+- Street furniture: the lamp-stands of §32; the figures of §24 and §26. Nothing is asserted about the interiors beyond what §23 and §24 state.
+
+## 32. The night (item 2)
+
+Code: `nightlight.js` (halo geometry), wired in `town.js`. The engine's additive `halo` material: lamps, hearths and torches as crossed discs and floor pools; the brightness is carried by the normals' y, so that the day view does not change (a halo is invisible by day).
+
+- Lamps of the temple: the lamp-stands (iron stands holding oil lamps) along the causeways and the court, the offering tables, and the lamps of the libraries. [inferred] Candles and torches were carried in processions at night [stated: Zhou Daguan on the king's evening processions with candles]; the old Khmer words for lamp, candle and oil are in the inscriptions [stated: the Old Khmer inscriptions; the vocabulary only, not a count of lamps].
+- Houses: half the houses (a hash of their place) show a lit doorway and hearth through the floor boards; the forges and kilns of the workshops glow. [inferred]
+- Budget: the arrival's main draws are held at 293 (baseline 291) by drawing the court's and the causeway's lights in a plan within 45 m of the causeway's middle (the arrival is 48 m from it, so the lights of the first metres appear when the visitor has walked a few steps), the sanctuary's in a plan within 50 m of it, and the houses' and forges' in plans of 40 m drawn within 38 m of the visitor.
+- Not done: no lit windows in the galleries (their bays are blind windows, §10), no light in the paddies.
+
+## 33. The sound (item 3)
+
+Code: `soundmap.js`, `src/engine/voices-angkor.js` (voices with the `ak` prefix, registered with `addVoices`), `tests/angkor-sound.test.mjs` (about 6 s).
+
+- The temple: a conch and a chant at the dawn and the dusk offices; harp, drum and cymbals on the Terrace of Honour. [stated: the 12th-century reliefs of Angkor Wat and the Bayon show drums, conches, trumpets, cymbals and harps; the music of the day is not recorded, so the tunes are [inferred]] No gongs and no oboes: both are later arrivals in the region [inferred from their absence in the reliefs].
+- The market 6:00 to 12:00 on mats [stated: Zhou Daguan]; the pestle of the mill, the smith's bellows, the cattle bells and the buffalo, the elephants of the road [stated: temple gifts of buffaloes, cows, goats, pigs, elephants and horses are listed in the inscriptions]; geckos in the thatch by night; the moat's boat track. [inferred]
+- The profile in `src/engine/soundscape.js` is `withLife({ rooster: 1, cattle: 0.5, dog: 0.4 }, { market: 0.7, canal: 0.5, map: ANGKOR })`.
+
+## 34. The animals (item 4)
+
+Code: `fauna.js` (`critters`), `tests/angkor-critters.test.mjs`. Ducks (brown and white) on the moat's west arm by the causeway's foot; a cock and two hens, a dog or a cat in the yard of each of the eight houses of the walk (a hen group at one in three, then a dog, then a cat), off the stair lane. [inferred: domestic fowl, dogs and cats of a Khmer village; the species are [inferred], not counted in any source] The engine's existing models only: no buffalo model was added (the buffalo are heard, §33, not seen). The critters are one more mesh and are not counted by `tools/draw-count.mjs`.
+
+## 35. Wear and writing (items 5 and 6): what was not done
+
+- Wear: not added as geometry. The monsoon's damp (`damp: 0.9` in plan.js) already stains the stone and posts; worn treads or thresholds would have needed new coplanar pieces on a plan at its draw budget, and were left out rather than made wrongly.
+- Writing: the Old Khmer of the inscriptions is not drawn: a script written wrongly would be worse than a plain face. The door jambs that carry inscriptions in Khmer temples are left plain.
+- Remaining landmark gaps (the cella and the Hall of Echoes, extra temple walk routes): not done in this pass.
