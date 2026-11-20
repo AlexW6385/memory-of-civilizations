@@ -5,6 +5,7 @@ import { ground } from './ground.js';
 import { sculptPlans } from './sculpt.js';
 import { tiles } from './tiles.js';
 import { isOpen, figureSpot } from './walk.js';
+import { lights } from './nightlight.js';
 /** How far from the visitor the houses are built in full (m); the arrival (the Templo Mayor's twin shrines, 160 m and more from the nearest) sees the simple form. */
 const NEAR = 190;
 const base = (id, elements) => ({ id, style: 'aztec', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-60, 0], facing: 'e' } });
@@ -118,6 +119,8 @@ export async function town() {
     ];
   })));
   // (what lies far from the visitor is cut into compact plans shown only within their `near` of him, so that its meshes are neither drawn nor counted from the other side of the island)
+  // the night's fires and the lit doors, one mesh of the additive halo material (nightlight.js)
+  plans.push(base('tenochtitlan-night', [{ t: 'tn_halo', lights: lights() }]));
   plans.push(...near('tenochtitlan-yards', yards().map((y) => ({ t: 'huerto', ...y })), 100, 170));
   // the farmers' houses on the chinampas, with their granaries, maguey and nopal
   plans.push(...sectors('tenochtitlan-chinampa-houses', chinampaHouses().map((h) => ({ t: 'chinampa_house', ...h, y: ground.height(h.c[0], h.c[1]) })), 8, 270));
