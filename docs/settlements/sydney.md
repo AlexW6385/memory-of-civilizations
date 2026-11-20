@@ -211,3 +211,15 @@ The map is `src/settlements/sydney/soundmap.js`, the voices `src/engine/voices-s
 - Not made: church bells (no source found for 1973's Sunday ringing near the Point), the time gun of Fort Denison, trams (withdrawn from the Bridge in 1958, §1b), the flying-foxes, the Opera House's organ (unfinished, §1d).
 
 Sources added: [Circular Quay railway station (Wikipedia)](https://en.wikipedia.org/wiki/Circular_Quay_railway_station); [Six o'clock swill (Wikipedia)](https://en.wikipedia.org/wiki/Six_o%27clock_swill).
+
+## 15. Animals (2026-11-20, match-to-Suzhou pass)
+
+The list is `critters` in `src/settlements/sydney/fauna.js` (one mesh, one draw; the rigs and models are in the engine's `fauna-critters.js` / `critter-models.js`). It replaces the egret that had stood in for the gull (the old perches at the wharves, the Point's wall and the Farm Cove walk keep their places, now as walking, pecking gulls).
+
+- **Silver gulls** (`gull_silver`, a new model: white, pale-grey back, black wing tips, red bill and legs; it walks and pecks as the fowl rig does and is out by day only): on the wharves' decks, the Quay's promenade, the Point's wall, the Farm Cove walk. The silver gull (*Chroicocephalus novaehollandiae*) is the common gull of Australian harbours and beaches and scavenges at wharves and cafes [stated: Australian Museum, "Silver Gull"; Wikipedia "Silver gull"].
+- **A little black cormorant** drying its wings on the sea wall by the arrival, one on the Quay's end [stated: little black and pied cormorants are common on Sydney Harbour's piles and walls, Wikipedia "Little black cormorant"; the two spots are inferred]. The engine's cormorant model (black with a bronze sheen) stands for it.
+- **Pacific black ducks** dabbling in the cove below the Point's wall and on the Farm Cove shallows (`duck_brown`) [stated: *Anas superciliosa* is the common duck of Sydney's waters, Wikipedia "Pacific black duck"; the Farm Cove flock inferred].
+- **A kelpie-type dog** lying at the hotel's step, and **three cats** (tabby, orange) on the Rocks' terraces' footpaths, all outside the door lanes [inferred: the stray and house animals of any 1970s city street].
+- Not made: the flying-foxes (night flyers; no rig), the Garden's ibis (the bin chicken came to the city's parks after the 1970s [stated: Wikipedia "Australian white ibis" on urban colonisation from the 1980s]), cockatoos and lorikeets (voice only, §14).
+
+Sources added: [Silver gull (Wikipedia)](https://en.wikipedia.org/wiki/Silver_gull); [Little black cormorant (Wikipedia)](https://en.wikipedia.org/wiki/Little_black_cormorant); [Pacific black duck (Wikipedia)](https://en.wikipedia.org/wiki/Pacific_black_duck); [Australian white ibis (Wikipedia)](https://en.wikipedia.org/wiki/Australian_white_ibis).
