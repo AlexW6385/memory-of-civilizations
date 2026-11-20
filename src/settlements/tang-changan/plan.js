@@ -10,7 +10,7 @@ const E = [];
 const [x0, z0, x1, z1] = DACI.rect, ax = DACI_AX;
 // the wall and its gate
 for (const r of wallRuns().filter((q) => q.ward === DACI.id)) E.push({ t: 'fang_wall', a: r.a, b: r.b, gaps: r.gaps, h: 3.6 });
-for (const g of gates().filter((q) => q.ward === DACI.id)) E.push({ t: 'fang_gate', c: g.c, axis: g.axis, w: 7.6 });
+for (const g of gates().filter((q) => q.ward === DACI.id)) E.push({ t: 'fang_gate', c: g.c, axis: g.axis, w: 7.6, open: true });
 // paving: the way from the gate up the courts to the hall's steps, the court's apron, the pagoda's court
 const pave = (r) => E.push({ t: 'paving', rect: r, y: 0.04, th: 0.3 });
 pave([ax - 5, DACI_MAIN[1] + 10.4, ax + 5, z1 - 2.0]);

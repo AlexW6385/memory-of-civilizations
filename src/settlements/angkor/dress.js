@@ -78,8 +78,9 @@ const tr = (m, role, tris) => { if (tris.length) m[role].push(fromTriangles(tris
  */
 function hand(a, b = 0) { const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return 1 + (v - Math.floor(v) - 0.5) * 0.02; }
 /** Place an assembly at plan point p, height y, facing N (its +z). */
-function put(bag, A, p, y, N) {
-  const pl = placer({ at: p, y, rot: Math.atan2(N[0], N[1]) }, bag), k = hand(p[0] + y, p[1] + N[0] * 3 + N[1]);
+function put(bag, A, p, y, N, inst = false) {
+  // (inst: built apart, in a plan drawn only near the visitor: the copies are the same shape and the engine draws them as instances of one)
+  const pl = placer({ at: p, y, rot: Math.atan2(N[0], N[1]) }, bag), k = inst ? 1 : hand(p[0] + y, p[1] + N[0] * 3 + N[1]);
   if (A.c) pl(C, A.c.clone().scale(k, k, k));
   if (A.o) pl('sandstone_khmer', A.o.clone().scale(k, k, k));
 }
@@ -332,8 +333,9 @@ const rect = (a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0
 function akGDress(el, ctx) {
   const { bag } = ctx, y = el.y, h = el.h, hw = el.w / 2, dr = el.dress ?? {};
   const { pieces, towers } = galleryPieces(el);
-  const seen = new Set();
-  for (const pc of pieces) {
+  const seen = new Set(), inst = !!el.inst;
+  pieces.forEach((pc, pi) => {
+    const emit = !el.dpieces || el.dpieces.includes(pi);      // (a pillar shared by two pieces is claimed by the first, whichever plan draws it)
     // ── the pillars
     for (let k = 0; k <= pc.np; k++) {
       const s = k / pc.np, p = [pc.A[0] + (pc.B[0] - pc.A[0]) * s, pc.A[1] + (pc.B[1] - pc.A[1]) * s];
@@ -341,13 +343,14 @@ function akGDress(el, ctx) {
         const q = [p[0] + pc.n[0] * off * pc.out, p[1] + pc.n[1] * off * pc.out], ph = off < -hw ? h * 0.62 : h, key = `${q[0].toFixed(2)}|${q[1].toFixed(2)}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        put(bag, pillarA(ph, 0.32, false, el.reliefMap && pc.n[0] >= 0 || el.devatas), q, y, [0, 1]);
+        if (emit) put(bag, pillarA(ph, 0.32, false, el.reliefMap && pc.n[0] >= 0 || el.devatas), q, y, [0, 1], inst);
       }
     }
+    if (!emit) return;
     // ── the wall's carved face (the one opposite the relief's)
     const Nn = [-pc.f[0], -pc.f[1]], U = [pc.ux, pc.uz], len = pc.len, P = (s, o = 0) => [pc.wa[0] + U[0] * s + Nn[0] * o, pc.wa[1] + U[1] * s + Nn[1] * o];
     const t0 = pc.s0 === 0 ? 0.9 : 0.5, t1 = pc.s1 >= pc.L - 1e-6 ? 0.9 : 0.5, a = t0, b = len - t1;
-    if (b - a < 1) continue;
+    if (b - a < 1) return;
     const bx = (s0, s1, o0, o1, y0, y1, mat = C) => { const r = rect(P(s0, o0), P(s1, o1)); bag.add(mat, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); };
     // the moulded plinth, down to the floor's underside
     bx(a, b, 0.45, 0.56, -0.6, 0.3); bx(a, b, 0.45, 0.51, 0.3, 0.46);
@@ -368,16 +371,17 @@ function akGDress(el, ctx) {
         const q = P(s, 0.45), west = pc.n[0] < 0;
         // full within reach of the way in (the gate wings' west face, seen from the causeway's end), reduced as far as 45 m of the temple's west gate, the old form beyond
         const tier = el.rect[0] < -100 ? (west ? 'full' : 'red') : (el.reliefMap && west && Math.abs(q[1]) <= 45 ? 'red' : 'old');
-        put(bag, devataA(1.0, tier), q, y + 0.62, Nn);
+        put(bag, devataA(1.0, tier), q, y + 0.62, Nn, inst);
       }
-      else if (dr.pil && k % 2 === 0) put(bag, pilasterA(h - 0.5), P(s, 0.45), y + 0.5, Nn);
+      else if (dr.pil && k % 2 === 0) put(bag, pilasterA(h - 0.5), P(s, 0.45), y + 0.5, Nn, inst);
     }
     if (dr.win) for (let k = 0; k < pc.np; k++) {
       const s = (k + 0.5) * bay;
       if (s < a + 0.9 || s > b - 0.9) continue;
-      put(bag, windowA(wh, !(pc.n[0] < 0 && Math.abs(P(s, 0.45)[1]) <= 45)), P(s, 0.45), y + 0.9, Nn);
+      put(bag, windowA(wh, !(pc.n[0] < 0 && Math.abs(P(s, 0.45)[1]) <= 45)), P(s, 0.45), y + 0.9, Nn, inst);
     }
-  }
+  });
+  if (el.dpieces && !el.dtowers) return;
   for (const tw of towers) towerDress(ctx, tw);
 }
 
@@ -433,7 +437,7 @@ function akNHood(el, ctx) {
 
 // ── the cloister ────────────────────────────────────────────────────────────────────────────────────────────────
 function akCDress(el, ctx) {
-  const { bag } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, w = el.w ?? 4, h = el.h ?? 3.4, hw = w / 2, xs = el.stair;
+  const { bag } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, w = el.w ?? 4, h = el.h ?? 3.4, hw = w / 2, xs = el.stair, inst = !!el.inst;
   const xm = el.cross ?? (x0 + x1) / 2, gn = z0 + hw + 0.6, gs = z1 - hw - 0.6, fy = y + 0.4;
   const row = ({ axis, u0, u1, v, sides, skip = [] }) => {
     const X = axis === 'x', P = (u, o) => (X ? [u, v + o] : [v + o, u]), L = u1 - u0;
@@ -443,7 +447,7 @@ function akCDress(el, ctx) {
       for (let k = 0; k <= np; k++) {
         const u = u0 + L * k / np;
         if (skip.some(([a, b]) => u > a - 0.5 && u < b + 0.5)) continue;
-        put(bag, pillarA(h, 0.3, true), P(u, o), fy, [0, 1]);
+        put(bag, pillarA(h, 0.3, true), P(u, o), fy, [0, 1], inst);
       }
     });
   };
@@ -457,13 +461,14 @@ function akCDress(el, ctx) {
     for (const [a, b] of [...gaps, [x1, x1]]) { if (a - s0 > 0.3) segs.push([s0, a]); s0 = Math.max(s0, b); }
     for (const [a, b] of segs) {
       const np = Math.max(1, Math.round((b - a) / 3.2));
-      for (let k = 1; k < np; k++) put(bag, devataA(1.0, tier), [a + (b - a) * k / np, v + o + Nz * 0.45], fy + 0.5, [0, Nz]);
+      for (let k = 1; k < np; k++) put(bag, devataA(1.0, tier), [a + (b - a) * k / np, v + o + Nz * 0.45], fy + 0.5, [0, Nz], inst);
     }
   }
   // the four pediments of the crossing (the style's: width w + 1.2, height 0.9 w, frame 0.3, at hw + 0.85 from the middle)
   const W = w + 1.2, H = w * 0.9, f = 0.3, th = Math.min(0.08, 0.6 * f - 0.04);
-  for (const N of [[1, 0], [-1, 0], [0, 1], [0, -1]]) put(bag, pedimentA(W - 0.5, H - 0.3, th), [xm + N[0] * (hw + 0.85 + 0.3 * f), N[1] * (hw + 0.85 + 0.3 * f)], fy + h + 1.1, N);
+  for (const N of [[1, 0], [-1, 0], [0, 1], [0, -1]]) put(bag, pedimentA(W - 0.5, H - 0.3, th), [xm + N[0] * (hw + 0.85 + 0.3 * f), N[1] * (hw + 0.85 + 0.3 * f)], fy + h + 1.1, N, inst);
 }
 
-Object.assign(STYLES.khmer.elements, { ak_gdress: akGDress, ak_tdress: akTDress, ak_ndress: akNDress, ak_nhood: akNHood, ak_cdress: akCDress });
+// (the *_wall names: the carving built apart in plans near the visitor (plan.js CARVED); a name with `wall` is not taken by src/objects/life.js for a house)
+Object.assign(STYLES.khmer.elements, { ak_gdress: akGDress, ak_tdress: akTDress, ak_ndress: akNDress, ak_nhood: akNHood, ak_cdress: akCDress, ak_gdress_wall: akGDress, ak_cdress_wall: akCDress });
 export { akGDress, akTDress, akNDress, akCDress, galleryPieces, devataA, hoodA, put };

@@ -6,7 +6,7 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 import { yardPlans, enclosurePlan } from './yards.js';
 import { ENC_PATHS, inShop } from './layout.js';
 import { useOf, frontOf } from './uses.js';
-import { ROSETTES } from './plan.js';
+import { ROSETTES, CARVED } from './plan.js';
 import './far.js';
 
 const NEAR_HOUSES = 170, NEAR_PALMS = 260;   // m: the village's tiles are drawn in full within this of the visitor (from the tile's middle), simple beyond
@@ -292,6 +292,8 @@ export async function town() {
   plans.push(...tiled('angkor-palms', P, NEAR_PALMS, (e) => [{ ...e, t: 'ak_far_palm' }], 400));
   // the temple's ceilings' rosettes, in plans near the piece of gallery they hang in
   ROSETTES.forEach((r, i) => plans.push({ ...base(`angkor-rosettes-${i}`, [r.el]), center: r.center, near: r.near }));
+  // the carving of the galleries and the cloister, built instanced in plans near each piece (plan.js CARVED)
+  CARVED.forEach((r, i) => plans.push({ ...base(`angkor-carved-${i}`, r.els), center: r.center, near: r.near }));
   plans.push(base('angkor-road', K), { ...base('angkor-market', L), style: 'life', center: [-222, 10], near: 260 });
   const PD = paddyPlans();
   plans.push({ ...base('angkor-paddy-tools', PD.K), center: [0, 0], near: 460 }, { ...base('angkor-farmers', PD.L), style: 'life', center: [0, 0], near: 230 });
