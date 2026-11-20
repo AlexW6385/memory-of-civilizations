@@ -78,7 +78,9 @@ export function house(el, ctx) {
   for (const p of subtractRects(inner, voids)) { bag.add(mat, box(p[0], y - 0.3, p[1], p[2], y + FLOOR, p[3])); col.rect(p, y - 0.3, y + FLOOR); }
   // the dukkans of the front; the side rooms of an open house (floor, ceiling, dado, divans, a lamp)
   const eye = [];
-  bays.forEach((b, i) => { const k = dukkan(bag, col, bayR[i], e, y, b.trade, rand, { laneW: el.laneW, mat }); bag.add(mat, fr.B(b.u0 - 0.0, b.u1, y + 2.8, y + FLOOR + 0.02, -BD, 0)); eye.push({ ...k, trade: b.trade }); });
+  bays.forEach((b, i) => { const k = dukkan(bag, col, bayR[i], e, y, b.trade, rand, { laneW: el.laneW, mat }); bag.add(mat, fr.B(b.u0 - 0.0, b.u1, y + 2.8, y + FLOOR + 0.02, -BD, 0)); eye.push({ ...k, trade: b.trade });
+    // the lamp hung in the cell on a hook from the lintel (lit at night: settlements/fez/nightlight.js; the bakers' oven is its own light)
+    if (b.trade !== 'bread') { const [lx, lz] = fr.P((b.u0 + b.u1) / 2, -0.55); bag.add('iron', rod([lx, y + 2.12, lz], [lx, y + 2.74, lz], 0.006, 3)); bag.add('bronze', lathe([[0.001, 0], [0.05, 0.01], [0.085, 0.07], [0.065, 0.13], [0.001, 0.14]], 8, null, lx, y + 1.94, lz)); } });
   sideRooms.forEach((q, i) => {
     const R = roomR[i], dR = doorR[i], [rx0, rz0, rx1, rz1] = R, cx = (rx0 + rx1) / 2, cz = (rz0 + rz1) / 2;
     bag.add('tile_cream', box(rx0, y - 0.3, rz0, rx1, y, rz1)); col.floor(R, y); bag.add('tile_cream', box(dR[0], y - 0.3, dR[1], dR[2], y, dR[3])); col.floor(dR, y);
@@ -198,6 +200,11 @@ export function house(el, ctx) {
     const lampU = ub + 0.55 < base + Lw - 0.3 ? ub + 0.55 : ua - 0.55;
     if (!holes.slice(1).some(([h0, h1]) => lampU > h0 && lampU < h1)) wallLamp(bag, fo, lampU, y + 2.35);
     if ((el.laneW ?? 0) >= 2.6 && (el.seed % 5) < 2 && ub + 2.2 < base + Lw && !bays.length) bench(bag, col, fo, ub + 0.4, ub + 1.9, y);
+    // a water jar by the door on the other side from the lamp, on a quarter of the doors of the lanes wide enough to pass it (each turned by its own seed: none is instanced)
+    if (!bays.length && (el.laneW ?? 0) >= 2.4 && el.seed % 4 === 1) {
+      const ju = lampU > ub ? ua - 0.5 : ub + 0.5;
+      if (ju > base + 0.4 && ju < base + Lw - 0.4) { const q = fo.R(0.32, 0.34, ju - 0.01, ju + 0.01); jar(bag, (q[0] + q[2]) / 2, y, (q[1] + q[3]) / 2, 0.65 + (el.seed % 7) * 0.05, el.seed % 3 ? 'terracotta' : 'pottery_dark'); }
+    }
   }
   if (fk === 0 && (rand() < 0.5 || el.rich)) { const canW = 1.2; void canW; import_canopy(bag, fo, ua - 0.4, ub + 0.4, y + 3.0); }
   // windows: dark openings with cedar lattices high on the facade and the other faces, one or two a storey

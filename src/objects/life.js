@@ -169,6 +169,8 @@ const KIT_OVER = {
   // Wikipedia, "Māori traditional textiles": https://en.wikipedia.org/wiki/M%C4%81ori_traditional_textiles). Unlike Rapa
   // Nui's hami and bark cloth (the pacific kit): no loincloths in sight, a cloak on most, the topknot.
   maori: { street: [['animal:dog', 0.8], ['basket', 1], ['figure', 2.5]], figures: F(['strands', 'strands', 'wrap'], ['cloth_ochre', 'cloth_brown', 'linen', 'cloth_ochre'], ['skin_medium'], ['none'], { hair: ['topknot', 'topknot', 'long', 'long'], comb: 0.4, beard: 0.15, feet: 'bare', tops: { wrap: ['bare', ''] }, cloths2: ['linen', 'cloth_ochre', 'cloth_brown', 'cloth_black', 'hide_white', 'linen'], overs: { strands: ['cloak', 'cloak', 'cloak', 'none'], wrap: ['cloak', 'cloak', 'none'] }, hairs: [['hide_black', 0.7], ['hide_black', 0.6]] }) },
+  // Heian Uji (1053): no paper lanterns or shop signs on the fronts (chōchin and signboards are later), the pots, baskets, firewood and bench at the doors (docs/settlements/heian-uji.md §19)
+  'heian-uji': { fronts: [], door: [['pot:dark_pot', 2], ['basket', 2.5], ['firewood', 1.5], ['bench', 1.5], ['sweeper', 0.5], ['laundry', 0.5]] },
   // Joseon Seoul: the men's jige (A-frame) on the back; the women carrying on the head, the water jar (dongi) and the basket
   // on a ring pad (https://en.wikipedia.org/wiki/Jige)
   'joseon-seoul': { fig: { carry: ['jige', 'jige', 'jige', 'basket', 'pot', 'none', 'none', 'none', 'none'] } },

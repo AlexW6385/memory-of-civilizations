@@ -37,7 +37,8 @@ const cobsHeap = () => carved('tt-cobheap', (k) => {
 });
 
 /** The yard at (x, z) on floor y, its cell 13 m across (the court's floor is 14 m); seed sets the layout. */
-export function householdYard(ctx, x, y, z, seed) {
+export function householdYard(ctx, x, y, z, seed, o = {}) {
+  // o.open: a yard the visitor walks (an opened compound): the turkeys and the dog are the rigged critters of fauna.js, not figures; o.gate (2 west, 3 east) the side the lane runs in on, kept clear
   const { bag, col } = ctx, L = STYLES.life.elements, r = rng(seed * 7 + 5);
   const flipU = r() < 0.5 ? -1 : 1, flipV = r() < 0.5 ? -1 : 1, swap = r() < 0.5;
   const Q = (u, v) => { const a = u * flipU, b = v * flipV; return swap ? [x + b, z + a] : [x + a, z + b]; };         // the quadrants turned and mirrored
@@ -48,7 +49,7 @@ export function householdYard(ctx, x, y, z, seed) {
   if (r() < 0.8) {
     const [px, pz] = Q(4.2, -4.0);
     inst(bag, penKit(), px, y, pz, swap ? (flipU > 0 ? Math.PI / 2 : -Math.PI / 2) : (flipV > 0 ? 0 : Math.PI), 1, 100);
-    L.chickens({ t: 'chickens', kind: 'turkey', n: 3, at: [px, pz], y, rot: r() * 6, seed: seed + 11 }, ctx);
+    if (!o.open) L.chickens({ t: 'chickens', kind: 'turkey', n: 3, at: [px, pz], y, rot: r() * 6, seed: seed + 11 }, ctx);
     const [cx, cz] = Q(4.2, -1.9); if (r() < 0.6) fig(ctx, { who: 'child', at: [cx, cz], y, rot: swap ? (flipV > 0 ? 0 : Math.PI) : (flipU > 0 ? Math.PI : 0), seed: seed + 12, pose: 'squat' });
   }
   // maize drying on trays, a heap of cobs, and a woman husking beside them
@@ -62,5 +63,5 @@ export function householdYard(ctx, x, y, z, seed) {
   // a drain slab let into the floor with a dark mouth, as the city's courts had
   { const [dx, dz] = Q(0.6, 0.2); inst(bag, drainKit(), dx, y, dz, swap ? Math.PI / 2 : 0, 1, 60); }
   // the dog asleep in the sun, now and then
-  if (r() < 0.45) { const [ax, az] = Q(1.0, -1.0); L.animal({ t: 'animal', kind: 'dog', at: [ax, az], y, rot: r() * 6.28, seed: seed + 60, mat: 'hide_tan' }, ctx); }
+  if (r() < 0.45 && !o.open) { const [ax, az] = Q(1.0, -1.0); L.animal({ t: 'animal', kind: 'dog', at: [ax, az], y, rot: r() * 6.28, seed: seed + 60, mat: 'hide_tan' }, ctx); }
 }

@@ -3,6 +3,8 @@
 
 import { RADIUS, HALL, RIVER, BRIDGE, height } from './layout.js';
 import hallPlan from '../../buildings/byodo-in-phoenix-hall/plan.js';
+import { walkRoutes } from './openwalk.js';
+import './nightlight.js';
 
 const rx = RIVER.x + 15 * Math.sin(BRIDGE.z / 110);
 export const bridge = {
@@ -68,7 +70,8 @@ export const [weirs, riverPeople] = riverLife();
 
 // the hall's plain lacquered block under Amida is replaced by a sumeru dais with mother-of-pearl inlay and gilt fittings (§10)
 const isAltar = (e) => e.t === 'block' && e.mat === 'lacquer_black' && e.rect.join() === '-2.7,-2,1.2,2';
-export const hall = { ...hallPlan, elements: hallPlan.elements.filter((e) => !isAltar(e)), origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 9, -10, HALL.origin[0] + 10, 10] };
+// (walks: the hall's own, then into the opened houses of the walk, openwalk.js)
+export const hall = { ...hallPlan, elements: [...hallPlan.elements.filter((e) => !isAltar(e)), { t: 'uji_hall_light' }], walks: [...(hallPlan.walks || []), ...walkRoutes()], origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 9, -10, HALL.origin[0] + 10, 10] };
 const HF = 1.1, hx = HALL.origin[0];                // the central hall's floor; its centre in the settlement
 export const dais = {
   id: 'heian-uji-dais', style: 'japanese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [],

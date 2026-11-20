@@ -1,7 +1,7 @@
 // Teotihuacan — what is set about the avenue's plazas and the Moon Plaza (docs/settlements/teotihuacan.md §15):
 // braziers, drain slabs, the worn way, litter, offerings, the plasterers, sweepers, bearers resting, sellers on
 // mats, groups, boys, dogs and turkeys. Pure data from layout.js; built by the style's `tt_avenue`.
-import { AVENUE, CROSS, STEP, LEVELS, MOON, PLAZA, CIUD } from './layout.js';
+import { AVENUE, CROSS, STEP, LEVELS, MOON, PLAZA, CIUD, platformTemples } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const SR = 3.6;
@@ -20,8 +20,10 @@ export function avenueItems() {
   const clear = (x, z, m = 0) => altars.every(([ax, az, r]) => Math.hypot(x - ax, z - az) > r + m);
   P.forEach(([za, zb, lv], i) => {
     const r = rng(900 + i), y = lv + 0.05, L = zb - za - 16, dens = i === 2 ? 1.5 : i === 1 || i === 3 ? 1.1 : 0.8;
-    const spot = (xmax = 17) => { for (let t = 0; t < 30; t++) { const x = (r() * 2 - 1) * xmax, z = za + 8 + r() * L; if (clear(x, z, 1.5)) return [x, z]; } return [xmax, za + 8]; };
-    for (let z = za + 9; z < zb - 8; z += 15) for (const sx of [-1, 1]) out.push({ k: 'brazier', x: sx * 17.4, z: z + (r() - 0.5) * 3, y });
+    const spot = (xmax = 17) => { for (let t = 0; t < 30; t++) { const x = (r() * 2 - 1) * xmax, z = za + 8 + r() * L; if (clear(x, z, 1.5) && Math.abs(x) > 2.8) return [x, z]; } return [xmax, za + 8]; };   // (the way up the middle, 5.6 m wide, is kept clear of people for the visitor's walk)
+    // (the braziers along the sides stand off the stairs up to the platforms' temples)
+    const stairs = platformTemples();
+    for (let z = za + 9; z < zb - 8; z += 15) for (const sx of [-1, 1]) { const zz = z + (r() - 0.5) * 3; if (stairs.some((t) => t.sd === sx && Math.abs(t.z - zz) < 4.6)) continue; out.push({ k: 'brazier', x: sx * 17.4, z: zz, y }); }
     for (let z = za + 12; z < zb - 8; z += 33) out.push({ k: 'drain', x: (r() < 0.5 ? -1 : 1) * (9 + r() * 3), z, y, rot: r() < 0.5 ? 0 : Math.PI / 2 });
     // the worn way up the middle: stretches a little off the axis
     for (let z = za + 4; z < zb - 4; z += 18 + r() * 8) { const len = Math.min(zb - 4 - z, 14 + r() * 14), x0 = -3.8 + r() * 2.5; out.push({ k: 'wear', y, x0, x1: x0 + 2.6 + r() * 1.6, z0: z, z1: z + len }); }
@@ -31,8 +33,8 @@ export function avenueItems() {
     for (let n = 0; n < Math.round(L / 30 * dens) + 1; n++) { const sx = r() < 0.5 ? -1 : 1, z = za + 10 + r() * L; if (!clear(sx * 15.5, z, 2)) continue; out.push({ k: 'seller', x: sx * 15.5, z, y, rot: 0, side: r() < 0.5 ? 1 : -1, seed: 120 + n + i * 10, goods: [['basket', 'water_pot', 'dark_pot', 'heap'], ['basket', 'basket', 'heap'], ['water_pot', 'dark_pot', 'amphora']][n % 3], who: r() < 0.75 ? 'woman' : 'man' }); }
     for (let n = 0; n < Math.round(L / 22 * dens); n++) { const [x, z] = spot(16); out.push({ k: 'group', x, z, y, n: 2 + Math.floor(r() * 3), seed: 200 + n * 7 + i * 30 }); }
     for (let n = 0; n < Math.round(L / 80 * dens) + 1; n++) { const [x, z] = spot(15); out.push({ k: 'boys', x, z, y, seed: 300 + n * 5 + i * 20 }); }
-    for (let n = 0; n < (i === 2 ? 3 : 1); n++) { const [x, z] = spot(16); out.push({ k: 'dog', x, z, y, rot: r() * 6.28, seed: 400 + n + i * 3 }); }
-    if (i === 2 || i === 3) { const [x, z] = spot(15); out.push({ k: 'turkey', x, z, y, rot: r() * 6.28, seed: 450 + i }); }
+    for (let n = 0; n < (i === 2 ? 3 : 1); n++) { const [x, z] = spot(16); out.push({ k: 'dog', x, z, y, rot: r() * 6.28, seed: 400 + n + i * 3, crit: true }); }
+    if (i === 2 || i === 3) { const [x, z] = spot(15); out.push({ k: 'turkey', x, z, y, rot: r() * 6.28, seed: 450 + i, crit: true }); }
     if (i >= 1 && i <= 3) { const z = za + 20 + r() * (L - 40), x = -13; if (clear(x, z, 4)) out.push({ k: 'crew', x, z, y, seed: 500 + i * 10 }); }
     // offerings at the middle altars
     for (const [ax, az, rr] of altars) if (az >= za && az <= zb) for (let q = 0; q < 5; q++) { const a = q * 1.3 + 0.3; out.push({ k: 'offering', x: ax + Math.cos(a) * (rr + 1.0), z: az + Math.sin(a) * (rr + 1.0), y, seed: q + 7 }); }

@@ -3,6 +3,7 @@
 // stepped into sunken plazas by talud-tablero platforms, the Ciudadela's banks with the Feathered Serpent Pyramid and its Adosada.
 
 import { avenueItems } from './dress.js';
+import { platformRoutes, barrioRoutes, compoundRoutes, marketRoutes, templeRoute, WEST_STAIR, MARKET_STAIR } from './walk.js';
 import { compounds, MARKET, lodges } from './layout.js';
 import { AVENUE, MOON, PLAZA, SUN, CIUD, KEEP_CLEAR, RADIUS, CROSS, STEP, BANK, LEVELS, QPP, JAGUARS } from './layout.js';
 
@@ -84,6 +85,9 @@ for (let i = 0; i < ends.length; i += 2) {
   // the altar in the plaza's middle
   if (z1 - z0 > 60 && i !== 4) E.push({ t: 'tt_pyramid', c: [0, (z0 + z1) / 2], y: lv, w: 7, d: 7, tw: 5.6, td: 5.6, h: 1.5, levels: 1, tablero: 0.55, stair: 's', stairW: 2.4, talud: 'stucco_red' });
 }
+// the way down the west platform's west face to the street behind it (the opened compounds and the market lie that way)
+E.push({ t: 'tt_stair', rect: WEST_STAIR.rect, y0: WEST_STAIR.y0, y1: WEST_STAIR.y1, dir: 'e', mat: 'stucco_ochre' });
+E.push({ t: 'tt_stair', rect: MARKET_STAIR.rect, y0: MARKET_STAIR.y0, y1: MARKET_STAIR.y1, dir: 'e', mat: 'stucco_ochre' });
 // the plaza of the arrival (between the Sun's and the Ciudadela's fronts): its altars, censers and people
 E.push({ t: 'tt_plaza_altars', c: [0, 15], y: LEVELS[2], seed: 15 });
 E.push({ t: 'tt_plaza_altars', c: [-9, 42], y: LEVELS[2], seed: 72, small: true });
@@ -126,6 +130,8 @@ const rooms = [room('avenue', AVENUE, 0, 'open'), room('plaza', PLAZA, MOON.rise
   ...lodges().map((l, i) => room(`lodge-${i}`, l.foot, l.y, 'house'))];
 const walks = [[[0, 300], [0, 100], [3, 85], [0, 60], [0, -80], [0, -160], [0, -194], [-18, -200], [-30, -236]]];
 walks[0].y0 = 0;
+// the houses of those who serve the avenue: up the west platform, and along the barrio's lane east of the avenue (walk.js)
+for (const r of [...platformRoutes(), ...barrioRoutes(), ...compoundRoutes(), ...marketRoutes(), templeRoute(53), templeRoute(178)]) { r.y0 = 0; walks.push(r); }
 
 export const city = {
   id: 'teotihuacan-centre',
