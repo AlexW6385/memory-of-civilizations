@@ -72,6 +72,8 @@
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
 import * as AGRA from '../settlements/mughal-agra/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
+import * as ANGKOR from '../settlements/angkor/soundmap.js';
+import './voices-angkor.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
 import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
@@ -123,7 +125,7 @@ const withLife = (animals, life) => ({ ...animals, [LIFE]: life });
 
 export const PROFILES = {
   amsterdam: T({ ...EU, gull: 0.8 }, { animals: { dog: 0.3, horse: 0.3 }, roof: 'tile', bells: 'carillon' }),
-  angkor: T(TROP, { cicadas: 0.8, frogs: 0.9, animals: { rooster: 1, cattle: 0.5, dog: 0.4 }, roof: 'thatch' }),
+  angkor: T(TROP, { cicadas: 0.8, frogs: 0.9, animals: withLife({ rooster: 1, cattle: 0.5, dog: 0.4 }, { market: 0.7, canal: 0.5, map: ANGKOR }), roof: 'thatch' }),
   athens: T(MED, { cicadas: 0.9, animals: withLife({ rooster: 0.6, donkey: 0.5, sheepbell: 0.4, dog: 0.3 }, { market: 0.8, map: ATHENS }) }),
   babylon: T({ ...NEAR, gull: 0 }, { frogs: 0.4, animals: { donkey: 0.7, dog: 0.4, rooster: 0.2 }, roof: 'flat' }),
   barcelona: T(MED, { cicadas: 0.3, animals: { dog: 0.3, horse: 0.4 }, bells: 'angelus' }),
