@@ -4,6 +4,8 @@
 // the forecourt. Elements; the heights come from layout.js.
 import { STALLS, STAIR, TT, TT_Y, TREASURIES, STOA, THEATRE, STADIUM, STADIUM_Y, SPRING, SPRING_Y, WAY, WAY2, wayY, way2Y, wayPoints, FC, FC_Y, height, WALL_S } from './layout.js';
 import { terraceDedications, wayDedications } from './votives.js';
+import { houseRoutes } from './walk.js';
+import { lampHalos } from './nightlight.js';
 import { temple, treasury, stoa, terraceMonuments, terraceWalls, retain } from './buildings.js';
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -14,8 +16,11 @@ const tr = temple(T);
 T.push({ t: 'floor', rect: [TT[0] + 0.5, TT[1] + 0.5, TT[2] - 0.5, TT[3] - 0.5], y: TT_Y + 0.03, th: 0.3, mat: 'limestone', walk: false });
 terraceMonuments(T);
 terraceDedications(T);
+// the torches of the terrace at night (nightlight.js): at the head of the stair, and before the altar of the Chians
+for (const [x, z] of [[89.4, 24.4], [82.6, 24.4], [56, -4], [56, 3]]) T.push({ t: 'dl_torch', at: [x, z], y: TT_Y + 0.03 });
 const rib = (P, o) => ({ t: 'ribbon', pts: P.map((p) => [p[0], p[2]]), ys: P.map((p) => p[1]), ...o });
 T.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] < 30), { w: 3.6, mat: 'flagstone', kerb: false, lift: 0.04 }));
+T.push(...lampHalos(T));
 const terraceRooms = [room('the terrace', [-34, -20, 90, 24], TT_Y, 'open'), room('before the temple', [30, -12, 70, 12], TT_Y, 'open'), ...tr.rooms];
 const twalks = [[[88, 26], [66, 8], [54, 6], [40, 4], [31.5, -1], [26, -1], [20.5, -1], [12, -1], [4, -3.5], [-6, -3.5], [-12, -1], [-15.2, -1], [-17.5, -1], [-20, 2], [-21, -1.5]]];
 twalks[0].y0 = TT_Y;
@@ -42,6 +47,8 @@ S.push({ t: 'stair', rect: STAIR, dir: 'n', y0: 13.1, y1: TT_Y, riser: 0.17, bas
 S.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] >= 24 && !(p[0] > 85.9 && p[0] < 86.1 && p[2] < 43.9)), { w: 3.6, mat: 'flagstone', kerb: true, lift: 0.04 }));
 S.push(rib(wayPoints(WAY2, way2Y), { w: 2.4, mat: 'flagstone', kerb: false, lift: 0.04 }));
 wayDedications(S);
+// the torches at the gates and the foot of the stair (nightlight.js)
+for (const [x, z] of [[92.6, 104.2], [99.4, 104.2], [102.6, 59.9], [102.6, 64.1], [89.6, 45.6], [83.0, 45.6]]) S.push({ t: 'dl_torch', at: [x, z], y: height(x, z) });
 const sanctRooms = [];
 for (const t of TREASURIES) sanctRooms.push(treasury(S, t));
 STOA.y = STOA.y ?? 0;
@@ -116,6 +123,12 @@ for (const e of S) if (e.y === FC_Y) { const c = e.at || [(e.rect[0] + e.rect[2]
 void FC; void WALL_S; void TT;
 const swalks = [wayPoints(WAY, wayY, 4).map(([x, , z]) => [x, z]).filter(([, z]) => z >= 26)];
 swalks[0].y0 = wayY(0);
+S.push(...lampHalos(S));
+// the visitor's walk into the open houses of the lanes (walk.js): the shop's opening and the passage of each, from the lane before it
+for (const r of houseRoutes()) for (const w of [r.shop, r.passage]) { w.y0 = r.y0; swalks.push(w); }
+// from the Way through the side gate to the village road and along it to the west ends of the four lanes
+[[[96, 62], [104, 62], [108.3, 62], [108.3, 79], [108.3, 95]], [[108.3, 62], [108.3, 46]], [[108.3, 62], [112.5, 62.5]], [[108.3, 79], [113, 78.7]], [[108.3, 96], [113, 96.5]], [[108.3, 46], [112.5, 44.7]]].forEach((w, i) => { w.y0 = [10.2, 10.95, 10.95, 8.3, 5.45, 12.6][i]; swalks.push(w); });
+
 export const sanctuary = {
   id: 'delphi-sanctuary',
   name: { en: 'The Sanctuary of Apollo, Delphi', zh: '德尔斐阿波罗圣所' },

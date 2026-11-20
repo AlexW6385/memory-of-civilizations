@@ -7,19 +7,25 @@ import { fronts, openLife } from './fronts.js';
 import { houseRooms } from '../../styles/delphi/house.js';
 import { retain } from './buildings.js';
 import { wayPoints } from './layout.js';
-import { inLot, inLane, lanes, alleys, ROW_PITCH, RADIUS, lots, height, pathAt, WAY, WAY2, TT_Y, TEMPLE, ALTAR, SPRING, STADIUM, STADIUM_Y, FC, FC_Y, THEATRE, TREASURIES, STOA, TT, inRect } from './layout.js';
+import { VROADS, inLot, inLane, lanes, alleys, ROW_PITCH, RADIUS, lots, height, pathAt, WAY, WAY2, TT_Y, TEMPLE, ALTAR, SPRING, STADIUM, STADIUM_Y, FC, FC_Y, THEATRE, TREASURIES, STOA, TT, inRect } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [98, 134], facing: 'n' } });
 const face = (dx, dz) => Math.atan2(-dx, -dz);                      // a figure faces −z when rot = 0
 const wayAt = (P, s) => { let acc = 0; for (let i = 0; i + 1 < P.length; i++) { const L = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); if (acc + L >= s) { const t = (s - acc) / L; return [P[i][0] + (P[i + 1][0] - P[i][0]) * t, P[i][1] + (P[i + 1][1] - P[i][1]) * t, Math.atan2(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1])]; } acc += L; } return P[P.length - 1].concat(0); };
 
+const NEAR_OPEN = 110;
 export async function town() {
   const all = lots(), plans = [];
   const closed = all.filter((l) => !l.open), opened = all.filter((l) => l.open);
   for (let i = 0; i < closed.length; i += 30) plans.push(base(`delphi-houses-${i / 30}`, 'delphi', closed.slice(i, i + 30).map((l) => ({ t: 'athens_house', rect: l.rect, front: 's', seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }))));
   // the walk-in houses: each a plan of its own with its rooms
-  opened.forEach((l, k) => plans.push({ ...base(`delphi-open-${k}`, 'delphi', [{ t: 'delphi_house', rect: l.rect, seed: l.seed, y: l.y, trade: l.trade, variant: l.variant, fall: l.fall, tier: l.tier }]), rooms: houseRooms(l.rect, l.seed, l.y, l.trade) }));
+  // (interiors only near the visitor: each is built in full within NEAR_OPEN m, and from farther off stands as the same lot's closed house, the form the closed lots have)
+  opened.forEach((l, k) => {
+    const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
+    plans.push({ ...base(`delphi-open-${k}`, 'delphi', [{ t: 'delphi_house', rect: l.rect, seed: l.seed, y: l.y, trade: l.trade, variant: l.variant, fall: l.fall, tier: l.tier }]), rooms: houseRooms(l.rect, l.seed, l.y, l.trade), near: NEAR_OPEN, center: c });
+    plans.push({ ...base(`delphi-open-${k}-far`, 'delphi', [{ t: 'athens_house', rect: l.rect, front: 's', seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }]), far: NEAR_OPEN, center: c, nocollide: true });
+  });
   // the lanes: paved ribbons along each terrace with the parapet on the downhill side, the stairs in the alleys
   { const E = [];
     for (const r of lanes()) {
@@ -29,6 +35,12 @@ export async function town() {
       // the parapet: gaps at the alleys
       let a = r.x0 - 0.5; const gaps = alleys().filter((q) => q.k === r.k + 1 && q.x0 > r.x0 && q.x1 < r.x1).sort((p, q) => p.x0 - q.x0);
       for (const g of [...gaps, { x0: r.x1 + 0.5 }]) { if (g.x0 - a > 0.8) retain(E, [a, r.z + 1.45], [g.x0, r.z + 1.45], r.y, -1, 700 + r.k * 13, { rough: true, th: 0.55, cap: 0.85 }); a = (g.x1 ?? g.x0) ; }
+    }
+    // the village road: from the side gate in the precinct's east wall to the lanes' west ends (layout.js VROADS)
+    for (const V of VROADS) {
+      const seg = []; let acc = 0;
+      for (let i = 0; i + 1 < V.P.length; i++) { const a = V.P[i], b = V.P[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / 2.5)); for (let k = i ? 1 : 0; k <= n; k++) seg.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n, V.yf(acc + L * k / n)]); acc += L; }
+      E.push({ t: 'ribbon', pts: seg.map((q) => [q[0], q[1]]), ys: seg.map((q) => q[2]), w: 3.0, mat: 'rubble', kerb: false, lift: 0.03 });
     }
     for (const q of alleys()) if (q.up && q.dn) {
       const yU = q.up.y, yD = q.dn.y;

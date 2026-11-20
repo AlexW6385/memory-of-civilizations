@@ -1,7 +1,7 @@
 // The buildings of the sanctuary as plan elements (docs/settlements/delphi.md §4): the Temple of Apollo, the treasuries, the
 // Athenian Stoa, the Chians' altar, the terrace's walls. Pure data; each pushes onto the list it is given.
 import { subtractRects } from '../../core/build.js';
-import { STAIR, TT, TT_Y, TEMPLE, ALTAR, STOA, SPHINX, SERPENT, height, WALL_S, WALL_E, GATE, inRect } from './layout.js';
+import { STAIR, TT, TT_Y, TEMPLE, ALTAR, STOA, SPHINX, SERPENT, height, WALL_S, WALL_E, GATE, SIDE_GATE, inRect } from './layout.js';
 
 const PI = Math.PI;
 /** A retaining wall along a→b on the downhill side: the polygonal masonry, segment by segment from below the ground to `top`. */
@@ -29,7 +29,13 @@ export function terraceWalls(E) {
   const g0 = GATE.x - GATE.w / 2, g1 = GATE.x + GATE.w / 2;
   for (let x = -70; x < g0 - 1; x += 8) PW([x, WALL_S], [Math.min(x + 8, g0), WALL_S]);
   PW([g1, WALL_S], [WALL_E, WALL_S]);
-  for (let z = WALL_S; z > -60; z -= 8) PW([WALL_E, z], [WALL_E, Math.max(z - 8, -60)]);
+  const sg0 = SIDE_GATE.z - SIDE_GATE.w / 2, sg1 = SIDE_GATE.z + SIDE_GATE.w / 2;                     // the side gate to the village road
+  for (let z = WALL_S; z > -60; z -= 8) {
+    const zb = Math.max(z - 8, -60);
+    if (zb < sg1 && z > sg0) { if (z > sg1 + 0.05) PW([WALL_E, z], [WALL_E, sg1]); if (zb < sg0 - 0.05) PW([WALL_E, sg0], [WALL_E, zb]); } else PW([WALL_E, z], [WALL_E, zb]);
+  }
+  for (const zz of [sg0 - 0.5, sg1 + 0.5]) E.push({ t: 'block', rect: [WALL_E - 0.55, zz - 0.5, WALL_E + 0.55, zz + 0.5], y0: height(WALL_E, SIDE_GATE.z) - 0.6, y1: height(WALL_E, SIDE_GATE.z) + 3.2, mat: 'limestone' });
+  E.push({ t: 'beam', a: [WALL_E, sg0 - 0.9], b: [WALL_E, sg1 + 0.9], y: height(WALL_E, SIDE_GATE.z) + 2.75, w: 1.1, h: 0.5, mat: 'limestone' });
   // the gate: two piers and a lintel
   for (const s of [-1, 1]) E.push({ t: 'block', rect: [GATE.x + s * (GATE.w / 2 + 0.5) - 0.5, WALL_S - 0.7, GATE.x + s * (GATE.w / 2 + 0.5) + 0.5, WALL_S + 0.7], y0: height(GATE.x, WALL_S) - 0.6, y1: height(GATE.x, WALL_S) + 3.6, mat: 'marble' });
   E.push({ t: 'beam', a: [g0 - 0.4, WALL_S], b: [g1 + 0.4, WALL_S], y: height(GATE.x, WALL_S) + 3.2, w: 1.1, h: 0.55, mat: 'marble' });

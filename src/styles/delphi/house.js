@@ -17,6 +17,8 @@ import { vase } from '../greek/vessels.js';
 function blobLike(x, y, z) { return lathe([[0.001, -0.17], [0.13, -0.1], [0.17, 0.0], [0.12, 0.13], [0.001, 0.18]], 9, null, x, y, z); }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const T = 0.5, TI = 0.4, FR = 4.9, BK = 3.9, H = 3.2, DOOR = 0.95;
+const DW = 0.8;   // half the street door's width: 1.6 m clear for the visitor
+
 const TONES = ['mud_plaster', 'mud_plaster', 'plaster_white', 'plaster_ochre', 'plaster_white', 'plaster_grey', 'mud_plaster'];
 
 /** The geometry of the house in the mirrored local frame: cells of the front range and the back range. */
@@ -31,7 +33,7 @@ function geom(rect, seed) {
 /** Where the doors are, in the plain (unmirrored) front frame: the passage's centre and the shop's opening. */
 export function houseDoors(rect, seed) {
   const g = geom(rect, seed), m = (u) => (g.mirror ? g.L - u : u), so = [Math.min(m(T + 0.7), m(Math.min(T + 3.1, g.ss - 0.6))), Math.max(m(T + 0.7), m(Math.min(T + 3.1, g.ss - 0.6)))];
-  return { du: m((g.pa + g.pb) / 2), shop: false, two: false, shopU: -1, so };
+  return { du: m((g.pa + g.pb) / 2), shop: false, two: false, shopU: -1, so, shopIn: m(g.ss - 0.9), courtV: (g.v1 + g.v2) / 2 };
 }
 /** The rooms the plan registers (world rectangles). */
 export function houseRooms(rect, seed, y, trade) {
@@ -68,24 +70,24 @@ function delphiHouse(el, ctx) {
   fl(T, T, L - T, v1, 'lime_plaster'); fl(T, v1, L - T, v2, 'pebbles'); fl(T, v2, L - T, D - T, 'lime_plaster');
   // ── the front wall on the lane: the shop's wide opening and the street door in the passage; the court wall; the back wall
   const so = [T + 0.7, Math.min(T + 3.1, ss - 0.6)];
-  wall(true, T / 2, 0, L, T, [so, [(pa + pb) / 2 - 0.55, (pa + pb) / 2 + 0.55]]);
+  wall(true, T / 2, 0, L, T, [so, [(pa + pb) / 2 - DW, (pa + pb) / 2 + DW]]);
   wall(true, D - T / 2, 0, L, T, []);
   wall(false, T / 2, T, D - T, T, []);                                // the side wall at u = 0 (for the whole depth)
   wall(false, L - T / 2, T, D - T, T, []);
   // the inner walls of the front range: shop | passage | room, and the wall on the court (the shop's back door, the room's)
-  wall(false, ss + TI / 2, T, v1, TI, []);
+  wall(false, ss + TI / 2, T, v1, TI, [[1.1, 2.7]]);   // the shop's door from the passage (1.6 m)
   wall(false, pb + TI / 2 - (room ? 0 : TI), T, v1, TI, room ? [] : [[100, 101]]);
   if (!room) { /* the passage is the last cell: its end is the side wall */ }
   wall(true, v1 + TI / 2 - TI / 2, T, ss, TI, [[ss - 1.5, ss - 0.55]]);
-  if (room) wall(true, v1, pb + TI, L - T, TI, [[pb + TI + 0.5, pb + TI + 1.45]]);
+  if (room) wall(true, v1, pb + TI, L - T, TI, [[pb + TI + 0.5, pb + TI + 2.1]]);
   // the back range: the wall on the court with three doors, the partitions
-  wall(true, v2, T, L - T, TI, [[kx - 1.45, kx - 0.5], [(kx + sx) / 2 - 0.5, (kx + sx) / 2 + 0.45], [sx + 0.5, sx + 1.45]]);
+  wall(true, v2, T, L - T, TI, [[kx - 1.78, kx - 0.18], [(kx + sx) / 2 - 0.8, (kx + sx) / 2 + 0.8], [sx + 0.3, sx + 1.9]]);
   wall(false, kx, v2, D - T, TI, []); wall(false, sx, v2, D - T, TI, []);
   // the court's side walls are the house's own side walls: lowered to 2.7 m where they enclose the court (coped below)
   // the front range by the house's kind (el.variant, 0–3), so that a row of walk-in houses shows different fronts: 0 the tiled hip over plaster; 1 a loft storey
   // over the front range with a pair of shuttered windows and a ledge (jettied on beams); 2 a flat roof terrace behind a parapet with its spouts and a red dado;
   // 3 an ashlar front of limestone with a painted frieze and a cornice
-  const fr = G.R(0, 0, L, v1 + TI / 2), vr = el.variant ?? 0, openAt = [so, [(pa + pb) / 2 - 0.55, (pa + pb) / 2 + 0.55]].sort((p, q) => p[0] - q[0]);
+  const fr = G.R(0, 0, L, v1 + TI / 2), vr = el.variant ?? 0, openAt = [so, [(pa + pb) / 2 - DW, (pa + pb) / 2 + DW]].sort((p, q) => p[0] - q[0]);
   const fpiece = (mat, u0, u1, d0, d1, y0, y1) => { const r = G.R(u0, d0, u1, d1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); };
   if (vr === 1) {
     bag.add('timber', box(fr[0] + 0.05, y + H - 0.12, fr[1] + 0.05, fr[2] - 0.05, y + H, fr[3] - 0.05));
@@ -122,11 +124,11 @@ function delphiHouse(el, ctx) {
     bag.add('roof_ridge', along ? box(r[0] - 0.1, yb + H + rise - 0.02, mz - 0.1, r[2] + 0.1, yb + H + rise + 0.12, mz + 0.1) : box(mx - 0.1, yb + H + rise - 0.02, r[1] - 0.1, mx + 0.1, yb + H + rise + 0.12, r[3] + 0.1));
   }
   // the door leaf standing open inward, the shop's shutter propped as an awning, a threshold and a step on the lane
-  { const u = (pa + pb) / 2, r = G.R(u - 0.5, T, u - 0.44, T + 0.9); bag.add('wood_dark', box(r[0], y + 0.04, r[1], r[2], y + 2.05, r[3]));
-    const st = G.R(u - 0.75, -0.4, u + 0.75, 0.0); bag.add('limestone', box(st[0], y - 0.12, st[1], st[2], y + 0.02, st[3]));
-    const fm = [G.R(u - 0.66, -0.1, u - 0.52, 0.12), G.R(u + 0.52, -0.1, u + 0.66, 0.12)];
+  { const u = (pa + pb) / 2, r = G.R(u - 0.78, T, u - 0.72, T + 0.9); bag.add('wood_dark', box(r[0], y + 0.04, r[1], r[2], y + 2.05, r[3]));
+    const st = G.R(u - 0.95, -0.4, u + 0.95, 0.0); bag.add('limestone', box(st[0], y - 0.12, st[1], st[2], y + 0.02, st[3]));
+    const fm = [G.R(u - 0.92, -0.1, u - 0.8, 0.12), G.R(u + 0.8, -0.1, u + 0.92, 0.12)];
     for (const q of fm) bag.add('timber', box(q[0], y + 0.05, q[1], q[2], y + 2.3, q[3]));
-    const hd = G.R(u - 0.74, -0.12, u + 0.74, 0.14); bag.add('timber', box(hd[0], y + 2.2, hd[1], hd[2], y + 2.4, hd[3]));
+    const hd = G.R(u - 0.94, -0.12, u + 0.94, 0.14); bag.add('timber', box(hd[0], y + 2.2, hd[1], hd[2], y + 2.4, hd[3]));
     if (vr !== 4) { const aw = G.R(so[0] - 0.1, -1.4, so[1] + 0.1, -0.1); bag.add('timber', frustum(aw, y + 2.15, y + 2.4, 0, 0, 0, 0));
       for (const uu of [so[0] - 0.04, so[1] + 0.04]) { const p = P(uu, -1.35); bag.add('timber', rod([p[0], y, p[1]], [p[0], y + 2.17, p[1]], 0.04, 5)); } }
     const cb = G.R(so[0] + 0.1, -0.05, so[1] - 0.1, 0.5); bag.add('timber', box(cb[0], y + 0.05, cb[1], cb[2], y + 0.92, cb[3]));
@@ -207,7 +209,7 @@ function delphiHouse(el, ctx) {
   { const cu = L / 2, cv = (v1 + v2) / 2, a = G.R(cu - 0.35, cv - 0.3, cu + 0.35, cv + 0.3);
     bag.add('limestone', box(a[0], y, a[1], a[2], y + 0.7, a[3])); bag.add('limestone', box(a[0] - 0.07, y + 0.7, a[1] - 0.07, a[2] + 0.07, y + 0.8, a[3] + 0.07)); col.rect(a, y, y + 0.8);
     bag.add('lacquer_black', box(a[0] + 0.15, y + 0.8, a[1] + 0.15, a[2] - 0.15, y + 0.805, a[3] - 0.15));
-    const [wx, wz] = P(L - T - 0.8, v1 + 0.9); bag.add('limestone', lathe([[0.42, 0], [0.42, 0.62], [0.34, 0.62], [0.34, 0.5], [0.001, 0.5]], 14, null, wx, y, wz)); col.circle(wx, wz, 0.42, y, y + 0.62);
+    const [wx, wz] = P(room ? L - T - 0.8 : pa - 1.0, v1 + 0.9);   // (not in the lane of the passage when there is no room beside it) bag.add('limestone', lathe([[0.42, 0], [0.42, 0.62], [0.34, 0.62], [0.34, 0.5], [0.001, 0.5]], 14, null, wx, y, wz)); col.circle(wx, wz, 0.42, y, y + 0.62);
     const [jx, jz] = P(T + 0.6, v2 - 0.6); bag.add('terracotta', lathe([[0.12, 0], [0.32, 0.25], [0.38, 0.6], [0.3, 0.95], [0.2, 1.05], [0.001, 1.1]], 12, null, jx, y, jz)); col.circle(jx, jz, 0.38, y, y + 1.1);
     const bn = G.R(T + 1.4, v1 + 0.15, T + 3.2, v1 + 0.55); bag.add('timber', box(bn[0], y, bn[1], bn[2], y + 0.42, bn[3])); col.rect(bn, y, y + 0.42);
     const [tx, tz] = P(L - 2.4, v2 - 1.2); if (rand() < 0.8) fig(bag, tx, y, tz, 4.2 + rand() * 1.4, rand);
