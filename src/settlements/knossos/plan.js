@@ -7,6 +7,7 @@
 import { COURT, THEATRAL, upstairsHouses, openHouses } from './layout.js';
 import { dwellingFrame, dwellingStoreys } from '../../styles/minoan/town.js';
 import { stairLayout, B0 } from '../../styles/minoan/upstairs.js';
+import { walkRoutes } from './walkroutes.js';
 
 const E = [];
 // the Central Court's paving
@@ -165,7 +166,9 @@ for (const l of upstairsHouses()) {
   else pts.push([c(0), B0 + 0.35], [c(0), B0 + R - 0.15], [c(0), B0 + R + 0.5], [uM, D * 0.5]);
   const w = pts.map(([u, v]) => F.P(u, v)); w.y0 = 0; walks.push(w); void sgn; void mid; void openHouses;
 }
-for (const w of walks) w.y0 = 0;
+// the opened lots of the visitor's walk (walk.js, §20.1): in at the door and along the front room (the upstairs houses have routes of their own above)
+for (const r of walkRoutes()) if (!r.up) { const w = r.route; w.y0 = r.y0; walks.push(w); }
+for (const w of walks) if (w.y0 === undefined) w.y0 = 0;
 walks[2].y0 = 0;
 walks[1].y0 = 0;
 walks[0].y0 = 0;

@@ -129,7 +129,7 @@ export function life() {
   }
   // the lanes: people by the doors and on the way, a donkey with its driver, children at play, dogs and cats
   let n = 0;
-  const doors = [...upH].map((l) => { const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }); return F.P(F.du, -1.0); });
+  const doors = [...openKinds.keys()].map((l) => { const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }); return F.P(F.du, -1.0); });
   for (const Ln of lanes()) {
     if (Math.hypot((Ln.x0 + Ln.x1) / 2, Ln.z) > 230) continue;
     for (let x = Ln.x0 + 4 + rand() * 10; x < Ln.x1 - 2; x += 14 + rand() * 20) {
@@ -137,7 +137,7 @@ export function life() {
       for (const d of doors) if (Math.abs(x - d[0]) < 2.4 && Math.abs(Ln.z - d[1]) < 3) x = d[0] + (x < d[0] ? -1 : 1) * 2.6 * 1.0 + (x < d[0] ? -1 : 1) * 0.2;
       const near = Math.hypot(x, Ln.z) < 170, p = rand();
       if (!near && (p < 0.8 || Math.hypot(x, Ln.z) > 220)) continue;
-      const z = Ln.z + (rand() - 0.5) * 1.8, y = height(x, z) + 0.08, dir = rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2;
+      const o = rand(), z = Ln.z + (o < 0.5 ? -1 : 1) * (1.05 + (o % 0.5) * 0.8), y = height(x, z) + 0.08, dir = rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2;
       if (p < 0.15) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y, rot: dir, seed: seed(), gear: true }); man([x + (dir < 0 ? 1.7 : -1.7), z + 0.5], dir, { y, carry: 'staff' }); }
       else if (p < 0.3) { for (let k = 0; k < 2; k++) man([x + k * 0.8, z + (k ? 0.5 : 0)], k ? 2.4 : 0.8, { y, pose: 'sit_ground', child: true, h: 1.05 - 0.06 * k }); }
       else if (p < 0.55) woman([x, z], dir, { y, carry: rand() < 0.6 ? 'pot' : 'sack' });
