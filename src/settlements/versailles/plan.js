@@ -1,4 +1,5 @@
 // Versailles about 1690 (docs/settlements/versailles.md §2–§4).
+import { walkRoutes } from './openwalk.js';
 import { RADIUS, CHATEAU, LOGIS, WINGS, PARTERRE, LATONA, LATONA_Y, APOLLO, CANAL, RISE, MARBLE, MARBLE_RISE, CHAPEL, STABLES, EXT, STAIR, FY, STATE_ROOMS } from './layout.js';
 
 const y = RISE;
@@ -43,7 +44,7 @@ export const chateau = {
   rooms: [{ id: 'parterre', rect: PARTERRE, y, kind: 'open' }, { id: 'marble court', rect: [MARBLE[0] + 1, MARBLE[1] + 1, MARBLE[2] - 1, MARBLE[3] - 1], y: y + MARBLE_RISE, kind: 'open' },
     { id: 'royal chapel', rect: [CHAPEL[0] + 1.6, CHAPEL[1] + 1.6, CHAPEL[2] - 1.6, CHAPEL[3] - 1.6], y, kind: 'hall' }, { id: 'royal chapel tribune', rect: [CHAPEL[0] + 1.6, CHAPEL[1] + 1.6, CHAPEL[2] - 1.6, CHAPEL[3] - 1.6], y: FY, kind: 'hall' },
     ...STATE_ROOMS.map(([id, rect, ry]) => ({ id, rect, y: ry, kind: 'hall' }))],
-  walks: [Object.assign([[180, 0], [80, 0]], { y0: y })],
+  walks: [Object.assign([[180, 0], [80, 0]], { y0: y }), Object.assign([[-60, 0], [-8, 0]], { y0: y }), ...walkRoutes(12)],   // the visitor's walk (openwalk.js): into the service lodgings and the avenue's opened shops
 };
 export const canal = {
   id: 'versailles-canal', style: 'classical_fr', origin: [0, 0], base: 0, yaw: 0, feature: true,
