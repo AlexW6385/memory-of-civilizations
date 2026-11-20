@@ -3,9 +3,11 @@
 import { RADIUS, LEVEL, ISLAND, PRECINCT, TM, SITES, houses, yards, priestHouses, houseGate, houseTrade, houseNoble, chinampaHouses, inLake, inLakeWater } from './layout.js';
 import { ground } from './ground.js';
 import { sculptPlans } from './sculpt.js';
-import { lodTiles } from '../lod.js';
+import { tiles } from './tiles.js';
+import { isOpen, figureSpot } from './walk.js';
+import { lights } from './nightlight.js';
 /** How far from the visitor the houses are built in full (m); the arrival (the Templo Mayor's twin shrines, 160 m and more from the nearest) sees the simple form. */
-const NEAR = 150;
+const NEAR = 190;
 const base = (id, elements) => ({ id, style: 'aztec', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-60, 0], facing: 'e' } });
 /**
  * The precinct's floor and the life before the Templo Mayor (docs/settlements/tenochtitlan.md §13): the plaza's plaster worn, stained and painted
@@ -29,7 +31,7 @@ function precinct() {
       const at = [x - 0.55 + k * 0.55 + (rand() - 0.5) * 0.1, z + 0.5 + (rand() - 0.5) * 0.2], g = rand();
       if (g < 0.5) L.push({ t: 'basket', at, y: Y + 0.015, seed: Math.floor(rand() * 1e6), goods: pick(['paint_ochre', 'cloth_red', 'cloth_ochre', 'cloth_white']) });
       else if (g < 0.8) L.push({ t: 'pot', kind: pick(['dark_pot', 'water_pot']), at, y: Y + 0.015, seed: Math.floor(rand() * 1e6) });
-      else L.push({ t: 'chickens', kind: 'hen', at, y: Y, n: 2, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
+      else L.push({ t: 'chickens', kind: 'turkey', at, y: Y, n: 2, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
     }
     if (i % 2 === 0) P.push([x + 0.9, z + 1.7, Y, Math.PI + (rand() - 0.5), pick(['woman', 'man', 'bearer']), 520 + i]);
   });
@@ -85,19 +87,20 @@ function sectors(id, elements, n, reach) {
 
 export async function town() {
   const all = houses(), plans = [];
-  // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full within NEAR of the visitor, simple (solid rooms, the wall, no furniture)
+  // the houses in tiles of 150 m, each built twice (tiles.js): in full within NEAR of the visitor, simple (solid rooms, the wall, no furniture)
   // beyond: the arrival frame shows the far form only, a tile's meshes are batched per material and culled by their own bounds
-  plans.push(...lodTiles('tenochtitlan-houses', 'aztec', all.flatMap((h) => {
+  plans.push(...tiles('tenochtitlan-houses', 'aztec', all.flatMap((h) => {
     const c = [(h.rect[0] + h.rect[2]) / 2, (h.rect[1] + h.rect[3]) / 2], r = Math.hypot(c[0], c[1]), lod = r < 170 ? 2 : r < 250 ? 1 : 0;
     const noble = houseNoble(h);
-    return [{ t: 'calli', ...h, noble }, { t: 'calli_front', rect: h.rect, seed: h.seed, gate: houseGate(h), trade: noble ? null : houseTrade(h), lod }];
+    return [{ t: 'calli', ...h, noble, open: isOpen(h) }, { t: 'calli_front', rect: h.rect, seed: h.seed, gate: houseGate(h), trade: noble ? null : houseTrade(h), lod }];
   }), { near: NEAR, R: RADIUS, entrance: { at: [-60, 0], facing: 'e' } }));
   // the people in the priests' compounds of the precinct (layout.js): in each patio, by the gate's side
   {
     const kinds = ['priest', 'woman', 'sweeper', 'priest', 'woman', 'man', 'child', 'woman', 'priest'], people = [];
     priestHouses().forEach((h, i) => {
       const cx = (h.rect[0] + h.rect[2]) / 2, cz = (h.rect[1] + h.rect[3]) / 2, g = { n: [0, -1], s: [0, 1], w: [-1, 0], e: [1, 0] }[houseGate(h)];
-      people.push([cx + g[0] * 1.0, cz + g[1] * 1.0, 0.42, Math.atan2(g[0], g[1]) + (i % 2 ? 1.2 : -1.2), kinds[i % kinds.length], 800 + i, { pose: i % 3 === 1 ? 'sit_ground' : 'stand' }]);
+      const sp = figureSpot(h, i) ?? [cx + g[0] * 1.0, cz + g[1] * 1.0];                           // (out of the lane from the gate to the hearth room's door: walk.js)
+      people.push([sp[0], sp[1], 0.42, Math.atan2(g[0], g[1]) + (i % 2 ? 1.2 : -1.2), kinds[i % kinds.length], 800 + i, { pose: i % 3 === 1 ? 'sit_ground' : 'stand' }]);
     });
     plans.push(base('tenochtitlan-priests-people', [{ t: 'mx_people', people }]));
   }
@@ -116,6 +119,8 @@ export async function town() {
     ];
   })));
   // (what lies far from the visitor is cut into compact plans shown only within their `near` of him, so that its meshes are neither drawn nor counted from the other side of the island)
+  // the night's fires and the lit doors, one mesh of the additive halo material (nightlight.js)
+  plans.push(base('tenochtitlan-night', [{ t: 'tn_halo', lights: lights() }]));
   plans.push(...near('tenochtitlan-yards', yards().map((y) => ({ t: 'huerto', ...y })), 100, 170));
   // the farmers' houses on the chinampas, with their granaries, maguey and nopal
   plans.push(...sectors('tenochtitlan-chinampa-houses', chinampaHouses().map((h) => ({ t: 'chinampa_house', ...h, y: ground.height(h.c[0], h.c[1]) })), 8, 270));
