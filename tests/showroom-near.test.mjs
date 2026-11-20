@@ -29,9 +29,10 @@ test('the town is cut down to what is near; landmarks are kept whole', () => {
   assert.equal(nearPlans([town], 0, 0, 80, 'none').entries[0].plan.elements.length, 3);
 });
 
+// (a third, not a fifth: the Agora at this point now holds the stalls, stelae and the small route-keeping footprints of the visitor's walk)
 test('a real settlement: a small reach builds a small share of it', async () => {
   const mod = await MODULES.athens();
   const all = [...mod.landmarks.map((p) => ({ plan: p.plan, landmark: true })), ...(await mod.town()).map((plan) => ({ plan }))];
   const r = nearPlans(all, 150, -150, 60);
-  assert.ok(r.kept > 0 && r.kept < r.total / 5, `${r.kept} of ${r.total}`);
+  assert.ok(r.kept > 0 && r.kept < r.total / 3, `${r.kept} of ${r.total}`);
 });
