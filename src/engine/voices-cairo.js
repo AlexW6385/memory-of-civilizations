@@ -153,5 +153,6 @@ export const CAIRO_VOICES = {
     return dur;
   },
 };
-export const CAIRO_GAIN = { caiTabl: 1.0, caiCamel: 1.0, caiKuttab: 1.0, caiOud: 1.0, caiHawk: 1.0 };
+/** Levels measured with tools/sound-render.mjs (RMS of one event at lv 1: saqqa 3.6e-3, kuttab 3.9e-3, hawk 2.6e-3, camel 3.1e-3, dove 2.2e-3, lesson 2.2e-3; the band and the oud 1.4e-2 and 1.5e-2 before the gains below, against copperBeat 6.8e-3 and recite 2.9e-3). */
+export const CAIRO_GAIN = { caiTabl: 0.5, caiOud: 0.5 };
 addVoices('voices-cairo.js', CAIRO_VOICES, CAIRO_GAIN);
