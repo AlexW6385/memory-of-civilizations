@@ -7,6 +7,7 @@ import { ground } from './ground.js';
 import { teaSeats } from '../../styles/tibetan/index.js';
 import { dressing } from './dress.js';
 import { openFlags } from './upstairs.js';
+import { bands } from './interiors.js';
 const base = (id, elements, style = 'tibetan') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-4, 60], facing: 'n' } });
 /** The street's incense burner and the tethered yaks (x, z, rot), by the booths and in the lane. */
 export const SANG = [-3.4, 166];
@@ -72,7 +73,10 @@ function people() {
 
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 130) plans.push(base(`lhasa-houses-${i / 130}`, all.slice(i, i + 130).map((l) => ({ t: 'tibetan_house', ...l, ...openFlags(l), y: l.farm ? ground.height((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) : 0 }))));
+  const house = (l, part) => ({ t: part === 'rooms' ? 'lh_floor_rooms' : 'tibetan_house', ...l, ...openFlags(l), part, y: l.farm ? ground.height((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) : 0 });
+  for (let i = 0; i < all.length; i += 130) plans.push(base(`lhasa-houses-${i / 130}`, all.slice(i, i + 130).map((l) => house(l, openFlags(l).open ? undefined : 'shell'))));
+  // what furnishes the rooms, in plans shown only near (interiors.js); the twelve houses the visitor enters keep their rooms in the shell's plan (their stairs and floors are walked in one world)
+  for (const b of bands(all)) plans.push({ ...base(`lhasa-rooms-${b.id}`, b.lots.filter((l) => !openFlags(l).open).map((l) => house(l, 'rooms'))), center: b.center, near: b.near });
   // yaks treading out the barley on the farmsteads' threshing floors (the post and floor are the house's: styles/tibetan house(), the same seed's draw)
   { const yk = [];
     for (const l of all) {

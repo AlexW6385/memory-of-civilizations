@@ -626,16 +626,24 @@ function house(el, ctx) {
   const { bag, col } = ctx, y = el.y ?? 0, [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0;
   const H = 6, b = 0.3, pe = 0.45, cap = 0.3, yw = y + H - pe - cap, k = b / (yw - y + 0.5);
   const K = houseKeys(el), { rand, third, dn, dr, dw, C, rooms, voids, farm, merchant, owins, wr, rs, loft } = K;
+  // el.part: 'shell' (the closed house, built wherever it stands), 'rooms' (what furnishes its rooms: built only near the visitor, in a plan of its own; docs/settlements/lhasa.md §19), or both
+  if (el.part === 'rooms') {
+    for (const r of rooms) furnishRoom(ctx, r);
+    if (wr) work(ctx, { rect: wr.rect, y: wr.y, h: wr.h, side: wr.side, seed: wr.seed });
+    if (loft) furnishRoom(ctx, loft.room);
+    return;
+  }
+  const furnish = el.part !== 'shell';
   // the house: one battered body hollowed by the courtyard (open to the sky and to the street side) and by its rooms
   dzong({ rect: el.rect, y0: y - 0.5, y1: y + H, batter: b, mat: 'limewash_white', windows: '', pembe: pe, cap, seed: el.seed, voids }, ctx);
   for (const r of rooms) {
-    furnishRoom(ctx, r);
+    if (furnish) furnishRoom(ctx, r);
     const up = r.y > y + 1;
     doorway({ at: [r.door, C[1]], n: 's', y: up ? r.y : r.y + 0.05, w: 1.1, h: up ? 1.95 : 2.1, k: 0 }, ctx);
   }
   const upDoors = rooms.filter((r) => r.y > y + 1).map((r) => r.door);
   if (wr) {
-    work(ctx, { rect: wr.rect, y: wr.y, h: wr.h, side: wr.side, seed: wr.seed });
+    if (furnish) work(ctx, { rect: wr.rect, y: wr.y, h: wr.h, side: wr.side, seed: wr.seed });
     doorway({ at: [wr.side === 'w' ? C[0] : C[2], wr.doorZ], n: wr.side === 'w' ? 'e' : 'w', y: wr.y, w: 0.9, h: 1.95, k: 0 }, ctx);
   }
   if (rs) {
@@ -757,7 +765,7 @@ function house(el, ctx) {
       win(bag, [wx, r3[3] - 0.03], [1, 0], [0, 1], y + H + 0.6, 0.9, rand, { k: 0.12 / 2.6, lights: i === Math.floor(nw / 2) && L > 5 ? 2 : 1 });
     }
     if (loft) {                                                                         // the roof room: a door onto the gallery's roof, a window on the west wall, the sleeping loft furnished
-      furnishRoom(ctx, loft.room);
+      if (furnish) furnishRoom(ctx, loft.room);
       doorway({ at: [loft.room.door, r3[3]], n: 's', y: y + H, w: 0.9, h: 1.95, k: 0.12 / 2.6 }, ctx);
       win(bag, [r3[0] + 0.01, loft.wz], [0, 1], [-1, 0], y + H + 0.8, 0.85, rand, { k: 0.12 / 2.6, lights: 1, open: true });
     }
@@ -1436,8 +1444,9 @@ const { furnish: furnishRoom, work } = makeRooms({ face, thangka });
 const { teaSeats: _ts, ...SHOPS } = makeShops({ face, doorway, win, thangka, sangkhun, twigs, bannerPole, flagString });
 /** Where patrons sit in a tea house (shops.js). */
 export const teaSeats = _ts;
-const FINE_VARIED = new Set(['tibetan_house', ...Object.keys(SHOPS)]);
-const OWN = { dzong, chorten, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS  };
+const FINE_VARIED = new Set(['tibetan_house', 'lh_floor_rooms', ...Object.keys(SHOPS)]);
+// (the rooms' furnishing is a plan element of its own, named with 'floor' so that src/objects/life.js, which places the street's life round the footprints of a plan's elements, passes it by)
+const OWN = { lh_floor_rooms: (el, ctx) => house({ ...el, part: 'rooms' }, ctx), dzong, chorten, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS  };
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
   // (the houses and the street's shops build with their fine pieces marked: vary.js)
