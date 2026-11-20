@@ -11,7 +11,7 @@ import { upOf } from './upper-plan.js';
 /** How far from the visitor the blocks are built in full (m, to a tile's middle); beyond, the simple form (far.js). */
 const NEAR = 200, TILE = 220, OFF = 160;
 /** The pavements' and the yards' tiles: 300 m (every tile is a plan, and every plan a mesh for each material it holds: 150 m tiles made 835 meshes of the streets alone). */
-const ST_TILE = 300, ST_NEAR = +(process.env.NY_STREET_NEAR || 340);   // (tiles of 220 m, their grid shifted 160 m: every tile is a plan of its own per form, and the count of meshes and of the arrival's draws depend on where the cuts fall)
+const ST_TILE = 300, ST_NEAR = 340;   // (tiles of 220 m, their grid shifted 160 m: every tile is a plan of its own per form, and the count of meshes and of the arrival's draws depend on where the cuts fall)
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
 // settlement's by the style's `turned`, the life of the streets — single placed things — moved and
 // turned here, and each tile's centre with it)
@@ -173,9 +173,8 @@ function yards() {
     if (!lines.length) continue;
     out.push({ t: 'laundry', pole: [cx, zm], y: height(cx, zm), h: Math.min(16, Math.max(...lines.map((p) => p[1])) - l.y + 2), lines, seed: Math.floor(rand() * 1e6) });
   }
-  const tiles = new Map();
-  for (const e of out) { const p = e.at ?? e.pole, k = `${Math.floor(p[0] / ST_TILE)},${Math.floor(p[1] / ST_TILE)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
-  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-yards-${k}`, list), center: toCity((i + 0.5) * ST_TILE, (j + 0.5) * ST_TILE), near: ST_NEAR }; });
+  // (one plan: the newsstands and the yards' washing are 0.7 MB in all, and a plan's every material is a mesh)
+  return [{ ...base('new-york-yards', out), center: [0, 0], near: RADIUS + 400 }];
 }
 /**
  * The pavements and what stands on them (docs §1i), in tiles: the flags and curbs of every block, then the street furniture

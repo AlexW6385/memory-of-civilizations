@@ -17,7 +17,7 @@ import { pavement, curb } from './pave.js';
 import { shopRoom } from './shoprooms.js';
 import { library } from './library.js';
 import { chryslerBody, CAP_AT } from './chrysler.js';
-import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance, face } from './blocks.js';
+import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance, face, LEAN, quadOut } from './blocks.js';
 import { shopName, shopSign, bladeText, nearEntrance, rng as rng2, Quads, letters, textLen, fitCell, readDir } from './dress.js';
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
@@ -42,7 +42,11 @@ function tank(bag, x, y, z, r = 2.2) {
 /** A fire escape down a street front (the face at o, outward sg, along x if `along`): a balcony of iron grating at each floor
  * with its railing, a stair between each, a drop ladder over the shop front. */
 function fireEscape(bag, along, o, sg, u0, u1, y0, top, step = 3.4) {
-  const B = (a0, a1, d0, d1, ya, yb) => { const p = o + sg * d0, q = o + sg * d1; return along ? box(a0, ya, Math.min(p, q), a1, yb, Math.max(p, q)) : box(Math.min(p, q), ya, a0, Math.max(p, q), yb, a1); };
+  const B = (a0, a1, d0, d1, ya, yb) => {
+    const p = o + sg * d0, q = o + sg * d1;
+    if (LEAN.on && LEAN.boxes && d1 > d0 && d0 <= 0.05) { const lo = along ? (sg > 0 ? { noZn: true } : { noZp: true }) : (sg > 0 ? { noXn: true } : { noXp: true }); return along ? frustum([a0, Math.min(p, q), a1, Math.max(p, q)], ya, yb, 0, 0, 0, 0, lo) : frustum([Math.min(p, q), a0, Math.max(p, q), a1], ya, yb, 0, 0, 0, 0, lo); }   // (lean: the face against the wall left out)
+    return along ? box(a0, ya, Math.min(p, q), a1, yb, Math.max(p, q)) : box(Math.min(p, q), ya, a0, Math.max(p, q), yb, a1);
+  };
   const P = (a, d, yy) => along ? [a, yy, o + sg * d] : [o + sg * d, yy, a];
   let flip = false;
   for (let yy = y0; yy < top - 1.5; yy += step) {
@@ -72,7 +76,7 @@ function storefronts(bag, [x0, z0, x1, z1], y, rand, faces = 'nsew') {
   for (const f of 'nsew') {
     if (!faces.includes(f)) continue;
     const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, a0 = along ? x0 : z0, o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
-    const R = (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(a0 + u0, y0, Math.min(a, b), a0 + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, a0 + u0, Math.max(a, b), y1, a0 + u1); };
+    const R = face([x0, z0, x1, z1], f).R;   // (the same box; blocks.js face, which leaves out the face in the wall in the lean form)
     const Pt = (u, d, yy) => along ? [a0 + u, yy, o + sg * d] : [o + sg * d, yy, a0 + u];
     const n = Math.max(1, Math.floor(L / 6)), FF = face([x0, z0, x1, z1], f), full = nearEntrance((x0 + x1) / 2, (z0 + z1) / 2);
     for (let i = 0; i < n; i++) {
@@ -115,7 +119,8 @@ function piers(bag, [x0, z0, x1, z1], y0, y1) {
     const n = Math.max(2, Math.round(L / 3.2));
     for (let i = 0; i <= n; i++) {
       const u = a0 + i * L / n, a = o, b = o + sg * 0.35;
-      bag.add(PLAIN, along ? box(u - 0.3, y0, Math.min(a, b), u + 0.3, y1 + 0.4, Math.max(a, b)) : box(Math.min(a, b), y0, u - 0.3, Math.max(a, b), y1 + 0.4, u + 0.3));
+      const o2 = LEAN.on ? { noBottom: true, noTop: true } : {};   // (lean: the stage's parapet lies on the pier's foot and the cornice over its head)
+      bag.add(PLAIN, along ? frustum([u - 0.3, Math.min(a, b), u + 0.3, Math.max(a, b)], y0, y1 + 0.4, 0, 0, 0, 0, o2) : frustum([Math.min(a, b), u - 0.3, Math.max(a, b), u + 0.3], y0, y1 + 0.4, 0, 0, 0, 0, o2));
     }
   }
 }
@@ -127,7 +132,7 @@ function piers(bag, [x0, z0, x1, z1], y0, y1) {
 function soot(bag, [x0, z0, x1, z1], f, y, h, mat, rand) {
   const m = mat === 'facade_brick' ? 'pottery_dark' : 'plaster_damp', along = f === 'n' || f === 's', o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
   const a0 = along ? x0 : z0, L = along ? x1 - x0 : z1 - z0, top = y + h - 1.6, low = y + 4.6;
-  const put = (u0, u1, ya, yb) => { if (yb - ya < 0.05) return; const p = o + sg * 0.004, q = o + sg * 0.014; bag.add(m, along ? box(a0 + u0, ya, Math.min(p, q), a0 + u1, yb, Math.max(p, q)) : box(Math.min(p, q), ya, a0 + u0, Math.max(p, q), yb, a0 + u1)); };
+  const put = (u0, u1, ya, yb) => { if (yb - ya < 0.05) return; if (LEAN.on) { const e = o + sg * 0.012, P = (u, yy) => (along ? [a0 + u, yy, e] : [e, yy, a0 + u]); bag.add(m, quadOut(P(u0, ya), P(u1, ya), P(u1, yb), P(u0, yb), along ? [0, sg] : [sg, 0])); return; } const p = o + sg * 0.004, q = o + sg * 0.014; bag.add(m, along ? box(a0 + u0, ya, Math.min(p, q), a0 + u1, yb, Math.max(p, q)) : box(Math.min(p, q), ya, a0 + u0, Math.max(p, q), yb, a0 + u1)); };
   const n = Math.max(2, Math.round(L / 3));
   for (let i = 0; i < n; i++) put(i * L / n, (i + 1) * L / n, Math.max(low, top - 0.6 - rand() * 0.9), top);
   for (const u of [0.05, L - 0.55]) put(u, u + 0.5, Math.max(low, top - 4 - rand() * 6), Math.max(low, top - 0.6));
@@ -139,7 +144,7 @@ function roofSign(bag, rect, front, yr, r) {
   const F = face(rect, front), [name, bm, lm] = ADS[Math.floor(r() * ADS.length)], w = Math.min(8.6, F.L - 2.4), u0 = (F.L - w) / 2 + (r() - 0.5) * 0.6, u1 = u0 + w, hh = 3.0, lift = 1.5, dd = 1.3;
   bag.add(bm, F.R(u0, u1, yr + lift, yr + lift + hh, -dd, -dd + 0.12)); bag.add('iron', F.R(u0 - 0.05, u1 + 0.05, yr + lift + hh, yr + lift + hh + 0.08, -dd - 0.04, -dd + 0.16)); bag.add('iron', F.R(u0 - 0.05, u1 + 0.05, yr + lift - 0.08, yr + lift, -dd - 0.04, -dd + 0.16));
   for (let k = 0; k <= 3; k++) { const u = u0 + 0.2 + k * (w - 0.5) / 3; bag.add('iron', F.R(u, u + 0.1, yr, yr + lift, -dd - 0.02, -dd + 0.1)); bag.add('iron', F.R(u, u + 0.1, yr + lift, yr + lift + hh - 0.1, -dd - 0.45, -dd - 0.35)); bag.add('iron', F.R(u, u + 0.08, yr + lift, yr + lift + 0.08, -dd - 0.4, -dd)); }
-  const Q = new Quads(), cell = fitCell(name, w - 0.8, 0.14), tl = textLen(name, cell), rs = readDir(front), mid = (u0 + u1) / 2;
+  const Q = new Quads(F.along ? [0, F.sg] : [F.sg, 0]), cell = fitCell(name, w - 0.8, 0.14), tl = textLen(name, cell), rs = readDir(front), mid = (u0 + u1) / 2;
   letters(Q.t(lm), name, cell, (h, v) => F.P(mid - rs * tl / 2 + rs * h, -dd + 0.13, yr + lift + (hh - 5 * cell) / 2 + v), 0, 0);
   Q.flush(bag);
 }
@@ -148,7 +153,7 @@ function wallAd(bag, rect, f, y, y0, h, r) {
   const F = face(rect, f), vis = h - y0;
   if (vis < 8.5 || F.L < 9) return;
   const [name, bm, lm] = ADS[Math.floor(r() * ADS.length)], w = Math.min(14, F.L - 3), u0 = (F.L - w) / 2 + (r() - 0.5) * 1.5, cell = fitCell(name, w - 1.2, 0.3), tl = textLen(name, cell), hh = Math.min(vis - 4.2, 5 * cell + 2.4), yb = y + h - 2.6 - hh;
-  const rs = readDir(f), Q = new Quads(), d = 0.07, mid = u0 + w / 2;
+  const rs = readDir(f), Q = new Quads(F.along ? [0, F.sg] : [F.sg, 0]), d = 0.07, mid = u0 + w / 2;
   bag.add(bm, F.R(u0, u0 + w, yb, yb + hh, 0.0, d)); bag.add('paint_white', F.R(u0 - 0.12, u0 + w + 0.12, yb - 0.12, yb, 0.0, d + 0.01)); bag.add('paint_white', F.R(u0 - 0.12, u0 + w + 0.12, yb + hh, yb + hh + 0.12, 0.0, d + 0.01));
   letters(Q.t(lm), name, cell, (hu, v) => F.P(mid - rs * tl / 2 + rs * hu, d + 0.01, yb + (hh - 5 * cell) / 2 + v), 0, 0);
   Q.flush(bag);

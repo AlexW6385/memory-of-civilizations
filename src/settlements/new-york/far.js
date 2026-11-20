@@ -10,7 +10,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import '../../styles/artdeco/index.js';
-import { face, rowPlan, rowStacks } from '../../styles/artdeco/blocks.js';
+import { face, rowPlan, rowStacks, LEAN, quadOut } from '../../styles/artdeco/blocks.js';
 import { shopRoom } from '../../styles/artdeco/shoprooms.js';
 import { nearEntrance, rng as rng2, fitCell } from '../../styles/artdeco/dress.js';
 import { narrowRect, stripRect, adsOf } from './upper-plan.js';
@@ -47,7 +47,7 @@ function storefronts(bag, rect, y, rand, faces = 'nsew') {
 /** Soot under the cornice of a street front (the full form's, boxes only). */
 function soot(bag, rect, f, y, h, mat, rand) {
   const m = mat === 'facade_brick' ? 'pottery_dark' : 'plaster_damp', F = face(rect, f), { R, L } = F, top = y + h - 1.6, low = y + 4.6;
-  const put = (u0, u1, ya, yb) => { if (yb - ya < 0.05) return; bag.add(m, R(u0, u1, ya, yb, 0.004, 0.014)); };
+  const put = (u0, u1, ya, yb) => { if (yb - ya < 0.05) return; if (LEAN.on) { bag.add(m, quadOut(F.P(u0, 0.012, ya), F.P(u1, 0.012, ya), F.P(u1, 0.012, yb), F.P(u0, 0.012, yb), F.along ? [0, F.sg] : [F.sg, 0])); return; } bag.add(m, R(u0, u1, ya, yb, 0.004, 0.014)); };
   const n = Math.max(2, Math.round(L / 3));
   for (let i = 0; i < n; i++) put(i * L / n, (i + 1) * L / n, Math.max(low, top - 0.6 - rand() * 0.9), top);
   for (const u of [0.05, L - 0.55]) put(u, u + 0.5, Math.max(low, top - 4 - rand() * 6), Math.max(low, top - 0.6));
@@ -109,7 +109,8 @@ function piers(bag, [x0, z0, x1, z1], y0, y1) {
     const n = Math.max(2, Math.round(L / 3.2));
     for (let i = 0; i <= n; i++) {
       const u = a0 + i * L / n, a = o, b = o + sg * 0.35;
-      bag.add(PLAIN, along ? box(u - 0.3, y0, Math.min(a, b), u + 0.3, y1 + 0.4, Math.max(a, b)) : box(Math.min(a, b), y0, u - 0.3, Math.max(a, b), y1 + 0.4, u + 0.3));
+      const o2 = LEAN.on ? { noBottom: true, noTop: true } : {};
+      bag.add(PLAIN, along ? frustum([u - 0.3, Math.min(a, b), u + 0.3, Math.max(a, b)], y0, y1 + 0.4, 0, 0, 0, 0, o2) : frustum([Math.min(a, b), u - 0.3, Math.max(a, b), u + 0.3], y0, y1 + 0.4, 0, 0, 0, 0, o2));
     }
   }
 }
@@ -220,10 +221,12 @@ const folded = (bag, T) => {
 const wrap = (fn, T) => (el, ctx) => fn(el, { ...ctx, bag: folded(ctx.bag, T) });
 const wrapAll = (els, T) => Object.fromEntries(Object.entries(els).map(([k, fn]) => [k, wrap(fn, T)]));
 const A = STYLES.artdeco.elements;
+/** The lean form (blocks.js LEAN): on while a lot with solid walls builds, off for a shop with its room or an opened lot (their fronts are hollow and seen from within). */
+const lean = (fn, boxes = false) => (el, ctx) => { const was = [LEAN.on, LEAN.boxes]; LEAN.on = !el.room && !el.up; LEAN.boxes = LEAN.on && boxes; try { return fn(el, ctx); } finally { [LEAN.on, LEAN.boxes] = was; } };
 registerStyle('artdeco_far', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: wrapAll({ skyscraper: withStrip(skyscraper), diner: lowBox(3.4, 'paint_white'), walkup: lowBox(15, 'facade_brick'), turned: A.turned }, FOLD_FAR),
+  elements: wrapAll({ skyscraper: lean(withStrip(skyscraper), true), diner: lowBox(3.4, 'paint_white'), walkup: lowBox(15, 'facade_brick'), turned: A.turned }, FOLD_FAR),
   objects: {},
 });
 // the near form: the style's own builders, their materials folded
-registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: withUpstairs(A.skyscraper), walkup: withTenement(A.walkup) }, FOLD) });
+registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: lean(withUpstairs(A.skyscraper)), walkup: withTenement(A.walkup) }, FOLD) });
