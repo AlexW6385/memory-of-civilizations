@@ -74,4 +74,21 @@ for (const r of streets()) {
 // crows at twilight over the town
 flights.push({ kind: 'crow', n: 7, loop: { c: [60, -60], a: [60, 40], rot: 0.5 }, y: [32, 14], speed: 9 });
 
-export default { fish, flights, perches };
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; docs/settlements/song-hangzhou.md §31) ──
+const critters = [];
+const lane = (z, x) => ground.height(x, z);
+// a raft of farm ducks on the canal between two bridges, going up and down its stretch [inferred: ducks were bred along the Jiangnan canals]
+critters.push({ type: 'floaters', models: ['duck_white', 'duck_brown', 'duck_brown', 'duck_white', 'duck_brown'], raft: true, area: [141, -64, 147, -30], dist: (x, z) => rectDist(canals()[0], x, z), a: [14, 3], rot: Math.PI / 2, ratio: 0.12, margin: 0.75, y: LEVEL.canal, speed: 0.2, cycle: [20, 30] });
+// the hens of a lane's yard, with their cock, off the Way's apron [inferred]
+for (const [model, x, z, size] of [['rooster', 52.0, -75.2, 1], ['hen_brown', 53.6, -74.6, 1], ['hen_brown', 51.0, -73.8, 0.96], ['hen_white', 54.4, -76.0, 1]]) critters.push({ model, at: [x, lane(z, x) + 0.02, z], rot: 0, range: [3.0, 1.2], size });
+// a cat asleep by a shop's step on the Way, and a dog in the lane's mouth
+critters.push({ model: 'cat_tabby', at: [21, lane(-60, 21) + 0.3, -60], rot: 0.4, range: [3, 1.5] });
+critters.push({ model: 'dog', at: [58, lane(-120, 58) + 0.02, -120], rot: 1.2, range: [6, 2.5] });
+// a fisherman's punt at the river side of the flood wall with its cormorants on the rails [inferred: cormorant fishing is old on the lower Yangtze and the Qiantang]
+{
+  const bx = -8, bz = 162, by = LEVEL.river;
+  critters.push({ model: 'fishing_craft', at: [bx, by, bz], rot: 0 });
+  [[-1.0, -1], [0.1, 1], [1.05, -1]].forEach(([u, sd], i) => critters.push({ model: 'cormorant', at: [bx + u, by + 0.296, bz + sd * 0.29], rot: sd * (Math.PI / 2) + (i - 1) * 0.25, cycle: 46 + 7 * i }));
+}
+
+export default { fish, flights, perches, critters };
