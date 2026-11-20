@@ -540,3 +540,37 @@ export function turkey() {
   return m;
 }
 MODELS.turkey = turkey;
+
+// ═════════════ the goat (Bhaktapur's lanes) ═════════════
+/** A small hill goat, standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs; the shader lies it down and stands it up as the visitor comes): black, or white with brown patches; swept-back horns, a short beard, upright ears, the tail cocked. Back at 0.47 m. */
+export function goat(variant) {
+  const m = new Model(), black = variant === 'black', base = black ? [0.12, 0.1, 0.09] : [0.82, 0.78, 0.68], patch = black ? [0.2, 0.15, 0.1] : [0.42, 0.28, 0.16], pale = black ? [0.3, 0.26, 0.22] : [0.9, 0.86, 0.78], horn = [0.55, 0.5, 0.4];
+  const coat = ({ p, n }) => lerp(lerp(base, patch, sm(0.55, 0.62, hash3([Math.round(p[0] * 7), 0, Math.round(p[2] * 9)], 4)) * (black ? 0.5 : 0.9)), shade(base, 0.8), sm(0.0, -0.8, n[1]) * 0.5 + hash3(p, 3) * 0.05);
+  const S = [[0.27, 0.4, 0.07, 0.065], [0.2, 0.42, 0.11, 0.09], [0.08, 0.43, 0.125, 0.1], [-0.06, 0.42, 0.125, 0.1], [-0.18, 0.41, 0.115, 0.095], [-0.27, 0.4, 0.08, 0.07], [-0.3, 0.39, 0.02, 0.02]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 9, col: coat });
+  const NP = [0.25, 0.45, 0], HP = [0.37, 0.64, 0];
+  m.as(1, NP, null, () => m.tube([[0.23, 0.44, 0], [0.3, 0.55, 0], [0.35, 0.62, 0]], [[0.07, 0.065], [0.052, 0.05], [0.045, 0.042]], { sides: 7, ref: [1, 0, 0], col: coat }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.38, 0.655, 0], [0.06, 0.05, 0.043], coat, { nu: 6, nv: 7 });
+    m.tube([[0.41, 0.64, 0], [0.46, 0.62, 0], [0.5, 0.605, 0]], [[0.03, 0.028], [0.025, 0.024], [0.02, 0.02]], { sides: 6, col: ({ t }) => lerp(coat({ p: [0.45, 0.6, 0], n: [0, 1, 0] }), pale, t * 0.6) });
+    m.ball([0.505, 0.6, 0], [0.012, 0.01, 0.014], [0.08, 0.05, 0.05], { nu: 3, nv: 5 });
+    m.tube([[0.46, 0.585, 0], [0.45, 0.545, 0], [0.445, 0.515, 0]], [[0.006, 0.008], [0.008, 0.01], [0.003, 0.004]], { sides: 4, col: pale });     // the beard
+    for (const s of [-1, 1]) {
+      m.tube([[0.36, 0.69, s * 0.025], [0.3, 0.74, s * 0.05], [0.24, 0.73, s * 0.065], [0.2, 0.69, s * 0.07]], [0.011, 0.01, 0.007, 0.002], { sides: 4, col: horn });   // the swept-back horn
+      m.tube([[0.355, 0.66, s * 0.04], [0.345, 0.68, s * 0.085], [0.335, 0.69, s * 0.115]], [[0.012, 0.025], [0.008, 0.02], [0.002, 0.004]], { sides: 4, col: coat });     // the ear
+    }
+    eyes(m, 0.43, 0.67, 0.036, 0.0085, [0.55, 0.45, 0.12]);
+  });
+  m.as(3, [-0.28, 0.4, 0], null, () => m.tube([[-0.28, 0.4, 0], [-0.32, 0.45, 0], [-0.31, 0.5, 0]], [0.016, 0.014, 0.004], { sides: 4, col: coat }));
+  const legs = [[4, 1, -1, 0.19], [5, 1, 1, 0.19], [6, 0, -1, -0.2], [7, 0, 1, -0.2]];
+  for (const [part, front, z, x] of legs) {
+    const hip = [x, 0.3, z * 0.075];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [x - (front ? 0 : 0.03), 0.17, z * 0.075], [x - (front ? 0 : 0.02), 0.07, z * 0.075], [x + 0.005, 0.02, z * 0.075]], [[0.04, 0.034], [0.02, 0.018], [0.014, 0.013], [0.016, 0.016]], { sides: 5, col: ({ t }) => lerp(coat({ p: [x, 0.3, z], n: [0, 1, 0] }), pale, t * 0.4) });
+      m.ball([x + 0.01, 0.012, z * 0.075], [0.026, 0.013, 0.018], [0.1, 0.08, 0.07], { nu: 4, nv: 5 });
+    });
+  }
+  return m;
+}
+MODELS.goat_black = () => goat('black');
+MODELS.goat_white = () => goat('white');
