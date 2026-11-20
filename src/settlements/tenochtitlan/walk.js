@@ -73,7 +73,7 @@ const segPt = (p, a, b) => { const vx = b[0] - a[0], vz = b[1] - a[1], l2 = vx *
  * Where a figure stands in an opened compound's patio: the free spot (0.8 m from the solids) nearest the patio's middle that is at least
  * 1.9 m off the route from the gate to the hearth room's door, so that nobody stands in the walker's way. Falls back to null.
  */
-export function figureSpot(h, k = 0) {
+export function figureSpot(h, k = 0, avoid = []) {
   const r = recordOf(h), route = routeInto(h), pr = r.patio;
   const cx = (pr[0] + pr[2]) / 2, cz = (pr[1] + pr[3]) / 2;
   let best = null, bd = 1e9;
@@ -81,7 +81,7 @@ export function figureSpot(h, k = 0) {
     const p = [x, z];
     if (!free(p, r.solids, h.rect, 0.8)) continue;
     let d = 1e9; for (let i = 0; i + 1 < route.length; i++) d = Math.min(d, segPt(p, route[i], route[i + 1]));
-    if (d < 1.9) continue;
+    if (d < 1.9 || avoid.some((q) => Math.hypot(q[0] - x, q[1] - z) < 2.2)) continue;
     const s = Math.hypot(x - cx, z - cz) + (k % 2 ? 0.15 : 0) * Math.sin(x * 7 + z * 3);
     if (s < bd) { bd = s; best = p; }
   }

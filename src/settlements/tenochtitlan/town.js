@@ -31,7 +31,7 @@ function precinct() {
       const at = [x - 0.55 + k * 0.55 + (rand() - 0.5) * 0.1, z + 0.5 + (rand() - 0.5) * 0.2], g = rand();
       if (g < 0.5) L.push({ t: 'basket', at, y: Y + 0.015, seed: Math.floor(rand() * 1e6), goods: pick(['paint_ochre', 'cloth_red', 'cloth_ochre', 'cloth_white']) });
       else if (g < 0.8) L.push({ t: 'pot', kind: pick(['dark_pot', 'water_pot']), at, y: Y + 0.015, seed: Math.floor(rand() * 1e6) });
-      else L.push({ t: 'chickens', kind: 'hen', at, y: Y, n: 2, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
+      else L.push({ t: 'chickens', kind: 'turkey', at, y: Y, n: 2, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
     }
     if (i % 2 === 0) P.push([x + 0.9, z + 1.7, Y, Math.PI + (rand() - 0.5), pick(['woman', 'man', 'bearer']), 520 + i]);
   });
