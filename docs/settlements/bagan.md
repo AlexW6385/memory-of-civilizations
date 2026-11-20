@@ -113,3 +113,14 @@ Not done: boats that move on the river (the river is a 15 m band at the disc's e
 - **Reliefs.** [stated] 80 corridor reliefs of the Buddha's life. Ours: seven scenes in rotation (Mara defeated, first sermon, parinirvana, birth, great departure, Nalagiri tamed, descent from Tavatimsa) as a modelled surface 4 cm over the slab, figures rising up to 4 cm more, on all corridor and porch panels, within 22/26 m (beyond it the first form's plates). [inferred: composition]
 - **Plaques.** [stated] 554 glazed Jataka plaques. Ours: small tiles in a raised frame with a deer, elephant, ascetic, horse, sage or tree, along the plinth's arms within 22 m. [inferred]
 - **Guardians.** [inferred] A pair of chinthe and a pair of seated stucco guardians (sword between the feet) at each porch entrance; the precinct gates' chinthe modelled likewise.
+
+## 15. Matching the reference (Suzhou): walk, night, sound, animals, wear
+
+Tags as above. Nothing here contradicts §1–§14; what is new is only what the place had then, or is marked [inferred] with its reason. No web source could be fetched in this pass (the shell reaches few sites): the facts used are those already cited in §1–§14 and general knowledge, flagged where it matters.
+
+### 15.1 The visitor's walk (src/settlements/bagan/walk.js, walkroutes.js)
+
+- **The route.** [inferred from the layout of §2] The way in stands inside the Ananda precinct's west gate (30, 0) looking east. The walk runs east along the cross passage between the pilgrims' stalls to the west porch, and the other way out of the gate and along the main road (z = ±4) between the two shop rows (34 shop lots in all, every one of them on the walk) to the Tharabar Gate, through it and along the city's market street to the cross street. This is the pilgrims' road of §6: river, gate, market, temple.
+- **Shops open as by day.** [inferred] Every shop on the road already stood open (§11): front open, counter with the trade's goods, hanging baskets, awning and sign, shelves of the trade inside, bench, sleeping platform, a lamp; the keeper stands behind the counter. New here: the shops are built in two forms by distance (full near, a closed shell far: interiors, goods and colliders exist only within about 110 m of a 100 m tile's middle), and twelve shops spread along the road are routed through by the walk check (in over the step by the door gap to the front room).
+- **Furniture where the shop rows leave room.** [inferred from Burmese village custom: free drinking water in pots (yay-zayat) at the roadside, wayside shrines, wells, festival poles, spirit houses] By the Tharabar Gate's two sides: water-pot stands, a wayside shrine and a bench; at the corners of the cross street: a well, a festival pole, a spirit house and a pot stand.
+- **Kept clear.** The cart driver who stood at a shop door's lane now walks on the road side of his ox.

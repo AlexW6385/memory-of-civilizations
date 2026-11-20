@@ -2,6 +2,7 @@
 // and the gilded spire, the precinct's wall with its four gates, the brick monastery by it.
 import '../../styles/burmese/index.js';
 import { ANANDA, PRECINCT, OKKYAUNG, RADIUS } from './layout.js';
+import { walkRoutes } from './walkroutes.js';
 
 const [px0, pz0, px1, pz1] = PRECINCT, [ax, az] = ANANDA.c, f = ANANDA.f;
 const E = [];
@@ -33,6 +34,8 @@ const rooms = [
 const c1 = HI + (HW - HI) / 2;
 const walks = [[[px0 - 8, az], [px0 + 10, az], [ax - 49, az], [ax - c1, az], [ax - c1, az - c1], [ax + c1, az - c1], [ax + c1, az + c1], [ax - c1, az + c1], [ax - c1, az]]];
 walks[0].y0 = 0;
+// into the opened shops of the visitor's walk (walk.js): in at the door gap over the step to the front room; eight or more spread along the road
+{ const all = walkRoutes(); const pick = all.filter((_, i) => i % 3 === 0); for (const q of pick) { const w = q.route.slice(); w.y0 = 0; walks.push(w); } }
 
 export const ananda = {
   id: 'ananda-temple',

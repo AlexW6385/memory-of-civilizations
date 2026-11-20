@@ -48,7 +48,7 @@ export function house(el, ctx) {
   const u0 = (W - hw) / 2 + (r() - 0.5) * 0.8, u1 = u0 + hw, v0 = 3.2, v1 = v0 + hd, fl = 1.35, wh = 1.95;
   // the posts on a grid, the floor's beams and boards
   const nu = Math.max(2, Math.round(hw / 2.3)), nv = Math.max(2, Math.round(hd / 2.5));
-  for (let i = 0; i <= nu; i++) for (let j = 0; j <= nv; j++) F.b('timber', u0 + (hw * i) / nu - 0.09 + (i === nu ? -0.09 : 0), 0, v0 + (hd * j) / nv - 0.09 + (j === nv ? -0.09 : 0), u0 + (hw * i) / nu + 0.09 + (i === 0 ? 0.09 : 0), fl, v0 + (hd * j) / nv + 0.09 + (j === 0 ? 0.09 : 0), false);
+  for (let i = 0; i <= nu; i++) for (let j = 0; j <= nv; j++) if (!el.simple || ((i === 0 || i === nu) && (j === 0 || j === nv))) F.b('timber', u0 + (hw * i) / nu - 0.09 + (i === nu ? -0.09 : 0), 0, v0 + (hd * j) / nv - 0.09 + (j === nv ? -0.09 : 0), u0 + (hw * i) / nu + 0.09 + (i === 0 ? 0.09 : 0), fl, v0 + (hd * j) / nv + 0.09 + (j === 0 ? 0.09 : 0), false);
   F.b('wood_ochre', u0 - 0.35, fl - 0.12, v0 - 0.35, u1 + 0.35, fl, v1 + 0.35, false);
   // the walls: woven bamboo; the front with the doorway when open
   const t = 0.1, du = u0 + hw * (0.3 + r() * 0.4), dw = 0.95;
@@ -64,6 +64,11 @@ export function house(el, ctx) {
   // crossed bamboo finials at the gable ends
   const rm = alongU ? [[u0 - ov - 0.1, (v0 + v1) / 2], [u1 + ov + 0.1, (v0 + v1) / 2]] : [[(u0 + u1) / 2, v0 - ov - 0.1], [(u0 + u1) / 2, v1 + ov + 0.1]];
   for (const [u, v] of rm) { F.b('bamboo_culm', u - 0.5, fl + wh + rise - 0.1, v - 0.05, u + 0.5, fl + wh + rise + 0.05, v + 0.05, false); F.b('bamboo_culm', u - 0.05, fl + wh + rise - 0.1, v - 0.5, u + 0.05, fl + wh + rise + 0.05, v + 0.5, false); }
+  if (el.simple) {
+    // the far form (a lot beyond the near plans): the house closed, its stair a plain block, no yard, no fittings
+    const su0 = du - 0.55; F.b('bamboo_culm', su0, 0, v0 - 2.9, su0 + 1.1, fl * 0.5, v0 - 0.05, false);
+    return;
+  }
   // a front veranda for the large house: a platform and a lean-to
   if (big) {
     F.b('wood_ochre', u0 - 0.2, fl - 0.12, v0 - 1.9, u1 * 0.5 + u0 * 0.5 + 1.2, fl, v0 - 0.35, false);
