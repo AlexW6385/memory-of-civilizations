@@ -1,4 +1,6 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
+import { openShops } from './openwalk.js';
+import { keeperOf, TRADE_SHELF } from './lavki.js';
 import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, NIKOLSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ, streetSkip, inLot } from './layout.js';
 const base = (id, elements, rooms = []) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
@@ -24,6 +26,7 @@ export async function houses() {
   const yb = yards(all); for (let i = 0; i < yb.length; i += 300) plans.push(base(`muscovy-yards-${i / 300}`, yb.slice(i, i + 300)));
   plans.push(base('muscovy-streets', streets()), base('muscovy-market', market()), base('muscovy-churches', CHURCHES.map(([x, z, yaw]) => ({ t: 'log_church', c: [x, z], y: height(x, z), yaw }))));
   plans.push(base('muscovy-waysides', waysides()), base('muscovy-stages', stages()), { ...base('muscovy-river-life', riverLife()), style: 'life' });
+  plans.push(...lavkaPlans());
   plans.push({ ...base('muscovy-people', people()), style: 'life' });
   return plans;
 }
@@ -220,3 +223,15 @@ function riverLife() {
   [-215, -95, 25, 150].forEach((x, i) => L.push({ t: 'boat', kind: 'barge', at: [x, riverZ(x) - 24 + i * 6], y: RIVER.level - 0.05, rot: Math.PI / 2 + (rand() - 0.5) * 0.08, seed: 120 + i }));
   return L;
 }
+
+// ── the opened shops of the trading rows (openwalk.js, lavki.js): per 36 m cell a plan drawn only within 58 m of the cell's middle ──
+const LAVKA_CELL = 36, LAVKA_NEAR = 58;
+function lavkaPlans() {
+  const cells = new Map();
+  for (const s of openShops().values()) { const k = `${Math.floor(s.fx / LAVKA_CELL)},${Math.floor(s.zc / LAVKA_CELL)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(s); }
+  return [...cells].map(([k, list]) => {
+    const [i, j] = k.split(',').map(Number);
+    return { ...base(`muscovy-lavki-${k}`, [{ t: 'lavka_open', y: height(ROWS[0] + 10, 0), list: list.map((s) => ({ s, trade: s.trade, seed: Math.floor(s.fx * 7 + s.zc * 131) >>> 0, keeper: keeperOf(Math.floor(s.fx * 3 + s.zc * 17) >>> 0) })) }]), near: LAVKA_NEAR, center: [i * LAVKA_CELL + LAVKA_CELL / 2, j * LAVKA_CELL + LAVKA_CELL / 2] };
+  });
+}
+void TRADE_SHELF;
