@@ -7,9 +7,12 @@ import { STYLES } from '../../core/build.js';
 import { lathe } from '../../core/geom.js';
 import { faceFrame, fbox, bar, slab4 } from '../../styles/dutch/facade.js';
 import { profile } from '../../styles/dutch/upper.js';
+import { inkOf, widthOf, canWrite } from '../rome/lettering.js';        // Rome's verified Latin capitals (A-Z without J, U, W), read only
 
 import { TRADES } from './dice.js';
 export { TRADES };
+/** What the board says, in Dutch of the time [inferred, dossier §10.5]; every text is checked by canWrite (the letters exist in the table). */
+export const SIGNS = { baker: 'BROOD', cheese: 'KAES', draper: 'LAKEN', grocer: 'SPECERYE', delft: 'POTTEN', tobacco: 'TABAK' };
 /** Awning cloth and the board's emblem colours by trade. */
 const LOOK = { baker: ['cloth_ochre', 'hide_tan'], cheese: ['cloth_red', 'cloth_ochre'], draper: ['cloth_indigo', 'cloth_red'], grocer: ['cloth_green', 'hide_brown'], delft: ['cloth_white', 'paint_blue'], tobacco: ['hide_brown', 'cloth_ochre'] };
 const BASE = 1.0, SILL = BASE + 0.45;
@@ -79,7 +82,12 @@ function amShopfront(el, { bag, col }) {
     const mid = 0.575, vm = bv - 0.41;
     // the emblem: a disc or a bar on each face (a thin box a hair proud)
     const E = (m, d0, d1, v0, v1) => { A(m, pu - 0.04, pu - 0.025, v0, v1, d0, d1); A(m, pu + 0.025, pu + 0.04, v0, v1, d0, d1); };
-    E(accent, mid - 0.2, mid + 0.2, vm - 0.12, vm + 0.12); E(cloth, mid - 0.1, mid + 0.1, vm - 0.06, vm + 0.06);
+    const word = SIGNS[kind];
+    if (word && canWrite(word)) {
+      // the word in dark paint on both faces of the board, its letters read along the street (on the face toward +u the reader's right is toward the wall)
+      const h = Math.min(0.17, 0.66 / widthOf(word)), quads = inkOf(word);
+      for (const [face, sg] of [[pu + 0.031, -1], [pu - 0.031, 1]]) for (const q of quads) bag.add('wood_dark', slab4(q.map(([a, b]) => P3(face, vm - 0.5 * h + b * h, mid + sg * a * h)), 0.006));
+    } else { E(accent, mid - 0.2, mid + 0.2, vm - 0.12, vm + 0.12); E(cloth, mid - 0.1, mid + 0.1, vm - 0.06, vm + 0.06); }
   }
   // the keeper, inside at the window
 }
