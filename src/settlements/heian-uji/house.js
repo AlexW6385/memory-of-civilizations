@@ -8,6 +8,7 @@
 // element `uji_house` of the japanese style: the shared files of the style are not touched.
 
 import '../../styles/japanese/index.js';
+import '../../objects/index.js';
 import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
@@ -153,6 +154,12 @@ function ujiHouse(el, { bag, col }) {
     }
     { const lp = P(hu + 0.95, hv + 0.35); B('wood_dark', hu + 0.9, hv + 0.3, hu + 1.0, hv + 0.4, ry, ry + 0.32); bag.add('lamp_white', lathe([[0.001, 0], [0.1, 0.05], [0.13, 0.17], [0.07, 0.26], [0.001, 0.28]], 9, null, lp[0], ry + 0.32, lp[1])); }
     furnishTrade(el, { bag, col }, { P: P2, B: B2, ry, T, L, D, g0 });
+    // the keeper, built into the near form (a life figure reaches 170 m; this one only where the house is near): behind the counter of a shop front, else at the hearth
+    if (el.keeper && STYLES.life?.elements.figure) {
+      const kr = rng((el.seed || 1) * 31 + 5), woman = kr() < 0.4, face = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
+      const side = kr() < 0.5 ? -1 : 1, at = mise ? P(door + side * (dw / 2 + BAY / 2 + 0.05), 0.95) : P2(hu + (tr.mir ? -1.35 : 1.35), hv), to = mise ? P(door + side * (dw / 2 + BAY / 2 + 0.05), -2.5) : P2(hu, hv);
+      STYLES.life.elements.figure({ at, y: mise ? fy + 0.015 : ry, rot: face(at, to), seed: 7700 + (el.seed % 9973) * 53, dress: woman ? 'robe' : 'trousers', hair: woman ? 'long' : 'topknot', hat: woman || mise ? 'none' : 'cap', hatMat: 'cloth_black', cloth: ['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_ochre'][Math.floor(kr() * 4)], cloth2: 'cloth_white', skin: 'skin_medium', carry: 'none', pose: mise ? 'stand' : 'cross' }, { bag, col });
+    }
   } else {
     B(wallMat, 0, 0, L, D, fy, y + H, true);
   }

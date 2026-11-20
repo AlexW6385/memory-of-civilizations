@@ -11,7 +11,7 @@ const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 const riverX = (z) => RIVER.x + 15 * Math.sin(z / 110);
 const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
 const base = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], elements, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'e' }, ...extra });
-const tiled = (id, style, list, near = 230) => {
+export const tiled = (id, style, list, near = 230) => {
   const tiles = new Map();
   for (const e of list) { const [x, z] = e.at ?? [(e.a[0] + e.b[0]) / 2, (e.a[1] + e.b[1]) / 2]; const k = `${Math.floor(x / 100)},${Math.floor(z / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, l]) => { const [i, j] = k.split(',').map(Number); return { ...base(`${id}-${k}`, style, l), center: [i * 100 + 50, j * 100 + 50], near }; });

@@ -7,7 +7,7 @@
 
 import { lots, HALL } from './layout.js';
 import { traits } from './house.js';
-import { openSet } from './town.js';
+import { openSet } from './openset.js';
 
 /** The walk: polylines along the middle of the streets (the pier is walked first, from the arrival). */
 export const WALK = [
