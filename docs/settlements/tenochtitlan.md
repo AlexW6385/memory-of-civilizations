@@ -187,3 +187,52 @@ Sources as §10, §12, §17 and §18 (World History Encyclopedia, ancient-histor
 - **Braziers** of Tlaloc with the knotted bow of bark paper [inferred: the bow].
 Two levels only (old / modelled), not three: the viewer's near/far plans cannot nest. Budget: arrival main 559 → 370 draws, 3.70 M → 2.26 M triangles: the houses in 100 m tiles (full within 150 m, simple solid form beyond), yards, chinampa houses and waters in compact plans shown only near.
 Still crude: relief figures are small (0.4 m) so faces are only suggested; the chacmool's feet and the bow's loops are rough.
+
+## 20. The visitor's walk (match to the Suzhou reference)
+
+Tags as above. Code: `src/settlements/tenochtitlan/{tiles,opened,walk}.js`, the `calli` element of `src/styles/aztec/houses.js`, `plan.js` (the routes).
+
+- **The budget first.** The houses' near/far plans were cut by `lod.js` into 100 m tiles (2852 meshes, limit 3000); `tiles.js` cuts them into 150 m tiles shown within 190 m of the visitor, so that far from him a tile is one mesh and not several. Geometry unchanged: 2852 → 2186 meshes, 98.8 → 90.0 MB, the arrival at 353 draws (370 before) [measured].
+- **The ways walked.** The avenue from the west gate over the canal's bridge toward the causeway; the lane between the priests' compounds (x = −109); the market's east side [inferred from layout.js: the harness of §14 checks the lanes form one piece].
+- **Compounds opened.** The nine priests' compounds and the 16 calpulli compounds within 52 m of the avenue or the market's east side (25 in all) are built with a gate 1.8 m wide (its lintel at 2.0 m) and the hearth room's door 1.6 m wide; the other compounds (about 200 more) keep their 0.95 m doors, closed to the walker [inferred: the Mexica house had one low door and no window on the street: Florentine Codex via ancient-history-sites, §13]. The widening is ours, for the walker's body; the real doorway was narrow and low [stated: §13].
+- **Lane kept clear.** Inside an opened compound the routes are found by A* over the colliders the builder made (the jars, the hearth, the side rooms); the person standing in the patio and the yard animals stand off that line (`figureSpot`) [inferred].
+- **Routes added to the landmark plan.** 25 into the compounds' hearth rooms; 2 through the tianguis (in at the east edge, by the row aisles and the cross aisle, steering clear of the people standing in them; and to the canal's quay at the landing stair); both stairs of the Templo Mayor to its summit (45 m; the north one at z = −15, off a stone at the stair's foot); the House of the Eagles (the sunken patio by its portico's central door, the east wing's main room); the calmecac (up its stair into the court and into the three ranges' rooms). 35 routes walked by `walk-check`.
+- **The market.** The in-disc tianguis of the west canal stands for Tlatelolco's, which lies outside the disc [inferred]; Díaz: the great square with its porticoes, every kind of merchandise in its place, three judges [stated: §14].
+- **Landmark fixes found on the way.** The House of the Eagles' central pilaster of the east portico stood in front of the main room's door, and two of the north portico's pilasters beside its doors: moved off them. The calmecac's room doors were 1.3 m and pilasters stood before some of them: now 1.6 m, the pilasters off the doors [our fixes: not sourced].
+
+## 21. Night
+
+Code: `src/settlements/tenochtitlan/nightlight.js` (the light list), `src/styles/aztec/halo.js` (the geometry), one plan `tenochtitlan-night`.
+
+- **How it was lit.** Fire was kept burning all night in the palaces and temples, tended by stewards and novices; dancing and feasting went on through the night at festivals [stated: S. T. Evans, "Night Falls on Tenochtitlan", SAA 2019 abstract, https://core.tdar.org/document/450644/night-falls-on-tenochtitlan]. The Mexica had no street lighting and no oil lamps; the house's light was the hearth and torch pine (ocote) [inferred: Díaz lists "torch pine" among the market's goods, §14; no source on the lighting of houses was found]. Night itself was feared (the tzitzimime) [stated: the same abstract], so the streets are dark.
+- **Built.** In the engine's additive `halo` material, one mesh: a glow ball and a pool on the floor at each brazier — the first ledge's row of Tlaloc's eight braziers, the four at the stair's foot, the stairheads' two cauldrons, the fires at the two shrines' doors, the three lesser temples' summits, the calpulli temples' stairs (12); the House of the Eagles' main room (door and two braziers); in each of the 25 opened compounds the hearth room's doorway full of firelight and its spill on the patio. About 60 lights, 3 k triangles, +1 draw [measured]. Day view unchanged (the material is cut away by day).
+- **Not lit.** The palace's halls (their braziers are inside the style's own builder), the calmecac's court (no fire is modelled there), the market (closed at dusk) [inferred].
+
+## 22. Sound
+
+Code: `src/settlements/tenochtitlan/soundmap.js`, `src/engine/voices-tenochtitlan.js` (12 voices, all `tnc…`), the profile in `src/engine/soundscape.js`, `tests/tenochtitlan-sound.test.mjs` (3 s).
+
+- **The temple.** A drum of enormous size whose sound carried more than eight miles, large and small trumpets, copal burned [stated: Díaz, in the translation at https://faculty.tnstate.edu/tcorse/h1220revised/memoirs_of_the_bdiaz.html]. Ours: the huehuetl beaten beside Huitzilopochtli's door and the conch trumpets, at dawn, noon, dusk and the night's watch [inferred: the hours are those of §14's copal].
+- **The market.** "The bustle and noise" of the multitude heard from more than four miles [stated: Díaz, same translation]; here the engine's hubbub, laid by `townNear` (full at the tianguis and out along the avenue to the priests' lane, 0.5 at the plaza's middle, 0.15 on the palace's side), and the sellers' wordless cries at eight stalls by trade [inferred]. Canoes at the two landing stairs and along the canals (paddle, drip, the shaft on the gunwale) [inferred, §14].
+- **The house.** In each opened compound's hearth room: the metate before the first meal, tortillas patted at the three meals, the pots; by trade, the potter's patting of clay, the lapidary's polishing, the mason's chisel, the knapper's strikes, the weaver [inferred from `houseTrade`].
+- **The calpulli.** In the evening the teponaztli and the clay flutes at each house of song's court (youths' singing and dancing) [inferred; the cuicacalli is known from Sahagún, not re-read here].
+- **Animals and night.** Turkeys in the yards; owls at night, an omen to the Mexica [inferred]; the lake's frogs and the profile's birds; dogs far off at night (the engine's).
+- **Measured** with `tools/sound-render.mjs` (RMS, centroid): huehuetl 104 Hz centroid, conch 394 Hz, flute 1.1 kHz, the others as expected for their kind [measured, not heard].
+- **Rooms.** 25 hearth rooms, the Eagles' and the calmecac's halls, the two summit shrines (the rain on a flat roof, the hush).
+
+## 23. Animals
+
+Code: `src/settlements/tenochtitlan/fauna.js` (`critters`), `src/engine/critter-models.js` (a `turkey` model, added), one line in `src/engine/fauna-critters.js`, `tests/tenochtitlan-critters.test.mjs`.
+
+- **Turkeys, dogs, ducks.** Turkeys, ducks, rabbits, hares, deer and dogs were sold in the market [stated: Díaz, the translation above]; turkeys were domesticated in Mexico [stated: Schorger, "The Domestic Turkey in Mexico", Wilson Bulletin 1966 — found in a search, not read here]; kept in the yards [inferred]. Built: 19 turkeys and 4 dogs, each in the patio of an opened compound on the avenue and by the market (not in the priests' lane), kept out of the lane to the hearth room and away from the people (`figureSpot`); two rafts of farm ducks (white and dark) on the west canal, south of the market and north of the avenue's bridge. The dogs are the engine's yellow village dog; the Mexica's hairless dog (xoloitzcuintli) is not modelled [inferred: Díaz says only "dogs"]. No hens: there were none before the Spaniards (the precinct's goods held 'hen' piles: now turkeys).
+- **The new model.** `turkey`: 539 triangles, dark bronze-sheened plumage, bare blue head with a red snood and wattle, the fan of the tail half spread; walks and pecks as the fowl do [inferred: the plumage of the Mexican domestic breeds].
+- **Not done.** Cormorants and other lake birds as critters; the egrets, herons and swallows stay in `perches` and `flights`.
+
+## 24. Wear and writing
+
+- **Writing: none added.** The Mexica wrote in pictographs (day signs, place glyphs) and I cannot verify each glyph; left plain on purpose.
+- **Wear: none added.** The plaza's worn and stained plaster (`plaza_wear`, `plaza_marks`) and the water line on the canals' walls are those of §14–§15 [stated there as inferred].
+
+## 25. Numbers of this pass
+
+Meshes 2852 → 2187, geo-one 98.8 → 90.1 MB. Arrival: main draws 354 (370 on master), main triangles 2.15 M (2.26 M). On the walk: market (−175, 33.5) 419 draws, 2.18 M; priests' lane (−109, 10) 427 draws, 2.13 M. 35 routes walked (25 into compounds).

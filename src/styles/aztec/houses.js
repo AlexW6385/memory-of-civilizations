@@ -42,7 +42,7 @@ function adobeWall(bag, col, r, y0, y1, base = 0.35) {
  * the roof beams laid across the short way and projecting, the earth roof plastered over them, a low
  * parapet and a spout. Returns the roof's level.
  */
-function room(bag, col, { r, y, h, door, t = 0.45, dw = 0.95, dh = 1.9, lintel = 'timber', mats = true, spout = true }) {
+function room(bag, col, { r, y, h, door, t = 0.45, dw = 0.95, dh = 1.9, lintel = 'timber', mats = true, spout = true, open = false }) {
   const [x0, z0, x1, z1] = r, alongX = door === 'n' || door === 's';
   // the walls: the two along x full length, the two along z between them
   const walls = { n: [x0, z0, x1, z0 + t], s: [x0, z1 - t, x1, z1], w: [x0, z0 + t, x0 + t, z1 - t], e: [x1 - t, z0 + t, x1, z1 - t] };
@@ -62,7 +62,7 @@ function room(bag, col, { r, y, h, door, t = 0.45, dw = 0.95, dh = 1.9, lintel =
       const o = 0.13, c = door === 'n' ? [m, q[1] - o] : door === 's' ? [m, q[3] + o] : door === 'w' ? [q[0] - o, m] : [q[2] + o, m];
       const g = lathe([[0.075, 0], [0.075, dw + 0.2], [0.001, dw + 0.2]], 8);
       g.translate(0, -(dw + 0.2) / 2, 0); if (alongX) g.rotateZ(Math.PI / 2); else g.rotateX(Math.PI / 2);
-      g.translate(c[0], y + dh - 0.09, c[1]); bag.add('reed_mat', g);
+      g.translate(c[0], y + dh - (open ? 0 : 0.09), c[1]); bag.add('reed_mat', g);      // (an opened door's roll rides above the walker's head)
     }
   }
   // the roof: beams from the patio wall to the back wall, their ends out past both; a course of plaster
@@ -228,10 +228,13 @@ export function calli(el, ctx) {
     if (noble) { const r = rooms[0].r; B(bag, W, [r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 1], P + 2.7, P + 5.2); }
     return;
   }
-  const tops = rooms.map((q, i) => { const hh = H(); roomThings(ctx, { r: q.r, y: P, h: hh, door: q.door }, i === 0 ? 'hearth' : rand() < 0.65 ? 'sleep' : 'store', rand); return room(bag, col, { r: q.r, y: P, h: hh, door: q.door }); });
+  // (an opened compound, on the visitor's walk: its doors 1.6 m wide, its gate 1.8 m: docs/settlements/tenochtitlan.md §20)
+  const DW = el.open ? 1.6 : 0.95;
+  const tops = rooms.map((q, i) => { const hh = H(); roomThings(ctx, { r: q.r, y: P, h: hh, door: q.door }, i === 0 ? 'hearth' : rand() < 0.65 ? 'sleep' : 'store', rand); return room(bag, col, { r: q.r, y: P, h: hh, door: q.door, dw: DW, open: !!el.open }); });
   // the compound wall along the rest of the perimeter (the walls on x run full length, those on z
   // between them), its gate on the street
   const t = 0.4, wh = P + (noble ? 2.45 : 1.9);
+  let gateAt = null;
   for (const f of SIDES) {
     const alongX = f === 'n' || f === 's', a0 = alongX ? I[0] : I[1] + t, a1 = alongX ? I[2] : I[3] - t;
     const cover = rooms.filter((q) => q.side === f || touches(q.r, I, f)).map((q) => (alongX ? [q.r[0], q.r[2]] : [q.r[1], q.r[3]])).sort((p, q) => p[0] - q[0]);
@@ -241,10 +244,11 @@ export function calli(el, ctx) {
     const cap = (s0, s1) => { B(bag, W, band(I, f, -0.03, t + 0.03, s0 + (alongX ? 0 : 0.03), s1 - (alongX ? 0 : 0.03)), wh, wh + 0.08); if (noble && s1 - s0 > 0.4) B(bag, R, band(I, f, -0.03, t + 0.03, s0 + 0.01, s1 - 0.01), wh - 0.5, wh - 0.1); };
     for (const [s0, s1] of segs) {
       if (f === gate && s1 - s0 > 2.6) {
-        const gh = noble ? 0.85 : 0.65, m = (s0 + s1) / 2 + (rand() - 0.5) * Math.max(0, s1 - s0 - 3), g0 = m - gh, g1 = m + gh;
+        const gh = el.open ? 0.9 : noble ? 0.85 : 0.65, m = (s0 + s1) / 2 + (rand() - 0.5) * Math.max(0, s1 - s0 - 3), g0 = m - gh, g1 = m + gh;
+        gateAt = f === 'n' ? [m, I[1] + t / 2] : f === 's' ? [m, I[3] - t / 2] : f === 'w' ? [I[0] + t / 2, m] : [I[2] - t / 2, m];
         adobeWall(bag, col, band(I, f, 0, t, s0, g0), P, wh); adobeWall(bag, col, band(I, f, 0, t, g1, s1), P, wh); cap(s0, g0); cap(g1, s1);
         B(bag, ST, band(I, f, -0.25, t, g0, g1), P - 0.22, P - 0.02);                              // the step at the gate
-        B(bag, 'timber', band(I, f, -0.04, t + 0.04, g0 - 0.25, g1 + 0.25), wh - 0.2, wh);          // the gate's lintel
+        B(bag, 'timber', band(I, f, -0.04, t + 0.04, g0 - 0.25, g1 + 0.25), wh - (el.open ? 0.12 : 0.2), wh);          // the gate's lintel (an opened gate's clear of the walker's head)
         if (noble) for (const [u0, u1] of [[g0 - 0.35, g0], [g1, g1 + 0.35]]) B(bag, ST, band(I, f, -0.14, t + 0.14, u0, u1), P, wh - 0.2);   // the lord's gate: posts of cut stone
       } else { adobeWall(bag, col, band(I, f, 0, t, s0, s1), P, wh); cap(s0, s1); }
     }
@@ -259,6 +263,12 @@ export function calli(el, ctx) {
   const half = bd[0] ? pd / 2 : pw / 2, deep = bd[0] ? pw / 2 : pd / 2;
   // (along the back wall at offset a, out from it by b)
   const at = (a, b) => [cx + bd[0] * (deep - b) + sd[0] * a, cz + bd[1] * (deep - b) + sd[1] * a];
+  // (what the walk needs to know of the compound: where the gate is, the doors of the rooms and the patio; see src/settlements/tenochtitlan/walk.js)
+  if (el.record) {
+    const inw = { n: [0, 1], s: [0, -1], w: [1, 0], e: [-1, 0] };
+    el.record({ gate: { side: gate, at: gateAt }, patio: pr, back, rooms: rooms.map((q, i) => { const ax = q.door === 'n' || q.door === 's', u = ax ? (q.r[0] + q.r[2]) / 2 : (q.r[1] + q.r[3]) / 2, face = q.door === 'n' ? q.r[1] : q.door === 's' ? q.r[3] : q.door === 'w' ? q.r[0] : q.r[2];
+      return { role: i === 0 ? 'hearth' : 'side', door: q.door, at: ax ? [u, face] : [face, u], inward: inw[q.door], rect: q.r }; }) });
+  }
   // the metate beside the back room's door, the woman kneeling at it
   const ma = Math.min(1.25, half - 0.45), mp = at(ma, 0.9), face = Math.atan2(bd[0], bd[1]);
   metate().emit(bag, mp[0], P, mp[1], -bd[0], -bd[1]);
@@ -272,14 +282,17 @@ export function calli(el, ctx) {
     L.ladder({ at: at(-Math.min(1.3, half - 0.4), off), y: P, rot: Math.atan2(-bd[0], -bd[1]), len }, ctx);
   }
   // in the corners on the gate side: the great water jar, and a granary, the house altar or baskets
-  const cA = at(-(half - 0.5), 2 * deep - 0.5), cB = at(half - 0.9, 2 * deep - 0.9);
+  const cA = at(-(half - 0.5), 2 * deep - 0.5);
+  let cB = at(half - 0.9, 2 * deep - 0.9), cs = 1;
+  // (on an opened compound the gate's lane stays free: the corner things go to the other corner when the gate is on their side)
+  if (el.open && gateAt && Math.hypot(gateAt[0] - cB[0], gateAt[1] - cB[1]) < 3.4) { cs = -1; cB = at(-(half - 0.9), 2 * deep - 0.9); }
   L.pot({ at: cA, y: P, seed: el.seed + 1, kind: 'water_pot', n: 1 + Math.floor(rand() * 2) }, ctx);
   const g = rand();
   if (g < 0.25 && half > 2 && deep > 2) { granary().emit(bag, cB[0], P, cB[1], 0, 1); col.circle(cB[0], cB[1], 0.8, P, P + 2.4); }
   else if (g < 0.45) altar().emit(bag, cB[0], P, cB[1], bd[0], bd[1]);
   else if (g < 0.7 && half > 3 && deep > 3) {
     // the household's temazcalli, its door toward the middle of the patio
-    const tp = at(half - 1.7, 2 * deep - 1.8), dx = cx - tp[0], dz = cz - tp[1], dl = Math.hypot(dx, dz) || 1;
+    const tp = at(cs * (half - 1.7), 2 * deep - 1.8), dx = cx - tp[0], dz = cz - tp[1], dl = Math.hypot(dx, dz) || 1;
     temazcal().emit(bag, tp[0], P, tp[1], dx / dl, dz / dl); col.circle(tp[0], tp[1], 1.25, P, P + 2.2);
     col.circle(tp[0] - dx / dl * 1.6, tp[1] - dz / dl * 1.6, 0.6, P, P + 0.6);
   }
