@@ -129,7 +129,7 @@ export function ttMarket(el, ctx) {
   }
   // people: bargainers and bearers in the lanes
   for (let i = 0; i < 46; i++) {
-    const lx = r() < 0.5, u = lx ? x0 + 6 + r() * (x1 - x0 - 12) : z0 + 6 + r() * (z1 - z0 - 12), off = (r() - 0.5) * 5, [x, z] = lx ? [u, cz + off] : [cx + off, u];
+    const lx = r() < 0.5, u = lx ? x0 + 6 + r() * (x1 - x0 - 12) : z0 + 6 + r() * (z1 - z0 - 12), o0 = (r() - 0.5) * 5, off = (o0 < 0 ? -1 : 1) * (1.7 + Math.abs(o0) * 0.5), [x, z] = lx ? [u, cz + off] : [cx + off, u];   // (the lanes' middle line, 3.4 m wide, kept clear for the visitor's walk)
     if (inHole(x, z)) continue;
     const man = r() < 0.55, car = ['basket', 'pot', 'none', 'bundle'][Math.floor(r() * 4)];
     if (i % 7 === 3) { fig(ctx, { who: 'child', at: [x, z], y: 0.04, rot: r() * 6.28, seed: Math.floor(r() * 1e9), pose: 'stand' }); continue; }

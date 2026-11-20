@@ -2,7 +2,7 @@
 // avenue — up a temple's stair on the west platform and along its top to the four houses there, east over the open ground to the lane of the barrio —
 // each entered by its stair and portico and the doorway of one of its rooms, 1.6 m wide (styles/teotihuacano/doors.js). Pure data and arithmetic (no
 // three.js); the routes are walked by tools/walk-check.mjs from the landmark's `walks` (plan.js).
-import { lodges } from './layout.js';
+import { lodges, compounds, WEST_STREET } from './layout.js';
 import { roomDoors } from '../../styles/teotihuacano/doors.js';
 
 const DIR = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] };
@@ -43,4 +43,33 @@ export function barrioRoutes() {
     out.push([[lane, 92], [lane, g.mid], [ox, g.mid], ...intoLodge(l).slice(1)]);
   }
   return out;
+}
+
+/**
+ * An opened compound (layout.js: open, gate 3 = the east wall's middle): the way in from the street, by the gate (1.8 m) and the entry court (the east block
+ * left out) to the main patio, round its altar, up the west block's stair and into the kitchen at its first door.
+ */
+export function intoCompound(c) {
+  const [x0, z0, x1, z1] = c.rect, cw = (x1 - x0 - 2) / 3, cd = (z1 - z0 - 2) / 3, zm = (z0 + z1) / 2, xm = (x0 + x1) / 2;
+  const r = [x0 + 1 + 0.6, z0 + 1 + cd + 0.6, x0 + 1 + cw - 0.6, z0 + 1 + 2 * cd - 0.6], pd = 2.6, ph = 0.5;
+  const back = [r[0], r[1], r[2] - pd, r[3]], nr = r[3] - r[1] > 11 ? 3 : 2, doors = roomDoors(back, [1, 0], nr);
+  const g = { fx: 1, fz: 0, edge: r[2], mid: zm, stairLen: ph * 1.6 }, d = doors[0];
+  return [[x1 + 3.5, zm], [x1 - 0.5, zm], [x1 - 4.5, zm + 2.7], [xm - 3.4, zm + 2.7], P(g, g.stairLen + 1.4, zm), P(g, 0.2, zm), P(g, -1.0, zm), d.at(-1.1), d.at(0.22), d.at(1.7)];
+}
+/** The way down from the west platform to the street along it, at z 40 (between the priest's house and the temple), 3 m wide (plan.js): its foot and top. */
+export const WEST_STAIR = { rect: [-55.6, 38.5, -52, 41.5], y0: 0, y1: 2.43 };
+/** The routes to the opened compounds: along the platform's corridor, down the stair, along the street. */
+export function compoundRoutes() {
+  const A = [[-8, 15], [-17.5, 15], [-21.4, 15], [-21.4, 40], [-48, 40], [-52.5, 40], [-55.6, 40], [WEST_STREET[0] - 0.4, 40]];
+  return compounds().filter((c) => c.open).map((c) => {
+    const zm = (c.rect[1] + c.rect[3]) / 2, x1 = c.rect[2];
+    return [...A, [-57.5, zm], ...intoCompound(c)];
+  });
+}
+
+/** The way down from the west platform at plaza 5 (top 1.5 m) to the market's east gate: z 251, 5 m wide, between the cross platform and the temple (plan.js). */
+export const MARKET_STAIR = { rect: [-54.25, 248.5, -52, 253.5], y0: 0, y1: 1.53 };
+/** From the arrival down the avenue, up the platform's stair at z 265, along it to the stair, and in by the market's east gate along its lane. */
+export function marketRoutes() {
+  return [[[0, 70], [2, 73], [2, 82], [0, 85], [0, 166], [8, 172], [8, 186], [0, 190], [0, 255], [-8, 265.25], [-17.5, 265.25], [-21.4, 265.25], [-21.4, 251], [-48, 251], [-52.5, 251], [-56.5, 251], [-62, 255], [-66, 259], [-72, 259], [-90, 259], [-108, 259]]];
 }

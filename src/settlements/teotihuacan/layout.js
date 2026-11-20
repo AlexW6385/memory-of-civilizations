@@ -19,6 +19,8 @@ export const KEEP_CLEAR = [[-100, -420, 100, -190], [22, -215, 315, 95], [22, 16
 export const QPP = { rect: [-93, -183, -52, -147], y: 4.2 };
 export const JAGUARS = { rect: [-98, -141, -60, -111], y: 0.6 };
 /** The Great Compound's market plaza west of the avenue, opposite the Ciudadela; its central platform. */
+/** Where the street along the avenue's west platform meets the way down from it (walk.js): the middle of the opened compounds' lane. */
+export const WEST_STREET = [-57, 40];
 export const MARKET = [-190, 172, -66, 346];
 export const MARKET_PLATFORM = [-142, 245, -114, 273];
 export const PALACE_CLEAR = [-112, -190, -52, -104];
@@ -54,7 +56,9 @@ export function compounds() {
     // the compounds with a painted room (Tepantitla's) and those of the obsidian workers (nearer the Ciudadela and the Moon)
     const h2 = ((seed ^ 0x9e3779b9) >>> 0) / 4294967296, mural = h < 0.2, workshop = h > 0.8 && (cz > 120 || cz < -300 || h > 0.93);
     // the potters' and the weavers' compounds (the rest are households)
-    LOTS.push({ rect: r, seed, mural, workshop, craft: !mural && !workshop && h2 < 0.32 ? (h2 < 0.17 ? 'potter' : 'weaver') : null });
+    // the compounds the visitor can walk into (walk.js): the three nearest the avenue's west platform, their gate on the east side toward the street along it
+    const open = r[2] < -50 && r[2] > -75 && Math.hypot(cx - WEST_STREET[0], cz - WEST_STREET[1]) < 150;
+    LOTS.push({ rect: r, seed, open, gate: open ? 3 : undefined, mural, workshop: open ? false : workshop, craft: !mural && !workshop && h2 < 0.32 ? (h2 < 0.17 ? 'potter' : 'weaver') : null });
   }
   return LOTS;
 }
