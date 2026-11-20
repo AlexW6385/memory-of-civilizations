@@ -11,6 +11,8 @@
 // `plans.push(base('song-kaifeng-shops', shopElements(), 'life'))`.
 import { STYLES } from '../../core/build.js';
 import { hangFrom, windMat, fromTriangles } from '../../core/geom.js';
+import { reliefGeometry } from '../ming-suzhou/brush.js';
+import { GLYPH } from './brush-data.js';
 import '../../objects/index.js';
 import { placer, assembly } from '../../objects/kit.js';
 import { box, rod, ly, drum, bowl, jar, prismX, rng, limb } from './props.js';
@@ -18,33 +20,14 @@ import { lots, hotDist } from './layout.js';
 import { poleA, doorOf } from './houses.js';
 import { tradeOf, wineShops, teaHouses } from './trades.js';
 
-// ── the writing: strokes [kind, x0, y0, x1, y1] on a 100 grid (as the other brush-stroke signs) ──
-const GLYPHS = {
-  酒: [['d', 16, 92, 26, 84], ['d', 10, 70, 20, 62], ['t', 10, 32, 26, 46], ['h', 42, 90, 92, 90], ['s', 48, 90, 48, 14], ['s', 86, 90, 86, 14], ['h', 48, 14, 86, 14], ['h', 48, 52, 86, 52], ['s', 67, 90, 67, 52]],
-  茶: [['h', 12, 92, 88, 92], ['s', 34, 100, 34, 82], ['s', 66, 100, 66, 82], ['p', 50, 80, 22, 54], ['n', 50, 80, 80, 54], ['h', 16, 40, 84, 40], ['s', 50, 52, 50, 4], ['p', 46, 34, 16, 8], ['n', 54, 34, 84, 8]],
-  米: [['d', 30, 88, 42, 78], ['p', 70, 88, 60, 78], ['h', 12, 62, 88, 62], ['s', 50, 96, 50, 6], ['p', 46, 58, 14, 12], ['n', 54, 58, 86, 12]],
-  药: [['h', 12, 92, 88, 92], ['s', 32, 100, 32, 84], ['s', 68, 100, 68, 84], ['p', 36, 72, 12, 52], ['p', 34, 52, 12, 32], ['t', 10, 24, 30, 36], ['p', 60, 74, 48, 56], ['h', 48, 74, 86, 74], ['s', 86, 74, 86, 24], ['d', 66, 50, 74, 42]],
-  书: [['h', 12, 78, 66, 78], ['s', 66, 78, 66, 56], ['h', 8, 56, 90, 56], ['s', 48, 98, 48, 8], ['d', 72, 88, 82, 76], ['h', 10, 30, 48, 30]],
-  金: [['p', 50, 98, 12, 66], ['n', 50, 98, 88, 66], ['h', 28, 72, 72, 72], ['h', 20, 56, 80, 56], ['s', 50, 72, 50, 14], ['d', 32, 44, 40, 36], ['d', 68, 44, 60, 36], ['h', 8, 16, 92, 16]],
-  店: [['d', 50, 98, 58, 90], ['h', 14, 84, 90, 84], ['p', 30, 84, 14, 14], ['s', 44, 66, 44, 8], ['h', 44, 66, 88, 66], ['s', 88, 66, 88, 40], ['h', 44, 40, 88, 40], ['h', 44, 8, 88, 8]],
-  肉: [['s', 20, 90, 20, 10], ['h', 20, 90, 82, 90], ['s', 82, 90, 82, 20], ['p', 54, 76, 28, 44], ['n', 56, 76, 80, 44], ['p', 52, 50, 26, 20], ['n', 54, 50, 78, 20]],
-};
-const STROKE = { h: [0.05, 0.065, 0.02, 0.035], s: [0.07, 0.04, 0.02, 0.05], p: [0.075, 0.012, 0.02, 0.06], n: [0.02, 0.1, 0.01, 0.045], d: [0.1, 0.06, 0.02, 0.03], t: [0.06, 0.02, 0.02, 0.05] };
-function stroke(out, [k, ax, ay, bx, by], grow, z0, z1) {
-  const [wa, wb, ca, cb] = STROKE[k], dx = bx - ax, dy = by - ay, l = Math.hypot(dx, dy) / 100, ux = dx / 100 / l, uy = dy / 100 / l, nx = -uy, ny = ux;
-  const A = [ax / 100 - 0.5, ay / 100 - 0.5], B = [bx / 100 - 0.5, by / 100 - 0.5], g = grow;
-  const P = [[A[0] - ux * (ca + g), A[1] - uy * (ca + g)], [A[0] - nx * (wa / 2 + g), A[1] - ny * (wa / 2 + g)], [B[0] - nx * (wb / 2 + g), B[1] - ny * (wb / 2 + g)],
-    [B[0] + ux * (cb + g), B[1] + uy * (cb + g)], [B[0] + nx * (wb / 2 + g), B[1] + ny * (wb / 2 + g)], [A[0] + nx * (wa / 2 + g), A[1] + ny * (wa / 2 + g)]];
-  for (let i = 1; i < 5; i++) out.push(P[0][0], P[0][1], z1, P[i][0], P[i][1], z1, P[i + 1][0], P[i + 1][1], z1);
-  for (let i = 0; i < 6; i++) { const p = P[i], q = P[(i + 1) % 6]; out.push(p[0], p[1], z0, q[0], q[1], z0, q[0], q[1], z1, p[0], p[1], z0, q[0], q[1], z1, p[0], p[1], z1); }
-}
-
+// ── the writing: traditional characters as brush relief (brush.js, the generic brush model; brush-data.js: each verified against a typeface) ──
+const CHARS = '酒茶米藥書金店肉';
 // ── shapes (built once, shared by every shop) ───────────────────────────────────
 const U = {}, DEF = {}, WINDY = new Set();
 function unit(name, defaults, build) { DEF[name] = defaults; U[name] = assembly(`kaifeng-shop|${name}`, build); }
 const mv = (g, x = 0, y = 0, z = 0) => { g.translate(x, y, z); return g; };
-for (const ch of Object.keys(GLYPHS)) unit(`g${ch}`, { g: 'gilt_bronze' }, (a) => { const t = []; for (const s of GLYPHS[ch]) stroke(t, s, 0.004, 0, 0.09); a('g', fromTriangles(t)); });
-for (const ch of ['酒', '茶', '店']) { unit(`f${ch}`, { g: 'cloth_black' }, (a) => { const t = []; for (const s of GLYPHS[ch]) stroke(t, s, 0.004, 0, 0.09); a('g', hangFrom(fromTriangles(t), 1.04)); }); WINDY.add(`f${ch}.g`); }
+for (const ch of CHARS) unit(`g${ch}`, { g: 'gilt_bronze' }, (a) => a('g', reliefGeometry(GLYPH[ch], 0, 0, 1, 0, 0.05, { thick: 1.03 })));      // gilt on a board (a character of 1 m, scaled by the placing)
+for (const ch of ['酒', '茶', '店']) { unit(`f${ch}`, { g: 'cloth_black' }, (a) => a('g', hangFrom(reliefGeometry(GLYPH[ch], 0, 0, 1, 0.03, 0.03, { flat: true, top: 1 }), 1.04))); WINDY.add(`f${ch}.g`); }      // sewn on a flag: they sway with it
 for (const n of ['flag.c', 'flag.e', 'streamers.c', 'pork.c']) WINDY.add(n);
 
 // the pole for the sign: bamboo on a stone foot, leaning a little out, a cross-arm along +z at its top
@@ -178,7 +161,7 @@ unit('tavernjars', { j: 'pottery_dark', c: 'cloth_red', t: 'timber', b: 'glaze_w
 });
 
 // ── the shop: its parts, laid out by trade and by seed ──────────────────────────
-const TRADE_CHAR = { wine: '酒', tea: '茶', rice: '米', medicine: '药', books: '书', iron: '金', food: '店', inn: '店', butcher: '肉' };
+const TRADE_CHAR = { wine: '酒', tea: '茶', rice: '米', medicine: '藥', books: '書', iron: '金', food: '店', inn: '店', butcher: '肉' };
 /** The sign each trade hangs from its pole. */
 const BANNER = { wine: 'flag', tea: 'hlantern', inn: 'hlamp', food: 'flag', cloth: 'hbowl', medicine: 'gourd', rice: 'dou', lacquer: 'hbowl', books: 'hbook', pottery: 'hvase', iron: 'hpan', incense: 'hincense', saddlery: 'hsaddle', butcher: 'pork' };
 /** What each trade shows: [unit, materials, top (on a trestle)]. */
@@ -211,7 +194,7 @@ function kaifengShop(el, { bag, col }) {
     else if (bn) put(bn, bn === 'hbook' ? { mats: { c: pick(['cloth_white', 'cloth_indigo', 'cloth_brown']) }, ...hang } : hang);
     col?.circle(...loc(x, zp), 0.22, y0, y0 + 4.6); }
   // the standing signboard on stone feet at the other end (the physician's, the inn's, the tea house's, some wine shops'), by the front's end
-  if ((trade === 'medicine' || trade === 'inn' || trade === 'tea' || trade === 'wine' || rand() < 0.1) && L > 4.2 && !el.water && !el.signOnly && !el.noBoard) { const xb = side * (L / 2 - 0.5), zb = 0.7; put('sboard', { x: xb, z: zb, ry: Math.PI / 2 }); col?.circle(...loc(xb, zb), 0.4, y0, y0 + 2.1); }
+  if ((trade === 'medicine' || trade === 'inn' || trade === 'tea' || trade === 'wine' || rand() < 0.1) && L > 4.2 && !el.water && !el.signOnly && !el.noBoard) { const xb = side * (L / 2 - 0.5), zb = 0.7; put('sboard', { x: xb, z: zb, ry: Math.PI / 2 }); if (tc) put(`g${tc}`, { x: xb, z: zb + 0.034, y: 1.0, k: 0.4 }); col?.circle(...loc(xb, zb), 0.4, y0, y0 + 2.1); }
   // the goods on the apron and on trestles, between the sign pole and the board
   if (!el.water && !el.signOnly) {
     const list = GOODS[trade] || GOODS.cloth, free0 = -L / 2 + 0.75, free1 = L / 2 - 0.75;
