@@ -207,11 +207,10 @@ function village() {
     const e = [{ t: 'stilt_house', ...h }], u = far(h) ? useOf(h) : null, f = far(h) ? frontOf(h) : null;
     if (u) e.push({ t: 'ak_use', ...h, use: u });
     if (f) e.push({ t: 'ak_front', ...h, dress: f });
-    e.push({ t: 'ak_halo', rect: h.rect, house: h });                     // (its night light, nightlight.js)
     return e;
   });
   // (each tile's houses in full, with the dressing of their fronts, near; the solid form of the house beyond)
-  plans.push(...tiled('angkor-village', els, NEAR_HOUSES, (e) => (e.t === 'stilt_house' ? [{ ...e, t: 'ak_far_house' }] : e.t === 'ak_halo' ? [{ ...e, far: true }] : [])));
+  plans.push(...tiled('angkor-village', els, NEAR_HOUSES, (e) => (e.t === 'stilt_house' ? [{ ...e, t: 'ak_far_house' }] : [])));
   const E = [];
   for (const g of granaries) E.push({ t: 'k_granary', ...g });
   for (const s of salas) E.push({ t: 'k_sala', ...s });
@@ -296,8 +295,15 @@ export async function town() {
   ROSETTES.forEach((r, i) => plans.push({ ...base(`angkor-rosettes-${i}`, [r.el]), center: r.center, near: r.near }));
   // the carving of the galleries and the cloister, built instanced in plans near each piece (plan.js CARVED)
   CARVED.forEach((r, i) => plans.push({ ...base(`angkor-carved-${i}`, r.els), center: r.center, near: r.near }));
-  // the night: the temple's lamp-stands and the glow of its lamps, the forges' and the kilns' glow (nightlight.js)
-  plans.push(base('angkor-night', [...stands().map((q) => ({ t: 'ak_lampstand', ...q })), { t: 'ak_halo', items: templeItems() }]), base('angkor-night-work', [{ t: 'ak_halo', items: workItems() }]));
+  // the night (nightlight.js): the lamp-stands and the lamps' glow of the causeway (what the arrival sees: one cell), of the court and the libraries and of the
+  // sanctuary in plans drawn only near them; the forges' and kilns' glow; the glow of each house in plans of 40 m drawn within 55 m of the visitor
+       // (in the road's plan, whose fine pieces and materials are already at the arrival)
+  plans.push({ ...base('angkor-night-court', [...stands().filter((q) => q.at[0] < 0 && q.y === 1.0).map((q) => ({ t: 'ak_lampstand', ...q })), { t: 'ak_halo', items: [...templeItems('causeway'), ...templeItems('court')] }]), center: [-125, 0], near: 45 });
+  plans.push({ ...base('angkor-night-sanctuary', [...stands().filter((q) => q.y !== 1.0).map((q) => ({ t: 'ak_lampstand', ...q })), { t: 'ak_halo', items: templeItems('sanctuary') }]), center: [CX, 0], near: 50 });
+  { const tiles = new Map();
+    for (const h of houses()) { const c = [(h.rect[0] + h.rect[2]) / 2, (h.rect[1] + h.rect[3]) / 2], k = `${Math.floor(c[0] / 40)},${Math.floor(c[1] / 40)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push({ t: 'ak_halo', rect: h.rect, house: h }); }
+    for (const it of workItems()) { const k = `${Math.floor(it.x / 40)},${Math.floor(it.z / 40)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push({ t: 'ak_halo', rect: [it.x, it.z, it.x, it.z], items: [it] }); }
+    for (const [k, l] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ ...base(`angkor-night-houses-${k}`, l), center: [i * 40 + 20, j * 40 + 20], near: 38, nocollide: true }); } }
   plans.push(base('angkor-road', K), { ...base('angkor-market', L), style: 'life', center: [-222, 10], near: 260 });
   const PD = paddyPlans();
   plans.push({ ...base('angkor-paddy-tools', PD.K), center: [0, 0], near: 460 }, { ...base('angkor-farmers', PD.L), style: 'life', center: [0, 0], near: 230 });

@@ -111,22 +111,29 @@ export function stands() {
   for (const s of [-1, 1]) out.push({ at: [CX - 2.0, s * 2.1], y: fy });
   return out;
 }
-/** The glows of the temple, as data (items): the stands, the offering tables' lamps, the libraries' fire pits and lamp stands. */
-export function templeItems() {
+/** The glows of the temple, as data, by zone: `causeway` (the stands and the first offering table, all in one cell before the gate: what the arrival sees), `court` (the offering tables of the inner causeway and the terrace, the libraries' fire pits and lamp stands), `sanctuary` (the stands by the image). */
+export function templeItems(zone) {
   const items = [], lamp = (x, y, z, fy, r = 2.4, k = 0.85) => { items.push({ k: 'ball', x, y, z, r: 0.9, f: 0.62 }, { k: 'floor', x, y: fy + 0.03, z, r, f: k, segs: 10 }); };
-  for (const s of stands()) lamp(s.at[0], s.y + 1.3, s.at[1], s.y);
-  // the offering tables (yards.js): at (x, ±7.4), two lamps 0.2 m out from the table's middle toward the causeway's axis
-  for (const s of [-1, 1]) for (const x of [-136, -118, -100, -88]) {
-    const at = [x, s * 7.4];
-    if (LIBRARIES.some((b) => at[0] > b[0] - 3 && at[0] < b[2] + 3 && at[1] > b[1] - 3 && at[1] < b[3] + 3) || BASINS.some((b) => at[0] > b[0] - 2 && at[0] < b[2] + 2 && at[1] > b[1] - 2 && at[1] < b[3] + 2)) continue;
-    lamp(at[0] - s * 0.2, 0.9, at[1], 0, 1.3, 0.7);
-  }
-  for (const s of [-1, 1]) lamp(CX - 96.8 - s * 0.0, T.base.y + 0.9, s * 7.5 - s * 0.2, T.base.y, 1.3, 0.7);
-  // the libraries: the fire pit at the middle, the lamp stands at the door-end corners of the chest wall
-  for (const r of LIBRARIES) {
-    const lx = (r[0] + r[2]) / 2, lz = (r[1] + r[3]) / 2, fy = 1.4 + 0.6, side = lz < 0 ? 1 : -1;
-    items.push({ k: 'ball', x: lx, y: fy + 0.7, z: lz, r: 1.1, f: 0.62 }, { k: 'floor', x: lx, y: fy + 0.03, z: lz, r: 3.4, f: 0.9, segs: 12 });
-    for (const d of [-4.6, 4.6]) lamp(lx + d, fy + 1.3, lz + side * 2.55, fy, 2.0, 0.8);
+  const fy = T.bakan.y + 0.7;
+  if (zone === 'causeway') {
+    for (const s of stands().filter((q) => q.at[0] < 0 && q.y === 1.0)) lamp(s.at[0], s.y + 1.3, s.at[1], s.y);
+    for (const s of [-1, 1]) lamp(-136, 0.9, s * 7.4, 0, 1.3, 0.7);
+  } else if (zone === 'sanctuary') {
+    for (const s of stands().filter((q) => q.y === fy)) lamp(s.at[0], s.y + 1.3, s.at[1], s.y);
+  } else {
+    // the offering tables (yards.js): at (x, ±7.4)
+    for (const s of [-1, 1]) for (const x of [-118, -100, -88]) {
+      const at = [x, s * 7.4];
+      if (LIBRARIES.some((b) => at[0] > b[0] - 3 && at[0] < b[2] + 3 && at[1] > b[1] - 3 && at[1] < b[3] + 3) || BASINS.some((b) => at[0] > b[0] - 2 && at[0] < b[2] + 2 && at[1] > b[1] - 2 && at[1] < b[3] + 2)) continue;
+      lamp(at[0], 0.9, at[1], 0, 1.3, 0.7);
+    }
+    for (const s of [-1, 1]) lamp(CX - 96.8, T.base.y + 0.9, s * 7.5, T.base.y, 1.3, 0.7);
+    // the libraries: the fire pit at the middle, the lamp stands at the door-end corners of the chest wall
+    for (const r of LIBRARIES) {
+      const lx = (r[0] + r[2]) / 2, lz = (r[1] + r[3]) / 2, ly = 1.4 + 0.6, side = lz < 0 ? 1 : -1;
+      items.push({ k: 'ball', x: lx, y: ly + 0.7, z: lz, r: 1.1, f: 0.62 }, { k: 'floor', x: lx, y: ly + 0.03, z: lz, r: 3.4, f: 0.9, segs: 12 });
+      for (const d of [-4.6, 4.6]) lamp(lx + d, ly + 1.3, lz + side * 2.55, ly, 2.0, 0.8);
+    }
   }
   return items;
 }
