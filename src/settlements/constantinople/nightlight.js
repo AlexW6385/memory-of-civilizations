@@ -187,7 +187,7 @@ export function registerNight() {
   if (done) return; done = true;
   const R = STYLES.roman?.elements;
   if (!R) return;
-  for (const k of ['byz_shopfit', 'byz_home', 'cn_home', 'byz_chapel', 'byz_bath', 'thermae']) if (!NO.includes(k) && typeof R[k] === 'function') R[k] = wrap(R[k]);
+  for (const k of ['byz_shopfit', 'byz_home', 'cn_home', 'byz_chapel', 'byz_bath', 'thermae']) if (typeof R[k] === 'function') R[k] = wrap(R[k]);
   if (typeof R.cn_house === 'function') R.cn_house = litHouse(R.cn_house);
   const S = STYLES['constantinople-site']?.elements;
   if (S && typeof S.candle === 'function') S.candle = wrap(S.candle);
