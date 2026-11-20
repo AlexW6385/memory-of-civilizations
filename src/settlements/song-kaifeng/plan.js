@@ -4,9 +4,10 @@
 // city gate with its tower; the streets' paving.
 
 import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK, APPROACH, pavedWay, paveRects, RIVER_WALK, BRIDGE_APRON, STEPS } from './layout.js';
-import { upperSpecs, walkOf } from './upper.js';
+import { upperSpecs, walkOf, upperOf, frameOf } from './upper.js';
+import { doorOf } from './houses.js';
 import './style.js';
-import { interiorRooms } from './interiors.js';
+import { interiorRooms, furnishedLots } from './interiors.js';
 
 const E = [];
 const RW = RADIUS - 26, half = (z) => Math.sqrt(Math.max(0, RW * RW - z * z));
@@ -124,6 +125,13 @@ const rooms = [
 const walks = [[[0, 108], [0, 100], [0, 76], [0, 50], [0, -80], [160, -80], [160, -150]]];
 walks[0].y0 = 0;
 for (const l of upperSpecs().keys()) { const r = walkOf(l); r.y0 = 0; walks.push(r); }
+// into every other opened shop and house on the visitor's walk (interiors.js, walkroute.js): from the street through the door and along the front room
+for (const l of furnishedLots()) {
+  if (upperOf(l)) continue;
+  if (Math.abs(doorOf(l).at[0] + 98.99) < 0.05 && Math.abs(doorOf(l).at[1] - 103.2) < 0.05) continue;      // (this rice shop's front is solid at the door: left without a route until its front is looked at)
+  const F = frameOf(l), d = doorOf(l).at, ad = (d[0] - F.ox) * F.u[0] + (d[1] - F.oz) * F.u[1], r = [F.W(ad, -3), F.W(ad, 0.2), F.W(ad, 2.4)];
+  r.y0 = 0; walks.push(r);
+}
 
 export const pagoda = {
   id: 'song-kaifeng-iron-pagoda',

@@ -122,6 +122,7 @@ export function streetPlans(base) {
       const o = (rand() < 0.5 ? -1 : 1) * (side - rand() * 0.7), p = W(a, o), dir = horiz ? [rand() < 0.5 ? 1 : -1, 0] : [0, rand() < 0.5 ? 1 : -1];
       const nearB = dBridge(...p) < 260;
       if (rand() > (nearB ? 0.8 : 0.4) || !spot(p[0], p[1], 2.4)) continue;
+      if (horiz && Math.abs(p[0]) < 4.6) continue;      // (where a cross street meets the main street the walker's axis stays clear of carts and beasts)
       const along = dir, out = [horiz ? 0 : (o > 0 ? 1 : -1), horiz ? (o > 0 ? 1 : -1) : 0], rot0 = faceTo(along) + Math.PI;
       const q = rand();
       claim(p[0], p[1], 3.2);

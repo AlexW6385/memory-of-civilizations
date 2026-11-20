@@ -50,7 +50,7 @@ function scroll() {
     const n0 = L.length, mid = [(F.a[0] + F.b[0]) / 2 + F.out[0] * 0.6, (F.a[1] + F.b[1]) / 2 + F.out[1] * 0.6];
     person(mid, 0, faceTo(F.out), { pose: 'talk', dress: 'robe', cloth: 'cloth_white', hat: 'cap' });
     if (rand() < 0.8) person([mid[0] + F.out[0] * 1.3 + F.out[1] * 0.6, mid[1] + F.out[1] * 1.3 + F.out[0] * 0.6], 0, faceTo([-F.out[0], -F.out[1]]), { pose: 'stand' });
-    if (upperOf(l)) L.length = n0;     // (an opened house keeps its door lane clear)
+    if (upperOf(l) || furnishedLots().has(l)) L.length = n0;     // (an opened shop keeps its door lane clear)
   });
   // ---- the upper balconies: on the two-storey shops near the bridge a man or woman stands or leans at the rail, looking at the street (the scroll shows the balconies full of onlookers)
   for (const l of lots()) {
