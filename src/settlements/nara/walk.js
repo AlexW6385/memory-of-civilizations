@@ -1,4 +1,4 @@
-// The visitor's walk in Nara (docs/settlements/nara.md §20): from the arrival in the Great Buddha Hall's court down the axis through the
+// The visitor's walk in Nara (docs/settlements/nara.md §19): from the arrival in the Great Buddha Hall's court down the axis through the
 // Middle Gate, along the temple's service quarter, through the Great South Gate and down Suzaku Avenue to the East Market and the first
 // blocks of the capital; and the lots on it that are opened. Pure data and functions of layout.js (no three.js).
 
