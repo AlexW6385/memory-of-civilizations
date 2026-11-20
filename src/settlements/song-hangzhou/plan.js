@@ -48,6 +48,7 @@ for (const [dx, dz, kind, h, seed] of [[-19, 120, 'camphor', 13, 3], [20, 123, '
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 4, T2.rect[3], PAGODA.c[0] + 4, T1.rect[1]], y0: T1.y, y1: T2.y, dir: 'n', mat: 'granite_block' });
 const tiers = [{ r: 10.5, h: 9.5 }];
 for (let i = 1; i < 7; i++) tiers.push({ r: 10.5 - 0.6 * i, h: 6.7 });
+export const TIERS = tiers;   // (the night plan's lanterns hang on the galleries' posts: nightlight.js)
 E.push({ t: 'liuhe_pagoda', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, bells: 'iron', interior: true, images: true });
 // the five upper storeys dressed as the two lowest are (the style dresses only those): pilasters, framed doors and windows, a brick-carved frieze, balusters
 E.push({ t: 'hz_pagoda_upper', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, from: 2 });

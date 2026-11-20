@@ -228,6 +228,19 @@ void NAMEBOARD;
 const CLOTHS = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_grey', 'cloth_brown', 'cloth_green'];
 
 /**
+ * What stands at the end of a shop front (the draws of the stream `rand` of the shop's seed, in the order hzShop makes them, so that nightlight.js can ask
+ * the same question): the side of the goods, the wine house's gate of silk (width, cloth) or the wine pole's place, the lantern sign.
+ */
+export function shopFront(el, rand = rng(el.seed || 1)) {
+  const pick = (a) => a[Math.floor(rand() * a.length)], L = el.L, trade = el.trade && GOODS[el.trade] ? el.trade : 'wares';
+  const side = rand() < 0.5 ? -1 : 1;
+  let gate = 0, cloth = null, pole = null;
+  if (trade === 'wine' && L >= 4.6 && (el.imperial || rand() < 0.5)) { gate = L >= 6.4 ? 6 : 4; cloth = pick(['cloth_red', 'cloth_red', 'cloth_ochre']); }
+  else if (trade === 'wine' || trade === 'food') pole = -side * (L / 2 - 0.2);
+  const lightbox = !!(el.imperial || rand() < 0.35);
+  return { side, gate, cloth, pole, lightbox };
+}
+/**
  * hz_shop: the signs and goods of one shop front { at (the middle of its front, on the lot's edge), y, rot
  * (out into the street), L (the front's width), trade, seed, v0 (how far in the shutter line stands: 0.5),
  * imperial (on the Imperial Way: grander signs) }.
@@ -240,19 +253,19 @@ function hzShop(el, { bag, col }) {
     const P = placer({ t: el.t, at: loc(x, z), y: y0 + y, rot: rot + ry, s: k }, bag);
     for (const [role, g] of Object.entries(U[name])) { let m = mats[role] ?? DEF[name][role]; if (WINDY.has(`${name}.${role}`)) m = windMat(m); P(m, g.clone()); }
   };
-  const side = rand() < 0.5 ? -1 : 1;
+  const F = shopFront(el, rand), side = F.side;
   // the wine houses' coloured-silk gate (wide fronts, most on the Imperial Way)
-  if (trade === 'wine' && L >= 4.6 && (el.imperial || rand() < 0.5)) {
-    const W = L >= 6.4 ? 6 : 4;
-    put(HUANMEN[W], { x: 0, z: 1.3, mats: { c: pick(['cloth_red', 'cloth_red', 'cloth_ochre']), w: 'cloth_white' } });
+  if (F.gate) {
+    const W = F.gate;
+    put(HUANMEN[W], { x: 0, z: 1.3, mats: { c: F.cloth, w: 'cloth_white' } });
     col?.circle(...loc(-W / 2, 1.3), 0.14, y0, y0 + 3.9); col?.circle(...loc(W / 2, 1.3), 0.14, y0, y0 + 3.9);
-  } else if (trade === 'wine' || trade === 'food') {
-    const x = -side * (L / 2 - 0.2);
+  } else if (F.pole !== null) {
+    const x = F.pole;
     put('winepole', { x, z: 0.35, mats: trade === 'food' ? { a: 'cloth_red', b: 'cloth_white' } : {} });
     col?.circle(...loc(x, 0.35), 0.22, y0, y0 + 5);
   }
   // the lantern sign (lightbox) standing at the end of the front on the grander streets, the hung signboard on a post
-  if (el.imperial || rand() < 0.35) { const x = side * (L / 2 - 0.3); put('lightbox', { x, z: 0.6 }); col?.circle(...loc(x, 0.6), 0.35, y0, y0 + 1.7); }
+  if (F.lightbox) { const x = side * (L / 2 - 0.3); put('lightbox', { x, z: 0.6 }); col?.circle(...loc(x, 0.6), 0.35, y0, y0 + 1.7); }
   if (rand() < 0.7) put('hsign', { x: side * (L / 2 - 0.12), z: 0.04, y: 3.2 });
   // goods along the front, from one end
   const list = GOODS[trade], free0 = -L / 2 + 0.7, free1 = L / 2 - 0.7;

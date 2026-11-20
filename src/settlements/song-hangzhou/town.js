@@ -10,7 +10,9 @@ import './houses.js';
 import { streetsideElements } from './houses.js';
 import * as LAYOUT from './layout.js';
 import { doorLanes } from './storeys.js';
-import { RIVER_BOATS, CANAL_BOATS, HALLS } from './plan.js';
+import { RIVER_BOATS, CANAL_BOATS, HALLS, TIERS } from './plan.js';
+import { nightPlan, registerNight } from './nightlight.js';
+registerNight();   // the lit windows of the town's own house builders
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 136], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const CLOTH = ['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_black', 'cloth_red', 'cloth_green'];
@@ -237,5 +239,7 @@ export async function town() {
   // the entertainment ground, the Way's sunshades and the ward gates (§24)
   plans.push(base('song-hangzhou-wazi', wazisStatic(LEVEL.street)));
   plans.push({ ...base('song-hangzhou-wazi-life', waziLife(LEVEL.street), 'life'), center: [72, -140], near: 200, rooms: [{ id: 'hz-wazi-court', rect: [66, -153, 78, -127], y: LEVEL.street, kind: 'winehouse' }] });
+  // the night's light, made from the lamps of every plan above (nightlight.js): one static plan, one mesh of the halo material
+  plans.push(nightPlan(plans, base, { tiers: TIERS, base: 2 }));
   return plans;
 }
