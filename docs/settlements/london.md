@@ -241,7 +241,7 @@ Thirteen open houses nearest the arrival and along Bridge Street are open to the
 - **Still shut:** the other houses (ground floor only), the cellars and areas, the pubs' cellars, roof terraces, windows on the side walls of the corner pubs (painted blanks).
 
 
-## 10. Brought up to the reference (2026-11; `nightlight.js`, `soundmap.js`, `src/engine/voices-london.js`, `fauna.js` critters, `lettering.js`, `wear.js`)
+## 10. Brought up to the reference (2026-11; `nightlight.js`, `soundmap.js`, `src/engine/voices-london.js`, `fauna.js` critters, `styles/victorian/letters.js`, `shops.js`)
 
 Written before the code. What this place had at this date (c. 1870, Westminster and Lambeth); [stated] with its source, [inferred] where it is reasoning from the dossier. Nothing here is Chinese, Roman or medieval by borrowing: where a thing is not known for London it is left out.
 
@@ -271,3 +271,9 @@ Written before the code. What this place had at this date (c. 1870, Westminster 
 ### 10.4 Wear and writing
 - **Soot.** Westminster's stone was blackened by coal smoke already (the palace's Anston stone was decaying and darkening within decades) [stated in part: the dossier's §7, "smoke"; the soot on the stone and brick fronts is generic weathering, `damp 0.7`]. Ours: worn steps and thresholds at the doors of the open houses and shops (a hollow dished in each step), boot-scrapers beside the doors [inferred: standard in London terraces], coal-hole covers in the pavement before the houses [inferred: the dossier §6 names the coal-hole cover].
 - **Lettering** (Latin capitals, which can be written correctly). The gilt fascia of the open shops names the trade and the keeper ("J. HOLT, BAKER" style; the names are invented, plain English surnames of the period [inferred]); the open pubs carry their names on the fascia (the Red Lion, the Crown, the Marquis of Granby and the like, all real pub names of the period [inferred]); each pub also has "WINES, SPIRITS, ALES" [inferred: the gin palaces advertised so]. Drawn as boxes of a block capital alphabet in the 'gold' material, only on lots that are open (fine pieces, a few hundred triangles each).
+
+### 10.5 As built
+- **Night:** `nightlight.js`, one `halo` plan (about 42 k triangles, one draw): street gas lamps, lit shop, pub and house windows (hash share), costers' flares, bridge and dolphin lamps, the Commons' river windows. Not built: the Ayrton Light (1885).
+- **Sound:** `soundmap.js` + `voices-london.js` (all `lon`-prefixed): traffic on Bridge Street and the bridge, Thames and pier, square (organ, Punch), knife-grinder (barrow now placed in town.js), fountain, trades of the open shops, pubs with piano until 00:30, Abbey bell and choir, street cries by hour, rooms. Sound levels were measured with sound-render, not heard.
+- **Animals:** 25 critters: 14 pigeons (bridge footway, square walks), 5 cats, 4 dogs (pubs, grinder, costers' stalls), 2 songbird cages on brackets under open fascias (`cagedAt`). No horse model exists, so horses stay in the plan's vehicles.
+- **Writing:** `letters.js`, a 5 by 7 block-capital alphabet (A–Z . , &) in 'gold': shop boards read "W. GRANT, BAKER" (invented names), pub boards carry real period pub names. The pub's "WINES, SPIRITS, ALES" line is not built (no room on the fascia). **Wear:** the door steps and shop thresholds have a darker worn tread (a colour patch, not a dished hollow); boot-scrapers and coal-hole covers already existed.
