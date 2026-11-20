@@ -4,7 +4,8 @@
 // five tiers and the three small keeps joined by roofed passages; the long gallery of the
 // Nishinomaru; the lord's residence in the Sannomaru; the middle moat and its gate.
 
-import { upperHouses } from './layout.js';
+import { upperHouses, lots, isOpen } from './layout.js';
+import { yashikiParts } from '../../styles/edo/yard.js';
 import { upPlan, upRoute, upRooms } from '../../styles/edo/upper.js';
 import { INNER, OUTER, BANK, LEVEL, NINO, HON, DAI, NISHI, KEEP, SMALL, GOTEN, OTEMON, MIDDLE, RADIUS } from './layout.js';
 
@@ -162,6 +163,20 @@ for (const [l, kind] of upperHouses()) {
   for (const [i, u] of upRooms(P).entries()) rooms.push(room(`${kind} upper room ${i + 1} (${Math.round(x0)}, ${Math.round(z0)})`, u.rect, u.y, 'hall'));
 }
 
+// the walk's shops and compounds (docs §10.4): a route from the street into the passage of every open machiya within 130 m of the avenue's foot that has no
+// stair route of its own, and from the lane through the gate-house into the yard of every open samurai compound on the avenue's blocks
+{
+  const x0m = (l) => l.rect[0], withUp = upperHouses();
+  for (const l of lots().filter((q) => q.t === 'machiya' && isOpen(q) && !withUp.has(q) && Math.abs((q.rect[0] + q.rect[2]) / 2) < 130)) {
+    const f = l.front || 's', sg = f === 's' ? 1 : -1, fz = f === 's' ? l.rect[3] : l.rect[1], dep = Math.min(11, l.rect[3] - l.rect[1]), px = x0m(l) + 0.95, Z = (q) => fz - sg * q;
+    const w = [[px, Z(-3.5)], [px, Z(2)], [px, Z(Math.min(6.5, dep - 1.6))]]; w.y0 = 0; walks.push(w);
+  }
+  for (const l of lots().filter((q) => q.t === 'yashiki' && isOpen(q) && q.rect[1] > OUTER[3] && q.rect[3] < MIDDLE.z0 - 4)) {
+    const P = yashikiParts(l), [a, b, c, d] = P.gate, mx = (a + c) / 2, mz = (b + d) / 2;
+    const v = P.g === 'n' ? [0, -1] : P.g === 's' ? [0, 1] : P.g === 'e' ? [1, 0] : [-1, 0];
+    const w = [[mx + v[0] * 3.5, mz + v[1] * 3.5], [mx, mz], [mx - v[0] * 7, mz - v[1] * 7]]; w.y0 = 0; walks.push(w);
+  }
+}
 export const OPENED = { kura: KURA_ROOMS, turrets: TURRET_ROOMS };
 export const castle = {
   id: 'edo-himeji-castle',
