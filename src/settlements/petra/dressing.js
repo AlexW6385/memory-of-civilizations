@@ -15,6 +15,8 @@ const dirRot = (dx, dz) => Math.atan2(dx, dz);                                  
 const Z = STREET.a[1], XA = STREET.b[0], XB = STREET.a[0], SIDE = STREET.w / 2;           // the street's middle line, its ends, half its width
 const YP = 0.45, YS = 0.05;                                                                  // the porticoes' floor, the street's
 
+/** The open fires of the walk (the night's glow, nightlight.js): the caravan's in the forecourt, the wayfarers' in the Siq and the Outer Siq. */
+export const FIRES = [];
 export function fronts() {
   const E = [], rand = rng(180);
   const wallS = Z + SIDE + 0.9 + 5;                                                         // the south portico's back: the shops' front wall
@@ -77,6 +79,7 @@ function okOuter(x, z) {
 }
 
 export function life() {
+  FIRES.length = 0;
   const L = [], rand = rng(181), pick = (a) => a[Math.floor(rand() * a.length)], seed = () => Math.floor(rand() * 1e9);
   const person = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, seed: seed(), dress: 'robe', cloth: pick(CL), cloth2: pick(CL), over: pick(['sash', 'cape', 'none']), skin: 'skin_medium', hat: rand() < 0.4 ? 'turban' : 'none', hatMat: 'cloth_white', feet: 'shod', ...o });
   const woman = (at, y, rot, o = {}) => person(at, y, rot, { over: 'shawl', hat: 'veil', hatMat: pick(['cloth_white', 'cloth_indigo', 'cloth_ochre']), beard: false, feet: 'bare', ...o });
@@ -134,6 +137,7 @@ export function life() {
   woman([px + 5.4, pz - 9.6], 0, face([px + 5.4, pz - 9.6], [px + 5, pz - 12]), { pose: 'stand' });
   // the resting caravan in the south-east of the square: three camels with their loads on the ground beside them, the drivers, the donkeys and a dog
   for (const [dx, dz, r] of [[8, 9, 1.1], [10.5, 10.4, 1.7], [12.5, 8.2, 0.7]]) beast('camel', [px + dx, pz + dz], on(px + dx, pz + dz), r, { gear: true });
+  FIRES.push([+(px + 10.3).toFixed(2), +(pz + 6.4).toFixed(2), on(px + 10.3, pz + 6.4)]);
   L.push({ t: 'sacks', n: 4, at: [px + 6.4, pz + 11.3], y: 0, rot: 0.4, seed: 11 }); L.push({ t: 'basket', n: 3, at: [px + 8, pz + 12.6], y: 0, seed: 12 }); L.push({ t: 'pot', kind: 'amphora', n: 3, at: [px + 12.4, pz + 11.8], y: 0, seed: 13 });
   person([px + 9.2, pz + 12.4], 0, 3.5, { pose: 'cross', beard: true, hat: 'turban', cloth: 'cloth_brown' }); person([px + 11, pz + 12.2], 0, 3.0, { pose: 'sit_ground', beard: true, hat: 'turban' });
   beast('donkey', [px + 4.5, pz + 11.5], 0, 2.2, { gear: true }); beast('donkey', [px + 5.9, pz + 12.4], 0, 0.9, { gear: true }); beast('dog', [px + 7.7, pz + 13.8], 0, 0.5);
@@ -157,7 +161,7 @@ export function life() {
     pts.forEach((q, i) => {
       const side = i % 2 ? 1 : -1, o = 3.6 + rand() * 1.1, x = q.x + q.nx * side * o, z = q.z + q.nz * side * o, fx = q.tx, fz = q.tz;
       const y = on(x, z);
-      if (i % 4 === 0) { L.push({ t: 'firewood', at: [x, z], y, rot: Math.atan2(q.nx, q.nz) + 1.57, len: 0.9, seed: i }); L.push({ t: 'basket', n: 1, at: [x + fx * 1.4, z + fz * 1.4], y: on(x + fx * 1.4, z + fz * 1.4), seed: i + 3 }); }
+      if (i % 4 === 0) { FIRES.push([+(x - fx * 1.3).toFixed(2), +(z - fz * 1.3).toFixed(2), on(x - fx * 1.3, z - fz * 1.3)]); L.push({ t: 'firewood', at: [x, z], y, rot: Math.atan2(q.nx, q.nz) + 1.57, len: 0.9, seed: i }); L.push({ t: 'basket', n: 1, at: [x + fx * 1.4, z + fz * 1.4], y: on(x + fx * 1.4, z + fz * 1.4), seed: i + 3 }); }
       if (i % 5 === 1) { for (let g = 0; g < 3; g++) { const gx = x + fx * (g * 0.9), gz = z + fz * (g * 0.9); beast('goat', [gx, gz], on(gx, gz), rand() * 6.28, { graze: g !== 1 }); } child([x - fx * 1.6, z - fz * 1.6], on(x, z), face([x - fx * 1.6, z - fz * 1.6], [x, z]), { pose: 'staff', carry: 'staff' }); }
       if (i % 5 === 3) { beast('donkey', [x, z], y, Math.atan2(fx, fz) + (i % 2 ? 0 : Math.PI), { gear: true }); person([x - fx * 1.5, z - fz * 1.5], on(x - fx * 1.5, z - fz * 1.5), Math.atan2(-fx, -fz), { pose: 'staff', carry: 'staff', beard: true, hat: 'turban' }); }
       if (i % 6 === 2) { person([x, z], y, face([x, z], [x + q.nx * side * 3, z + q.nz * side * 3]), { pose: 'sit_ground', beard: true, hat: 'turban' }); L.push({ t: 'basket', n: 2, at: [x + fx * 0.9, z + fz * 0.9], y, seed: i + 9 }); L.push({ t: 'pot', kind: 'water_pot', at: [x - fx * 0.9, z - fz * 0.9], y, seed: i + 11 }); }
@@ -181,7 +185,7 @@ export function life() {
         else if (r < 0.36) { for (let c = 0; c < 2; c++) beast('camel', [x + c * 2.3, z + (rand() - 0.5)], on(x + c * 2.3, z), rand() * 6.28, { gear: true }); L.push({ t: 'sacks', n: 4, at: [x + 1, z + 2.6], y, rot: 0.5, seed: i * 50 + t }); L.push({ t: 'basket', n: 2, at: [x + 2.6, z + 2.8], y, seed: i * 50 + t + 1 }); person([x + 0.2, z + 3.4], y, rand() * 6.28, { pose: 'sit_ground', beard: true, hat: 'turban', cloth: 'cloth_brown' }); }
         else if (r < 0.5) { person([x, z], y, rand() * 6.28, { pose: 'stand', beard: true }); person([x + 1, z + 0.4], y, face([x + 1, z + 0.4], [x, z]), { pose: 'talk', beard: true }); }
         else if (r < 0.62) { beast('donkey', [x, z], y, rand() * 6.28, { gear: true }); woman([x + 1.3, z - 0.4], y, rand() * 6.28, { carry: 'basket' }); }
-        else if (r < 0.72) { L.push({ t: 'firewood', at: [x, z], y, rot: 0.8, len: 1.2, seed: i * 31 + t }); L.push({ t: 'pot', kind: 'dark_pot', n: 2, at: [x + 1.1, z + 0.4], y, seed: i * 31 + t + 1 }); woman([x + 0.4, z + 1.4], y, rand() * 6.28, { pose: 'squat' }); }
+        else if (r < 0.72) { FIRES.push([+(x - 1.4).toFixed(2), +(z + 0.9).toFixed(2), on(x - 1.4, z + 0.9)]); L.push({ t: 'firewood', at: [x, z], y, rot: 0.8, len: 1.2, seed: i * 31 + t }); L.push({ t: 'pot', kind: 'dark_pot', n: 2, at: [x + 1.1, z + 0.4], y, seed: i * 31 + t + 1 }); woman([x + 0.4, z + 1.4], y, rand() * 6.28, { pose: 'squat' }); }
         else if (r < 0.8) L.push({ t: 'sacks', n: 3, at: [x, z], y, rot: rand() * 3, seed: i * 17 + t });
       }
     }

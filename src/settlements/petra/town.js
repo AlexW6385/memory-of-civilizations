@@ -2,7 +2,7 @@
 import { RADIUS, lots, outerLots } from './layout.js';
 import { people } from './people.js';
 import { shopLife, houseLife } from './shops.js';
-import { fronts, life } from './dressing.js';
+import { fronts, life, FIRES } from './dressing.js';
 import { houseLayout } from '../../styles/nabataean/house.js';
 const base = (id, elements) => ({ id, style: 'nabataean', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 12], facing: 'w' } });
 export async function town() {
@@ -18,7 +18,7 @@ export async function town() {
     const p = yawed('petra-outer-houses', ol.map((l) => ({ t: 'nabataean_house', ...l })));
     p.rooms = ol.map((l, j) => { const H = houseLayout(l), r = H.Rc(...H.room.rect); return { id: `outer house ${j}`, rect: r.map((v) => +v.toFixed(2)), y: 0, kind: 'house' }; });
     plans.push(p, { ...yawed('petra-outer-life', houseLife(ol, 200)), style: 'life', center: [115, -110], near: 200 }); }
-  plans.push(base('petra-fronts', fronts()));
+  plans.push(base('petra-fronts', [...fronts(), ...(life(), FIRES).map(([x, z, y]) => ({ t: 'petra_fire', at: [x, z], y: +y.toFixed(3) }))]));
   plans.push({ ...base('petra-people', people()), style: 'life', center: [-20, -40], near: 320 });
   plans.push({ ...base('petra-dressing', life()), style: 'life', center: [-20, -30], near: 330 });
   plans.push({ ...base('petra-life', [...shopLife(), ...houseLife()]), style: 'life', center: [-70, 15], near: 280 });
