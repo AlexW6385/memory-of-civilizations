@@ -8,6 +8,7 @@
 
 import { box, lathe, fromTriangles, disc, clothBox, addCloth } from '../../core/geom.js';
 import * as IN from './interiors.js';
+import { vessel } from './vessel.js';
 
 const G = 'granite_tamil';
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -65,7 +66,7 @@ const WASHES = ['plaster_white', 'stucco_cream', 'limewash_white', 'limewash_yel
 const pick = (r, a) => a[Math.floor(r() * a.length)];
 
 /** Little brass vessel (kudam): foot, belly, neck, flared lip. */
-export const vessel = (bag, x, y, z, s = 1, mat = 'bronze') => bag.add(mat, lathe([[0.001, 0], [0.07 * s, 0], [0.1 * s, 0.05 * s], [0.17 * s, 0.17 * s], [0.18 * s, 0.26 * s], [0.12 * s, 0.38 * s], [0.07 * s, 0.44 * s], [0.1 * s, 0.5 * s], [0.07 * s, 0.5 * s]], 8, null, x, y, z));
+export { vessel };
 /** A tall Tamil standing lamp (kuttuvilakku): a round foot, a slender stem with rings, a dish with a lit wick. */
 export function lampStand(bag, x, y, z, h = 1.2) {
   bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.13, 0.03], [0.07, 0.08], [0.04, 0.16], [0.05, 0.28], [0.035, 0.36], [0.035, h - 0.14], [0.06, h - 0.1], [0.1, h - 0.04], [0.12, h], [0.001, h]], 10, null, x, y, z));

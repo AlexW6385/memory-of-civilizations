@@ -4,9 +4,9 @@
 // eye level (damp, streaks, fallen plaster, a name board over each shop, mango-leaf toranam over house doors,
 // water pots, firewood, a cot, washing on a line). Everything is built in the lot's own frame (see houses.js).
 import { lathe, disc, clothBox, addCloth } from '../../core/geom.js';
+import { vessel } from './vessel.js';
 
 const G = 'granite_tamil', TH = 0.32, I = 'plaster_white';
-const vessel = (bag, x, y, z, s = 1, mat = 'bronze') => bag.add(mat, lathe([[0.001, 0], [0.07 * s, 0], [0.1 * s, 0.05 * s], [0.17 * s, 0.17 * s], [0.18 * s, 0.26 * s], [0.12 * s, 0.38 * s], [0.07 * s, 0.44 * s], [0.1 * s, 0.5 * s], [0.07 * s, 0.5 * s]], 8, null, x, y, z));
 const dome = (bag, mat, x, y, z, r, h) => bag.add(mat, lathe([[0.001, 0], [r, 0], [r * 0.92, h * 0.5], [r * 0.6, h * 0.88], [0.001, h]], 7, null, x, y, z));
 const strip = (F, mat, u, ytop, v, w, len) => {
   const [x, , z] = F.P(u, 0, v), [ax, , az] = F.P(u + w, 0, v + 0.04);
