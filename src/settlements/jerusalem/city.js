@@ -8,11 +8,14 @@ import { gardenWalls, gardenLife, laneArchElements, laneLife } from './lanes.js'
 import { sepulchreFurnish, sepulchreLife } from './sepulchre-detail.js';
 import { haramFurnish, haramLife } from './haram-detail.js';
 import { platformFurnish, platformLife } from './platform-detail.js';
+import { braziers } from './nightlight.js';
 import { STREET, RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' }, ...extra });
 const D2R = Math.PI / 180;
+/** The style of the plans that carry lamps: the islamic style with its lamps given their glow at night (nightlight.js). */
+const LIT = 'jerusalem-lit';
 
 // ── the wall, towers and gates ──────────────────────────────────────────────────────────────────
 function walls() {
@@ -253,18 +256,18 @@ function markets() {
 
 export function city() {
   return [
-    plan('jerusalem-walls', 'islamic', walls()),
-    plan('jerusalem-cardo', 'islamic', cardo()),
+    plan('jerusalem-walls', LIT, [...walls(), ...braziers()]),
+    plan('jerusalem-cardo', LIT, cardo()),
     plan('jerusalem-sepulchre', 'islamic', sepulchre(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
-    plan('jerusalem-sepulchre-furnish', 'islamic', sepulchreFurnish(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
+    plan('jerusalem-sepulchre-furnish', LIT, sepulchreFurnish(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
     plan('jerusalem-sepulchre-life', 'life', sepulchreLife(), { bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
     plan('jerusalem-gardens', 'islamic', [...gardenWalls(), ...laneArchElements()]),
     plan('jerusalem-garden-life', 'life', [...gardenLife(), ...laneLife()]),
     plan('jerusalem-kidron', 'islamic', kidron()),
     plan('jerusalem-palaces', 'islamic', palaces()),
-    ...STREET.spans.map((sp, i) => plan(`jerusalem-bazaar-${i}`, 'islamic', bazaar(sp), { bounds: [sp[0] - 4, -STREET.half - 2, sp[1] + 4, STREET.half + 2] })),
+    ...STREET.spans.map((sp, i) => plan(`jerusalem-bazaar-${i}`, LIT, bazaar(sp), { bounds: [sp[0] - 4, -STREET.half - 2, sp[1] + 4, STREET.half + 2] })),
     plan('jerusalem-markets', 'life', markets()),
-    plan('jerusalem-haram-furnish', 'islamic', [...haramFurnish(), ...platformFurnish()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
+    plan('jerusalem-haram-furnish', LIT, [...haramFurnish(), ...platformFurnish()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
     plan('jerusalem-haram-life', 'life', [...haramLife(), ...platformLife()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
   ];
 }
