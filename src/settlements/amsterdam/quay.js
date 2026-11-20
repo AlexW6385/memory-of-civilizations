@@ -6,6 +6,7 @@
 import { RADIUS, C, RINGS, CANAL_W, QUAY, GROUND, WATER, BRIDGE_ANGLES, DAM, lots, inRect } from './layout.js';
 import { faceFrame } from '../../styles/dutch/facade.js';
 import { person, rng } from './town.js';
+import { nudge } from './shops.js';
 
 const Y = GROUND + 0.05, CELL = 110;
 const OUT = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -16,7 +17,7 @@ const base = (id, elements, c) => ({ id, style: 'life', origin: [0, 0], base: 0,
 export function quayLife() {
   const rand = rng(1671), cells = new Map();
   const put = (e) => {
-    const at = e.at, k = Math.floor((at[0] + RADIUS) / CELL) + ',' + Math.floor((at[1] + RADIUS) / CELL);
+    e.at = nudge(e.at); const at = e.at, k = Math.floor((at[0] + RADIUS) / CELL) + ',' + Math.floor((at[1] + RADIUS) / CELL);
     if (!cells.has(k)) cells.set(k, []); cells.get(k).push(e);
   };
   const P = (k, x, z, rot, ex) => put(person(rand, k, [x, z], rot, ex));
