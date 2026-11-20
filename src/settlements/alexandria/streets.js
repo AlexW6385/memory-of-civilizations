@@ -7,6 +7,7 @@ import { frame } from '../../styles/greek/agora.js';
 import { houseLayout } from '../../styles/ptolemaic/house.js';
 import { laneClear } from './walk.js';
 import { WELLS } from './soundmap.js';
+import { DECREE } from '../../styles/ptolemaic/script.js';
 import { RADIUS, GROUND, SEA, QUAY, PIER, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, PHAROS, lots, isle, wet, inRect, inLot } from './layout.js';
 
 const g = GROUND;
@@ -83,7 +84,8 @@ function quayLife() {
   for (const [x, z, rot] of [[SOMA[0] - 1.6, CANOPIC[1] - 1.2, 0], [SOMA[2] + 1.6, CANOPIC[3] + 1.2, Math.PI], [-300, CANOPIC[1] - 1.2, 0], [330, CANOPIC[3] + 1.2, Math.PI], [AGORA[0] + 4, AGORA[3] + 1, Math.PI]]) E.push({ t: 'shrine', at: [x, z], y: g + 0.04, rot });
   // the agora: the fountain house, stelae with decrees, a herm already built (town.js); goods heaped about
   E.push({ t: 'nymphaeum', c: [AGORA[2] - 7, (AGORA[1] + AGORA[3]) / 2], y: g + 0.04, rot: Math.PI / 2 });
-  for (const dz of [-5, 5]) E.push({ t: 'stele', at: [AGORA[0] + 12, (AGORA[1] + AGORA[3]) / 2 + dz], y: g + 0.04, rot: 0.2 * dz, h: 2.1 });
+  for (const dz of [-5, 5]) E.push({ t: 'stele', at: [AGORA[0] + 12, (AGORA[1] + AGORA[3]) / 2 + dz], y: g + 0.04, rot: 0.2 * dz, h: 2.1, lines: DECREE });
+  for (const x of [43.4, 76.6]) E.push({ t: 'stele', at: [x, -42], y: g + 0.04, rot: x < 60 ? Math.PI / 2 : -Math.PI / 2, h: 2.1, lines: DECREE });      // the king's decrees on the Soma street's edges
   E.push({ t: 'cargo_pile', at: [AGORA[0] + 40, AGORA[1] + 28], y: g + 0.04, rot: 0.3, kind: 'amphorae', n: 3, seed: 8 });
   E.push({ t: 'cargo_pile', at: [AGORA[0] + 14, AGORA[1] + 26], y: g + 0.04, rot: 0, kind: 'sacks', n: 3, seed: 9 });
   // date palms along the promenade and in the agora, fig trees in the agora's corners

@@ -6,6 +6,7 @@
 
 import { box, lathe, rod, frustum, fromTriangles } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
+import { inscribe, PHAROS_DEDICATION } from './script.js';
 import { doorway, stageOne, stageTwo, stageThree, triton as tritonFig, fire, zeus, lantern } from './pharos-detail.js';
 
 /** An eight-sided tapering prism (flat across `w` at the foot, `w2` at the top), turned so that a face looks along +z. */
@@ -79,6 +80,8 @@ function pharos(el, ctx) {
   doorway(bag, { dx: cx, zf: cz + h + 0.5, y0 });
   // the Zeus inscription over the door, a band of lettered stone on the seaward face
   bag.add('marble_smooth', box(cx - 5, y0 + 9.0, cz + h - lean(y0 + 9.0) + 0.0, cx + 5, y0 + 9.9, cz + h - lean(y0 + 9.0) + 0.14));
+  // the dedication of Sostratos, in bronze letters set in the band: "Sostratos of Knidos, son of Dexiphanes, to the Saviour Gods, for those who sail" [stated: Lucian, How to Write History 62]
+  inscribe(bag, PHAROS_DEDICATION, { at: [cx, cz + h - lean(y0 + 9.0) + 0.14], n: [0, 1], y: y0 + 9.82, h: 0.31, mat: 'bronze', line: 1.3, pitch: 0.16 });
   // the platform on the tier: a slab with a hole over the last leg of the ramp, a parapet round it, a Triton on each corner
   { const e = q1 + 0.5, hole = [cx - a0, cz + a0, cx + a0, cz + a1], P = [[cx - e, cz - e, cx + e, hole[1]], [cx - e, hole[1], hole[0], hole[3]], [hole[2], hole[1], cx + e, hole[3]], [cx - e, hole[3], cx + e, cz + e]];
     for (const r of P) { bag.add('limestone', box(r[0], yt, r[1], r[2], yt + 0.5, r[3])); col.floor(r, yt + 0.5); }

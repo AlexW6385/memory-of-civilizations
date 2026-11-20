@@ -181,6 +181,7 @@ function quay(el, { bag, col }) {
   for (let k = 0; k < n; k++) {
     const u = (alongX ? x0 : z0) + 6 + k * 12, x = alongX ? u : (x0 + x1) / 2, z = alongX ? (z0 + z1) / 2 + (el.side ?? 0) : u;
     bag.add('granite_grey', lathe([[0.24, 0], [0.2, 0.05], [0.17, 0.4], [0.26, 0.46], [0.001, 0.48]], 8, null, x, y1, z));
+    if (alongX) bag.add('granite_grey', box(x - 0.35, y1 + 0.001, z0 + 0.0, x + 0.35, y1 + 0.014, z0 + 0.12));       // the edge rubbed dark where the mooring ropes run over it (docs §16.5)
     col.circle(x, z, 0.24, y1, y1 + 0.48);
   }
 }
