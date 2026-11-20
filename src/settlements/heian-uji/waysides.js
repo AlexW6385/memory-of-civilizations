@@ -23,7 +23,7 @@ function hokora(el, { bag, col }) {
   boxAt('limestone', -0.4, -0.4, 0.4, 0.4, -0.05, 0.22);
   for (const [u, v] of [[-0.27, -0.27], [0.27, -0.27], [-0.27, 0.27], [0.27, 0.27]]) boxAt('wood_dark', u - 0.035, v - 0.035, u + 0.035, v + 0.035, 0.22, 1.0);
   boxAt('timber', -0.27, -0.27, 0.27, -0.23, 0.26, 0.98); boxAt('timber', -0.27, -0.27, -0.23, 0.27, 0.26, 0.98); boxAt('timber', 0.23, -0.27, 0.27, 0.27, 0.26, 0.98);
-  boxAt('lacquer_red', -0.23, 0.24, 0.0, 0.27, 0.3, 0.9); boxAt('lacquer_red', 0.0, 0.24, 0.23, 0.27, 0.3, 0.9);      // the two doors
+  boxAt('wood_dark', -0.23, 0.24, 0.0, 0.27, 0.3, 0.9); boxAt('wood_dark', 0.0, 0.24, 0.23, 0.27, 0.3, 0.9);      // the two doors
   boxAt('wood_dark', -0.01, 0.235, 0.01, 0.275, 0.3, 0.9);
   boxAt('wood_dark', -0.3, 0.23, 0.3, 0.3, 0.9, 1.0);                                                                    // the lintel
   boxAt('wood_dark', -0.14, 0.4, 0.14, 0.62, 0.22, 0.26);                                                                // a step of plank

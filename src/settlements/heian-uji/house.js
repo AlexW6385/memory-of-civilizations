@@ -13,6 +13,7 @@ import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
 import { dressHouse, furnishTrade } from './dress.js';
+import { hearthLight } from './nightlight.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const pot = (bag, m, x, y, z, r, h) => bag.add(m, lathe([[r * 0.6, 0], [r, h * 0.45], [r * 0.75, h * 0.85], [r * 0.55, h], [0.001, h]], 10, null, x, y, z));
@@ -152,14 +153,15 @@ function ujiHouse(el, { bag, col }) {
       { const p = P2(T + 0.145, v0 + 0.25); bag.add('roof_bark', lathe([[0.2, 0], [0.12, 0.05], [0.001, 0.13]], 4, null, p[0], y + 1.86, p[1])); }
       B2('cloth_white', T + 0.28, v0 + 0.15, T + 0.31, v0 + 0.35, y + 1.45, y + 1.62);                          // a hanging strip of paper at its edge
     }
-    { const lp = P(hu + 0.95, hv + 0.35); B('wood_dark', hu + 0.9, hv + 0.3, hu + 1.0, hv + 0.4, ry, ry + 0.32); bag.add('lamp_white', lathe([[0.001, 0], [0.1, 0.05], [0.13, 0.17], [0.07, 0.26], [0.001, 0.28]], 9, null, lp[0], ry + 0.32, lp[1])); }
+    { const lp = P(hu + 0.95, hv + 0.35); B('wood_dark', hu + 0.9, hv + 0.3, hu + 1.0, hv + 0.4, ry, ry + 0.32); bag.add('pottery_dark', lathe([[0.001, 0], [0.09, 0.01], [0.12, 0.045], [0.1, 0.05], [0.001, 0.03]], 9, null, lp[0], ry + 0.32, lp[1])); }   // an oil saucer on its stand (an andon with a paper shade is later)
     furnishTrade(el, { bag, col }, { P: P2, B: B2, ry, T, L, D, g0 });
     // the keeper, built into the near form (a life figure reaches 170 m; this one only where the house is near): behind the counter of a shop front, else at the hearth
     if (el.keeper && STYLES.life?.elements.figure) {
       const kr = rng((el.seed || 1) * 31 + 5), woman = kr() < 0.4, face = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
       const side = kr() < 0.5 ? -1 : 1, at = mise ? P(door + side * (dw / 2 + BAY / 2 + 0.05), 0.95) : P2(hu + (tr.mir ? -1.35 : 1.35), hv), to = mise ? P(door + side * (dw / 2 + BAY / 2 + 0.05), -2.5) : P2(hu, hv);
-      STYLES.life.elements.figure({ at, y: mise ? fy + 0.015 : ry, rot: face(at, to), seed: 7700 + (el.seed % 9973) * 53, dress: woman ? 'robe' : 'trousers', hair: woman ? 'long' : 'topknot', hat: woman || mise ? 'none' : 'cap', hatMat: 'cloth_black', cloth: ['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_ochre'][Math.floor(kr() * 4)], cloth2: 'cloth_white', skin: 'skin_medium', carry: 'none', pose: mise ? 'stand' : 'cross' }, { bag, col });
+      STYLES.life.elements.figure({ at, y: mise ? fy + 0.015 : ry, rot: face(at, to), seed: 7700 + (el.seed % 9973) * 53, dress: woman ? 'robe' : 'trousers', hair: woman ? 'long' : 'topknot', hat: woman || mise ? 'none' : 'cap', hatMat: 'cloth_black', cloth: ['cloth_indigo', 'cloth_brown', 'cloth_black', 'cloth_ochre'][Math.floor(kr() * 4)], cloth2: 'cloth_white', skin: 'skin_medium', carry: 'none', pose: mise ? 'stand' : 'cross' }, { bag, col });
     }
+    if (el.night) hearthLight(bag, P(hu, hv), ry, P(door, -1.7), fy);
   } else {
     B(wallMat, 0, 0, L, D, fy, y + H, true);
   }

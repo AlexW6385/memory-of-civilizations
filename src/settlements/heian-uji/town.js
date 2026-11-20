@@ -10,7 +10,7 @@ import { traits } from './house.js';
 export { openSet };
 export async function houses() {
   const all = lots(), open = openSet(all), walk = walkSet();
-  return lodTiles('heian-uji-houses', 'japanese', all.map((l) => ({ t: 'uji_house', ...l, ...(open.has(l) ? { open: open.get(l) } : {}), ...(walk.has(l) && keeperLot(l) ? { keeper: true } : {}) })), { near: 200, R: RADIUS + 100, entrance: { at: [-60, 72], facing: 'n' } });
+  return lodTiles('heian-uji-houses', 'japanese', all.map((l) => ({ t: 'uji_house', ...l, ...(open.has(l) ? { open: open.get(l) } : {}), ...(walk.has(l) && keeperLot(l) ? { keeper: true } : {}), ...(open.has(l) && keeperLot(l) ? { night: true } : {}) })), { near: 200, R: RADIUS + 100, entrance: { at: [-60, 72], facing: 'n' } });
 }
 
 /** The people at home in the open houses (an interior's frame follows heian_house: front f, v inward from the front, u along it). */
