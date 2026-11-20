@@ -6,6 +6,7 @@
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
+import { TRADE_MARK, markFacing } from './script.js';
 
 const PL = 'plaster_castle', WD = 'wood_dark', TL = 'tile_grey', MAT = 'reed_mat';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -59,8 +60,10 @@ export function machiyaShop(el, { bag, col }, { r, H1, H2, up }) {
   const noren = (u0, u1, v0, v1, n) => { const w = (u1 - u0) / n; for (let k = 0; k < n; k++) { B('cloth_indigo', u0 + k * w + 0.012, u0 + (k + 1) * w - 0.012, v0, v1, -0.06, -0.05); B('cloth_white', u0 + (k + 0.5) * w - 0.09, u0 + (k + 0.5) * w + 0.09, v1 - 0.38, v1 - 0.2, -0.062, -0.06); } B(WD, u0 - 0.05, u1 + 0.05, v1, v1 + 0.04, -0.08, -0.03); };
   noren(ua + 0.08, du - 0.1, H1 - 1.45, H1 - 0.3, 3); noren(du + 0.12, ub - 0.1, H1 - 0.85, H1 - 0.3, Math.max(3, Math.round((ub - du) / 0.7)));
   // the sign board (kanban) on its post at the shop's corner, the trade written on it in black
-  { const u = x1 - 0.32; B(WD, u - 0.04, u + 0.04, 0, 1.0, -0.42, -0.34); B('wood_painted', u - 0.17, u + 0.17, 0.95, 2.3, -0.42, -0.36); B(WD, u - 0.2, u + 0.2, 2.3, 2.38, -0.44, -0.34);
-    for (let k = 0; k < 4; k++) B('lacquer_black', u - 0.09 + (k % 2) * 0.03, u + 0.09 - (k % 2) * 0.05, 2.12 - k * 0.27, 2.2 - k * 0.27, -0.445, -0.4205); C(u - 0.2, u + 0.2, -0.44, -0.34, 0, 2.38); }
+  { const u = x1 - 0.32; B(WD, u - 0.04, u + 0.04, 0, 1.0, -0.42, -0.34); B('wood_painted', u - 0.17, u + 0.17, 0.95, 2.3, -0.45, -0.36); B(WD, u - 0.2, u + 0.2, 2.3, 2.38, -0.44, -0.34);
+    const ch = TRADE_MARK[el.trade];   // the trade's character, as verified (src/styles/edo/script.js), brushed large on the board's street face
+    if (ch) bag.add('lacquer_black', markFacing(ch, u, 1.88, Z(-0.466), 0.3, s > 0 ? 0 : Math.PI));
+    C(u - 0.2, u + 0.2, -0.44, -0.34, 0, 2.38); }
   // ---- the trade: cloth on shelves, ceramics on stepped stands, or rice in straw bales
   const KNOWN = ['cloth', 'pottery', 'rice', 'sake', 'tea', 'medicine', 'sandals', 'oil', 'bucket', 'paper', 'dye'];
   const trade = KNOWN.includes(el.trade) ? el.trade : ['cloth', 'pottery', 'rice'][Math.floor(rand() * 3)];

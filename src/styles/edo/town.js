@@ -7,6 +7,7 @@
 import { box, lathe, rod, fromTriangles, clothBox, addCloth } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import { barredWindows } from './detail.js';
+import { TRADE_MARK, markFacing } from './script.js';
 
 const PL = 'plaster_castle', WD = 'wood_dark', TL = 'tile_grey';
 export const TRADES = ['cloth', 'pottery', 'rice', 'dye', 'oil', 'sandals', 'sake', 'tea', 'medicine', 'paper', 'fish', 'tofu', 'bucket'];
@@ -180,8 +181,9 @@ export function machiyaFront(bag, col, { x0, x1, fz, s, H1, seed, trade }) {
   // the sign (kanban) hung from the eave's corner on a bracket, standing out into the street
   const ku = left ? x1 - 0.15 : x0 + 0.15, kz = Z(-0.5);
   B(WD, ku - 0.03, ku + 0.03, H1 - 0.7, H1 - 0.64, -0.0, -0.9);
-  B('wood_painted', ku - 0.03, ku + 0.03, H1 - 1.55, H1 - 0.7, -0.62, -0.36);
-  B('lacquer_black', ku, ku + 0.04, H1 - 1.4, H1 - 0.85, -0.58, -0.4);
+  B('wood_painted', ku - 0.03, ku + 0.03, H1 - 1.25, H1 - 0.7, -0.84, -0.36);   // (its foot at 1.95 m: a visitor walks under it)
+  const ch = TRADE_MARK[trade];                                                    // the trade's character on both faces of the board, as verified (script.js)
+  if (ch) for (const [d, face] of [[1, Math.PI / 2], [-1, -Math.PI / 2]]) bag.add('lacquer_black', markFacing(ch, ku + d * 0.045, H1 - 0.975, Z(-0.6), 0.38, face));
   void kz;
   // the bamboo fender (inu-yarai) before the lattice on most fronts, a reed blind (sudare) half down over a lattice bay on some
   if (rand() < 0.6) {
