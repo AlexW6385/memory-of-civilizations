@@ -24,6 +24,7 @@ const MODEL_KIND = {
 };
 Object.assign(MODEL_KIND, { pigeon_grey: 'hen', pigeon_white: 'hen', pigeon_dark: 'hen', goose_white: 'hen', goose_grey: 'hen' });      // (the town's birds on the ground walk and peck as the fowl do)
 MODEL_KIND.turkey = 'hen';                                                                                                    // (Tenochtitlan's turkeys walk and peck as the fowl do)
+Object.assign(MODEL_KIND, { goat_black: 'dog', goat_white: 'dog' });                                                      // (Bhaktapur's goats lie down and stand on the dog's rig)
 /** Out at night too (a cat and a dog asleep, a cage hung out, the craft)? */
 const NIGHT = { cat: 1, dog: 1, cagebird: 1, craft: 1 };
 const REACH = 95;
