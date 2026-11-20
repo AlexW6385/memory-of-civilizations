@@ -1927,8 +1927,8 @@
    }
   ],
   "bytes": 1290289,
-  "seconds": 175,
-  "baked": "2026-11-18"
+  "seconds": 199,
+  "baked": "2026-11-20"
  },
  "hakka-tulou": {
   "site": "hakka-tulou",
@@ -3379,7 +3379,7 @@
  },
  "mughal-agra-taj": {
   "site": "mughal-agra",
-  "hash": "79cec406dd899579",
+  "hash": "e0866afe093e193e",
   "rays": 128,
   "probes": 77348,
   "boxes": [
@@ -3481,9 +3481,9 @@
     ]
    }
   ],
-  "bytes": 1289076,
-  "seconds": 122,
-  "baked": "2026-11-17"
+  "bytes": 1289053,
+  "seconds": 163,
+  "baked": "2026-11-20"
  },
  "muromachi-ginkaku": {
   "site": "muromachi-kyoto",
@@ -3864,8 +3864,8 @@
    }
   ],
   "bytes": 685975,
-  "seconds": 214,
-  "baked": "2026-11-18"
+  "seconds": 245,
+  "baked": "2026-11-20"
  },
  "norse-borgund-church": {
   "site": "norse-borgund",
@@ -4911,8 +4911,8 @@
    }
   ],
   "bytes": 630722,
-  "seconds": 56,
-  "baked": "2026-11-17"
+  "seconds": 53,
+  "baked": "2026-11-20"
  },
  "sydney-opera": {
   "site": "sydney",
