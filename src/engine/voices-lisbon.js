@@ -99,7 +99,7 @@ export const LISBON_VOICES = {
   lsbMurmur(t, bus, lv) {
     for (let k = 0; k < 3; k++) {
       const w = t + k * (0.9 + R() * 0.8), v = 'aoeu'[Math.floor(R() * 4)], f = (R() < 0.35 ? 205 : 118) * (0.9 + R() * 0.25);
-      this.cue(w, (x) => this.cry(x, f, [[0, 0.35, v], [2, 0.3, v], [-1, 0.5, 'o']], 0.02 * lv, bus, { cutoff: 1800 }));
+      this.cue(w, (x) => this.cry(x, f, [[0, 0.35, v], [2, 0.3, v], [-1, 0.5, 'o']], 0.034 * lv, bus, { cutoff: 1800 }));
     }
     return 4.5;
   },
@@ -121,7 +121,7 @@ export const LISBON_VOICES = {
   },
   /** A parrot in its cage: a harsh squawk or two and a run of chatter on rising whistles. */
   lsbParrot(t, bus, lv) {
-    for (let k = 0, n = 1 + Math.floor(R() * 2); k < n; k++) this.cue(t + k * 0.5, (x) => { this.tone(x, [[0, 1300], [0.07, 2100], [0.2, 1500]], 0.22, 0.012 * lv, bus, 'sawtooth', ['bandpass', 2000]); });
+    for (let k = 0, n = 1 + Math.floor(R() * 2); k < n; k++) this.cue(t + k * 0.5, (x) => { this.tone(x, [[0, 1300], [0.07, 2100], [0.2, 1500]], 0.22, 0.02 * lv, bus, 'sawtooth', ['bandpass', 2000]); });
     if (R() < 0.6) for (let k = 0; k < 5; k++) this.cue(t + 1.4 + k * 0.13, (x) => this.tone(x, [[0, 1700 + k * 150], [0.05, 2300 + k * 150]], 0.07, 0.007 * lv, bus, 'square', ['bandpass', 2400]));
     return 2.6;
   },
