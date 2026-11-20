@@ -14,6 +14,7 @@ import '../qing/index.js';
 import '../chinese/index.js';
 import { makeShops } from './shops.js';
 import { makeRooms } from './rooms.js';
+import { withVariety } from './vary.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -1435,8 +1436,11 @@ const { furnish: furnishRoom, work } = makeRooms({ face, thangka });
 const { teaSeats: _ts, ...SHOPS } = makeShops({ face, doorway, win, thangka, sangkhun, twigs, bannerPole, flagString });
 /** Where patrons sit in a tea house (shops.js). */
 export const teaSeats = _ts;
+const FINE_VARIED = new Set(['tibetan_house', ...Object.keys(SHOPS)]);
+const OWN = { dzong, chorten, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS  };
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dzong, chorten, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS },
+  // (the houses and the street's shops build with their fine pieces marked: vary.js)
+  elements: { ...STYLES.qing.elements, ...Object.fromEntries(Object.entries(OWN).map(([k, f]) => [k, FINE_VARIED.has(k) ? withVariety(f) : f])) },
   objects: {},
 });
