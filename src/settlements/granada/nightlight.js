@@ -141,7 +141,7 @@ function wrapElement(S, name, o) {
 }
 
 // ── the lamps hung where the palaces had none (lamps.js: where) ──────────────────────────────────────────
-const GB = 'gilt_bronze', GL = 'glass_lamp';
+const GB = 'gilt_bronze', GL = 'glaze_yellow';   // (the amber vessel: a material the palaces' fine meshes already have, not a draw of its own)
 /** A hanging lamp: three chains to a ring of bronze, a glass vessel of oil in it with its wick, its top at yt; bottom at yb. Returns the glow's centre. */
 function hang(bag, x, z, yt, yb) {
   const r = 0.13;
@@ -159,9 +159,10 @@ function wall(bag, x, y, z, n) {
 }
 /** A lamp on a stand: a foot, a stem, a dish, the glass vessel; 1.4 m high. */
 function stand(bag, x, y, z) {
-  bag.add(GB, lathe([[0.2, 0], [0.19, 0.04], [0.1, 0.09], [0.05, 0.14], [0.035, 0.5], [0.05, 0.54], [0.035, 0.6], [0.035, 1.25], [0.14, 1.3], [0.16, 1.36], [0.001, 1.36]], 10, null, x, y, z));
-  bag.add(GL, lathe([[0.001, 1.34], [0.1, 1.36], [0.12, 1.46], [0.08, 1.56], [0.001, 1.58]], 9, null, x, y, z));
-  return [x, y + 1.5, z];
+  const j = 0.94 + 0.12 * hashAt(x, z, 7), s = (p) => p.map(([r, h]) => [r * j, h * (2 - j)]);       // (each its own height: alike, they would be an instanced draw)
+  bag.add(GB, lathe(s([[0.2, 0], [0.19, 0.04], [0.1, 0.09], [0.05, 0.14], [0.035, 0.5], [0.05, 0.54], [0.035, 0.6], [0.035, 1.25], [0.14, 1.3], [0.16, 1.36], [0.001, 1.36]]), 10, null, x, y, z));
+  bag.add(GL, lathe(s([[0.001, 1.34], [0.1, 1.36], [0.12, 1.46], [0.08, 1.56], [0.001, 1.58]]), 9, null, x, y, z));
+  return [x, y + 1.5 * (2 - j), z];
 }
 /** A corona: a ring of bronze with twelve small lamps hung on three long chains from the ceiling's crown at yt, the ring at yb. */
 function corona(bag, x, z, yt, yb) {

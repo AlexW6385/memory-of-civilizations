@@ -122,28 +122,32 @@ function house(el, { bag, col }) {
     bag.add(['glaze_blue', 'glaze_green', 'cloth_red'][el.seed % 3], box(b[0] - 0.17, y + 2.3, b[1] - 0.035, b[0] + 0.17, y + 2.52, b[1] + 0.035));
   }
 }
+/** a size by the place alone, every piece its own (to a tenth of a millimetre: a repeated shape would become an instanced draw of its own) */
+function jit(x, z) { const f = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return 0.9 + 0.2 * (f - Math.floor(f)); }
 function jar(bag, x, y, z, s) {
+  s *= jit(x, z);
   bag.add('terracotta', lathe([[0.001, 0], [0.16 * s, 0.01], [0.27 * s, 0.25 * s], [0.31 * s, 0.5 * s], [0.25 * s, 0.7 * s], [0.14 * s, 0.82 * s], [0.17 * s, 0.9 * s], [0.001, 0.9 * s]], 10, null, x, y, z));
 }
 
 /** The furniture of the ground room (a shop by its trade, or a room by its use) and of the upper room (a divan under the lattice, a chest, a lamp). */
 function room(bag, B, F, { L, D, y, fy, N, shop, rand, trade, use, du, dw, col }) {
-  const h = (mat, u, v, r, ht, ya) => { const p = F(u, v); bag.add(mat, lathe([[r * 0.6, 0], [r, ht * 0.4], [r * 0.7, ht * 0.85], [r * 0.4, ht], [0.001, ht]], 10, null, p[0], ya, p[1])); };
-  const cush = ['cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_white', 'cloth_blue'];
+  const jt = jit;
+  const h = (mat, u, v, r, ht, ya) => { const p = F(u, v), j = jt(p[0], p[1]); r *= j; ht *= 2 - j; bag.add(mat, lathe([[r * 0.6, 0], [r, ht * 0.4], [r * 0.7, ht * 0.85], [r * 0.4, ht], [0.001, ht]], 10, null, p[0], ya, p[1])); };
+  const cush = ['cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_white', 'cloth_blue'], bolt = ['glaze_blue', 'terracotta', 'glaze_white', 'glaze_green', 'terracotta'];
   const divan = (u0, v0, u1, v1, yb) => { B('timber', u0, v0, u1, v1, yb, yb + 0.3, true); B(cush[Math.floor(rand() * 5)], u0 + 0.03, v0 + 0.03, u1 - 0.03, v1 - 0.03, yb + 0.3, yb + 0.36); };
   const lamp = (u, v, yb) => { const p = F(u, v); bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.15, 0.2], [0.08, 0.3], [0.001, 0.32]], 10, null, p[0], yb, p[1])); bag.add('iron', rod([p[0], yb + 0.32, p[1]], [p[0], yb + 1.0, p[1]], 0.006, 3)); };
   const at = (u, v, f) => { const p = F(u, v); f(p[0], p[1]); };
   const tin = (u, v, sc, ya = fy) => at(u, v, (x, z) => { jar(bag, x, ya, z, sc); col?.circle(x, z, 0.31 * sc, ya, ya + 0.9 * sc); });
-  const pan = (mat, u, v, r, ya, hang = false) => at(u, v, (x, z) => bag.add(mat, lathe(hang ? [[0.001, 0.2], [r * 0.9, 0.17], [r, 0.04], [r * 0.9, 0], [0.001, 0]] : [[0.001, 0], [r * 0.7, 0.005], [r, 0.09], [r * 0.9, 0.1], [0.001, 0.08]], 10, null, x, ya, z)));
+  const pan = (mat, u, v, r, ya, hang = false) => at(u, v, (x, z) => (r *= jt(x, z)) && bag.add(mat, lathe(hang ? [[0.001, 0.2], [r * 0.9, 0.17], [r, 0.04], [r * 0.9, 0], [0.001, 0]] : [[0.001, 0], [r * 0.7, 0.005], [r, 0.09], [r * 0.9, 0.1], [0.001, 0.08]], 10, null, x, ya, z)));
   if (shop) {
     B('wood_dark', 0.9, 2.2, L - 0.9, 2.7, fy, fy + 1.0, true); B('timber', 0.85, 2.15, L - 0.85, 2.75, fy + 1.0, fy + 1.05);
     for (let q = 0; q < 3; q++) B('wood_dark', 0.5, D - 0.65, L - 0.5, D - 0.4, fy + 0.4 + q * 0.6, fy + 0.45 + q * 0.6, q === 0);
     for (let i = 0; i < 7; i++) {
       const u = 1.2 + i * (L - 2.4) / 6, q = i % 3;
       if (trade === 'potter') { h(i % 2 ? 'terracotta' : 'glaze_blue', u, 2.45, 0.1, 0.28, fy + 1.05); h(i % 2 ? 'glaze_white' : 'terracotta', u, D - 0.52, 0.11, 0.3, fy + 0.45 + q * 0.6); }
-      else if (trade === 'cloth') { B(cush[(i * 2) % 5], u - 0.25, 2.3, u + 0.25, 2.6, fy + 1.05, fy + 1.3); B(cush[(i * 3 + 1) % 5], u - 0.28, D - 0.6, u + 0.28, D - 0.45, fy + 0.45 + q * 0.6, fy + 0.7 + q * 0.6); }
-      else if (trade === 'smith') { pan(i % 2 ? 'bronze' : 'iron', u, 2.45, 0.17 + 0.02 * (i % 3), fy + 1.05); h(i % 2 ? 'bronze' : 'terracotta', u, D - 0.52, 0.12, 0.3, fy + 0.45 + q * 0.6); }
-      else if (trade === 'baker') { at(u, 2.45, (x, z) => bag.add('hide_tan', lathe([[0.001, 0], [0.13, 0.01], [0.15, 0.05], [0.1, 0.09], [0.001, 0.1]], 8, null, x, fy + 1.05, z))); h('sacking', u, D - 0.52, 0.16, 0.3, fy + 0.45 + q * 0.6); }
+      else if (trade === 'cloth') { B(bolt[(i * 2) % 5], u - 0.25, 2.3, u + 0.25, 2.6, fy + 1.05, fy + 1.3); B(bolt[(i * 3 + 1) % 5], u - 0.28, D - 0.6, u + 0.28, D - 0.45, fy + 0.45 + q * 0.6, fy + 0.7 + q * 0.6); }
+      else if (trade === 'smith') { pan(i % 2 ? 'terracotta' : 'iron', u, 2.45, 0.17 + 0.02 * (i % 3), fy + 1.05); h(i % 2 ? 'terracotta' : 'terracotta', u, D - 0.52, 0.12, 0.3, fy + 0.45 + q * 0.6); }
+      else if (trade === 'baker') { at(u, 2.45, (x, z) => bag.add('stucco_cream', lathe([[0.001, 0], [0.13, 0.01], [0.15, 0.05], [0.1, 0.09], [0.001, 0.1]], 8, null, x, fy + 1.05, z))); h('wicker', u, D - 0.52, 0.16, 0.3, fy + 0.45 + q * 0.6); }
       else { const p = F(u, 2.45); bag.add('wicker', lathe([[0.12, 0], [0.2, 0.2], [0.001, 0.22]], 8, null, p[0], fy + 1.05, p[1])); h('terracotta', u, D - 0.52, 0.1, 0.25, fy + 0.45 + q * 0.6); }
     }
     B('cloth_red', 2.2, 3.4, L - 2.2, 5.0, fy + 0.01, fy + 0.025);
@@ -154,17 +158,17 @@ function room(bag, B, F, { L, D, y, fy, N, shop, rand, trade, use, du, dw, col }
       // the stake: a stump with an anvil and a hammer, a charcoal forge on a brick bed, the bellows, copper pans hung on pegs along the front wall
       at(wl - 0.4, 1.3, (x, z) => { bag.add('timber', lathe([[0.2, 0], [0.22, 0.25], [0.2, 0.5], [0.001, 0.5]], 9, null, x, fy, z)); bag.add('iron', box(x - 0.1, fy + 0.5, z - 0.05, x + 0.12, fy + 0.62, z + 0.05)); bag.add('iron', box(x - 0.16, fy + 0.58, z - 0.025, x - 0.1, fy + 0.62, z + 0.025)); col?.circle(x, z, 0.24, fy, fy + 0.62); });
       B('brick', er + 0.2, 0.8, er + 1.1, 1.6, fy, fy + 0.55, true); B('iron', er + 0.3, 0.9, er + 1.0, 1.5, fy + 0.55, fy + 0.6);
-      B('flame', er + 0.45, 1.05, er + 0.85, 1.35, fy + 0.6, fy + 0.66); B('wood_dark', er + 1.15, 1.0, er + 1.45, 1.3, fy, fy + 0.4);
-      for (let k = 0; k < 5; k++) { const u = 0.8 + k * 0.5; if (u < wl - 1.0) { pan(k % 2 ? 'bronze' : 'iron', u, 0.5, 0.17, fy + 1.55, true); } }
-      for (let k = 0; k < 4; k++) { const u = er + 1.8 + k * 0.5; if (u < L - 0.8) pan('bronze', u, 0.5, 0.17, fy + 1.55, true); }
+      B('lamp_glass', er + 0.45, 1.05, er + 0.85, 1.35, fy + 0.6, fy + 0.66); B('wood_dark', er + 1.15, 1.0, er + 1.45, 1.3, fy, fy + 0.4);
+      for (let k = 0; k < 5; k++) { const u = 0.8 + k * 0.5; if (u < wl - 1.0) { pan(k % 2 ? 'terracotta' : 'iron', u, 0.5, 0.17, fy + 1.55, true); } }
+      for (let k = 0; k < 4; k++) { const u = er + 1.8 + k * 0.5; if (u < L - 0.8) pan('terracotta', u, 0.5, 0.17, fy + 1.55, true); }
     } else if (trade === 'baker') {
       // the oven: a clay dome on a brick base with its mouth to the front, a glow in it; the peel, the sacks of flour, the wood for it
       const ou = L - 2.4, ov = D - 2.4;
       at(ou, ov, (x, z) => { bag.add('brick', lathe([[0.95, 0], [0.95, 0.5], [0.001, 0.5]], 12, null, x, fy, z)); bag.add('earth_wall', lathe([[0.9, 0.5], [0.85, 0.9], [0.6, 1.25], [0.2, 1.5], [0.001, 1.55]], 12, null, x, fy, z)); col?.circle(x, z, 0.98, fy, fy + 1.6); });
       const m = F(ou, ov - 0.9); bag.add('opening', box(m[0] - 0.28, fy + 0.62, m[1] - 0.04, m[0] + 0.28, fy + 1.0, m[1] + 0.04));
-      B('flame', ou - 0.22, ov - 0.96, ou + 0.22, ov - 0.9, fy + 0.62, fy + 0.74);
+      B('lamp_glass', ou - 0.22, ov - 0.96, ou + 0.22, ov - 0.9, fy + 0.62, fy + 0.74);
       for (let k = 0; k < 6; k++) B('timber', ou + 1.3 - (k % 3) * 0.03, ov - 1.3 + k * 0.17, ou + 1.9, ov - 1.3 + k * 0.17 + 0.14, fy, fy + 0.14);
-      for (let k = 0; k < 3; k++) h('sacking', 0.9 + k * 0.45, D - 0.9, 0.22, 0.55, fy);
+      for (let k = 0; k < 3; k++) h('wicker', 0.9 + k * 0.45, D - 0.9, 0.22, 0.55, fy);
       B('timber', 0.5, D - 0.5, 0.56, D - 0.38, fy + 0.1, fy + 1.7);
     }
   } else {
@@ -177,12 +181,12 @@ function room(bag, B, F, { L, D, y, fy, N, shop, rand, trade, use, du, dw, col }
     if (use === 'kitchen') {
       // the hearth: a stone bed with a fire in it, a pot on a trivet, a stew-pan; the shelf of plates above, a mortar, the wood, jars of water
       B('limestone', E - 1.35, 3.0, E, 4.5, fy, fy + 0.4, true); B('iron', E - 1.15, 3.2, E - 0.2, 4.3, fy + 0.4, fy + 0.43);
-      B('flame', E - 0.85, 3.5, E - 0.45, 3.9, fy + 0.43, fy + 0.49);
+      B('lamp_glass', E - 0.85, 3.5, E - 0.45, 3.9, fy + 0.43, fy + 0.49);
       at(E - 0.65, 3.7, (x, z) => { bag.add('terracotta', lathe([[0.001, 0.4], [0.13, 0.43], [0.2, 0.6], [0.22, 0.78], [0.18, 0.84], [0.001, 0.84]], 10, null, x, fy + 0.4, z)); });
-      pan('bronze', E - 1.05, 4.0, 0.15, fy + 0.43);
+      pan('terracotta', E - 1.05, 4.0, 0.15, fy + 0.43);
       B('wood_dark', E - 0.22, 2.9, E, 4.7, fy + 1.55, fy + 1.6);
       for (let k = 0; k < 5; k++) at(E - 0.12, 3.05 + k * 0.33, (x, z) => bag.add(k % 2 ? 'glaze_white' : 'glaze_blue', box(x - 0.02, fy + 1.6, z - 0.12, x + 0.02, fy + 1.9, z + 0.12)));
-      at(E - 0.5, 2.3, (x, z) => bag.add('granite_grey', lathe([[0.001, 0], [0.11, 0.01], [0.13, 0.12], [0.1, 0.17], [0.001, 0.17]], 9, null, x, fy, z)));
+      at(E - 0.5, 2.3, (x, z) => bag.add('stucco_cream', lathe([[0.001, 0], [0.11, 0.01], [0.13, 0.12], [0.1, 0.17], [0.001, 0.17]], 9, null, x, fy, z)));
       for (let k = 0; k < 6; k++) B('timber', E - 0.6, 1.5 + k * 0.1 - (k % 2) * 0.0, E - 0.2, 1.5 + k * 0.1 + 0.08, fy + (k % 3) * 0.0, fy + 0.1);
       tin(E - 0.55, 5.1, 1.1); tin(E - 1.35, 5.4, 0.9); tin(E - 0.55, 5.8, 1.0);
     } else if (use === 'weaver') {
@@ -193,14 +197,14 @@ function room(bag, B, F, { L, D, y, fy, N, shop, rand, trade, use, du, dw, col }
       B('cloth_red', lu0 + 0.06, lv - 0.01, lu1 - 0.06, lv + 0.01, fy + 0.5, fy + 1.75);
       B('cloth_indigo', lu0 + 0.06, lv - 0.02, lu1 - 0.06, lv + 0.02, fy + 0.5, fy + 0.72); B('cloth_ochre', lu0 + 0.06, lv - 0.02, lu1 - 0.06, lv + 0.02, fy + 0.72, fy + 0.8);
       B('wood_dark', lu0 + 0.3, lv + 0.45, lu0 + 0.7, lv + 0.8, fy, fy + 0.4);
-      at(E - 0.7, 4.5, (x, z) => { bag.add('wicker', lathe([[0.2, 0], [0.3, 0.3], [0.001, 0.32]], 10, null, x, fy, z)); for (let k = 0; k < 4; k++) bag.add(cush[k], box(x - 0.2 + k * 0.1, fy + 0.28, z - 0.08 + (k % 2) * 0.08, x - 0.12 + k * 0.1, fy + 0.4, z + 0.04 + (k % 2) * 0.08)); });
+      at(E - 0.7, 4.5, (x, z) => { bag.add('wicker', lathe([[0.2, 0], [0.3, 0.3], [0.001, 0.32]], 10, null, x, fy, z)); for (let k = 0; k < 4; k++) bag.add(bolt[k], box(x - 0.2 + k * 0.1, fy + 0.28, z - 0.08 + (k % 2) * 0.08, x - 0.12 + k * 0.1, fy + 0.4, z + 0.04 + (k % 2) * 0.08)); });
       ph('terracotta', E - 0.5, 2.4, 0.15, 0.4, fy);
     } else if (use === 'store') {
       // the household's store: tall jars of oil and grain along the wall, sacks stacked in the corner, a bin
       for (let k = 0; k < 4; k++) tin(E - 0.5, 2.0 + k * 0.9, 1.25 - 0.1 * (k % 2));
-      for (let k = 0; k < 4; k++) ph('sacking', E - 1.6 - (k % 2) * 0.42, 5.7 + (k > 1 ? 0.0 : 0.0) + (k >> 1) * 0.0, 0.22, 0.55, fy + (k > 1 ? 0.5 : 0));
+      for (let k = 0; k < 4; k++) ph('wicker', E - 1.6 - (k % 2) * 0.42, 5.7 + (k > 1 ? 0.0 : 0.0) + (k >> 1) * 0.0, 0.22, 0.55, fy + (k > 1 ? 0.5 : 0));
       B('wood_dark', E - 2.4, 2.1, E - 1.4, 2.9, fy, fy + 0.7, true); B('timber', E - 2.45, 2.05, E - 1.35, 2.95, fy + 0.7, fy + 0.74);
-      for (let k = 0; k < 3; k++) at(E - 2.1 + k * 0.3, 2.5, (x, z) => bag.add('hide_tan', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.12], [0.001, 0.14]], 7, null, x, fy + 0.74, z)));
+      for (let k = 0; k < 3; k++) at(E - 2.1 + k * 0.3, 2.5, (x, z) => bag.add('stucco_cream', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.12], [0.001, 0.14]], 7, null, x, fy + 0.74, z)));
     }
   }
   if (N > 1) {

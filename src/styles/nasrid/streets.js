@@ -59,13 +59,13 @@ function laneDress(el, { bag, col }) {
         const gx = cxm - 0.6 + i * 0.4, [za, zc] = zb(0.15, 0.45);
         if (trade === 'potter') { if (i % 2) pot(bag, gx, y + 0.9, Z(0.3), 0.09, rand, false); else jar(bag, gx, y + 0.9, Z(0.3), 0.32); }
         else if (trade === 'cloth') bx(CLOTHS[(lot.seed + i) % 6], gx - 0.16, y + 0.9, 0.15, gx + 0.16, y + 0.9 + 0.14 + 0.05 * (i % 2), 0.45);
-        else if (trade === 'smith') bag.add(i % 2 ? 'bronze' : 'iron', lathe([[0.001, 0], [0.12, 0.005], [0.16, 0.09], [0.14, 0.1], [0.001, 0.08]], 9, null, gx, y + 0.9, Z(0.3)));
-        else if (trade === 'baker') { for (let k = 0; k < 2; k++) bag.add('hide_tan', lathe([[0.001, 0], [0.12, 0.01], [0.14, 0.05], [0.09, 0.08], [0.001, 0.09]], 8, null, gx + (k - 0.5) * 0.14, y + 0.9, Z(0.3))); }
-        else bag.add('wicker', lathe([[0.1, 0], [0.16, 0.1], [0.15, 0.11], [0.001, 0.11]], 8, null, gx, y + 0.9, Z(0.3)));
+        else if (trade === 'smith') bag.add(i % 2 ? 'terracotta' : 'iron', lathe([[0.001, 0], [0.12, 0.005], [0.16, 0.09], [0.14, 0.1], [0.001, 0.08]], 9, null, gx, y + 0.9, Z(0.3)));
+        else if (trade === 'baker') { for (let k = 0; k < 2; k++) bag.add('stucco_cream', lathe([[0.001, 0], [0.12, 0.01], [0.14, 0.05], [0.09, 0.08], [0.001, 0.09]], 8, null, gx + (k - 0.5) * 0.14, y + 0.9, Z(0.3))); }
+        else bag.add('terracotta', lathe([[0.1, 0], [0.16, 0.1], [0.15, 0.11], [0.001, 0.11]], 8, null, gx, y + 0.9, Z(0.3)));
         void za; void zc;
       }
       // the trade's sign of its wares over the counter: pans on a rail (smith), bolts hung over a pole (cloth), a string of loaves' board (baker)
-      if (trade === 'smith') for (let i = 0; i < 3; i++) bag.add('bronze', lathe([[0.001, 0.2], [0.13, 0.17], [0.17, 0.04], [0.14, 0], [0.001, 0]], 9, null, cxm - 0.5 + i * 0.5, y + 1.55, Z(0.3)));
+      if (trade === 'smith') for (let i = 0; i < 3; i++) bag.add('terracotta', lathe([[0.001, 0.2], [0.13, 0.17], [0.17, 0.04], [0.14, 0], [0.001, 0]], 9, null, cxm - 0.5 + i * 0.5, y + 1.55, Z(0.3)));
       if (trade === 'cloth') { bag.add('timber', rod([cxm - 0.75, y + 2.0, Z(0.3)], [cxm + 0.75, y + 2.0, Z(0.3)], 0.02, 4)); for (let i = 0; i < 3; i++) addCloth(bag, CLOTHS[(lot.seed + 2 * i + 1) % 6], clothBox(cxm - 0.6 + i * 0.5, y + 1.25, Z(0.3) - 0.01, cxm - 0.25 + i * 0.5, y + 1.98, Z(0.3) + 0.01, 0.2), y + 1.98); }
     }
     // a masonry bench (mastaba) by the door, with a folded rug on it now and then
