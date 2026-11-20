@@ -194,5 +194,5 @@ export const TIMURID_VOICES = {
   },
 };
 /** Levels of the voices (relative to their own scale), set by measuring renders (tools/sound-render.mjs). */
-export const TIMURID_GAIN = { timNawbat: 0.55, timDutar: 1.0, timDoira: 0.6, timCopper: 1.0, timAryk: 1.0, timDoves: 0.6, timCamel: 0.7, timCaravan: 1.0 };
+export const TIMURID_GAIN = { timNawbat: 0.3, timDutar: 0.6, timDoira: 0.4, timCopper: 1.0, timAryk: 1.0, timDoves: 0.5, timCamel: 0.5, timCaravan: 0.5 };
 addVoices('voices-timurid.js', TIMURID_VOICES, TIMURID_GAIN);

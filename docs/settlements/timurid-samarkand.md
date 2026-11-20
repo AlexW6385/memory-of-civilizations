@@ -171,3 +171,20 @@ Brought toward the reference (Ming Suzhou) in the order of docs/suzhou-method.md
 | Braziers | three: the cameleers' camp on the east side and the khanqah's portal | [inferred] caravans camped on the square (§5) |
 | Tray lamps | a lamp on the tray of each tea-house platform | [inferred] |
 Not lit: the minarets, the domes, the pishtaq (no light was kept on them); the observatory's upper floors (shut).
+
+### 20.3 Sound (soundmap.js, src/engine/voices-timurid.js, tests/samarkand-sound.test.mjs)
+
+The call to prayer stays the engine's (profile `adhan`: five a day from the madrasa's and the mosques' minarets; no bells, none in a Muslim city). The rest is placed where it is made, by hour, season and weather (rain stops the open-air trades and the tea-house music). All voices are synthesised (`tim…`); levels set by measuring renders (tools/sound-render.mjs). [inferred throughout: no recording of 1420 exists]
+
+| Sound | Where / when | Basis |
+|---|---|---|
+| Hawkers' cries (wordless): melon, bread, cloth | at every third booth of those trades on the Registan, by day (bread in the morning); at the chorsu a cloth broker | [inferred] the booths of §16; melons, bread (nan) and cloth after Clavijo's markets |
+| Tea-house talk and cups; at evening the dutar and the doira | the six platforms of the Registan, 6.5–22.5 h; the music from about 16 h | [inferred] the dutar (two-stringed long-necked lute) and the frame drum as the instruments of the region; the melodies are ours, in a seven-note maqam-type mode on D |
+| The nawbat (kettledrums and long trumpets) at dusk | far, from the citadel off the disc to the north-west, 17.9–18.6 h | [inferred] the naqqara-khana of a Timurid court (the state drums and trumpets) |
+| Coppersmiths | five places in the bazaar streets and the shop rows, 7.5–17.5 h | [inferred] |
+| The trades of the houses: potter's wheel, baker's work at the tandoor, smith's hammer, loom, plane, grocer's drawer and coins, the papermaker's pounding | each trade room (life.js / houses.js), by its own hours | [stated] Samarkand paper from mulberry bark (Wikipedia, Samarkand paper); the rest [inferred] |
+| Lecture in the classroom, recitation in the mosques and at the tomb | inside the halls, by day (the mosques from dawn to the evening) | [stated] teaching in the madrasa (Ulugh Beg taught mathematics and astronomy); recitation [inferred] |
+| The aryk's trickle | along every lane with a channel, all day and night | [inferred] §6 |
+| Doves on the cornices | the madrasa's front and court, Bibi-Khanym, Gur-e Amir, 5.5–19 h | [inferred] |
+| A camel's groan with its bell; a donkey; a caravan passing in the bazaar's streets; the water carrier in the lanes; the night watch | the camp on the Registan's east side; the bazaar streets 6–18 h; lanes 6.5–18.5 h; lanes 20.5–4 h | [stated] caravans in Samarkand (Clavijo, §1); the rest [inferred] |
+Rooms (inside): the walls hush the street, the flat mud roof dulls rain; the vaulted bazaar passes a murmur and no rain.
