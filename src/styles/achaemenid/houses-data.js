@@ -23,7 +23,7 @@ export function houseMake(el) {
 /** The doorway on the street face: its middle in the world (x, z), the way out into the street, its width, and the house's height. */
 export function houseDoor(el) {
   const m = houseMake(el), { P, out } = frameOf(m.rect, m.front);
-  return { p: P(m.da, 0), out, w: m.kind === 'shop' ? 3.0 : m.court ? 1.5 : 1.1, a: m.da, h: m.h, m };
+  return { p: P(m.da, 0), out, w: m.kind === 'shop' ? 3.0 : m.court ? (m.enter ? 1.7 : 1.5) : (m.enter ? 1.6 : 1.1), a: m.da, h: m.h, m };
 }
 
 /** Where the kitchen smoke of a house leaves (x, y, z): the vent on the roof, or null (a third of the houses cook indoors without one). */
