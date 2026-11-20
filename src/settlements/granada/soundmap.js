@@ -160,7 +160,8 @@ export const TRACKS = [
 
 // ── the emitters in the open ─────────────────────────────────────────────────
 const [lcx, lcz] = mid(LIONS), [mcx] = mid(MYRTLES);
-const gm = mid(GREAT_MOSQUE), alm = mid(PRAYER[1].sahn);
+const poolOf = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2 + 0.6];       // (the sahn's pool: medina.js)
+const gm = poolOf(PRAYER[0].sahn), alm = poolOf(PRAYER[1].sahn);
 /**
  * Fixed emitters: { voice, at, r50 (m: the distance at which it is half as loud), gap [min, max] s, hours [from, to] (local; wrapping midnight when from > to), dry,
  * rainMax, lv, after, inside }. The shops' and kitchens' work comes from sites(). [inferred; the sources for the places and hours are in the dossier §22]
