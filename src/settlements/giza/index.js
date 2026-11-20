@@ -4,6 +4,8 @@ import pyramid from './plan.js';
 import music from './music.js';
 import { walkRoutes } from './walk.js';
 pyramid.walks.push(...walkRoutes());                  // the visitor's walk and the routes into the town's places (walk.js)
+import { registerNight } from './nightlight.js';
+registerNight();                                      // (idempotent: the night's halo and the lamp-stands)
 export { town } from './town.js';
 export { music };
 export const landmarks = [{ plan: pyramid, music }];
