@@ -8,6 +8,7 @@ import { teaSeats } from '../../styles/tibetan/index.js';
 import { dressing } from './dress.js';
 import { openFlags } from './upstairs.js';
 import { bands } from './interiors.js';
+import { nightElements } from './nightlight.js';
 const base = (id, elements, style = 'tibetan') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-4, 60], facing: 'n' } });
 /** The street's incense burner and the tethered yaks (x, z, rot), by the booths and in the lane. */
 export const SANG = [-3.4, 166];
@@ -68,7 +69,7 @@ function people() {
     L.push({ t: 'figure', at: p, y: yf, rot: face(p, [bx, bz]), h: 1.6 + rand() * 0.1, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.5 ? 'cloth_maroon' : pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_maroon', over: 'sash', skin: 'skin_medium', hat: 'none', hair: rand() < 0.5 ? 'shaven' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'cross' });
   }
   monk([PRINTERY[0] + 22.5, PRINTERY[1] + 3.6], yf, face([0, 0], [1, 0]));
-  return [base('lhasa-people', L, 'life'), base('lhasa-wheels', W)];
+  return [base('lhasa-people', [...L, ...nightElements()], 'life'), base('lhasa-wheels', W)];
 }
 
 export async function town() {

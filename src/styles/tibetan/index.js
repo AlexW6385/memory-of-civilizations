@@ -77,7 +77,11 @@ function win(bag, [px, pz], [ux, uz], [nx, nz], y, s = 1, rand = Math.random, o 
     face(bag, cb, n, P(u0, v2, d0), P(u1, v2, d1), P(u1, v1, d1), P(u0, v1, d0));
     face(bag, ca, n, P(u0, v3, d0), P(u1, v3, d1), P(u1, v2, d1), P(u0, v2, d0));
   }
+  // the night's light behind the lattice (settlements/lhasa/nightlight.js listens here): the pane of lamp-light, the lattice's own plane a hair in front
+  if (litSink.fn) litSink.fn({ q: [P(-ow, 0.12, 0.085), P(ow, 0.12, 0.085), P(ow, h - 0.1, 0.085), P(-ow, h - 0.1, 0.085)], n: [nx, nz], y, s, c: [px, pz], open: !!o.open });
 }
+/** A listener for the windows being built (lit panes at night); null when nobody listens. */
+export const litSink = { fn: null };
 /** The four faces of a rect, each as [start x, start z, end x, end z, nx, nz] with u to the right seen from outside. */
 const FACES = (x0, z0, x1, z1) => ({ s: [x0, z1, x1, z1, 0, 1], n: [x1, z0, x0, z0, 0, -1], e: [x1, z1, x1, z0, 1, 0], w: [x0, z0, x0, z1, -1, 0] });
 /**
@@ -561,6 +565,13 @@ function sangkhun(bag, x, y, z, dir = [0, 1]) {
  * The parts of a house that its plan, its walks and its upper floor need to agree on (the same draws of the house's rng, in the same order as
  * house() has always made them): { rand (the stream, after these), third, dn, dr, C, rooms, voids, gx, farm, merchant, ladder: the courtyard's way up }.
  */
+/** The windows a lot's house builds, as win() reports them (a replay of the shell with a bag that keeps nothing): [{ q, n, y, s, c, open }]. */
+export function houseWindows(el) {
+  const out = [], spy = new Proxy({}, { get: () => () => {} }), prev = litSink.fn;
+  litSink.fn = (w) => out.push(w);
+  try { house({ ...el, part: 'shell' }, { bag: spy, col: spy, lights: [] }); } catch { /* a house that does not replay has no lit windows */ } finally { litSink.fn = prev; }
+  return out;
+}
 export function houseKeys(el) {
   const rand = rng(el.seed || 1), y = el.y ?? 0, [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, H = 6;
   const third = W > 11 && rand() < 0.35, dn = third ? 5.3 : 4.6, dr = W > 12 ? 3.2 : 2.9, dw = 0.8;

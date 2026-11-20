@@ -8,6 +8,7 @@
 import { SHOL, hill } from './layout.js';
 import { openWalks } from './upstairs.js';
 import { ground } from './ground.js';
+import './nightlight.js';
 
 const E = [];
 /** The ground under a block's south face (the lowest of its edge), a little below it. */
