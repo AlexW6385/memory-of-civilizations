@@ -254,6 +254,22 @@ export function openHouses() {
   for (const e of blockElements()) if (e.open) for (const h of blockHouses(e)) if (e.open.includes(h.seed)) out.push({ block: e, ...h });
   return out;
 }
+/**
+ * Where the night's lights are that the town's builders put up (docs/settlements/barcelona.md §14.2): the gas lamps of the crossings, the trams on the lines (the
+ * same draws as town() makes: the first user of its stream), the flower sellers of the market's north pavement, the newspaper kiosks. Pure data, read by nightlight.js.
+ */
+export function nightSites() {
+  const els = blockElements(), lines = tramLines(), rand = rng(1910), tr = trams(lines, rand);
+  const XM = PITCH * 2.5, zt = SAGRADA[1] - 17, [cx, cz] = MERCAT, my = Math.max(Y(cx, cz - 27), Y(cx, cz + 27)) + 0.07;
+  const kiosks = [[GRACIA_X - 9.2, -114], [GRACIA_X + 9.5, -45], [GRACIA_X - 9.2, 160], [XM - 8.6, SAGRADA[1] + 29]].map(([x, z]) => [x, z, Y(x, z)]);
+  const flowers = []; for (let x = cx - 24; x <= cx + 24; x += 6) flowers.push([x, cz - 25, my]);
+  return {
+    els,
+    fanals: fanals(els).map((e) => [e.at[0], e.at[1], e.y]),
+    trams: [...tr, { at: [XM + 1.55, zt], y: Y(XM + 1.55, zt) + 0.03, rot: 0, kind: 'closed' }].map((q) => ({ at: q.at, y: q.y, rot: q.rot, kind: q.kind })),
+    flowers, kiosks, gate: [SAGRADA[0] + BLOCK / 2 - 0.8, SAGRADA[1] - 4.0, Y(SAGRADA[0] + BLOCK / 2, SAGRADA[1] - 4.0)],
+  };
+}
 export async function town() {
   const els = blockElements();
   // in plans of a few blocks each, so that the town streams in pieces
