@@ -85,6 +85,7 @@ import * as ISFAHAN from '../settlements/isfahan/soundmap.js';
 import './voices-isfahan.js';
 import * as JERUSALEM from '../settlements/jerusalem/soundmap.js';
 import './voices-jerusalem.js';
+import * as LHASA from '../settlements/lhasa/soundmap.js';
 import * as NEWYORK from '../settlements/new-york/soundmap.js';
 import './voices-ny.js';
 import * as VENICE from '../settlements/venice/soundmap.js';
@@ -202,7 +203,7 @@ export const PROFILES = {
   kilwa: T({ ...TROP, gull: 0.6 }, { cicadas: 0.6, animals: { goat: 0.5, rooster: 0.5, dog: 0.2 }, roof: 'flat', adhan: 1 }),
   knossos: T(MED, { cicadas: 0.9, animals: { goat: 0.5, sheepbell: 0.4, donkey: 0.3, dog: 0.2 }, roof: 'flat' }),
   lalibela: T({ dove: 0.8, kite: 0.6, tropic: 0.4, crow: 0.4 }, { animals: { goat: 0.5, cattle: 0.5, rooster: 0.6, dog: 0.4, donkey: 0.3 }, roof: 'thatch' }),
-  lhasa: T({ crow: 1, sparrow: 0.7, kite: 0.4 }, { animals: { dog: 0.8, cattle: 0.3 }, roof: 'flat', bells: 'dungchen' }),
+  lhasa: T({ crow: 1, sparrow: 0.7, kite: 0.4 }, { animals: withLife({ dog: 0.5, cattle: 0.3 }, { market: 1, eaves: 1, map: LHASA }), roof: 'flat', bells: null }),
   london: T({ ...EU, gull: 0.5 }, { animals: withLife({ horse: 0.8, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: LONDON }), roof: 'slate', bells: 'westminster' }),
   'machu-picchu': T({ warbler: 0.6, tropic: 0.4, dove: 0.4 }, { animals: { dog: 0.2 }, roof: 'thatch' }),
   madurai: T(IND, { cicadas: 0.5, frogs: 0.5, animals: { cattle: 0.7, rooster: 0.4, goat: 0.4, dog: 0.3 }, roof: 'tile', bells: 'puja' }),
