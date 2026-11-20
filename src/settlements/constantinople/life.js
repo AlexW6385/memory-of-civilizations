@@ -34,11 +34,11 @@ export function life() {
       if (rand() < 0.25) continue;
       const c = (k + 0.5) * sw, g = pick(GOODS), dy = 0.18, face = Math.atan2(u[1] * s, -u[0] * s);   // facing the street
       const P = (along, t) => fp(st.a, u, c + along, t * s);
-      if (g[0] === 'cloth' || g[0] === 'produce') L.push({ t: 'stall', at: P(0, D - 1.0), y: height(ax, az) + dy, rot: face, seed: Math.floor(rand() * 1e9), w: 2.2, d: 0.9, awning: pick(['cloth_white', 'cloth_ochre', 'linen']), goods: [g[0], g[0] === 'cloth' ? 'cloth' : 'basket'] });
-      else if (g[0] === 'sacks' || g[0] === 'crates') L.push({ t: g[0], at: P(-1.4, D - 0.6), y: height(ax, az) + dy, rot: face, seed: Math.floor(rand() * 1e9) });
-      else if (g[0] === 'basket') for (const q of [-1.5, -0.9, 1.2]) L.push({ t: 'basket', at: P(q, D - 0.5), y: height(ax, az) + dy, seed: Math.floor(rand() * 1e9) });
-      else for (const q of [-1.6, -1.15, 1.3, 1.75]) L.push({ t: 'pot', kind: pick(g), at: P(q, D - 0.45), y: height(ax, az) + dy, n: 1, seed: Math.floor(rand() * 1e9) });
-      person(P(rand() < 0.5 ? -0.4 : 0.6, D - 1.7), face, { dy, pose: rand() < 0.5 ? 'sit' : 'stand' });
+      if (g[0] === 'cloth' || g[0] === 'produce') L.push({ t: 'stall', at: P(rand() < 0.5 ? -1.95 : 1.95, D - 1.0), y: height(ax, az) + dy, rot: face, seed: Math.floor(rand() * 1e9), w: 1.6, d: 0.9, awning: pick(['cloth_white', 'cloth_ochre', 'linen']), goods: [g[0], g[0] === 'cloth' ? 'cloth' : 'basket'] });
+      else if (g[0] === 'sacks' || g[0] === 'crates') L.push({ t: g[0], at: P(-1.8, D - 0.6), y: height(ax, az) + dy, rot: face, seed: Math.floor(rand() * 1e9) });
+      else if (g[0] === 'basket') for (const q of [-1.8, -1.4, 1.5]) L.push({ t: 'basket', at: P(q, D - 0.5), y: height(ax, az) + dy, seed: Math.floor(rand() * 1e9) });
+      else for (const q of [-1.9, -1.5, 1.5, 1.9]) L.push({ t: 'pot', kind: pick(g), at: P(q, D - 0.45), y: height(ax, az) + dy, n: 1, seed: Math.floor(rand() * 1e9) });
+      person(P(rand() < 0.5 ? -1.7 : 1.7, D - 1.7), face, { dy, pose: rand() < 0.5 ? 'sit' : 'stand' });
       if (rand() < 0.6) person(P(rand() - 0.5, D - 3.0), face + Math.PI, { dy });
     }
   }

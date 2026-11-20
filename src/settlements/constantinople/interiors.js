@@ -5,20 +5,12 @@
 import '../../styles/byzantine/interiors.js';
 import { height, special, EIRENE } from './layout.js';
 import { MESE_STOAS } from './plan.js';
-import { shopFrame, TRADES } from '../../styles/byzantine/interiors.js';
+import { shopFrame } from '../../styles/byzantine/interiors.js';
+import { shopsOf } from './shops.js';
 import { upKind } from '../../styles/constantinople/upper.js';
 import { homeWalks } from '../../styles/constantinople/homes.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const shopsOf = () => {
-  const out = [], rand = rng(5602);
-  for (const st0 of MESE_STOAS) {
-    if (!st0.shops) continue;
-    const st = { ...st0, y: height(...st0.a), depth: st0.depth ?? 5 }, L = Math.hypot(st.b[0] - st.a[0], st.b[1] - st.a[1]), ns = Math.max(1, Math.round(L / 4.4));
-    for (let k = 0; k < ns; k++) if (rand() < 0.93) out.push({ st, k, ns, trade: TRADES[Math.floor(rand() * TRADES.length)], seed: Math.floor(rand() * 1e6) });
-  }
-  return out;
-};
 const specials = () => special();
 const HOUSES = ['home', 'tavern', 'bakery', 'weaver', 'home2', 'home3'];
 /** The outer lanes' working and family houses (layout.js SPECIAL w01…): the same builder, a trade by kind. */

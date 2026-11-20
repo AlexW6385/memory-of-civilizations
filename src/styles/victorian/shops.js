@@ -10,6 +10,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { hexa } from './street.js';
 import { shopInterior, pubInterior } from './inside.js';
 import { terraceInterior } from './houseinside.js';
+import { write, shopName, pubName, cagedAt, CAGE } from './letters.js';
 import { terraceUp, terraceWindows, frame, dogleg, shopSpec, shopUp, shopWindows, pubSpec, pubUp, pubWindows } from './upstairs.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -170,6 +171,7 @@ export function terraceRich(el, ctx, base) {
   B('gold', uD - 0.04, uD + 0.04, y + 1.7, y + 1.82, 0.13, 0.16);
   }
   B('limestone', uD - 0.7, uD + 0.7, y - 0.3, y + 0.2, 0, 0.95); B('limestone', uD - 0.7, uD + 0.7, y - 0.3, y + 0.4, 0, 0.5);
+  B('granite_grey', uD - 0.34, uD + 0.34, y + 0.4, y + 0.405, 0.1, 0.42); B('granite_grey', uD - 0.3, uD + 0.3, y + 0.2, y + 0.205, 0.58, 0.88);      // the treads worn smooth and dark where the feet fall
   if (type === 'stucco') {
     // the porch: two columns, an entablature, the iron balcony round its flat roof, the first-floor window to the floor
     for (const sd of [-1, 1]) { F.L('plaster_white', [[0.2, 0], [0.17, 0.2], [0.14, 0.3], [0.13, 2.7], [0.17, 2.8], [0.2, 2.9]], 10, uD + sd * 0.78, y + 0.4, 1.05); }
@@ -358,7 +360,8 @@ export function shopHouse(el, ctx, base) {
   }
   // the fascia board with its lettering, the cornice, the blind's roller box
   B(tr.fascia, 0, Wd, y + g0 - 1.0, y + g0 - 0.28, 0, bayD); B('gold', 0, Wd, y + g0 - 1.0, y + g0 - 0.97, bayD - 0.01, bayD + 0.01); B('gold', 0, Wd, y + g0 - 0.31, y + g0 - 0.28, bayD - 0.01, bayD + 0.01);
-  lettering(F, rand, 0.42, Wd - 0.42, y + g0 - 0.88, y + g0 - 0.45, bayD, 'gold');
+  write(F, shopName(el.seed, tn), 0.8, Wd - 0.8, y + g0 - 0.9, y + g0 - 0.4, bayD, bayD + 0.02, 'gold');      // the keeper's name and trade, in capitals (letters.js)
+  if (cagedAt(el)) { const u = F.Wd * CAGE.u; B('iron', u - 0.02, u + 0.02, y + g0 - 1.04, y + g0 - 1.0, bayD, CAGE.d); B('iron', u - 0.02, u + 0.02, y + CAGE.h - 0.04, y + CAGE.h, CAGE.d - 0.04, CAGE.d + 0.04); }      // the bracket for a songbird's cage (the critter hangs from it: fauna.js)
   B('plaster_white', -0.05, Wd + 0.05, y + g0 - 0.28, y + g0, 0, bayD + 0.14); B('plaster_white', -0.08, Wd + 0.08, y + g0, y + g0 + 0.1, 0, bayD + 0.17);
   // the stallriser, the plate-glass window: a bottom rail, transom, mullions
   B('wood_dark', wu0 - 0.04, wu1 + 0.04, y, y + 0.7, 0, bayD - 0.04);
@@ -385,6 +388,7 @@ export function shopHouse(el, ctx, base) {
   }
   B('glass_outer', uDoor - dw / 2, uDoor + dw / 2, y + 2.55, y + g0 - 1.05, bayD - 0.09, bayD - 0.075); B('gold', uDoor + dw / 2 - 0.2, uDoor + dw / 2 - 0.12, y + 1.0, y + 1.2, bayD - 0.04, bayD - 0.02);
   B('limestone', uDoor - dw / 2, uDoor + dw / 2, y - 0.1, y + 0.03, 0, bayD + 0.25);
+  B('granite_grey', uDoor - dw / 2 + 0.12, uDoor + dw / 2 - 0.12, y + 0.03, y + 0.034, bayD - 0.12, bayD + 0.2);      // the worn threshold
   if (tn === 'chemist') for (const [i, m] of ['lamp_glass', 'lamp_glass'].entries()) F.L(m, [[0.001, 0], [0.1, 0.02], [0.17, 0.18], [0.19, 0.3], [0.14, 0.44], [0.06, 0.52], [0.05, 0.62]], 10, wu0 + (wu1 - wu0) * (0.3 + 0.4 * i), y + 0.78 + 0.0, 0.2);
   // the blind and the pavement goods
   if (tr.awn && rand() < 0.7) awning(F, tr, 0.0, Wd, y + g0 + 0.05, 1.45, rand);
@@ -435,7 +439,7 @@ export function pub(el, ctx, base) {
   // the fascia: a deep dark board with the name in large gilt letters, a cornice over it
   const fasc = pick(rand, ['lacquer_black', 'shutter_green', 'paint_blue', 'wall_red']);
   B(fasc, 0, Wd, y + g0 - 1.0, y + g0 - 0.2, 0, bayD); B('gold', 0, Wd, y + g0 - 1.0, y + g0 - 0.97, bayD - 0.01, bayD + 0.01); B('gold', 0, Wd, y + g0 - 0.23, y + g0 - 0.2, bayD - 0.01, bayD + 0.01);
-  { const nn = 6 + Math.floor(rand() * 4), w = Math.min(Wd - 1.2, nn * 0.4); let u = Wd / 2 - w / 2; for (let i = 0; i < nn; i++) { B('gold', u, u + 0.26, y + g0 - 0.9, y + g0 - 0.35, bayD, bayD + 0.015); if (rand() < 0.5) B(fasc, u + 0.08, u + 0.18, y + g0 - 0.78, y + g0 - 0.45, bayD + 0.015, bayD + 0.02); u += w / nn; } }
+  write(F, pubName(el.seed), 0.6, Wd - 0.6, y + g0 - 0.92, y + g0 - 0.32, bayD, bayD + 0.07, 'gold');      // the house's name, standing proud of the consoles (letters.js)
   B('plaster_white', -0.05, Wd + 0.05, y + g0 - 0.2, y + g0, 0, bayD + 0.18); B('plaster_white', -0.08, Wd + 0.08, y + g0, y + g0 + 0.1, 0, bayD + 0.22);
   // the windows between the pilasters: a granite stallriser, mahogany frames, etched glass above clear glass; the double doors at the corner
   const wins = [], edges = [...cuts.map((a) => [a, a + 0.4])];

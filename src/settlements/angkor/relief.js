@@ -49,7 +49,8 @@ function carve(out, outline, t, mapP, round) {
 function akRelief(el, ctx) {
   const { bag } = ctx, y = el.y, [x0, , x1] = el.rect, { pieces } = galleryPieces(el), map = el.reliefMap ?? {};
   const rectOf = (a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
-  for (const pc of pieces) {
+  pieces.forEach((pc, pi) => {
+    if (el.rpieces && !el.rpieces.includes(pi)) return;
     const { wa, ux, uz, len, f } = pc, U = [ux, uz], n = pc.n;
     const side = n[0] ? (n[0] > 0 ? 'e' : 'w') : (n[1] > 0 ? 's' : 'n');
     const half = n[1] ? ((pc.A[0] + pc.B[0]) / 2 < (x0 + x1) / 2 ? 'w' : 'e') : ((pc.A[1] + pc.B[1]) / 2 < (el.rect[1] + el.rect[3]) / 2 ? 'n' : 's');
@@ -72,7 +73,31 @@ function akRelief(el, ctx) {
     const pan = mine ? { unique: mine, tiles: [] } : subject ? panel(subject, len - 0.8) : null;
     if (pan) {
       const put = (outline, dx, thick) => carve(T, dx ? outline.map(([u, v]) => [u + dx, v]) : outline, thick >= 0.075 ? 0.06 : 0.035, mapFig, true);
-      for (const part of pan.unique) put(part, 0, part.t ?? 0.05);
+      // the figures that repeat (a file of soldiers, the apsaras, the fish) are each carved once and placed as instances of one
+      // prototype (the plan is built instanced, near the visitor: el.inst); the others, and the principal figures, as before
+      const done = new Set();
+      if (el.inst && pan.unique.groups) {
+        const sgn = toRight ? 1 : -1, s0 = toRight ? 0.4 : len - 0.4, o0 = P(s0, W0 + 0.04);
+        const basis = new Matrix4().makeBasis(new Vector3(U[0] * sgn, 0, U[1] * sgn), new Vector3(0, 1, 0), new Vector3(f[0], 0, f[1]));
+        for (const [g0, g1] of pan.unique.groups) {
+          const parts = pan.unique.slice(g0, g1);
+          if (!parts.length) continue;
+          const [au, av] = parts[0][0], r5 = (v) => Math.round(v * 2e4);
+          const key = parts.map((q) => (q.t ?? 0.05) + ':' + q.map(([u, v]) => r5(u - au) + ',' + r5(v - av)).join(';')).join('|');
+          let g = PROTO.get(key);
+          if (!g) {
+            const T2 = [];
+            for (const q of parts) carve(T2, q.map(([u, v]) => [u - au, v - av]), (q.t ?? 0.05) >= 0.075 ? 0.06 : 0.035, (u, v, w) => [u, v, w], true);
+            PROTO.set(key, (g = T2.length ? fromTriangles(T2) : null));
+          }
+          if (g) {
+            const M = basis.clone().setPosition(o0[0] + U[0] * sgn * au, y + 0.8 + av, o0[1] + U[1] * sgn * au);
+            bag.addInstance(C, g, M, { reach: 90 });
+          }
+          for (let i = g0; i < g1; i++) done.add(i);
+        }
+      }
+      pan.unique.forEach((part, i) => { if (!done.has(i)) put(part, 0, part.t ?? 0.05); });
       for (const tl of pan.tiles) for (const x of tl.xs) for (const part of tl.parts) put(part, x, part.t ?? 0.05);
       const L = len - 0.8;
       if (subject === 'churning') {
@@ -94,8 +119,9 @@ function akRelief(el, ctx) {
       }
     }
     if (T.length) bag.add(C, fromTriangles(T));
-  }
+  });
 }
+const PROTO = new Map();
 
-Object.assign(STYLES.khmer.elements, { ak_relief: akRelief });
+Object.assign(STYLES.khmer.elements, { ak_relief: akRelief, ak_relief_wall: akRelief });
 export { akRelief };

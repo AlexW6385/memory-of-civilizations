@@ -3,5 +3,7 @@
 import '../../styles/tang/index.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import { daciHall } from './hall.js';
+import { registerNight } from './night.js';
 
 registerStyle('tang-changan', { ...STYLES.tang, elements: { ...STYLES.tang.elements, daci_hall: daciHall } });
+registerNight();

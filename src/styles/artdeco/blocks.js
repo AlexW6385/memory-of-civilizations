@@ -3,17 +3,31 @@
 // over plate glass); the chimney stacks of the coal-fired roofs; and the subway's railed stair-heads with their globe lamps.
 // All laid out on a face: u along it from the rect's corner, d outward from the wall.
 
-import { box, rod, lathe } from '../../core/geom.js';
+import { box, rod, lathe, frustum, fromTriangles } from '../../core/geom.js';
+
+/** Switched on by New York's near and far forms of a block (settlements/new-york/far.js) while they build a lot whose walls are solid: boxes standing on the street plane then leave out the face that lies in the wall, and lettering and goods on a front are drawn on their street side only. `boxes` (on in the far form only: the near form's repeated boxes are instanced, and a box with a face fewer is instanced only from more copies). Off for every other user of this style (Sydney's skyscrapers). */
+export const LEAN = { on: false, boxes: false, rooms: false };
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** The frame of a street face f of a rect: { R(u0, u1, y0, y1, d0, d1) → box, P(u, d, y) → point, L, a0, o, sg, along, ext }. */
 export function face([x0, z0, x1, z1], f) {
   const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, a0 = along ? x0 : z0, o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
   const ext = along ? z1 - z0 : x1 - x0;
-  const R = (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(a0 + u0, y0, Math.min(a, b), a0 + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, a0 + u0, Math.max(a, b), y1, a0 + u1); };
+  const R = (u0, u1, y0, y1, d0, d1) => {
+    const a = o + sg * d0, b = o + sg * d1;
+    // (lean: a box that starts at or just inside the street plane and stands out of it has its wall-side face in the wall)
+    const lean = LEAN.on && LEAN.boxes && d1 > d0 && d0 >= -0.06 && d0 <= 0.012 ? (along ? (sg > 0 ? { noZn: true } : { noZp: true }) : (sg > 0 ? { noXn: true } : { noXp: true })) : null;
+    if (lean) return along ? frustum([a0 + u0, Math.min(a, b), a0 + u1, Math.max(a, b)], y0, y1, 0, 0, 0, 0, lean) : frustum([Math.min(a, b), a0 + u0, Math.max(a, b), a0 + u1], y0, y1, 0, 0, 0, 0, lean);
+    return along ? box(a0 + u0, y0, Math.min(a, b), a0 + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, a0 + u0, Math.max(a, b), y1, a0 + u1);
+  };
   const P = (u, d, yy) => along ? [a0 + u, yy, o + sg * d] : [o + sg * d, yy, a0 + u];
   const rc = (u0, u1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? [a0 + u0, Math.min(a, b), a0 + u1, Math.max(a, b)] : [Math.min(a, b), a0 + u0, Math.max(a, b), a0 + u1]; };
   return { R, P, rc, L, a0, o, sg, along, ext };
+}
+/** A one-sided upright quad a b c d facing the horizontal direction out = [x, z]. */
+export function quadOut(a, b, c, d, out) {
+  const n = ((b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1])) * out[0] + ((b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2])) * out[1];
+  return fromTriangles(n >= 0 ? [...a, ...b, ...c, ...a, ...c, ...d] : [...a, ...c, ...b, ...a, ...d, ...c]);
 }
 const BROWN = ['pottery_dark', 'brick', 'pottery_dark', 'brick_buff', 'pottery_dark', 'brick_grey'];
 const STONE = 'limestone';

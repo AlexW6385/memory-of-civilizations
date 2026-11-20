@@ -70,15 +70,27 @@
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
+import * as AGRA from '../settlements/mughal-agra/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
+import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
+import * as ISFAHAN from '../settlements/isfahan/soundmap.js';
+import './voices-isfahan.js';
+import * as NEWYORK from '../settlements/new-york/soundmap.js';
+import './voices-ny.js';
 import * as VENICE from '../settlements/venice/soundmap.js';
+import * as LONDON from '../settlements/london/soundmap.js';
+import './voices-london.js';
 import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
 import * as PARIS from '../settlements/paris/soundmap.js';
 import './voices-paris.js';
 import * as ROME from '../settlements/rome/soundmap.js';
+import * as KAIFENG from '../settlements/song-kaifeng/soundmap.js';
+import * as TANGCA from '../settlements/tang-changan/soundmap.js';
+import './voices-tang.js';
+import * as THEBES from '../settlements/thebes/soundmap.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -118,7 +130,7 @@ export const PROFILES = {
   cahokia: T(AMER, { cicadas: 0.6, frogs: 0.8, animals: { dog: 0.6 }, roof: 'thatch' }),
   'chichen-itza': T(TROP, { cicadas: 1, frogs: 0.5, animals: { dog: 0.4 }, roof: 'thatch' }),
   conques: T(EU, { animals: { rooster: 0.7, cattle: 0.5, sheepbell: 0.5, dog: 0.3 }, roof: 'slate', bells: 'office' }),
-  constantinople: T({ ...MED, gull: 0.7 }, { cicadas: 0.5, animals: { rooster: 0.4, donkey: 0.4, dog: 0.5 }, bells: 'semantron' }),
+  constantinople: T({ ...MED, gull: 0.7 }, { cicadas: 0.5, animals: withLife({ rooster: 0.4, donkey: 0.4, dog: 0.5 }, { market: 0.9, map: CONSTANTINOPLE }), bells: 'semantron' }),
   djenne: T({ dove: 1, sparrow: 0.6, kite: 0.5, tropic: 0.3 }, { frogs: 0.6, animals: { goat: 0.6, donkey: 0.5, rooster: 0.6, cattle: 0.4 }, roof: 'flat', adhan: 1 }),
   'edo-himeji': T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { rooster: 0.4, dog: 0.3, horse: 0.2 }, roof: 'tile', bells: 'toki' }),
   florence: T(MED, { cicadas: 0.3, animals: withLife({ horse: 0.4, donkey: 0.3, dog: 0.3 }, { market: 1, eaves: 1, map: FLORENCE }), bells: 'angelus-hours' }),
@@ -128,7 +140,7 @@ export const PROFILES = {
   'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, roof: 'shingle', bells: null, animals: withLife({ dog: 0.2, crow: 0.2, rooster: 0.25 }, { canal: 1, market: 0.8, eaves: 1, map: KYOTO }) }),
   'abu-simbel': T(NEAR, { animals: { donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
   'qin-xianyang': T(NEAR, { animals: { cattle: 0.5, dog: 0.3, horse: 0.3 }, roof: 'tile' }),
-  thebes: T(NEAR, { animals: { donkey: 0.5, dog: 0.3, cattle: 0.3 }, roof: 'flat' }),
+  thebes: T(NEAR, { frogs: 0.3, animals: withLife({ donkey: 0.5, dog: 0.3, cattle: 0.3 }, { market: 0.7, canal: 0.5, map: THEBES }), roof: 'flat' }),
   fez: T(NEAR, { animals: { donkey: 0.6, rooster: 0.3, cat: 0.3 }, roof: 'flat', adhan: 1 }),
   'mongol-karakorum': T(NEAR, { animals: { horse: 0.8, dog: 0.6, sheep: 0.4 }, roof: 'flat' }),
   catalhoyuk: T({ sparrow: 0.4, warbler: 0.5, crow: 0.4, dove: 0.2 }, { frogs: 0.6, animals: { dog: 0.4, goat: 0.5, cattle: 0.4 }, roof: 'flat' }),
@@ -138,7 +150,7 @@ export const PROFILES = {
   'abbasid-baghdad': T(NEAR, { animals: { donkey: 0.6, dog: 0.3, rooster: 0.2 }, frogs: 0.3, roof: 'flat', adhan: 1 }),
   alexandria: T({ ...MED, gull: 1, kite: 0.3 }, { cicadas: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'flat' }),
   'han-changan': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3, camel: 0.2 }, roof: 'tile' }),
-  'tang-changan': T(EAS, { cicadas: 0.4, animals: { rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, roof: 'tile', bells: 'monastery' }),
+  'tang-changan': T(EAS, { cicadas: 0.4, animals: withLife({ rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, { market: 1, eaves: 1, map: TANGCA }), roof: 'tile', bells: 'tang-changan' }),
   'wei-ye': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
   bhaktapur: T(IND, { cicadas: 0.2, animals: { dog: 0.4, rooster: 0.4, cattle: 0.3, goat: 0.2 }, roof: 'tile', bells: 'puja' }),
   nalanda: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.5, goat: 0.3, rooster: 0.3, dog: 0.2 }, roof: 'flat', bells: 'puja' }),
@@ -164,7 +176,7 @@ export const PROFILES = {
   granada: T(MED, { cicadas: 0.7, animals: { donkey: 0.4, rooster: 0.4, horse: 0.2 }, adhan: 1 }),
   'great-zimbabwe': T({ dove: 1, tropic: 0.7, kite: 0.3 }, { cicadas: 0.7, frogs: 0.4, animals: { cattle: 0.8, goat: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'thatch' }),
   'heian-uji': T(EAS, { cicadas: 0.5, frogs: 0.8, animals: { dog: 0.2 }, roof: 'shingle', bells: 'bonsho' }),
-  isfahan: T(NEAR, { cicadas: 0.4, animals: { donkey: 0.5, horse: 0.3, dog: 0.2 }, roof: 'flat', adhan: 1 }),
+  isfahan: T(NEAR, { cicadas: 0.4, animals: withLife({ donkey: 0.5, horse: 0.3, dog: 0.2 }, { market: 1, map: ISFAHAN }), roof: 'flat', adhan: 1 }),
   jerusalem: T(NEAR, { cicadas: 0.6, animals: { donkey: 0.6, goat: 0.4, rooster: 0.4, dog: 0.3 }, roof: 'flat', adhan: 1 }),
   'joseon-seoul': T(EAS, { cicadas: 0.6, frogs: 0.5, animals: { rooster: 0.6, dog: 0.4, cattle: 0.2 }, roof: 'tile', bells: 'bosingak' }),
   khajuraho: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.6, rooster: 0.4, goat: 0.4, dog: 0.3 }, roof: 'tile', bells: 'puja' }),
@@ -172,7 +184,7 @@ export const PROFILES = {
   knossos: T(MED, { cicadas: 0.9, animals: { goat: 0.5, sheepbell: 0.4, donkey: 0.3, dog: 0.2 }, roof: 'flat' }),
   lalibela: T({ dove: 0.8, kite: 0.6, tropic: 0.4, crow: 0.4 }, { animals: { goat: 0.5, cattle: 0.5, rooster: 0.6, dog: 0.4, donkey: 0.3 }, roof: 'thatch' }),
   lhasa: T({ crow: 1, sparrow: 0.7, kite: 0.4 }, { animals: { dog: 0.8, cattle: 0.3 }, roof: 'flat', bells: 'dungchen' }),
-  london: T({ ...EU, gull: 0.5 }, { animals: { horse: 0.8, dog: 0.3 }, roof: 'slate', bells: 'westminster' }),
+  london: T({ ...EU, gull: 0.5 }, { animals: withLife({ horse: 0.8, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: LONDON }), roof: 'slate', bells: 'westminster' }),
   'machu-picchu': T({ warbler: 0.6, tropic: 0.4, dove: 0.4 }, { animals: { dog: 0.2 }, roof: 'thatch' }),
   madurai: T(IND, { cicadas: 0.5, frogs: 0.5, animals: { cattle: 0.7, rooster: 0.4, goat: 0.4, dog: 0.3 }, roof: 'tile', bells: 'puja' }),
   'mamluk-cairo': T(NEAR, { animals: { donkey: 0.8, horse: 0.3, rooster: 0.3, dog: 0.4 }, roof: 'flat', adhan: 1 }),
@@ -181,10 +193,10 @@ export const PROFILES = {
     cicadas: 0.7, frogs: 0.8, roof: 'xiaoqing', bells: 'suzhou',
     animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: SUZHOU }),
   }),
-  'mughal-agra': T(IND, { cicadas: 0.5, animals: { cattle: 0.4, horse: 0.3, rooster: 0.3, dog: 0.3 }, roof: 'flat', adhan: 2 }),
+  'mughal-agra': T(IND, { cicadas: 0.5, animals: withLife({ cattle: 0.4, horse: 0.3, rooster: 0.3, dog: 0.3 }, { market: 1, eaves: 1, map: AGRA }), roof: 'flat', adhan: 2 }),
   muscovy: T({ crow: 1, sparrow: 0.8, warbler: 0.4 }, { animals: { horse: 0.7, dog: 0.4, rooster: 0.4, cattle: 0.2 }, roof: 'shingle', bells: 'zvon' }),
   nara: T(EAS, { cicadas: 0.6, frogs: 0.6, animals: { dog: 0.2 }, roof: 'tile', bells: 'bonsho' }),
-  'new-york': T({ sparrow: 0.8 }, { animals: {}, roof: 'flat' }),
+  'new-york': T({ sparrow: 0.8 }, { animals: withLife({ horse: 0.2 }, { market: 1, map: NEWYORK }), roof: 'flat' }),
   'norse-borgund': T({ warbler: 1, crow: 0.5 }, { animals: { sheepbell: 0.7, cattle: 0.6, dog: 0.3, horse: 0.2 }, roof: 'shingle', bells: 'parish' }),
   'ottoman-istanbul': T({ ...MED, gull: 0.8 }, { cicadas: 0.4, animals: withLife({ dog: 0.5, donkey: 0.3, horse: 0.3 }, { market: 1, map: ISTANBUL }), roof: 'tile', adhan: 2 }),
   paris: T(EU, { roof: 'slate', bells: 'paris', animals: withLife({ horse: 0.5, rooster: 0.3, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: PARIS }) }),
@@ -195,7 +207,7 @@ export const PROFILES = {
   rome: T(MED, { cicadas: 0.5, frogs: 0.3, animals: withLife({ donkey: 0.4, horse: 0.3, dog: 0.3, rooster: 0.3 }, { canal: 1, market: 1, eaves: 1, map: ROME }) }),
   sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: { cattle: 0.6, goat: 0.4, rooster: 0.3 }, roof: 'thatch' }),
   'song-hangzhou': T(EAS, { cicadas: 0.7, frogs: 0.6, animals: { rooster: 0.4, dog: 0.3 }, roof: 'tile', bells: 'monastery' }),
-  'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, animals: { donkey: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'tile', bells: 'monastery' }),
+  'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, roof: 'tile', bells: null, animals: withLife({ donkey: 0.4, rooster: 0.3, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: KAIFENG }) }),
   stonehenge: T({ warbler: 1, crow: 0.6 }, { animals: { cattle: 0.4, dog: 0.3 }, roof: 'thatch' }),
   sydney: T({ gull: 0.8, tropic: 0.5 }, { cicadas: 0.4, animals: {}, roof: 'flat' }),
   'tang-wutai': T({ warbler: 0.7, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.3, cattle: 0.3 }, roof: 'tile', bells: 'monastery' }),
@@ -237,6 +249,8 @@ const HOURS = {
   // Paris 1248: the canonical hours from Notre-Dame's north tower and the parish churches, the curfew bell at 7:30 (the equinox between seven in winter and eight in summer)
   paris: [[2, 'paris:matins'], [5, 'paris:lauds'], [6, 'paris:prime'], [9, 'paris:terce'], [12, 'paris:sext'], [15, 'paris:none'], [17.5, 'paris:vespers'], [19.5, 'paris:curfew']],
   monastery: [[5, 'zhong'], [18.5, 'gu']],
+  // Tang Chang'an: Daci'en's bell and drum at dawn and dusk (the street drums sound from the map), the city's drum far off (docs/settlements/tang-changan.md §19)
+  'tang-changan': [[4.6, 'temple-am'], [5.1, 'tower:am'], [18.4, 'temple-pm'], [18.7, 'tower:pm']],
   bonsho: [[5.5, 'bonsho'], [18.2, 'bonsho']],
   zvon: [[6.5, 'zvon'], [17, 'zvon']],
   dungchen: [[5.5, 'dungchen'], [18.5, 'dungchen']],

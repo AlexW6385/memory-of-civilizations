@@ -6,6 +6,8 @@
 
 import { AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, MESE, MILION, FORUM, SENATE, CHALKE, COURTS, COURT_KINDS, COURT_Y, height } from './layout.js';
 import sophiaPlan from '../../buildings/hagia-sophia/plan.js';
+import { MESE_STOAS } from './stoas.js';
+import { porticoLamps, fires } from './nightlight.js';
 
 export const JUSTINIAN = [AUGUSTAION[0] + 24, AUGUSTAION[1] + 32];
 const E = [];
@@ -54,21 +56,11 @@ E.push({ t: 'honor_column', kind: 'constantine', at: FORUM.c, y: height(...FORUM
   E.push({ t: 'forum_arch', at: [xe, zM], u: [1, 0], w: 11, depth: 6, y: height(xe, zM) });
   E.push({ t: 'forum_arch', at: [xw, zM], u: [1, 0], w: 11, depth: 6, y: height(xw, zM), statues: true });
 }
-// the Mese's porticoes with the shops behind them (§4.5): open between the Milion and the Augustaion and
-// at the corners; on the south of the first leg a shallow portico against the Baths of Zeuxippus, on the
-// west of the second a portico backed by a wall along the Hippodrome
-export const MESE_STOAS = [
-  { a: [-112, 103], b: [-170, 103], side: 1, shops: 5 },
-  { a: [-102, 117], b: [-170, 117], side: -1, depth: 2.4 },
-  { a: [-173, 100], b: [-173, 50], side: 1, shops: 5 },
-  { a: [-187, 100], b: [-187, 50], side: -1, back: true },
-  { a: [-190, 33], b: [-296, 33], side: 1, shops: 5 },
-  { a: [-190, 47], b: [-296, 47], side: -1, shops: 5 },
-  // the forecourt south of Hagia Sophia (layout.js FORECOURT): a row of shops under a portico on either side, their doors on the court
-  { a: [-54, 50], b: [-54, 92], side: 1, shops: 5 },
-  { a: [42, 94], b: [42, 50], side: 1, shops: 5 },
-];
+// the Mese's porticoes with the shops behind them (§4.5): their data is in stoas.js
+export { MESE_STOAS };
 for (const s of MESE_STOAS) E.push({ t: 'stoa', y: height(...s.a), depth: 5, h: 6, d: 0.62, spacing: 3.8, ...s });
+// the night (nightlight.js): the lamps hung in the porticoes, the light of the church's south door
+E.push({ t: 'cn_lamps', list: porticoLamps() }, ...fires());
 
 export const city = {
   id: 'constantinople-city',

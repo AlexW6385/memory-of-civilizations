@@ -17,6 +17,7 @@ import { tradeOf, wineShops, teaHouses } from './trades.js';
 import { doorOf } from './houses.js';
 import { shopElements } from './shops.js';
 import { holdOf } from './upper.js';
+import { walkDistance } from './walkroute.js';
 import { Parts, box, lathe, rod, ly, drum, bowl, jar, limb, rng, table, bench, stool, chair, couch, bed, chest, shelves, screen, brazier, teaSet, hanging, lantern, lampStand, plumVase, crockery, WD, LQ, DK } from './props.js';
 
 const FLOOR = 0.28;                                   // the floor of houses.js's shops and houses: the plinth's top, P0 (0.14 for thatch and farms)
@@ -123,12 +124,13 @@ const KIND = { wine: 'tavern', tea: 'tea', inn: 'inn' };
 let PICK = null;
 /** Where the visitor arrives (src/planet/arrivals.js): the Iron Pagoda's enclosure. The rooms are furnished round it first, then round the bridge (the scroll's own scene). */
 const ARRIVAL = [160, -140];
+const WALK_REACH = 9;                                    // m: a shop whose front lies within this of the walk is on it
 function picks() {
   if (PICK) return PICK;
   const L = lots(), out = [], mid = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
   const dB = (l) => { const [x, z] = mid(l); return Math.hypot(x - BRIDGE.at[0], z - BRIDGE.at[1]); };
   const dA = (l) => { const [x, z] = mid(l); return Math.hypot(x - ARRIVAL[0], z - ARRIVAL[1]); };
-  const dist = (l) => Math.min(dA(l), dB(l) * 1.6);       // the arrival's lots count full; the bridge's are held to its nearest 55 m or so
+  const dist = (l) => Math.min(dA(l), dB(l) * 1.6, walkDistance(l) < WALK_REACH ? 0 : 1e9);       // the arrival's lots count full; the bridge's are held to its nearest 55 m or so; every lot on the visitor's walk (walkroute.js) is opened
   const skip = new Set(teaHouses());                      // the two tea houses by the bridge are the style's own tea_house (its room is its own)
   for (const l of L) {
     const t = tradeOf(l), w = l.foot[2] - l.foot[0], d = l.foot[3] - l.foot[1], dd = Math.min(w, d), big = Math.max(w, d);

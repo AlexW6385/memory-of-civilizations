@@ -861,6 +861,8 @@ export function installVoices(Music) {
 for (const k of Object.keys(VOICES)) VOICE_OWNER.set(k, 'voices.js');
 for (const k of Object.keys(GAIN)) GAIN_OWNER.set(k, 'voices.js');
 import { ATHENS_VOICES, ATHENS_GAIN } from './voices-athens.js'; addVoices('voices-athens.js', ATHENS_VOICES, ATHENS_GAIN);   // Athens' voices (docs/settlements/athens.md §20)
+import { CN_VOICES, CN_GAIN } from './voices-constantinople.js'; addVoices('voices-constantinople.js', CN_VOICES, CN_GAIN);   // Constantinople's voices (docs/settlements/constantinople.md §16.3)
+import { THEBES_VOICES, THEBES_GAIN } from './voices-thebes.js'; addVoices('voices-thebes.js', THEBES_VOICES, THEBES_GAIN);   // Thebes' voices (docs/settlements/thebes.md §15c)
 import { VOICES_FLORENCE } from './voices-florence.js'; addVoices('voices-florence.js', VOICES_FLORENCE);       // (Florence's own: the market's cries, the chain, the cleaver, the weirs)
 addVoices('voices-qing.js', QING_VOICES);         // Beijing's
 addVoices('voices-ottoman.js', OTTOMAN_VOICES);   // Istanbul's

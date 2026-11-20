@@ -10,7 +10,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import '../../styles/artdeco/index.js';
-import { face, rowPlan, rowStacks } from '../../styles/artdeco/blocks.js';
+import { face, rowPlan, rowStacks, LEAN, quadOut } from '../../styles/artdeco/blocks.js';
 import { shopRoom } from '../../styles/artdeco/shoprooms.js';
 import { nearEntrance, rng as rng2, fitCell } from '../../styles/artdeco/dress.js';
 import { narrowRect, stripRect, adsOf } from './upper-plan.js';
@@ -19,7 +19,7 @@ import { withTenement } from './tenement.js';
 
 const LS = 'facade_limestone', PLAIN = 'limestone';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const block = (bag, mat, [x0, z0, x1, z1], y0, y1) => bag.add(mat, box(x0, y0, z0, x1, y1, z1));
+const block = (bag, mat, [x0, z0, x1, z1], y0, y1) => bag.add(mat, LEAN.on && y1 - y0 > 6 ? frustum([x0, z0, x1, z1], y0, y1, 0, 0, 0, 0, { noBottom: true }) : box(x0, y0, z0, x1, y1, z1));
 const inset = ([x0, z0, x1, z1], ix, iz = ix) => [x0 + ix, z0 + iz, x1 - ix, z1 - iz];
 const AWN = ['cloth_green', 'cloth_red', 'cloth_ochre'];
 const ADS = ['car_red', 'paint_cab_yellow', 'shutter_green', 'car_blue', 'paint_white', 'prussian_blue', 'stucco_cream', 'cloth_red'];
@@ -36,8 +36,7 @@ function storefronts(bag, rect, y, rand, faces = 'nsew') {
       bag.add('glass_outer', R(u0, u1, y + 0.3, y + 3.2, 0.15, 0.18));
       if (rand() < 0.35) {                                        // the awning
         const m = AWN[Math.floor(rand() * 3)], T = [], A = P(u0, 0.2, y + 3.55), B = P(u1, 0.2, y + 3.55), C = P(u1, 1.7, y + 2.95), D = P(u0, 1.7, y + 2.95);
-        T.push(...A, ...B, ...C, ...A, ...C, ...D, ...A, ...C, ...B, ...A, ...D, ...C);
-        bag.add(m, fromTriangles(T));
+        bag.add(m, quadOut(A, B, C, D, F.along ? [0, F.sg] : [F.sg, 0]));   // (far: the canvas's upper face, seen from the street)
       }
       if (rand() < 0.18) { rand(); rand(); rand(); rand(); if (full) rand(); }   // (the blade sign: not drawn far)
     }
@@ -47,7 +46,7 @@ function storefronts(bag, rect, y, rand, faces = 'nsew') {
 /** Soot under the cornice of a street front (the full form's, boxes only). */
 function soot(bag, rect, f, y, h, mat, rand) {
   const m = mat === 'facade_brick' ? 'pottery_dark' : 'plaster_damp', F = face(rect, f), { R, L } = F, top = y + h - 1.6, low = y + 4.6;
-  const put = (u0, u1, ya, yb) => { if (yb - ya < 0.05) return; bag.add(m, R(u0, u1, ya, yb, 0.004, 0.014)); };
+  const put = (u0, u1, ya, yb) => { if (yb - ya < 0.05) return; if (LEAN.on) { bag.add(m, quadOut(F.P(u0, 0.012, ya), F.P(u1, 0.012, ya), F.P(u1, 0.012, yb), F.P(u0, 0.012, yb), F.along ? [0, F.sg] : [F.sg, 0])); return; } bag.add(m, R(u0, u1, ya, yb, 0.004, 0.014)); };
   const n = Math.max(2, Math.round(L / 3));
   for (let i = 0; i < n; i++) put(i * L / n, (i + 1) * L / n, Math.max(low, top - 0.6 - rand() * 0.9), top);
   for (const u of [0.05, L - 0.55]) put(u, u + 0.5, Math.max(low, top - 4 - rand() * 6), Math.max(low, top - 0.6));
@@ -81,7 +80,7 @@ function castIron(bag, rect, front, y, h, rand) {
     const ya = y0 + f * SH, yb = ya + SH;
     bag.add('glass_outer', R(0.15, L - 0.15, ya + 0.5, yb, 0.14, 0.2));
     bag.add(m, R(0, L, ya, ya + 0.62, 0, 0.36));
-    for (let i = 0; i <= n; i++) { const u = i * W; bag.add(m, R(Math.max(0, u - 0.17), Math.min(L, u + 0.17), ya + 0.5, yb, 0.0, 0.32)); }
+    for (let i = 0; i <= n; i += 2) { const u = i * W; bag.add(m, R(Math.max(0, u - 0.25), Math.min(L, u + 0.25), ya + 0.5, yb, 0.0, 0.32)); }   // (every other column, wider: from 200 m the stripes read the same)
   }
   const top = y + h;
   bag.add(m, R(0, L, top - 1.2, top - 0.5, 0, 0.3)); bag.add(m, R(-0.05, L + 0.05, top - 0.5, top - 0.1, 0, 0.9)); bag.add(m, R(-0.05, L + 0.05, top - 0.1, top + 0.55, 0.45, 0.9));
@@ -109,7 +108,8 @@ function piers(bag, [x0, z0, x1, z1], y0, y1) {
     const n = Math.max(2, Math.round(L / 3.2));
     for (let i = 0; i <= n; i++) {
       const u = a0 + i * L / n, a = o, b = o + sg * 0.35;
-      bag.add(PLAIN, along ? box(u - 0.3, y0, Math.min(a, b), u + 0.3, y1 + 0.4, Math.max(a, b)) : box(Math.min(a, b), y0, u - 0.3, Math.max(a, b), y1 + 0.4, u + 0.3));
+      const o2 = LEAN.on ? { noBottom: true, noTop: true } : {};
+      bag.add(PLAIN, along ? frustum([u - 0.3, Math.min(a, b), u + 0.3, Math.max(a, b)], y0, y1 + 0.4, 0, 0, 0, 0, o2) : frustum([Math.min(a, b), u - 0.3, Math.max(a, b), u + 0.3], y0, y1 + 0.4, 0, 0, 0, 0, o2));
     }
   }
 }
@@ -134,9 +134,7 @@ function rows(bag, rect, front, y, h, seed) {
       const ya = y + B + f * 3.4 + 0.35, yb = ya + (f === 1 ? 2.35 : 2.05);
       for (let k = 0; k < 3; k++) { const ua = 0.5 + k * ((W - 1.0 - 1.0) / 2); bag.add('glass_outer', Rm(ua, ua + 1.0, ya, yb, -0.02, 0.05)); }
     }
-    bag.add(PLAIN, R(c0 - 0.02, c1 + 0.02, y + H - 0.8, y + H - 0.25, 0, 0.12));
     bag.add(PLAIN, R(c0 - 0.02, c1 + 0.02, y + H - 0.25, y + H + 0.12, 0, 0.62));
-    bag.add(PLAIN, R(c0 - 0.02, c1 + 0.02, y + H + 0.12, y + H + 0.5, 0.2, 0.55));
     bag.add('tar_wood', R(c0, c1, y + H, y + H + 0.04, -ext * 0.9, -0.1));
   }
 }
@@ -220,10 +218,12 @@ const folded = (bag, T) => {
 const wrap = (fn, T) => (el, ctx) => fn(el, { ...ctx, bag: folded(ctx.bag, T) });
 const wrapAll = (els, T) => Object.fromEntries(Object.entries(els).map(([k, fn]) => [k, wrap(fn, T)]));
 const A = STYLES.artdeco.elements;
+/** The lean form (blocks.js LEAN): on while a lot with solid walls builds, off for a shop with its room or an opened lot (their fronts are hollow and seen from within). */
+const lean = (fn, boxes = false) => (el, ctx) => { const was = [LEAN.on, LEAN.boxes]; LEAN.on = !el.room && !el.up; LEAN.boxes = LEAN.on && boxes; LEAN.rooms = true; try { return fn(el, ctx); } finally { [LEAN.on, LEAN.boxes] = was; LEAN.rooms = false; } };
 registerStyle('artdeco_far', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: wrapAll({ skyscraper: withStrip(skyscraper), diner: lowBox(3.4, 'paint_white'), walkup: lowBox(15, 'facade_brick'), turned: A.turned }, FOLD_FAR),
+  elements: wrapAll({ skyscraper: lean(withStrip(skyscraper), true), diner: lowBox(3.4, 'paint_white'), walkup: lowBox(15, 'facade_brick'), turned: A.turned }, FOLD_FAR),
   objects: {},
 });
 // the near form: the style's own builders, their materials folded
-registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: withUpstairs(A.skyscraper), walkup: withTenement(A.walkup) }, FOLD) });
+registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: lean(withUpstairs(A.skyscraper)), walkup: withTenement(A.walkup) }, FOLD) });
