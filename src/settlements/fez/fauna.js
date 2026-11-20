@@ -3,6 +3,7 @@
 // an egret on the river's quay. No fish: the Oued Fes is drawn but not swum in.
 import { SITES, riverZ, siteY, ground0, RADIUS, inLot } from './layout.js';
 import { houseList } from './houses.js';
+import { openWalks } from './openwalk.js';
 import { planOf } from '../../styles/marinid/house.js';
 import { frame } from '../../styles/mamluk/kit.js';
 
@@ -41,7 +42,8 @@ const hash = (x, z, s = 0) => { const k = Math.sin(x * 12.9898 + z * 78.233 + s 
 // the martins' nests: on the cedar corbels under the canopy of the prayer hall's front (madrasa.js zH = court's south edge + 0.7; hallfront.js canopy at y + 5.2, corbels every 0.55 m from gx0 + 0.3), open to the court
 { const gx0 = b[0] + 6.4, gx1 = b[2] - 6.4, u0 = gx0 + 0.3, u1 = gx1 - 0.3, n = Math.max(2, Math.round((u1 - u0) / 0.55)), zH = b[3] - 9.6 - 0.7 + 0.7, yy = siteY('bou') + 5.0;
   for (const [i, side] of [[11, 1], [27, -1]]) critters.push({ model: 'swallow_nest', at: [u0 + (u1 - u0) * i / n, yy, zH - 0.3], rot: -Math.PI / 2, cycle: 33 + 4 * side, flight: 8, radius: 7, side, rise: -3.2 }); }
-// cats: in the corner of a dukkan's cell, on its floor, by the jamb (a share of the bays, by the bay's own place)
+// cats: in the corner of a dukkan's cell, on its floor, by the jamb (a share of the bays, by the bay's own place; not in the cells the visitor enters)
+const ROUTES = openWalks().flat();
 for (const h of houseList()) {
   if (!h.shops || Math.hypot(h.rect[0], h.rect[1]) > 250) continue;
   const P = planOf(h), fr = frame(h.rect, h.door), [nx, nz] = fr.N;
@@ -49,6 +51,7 @@ for (const h of houseList()) {
     const w = bay.u1 - bay.u0, c = fr.P((bay.u0 + bay.u1) / 2, 0);
     if (w < 2.2 || hash(c[0], c[1], 3) > 0.095) continue;
     const q = fr.P(bay.u0 + 0.4, -1.05);
+    if (ROUTES.some((p) => Math.hypot(p[0] - q[0], p[1] - q[1]) < 1.8)) continue;
     critters.push({ model: hash(c[0], c[1], 5) < 0.5 ? 'cat_tabby' : 'cat_orange', at: [q[0], h.y + 0.3, q[1]], rot: Math.atan2(nz, nx) + (hash(c[1], c[0]) - 0.5) * 0.8, range: [7, 2.5] });
   }
 }

@@ -181,7 +181,7 @@ One mesh (`fauna:critters`, one draw, not counted by `draw-count`), 42 animals, 
 - **Hens and a cock** in the funduq court's south-west corner. [inferred: the funduq kept fowl with its animals.]
 - **Pigeons** (18) on the paving of the Place Seffarine, the Qarawiyyin's sahn and the tannery's north walk. [stated for the tannery's use of pigeon dung §4.4; the flocks' places inferred.]
 - **Three caged songbirds** hung from the lintels of dukkans on the Talaa Kebira, swaying and hopping. [inferred: caged birds are a commonplace of Maghribi shopfronts; none is documented for 1350.]
-Not done: a donkey and a mule rig (the muleteers' donkeys are still still figures); storks on the walls (§8: not in our sources); the egret and swifts stay as the old flocks.
+The cats keep out of the cells the visitor enters (§16.4), so there are a few fewer. Not done: a donkey and a mule rig (the muleteers' donkeys are still still figures); storks on the walls (§8: not in our sources); the egret and swifts stay as the old flocks.
 
 ### 16.3 Night (`nightlight.js`, night plans in `town.js`)
 
