@@ -3,25 +3,14 @@
 import { GROUND, HALL, RADIUS, lots } from './layout.js';
 import { walkSet, ARRIVAL } from './openwalk.js';
 import { isOpen, person, rng } from './town.js';
+import { shopSites } from './dice.js';
 import { shopBay, TRADES } from './shopfront.js';
 import { faceFrame } from '../../styles/dutch/facade.js';
 import { profile } from '../../styles/dutch/upper.js';
 
 const mid = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
-let SHOPS = null;
-/** The shop lots: [{ lot, trade }], nearest the arrival first, no two neighbours of one trade; the lot at the Town Hall's corner (shut) and warehouses excepted. */
-export function shopLots() {
-  if (SHOPS) return SHOPS;
-  SHOPS = [];
-  const d = (l) => Math.hypot(mid(l)[0] - ARRIVAL[0], mid(l)[1] - ARRIVAL[1]);
-  let k = 0;
-  for (const l of [...walkSet()].filter((q) => isOpen(q) && shopBay(q) && !(q.rect[0] <= HALL[2] + 0.5 && q.rect[1] - HALL[3] < 3)).sort((a, b) => d(a) - d(b)).slice(0, 8)) {
-    let t = TRADES[(l.seed + k) % TRADES.length];
-    if (SHOPS.length && SHOPS[SHOPS.length - 1].trade === t) t = TRADES[(TRADES.indexOf(t) + 1) % TRADES.length];
-    SHOPS.push({ lot: l, trade: t }); k++;
-  }
-  return SHOPS;
-}
+/** The shop lots: [{ lot, trade }] (dice.js: no builders needed to know them). */
+export const shopLots = () => shopSites(8);
 /** The keeper of a shop: standing inside at the window, facing the street. */
 function keeper(l, trade, rand) {
   const B = shopBay(l), F = faceFrame(l.rect, l.front), [x, z] = F.at(B.uw, -0.8), out = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[l.front];

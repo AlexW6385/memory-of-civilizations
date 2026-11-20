@@ -8,7 +8,8 @@ import { lathe } from '../../core/geom.js';
 import { faceFrame, fbox, bar, slab4 } from '../../styles/dutch/facade.js';
 import { profile } from '../../styles/dutch/upper.js';
 
-export const TRADES = ['baker', 'cheese', 'draper', 'grocer', 'delft', 'tobacco'];
+import { TRADES } from './dice.js';
+export { TRADES };
 /** Awning cloth and the board's emblem colours by trade. */
 const LOOK = { baker: ['cloth_ochre', 'hide_tan'], cheese: ['cloth_red', 'cloth_ochre'], draper: ['cloth_indigo', 'cloth_red'], grocer: ['cloth_green', 'hide_brown'], delft: ['cloth_white', 'paint_blue'], tobacco: ['hide_brown', 'cloth_ochre'] };
 const BASE = 1.0, SILL = BASE + 0.45;
