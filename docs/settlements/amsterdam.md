@@ -237,3 +237,30 @@ Carillons and the organ; the lute and the viol; songs in the taverns. [inferred]
 - [From Dwelling to Dwelling (Herengracht 249) — DASH, TU Delft](https://journals.open.tudelft.nl/dash/article/download/5077/4630)
 - [Voorstraat 97 — Jaarboek, dbnl](https://www.dbnl.org/tekst/_jaa030199601_01/_jaa030199601_01_0031.php)
 - [Huisraad uit beerputten toont diversiteit van verdwenen wijk Vlooienburg — UvA](https://www.uva.nl/shared-content/faculteiten/nl/faculteit-der-geesteswetenschappen/nieuws/2022/12/huisraad-uit-beerputten-toont-diversiteit-van-verdwenen-wijk-vlooienburg.html)
+
+## 10. Match to the reference standard (the visitor's walk, night, sound, animals, writing)
+
+Marking: [stated] has a source named beside it; [inferred] is this dossier's reasoning from the place and date. Nothing here changes a choice made in §1–§9.
+
+### 10.1 The visitor's walk
+- [stated] Shop fronts of the 17th-century canal houses were open stall-like fronts: the lower shutters folded down into a counter, goods laid on the stoop, on ledges and under awnings, shops clustering around the Dam (Clé Lesger, *The Rise of the Amsterdam Market and Information Exchange*, 2006/2015, on retail and shop fronts). So the open ground floors on the walk carry a counter board, goods and an awning of the trade's cloth.
+- [inferred] The trades chosen (baker, cheese, draper, grocer, Delft ware, tobacco) are those the dossier's §5 already names for the Dam's surroundings; their goods (loaves, cheese rounds, cloth bolts, jars and sacks, plates, tobacco rolls) are the ordinary stock of each. The keeper stands inside at the window (a wife for the food trades, a burgher for cloth and ware).
+- [inferred] Which lots stand open: those whose fronts lie within 9 m of the walk (the Dam's south row, the Damrak quay, the Singel's quay street, the way to the Nieuwe Kerk), the twelve nearest the arrival; eight of them are shops, the rest lived-in houses with their halls enterable. The street's clutter keeps off the way to every open door (barrels and benches stand beside the stoop, not on it).
+
+### 10.2 Night
+- [stated] Amsterdam's street lighting: Jan van der Heyden's oil lamps from 1669 (a lamp on a post about every 125-150 ft; some 1,800 by 1670), lit from dusk by the lamplighters (Wikipedia, *Jan van der Heyden*; Rijksmuseum notes on his *Fire Engine* and lamp designs). The glow of every lamp of the quays and the Dam is a halo on the lamps' own positions.
+- [inferred] Candle and rushlight behind the small panes of the houses, more on the lower floors and fewer upstairs; shops open into the early evening with a hanging lantern over the counter; a lantern at the Weigh House door. The shares of lit windows are a hash of the house and the pane, not a count of households.
+
+### 10.3 Sound
+- [stated] Five carillons sounded in the town (the Town Hall, the Westerkerk, the Zuiderkerk, the Oude Kerk, the Nieuwe Kerk's tower) and struck the quarters and hours (the profile's `carillon` hours were already set).
+- [stated] Transport of goods in the old town went on sledges, not carts, and by boat (§5.6 of this dossier; Amsterdam ordinances against carts in the centre, as cited there). Hence `amSledge` and `amPraam`.
+- [inferred] The rest is reasoning from the trades: the Weigh House's weights and chains (the building weighed goods, §5.4), the treadwheel cranes of the warehouses, caulkers' mallets at the IJ's yards, the fishwives' market at the Damrak's head, a lute on the Dam, the Nieuwe Kerk's bell before the sermons, the rattle-watch at night (the night watch in Dutch towns carried rattles: attested for the Dutch Republic generally, not confirmed for Amsterdam in 1670), the cries of milk, fish, peat, sand and old clothes. Every melody is invented; no word is sung.
+
+### 10.4 Animals
+- [stated] The canals held domestic ducks and geese; pigeons and sparrows lived on the squares and quays (the dossier §11 lists the town's fauna).
+- [inferred] Cats before open shops (against rats in the goods), dogs at the warehouse doors (watchdogs; dogs also drew small carts in the Netherlands), pigeons on the Dam's paving. No census exists.
+
+### 10.5 Writing
+- [stated] Latin capitals, as the Dutch Republic wrote on signs, gable stones and public buildings. The letter table is Rome's verified one (`src/settlements/rome/lettering.js`: A-Z without J, U, W), read only; a text is written only if every letter is in it.
+- [inferred] The board words in the spelling of the time: BROOD (bread), KAES (cheese), LAKEN (cloth), SPECERYE (spices), POTTEN (pots, for Delft ware), TABAK. The spellings are plausible for 1670 but were not checked against a dated sign.
+- Not done: wear (worn treads and thresholds, the quay walls' waterline stain) and inscriptions on the Town Hall and the Weigh House.

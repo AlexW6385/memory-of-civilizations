@@ -1,4 +1,4 @@
-// Amsterdam by night about 1670 (docs/settlements/amsterdam.md §10.2x): oil lamps, 1,800 of them since 1669 (van der Heyden's street lamps, one per
+// Amsterdam by night about 1670 (docs/settlements/amsterdam.md §10.2): oil lamps, 1,800 of them since 1669 (van der Heyden's street lamps, one per
 // 125-150 ft), candles and rushlights behind the small panes of the houses, lanterns hung out at the open shop fronts, the great lantern at the Weigh House
 // door. Made of geometry in one material, `halo` (palette.js): light added over the scene at night only, no light, no shadow, no collision, the shape
 // of each piece carried by its normals (a copy of the pattern of London's and Suzhou's nightlight.js, whose `Halo` this class is). Where the panes
