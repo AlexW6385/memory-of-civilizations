@@ -1,5 +1,6 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
 import { openShops } from './openwalk.js';
+import { cressets } from './nightlight.js';
 import { keeperOf, TRADE_SHELF } from './lavki.js';
 import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, NIKOLSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ, streetSkip, inLot } from './layout.js';
 const base = (id, elements, rooms = []) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
@@ -26,7 +27,7 @@ export async function houses() {
   const yb = yards(all); for (let i = 0; i < yb.length; i += 300) plans.push(base(`muscovy-yards-${i / 300}`, yb.slice(i, i + 300)));
   plans.push(base('muscovy-streets', streets()), base('muscovy-market', market()), base('muscovy-churches', CHURCHES.map(([x, z, yaw]) => ({ t: 'log_church', c: [x, z], y: height(x, z), yaw }))));
   plans.push(base('muscovy-waysides', waysides()), base('muscovy-stages', stages()), { ...base('muscovy-river-life', riverLife()), style: 'life' });
-  plans.push(...lavkaPlans());
+  plans.push(...lavkaPlans(), base('muscovy-cressets', cressets()));
   plans.push({ ...base('muscovy-people', people()), style: 'life' });
   return plans;
 }

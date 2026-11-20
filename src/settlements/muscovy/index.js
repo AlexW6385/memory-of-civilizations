@@ -6,6 +6,7 @@ import { river } from './river.js';
 import music from './music.js';
 import { houses } from './town.js';
 import './lavki.js';
+import './nightlight.js';
 export { music };
 export const landmarks = [{ plan: square, music }, { plan: dormition, music }];
 export async function town() { return [kremlin, river, ...(await houses())]; }

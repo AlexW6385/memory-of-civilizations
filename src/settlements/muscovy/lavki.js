@@ -4,7 +4,8 @@
 // The shell (the wide door, the free room, the side counter, the piers) is the style's rows() with `open` keys (styles/muscovite/index.js).
 // Shop frame: u along z from the cell's start, w into the room from the slab's inner face, v up. [inferred throughout: see the dossier.]
 import { box, lathe } from '../../core/geom.js';
-import { STYLES } from '../../core/build.js';
+import { STYLES, registerStyle } from '../../core/build.js';
+import '../../styles/muscovite/index.js';
 import { SLAB } from '../../styles/muscovite/rowsgeo.js';
 
 const rng = (seed) => { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); };
@@ -103,7 +104,7 @@ function lavka(el, { bag, col }) {
 /** Register `lavka_open` with the style (called by index.js). */
 export function registerLavki() {
   const S = STYLES.muscovite;
-  if (S && !S.elements.lavka_open) S.elements.lavka_open = (el, ctx) => { for (const one of el.list) lavka({ ...one, y: el.y }, ctx); };
+  if (S && !S.elements.lavka_open) registerStyle('muscovite', { ...S, elements: { ...S.elements, lavka_open: (el, ctx) => { for (const one of el.list) lavka({ ...one, y: el.y }, ctx); } } });
 }
 registerLavki();
 /** A keeper's dress by seed (as the street life's people of town.js). */
