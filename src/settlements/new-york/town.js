@@ -8,6 +8,9 @@ import { concoursePeople } from '../../styles/artdeco/concourse.js';
 import { libraryPeople } from '../../styles/artdeco/library.js';
 import './far.js';
 import { upOf } from './upper-plan.js';
+import { nightPlan } from './nightlight.js';
+/** The street lamps' places (grid frame [x, z, y, h]), for the night's light. */
+const LAMPS = [];
 /** How far from the visitor the blocks are built in full (m, to a tile's middle); beyond, the simple form (far.js). */
 const NEAR = 200, TILE = 220, OFF = 160;
 /** The pavements' and the yards' tiles: 300 m (every tile is a plan, and every plan a mesh for each material it holds: 150 m tiles made 835 meshes of the streets alone). */
@@ -120,7 +123,7 @@ function streetLife() {
       const woman = rand() < 0.4;
       L.push({ t: 'figure', at: [x + (rand() - 0.5) * 1.6, z], y: height(x, z), rot: rand() < 0.5 ? 0 : Math.PI, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'trousers', cloth: pick(DRESS), cloth2: pick(['cloth_white', 'cloth_grey', 'cloth_black']), skin: pick(['skin_light', 'skin_light', 'skin_medium', 'skin_dark']), hat: woman ? pick(['cap', 'none']) : 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']) });
     }
-    for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1) && !onElStair(xx, z, 0.5) && !inSpecial(xx, z, 0.4) && !nearStand(xx, z, 1.8)) L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); }
+    for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1) && !onElStair(xx, z, 0.5) && !inSpecial(xx, z, 0.4) && !nearStand(xx, z, 1.8)) { L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); LAMPS.push([xx, z, height(xx, z), 5.5]); } }
   }
   // people waiting at the crossings: at about half the corners a knot of two to five on the kerb, facing across the
   // avenue or the street, a policeman in blue on some corners of Fifth Avenue
@@ -352,5 +355,6 @@ export async function buildings() {
   const dl = dinerLife(), c = toCity(...DINER_AT);
   // the walk from the entrance down Fifth Avenue to the Empire State's doors (plan.js walks) kept clear of the landmarks' stroll-about figures: an element with a rect and no items marks it for the life placer and draws nothing
   const route = base('new-york-route', [{ t: 'curb', items: [], rect: [2.2, 172, 5.8, 232] }]);
-  return [...plans, route, ...streetLife(), ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), libraryLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
+  const life = streetLife();
+  return [...plans, route, nightPlan(LAMPS, base), ...life, ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), libraryLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }
