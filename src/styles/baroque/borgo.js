@@ -145,7 +145,12 @@ function bottega(L, uc, w, o, rand, open) {
     L.box('wood_dark', uc - w / 2 - 0.04, 0.0, 0.03, uc - w / 2 + 0.3, 3.0, 0.1);              // a leaf of the folding doors swung back
     L.box('wood_dark', uc - w / 2 - 0.04, 0.0, 0.03, uc + w / 2 + 0.04, 0.95, 0.07);           // the lower leaves, closed
   } else {
-    goods(L, uc, w, 1.06, o.trade, rand);
+    // an open front: the folded-down board is only at the two jambs (the middle is the way in; the shop's own counter and goods are inside), with the trade's goods on them
+    for (const sd of [-1, 1]) {
+      const a = sd < 0 ? uc - w / 2 : uc + w / 2 - 0.55;
+      L.box('timber', a, 1.0, 0.02, a + 0.55, 1.06, 0.6); L.box('iron', a + (sd < 0 ? 0.04 : 0.5), 0.6, 0.02, a + (sd < 0 ? 0.06 : 0.52), 1.0, 0.04);
+      goods(L, a + 0.275, 0.55, 1.06, o.trade, rand);
+    }
   }
   // the sign: a painted board hung from an iron bracket at the jamb's side
   const su = uc + w / 2 + 0.5;

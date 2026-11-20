@@ -5,6 +5,7 @@
 // shared objects (life).
 
 import { feast } from './feast.js';
+import { clearU, frontedLots, lotRow } from './openwalk.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 import { COACH_SITES, OVAL, FRONT_X, FLOOR, BORGO, GARDEN, TIBER, rows, frontPt, lots, tiberX, height, CROSSING, openHomes, SISTINA_C, COURT } from './layout.js';
 
@@ -63,6 +64,7 @@ export function streetPlans() {
   L.push({ t: 'stall', at: [OVAL.c[0] + 40, 46], rot: -2.3, seed: 77, awning: 'cloth_white', goods: ['basket', 'cloth', 'basket'], w: 2.2, d: 1.2 });
   L.push({ t: 'figure', at: at(OVAL.c[0] + 40, 46, -2.3, 0, -1.2), y: 0, rot: -2.3 + Math.PI, seed: 78, pose: 'stand', dress: 'robe', cloth: 'cloth_black', skin: 'skin_light', hat: 'cap', over: 'none' });
   // the keepers of the botteghe that can be entered, behind their counters, a customer before each; and women at the wall fountains
+  const UNITS = new Map(frontedLots().map((f) => [f.l, lotRow(f).units[0]]));
   const sc = (o) => ({ t: 'figure', y: 0, skin: 'skin_light', ...o });
   const doors = (row, u) => {
     const kp = frontPt(row, u.u0 + (u.flip ? 1.3 : u.w - 1.3), 4.3), cu = frontPt(row, u.u0 + u.w / 2 + 0.5, 1.6);
@@ -70,6 +72,8 @@ export function streetPlans() {
     L.push(sc({ at: cu.at, y: 0.05, rot: cu.out + Math.PI, seed: u.seed + 1, pose: 'talk', dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_white', hat: 'veil', over: 'shawl' }));
     if (u.trade === 'osteria') for (const [k, d] of [[0, 1.7], [1, 2.3]]) { const sp = frontPt(row, u.u0 + 0.55, d); L.push(sc({ at: sp.at, y: 0.05, rot: sp.out + Math.PI / 2, seed: u.seed + 20 + k, pose: 'sit', dress: 'tunic', legs: 'hose', cloth: k ? 'cloth_green' : 'cloth_ochre', cloth2: 'cloth_brown', hat: 'brim', over: 'cloak' })); }
   };
+  // (a point on a casa's front, kept out of its shop's opening and its door's lane)
+  const fpu = (row, u, off, inward) => frontPt(row, clearU(u, u.u0 + off), inward);
   const prop = (kind, a, rot, seed, extra = {}) => L.push({ t: kind, at: a, y: 0, rot, seed, ...extra });
   const KINDS = ['barrel', 'crates', 'firewood', 'sacks', 'basket', 'stool'];
   for (const row of rows()) for (const u of row.units) {
@@ -77,26 +81,26 @@ export function streetPlans() {
     if (u.open) doors(row, u);
     if (u.kind !== 'casa') {
       // a porter on the palazzo's step, his staff in his hand
-      const p = frontPt(row, u.u0 + u.w / 2 + 2.2, -0.9);
+      const p = fpu(row, u, u.w / 2 + 2.2, -0.9);
       if (rr() < 0.6) L.push(sc({ at: p.at, rot: p.out + 0.3, seed: u.seed + 3, pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_black', hat: 'cap', over: 'cape', carry: 'staff' }));
       continue;
     }
     if (u.fountain) continue;
     // goods and gear by the front, a cat on the step
-    prop(KINDS[Math.floor(rr() * KINDS.length)], frontPt(row, u.u0 + 0.5 + rr() * (u.w - 1), -0.7 - rr() * 0.3).at, rr() * 6.28, u.seed + 7);
-    if (rr() < 0.5) prop(KINDS[Math.floor(rr() * 4)], frontPt(row, u.u0 + 0.5 + rr() * (u.w - 1), -0.8).at, rr() * 6.28, u.seed + 8);
-    if (u.cat) L.push({ t: 'animal', kind: 'cat', at: frontPt(row, u.u0 + u.w * 0.5, -0.5).at, y: 0, rot: out + 1, seed: u.seed + 9 });
+    prop(KINDS[Math.floor(rr() * KINDS.length)], fpu(row, u, 0.5 + rr() * (u.w - 1), -0.7 - rr() * 0.3).at, rr() * 6.28, u.seed + 7);
+    if (rr() < 0.5) prop(KINDS[Math.floor(rr() * 4)], fpu(row, u, 0.5 + rr() * (u.w - 1), -0.8).at, rr() * 6.28, u.seed + 8);
+    if (u.cat) L.push({ t: 'animal', kind: 'cat', at: fpu(row, u, u.w * 0.5, -0.5).at, y: 0, rot: out + 1, seed: u.seed + 9 });
     // the trade at the door: the cobbler at his stool, men on the osteria's bench, women talking, the baker's boy
-    if (u.trade === 'cobbler' && !u.open) { const c = frontPt(row, u.u0 + u.w * 0.5 + 1.2, -1.1).at; prop('stool', c, 0, u.seed + 11); L.push(sc({ at: c, rot: out, seed: u.seed + 12, pose: 'sit', dress: 'tunic', legs: 'hose', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', over: 'apron' })); }
-    else if (u.trade === 'osteria' && !u.open) { const c = frontPt(row, u.u0 + u.w * 0.5, -0.9).at; prop('bench', c, out, u.seed + 13); for (const s of [-0.5, 0.5]) L.push(sc({ at: frontPt(row, u.u0 + u.w * 0.5 + s, -0.9).at, rot: out, seed: u.seed + 14 + s * 4, pose: 'sit', dress: 'tunic', legs: 'hose', cloth: s > 0 ? 'cloth_indigo' : 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', over: 'cloak' })); }
-    else if (rr() < 0.3) { for (const [k, cl] of [[0, 'cloth_black'], [1, 'cloth_ochre']]) L.push(sc({ at: frontPt(row, u.u0 + u.w * 0.3 + k * 0.8, -1.6 - k * 0.2).at, rot: out + (k ? -2.6 : 2.6), seed: u.seed + 15 + k, pose: 'talk', dress: 'robe', cloth: cl, cloth2: 'cloth_white', hat: 'veil', over: 'shawl' })); }
-    if (u.trade === 'baker' && rr() < 0.7) L.push(sc({ at: frontPt(row, u.u0 + u.w * 0.7, -1.4).at, rot: out + 0.5, seed: u.seed + 17, pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_white', cloth2: 'cloth_brown', hat: 'cap', over: 'apron', carry: 'basket', child: true }));
+    if (u.trade === 'cobbler' && !u.open) { const c = fpu(row, u, u.w * 0.5 + 1.2, -1.1).at; prop('stool', c, 0, u.seed + 11); L.push(sc({ at: c, rot: out, seed: u.seed + 12, pose: 'sit', dress: 'tunic', legs: 'hose', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', over: 'apron' })); }
+    else if (u.trade === 'osteria' && !u.open) { const c = fpu(row, u, u.w * 0.5, -0.9).at; prop('bench', c, out, u.seed + 13); for (const s of [-0.5, 0.5]) L.push(sc({ at: fpu(row, u, u.w * 0.5 + s, -0.9).at, rot: out, seed: u.seed + 14 + s * 4, pose: 'sit', dress: 'tunic', legs: 'hose', cloth: s > 0 ? 'cloth_indigo' : 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', over: 'cloak' })); }
+    else if (rr() < 0.3) { for (const [k, cl] of [[0, 'cloth_black'], [1, 'cloth_ochre']]) L.push(sc({ at: fpu(row, u, u.w * 0.3 + k * 0.8, -1.6 - k * 0.2).at, rot: out + (k ? -2.6 : 2.6), seed: u.seed + 15 + k, pose: 'talk', dress: 'robe', cloth: cl, cloth2: 'cloth_white', hat: 'veil', over: 'shawl' })); }
+    if (u.trade === 'baker' && rr() < 0.7) L.push(sc({ at: fpu(row, u, u.w * 0.7, -1.4).at, rot: out + 0.5, seed: u.seed + 17, pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_white', cloth2: 'cloth_brown', hat: 'cap', over: 'apron', carry: 'basket', child: true }));
   }
   // the fronted lots about the Borgo: the same goods and gear
   for (const l of lots()) {
     if (!l.fronted) continue;
     const rr = rng(l.seed + 5), n = l.front === 'n', w = l.rect[2] - l.rect[0], out = n ? 0 : Math.PI;
-    const P = (u, d) => (n ? [l.rect[2] - u, l.rect[1] + d] : [l.rect[0] + u, l.rect[3] - d]);
+    const un = UNITS.get(l), cu = (x) => (un ? clearU(un, x) : x), P = (u, d) => (n ? [l.rect[2] - cu(u), l.rect[1] + d] : [l.rect[0] + cu(u), l.rect[3] - d]);
     if (rr() < 0.65) prop(KINDS[Math.floor(rr() * 5)], P(0.8 + rr() * (w - 1.6), -0.8), rr() * 6.28, l.seed + 3);
     if (rr() < 0.2) L.push({ t: 'animal', kind: 'cat', at: P(w * 0.5, -0.5), y: 0, rot: out + 1, seed: l.seed + 4 });
     if (rr() < 0.18) L.push(sc({ at: P(w * 0.4, -1.6), rot: out + 2.4, seed: l.seed + 6, pose: 'talk', dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'veil', over: 'shawl' }));
