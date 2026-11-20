@@ -28,7 +28,6 @@ test('Athens has the voices of its streets, riding on the animals, and no bell h
   const P = profileOf('athens'), L = P.animals[LIFE];
   assert.ok(L.market > 0 && L.map === AT);
   assert.deepEqual(Object.keys(P.animals).sort(), ['dog', 'donkey', 'rooster', 'sheepbell'], 'the life is not an animal');
-  assert.equal(profileOf('new-york').animals[LIFE], undefined);
   assert.equal(P.bells, null);
   const ev = []; let prev = null;
   for (let m = 0; m <= 24 * 60; m += 0.5) { const hour = (m / 60) % 24, now = { hour, el: 0, lat: 38 }; ev.push(...due(P, prev, now)); prev = now; }

@@ -509,3 +509,34 @@ export const MODELS = {
   cat_tabby: () => cat('tabby'), cat_orange: () => cat('orange'), dog, cormorant, fishing_craft: craft, cagebird, swallow_nest: swallowNest, kingfisher,
 };
 Object.assign(MODELS, { pigeon_grey: () => pigeon('grey'), pigeon_white: () => pigeon('white'), pigeon_dark: () => pigeon('dark'), goose_white: () => goose('white'), goose_grey: () => goose('grey') });
+
+// ═════════════ the domestic turkey (Tenochtitlan's yards) ═════════════
+/** A domestic turkey, standing (feet at y = 0; Mexican breeds were dark, bronze-sheened): a stout body, the fan of the tail half spread, the bare blue head with its red snood and wattle; parts as the fowl's (1 neck, 2 head, 3 tail, 4 5 legs). */
+export function turkey() {
+  const m = new Model(), C = { back: [0.2, 0.14, 0.09], breast: [0.42, 0.28, 0.12], tail: [0.17, 0.12, 0.08], band: [0.55, 0.42, 0.25], skin: [0.52, 0.6, 0.78], red: [0.82, 0.14, 0.1] };
+  const S = [[0.3, 0.34, 0.07, 0.06], [0.2, 0.37, 0.17, 0.13], [0.05, 0.37, 0.23, 0.18], [-0.1, 0.36, 0.21, 0.16], [-0.25, 0.37, 0.12, 0.1], [-0.33, 0.39, 0.03, 0.03]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 8, col: ({ p, n }) => { const c = lerp(C.back, C.breast, sm(0.4, -0.4, n[1]) * (0.5 + 0.5 * sm(-0.2, 0.2, p[0]))); return shade(c, 0.9 + 0.2 * hash3(p)); } });
+  for (const z of [-1, 1]) m.ball([-0.02, 0.38, z * 0.17], [0.22, 0.07, 0.04], ({ p }) => shade(lerp(C.back, C.band, sm(-0.1, -0.2, p[0]) * 0.6), 0.9 + 0.2 * hash3(p, 2)), { nu: 5, nv: 5 });
+  m.as(3, [-0.3, 0.38, 0], null, () => {
+    // the fan, half spread: a vertical sheet behind the rump, its feathers' tips banded
+    m.poly([[-0.3, 0.36, -0.05], [-0.3, 0.36, 0.05], [-0.46, 0.5, 0.22], [-0.52, 0.62, 0.1], [-0.54, 0.64, 0], [-0.52, 0.62, -0.1], [-0.46, 0.5, -0.22]], [C.tail, C.tail, C.band, C.tail, shade(C.tail, 1.2), C.tail, C.band]);
+  });
+  const NP = [0.24, 0.4, 0], HP = [0.31, 0.62, 0];
+  m.as(1, NP, null, () => m.tube([[0.22, 0.4, 0], [0.28, 0.52, 0], [0.31, 0.62, 0]], [0.075, 0.05, 0.036], { sides: 6, ref: [1, 0, 0], col: ({ t }) => lerp(C.breast, C.skin, sm(0.5, 1, t)) }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.335, 0.655, 0], [0.05, 0.045, 0.038], ({ n }) => lerp(C.skin, C.red, sm(0.2, -0.6, n[1]) * 0.5), { nu: 5, nv: 5 });
+    m.tube([[0.38, 0.65, 0], [0.415, 0.64, 0]], [[0.014, 0.017], [0.002, 0.003]], { sides: 4, col: [0.8, 0.7, 0.5] });
+    m.tube([[0.372, 0.68, 0], [0.392, 0.655, 0], [0.397, 0.61, 0]], [0.011, 0.01, 0.004], { sides: 4, col: C.red });    // the snood
+    m.ball([0.335, 0.6, 0], [0.022, 0.04, 0.016], C.red, { nu: 4, nv: 4 });                                              // the wattle
+    eyes(m, 0.355, 0.665, 0.032, 0.008, [0.3, 0.12, 0.03]);
+  });
+  for (const [part, z] of [[4, -1], [5, 1]]) {
+    const hip = [0.0, 0.27, z * 0.08];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [0.0, 0.14, z * 0.08], [0.01, 0.02, z * 0.08]], [0.036, 0.02, 0.015], { sides: 4, col: ({ t }) => (t < 0.3 ? C.back : [0.7, 0.5, 0.48]) });
+      for (const a of [-0.5, 0, 0.5]) m.tube([[0.01, 0.02, z * 0.08], [0.06, 0.008, z * 0.08 + a * 0.03], [0.11, 0.004, z * 0.08 + a * 0.075]], [0.008, 0.006, 0.004], { sides: 3, col: [0.7, 0.5, 0.48] });
+    });
+  }
+  return m;
+}
+MODELS.turkey = turkey;
