@@ -8,9 +8,10 @@ import {
   wallRuns, gates, lots, marketRows, marketYards, inDitch, inRect, DAO_HALLS, GALLERIES,
 } from './layout.js';
 import { dressLife } from './dress.js';
+import { nightPlans } from './night.js';
 import { interiorElements, interiorLife, furnishedLot } from './interiors.js';
 
-const base = (id, elements, style = 'tang') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [28, 20], facing: 'n' } });
+const base = (id, elements, style = 'tang-changan') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [28, 20], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
@@ -164,6 +165,7 @@ function life() {
 
 export async function town() {
   const plans = [base('tang-changan-walls', walls()), base('tang-changan-avenue', avenue()), base('tang-changan-daoist', daoist()), base('tang-changan-market', market())];
+  plans.push(...nightPlans(base, WARDS, gates, MARKET.id, marketRows));
   const fl = furnishedLot(), by = new Map();
   for (const l of lots()) { if (!by.has(l.ward)) by.set(l.ward, []); by.get(l.ward).push(l); }
   for (const [ward, ls] of [...by].sort()) for (let i = 0; i < ls.length; i += 40) plans.push(base(`tang-changan-houses-${ward}-${i / 40}`, ls.slice(i, i + 40).map((l) => ({ t: 'tang_house', ...l, furnished: l === fl }))));
