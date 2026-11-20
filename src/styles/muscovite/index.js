@@ -23,6 +23,7 @@ import { gateFront } from './gate.js';
 import { wayside } from './street.js';
 import { landing, raft } from './river.js';
 import { dressHouse, yardbuild, garden } from './yard.js';
+import { DOOR_OPEN, SLAB, END, shopKey } from './rowsgeo.js';
 
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -497,16 +498,33 @@ function tsarCannon(el, { bag, col }) {
  * with its counter and its upper shutter propped out, shelves and goods inside; a plank pent over the
  * shop fronts on brackets; plank roofs over the ranges.
  */
+/** The solid parts of a range with opened shops: end walls, back or party wall, partitions, and each front's piers (a closed shop's whole front); the shop rooms and the opened doors stay free. */
+function rangeWalls(col, { ra, rb, za, zb, sides, n, step, y, H, isOpen }) {
+  const hi = y + H;
+  col.rect([ra, za, rb, za + END], y, hi); col.rect([ra, zb - END, rb, zb], y, hi);
+  if (sides.length === 1) col.rect([rb - END, za, rb, zb], y, hi); else col.rect([(ra + rb) / 2 - 0.22, za, (ra + rb) / 2 + 0.22, zb], y, hi);
+  for (let q = 1; q < n; q++) col.rect([ra + 0.3, za + q * step - 0.17, rb - 0.3, za + q * step + 0.17], y, hi);
+  for (const sg of sides) {
+    const fx = sg < 0 ? ra : rb, xa = Math.min(fx, fx - sg * SLAB), xb = Math.max(fx, fx - sg * SLAB);
+    for (let q = 0; q < n; q++) {
+      const a = za + q * step, b = a + step, zc = (a + b) / 2;
+      if (isOpen(sg, q)) { col.rect([xa, a, xb, zc - DOOR_OPEN.w / 2], y, hi); col.rect([xa, zc + DOOR_OPEN.w / 2, xb, b], y, hi); }
+      else col.rect([xa, a, xb, b], y, hi);
+    }
+  }
+}
 const GOODS = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'linen', 'cloth_brown'];
 function rows(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed ?? 1595), W = x1 - x0;
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed ?? 1595), W = x1 - x0, opened = new Set(el.open ?? []);
   // the ranges across the width: [from, to, open sides (-1 west, +1 east)]
   const k = W / 20, R = [[x0, x0 + 4 * k, [-1]], [x0 + 7 * k, x0 + 14 * k, [-1, 1]], [x0 + 17 * k, x1, [-1]]];
   const nb = 6, pass = 3.2, bl = (z1 - z0 - (nb - 1) * pass) / nb, H = 3.3, sw = 3.0;
   for (let b = 0; b < nb; b++) {
     const za = z0 + b * (bl + pass), zb = za + bl, n = Math.round(bl / sw), step = bl / n;
-    for (const [ra, rb, sides] of R) {
-      col.rect([ra, za, rb, zb], y, y + H);
+    for (const [ri, [ra, rb, sides]] of R.entries()) {
+      const isOpen = (sg, q) => opened.has(shopKey(b, ri, sg, q)), anyOpen = opened.size > 0 && sides.some((sg) => Array.from({ length: n }, (_, q) => q).some((q) => isOpen(sg, q)));
+      if (!anyOpen) col.rect([ra, za, rb, zb], y, y + H);
+      else rangeWalls(col, { ra, rb, za, zb, sides, n, step, y, H, isOpen });
       // the back and end walls, the partitions between the shops, the ceiling; the roof over the range
       if (sides.length === 1) bag.add(BR, box(rb - 0.45, y - 0.3, za, rb, y + H, zb)); else bag.add(BR, box((ra + rb) / 2 - 0.22, y - 0.3, za, (ra + rb) / 2 + 0.22, y + H, zb));
       for (const zz of [za, zb - 0.45]) bag.add(BR, box(ra, y - 0.3, zz, rb, y + H, zz + 0.45));
@@ -517,9 +535,11 @@ function rows(el, { bag, col }) {
       pitched(bag, 'planks_grey', BR, [ra, za, rb, zb], y + H + 0.25, 0.55, 0.3, false, 0.12);
       for (const sg of sides) {
         const fx = sg < 0 ? ra : rb, line = fx - sg * 0.2;
-        const doors = Array.from({ length: n }, (_, q) => ({ u: (q + 0.5) * step, w: 2.1, h: 1.85 }));
+        const doors = Array.from({ length: n }, (_, q) => (isOpen(sg, q) ? { u: (q + 0.5) * step, ...DOOR_OPEN } : { u: (q + 0.5) * step, w: 2.1, h: 1.85 }));
         bag.add(BR, slab(wallShape(bl, H + 0.25, doors), 0.4, [line, za], [line, zb], y - 0.3 + 0.3, 10));
-        bag.add(WS, box(Math.min(fx, fx + sg * 0.06), y - 0.3, za, Math.max(fx, fx + sg * 0.06), y + 0.2, zb));        // the white-stone footing along the front
+        // the white-stone footing along the front (cut away in an opened shop's door, where a visitor steps in)
+        { let a = za; for (let q = 0; q < n; q++) if (isOpen(sg, q)) { const zc = za + (q + 0.5) * step; if (zc - DOOR_OPEN.w / 2 > a) bag.add(WS, box(Math.min(fx, fx + sg * 0.06), y - 0.3, a, Math.max(fx, fx + sg * 0.06), y + 0.2, zc - DOOR_OPEN.w / 2)); a = zc + DOOR_OPEN.w / 2; }
+          if (zb > a) bag.add(WS, box(Math.min(fx, fx + sg * 0.06), y - 0.3, a, Math.max(fx, fx + sg * 0.06), y + 0.2, zb)); }
         // the pent of planks over the fronts, on its brackets
         const ox = fx + sg * 1.25;
         bag.add('planks_grey', hexa([[fx, y + H - 0.05, za], [fx, y + H - 0.05, zb], [ox, y + H - 0.55, zb], [ox, y + H - 0.55, za], [fx, y + H + 0.05, za], [fx, y + H + 0.05, zb], [ox, y + H - 0.45, zb], [ox, y + H - 0.45, za]]));
@@ -527,13 +547,20 @@ function rows(el, { bag, col }) {
         // each shop: the counter across its opening, the upper shutter propped out, shelves and goods
         for (let q = 0; q < n; q++) {
           const zc = za + (q + 0.5) * step, xi = fx - sg * 0.4, deep = (sides.length === 2 ? (rb - ra) / 2 - 0.22 : rb - ra - 0.45) - 0.4;
+          if (isOpen(sg, q)) {
+            // an opened shop: the counter runs back along the side partition (the keeper's side), the aisle beside it free; its flap stands up at the front
+            const zl = zc - step / 2 + 0.17, xe = fx - sg * (SLAB + 1.7);
+            bag.add('timber', box(Math.min(fx - sg * SLAB, xe), y + 0.85, zl, Math.max(fx - sg * SLAB, xe), y + 0.92, zl + 0.55));
+            bag.add('timber', box(Math.min(fx - sg * SLAB, xe), y, zl, Math.max(fx - sg * SLAB, xe), y + 0.85, zl + 0.5));
+          } else {
           bag.add('timber', box(Math.min(xi, xi + sg * 0.55), y + 0.85, zc - 1.0, Math.max(xi, xi + sg * 0.55), y + 0.92, zc + 1.0));
           bag.add('timber', box(Math.min(xi, xi + sg * 0.08), y, zc - 1.0, Math.max(xi, xi + sg * 0.08), y + 0.85, zc + 1.0));
+          }
           const sx = fx + sg * 0.5, top = y + 1.85 + 1.05;
           bag.add('timber', hexa([[fx + sg * 0.02, top - 0.02, zc - 1.05], [fx + sg * 0.02, top - 0.02, zc + 1.05], [sx + sg * 0.35, top - 0.95, zc + 1.05], [sx + sg * 0.35, top - 0.95, zc - 1.05], [fx + sg * 0.06, top + 0.02, zc - 1.05], [fx + sg * 0.06, top + 0.02, zc + 1.05], [sx + sg * 0.39, top - 0.91, zc + 1.05], [sx + sg * 0.39, top - 0.91, zc - 1.05]]));
           const xb = fx - sg * (0.4 + deep);
           for (const hh of [0.9, 1.5, 2.1]) bag.add('timber', box(Math.min(xb, xb + sg * 0.45), y + hh, zc - 1.2, Math.max(xb, xb + sg * 0.45), y + hh + 0.05, zc + 1.2));
-          const kind = Math.floor(rand() * 4);
+          const kind = isOpen(sg, q) && el.shelf?.[shopKey(b, ri, sg, q)] !== undefined ? (rand(), el.shelf[shopKey(b, ri, sg, q)]) : Math.floor(rand() * 4);
           for (let g = 0; g < 4; g++) {
             const gz = zc - 0.75 + g * 0.5, gx = xi + sg * 0.28;
             if (kind === 0) bag.add(GOODS[Math.floor(rand() * GOODS.length)], lathe([[0.1, 0], [0.1, 0.5], [0.001, 0.5]], 8).rotateX(Math.PI / 2).translate(gx, y + 1.02, gz - 0.25));        // bolts of cloth
