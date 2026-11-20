@@ -175,9 +175,19 @@ function extras() {
   return base('vienna-extras', E.filter((e) => !e.at || Math.hypot(e.at[0], e.at[1]) < RADIUS - 8));
 }
 
+/** The night: the halo of every street lamp (the Ring's are the arc lamps of 1902), the lit shop windows and flats of the lots, the Café Museum: one plan, one mesh (styles/viennese/night.js). */
+function night(furn, houses) {
+  const lamps = [...furn.filter((e) => e.t === 'gaslamp').map((e) => [e.at[0], e.at[1], e.y ?? 0, Math.abs(e.at[1] + 230) < 26]), [-11, SEC[1] - 5.5, 0.03, false], [11, SEC[1] - 5.5, 0.03, false]];   // (the last two: the Secession's forecourt, plan.js)
+  const lotsLit = houses.filter((e) => e.lod <= 1 && Math.hypot((e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2) < LIT_R);
+  return base('vienna-night', [{ t: 'vienna_night', lamps, lots: lotsLit, cafe: CAFE }], { nocollide: true });
+}
+const LIT_R = 250;
+
 export async function town() {
-  const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz(), houseRooms(), extras(), base('vienna-life', stillLife(), { style: 'life' })];
+  const fur = furniture();
+  const plans = [streets(), wien(), ...fur, naschmarkt(), karlsplatz(), houseRooms(), extras(), base('vienna-life', stillLife(), { style: 'life' })];
   const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat, passage: l.passage, yardAt: l.yardAt, open: l.open, up: l.up }));
+  plans.push(night(fur[0].elements, els));
   els.push(...hofs());
   plans.push(...lodTiles('vienna-houses', 'viennese', els, { R: RADIUS, near: 150 }));
   void CAFE; void SEC;

@@ -28,6 +28,12 @@ export function tables(trade, w) {
   else if (trade === 'kaffeehaus') { let n = 0; for (let a = T + 1.3; a < w - T - 1; a += 2.3) for (const dd of [db + 3.6, db + 5.4, db + 7.2]) { if (n % 5 === 4) { n++; continue; } out.push([a, dd]); n++; } }
   return out;
 }
+/** Where the opal globes hang in a shop room (as shopRoom hangs them): [[x, y, z]…]. */
+export function lampPoints(F, y, w, g) {
+  const db = -(SHOP_T + SHOP_RD), nl = Math.max(2, Math.round(w / 3.4)), out = [];
+  for (let k = 0; k < nl; k++) { const p = F.at((k + 0.5) * w / nl, db + 3.6); out.push([p[0], y + g - 0.9, p[1]]); }
+  return out;
+}
 /** The ground floor's front of a shop house: piers, window frames, door, name board with its lettering, awning, goods in the windows. */
 export function shopFront(bag, F, y, { w, g, bays, trade, seed, lod }) {
   const r = rng(seed * 3 + 1), A = (m, ...q) => bag.add(m, fbox(F, y, ...q)), bw = w / bays, top = Math.min(g - 0.9, 3.3), sill = 0.65, doorB = Math.floor(bays / 2);
@@ -43,6 +49,7 @@ export function shopFront(bag, F, y, { w, g, bays, trade, seed, lod }) {
       A('wood_dark', u0 + 0.28, u1 - 0.28, sill - 0.12, sill, 0, 0.14); A('wood_dark', u0 + 0.28, u1 - 0.28, top, top + 0.12, 0, 0.14);
       A('wood_dark', u0 + 0.28, u0 + 0.38, sill, top, 0, 0.12); A('wood_dark', u1 - 0.38, u1 - 0.28, sill, top, 0, 0.12);
       A('opening', u0 + 0.38, u1 - 0.38, sill, top, -0.04, -0.02);
+      bag.shop?.(F, y, u0 + 0.38, u1 - 0.38, sill, top, -0.015, trade);
       // the goods in the window, in a row on the sill and a second step, in the trade's colours
       const pal = WINDOWGOODS[trade] ?? WINDOWGOODS.baeckerei;
       for (let q = 0; q < 4 + (lod ? 0 : 3); q++) { const c = u0 + 0.55 + r() * (bw - 1.5), m = pal[Math.floor(r() * pal.length)], hh = 0.18 + r() * 0.3; A(m, c, c + 0.2 + r() * 0.25, sill + q * 0.02, sill + hh, 0.05 + q * 0.025, 0.3 + q * 0.025); }
