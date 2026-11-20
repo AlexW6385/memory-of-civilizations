@@ -188,3 +188,16 @@ The call to prayer stays the engine's (profile `adhan`: five a day from the madr
 | Doves on the cornices | the madrasa's front and court, Bibi-Khanym, Gur-e Amir, 5.5–19 h | [inferred] |
 | A camel's groan with its bell; a donkey; a caravan passing in the bazaar's streets; the water carrier in the lanes; the night watch | the camp on the Registan's east side; the bazaar streets 6–18 h; lanes 6.5–18.5 h; lanes 20.5–4 h | [stated] caravans in Samarkand (Clavijo, §1); the rest [inferred] |
 Rooms (inside): the walls hush the street, the flat mud roof dulls rain; the vaulted bazaar passes a murmur and no rain.
+
+### 20.4 Animals (fauna.js `critters`, tests/samarkand-critters.test.mjs)
+
+Rigged small animals (src/engine/fauna-critters.js), existing models only, each placed from the plan's own numbers. [inferred] throughout, except where noted: the keeping of fowl in town courts and of cats and dogs is general to Central Asian towns; the rock dove is the dove of the towns' cornices.
+
+| Animal | Where | Behaviour |
+|---|---|---|
+| Doves on the ground | five flocks of four on the Registan's paving where grain and crumbs fall: before the pishtaq's apron, between the aisle and the booths, by the tea-houses | walk and peck within a metre or two, take fright at the visitor |
+| Doves in the air and on the parapets | two flocks wheeling over the madrasa's front and the square's east; three on the parapets of the madrasa's wings (sparrows already there) | flights and perches of the fauna system |
+| Cats | on the sill carpets of the two nearest shops each row that nobody sits in, among the wares | sleep, wash, lift the head toward the visitor |
+| Dogs | asleep against the walls of the two nearest houses beyond 40 m, one by the camp | lie, stand when the visitor is near |
+| Hens and a cock | in the courts of the six furnished houses nearest the arrival, in the free half of the court between the pool and the south wing (the pool, tandoor, charpoy, washing line and stair are at the court's middle and edges) | scratch and peck within a metre |
+Working animals (camels and donkeys at the camp, donkeys at doors) are still the street life's still figures, not rigged: no critter model of either yet.
