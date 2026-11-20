@@ -16,7 +16,8 @@ export const hash = (x, z, s = 0) => {
  * A worn sill across a door: P(s, d) maps a position along the door (s, from the middle) and across it (d, from the middle) to the plan; spans s ∈ [-hw, hw], d ∈ [-hd, hd],
  * its top 5.5 cm above `y` at the ends and 3 cm in the middle, the long arrises bevelled 1.8 cm, six steps along; no bottom, no end faces below the bevel (it sits on the floor).
  */
-export function wornSill(bag, P, hw, hd, y, mat = 'limestone') {
+export function wornSill(bag, P, hw0, hd0, y, mat = 'limestone') {
+  const c = P(0, 0), hw = hw0 * (0.94 + 0.1 * hash(c[0], c[1], 71)), hd = hd0 * (0.9 + 0.2 * hash(c[0], c[1], 72));   // each sill its own size by its place, so they do not fold into one instanced shape
   const out = [], N = 6, bev = 0.018, top = (s) => 0.055 - 0.026 * Math.exp(-(s / hw) * (s / hw) * 5);
   const V = (s, d, h) => { const p = P(s, d); return [p[0], y + h, p[1]]; };
   const q = (a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
