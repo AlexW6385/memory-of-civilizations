@@ -72,7 +72,7 @@ test('the map: shops that work, rooms, quays and canals', () => {
 });
 
 test('the dice agree with the house builder\'s own profile', () => {
-  for (const l of lots().slice(0, 120)) { const d = dice(l), p = profile(l); assert.equal(d.warehouse, p.warehouse); assert.equal(d.use, p.use); assert.equal(d.trade, p.trade); }
+  for (const l of lots().slice(0, 120)) { const d = dice(l), p = profile(l); assert.equal(d.warehouse, p.warehouse); assert.equal(d.use, p.use); assert.equal(d.left, p.left); assert.equal(d.trade, p.trade); }
   for (const { lot } of shopSites()) assert.ok(!profile(lot).warehouse);
 });
 

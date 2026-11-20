@@ -12,11 +12,11 @@ export const isOpen = (l) => isOpenBase(l) || onWalk(l);
 /** The house's use and trade, as profile() has them: { warehouse, use: 'zaal' | 'kitchen' | 'office' | 'store', trade: 'inn' | 'merchant' | 'lodgers' | 'craftsman' | 'counting' | 'store' }. */
 export function dice(l) {
   const seed = l.seed || 1, rand = rng(seed); rand(); rand(); rand();
-  const kr = rand(), kind = l.gable ?? (kr > 0.9 ? 'spout' : kr < 0.3 ? 'step' : kr < 0.65 ? 'neck' : 'bell'), warehouse = kind === 'spout';
-  const use = warehouse ? 'store' : ((q) => (q < 0.45 ? 'zaal' : q < 0.75 ? 'kitchen' : 'office'))(rng(seed * 19 + 7)());
+  const kr = rand(), st = rand(), doorR = rand(), kind = l.gable ?? (kr > 0.9 ? 'spout' : kr < 0.3 ? 'step' : kr < 0.65 ? 'neck' : 'bell'), warehouse = kind === 'spout';
+  const left = warehouse ? false : doorR < 0.5, use = warehouse ? 'store' : ((q) => (q < 0.45 ? 'zaal' : q < 0.75 ? 'kitchen' : 'office'))(rng(seed * 19 + 7)());
   const tr = rng(seed * 29 + 5)();
   const trade = warehouse ? 'store' : use === 'zaal' ? (tr < 0.3 ? 'inn' : 'merchant') : use === 'kitchen' ? (tr < 0.5 ? 'lodgers' : 'craftsman') : 'counting';
-  return { warehouse, use, trade };
+  return { warehouse, left, use, trade };
 }
 const mid = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
 const atCorner = (q) => q.rect[0] <= HALL[2] + 0.5 && q.rect[1] - HALL[3] < 3;       // the lot at the Town Hall's corner stays shut
