@@ -63,7 +63,7 @@ E.push({ t: 'throne_hall', rect: [-14, -52, 14, -38], y: 0, H: 4.9, bays: [7, 4]
 E.push({ t: 'joseon_inner', rect: [-14, -52, 14, -38], y: 0, H: 4.9, kind: 'throne', seed: 41 });
 for (const [z, w] of [[-108, 34], [-165, 32]]) {
   // Gangnyeongjeon and Gyotaejeon: hip-and-gable roofs with no main ridge (muryang), brackets on the posts only
-  E.push({ t: 'ming_hall', rect: [-w / 2, z - 7, w / 2, z + 7], y: 0, H: 4.6, front: 's', four: true, roof: 'xieshan', muryang: true, plat: 1, eave: 1.5, sweep: 0.8, orn: { figures: 5 }, dapo: { tiers: 2, inter: 0 } });
+  E.push({ t: 'ming_hall', rect: [-w / 2, z - 7, w / 2, z + 7], y: 0, H: 4.6, front: 's', four: true, roof: 'xieshan', muryang: true, plat: 1, eave: 1.5, sweep: 0.8, litShare: 0.7, orn: { figures: 5 }, dapo: { tiers: 2, inter: 0 } });
   wall([-w / 2 - 14, z - 20], [w / 2 + 14, z - 20], [], 3.6); wall([-w / 2 - 14, z + 22], [-5, z + 22], [], 3.6); wall([5, z + 22], [w / 2 + 14, z + 22], [], 3.6);
   wall([-w / 2 - 14, z - 20], [-w / 2 - 14, z + 22], [], 3.6); wall([w / 2 + 14, z - 20], [w / 2 + 14, z + 22], [], 3.6);
   E.push({ t: 'joseon_inner', rect: [-w / 2, z - 7, w / 2, z + 7], y: 0, H: 4.6, kind: 'royal', who: z === -108 ? 'king' : 'queen', seed: z });
@@ -129,7 +129,7 @@ E.push({ t: 'water_rect', rect: HYANG, y: -1.2 });
   E.push({ t: 'ming_wall', a: [gx0, gz0], b: [gx0, gz1], y: 0, h: 3, th: 0.6, gates: [] });
   E.push({ t: 'ming_wall', a: [gx1, gz0], b: [gx1, gz1], y: 0, h: 3, th: 0.6, gates: [{ at: 50, w: 2.6, h: 2.5 }] });
   E.push({ t: 'ming_wall', a: [xm, gz0], b: [xm, gz1], y: 0, h: 2.6, th: 0.5, gates: [{ at: 50, w: 2.2, h: 2.2 }] });
-  const house = (rect, front, H = 3.1) => E.push({ t: 'ming_hall', rect, y: 0, H, front, roof: 'xieshan', plat: 0.75, eave: 1.2, sweep: 0.5, pal: U });
+  const house = (rect, front, H = 3.1) => E.push({ t: 'ming_hall', rect, y: 0, H, front, roof: 'xieshan', plat: 0.75, eave: 1.2, sweep: 0.5, litShare: 0.7, pal: U });
   house([-170, -266, -136, -255], 's');                        // Jangandang
   house([-170, -255, -161, -234], 'e', 2.9);                   // its wing
   house([-112, -274, -82, -263], 's');                         // Gonnyeonghap

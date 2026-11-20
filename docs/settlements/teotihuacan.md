@@ -170,3 +170,44 @@ Measured before: within 120 m of the arrival (0, 70) on the avenue's plaza, two 
 - The Feathered Serpent's heads and bodies in pale painted stone (they read as near-black before), larger (scale up to 1.25), the head with a feather collar of two rings, a band, the eyes with a white ring and a dark pupil, the Cipactli headdress with dark discs in its rings and painted side scrolls; the serpent bodies on the taluds thicker with a painted stripe along them [stated: the Met essay, heads about 0.9 m, bodies in relief with rattles; inferred: the colours, the painted stripe].
 - Tableros (every platform, pyramid stage and the Adosada): a thin pale line framing the field above and below, and between the chalchihuite discs a stepped-pyramid fret in pale plaster raised on the red [stated: painted panels with stepped frets, México Desconocido on the palace; inferred: extended to the platforms' tableros].
 - Frame: `tools/draw-count.mjs teotihuacan` main 1.36 M to 1.43 M triangles, main draws 260 to 260 (no new material: feathers red, not green, to keep the draw count).
+
+## 18. The visitor's walk (match to the Suzhou reference)
+
+Code: `src/settlements/teotihuacan/walk.js`, `layout.js` (`open`, `WEST_STREET`, `platformTemples()`), `src/styles/teotihuacano/{doors,rooms,index,yard,market}.js`, `plan.js` (stairs, routes). Tags as above.
+- **Doorways.** The rooms' doorways were 1.0 m; now 1.6 m clear (`doors.js` DOOR_HALF), the compounds' gate stays 1.8 m: the walker's body needs it [our change for the walker; the real doorways were narrower: inferred].
+- **The ways.** From the arrival east over the open ground to the barrio's lane (x 81, z 92–143) and its six houses; up the west platform's temple stair at z 15 and along its top to its four houses (dwelling, priest's house, weaver's, obsidian workshop), each by its own stair, portico and doorway into the room that matters (the kitchen, the shrine, the workroom); south down the avenue (the plazas' stairs) and up the stair at z 265 to the two big temples' summit chambers on the west platform (z 53 and 178; 8 m up, a door 2.4 m wide into the chamber) [inferred: the plan].
+- **Compounds opened.** The first row of compounds west of the platform (three, centres within 150 m of the street behind it) have their gate on the east side and their east room block left out, so the gate opens on an entry court beside the main patio (the household yard lives in it); the way runs round the patio's altar and up the west block's stair into the kitchen. The other ~200 compounds keep their closed form [inferred: a compound had one entrance serving many households (sci.news, §16); the entry court is ours].
+- **Links.** Two stairs down the platform's west face (z 40, 3 m wide; z 251, 5 m wide) join the avenue to the street behind it and to the market's east gate (9 m wide); in the market the lanes' middle line is kept clear of the people standing in them [inferred: the Great Compound across the avenue from the Ciudadela, §13].
+- **Kept clear.** The avenue's people stand 2.8 m or more off its middle way; the side braziers stand off the platform stairs (moved, not removed); the street-front turkeys and dogs of the market and plazas are critters (§21).
+- **Walked** by `walk-check`: 18 routes (11 new into houses, 3 into compounds, 2 into temple chambers, 1 to the market): ten houses within 114 m of the arrival and the market gate.
+
+## 19. Night
+
+Code: `nightlight.js`, `styles/teotihuacano/halo.js` (the Halo class copied from Tenochtitlan's, which copied Suzhou's), one plan `teotihuacan-night`, the engine's `halo` material.
+- **How it was lit.** No oil lamps and no street lighting are known for Mesoamerica [inferred]; the light was the hearth, pine torches and the embers of copal in censers and braziers [inferred, after Tenochtitlan §21]. The rooms' one clay lamp of round 5 (§16) stands for a hearth or torch glow [inferred]; those are real point lights and stay.
+- **Built.** In one mesh: the 73 incense braziers of the avenue's plazas, the Moon Plaza and the Ciudadela's court, the eight at the market's gates, the censers on the arrival plaza's altars, the fires at the stair-heads of the Sun and the Moon, the lit doors of the temple chambers (the four big temples of the west platform, the Sun's, the Feathered Serpent's, the Moon Plaza's four, the Ciudadela's seven), the door of the room each of the ten houses is entered by (the priest's shrine dimmer and redder, the craft rooms faint) and the kitchen door of the compounds within 210 m. 118 lights [inferred: that the temples kept a fire at night, as elsewhere in Mesoamerica; which doors]. Day view unchanged.
+- **Not lit.** The palace and the Jaguars' patio, the Sun's chamber inside, most compounds' other rooms.
+
+## 20. Sound
+
+Code: `soundmap.js`, `src/engine/voices-teotihuacan.js` (13 voices, all `tth…`), the profile line in `soundscape.js`, `tests/teotihuacan-sound.test.mjs`.
+- **What is known.** Ceramic trumpets are common, marine-shell horns come from high-status contexts, ceramic quadruple flutes, piston whistles and whistling vessels, ceramic and gourd rattles are found; drums of wood or clay are absent from the record [stated: Both et al., "Sounds in Context: Musical Instruments from Teotihuacan", Acoustics 2021, https://www.mdpi.com/2624-599X/3/3/34, read in part]. The murals show plumed felines blowing shells (§11). So: shell trumpets at the temples (Sun, Moon, Feathered Serpent) at dawn, noon and dusk, flutes and a whistle in the market, rattles at the chambers and the Cross [inferred: the hours and the rites]. The drum at the Ciudadela and the market is kept from the dossier's §9 and §15 although none survives [inferred; perishable wood, not proved].
+- **The city.** The Great Compound's murmur (the engine's hubbub, laid by `townNear`: full inside its wall, 0.8 at its gate, 0.15 across the city), eight sellers' cries, the masons' plastering at the plazas (`crew`), sweepers at dawn, turkeys in the yards and lanes, owls at night [inferred].
+- **The houses.** In each kitchen the metate, tortillas at the three meals, the pots; in the craft rooms the knapper's strikes, the potter's patting, the weaver's batten [inferred, from §12–§13].
+- **Rooms.** 31 rooms: the houses' rooms by use (hearth, shrine, workshop, sleeping and store), the opened compounds' kitchens, the chambers of the big temples, the Sun's and the Feathered Serpent's, the palace and the Jaguars' hall; no water, bridges, bamboo or lotus.
+- **Measured** with `tools/sound-render.mjs` (see §23); not heard.
+
+## 21. Animals
+
+Code: `fauna.js` (`critters`), the `turkey` model of `src/engine/critter-models.js` (existing) and the engine's dog, `tests/teotihuacan-critters.test.mjs`.
+- **Turkeys and dogs, no hens.** "Turkeys, dogs, rabbits, deer, fish, waterfowl" were the protein of §15; hens came with the Spaniards. Built as rigged critters: two turkeys and a dog in the main patio of each opened compound (off the lane to the kitchen), a turkey in each barrio forecourt and a dog in some, six in the market's lanes (off the lanes' middle), and the plazas' dogs and turkey flocks of `dress.js` (marked `crit`) in place of the old figures. About 40 in all [inferred: the places]. The xoloitzcuintli is not modelled [inferred: no source read].
+- **Not done.** Wild animals (rabbits, deer), the swallows/crows/sparrows stay in `perches` and `flights`.
+
+## 22. Wear and writing
+
+- **Writing: none.** Teotihuacan had a glyph repertoire (day signs, speech scrolls), but none could be verified glyph by glyph here; left plain on purpose. The painted frets and chalchihuites are patterns, not writing.
+- **Wear: none added.** Worn ways, patched plaster, soot and streaks are those of §12, §15 and §17.
+
+## 23. Numbers of this pass
+
+Arrival: main draws 260 → 257, main triangles 1.43 M → 1.42 M. On the walk: market's east gate (−72, 259) 273 draws, 2.28 M; barrio lane (81, 118) 349 draws, 2.16 M; before the kitchen of the first compound (−100, 40) 344 draws, 2.45 M. geo-one 52.0 MB / 1387 meshes → 51.7 MB / 1375 meshes.
