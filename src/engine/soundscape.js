@@ -69,6 +69,7 @@
 //   Constantinople in the 9th century) [inferred; the semantron is in the dossier's music].
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
+import * as BAGHDAD from '../settlements/abbasid-baghdad/soundmap.js';
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
 import * as AGRA from '../settlements/mughal-agra/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
@@ -111,6 +112,8 @@ import './voices-paris.js';
 import * as ROME from '../settlements/rome/soundmap.js';
 import * as HANGZHOU from '../settlements/song-hangzhou/soundmap.js';
 import * as KAIFENG from '../settlements/song-kaifeng/soundmap.js';
+import * as SYDNEY from '../settlements/sydney/soundmap.js';
+import './voices-sydney.js';
 import * as TANGCA from '../settlements/tang-changan/soundmap.js';
 import './voices-tang.js';
 import * as TEOTIHUACAN from '../settlements/teotihuacan/soundmap.js';
@@ -178,7 +181,7 @@ export const PROFILES = {
   shibam: T(NEAR, { animals: { donkey: 0.3, goat: 0.3 }, roof: 'flat' }),
   delphi: T(MED, { cicadas: 0.7, animals: { sheepbell: 0.7, donkey: 0.3, dog: 0.25, rooster: 0.3 }, roof: 'tile' }),
   mycenae: T(MED, { cicadas: 0.9, animals: { goat: 0.5, sheepbell: 0.5, donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
-  'abbasid-baghdad': T(NEAR, { animals: { donkey: 0.6, dog: 0.3, rooster: 0.2 }, frogs: 0.3, roof: 'flat', adhan: 1 }),
+  'abbasid-baghdad': T(NEAR, { animals: withLife({ donkey: 0.6, dog: 0.3, rooster: 0.2 }, { market: 1, map: BAGHDAD }), frogs: 0.3, roof: 'flat', adhan: 1 }),
   alexandria: T({ ...MED, gull: 1, kite: 0.3 }, { cicadas: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'flat' }),
   'han-changan': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3, camel: 0.2 }, roof: 'tile' }),
   'tang-changan': T(EAS, { cicadas: 0.4, animals: withLife({ rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, { market: 1, eaves: 1, map: TANGCA }), roof: 'tile', bells: 'tang-changan' }),
@@ -240,7 +243,7 @@ export const PROFILES = {
   'song-hangzhou': T(EAS, { cicadas: 0.7, frogs: 0.6, roof: 'tile', bells: null, animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: HANGZHOU }) }),
   'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, roof: 'tile', bells: null, animals: withLife({ donkey: 0.4, rooster: 0.3, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: KAIFENG }) }),
   stonehenge: T({ warbler: 1, crow: 0.6 }, { animals: { cattle: 0.4, dog: 0.3 }, roof: 'thatch' }),
-  sydney: T({ gull: 0.8, tropic: 0.5 }, { cicadas: 0.4, animals: {}, roof: 'flat' }),
+  sydney: T({ gull: 0.6, koel: 0.25, sparrow: 0.5, dove: 0.3, crow: 0.2 }, { cicadas: 0.4, animals: withLife({ dog: 0.2 }, { market: 0.9, map: SYDNEY }), roof: 'flat' }),
   'tang-wutai': T({ warbler: 0.7, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.3, cattle: 0.3 }, roof: 'tile', bells: 'monastery' }),
   taos: T({ warbler: 0.6, crow: 0.6, dove: 0.3 }, { cicadas: 0.3, animals: { dog: 0.6 }, roof: 'flat' }),
   tenochtitlan: T({ warbler: 0.8, tropic: 0.5 }, { frogs: 0.7, animals: withLife({ dog: 0.3 }, { canal: 0.6, market: 1, map: TENOCHTITLAN }), roof: 'flat' }),
