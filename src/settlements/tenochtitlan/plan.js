@@ -6,7 +6,8 @@
 
 import { EAGLE_HOUSE, RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI, GAP, inChinampaHouse } from './layout.js';
 import { ground } from './ground.js';
-import { stalls, aisles, GEOM, JUDGES, LANDINGS } from './market.js';
+import { stalls, aisles, GEOM, JUDGES, LANDINGS, spots as marketSpots } from './market.js';
+import { openSet, routeInto, marketRoutes } from './walk.js';
 
 const E = [];
 const [px0, pz0, px1, pz1] = PRECINCT;
@@ -90,9 +91,7 @@ for (const c of CANALS) {
 }
 // ---- the market by the west canal: the sellers' rows, a landing stair down to the water, canoes unloading
 {
-  const rp = ((q) => () => ((q = (q * 1664525 + 1013904223) >>> 0) / 4294967296))(3);
-  const spots = [];
-  for (const [ax0, az0, ax1, az1] of aisles().slice(0, GEOM.rows + 1)) for (let i = 0; i < 5; i++) spots.push([ax0 + 3 + rp() * (ax1 - ax0 - 6), (az0 + az1) / 2 + (rp() - 0.5) * 1.6]);
+  const spots = marketSpots();
   E.push({ t: 'tianguis', rect: MARKET, seed: 1519, stalls: stalls(), judges: JUDGES, aisleX: [GEOM.xWest, GEOM.xCross, GEOM.xEast], aisleSpots: spots });
 }
 for (const z of LANDINGS.map((v) => v - 3)) E.push({ t: 'stairs', rect: [-219.6, z, -215.6, z + 6], y0: LEVEL.water - 0.3, y1: 0.05, dir: 'e', mat: 'andesite' });
@@ -157,6 +156,19 @@ const rooms = [room('eagle-house north-west', [84.4, -137.6, 104.6, -125.8], 1.4
   room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open'), room('palace', PALACE, 1.0, 'open')];
 const walks = [[[-260, 0], [-150, 0], [-60, 0], [-20, 8], [20, 8], [34, 0]]];
 walks[0].y0 = 0;
+for (const h of openSet()) { const r = routeInto(h); r.y0 = 0; walks.push(r); }       // into the compounds opened along the avenue and the priests' lane (walk.js)
+for (const r of marketRoutes()) { r.y0 = 0; walks.push(r); }                                     // through the tianguis (walk.js)
+// the climbs and the rooms of the precinct: Huitzilopochtli's stair to the top of the Templo Mayor (45 m) and Tlaloc's; the House of the Eagles (its sunken patio by the
+// portico's central door, the main room of the east wing); the calmecac (up its stair into the court, and the rooms of the north, east and west ranges)
+for (const r of [
+  [[20, 8], [28, 10.35], [34, 10.35], [40, 10.35], [50, 10.35], [60, 10.35], [70, 10.35], [77, 10.35], [84, 10.35]],
+  [[20, 8], [26, -8], [28, -15], [34, -15], [40, -15], [50, -15], [60, -15], [70, -15], [77, -15], [84, -15]],
+  [[109.8, -100], [109.8, -118], [109.8, -124], [109.8, -130], [113, -131]],
+  [[104, -113], [112, -113], [116, -113], [119.5, -113], [122.5, -113], [127, -113]],
+  [[-112, -80], [-112, -106], [-112, -118], [-116.6, -122], [-116.6, -127], [-116.6, -131], [-116.6, -135]],
+  [[-112, -80], [-112, -106], [-112, -112], [-102, -119.2], [-98, -119.2], [-92, -119.2], [-88, -119.2]],
+  [[-112, -80], [-112, -106], [-112, -112], [-122, -119.2], [-126, -119.2], [-132, -119.2], [-136, -119.2]],
+]) { r.y0 = 0; walks.push(r); }
 
 export const precinct = {
   id: 'tenochtitlan-precinct',

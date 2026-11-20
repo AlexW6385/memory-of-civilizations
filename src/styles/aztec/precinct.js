@@ -218,7 +218,7 @@ export function eagleHouse(el, ctx0) {
   wall(bag, col, W, 'z', px, px + T, EW[1], Z1 - 0.4, y, y + H, door);
   wall(bag, col, W, 'z', X1 - 0.4 - T, X1 - 0.4, EW[1], Z1 - 0.4, y, y + H);
   wall(bag, col, W, 'x', Z1 - 0.4 - T, Z1 - 0.4, ex, X1 - 0.4, y, y + H);
-  for (let i = 0; i < 5; i++) { const z = EW[1] + 0.9 + i * (Z1 - 0.4 - 0.9 - EW[1] - 0.9) / 4; bag.add(W, box(ex + 0.1, y, z - 0.35, ex + 0.8, y + H, z + 0.35)); band(bag, R, 'z', ex + 0.1, -1, z - 0.36, z + 0.36, y, y + 0.6); col.rect([ex + 0.1, z - 0.35, ex + 0.8, z + 0.35], y, y + H); }
+  for (let i = 0; i < 5; i++) { const z = EW[1] + 0.9 + i * (Z1 - 0.4 - 0.9 - EW[1] - 0.9) / 4; if (Math.abs(z - mz) < 1.4) continue; bag.add(W, box(ex + 0.1, y, z - 0.35, ex + 0.8, y + H, z + 0.35)); band(bag, R, 'z', ex + 0.1, -1, z - 0.36, z + 0.36, y, y + 0.6); col.rect([ex + 0.1, z - 0.35, ex + 0.8, z + 0.35], y, y + H); }
   bag.add(W, box(ex, y + H - 0.6, EW[1], px, y + H, Z1 - 0.4)); band(bag, R, 'z', ex, -1, EW[1], Z1 - 0.4, y + H - 0.6, y + H, 0.03);
   for (const s of [-1, 1]) eagleWarrior().emit(bag, px - 0.8, y, mz + s * 1.9, -1, 0, 1.0);
   for (const s of [-1, 1]) col.rect([px - 1.1, mz + s * 1.9 - 0.35, px - 0.5, mz + s * 1.9 + 0.35], y, y + 1.8);
@@ -229,15 +229,15 @@ export function eagleHouse(el, ctx0) {
   benches(bag, col, 'x', rm[3], -1, rm[0], rm[2] - 1.6, y, SC); wallBands(bag, 'x', rm[3] - 0.9, -1, rm[0], rm[2] - 1.6, y);
   // ---- the north wing: its portico facing south, the hall of benches, the sunken patio, the room of the altar
   const pz = ny - 3.4, bz = pz - T, hallX = X0 + 20, patX = [X0 + 20.6, X0 + 31], q = Z0 + 0.4;
-  const doorsN = [{ at: X0 + 10, w: 1.6, h: 2.5 }, { at: (patX[0] + patX[1]) / 2, w: 2.0, h: 2.6 }, { at: X1 - 24, w: 1.4, h: 2.4 }];
+  const doorsN = [{ at: X0 + 10, w: 1.6, h: 2.5 }, { at: (patX[0] + patX[1]) / 2, w: 2.0, h: 2.6 }, { at: X1 - 24, w: 1.6, h: 2.4 }];
   wall(bag, col, W, 'x', bz, pz, X0 + 0.4, ex, y, y + H, doorsN);
   wall(bag, col, W, 'x', q, q + T, X0 + 0.4, X1 - 0.4, y, y + H);
   wall(bag, col, W, 'z', X0 + 0.4, X0 + 0.4 + T, q + T, ny, y, y + H);
   wall(bag, col, W, 'z', X1 - 0.4 - T, X1 - 0.4, q + T, EW[1], y, y + H);
-  wall(bag, col, W, 'x', EW[1] - T, EW[1], px + T, X1 - 0.4 - T, y, y + H, [{ at: (px + X1) / 2, w: 1.4, h: 2.4 }]);
+  wall(bag, col, W, 'x', EW[1] - T, EW[1], px + T, X1 - 0.4 - T, y, y + H, [{ at: (px + X1) / 2, w: 1.6, h: 2.4 }]);
   for (const xx of [hallX, patX[1] + T]) wall(bag, col, W, 'z', xx - T, xx, q + T, bz, y, y + H);
   // the portico's pilasters along its front
-  for (let i = 0; i < 8; i++) { const x = X0 + 1.4 + i * (ex - X0 - 2.8) / 7; bag.add(W, box(x - 0.35, y, ny - 0.8, x + 0.35, y + H, ny - 0.1)); band(bag, R, 'x', ny - 0.1, 1, x - 0.36, x + 0.36, y, y + 0.6); col.rect([x - 0.35, ny - 0.8, x + 0.35, ny - 0.1], y, y + H); }
+  for (let i = 0; i < 8; i++) { const x = X0 + 1.4 + i * (ex - X0 - 2.8) / 7; if (doorsN.some((d) => Math.abs(d.at - x) < 1.2)) continue; bag.add(W, box(x - 0.35, y, ny - 0.8, x + 0.35, y + H, ny - 0.1)); band(bag, R, 'x', ny - 0.1, 1, x - 0.36, x + 0.36, y, y + 0.6); col.rect([x - 0.35, ny - 0.8, x + 0.35, ny - 0.1], y, y + H); }
   bag.add(W, box(X0 + 0.4, y + H - 0.6, pz, ex, y + H, ny - 0.1)); band(bag, R, 'x', ny - 0.1, 1, X0 + 0.4, ex, y + H - 0.6, y + H, 0.03);
   for (const s of [-1, 1]) { mictlan().emit(bag, X0 + 10 + s * 1.5, y, pz + 0.6, 0, 1); col.rect([X0 + 10 + s * 1.5 - 0.35, pz + 0.3, X0 + 10 + s * 1.5 + 0.35, pz + 0.9], y, y + 1.9); }
   // the hall of benches
@@ -289,7 +289,7 @@ export function calmecac(el, ctx) {
     const o0 = g.sd > 0 ? g.out : g.out - T, back = g.out + g.sd * (T + RM), b0 = g.sd > 0 ? back : back - T, front = back + g.sd * (T + D);
     wall(bag, col, W, g.ax, o0, o0 + T, g.a0, g.a1, y, y + H, [], 'scoria_red');
     const L = g.a1 - g.a0, nd = Math.max(2, Math.round(L / 9)), doors = [];
-    for (let i = 0; i < nd; i++) doors.push({ at: g.a0 + L * (i + 0.5) / nd, w: 1.3, h: 2.3 });
+    for (let i = 0; i < nd; i++) doors.push({ at: g.a0 + L * (i + 0.5) / nd, w: 1.6, h: 2.3 });
     wall(bag, col, W, g.ax, b0, b0 + T, g.a0 + (g.ax === 'z' ? 0 : RM + T), g.a1 - (g.ax === 'z' ? 0 : RM + T), y, y + H, doors, 'scoria_red');
     for (let i = 1; i < nd; i++) { const u = g.a0 + L * i / nd; wall(bag, col, W, g.ax === 'x' ? 'z' : 'x', u - 0.25, u + 0.25, Math.min(o0 + T, b0), Math.max(o0 + T, b0), y, y + H); }
     // benches along the rooms' outer walls
@@ -303,6 +303,7 @@ export function calmecac(el, ctx) {
     const np = Math.max(3, Math.round((g.a1 - g.a0) / 4)), f0 = g.sd > 0 ? front - 0.7 : front;
     for (let i = 0; i < np; i++) {
       const u = g.a0 + (g.ax === 'z' ? D + T : 0) + 0.6 + i * ((g.a1 - g.a0 - (g.ax === 'z' ? D + T : 0)) - 1.2) / (np - 1);
+      if (doors.some((d) => Math.abs(d.at - u) < 1.25)) continue;
       const r = g.ax === 'x' ? [u - 0.35, f0, u + 0.35, f0 + 0.7] : [f0, u - 0.35, f0 + 0.7, u + 0.35];
       bag.add(W, box(r[0], y, r[1], r[2], y + H, r[3])); col.rect(r, y, y + H);
     }
