@@ -4,6 +4,7 @@ import { RADIUS, LEVEL, ISLAND, PRECINCT, TM, SITES, houses, yards, priestHouses
 import { ground } from './ground.js';
 import { sculptPlans } from './sculpt.js';
 import { tiles } from './tiles.js';
+import { isOpen, figureSpot } from './walk.js';
 /** How far from the visitor the houses are built in full (m); the arrival (the Templo Mayor's twin shrines, 160 m and more from the nearest) sees the simple form. */
 const NEAR = 190;
 const base = (id, elements) => ({ id, style: 'aztec', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-60, 0], facing: 'e' } });
@@ -90,14 +91,15 @@ export async function town() {
   plans.push(...tiles('tenochtitlan-houses', 'aztec', all.flatMap((h) => {
     const c = [(h.rect[0] + h.rect[2]) / 2, (h.rect[1] + h.rect[3]) / 2], r = Math.hypot(c[0], c[1]), lod = r < 170 ? 2 : r < 250 ? 1 : 0;
     const noble = houseNoble(h);
-    return [{ t: 'calli', ...h, noble }, { t: 'calli_front', rect: h.rect, seed: h.seed, gate: houseGate(h), trade: noble ? null : houseTrade(h), lod }];
+    return [{ t: 'calli', ...h, noble, open: isOpen(h) }, { t: 'calli_front', rect: h.rect, seed: h.seed, gate: houseGate(h), trade: noble ? null : houseTrade(h), lod }];
   }), { near: NEAR, R: RADIUS, entrance: { at: [-60, 0], facing: 'e' } }));
   // the people in the priests' compounds of the precinct (layout.js): in each patio, by the gate's side
   {
     const kinds = ['priest', 'woman', 'sweeper', 'priest', 'woman', 'man', 'child', 'woman', 'priest'], people = [];
     priestHouses().forEach((h, i) => {
       const cx = (h.rect[0] + h.rect[2]) / 2, cz = (h.rect[1] + h.rect[3]) / 2, g = { n: [0, -1], s: [0, 1], w: [-1, 0], e: [1, 0] }[houseGate(h)];
-      people.push([cx + g[0] * 1.0, cz + g[1] * 1.0, 0.42, Math.atan2(g[0], g[1]) + (i % 2 ? 1.2 : -1.2), kinds[i % kinds.length], 800 + i, { pose: i % 3 === 1 ? 'sit_ground' : 'stand' }]);
+      const sp = figureSpot(h, i) ?? [cx + g[0] * 1.0, cz + g[1] * 1.0];                           // (out of the lane from the gate to the hearth room's door: walk.js)
+      people.push([sp[0], sp[1], 0.42, Math.atan2(g[0], g[1]) + (i % 2 ? 1.2 : -1.2), kinds[i % kinds.length], 800 + i, { pose: i % 3 === 1 ? 'sit_ground' : 'stand' }]);
     });
     plans.push(base('tenochtitlan-priests-people', [{ t: 'mx_people', people }]));
   }
