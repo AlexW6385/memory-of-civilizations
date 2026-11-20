@@ -3,7 +3,7 @@
 // wall to the upper room whose lane windows are closed by wooden lattices, a second flight to the flat roof (terrado) with its
 // parapet, its water jars and washing. Built in a frame u along the front, v in from it; every storey walkable.
 
-import { box, lathe, rod, clothBox, addCloth } from '../../core/geom.js';
+import { box, lathe, rod, clothBox, addCloth, fromTriangles } from '../../core/geom.js';
 import { holedWall, archHead, face } from './halls.js';
 
 const LW = 'limewash_white', T = 0.4, ST = 3.1;
@@ -56,6 +56,7 @@ function house(el, { bag, col }) {
   // the door's leaf folded back; a shop's two leaves stand folded against its jambs (shutters up: the front open)
   if (SHOP) for (const sg of [-1, 1]) B('wood_dark', du + sg * dw - (sg > 0 ? 0 : 0.07), T, du + sg * dw + (sg > 0 ? 0.07 : 0), 1.0, y + 0.12, y + 2.1);
   else B('wood_dark', du - 0.55, 0.08, du - 0.05, 0.16, y + 0.12, y + 2.0);
+  sill(bag, F, du - dw, du + dw, y + 0.12, el.seed);
   B(LW, du - dw - 0.3, -0.5, du + dw + 0.3, 0, y - 0.1, y + 0.12); col.floor(R(du - dw - 0.3, -0.5, du + dw + 0.3, 0), y + 0.12);
   // a wooden lattice over each upper window, standing a hand off the wall (the middle bay of the first upper floor of some houses is a mirador, an enclosed lattice bay on corbels)
   for (let q = 1; q < N; q++) for (let b = 0; b < bays; b++) {
@@ -124,6 +125,27 @@ function house(el, { bag, col }) {
 }
 /** a size by the place alone, every piece its own (to a tenth of a millimetre: a repeated shape would become an instanced draw of its own) */
 function jit(x, z) { const f = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return 0.9 + 0.2 * (f - Math.floor(f)); }
+/**
+ * The door's sill: a slab of brick through the wall's thickness, its top worn to a hollow in the middle by the feet that crossed it (a shop's, wider and busier,
+ * more than a house's), the arrises bevelled. Every one its own depth of hollow (by the seed), so none is a repeated shape. Geometry only; the walker's floor is unchanged.
+ */
+function sill(bag, F, u0, u1, y, seed) {
+  const dip = (0.014 + 0.016 * ((seed * 7919) % 100) / 100) * (u1 - u0 > 1.5 ? 1.4 : 1), N = 4, hi = 0.05, bev = 0.015, tris = [];
+  const P = (u, v, h) => { const f = F(u, v); return [f[0], y + h, f[1]]; };
+  const top = (u) => { const m = (u - (u0 + u1) / 2) / ((u1 - u0) / 2); return hi - dip * Math.exp(-m * m * 4); };
+  const q = (a, b, c, d) => tris.push(...a, ...b, ...c, ...a, ...c, ...d);
+  for (let i = 0; i < N; i++) {
+    const ua = u0 + (u1 - u0) * i / N, ub = u0 + (u1 - u0) * (i + 1) / N, ha = top(ua), hb = top(ub);
+    q(P(ua, bev, ha), P(ua, T - bev, ha), P(ub, T - bev, hb), P(ub, bev, hb));
+    q(P(ua, 0, ha - bev), P(ua, bev, ha), P(ub, bev, hb), P(ub, 0, hb - bev));
+    q(P(ua, T - bev, ha), P(ua, T, ha - bev), P(ub, T, hb - bev), P(ub, T - bev, hb));
+    q(P(ua, 0, 0), P(ua, 0, ha - bev), P(ub, 0, hb - bev), P(ub, 0, 0));
+    q(P(ub, T, 0), P(ub, T, hb - bev), P(ua, T, ha - bev), P(ua, T, 0));
+  }
+  q(P(u0, T, 0), P(u0, T, top(u0) - bev), P(u0, 0, top(u0) - bev), P(u0, 0, 0));
+  q(P(u1, 0, 0), P(u1, 0, top(u1) - bev), P(u1, T, top(u1) - bev), P(u1, T, 0));
+  bag.add('brick_paving', fromTriangles(tris));
+}
 function jar(bag, x, y, z, s) {
   s *= jit(x, z);
   bag.add('terracotta', lathe([[0.001, 0], [0.16 * s, 0.01], [0.27 * s, 0.25 * s], [0.31 * s, 0.5 * s], [0.25 * s, 0.7 * s], [0.14 * s, 0.82 * s], [0.17 * s, 0.9 * s], [0.001, 0.9 * s]], 10, null, x, y, z));
