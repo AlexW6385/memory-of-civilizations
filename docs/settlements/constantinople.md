@@ -171,6 +171,35 @@ As for Hagia Sophia (`docs/buildings/hagia-sophia.md` §9).
 - **The roof** of the merchant's house and the tenement is flat, as one tenement in four is (§11): a second timber stair from the hall through a hole in the deck, a parapet a metre high with a coping and scuppers, a sun-room (heliakon) of four posts and a lean-to of tiles with a couch and a table, a washing line with cloth, jars [inferred: after §11, the heliakon of the Byzantine house]. The other kinds keep their tiled hip roofs.
 - **Walked**: walk-check routes in the settlement plan (`houseWalks`, interiors.js) take the walker from the lane through the door, the store, up the stair, across the hall to the bedroom and the reception room and out on the maenianum, and, in the flat-roofed houses, up the second stair on to the roof.
 
+## 16. Reference-standard pass: walk, night, sound, animals (round 7)
+
+Marks: [stated] with its source, [inferred] where the place and date suggest it. Only what Constantinople about 562 had.
+
+### 16.1 The visitor's walk
+- [inferred] The walk runs from the arrival on the forecourt to the south door of Hagia Sophia, west under the forecourt's shop porticoes to the Milion, along the Mese's porticoes round the Hippodrome's end, and south across the Augustaion to the Chalke (`walk.js`, WALK). Walk-check routes enter ten shops (`walk.js`, OPEN) through the portico and the door (2.2 m) into the front room, keeping to the side of the door away from the counter.
+- [stated] Shops in the porticoes of the Mese and the colonnaded squares, with workshops of the silversmiths, cloth sellers and bakers, are in §4.5 and Procopius' Buildings; the Mese as a colonnaded, shop-lined street is in the sources below.
+- [inferred] Goods stand beside the doors, not in front: pots, baskets, sacks and a small stall at 1.5 to 2 m off a door's middle, the keeper by them. Sacks, barrels and amphorae stacked on the forecourt's porticoes stand on the piers between doors.
+- Not built: more enterable houses along the walk, street shrines, and keepers in every walked shop. Seventeen further shop routes were written and fail in the walker's raster (the counter of the style's shop fitting leaves a lane under a hand's breadth beside the door); they are not kept.
+
+### 16.2 Night
+- [stated] Oil lamps of clay and bronze, hung from chains in churches and porticoes, and the polykandelon, a bronze ring of glass lamps hanging in the church (Paul the Silentiary, Descriptio S. Sophiae, on the silver lamps of the dome; lamps and candles in the dossier §3 and §4).
+- [inferred] A clay lamp on an iron chain in every second intercolumniation of the Mese's porticoes; a hearth or oven glow in bakeries and cook-shops; lit upper windows in houses (the ground floor stays dark behind its shutters); the ring of 40 windows at the dome's foot lit from within. All as `halo` (additive, night only); the day view is unchanged. Code: `nightlight.js`.
+- [inferred] Street lighting by the city (Constantinople had none by the state at this date): none is made. Torches and lanterns carried by walkers are not built.
+
+### 16.3 Sound
+- [stated] Chant (Kyrie, psalmody, acclamations of the emperor) and the church organ's absence: the organ was a court instrument in the Hippodrome and palace ceremony, not in the church (Byzantine liturgy was unaccompanied). The voice `cnOrgan` is therefore for the palace and is placed only there; marked [inferred] for its tone.
+- [stated] Chariot racing in the Hippodrome, with the factions' acclamations, is in §4.1 and in Procopius' Wars (the Nika riot, 532). The racing hours and the pace are [inferred].
+- [inferred] Hawkers' cries (candles, bread, water, fruit, cloth) by the shops and the forecourt; mules and carts on the Mese; windlass and well at the cistern head; fountain and bath; hammering and chasing in the silversmiths; bellows in smithies; doves; a household's supper. Wordless, synthesised (`voices-constantinople.js`, `soundmap.js`). Not heard by the author: measured only (about 4.5e-3 RMS per voice).
+- Not built: the semantron (the wooden board struck to call to prayer, [stated] in monastic use) and bells at the church (bells were in use in Constantinople by this date only in a few places; left out).
+
+### 16.4 Animals
+- [inferred] Dogs and cats lying by the piers of the shop porticoes, a caged songbird at one door, doves on the paving of the forecourt and the Augustaion, fowl before the bakery and the weaver's, a dog at two house doors, crows, swallows and sparrows already in `fauna.js`. Code: the `critters` list of `fauna.js`.
+- Not built: the swallows' nests under the porticoes, horses at the Hippodrome, fish in the Golden Horn's boats (the sea is not built).
+
+### 16.5 Wear and writing; the landmark
+- Not done: worn thresholds and steps, and Greek inscriptions (the shop signs, the lintel texts, the dedications of Hagia Sophia). No letters are written: none could be checked in this pass, so the boards stay plain.
+- Not done, from the landmark's own gaps: the Pharos, the sea walls and the harbours.
+
 ## Sources
 
 - [Zeno's constitution on private buildings (Scott, Corpus Juris Civilis) — droitromain.univ-grenoble-alpes.fr](https://droitromain.univ-grenoble-alpes.fr/Anglica/N63_Scott.htm)
