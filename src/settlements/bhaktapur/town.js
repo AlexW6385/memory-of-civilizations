@@ -133,12 +133,12 @@ export async function town() {
   for (const [x, z] of [[-18, -2], [30, 30], [-60, -70]]) A.push({ t: 'animal', kind: 'zebu', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(x) });
   // water buffalo in two lanes, a cat on a pidha here and there, dogs sleeping before the shops
   for (const [x, z] of [[-24, 5], [70, -40]]) A.push({ t: 'animal', kind: 'buffalo', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(x) + 9 });
-  for (const l of L) if (!l.use && !l.open && l.pid && rand() < 0.22 && Math.hypot(...fp(l, 2, 0)) < 100) { const q = fp(l, 3.2, -0.45); if (!CRITTER_CAT.has(l)) A.push({ t: 'animal', kind: 'cat', at: q, y: 0.46, rot: rand() * 6.28, seed: l.seed % 97 }); }   // (the nearest three are critters: fauna.js)
-  for (const l of L) if (l.open && rand() < 0.35) { const q = fp(l, (l.rect[2] - l.rect[0] > 0 ? 1.0 : 1.0) + rand() * 2, -1.2); if (!CRITTER_DOG.has(l)) A.push({ t: 'animal', kind: 'dog', at: q, y: 0.05, rot: rand() * 6.28, seed: l.seed % 53 }); }
+  for (const l of L) if (!l.use && !l.open && l.pid && rand() < 0.22 && Math.hypot(...fp(l, 2, 0)) < 100) { const q = fp(l, 3.2, -0.45), rt = rand() * 6.28; if (!CRITTER_CAT.has(l)) A.push({ t: 'animal', kind: 'cat', at: q, y: 0.46, rot: rt, seed: l.seed % 97 }); }   // (the nearest three are critters: fauna.js)
+  for (const l of L) if (l.open && rand() < 0.35) { const q = fp(l, (l.rect[2] - l.rect[0] > 0 ? 1.0 : 1.0) + rand() * 2, -1.2), rt = rand() * 6.28; if (!CRITTER_DOG.has(l)) A.push({ t: 'animal', kind: 'dog', at: q, y: 0.05, rot: rt, seed: l.seed % 53 }); }
   for (const [x, z] of [[8, 60], [-70, -30]]) A.push({ t: 'animal', kind: 'goat', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(z) });
   // the pigeons of Taumadhi: flocks on the paving about the temples and on the dabali, women scattering grain [stated: the square is known for them]
   // (the flocks are critters now: fauna.js, pigeon_* models that walk and peck and scatter before the visitor)
-  for (const [x, z, n] of [[-16, -2, 9], [2, -3, 8], [26, 2, 10], [-24, 14, 7], [33, 19, 8], [12, 18, 7], [-6, 17, 6], [36, -12, 6]]) if (false && free(x, z, 0.3) && Math.hypot(x - 19, z - 21) > 6) A.push({ t: 'chickens', kind: 'pigeon', at: [x, z], y: 0.05, rot: rand() * 6.28, seed: Math.round(x * 3 + z), n });
+  for (const [x, z, n] of [[-16, -2, 9], [2, -3, 8], [26, 2, 10], [-24, 14, 7], [33, 19, 8], [12, 18, 7], [-6, 17, 6], [36, -12, 6]]) if (free(x, z, 0.3) && Math.hypot(x - 19, z - 21) > 6) rand();   // (the random sequence stays as it was: later figures keep their places)
   void STREETS;
   // the arrival (src/planet/arrivals.js, 19 m, 21 m): no figure within 6 m of the visitor's feet, and none close on the right of the lens
   const AR = [19, 21];
