@@ -10,22 +10,16 @@ import { officePlans } from './offices.js';
 import { RADIUS, lots, SHOPS, BELL, JONGNO, AVENUE, YANGBAN } from './layout.js';
 import { ground } from './ground.js';
 import { homeLayout, classOf } from '../../styles/joseon/home.js';
+import { blocksOf, enterable } from './openwalk.js';
+import { lanternHalos } from './nightlight.js';
 import { rangeFrame } from '../../styles/joseon/house.js';
 const base = (id, elements) => ({ id, style: 'joseon', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 70], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-// Jongno's shop rows, cut into blocks by the lanes running south, and the bell pavilion at the corner
-const blocksOf = () => {
-  const out = [];
-  for (const [x0, z0, x1, z1] of SHOPS) {
-    let x = x0, k = 0;
-    while (x < x1 - 8) { const xe = Math.min(x1, x + 20.8), nb = Math.max(1, Math.round((xe - x) / 2.6)); out.push({ rect: [x, z0, xe, z1], k: k++, nb, bw: (xe - x) / nb }); x = xe + 3.2; }
-  }
-  return out;
-};
+// Jongno's shop rows, cut into blocks by the lanes running south, and the bell pavilion at the corner (blocksOf: openwalk.js)
 function jongno() {
   const L = [];
-  for (const b of blocksOf()) L.push({ t: 'sijeon', rect: b.rect, front: 'n', seed: 1880 + 7 * b.k + Math.round(b.rect[0]) });
+  for (const b of blocksOf()) L.push({ t: 'sijeon', rect: b.rect, front: 'n', seed: 1880 + 7 * b.k + Math.round(b.rect[0]), wide: b.wide });
   L.push({ t: 'bell_pavilion', rect: BELL });
   return { ...base('joseon-seoul-jongno', L), feature: false };
 }
@@ -36,17 +30,20 @@ function shopfronts() {
   const rand = rng(1894), L = [];
   for (const b of blocksOf()) {
     const [x0, z0] = b.rect;
-    for (let k = 0; k <= b.nb; k++) if (k % 3 === 0 && k < b.nb) L.push({ t: 'shop_sign', at: [x0 + k * b.bw + 0.12, z0 - 0.1], y: 0.42, rot: Math.PI, h: 2.0, len: 0.95, out: 0.85, cloth: ['cloth_indigo', 'cloth_white', 'cloth_red', 'cloth_ochre'][Math.floor(rand() * 4)], letters: 2 + Math.floor(rand() * 2) });
+    const wd = new Set(b.wide);
+    for (let k = 0; k <= b.nb; k++) if (k % 3 === 0 && k < b.nb) (wd.has(k - 1) ? (() => {}) : (e) => L.push(e))({ t: 'shop_sign', at: [x0 + k * b.bw + 0.12, z0 - 0.1], y: 0.42, rot: Math.PI, h: 2.0, len: 0.95, out: 0.85, cloth: ['cloth_indigo', 'cloth_white', 'cloth_red', 'cloth_ochre'][Math.floor(rand() * 4)], letters: 2 + Math.floor(rand() * 2) });
     for (let k = 0; k < b.nb; k++) {
-      const xa = x0 + k * b.bw + 0.12;
+      const xa = x0 + k * b.bw + 0.12, wayK = wd.has(k - 1);      // (the second bay of a two-bay shop: its right end is the way in, kept clear)
       if (rand() < 0.5) L.push({ t: 'hang_lantern', at: [xa + 0.35, z0 - 0.3], y: 0.42 + 2.08, rot: 0, kind: rand() < 0.6 ? 'paper' : 'white', drop: 0.15, seed: 1 });
-      const r = rand(), px = xa + 0.4 + rand() * 0.9, pz = z0 - 1.25 - rand() * 0.4;
+      const r = rand(), px = xa + 0.4 + rand() * 0.9 - (wayK ? 0.9 : 0), pz = z0 - 1.25 - rand() * 0.4;
       if (r < 0.28) L.push({ t: 'pot', kind: rand() < 0.5 ? 'dark_pot' : 'vat', at: [px, pz], y: 0.03, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: Math.floor(rand() * 1e9) });
       else if (r < 0.5) L.push({ t: 'basket', at: [px, pz], y: 0.03, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: Math.floor(rand() * 1e9) });
       else if (r < 0.62) L.push({ t: 'sacks', at: [px, pz], y: 0.03, rot: Math.PI, n: 2 + Math.floor(rand() * 4), seed: Math.floor(rand() * 1e9) });
       else if (r < 0.7) L.push({ t: 'stool', at: [px, pz], y: 0.03, rot: rand() * 6.28 });
     }
   }
+  // the public wells of Jongno (stone curb, rope and bucket) on the street's north edge, clear of the way along it [inferred: Hanyang's streets had public wells]
+  for (const x of [-84, 74]) L.push({ t: 'well', kind: 'open', mat: 'granite_korea', at: [x, JONGNO[1] + 1.4], y: 0.03 });
   for (const x of [-112, -48, 60, 118]) L.push({ t: 'animal', kind: 'dog', at: [x, JONGNO[1] + 1.6], y: 0.03, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: false, mat: rand() < 0.5 ? 'hide_tan' : 'hide_white' });
   return { ...base('joseon-seoul-shopfronts', L), style: 'life', feature: false, center: [0, 357], near: 260 };
 }
@@ -121,13 +118,16 @@ function street() {
   };
   // Jongno: merchants on their shop floors, buyers before them, people walking both ways
   const [jx0, jz0, jx1, jz1] = JONGNO;
+  // (every bay draws its dice as before, so the rest of the street keeps its people; those at a two-bay shop's second bay or its way in are dropped)
   const shopx = [];
-  for (const b of blocksOf()) for (let k = 0; k < b.nb; k++) shopx.push([b.rect[0] + k * b.bw + 0.12 + (b.bw - 0.24 - 0.95) / 2, b.rect[1], b.rect[0] + (k + 1) * b.bw - 0.12 - 0.5]);
-  for (const [x, z0, xin] of shopx) {
+  for (const b of blocksOf()) { const wd = new Set(b.wide); for (let k = 0; k < b.nb; k++) shopx.push([b.rect[0] + k * b.bw + 0.12 + (b.bw - 0.24 - 0.95) / 2, b.rect[1], b.rect[0] + (k + 1) * b.bw - 0.12 - 0.5, wd.has(k), wd.has(k - 1)]); }
+  for (const [x, z0, xin, opened, second] of shopx) {
+    const hold = P.length;
     // the shopkeeper on his maru (seen over the goods), a customer or two before it, a boy by the bay's way in now and then
-    if (rand() < 0.15) P.push({ t: 'figure', at: [xin, z0 + 2.2], y: 0.42, rot: Math.PI, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', skin: skin(), hat: 'brim', hatMat: 'lacquer_black', beard: rand() < 0.6, h: 1.62, pose: 'stand' });
+    if (rand() < 0.15) (opened ? (() => {}) : (e) => P.push(e))({ t: 'figure', at: [xin, z0 + 2.2], y: 0.42, rot: Math.PI, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', skin: skin(), hat: 'brim', hatMat: 'lacquer_black', beard: rand() < 0.6, h: 1.62, pose: 'stand' });
     if (rand() < 0.45) P.push({ t: 'figure', at: [x, z0 + 0.75], y: 0.88, rot: 0, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', skin: skin(), hat: 'brim', hatMat: 'lacquer_black', pose: 'cross', beard: rand() < 0.6, h: 1.62 });
     if (rand() < 0.3) (rand() < 0.65 ? man : woman)(x + (rand() - 0.5), z0 - 1.1 - rand() * 0.5, Math.PI + (rand() - 0.5) * 0.6);
+    if (second) P.length = hold;
   }
   for (let k = 0; k < 46; k++) {
     const x = jx0 + 12 + rand() * (jx1 - jx0 - 24), z = jz0 + 1.5 + rand() * (jz1 - jz0 - 3), rot = rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2;
@@ -150,9 +150,6 @@ function street() {
   ox(7, 300, Math.PI);
   return [{ ...base('joseon-seoul-street', P), style: 'life', center: [0, 330], near: 260 }, { ...base('joseon-seoul-loads', J), feature: false, center: [0, 330], near: 260 }];
 }
-
-// which hanok can be entered: every gentry house and every other lot by its seed (half of them), where the ground is level
-const enterable = (l) => { const [a, b, c, d] = l.rect; return [[a, b], [c, b], [a, d], [c, d]].every(([x, z]) => ground.height(x, z) < 0.05) && (classOf(l) === 'gentry' || l.seed % 2 === 0); };
 
 // the households: in some houses a woman at the kitchen's stove, an old man on his cushion in the men's room or the main room, a child in the yard
 function homefolk() {
@@ -177,11 +174,44 @@ function homefolk() {
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`joseon-seoul-homefolk-${k}`, list), style: 'life', feature: false, center: [i * 100 + 50, j * 100 + 50], near: 200 }; });
 }
 
+// the light of the houses (nightlight.js `seoul_glow`): the halo of every house's lit windows, lanterns and kitchen fire, in plans of their own, tiles of 128 m,
+// drawn within 190 m of the visitor (a plan's halo is one draw wherever its bounds meet the view: not in the houses' own plans, which span the town)
+function glowPlans() {
+  const tiles = new Map(), T = 128;
+  for (const l of lots()) {
+    const k = Math.floor((l.rect[0] + l.rect[2]) / 2 / T) + ',' + Math.floor((l.rect[1] + l.rect[3]) / 2 / T);
+    if (!tiles.has(k)) tiles.set(k, []);
+    // (the lot's rectangle goes under `box`: a `rect` would be read by the street-life pass (src/objects/life.js) as one more house)
+    const { rect, ...rest } = l;
+    tiles.get(k).push(enterable(l) ? { t: 'seoul_glow', of: 'hanok_home', box: rect, ...rest, cls: classOf(l) } : { t: 'seoul_glow', of: 'hanok', box: rect, ...rest, simple: true });
+  }
+  // the shops' lamps and the bell pavilion's windows (the jongno plan carries no halo: one draw more at the arrival)
+  for (const e of [...blocksOf().map((b) => ({ t: 'seoul_glow', of: 'sijeon', box: b.rect, front: 'n', seed: 1880 + 7 * b.k + Math.round(b.rect[0]), wide: b.wide })), { t: 'seoul_glow', of: 'bell_pavilion', box: BELL }]) {
+    const k = Math.floor((e.box[0] + e.box[2]) / 2 / T) + ',' + Math.floor((e.box[1] + e.box[3]) / 2 / T);
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push(e);
+  }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`joseon-seoul-glow-${k}`, list), feature: false, center: [i * T + T / 2, j * T + T / 2], near: 190 }; });
+}
+
 export async function town() {
   const all = lots(), plans = [], shells = all.filter((l) => !enterable(l)), homes = all.filter(enterable);
   for (let i = 0; i < shells.length; i += 80) plans.push(base(`joseon-seoul-hanok-${i / 80}`, shells.slice(i, i + 80).map((l) => ({ t: 'hanok', ...l, simple: true }))));
   for (let i = 0; i < homes.length; i += 12) plans.push(base(`joseon-seoul-homes-${i / 12}`, homes.slice(i, i + 12).map((l) => ({ t: 'hanok_home', ...l, cls: classOf(l) }))));
   plans.push({ ...base('joseon-seoul-yangban', [{ t: 'yangban_house', rect: YANGBAN, seed: 1888 }]), feature: false });
-  plans.push(...courtPlans(), ...officePlans(), jongno(), shopfronts(), ...lanedress(), ...street(), ...homefolk());
+  plans.push(...courtPlans(), ...officePlans(), jongno(), shopfronts(), ...lanedress(), ...street(), ...homefolk(), ...glowPlans());
+  // the light of the lanterns the life plans hang (nightlight.js): gathered into the glow plans by place (a halo is one draw in each plan that has any),
+  // so the lane and street plans carry none of their own
+  const T = 128, glow = new Map(plans.filter((p) => /-glow-/.test(p.id)).map((p) => [p.id.split('-glow-')[1], p]));
+  const into = new Map();
+  for (const p of plans) {
+    if (p.style !== 'life' || /office/.test(p.id)) continue;
+    for (const h of lanternHalos(p.elements)) { const k = Math.floor(h.x / T) + ',' + Math.floor(h.z / T); if (!into.has(k)) into.set(k, []); into.get(k).push(h); }
+  }
+  for (const [k, list] of into) {
+    let g = glow.get(k);
+    if (!g) { const [i, j] = k.split(',').map(Number); g = { ...base(`joseon-seoul-glow-${k}`, []), feature: false, center: [i * T + T / 2, j * T + T / 2], near: 190 }; plans.push(g); }
+    g.elements.push({ t: 'seoul_halo', list });
+  }
   return plans;
 }

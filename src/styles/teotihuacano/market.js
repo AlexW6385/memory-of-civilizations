@@ -129,12 +129,11 @@ export function ttMarket(el, ctx) {
   }
   // people: bargainers and bearers in the lanes
   for (let i = 0; i < 46; i++) {
-    const lx = r() < 0.5, u = lx ? x0 + 6 + r() * (x1 - x0 - 12) : z0 + 6 + r() * (z1 - z0 - 12), off = (r() - 0.5) * 5, [x, z] = lx ? [u, cz + off] : [cx + off, u];
+    const lx = r() < 0.5, u = lx ? x0 + 6 + r() * (x1 - x0 - 12) : z0 + 6 + r() * (z1 - z0 - 12), o0 = (r() - 0.5) * 5, off = (o0 < 0 ? -1 : 1) * (1.7 + Math.abs(o0) * 0.5), [x, z] = lx ? [u, cz + off] : [cx + off, u];   // (the lanes' middle line, 3.4 m wide, kept clear for the visitor's walk)
     if (inHole(x, z)) continue;
     const man = r() < 0.55, car = ['basket', 'pot', 'none', 'bundle'][Math.floor(r() * 4)];
     if (i % 7 === 3) { fig(ctx, { who: 'child', at: [x, z], y: 0.04, rot: r() * 6.28, seed: Math.floor(r() * 1e9), pose: 'stand' }); continue; }
-    if (i % 11 === 5) { L.chickens({ t: 'chickens', kind: 'turkey', n: 3, at: [x, z], y: 0.04, rot: r() * 6, seed: i }, ctx); continue; }
-    if (i % 13 === 7) { L.animal({ t: 'animal', kind: 'dog', at: [x, z], y: 0.04, rot: r() * 6.28, seed: i, mat: 'hide_tan' }, ctx); continue; }
+    if (i % 11 === 5 || i % 13 === 7) continue;                                       // (the turkeys and the dogs of the lanes are rigged critters: settlements/teotihuacan/fauna.js)
     L.figure(man ? { at: [x, z], y: 0.04, rot: r() * 6.28, seed: Math.floor(r() * 1e9), dress: 'tunic', legs: 'bare', over: r() < 0.5 ? 'cape' : 'none', cloth: ['cloth_white', 'cloth_ochre', 'cloth_brown'][Math.floor(r() * 3)], cloth2: 'cloth_white', skin: 'skin_medium', hair: 'long', hairMat: 'hide_black', feet: 'bare', carry: car, pose: r() < 0.4 ? 'talk' : 'stand' }
       : { at: [x, z], y: 0.04, rot: r() * 6.28, seed: Math.floor(r() * 1e9), dress: 'wrap', over: 'shawl', cloth: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][Math.floor(r() * 4)], cloth2: 'cloth_white', skin: 'skin_dark', hair: 'bun', hairMat: 'hide_black', feet: 'bare', carry: car, pose: 'stand' }, ctx);
   }

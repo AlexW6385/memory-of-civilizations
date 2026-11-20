@@ -3,6 +3,7 @@
 // brick-paved square, the stalls of the market, the enterable Newar house on its south side; Pottery Square with its drying ground, wheels and kilns.
 
 import { upRoutes } from './upstairs.js';
+import { shopRoutes } from './shopwalk.js';
 import { lots, SQ, POT, NYATAPOLA, BHAIRAB, SHI, DABALI, PATI, DHARA, CHAITYA, TREES, HOUSE, STALLS } from './layout.js';
 
 const E = [];
@@ -11,6 +12,7 @@ E.push({ t: 'newar_paving', rect: SQ, y: 0.05, th: 0.3, mat: 'cotto_floor' });
 E.push({ t: 'newar_inlay', rect: SQ, rings: KEEP_RINGS, seed: 4 });
 E.push({ t: 'newar_pagoda', ...NYATAPOLA });
 E.push({ t: 'newar_offerings', pagoda: NYATAPOLA, seed: 11 });
+E.push({ t: 'newar_wear', pagoda: NYATAPOLA, seed: 5 });
 E.push({ t: 'newar_trisul', c: [BHAIRAB.c[0] - 7.4, BHAIRAB.c[1] - 4.2], s: 1 }, { t: 'newar_trisul', c: [BHAIRAB.c[0] - 7.4, BHAIRAB.c[1] + 4.2], s: 1 });
 E.push({ t: 'newar_pagoda', ...BHAIRAB });
 E.push({ t: 'newar_shikhara', c: SHI.c, s: 1 });
@@ -51,6 +53,9 @@ walks.push([[19, 22], [17.5, 25.4], [17.5, 28.2], [20, 29.6], [22, 27], [20, 26.
 walks[1].y0 = 0;
 // the walked houses (upstairs.js, docs §16): from the street up each ladder-stair to the rooms and the kitchen under the roof
 for (const r of upRoutes()) { r.y0 = 0; walks.push(r); }
+
+// the front rooms of twelve more opened fronts nearest the arrival (shopwalk.js, docs §17)
+for (const r of shopRoutes()) { r.y0 = 0; walks.push(r); }
 
 export const taumadhi = {
   id: 'bhaktapur-taumadhi',
