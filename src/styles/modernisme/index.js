@@ -247,7 +247,7 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   const opened = !!opt.open, tb2 = opened ? door : tb;       // (an opened house has its gallery over the door)
   if (!own) {
     { // the plinth, in pieces round the shops' doors
-      const gaps = shops.map((q) => { const d = q.door === 'L' ? q.s0 + q.bw / 2 : q.s1 - q.bw / 2; return [d - 0.9, d + 0.9]; });
+      const gaps = shops.map((q) => { const d = q.door === 'L' ? q.s0 + q.bw / 2 : q.s1 - q.bw / 2; return [d - 1.06, d + 1.06]; });
       if (opt.portal) gaps.push([opt.portal.pc - POW, opt.portal.pc + POW]);                // (the doorway of a portal with a vestibule: portal.js)
       gaps.sort((p, q) => p[0] - q[0]);
       let c0 = s0; for (const [g0, g1] of gaps) { if (g0 > c0 + 0.05) bag.add('granite_grey', F(c0, g0, -0.04, 0.1, y - 1.25, y + 0.45)); c0 = g1; }

@@ -26,12 +26,14 @@ export const TRADES = {
 };
 const TRADE_LIST = Object.keys(TRADES);
 const DD = 8.8;                                   // the inside face of the back wall, d from the street line
-const FW = 0.5;                                   // the front wall's thickness
+const FW = 0.5;
+const DW = 0.78;                                  // half the door's width: 1.56 m clear (the walker's raster wants 1.5 m)
+const LANE = 0.86;                                // the furnishing's lane before the door                                   // the front wall's thickness
 export const SHOP_DEPTH = DD;
 
 /** The plan of a shop of width W whose door stands at dc from its left end (flipped when the door is at the right end). */
 export function layout(W, dc) {
-  const wide = W - (dc + 0.7) >= 2.5, lane = [dc - 0.7, dc + 0.7];
+  const wide = W - (dc + LANE) >= 2.5, lane = [dc - LANE, dc + LANE];
   const L = { W, dc, lane, wide, shelves: [], tables: [], cust: [] };
   if (wide) {
     L.shelves.push([W - 0.42, W, 1.0, DD - 0.4, 'd'], [0.42, W - 0.42, DD - 0.42, DD, 's'], [0, 0.42, 1.0, DD - 0.4, 'd']);
@@ -182,10 +184,10 @@ export function makeShops(H) {
     const crate = (s, t, y, f) => { bx('wood_ochre', s - 0.27, s + 0.27, t - 0.19, t + 0.19, y, y + 0.22); if (f) for (let k = 0; k < 6; k++) lat(f[k % f.length], [[0.001, 0], [0.05, 0.03], [0.065, 0.07], [0.04, 0.115], [0.001, 0.12]], s - 0.17 + (k % 3) * 0.17, t - 0.08 + Math.floor(k / 3) * 0.16, y + 0.22, 6); };
     // the blade sign: an iron bracket out from the wall over the door, a board with the trade's mark on both faces
     const ds = dc, bt = 0.85, by = 2.95;
-    rd(IRON, [ds - 0.7, 0.04, by + 0.55], [ds - 0.7, bt + 0.1, by + 0.55], 0.014, 5); rd(IRON, [ds - 0.7, 0.04, by + 0.1], [ds - 0.7, bt * 0.6, by + 0.5], 0.01, 4);
-    rd(IRON, [ds - 0.7, 0.3, by + 0.55], [ds - 0.7, 0.3, by + 0.45], 0.005, 3);
-    const board = (m, y0, y1, t0, t1) => b.box(m, S(ds - 0.7) - 0.02, y0, -t1, S(ds - 0.7) + 0.02, y1, -t0);
-    const mark = (m, y0, y1, t0, t1) => b.box(m, S(ds - 0.7) - 0.032, y0, -t1, S(ds - 0.7) + 0.032, y1, -t0);
+    rd(IRON, [ds - (DW + 0.08), 0.04, by + 0.55], [ds - (DW + 0.08), bt + 0.1, by + 0.55], 0.014, 5); rd(IRON, [ds - (DW + 0.08), 0.04, by + 0.1], [ds - (DW + 0.08), bt * 0.6, by + 0.5], 0.01, 4);
+    rd(IRON, [ds - (DW + 0.08), 0.3, by + 0.55], [ds - (DW + 0.08), 0.3, by + 0.45], 0.005, 3);
+    const board = (m, y0, y1, t0, t1) => b.box(m, S(ds - (DW + 0.08)) - 0.02, y0, -t1, S(ds - (DW + 0.08)) + 0.02, y1, -t0);
+    const mark = (m, y0, y1, t0, t1) => b.box(m, S(ds - (DW + 0.08)) - 0.032, y0, -t1, S(ds - (DW + 0.08)) + 0.032, y1, -t0);
     board('wood_painted', by - 0.05, by + 0.5, 0.25, bt);
     ({
       colmado: () => { mark('cloth_green', by + 0.02, by + 0.43, 0.32, 0.78); mark('cloth_red', by + 0.1, by + 0.28, 0.4, 0.7); },
@@ -247,20 +249,20 @@ export function makeShops(H) {
     const dc = bw / 2, dS = flip ? s1 - dc : s0 + dc, FL = yS + 0.12, r = rng(sh.seed);
     // the back of the shop's ground floor (solid behind its wall), the front wall with its openings
     bag.add(mat, F(s0, s1, -D, -(DD + 0.02), y - 1.2, top)); wr(s0, s1, -D, -(DD + 0.02), y - 1.2, top);
-    const cuts = [[dS - 0.62, dS + 0.62]];                              // the door
+    const cuts = [[dS - DW, dS + DW]];                              // the door
     const piers = [];
     for (let k = 1; k < sh.nbay; k++) piers.push(s0 + k * bw);
     // the wall: bulkhead, lintel, piers; collision all along except the door
-    bag.add(mat, F(s0, dS - 0.62, -FW, 0, y - 1.2, yS + 0.85)); bag.add(mat, F(dS + 0.62, s1, -FW, 0, y - 1.2, yS + 0.85));
+    bag.add(mat, F(s0, dS - DW, -FW, 0, y - 1.2, yS + 0.85)); bag.add(mat, F(dS + DW, s1, -FW, 0, y - 1.2, yS + 0.85));
     bag.add(mat, F(s0, s1, -FW, 0, yS + 3.3, top));
     for (const p of piers) bag.add(mat, F(p - 0.22, p + 0.22, -FW, 0, yS + 0.85, yS + 3.3));
-    wr(s0, dS - 0.62, -FW, 0, y - 1.2, top); wr(dS + 0.62, s1, -FW, 0, y - 1.2, top);
+    wr(s0, dS - DW, -FW, 0, y - 1.2, top); wr(dS + DW, s1, -FW, 0, y - 1.2, top);
     // the end piers (the party walls' returns) as stone strips
     for (const e of [s0, s1 - 0.3]) bag.add('limestone_yellow', F(e, e + 0.3, 0, 0.1, yS + 0.45, yS + 4.3));
     // the wooden front: a bulkhead of panels, mullions, a transom, glass
     for (let k = 0; k < sh.nbay; k++) {
       const a0 = s0 + k * bw + (k === 0 ? 0.3 : 0.22), a1 = s0 + (k + 1) * bw - (k === sh.nbay - 1 ? 0.3 : 0.22);
-      const parts = dS - 0.62 > a0 && dS + 0.62 < a1 ? [[a0, dS - 0.7], [dS + 0.7, a1]] : [[a0, a1]];
+      const parts = dS - DW > a0 && dS + DW < a1 ? [[a0, dS - (DW + 0.08)], [dS + (DW + 0.08), a1]] : [[a0, a1]];
       for (const [p0, p1] of parts) {
         if (p1 - p0 < 0.3) continue;
         bag.add('wood_painted', F(p0, p1, 0, 0.1, yS + 0.1, yS + 0.9));                       // the bulkhead
@@ -273,11 +275,11 @@ export function makeShops(H) {
       }
     }
     // the door: open, a leaf folded into the room, a glass-and-wood transom, the granite step
-    const lf = flip ? dS - 0.62 : dS + 0.62;
+    const lf = flip ? dS - DW : dS + DW;
     bag.add('wood_painted', F(Math.min(lf, lf + (flip ? 0.05 : -0.05)), Math.max(lf, lf + (flip ? 0.05 : -0.05)), -1.3, -FW, yS + 0.12, yS + 3.0));
     bag.add('glass_outer', F(Math.min(lf, lf + (flip ? 0.065 : -0.065)) - 0.003, Math.max(lf, lf + (flip ? 0.065 : -0.065)) + 0.003, -1.1, -0.7, yS + 1.1, yS + 2.6));
-    bag.add('wood_painted', F(dS - 0.62, dS + 0.62, -0.05, 0.08, yS + 3.05, yS + 3.3)); bag.add('glass_outer', F(dS - 0.58, dS + 0.58, -0.16, -0.12, yS + 3.1, yS + 3.28));
-    bag.add('granite_grey', F(dS - 0.85, dS + 0.85, 0, 0.55, yS - 0.25, yS + 0.1));
+    bag.add('wood_painted', F(dS - DW, dS + DW, -0.05, 0.08, yS + 3.05, yS + 3.3)); bag.add('glass_outer', F(dS - (DW - 0.04), dS + (DW - 0.04), -0.16, -0.12, yS + 3.1, yS + 3.28));
+    bag.add('granite_grey', F(dS - (DW + 0.23), dS + (DW + 0.23), 0, 0.55, yS - 0.25, yS + 0.1));
     // the fascia board with its gilt letters and the cornice over it
     bag.add(T.fascia, F(s0 + 0.12, s1 - 0.12, 0.1, 0.2, yS + 3.45, yS + 4.12));
     bag.add('limestone_yellow', F(s0, s1, 0, 0.3, yS + 4.12, yS + 4.42)); bag.add('limestone_yellow', F(s0, s1, 0.02, 0.12, yS + 3.3, yS + 3.45));

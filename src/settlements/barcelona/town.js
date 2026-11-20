@@ -132,7 +132,7 @@ function shopLife(els) {
             : keeper ? { dress: 'trousers', cloth: white ? 'cloth_white' : pick(['cloth_brown', 'cloth_grey', 'cloth_black']), cloth2: 'cloth_black', over: white ? 'none' : 'apron', hat: sh.trade === 'forn' ? 'cap' : 'none', hatMat: 'cloth_white', beard: rand() < 0.4 ? 0.8 : 0 }
               : { dress: 'trousers', cloth: pick(['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo']), cloth2: 'cloth_black', hat: pick(['brim', 'cap']), hatMat: pick(['cloth_black', 'cloth_grey']), beard: rand() < 0.4 ? 0.8 : 0 }) });
       }
-      if (rand() < 0.22) { const d = sh.door, nx = sh.n[0], nz = sh.n[1]; L.push({ t: 'figure', at: [d[0] + nx * 1.1 + nz * 0.9, d[1] + nz * 1.1 - nx * 0.9], y: sh.y + 0.04, rot: rot([nx, nz]), ...o, seed: Math.floor(rand() * 1e9), hair: 'short', dress: 'trousers', cloth: white ? 'cloth_white' : 'cloth_brown', cloth2: 'cloth_black', over: white ? 'none' : 'apron', hat: 'none', beard: 0.8, pose: rand() < 0.5 ? 'talk' : 'stand' }); }
+      if (rand() < 0.22) { const d = sh.door, nx = sh.n[0], nz = sh.n[1]; L.push({ t: 'figure', at: [d[0] + nx * 1.1 + nz * 1.5, d[1] + nz * 1.1 - nx * 1.5], y: sh.y + 0.04, rot: rot([nx, nz]), ...o, seed: Math.floor(rand() * 1e9), hair: 'short', dress: 'trousers', cloth: white ? 'cloth_white' : 'cloth_brown', cloth2: 'cloth_black', over: white ? 'none' : 'apron', hat: 'none', beard: 0.8, pose: rand() < 0.5 ? 'talk' : 'stand' }); }
     }
     if (L.length) out.push(L);
   });
