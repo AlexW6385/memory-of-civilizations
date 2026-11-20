@@ -9,6 +9,7 @@ import { sepulchreFurnish, sepulchreLife } from './sepulchre-detail.js';
 import { haramFurnish, haramLife } from './haram-detail.js';
 import { platformFurnish, platformLife } from './platform-detail.js';
 import { braziers } from './nightlight.js';
+import { sepulchreStairWear, haramStairWear } from './wear.js';
 import { cardoColonnades, bazaarColonnades, ZN, ZS } from './shopline.js';
 import { STREET, RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
 
@@ -238,7 +239,7 @@ export function city() {
     plan('jerusalem-walls', LIT, [...walls(), ...braziers()]),
     plan('jerusalem-cardo', LIT, cardo()),
     plan('jerusalem-sepulchre', 'islamic', sepulchre(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
-    plan('jerusalem-sepulchre-furnish', LIT, sepulchreFurnish(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
+    plan('jerusalem-sepulchre-furnish', LIT, [...sepulchreFurnish(), ...sepulchreStairWear()], { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
     plan('jerusalem-sepulchre-life', 'life', sepulchreLife(), { bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
     plan('jerusalem-gardens', 'islamic', [...gardenWalls(), ...laneArchElements()]),
     plan('jerusalem-garden-life', 'life', [...gardenLife(), ...laneLife()]),
@@ -246,7 +247,7 @@ export function city() {
     plan('jerusalem-palaces', 'islamic', palaces()),
     ...STREET.spans.map((sp, i) => plan(`jerusalem-bazaar-${i}`, LIT, bazaar(sp), { bounds: [sp[0] - 4, -STREET.half - 2, sp[1] + 4, STREET.half + 2] })),
     plan('jerusalem-markets', 'life', markets()),
-    plan('jerusalem-haram-furnish', LIT, [...haramFurnish(), ...platformFurnish()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
+    plan('jerusalem-haram-furnish', LIT, [...haramFurnish(), ...platformFurnish(), ...haramStairWear()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
     plan('jerusalem-haram-life', 'life', [...haramLife(), ...platformLife()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
   ];
 }
