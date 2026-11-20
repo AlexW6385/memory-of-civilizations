@@ -172,6 +172,13 @@ What was lit at night about 1650 [inferred: oil lamps and the temple's wicks; no
 - **How.** One street-life plan `madurai-night` of `madurai_halo` elements (four shapes, instanced, drawn within 60 m of the eye): +1 main draw at the arrival. The day picture is unchanged (the material shows at night only).
 - Not lit: windows (the houses have shuttered fronts; the hollow rooms are seen through their doors), the gopuram passages and the processional car (no source for lamps there in 1650).
 
+## 21. The visitor's walk, make-room and wear (2026-11 match pass)
+
+- **Make room** [inferred, engineering only]. The vessel of the shelves, shops and thinnais is now one unit shape per material placed with a scale (`styles/dravidian/vessel.js`): every size shares one prototype (126 to 63 MB); the far house tiles' boxes and posts are varied by up to 2 cm from a hash of their own place so that they join the tiles' batches (`unshare.js`, as Versailles did): the arrival's main draws fell from 444 to 406, with the picture unchanged.
+- **The walk.** `openwalk.js`: twelve routes from the street over the thinnai or the shop's platform, through the doorway into the furnished front room of five houses, five shops, two narrow-lot agraharam houses and a court house nearest the arrival, in `walks` of the temple plan (walk-check: 13 routes, 51 legs). To make them passable the doorways of the hollow rooms are 1.6 m wide (were 1.1 m for houses and 1.3 m for shops) and their lintels 2.65 m (were 2.35 m, under the walker's head on the 0.55–0.72 m platform); the cream jambs, the lintel timber and the shop's header follow [inferred: the carved portals of the merchant houses were taller than a man; Studio Matrx, §12].
+- **Wear.** A worn, dark hollow of feet across the granite sill of every opened door (plaster_damp, 6 mm thick); damp, streaks and fallen plaster already in §14.
+- **Writing: none added.** The name boards keep their abstract chalk strokes (§14), which stand in for Tamil script; no Tamil glyph was written because none could be verified here glyph by glyph.
+
 ## Sources
 
 - [Meenakshi Temple — Wikipedia](https://en.wikipedia.com/wiki/Meenakshi_Temple)

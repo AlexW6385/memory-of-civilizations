@@ -16,7 +16,7 @@ const lampDish = (bag, x, y, z) => { bag.add('bronze', lathe([[0.001, 0], [0.09,
 
 /** Where the doorway of a lot lies (local u range) and how deep the room is. */
 export function plan(el, W, D, ver, rand) {
-  const shop = el.kind === 'shop', door = shop ? (el.trade === 'sweets' ? [0.55, 1.85] : [W - 1.85, W - 0.55]) : [W / 2 - 0.55, W / 2 + 0.55];
+  const shop = el.kind === 'shop', door = shop ? (el.trade === 'sweets' ? [0.55, 2.15] : [W - 2.15, W - 0.55]) : [W / 2 - 0.8, W / 2 + 0.8];      // (1.6 m clear: the walker's door, docs/settlements/madurai.md §21)
   const rd = Math.max(2.4, Math.min(shop ? 5.0 : el.kind === 'agra' ? 6.4 : 4.7, D - ver - 2 * TH - 2.2));
   return { g0: door[0], g1: door[1], rd, shop };
 }
@@ -25,10 +25,11 @@ export function plan(el, W, D, ver, rand) {
 export function shell(F, o) {
   const { W, D, B, C, Fl } = F, { wash, h, ver, py, g0, g1, rd, shop } = o, vs = ver + TH + rd;
   const wall = (m, u0, v0, u1, v1, y0 = -0.3, y1 = h) => { B(m, u0, y0, v0, u1, y1, v1); C(u0, v0, u1, v1, Math.max(0, y0), y1 + 0.1); };
-  wall(wash, 0, ver, g0, ver + TH); wall(wash, g1, ver, W, ver + TH); wall(wash, g0, ver, g1, ver + TH, 2.35, h);
+  wall(wash, 0, ver, g0, ver + TH); wall(wash, g1, ver, W, ver + TH); wall(wash, g0, ver, g1, ver + TH, 2.65, h);
   wall(I, 0, ver + TH, TH, vs + TH); wall(I, W - TH, ver + TH, W, vs + TH); wall(I, TH, vs, W - TH, vs + TH);
   wall(wash, 0, vs + TH, W, D);
   B(G, g0, -0.3, ver, g1, py, ver + TH); Fl(g0, ver, g1, ver + TH, py);
+  B('plaster_damp', g0 + 0.12, py, ver + 0.06, g1 - 0.12, py + 0.006, ver + TH - 0.06);          // the worn, dark hollow of feet across the sill (§21)
   B(shop ? G : 'cotto_floor', TH, py - 0.15, ver + TH, W - TH, py, vs); Fl(TH, ver + TH, W - TH, vs, py);
   B('timber', TH + 0.02, h - 0.52, ver + TH + 0.02, W - TH - 0.02, h - 0.46, vs - 0.02); B('stucco_cream', TH + 0.02, h - 0.46, ver + TH + 0.02, W - TH - 0.02, h - 0.43, vs - 0.02);
   const nb = Math.max(2, Math.round((W - 2 * TH) / 1.6));
@@ -40,11 +41,11 @@ export function shell(F, o) {
 export function openDoor(F, uc, ver, w = 1.1) {
   const { B, bag } = F;
   for (const s of [-1, 1]) {
-    B('stucco_cream', s < 0 ? uc - w / 2 - 0.22 : uc + w / 2, 0.55, ver - 0.06, s < 0 ? uc - w / 2 : uc + w / 2 + 0.22, 2.55, ver + TH + 0.03);
+    B('stucco_cream', s < 0 ? uc - w / 2 - 0.22 : uc + w / 2, 0.55, ver - 0.06, s < 0 ? uc - w / 2 : uc + w / 2 + 0.22, 2.85, ver + TH + 0.03);
     B('wood_dark', s < 0 ? uc - w / 2 - 0.5 : uc + w / 2 + 0.46, 0.58, ver - 0.12, s < 0 ? uc - w / 2 - 0.46 : uc + w / 2 + 0.5, 2.3, ver - 0.06);
     for (let r = 0; r < 3; r++) { const [x, , z] = F.P(s < 0 ? uc - w / 2 - 0.515 : uc + w / 2 + 0.515, 0, ver - 0.09); bag.add('gilt_bronze', lathe([[0.001, 0], [0.03, 0], [0.02, 0.02], [0.001, 0.025]], 5, null, x, 0.85 + r * 0.45, z)); }
   }
-  B('timber', uc - w / 2 - 0.35, 2.3, ver - 0.11, uc + w / 2 + 0.35, 2.55, ver + TH + 0.03);
+  B('timber', uc - w / 2 - 0.35, 2.6, ver - 0.11, uc + w / 2 + 0.35, 2.85, ver + TH + 0.03);
 }
 
 /** Damp, streaks and fallen plaster on the street front (between the openings), strictly flat on the wall. */
