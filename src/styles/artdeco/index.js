@@ -22,7 +22,7 @@ import { shopName, shopSign, bladeText, nearEntrance, rng as rng2, Quads, letter
 
 const LS = 'facade_limestone', CH = 'steel_chrome';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const block = (bag, mat, [x0, z0, x1, z1], y0, y1) => bag.add(mat, box(x0, y0, z0, x1, y1, z1));
+const block = (bag, mat, [x0, z0, x1, z1], y0, y1) => bag.add(mat, LEAN.on && y0 < -0.3 ? frustum([x0, z0, x1, z1], y0, y1, 0, 0, 0, 0, { noBottom: true }) : box(x0, y0, z0, x1, y1, z1));   // (lean: the foot under the ground)
 const inset = ([x0, z0, x1, z1], ix, iz = ix) => [x0 + ix, z0 + iz, x1 - ix, z1 - iz];
 /** A water tank on its stilts, the New York roof's mark: a timber platform on a braced steel frame, the
  * tub of upright staves bound by steel hoops, a conical roof with a vent, a ladder up the side. */
@@ -32,9 +32,9 @@ function tank(bag, x, y, z, r = 2.2) {
   for (const yy of [y + 1.1, y + 2.4]) { bag.add('iron', box(x - k, yy - 0.06, z - k - 0.05, x + k, yy + 0.06, z - k + 0.05)); bag.add('iron', box(x - k, yy - 0.06, z + k - 0.05, x + k, yy + 0.06, z + k + 0.05)); bag.add('iron', box(x - k - 0.05, yy - 0.06, z - k, x - k + 0.05, yy + 0.06, z + k)); bag.add('iron', box(x + k - 0.05, yy - 0.06, z - k, x + k + 0.05, yy + 0.06, z + k)); }
   for (const sx of [-1, 1]) { bag.add('iron', rod([x + sx * k, y + 0.1, z - k], [x + sx * k, y + H - 0.1, z + k], 0.03, 4)); bag.add('iron', rod([x - k, y + 0.1, z + sx * k], [x + k, y + H - 0.1, z + sx * k], 0.03, 4)); }
   bag.add('timber', box(x - r - 0.1, y + H, z - r - 0.1, x + r + 0.1, y + H + 0.2, z + r + 0.1));
-  bag.add('tar_wood', lathe([[r * 0.97, 0], [r, 2.0], [r * 0.98, 4.2], [r * 1.04, 4.25], [r * 1.04, 4.3], [0.001, 4.3]], 16, (th) => 1 + 0.012 * Math.cos(th * 16), x, y + H + 0.2, z));
-  for (const hy of [0.4, 1.1, 1.9, 2.8, 3.7]) bag.add('iron', lathe([[r + 0.04, 0], [r + 0.04, 0.06], [r * 0.9, 0.06]], 16, null, x, y + H + 0.2 + hy, z));
-  bag.add('tar_wood', lathe([[r * 1.08, 0], [r * 1.08, 0.08], [0.25, 1.25], [0.25, 1.3], [0.001, 1.3]], 16, null, x, y + H + 4.5, z));
+  bag.add('tar_wood', lathe([[r * 0.97, 0], [r, 2.0], [r * 0.98, 4.2], [r * 1.04, 4.25], [r * 1.04, 4.3], [0.001, 4.3]], 12, (th) => 1 + 0.012 * Math.cos(th * 12), x, y + H + 0.2, z));
+  for (const hy of [0.4, 1.1, 1.9, 2.8, 3.7]) bag.add('iron', lathe([[r + 0.04, 0], [r + 0.04, 0.06], [r * 0.9, 0.06]], 12, null, x, y + H + 0.2 + hy, z));
+  bag.add('tar_wood', lathe([[r * 1.08, 0], [r * 1.08, 0.08], [0.25, 1.25], [0.25, 1.3], [0.001, 1.3]], 12, null, x, y + H + 4.5, z));
   bag.add('iron', lathe([[0.18, 0], [0.18, 0.45], [0.32, 0.5], [0.001, 0.75]], 8, null, x, y + H + 5.75, z));
   for (const sx of [-0.25, 0.25]) bag.add('iron', box(x + sx - 0.025, y, z + r + 0.12, x + sx + 0.025, y + H + 4.4, z + r + 0.17));
   for (let yy = y + 0.4; yy < y + H + 4.3; yy += 0.35) bag.add('iron', box(x - 0.25, yy - 0.015, z + r + 0.13, x + 0.25, yy + 0.015, z + r + 0.16));

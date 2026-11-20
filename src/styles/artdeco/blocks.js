@@ -6,7 +6,7 @@
 import { box, rod, lathe, frustum, fromTriangles } from '../../core/geom.js';
 
 /** Switched on by New York's near and far forms of a block (settlements/new-york/far.js) while they build a lot whose walls are solid: boxes standing on the street plane then leave out the face that lies in the wall, and lettering and goods on a front are drawn on their street side only. `boxes` (on in the far form only: the near form's repeated boxes are instanced, and a box with a face fewer is instanced only from more copies). Off for every other user of this style (Sydney's skyscrapers). */
-export const LEAN = { on: false, boxes: false };
+export const LEAN = { on: false, boxes: false, rooms: false };
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** The frame of a street face f of a rect: { R(u0, u1, y0, y1, d0, d1) → box, P(u, d, y) → point, L, a0, o, sg, along, ext }. */
