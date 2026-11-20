@@ -8,7 +8,6 @@ import { STYLES } from '../../core/build.js';
 import { town as townLots, furnished, QUARRY, HARBOUR, ENCLOSURE, CROW_WALL, TEMPLE, VALLEY_TEMPLE, VALLEY } from './layout.js';
 import { plan as housePlan, bakeryFires } from '../../styles/oldkingdom-giza/walkhouse.js';
 import { CAMP_ITEMS } from './camps.js';
-import { LODGES } from './lodges.js';
 import { ground } from './ground.js';
 
 const TAU = Math.PI * 2;
@@ -66,14 +65,10 @@ export function sites() {
     } else if (l.kind === 'gallery' && hash(l.seed, l.rect[0]) < 0.5) S.push({ k: 'fire', x: x0 + 1.0, y: fy + 0.35, z: (z0 + z1) / 2 - 0.9, fy, r: 0.55, pool: 1.8 });
   }
   for (const c of CAMP_ITEMS) if (c.kind === 'fire') S.push({ k: 'fire', x: c.x, y: g(c.x, c.z) + 0.5, z: c.z, fy: g(c.x, c.z), r: 0.9, pool: 2.6 });
-  for (const l of LODGES) if (l.t === 'ok_lodge') {
-    const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, d = { w: [x0 - 0.8, cz], e: [x1 + 0.8, cz], n: [cx, z0 - 0.8], s: [cx, z1 + 0.8] }[l.door];
-    S.push({ k: 'lamp', x: d[0], y: g(...d) + 0.9, z: d[1], fy: g(...d), r: 0.6, pool: 2 });                    // the lamp at the doorway, the room's light spilling out
-  }
   // the watch-fires: at the Wall of the Crow's gate on either side, on the quay at the landing and the north quay, and the lamp-stands at the temples' east doors
   const gx = CROW_WALL.a[0] + CROW_WALL.gate.at;
   for (const [x, z] of [[gx - 4, CROW_WALL.a[1] - 7], [gx + 4, CROW_WALL.a[1] + 7], [HARBOUR[0] + 2.5, 50], [HARBOUR[0] + 2.5, 24], [HARBOUR[0] + 2.5, 90]]) { const fy = x > 300 ? VALLEY + 0.02 : g(x, z); S.push({ k: 'fire', x, y: fy + 0.6, z, fy, r: 0.95, pool: 2.8 }); }
-  for (const [x, z, fy] of [[TEMPLE[2] + 1.2, -45, 0], [TEMPLE[2] + 1.2, -35, 0], [VALLEY_TEMPLE[2] + 1.2, 47, VALLEY + 0.02], [VALLEY_TEMPLE[2] + 1.2, 57, VALLEY + 0.02]]) S.push({ k: 'stand', x, y: fy + 1.5, z, fy, r: 0.55, pool: 1.8 });
+  for (const [x, z, fy] of [[VALLEY_TEMPLE[2] + 1.2, 47, VALLEY + 0.02], [VALLEY_TEMPLE[2] + 1.2, 57, VALLEY + 0.02]]) S.push({ k: 'stand', x, y: fy + 1.5, z, fy, r: 0.55, pool: 1.8 });
   void QUARRY; void ENCLOSURE; void VALLEY;
   return S;
 }
