@@ -134,8 +134,8 @@ function house(el, ctx) {
     // the shutters of the window folded up as a hood, the sign
     R(0.85, -0.5, wA - 0.25, 0.62, 2.6, 2.66, 'wood_dark', false);
     R(wA - 0.02, -1.0, wA + 0.05, 0.0, 3.0, 3.6, SIGN[trade] ?? 'timber', false); R(wA - 0.02, -0.1, wA + 0.05, 0.0, 2.9, 3.0, 'iron', false);
-    // the goods named on both faces of the board, in Greek capitals of white (red on the pale boards) [inferred; docs §16.5]
-    if (SHOP_WORD[trade]) { const word = [SHOP_WORD[trade]], pale = ['papyrus', 'grain', 'perfume'].includes(trade), mat = pale ? 'wall_red' : 'plaster_white', [bx, bz] = F.P(wA + 0.015, -0.5), al = F.along, h = Math.min(0.26, 0.86 / layout(word[0], 0.2).width); for (const s of [-1, 1]) inscribe(bag, word, { at: [bx + al[0] * s * 0.05, bz + al[1] * s * 0.05], n: [al[0] * s, al[1] * s], y: y + 3.45, h, mat, pitch: 0.2 }); }
+    // the goods named on both faces of the board, in Greek capitals of bronze [inferred; docs §16.5]
+    if (SHOP_WORD[trade]) { const word = [SHOP_WORD[trade]], mat = 'bronze', [bx, bz] = F.P(wA + 0.015, -0.5), al = F.along, h = Math.min(0.26, 0.86 / layout(word[0], 0.2).width); for (const s of [-1, 1]) inscribe(bag, word, { at: [bx + al[0] * s * 0.05, bz + al[1] * s * 0.05], n: [al[0] * s, al[1] * s], y: y + 3.45, h, mat, pitch: 0.2 }); }
     if (rand() < 0.75) { const [x0, z0, x1, z1] = F.R(0.75, -1.2, wA - 0.15, 0.0); awning(bag, [x0, z0, x1, z1], F.out[1] > 0 ? 'z1' : F.out[1] < 0 ? 'z0' : F.out[0] > 0 ? 'x1' : 'x0', y + 3.1, y + 2.45, pick(rand, ['cloth_ochre', 'cloth_red', 'linen', 'cloth_indigo', 'cloth_white']), col); }
     if (el.seed % 2) { const [sx, sz] = F.P((aU0 + aU1) / 2, aV1 - 0.8); figureAt(ctx, sx, sz, y, ox, oz, { seed: el.seed + 3, dress: 'robe', cloth: pick(rand, ['cloth_white', 'linen', 'cloth_ochre']), skin: 'skin_medium', hair: 'short', beard: rand() < 0.5, pose: 'stand' }); }
   } else {

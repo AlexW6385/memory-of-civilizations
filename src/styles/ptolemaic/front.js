@@ -84,7 +84,7 @@ function customsPost(el, ctx) {
   crate(bag, col, x - 1.7, y, z0 + 0.5, 0.7, 0.5, 0.5);
   lampBracket(bag, x1 - 0.1, y + 2.4, z0 + 0.1, 0, -1);
   bag.add('limestone', box(x1 + 0.7, y, z - 0.3, x1 + 1.5, y + 0.3, z + 0.3)); bag.add('marble_smooth', box(x1 + 0.8, y + 0.3, z - 0.1, x1 + 1.4, y + 2.1, z + 0.1));
-  for (const sd of [-1, 1]) inscribe(bag, TARIFF, { at: [x1 + 1.1, z + sd * 0.1], n: [0, sd], y: y + 1.95, h: 0.09, mat: 'wall_red', pitch: 0.2 });          // the head of the tariff: ΤΕΛΟΣ, the due col.rect([x1 + 0.7, z - 0.3, x1 + 1.5, z + 0.3], y, y + 2.1);
+  for (const sd of [-1, 1]) inscribe(bag, TARIFF, { at: [x1 + 1.1, z + sd * 0.1], n: [0, sd], y: y + 1.95, h: 0.09, mat: 'bronze', pitch: 0.2 });          // the head of the tariff: ΤΕΛΟΣ, the due col.rect([x1 + 0.7, z - 0.3, x1 + 1.5, z + 0.3], y, y + 2.1);
 }
 /** quay_steps: { at [x, z] (the quay wall's water face), w, y (the paving), yw (the water) } — a flight of steps down the wall's face to the water: for boats' landings and the washers. */
 function quaySteps(el, ctx) {
