@@ -5,6 +5,7 @@
 import { esagilaChambers, RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height, lots } from './layout.js';
 import { frame } from '../../styles/sumerian-ur/upper.js';
 import { routes as openRoutes } from './openwalk.js';
+import './trim.js';
 
 const E = [];
 // the level of detail of the modelled relief by distance from the arrival (src/planet/arrivals.js): full to the gate, reduced beyond
@@ -80,7 +81,7 @@ export const babylon = {
   id: 'babylon-centre',
   name: { en: 'Etemenanki and the Processional Way', zh: '埃特曼安吉塔庙与游行大道' },
   era: { en: 'Babylon, about 570 BC', zh: '巴比伦，约公元前570年' },
-  style: 'babylonian',
+  style: 'babylonian-n',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [WAY.x, -370], facing: 's' },
   bounds: [-(RADIUS - 48), -385, RADIUS - 48, ESAGILA[3] + 2],
