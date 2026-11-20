@@ -280,6 +280,7 @@ const turnPoint = (a, x, z) => { const c = Math.cos(a), s = Math.sin(a); return 
 const rectOf = (plan, [x0, z0, x1, z1]) => { const a = toSettle(plan, x0, z0), b = toSettle(plan, x1, z1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
 // landmarks whose plan is the town itself (their elements are read like a townscape's)
 const OWN_FRONTS = new Set(['ming-suzhou']);          // settlements that dress their own house fronts (their town.js)
+OWN_FRONTS.add('song-kaifeng');      // (Kaifeng's shops and houses carry their own signs, lantern boxes and washing: houses.js, shops.js; a generic lantern hung in a door bay is lower than the plinth's headroom)
 const TOWN_LANDMARKS = new Set(['machu-picchu-town', 'taos-pueblo']);
 const isFull = (plan, R) => TOWN_LANDMARKS.has(plan.id) || (plan.bounds && plan.bounds[2] - plan.bounds[0] >= R * 1.5);
 

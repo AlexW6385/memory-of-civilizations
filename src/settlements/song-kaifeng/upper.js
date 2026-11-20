@@ -68,7 +68,12 @@ export function layoutOfLot(l, sp) {
 /** The rect the ground room's furniture keeps clear of, in the room's centred frame (a − L/2): the stair's strip and its foot. */
 export function holdOf(l) {
   const sp = upperOf(l);
-  if (!sp || sp.type === 'inn') return null;
+  if (sp?.type === 'inn') return null;
+  if (!sp) {
+    // (a room with no stair: the lane from the door, 1.4 m wide, 3.4 m in, which the walk through it follows)
+    const F0 = frameOf(l), d0 = doorOf(l).at, a0 = (d0[0] - F0.ox) * F0.u[0] + (d0[1] - F0.oz) * F0.u[1];
+    return [[a0 - 0.7 - F0.L / 2, 0, a0 + 0.7 - F0.L / 2, 3.4]];
+  }
   const S = layoutOfLot(l, sp), F = frameOf(l), d = doorOf(l).at, ad = (d[0] - F.ox) * F.u[0] + (d[1] - F.oz) * F.u[1], as = (S.sa0 + S.sa1) / 2, c = F.L / 2;
   // the stair's strip and foot, and the lane from the door to the foot
   return [[S.sa0 - c, S.bf - 0.2, S.sa1 - c, S.bTop + 0.3], [Math.min(as, ad) - 0.7 - c, 1.4, Math.max(as, ad) + 0.7 - c, 2.7], [ad - 0.7 - c, 0, ad + 0.7 - c, 2.7]];
