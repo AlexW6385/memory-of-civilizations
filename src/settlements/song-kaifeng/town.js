@@ -19,6 +19,7 @@ import { SEDANS, OXCARTS, BARROWS, DRAY } from './doors.js';
 import { doorOf } from './houses.js';
 import { isOuter, outerLife } from './outer.js';
 import { upperOf } from './upper.js';
+import { nightLamps, registerNight } from './nightlight.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [160, -130], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -375,9 +376,20 @@ export async function town() {
   plans.push(waterside(), ...scroll(), ...landing());
   // the shops' signs on their poles and goods in the street; the rooms of the shops, wine shops and tea shops furnished, their people
   plans.push(base('song-kaifeng-shops', shopElements(), 'life'));
-  plans.push(base('song-kaifeng-interiors', interiorElements()));
+  plans.push(base('song-kaifeng-night', nightLamps(), 'life'));      // (the lamps' light: additive halo, at night only: nightlight.js)
+  {
+    // the rooms in groups of an 64 m cell, each shown only within 64 m of its middle (interiors exist near the visitor only: draws at the arrival stay as they were)
+    const cells = new Map();
+    for (const e of interiorElements()) { const k = Math.floor((e.rect[0] + e.rect[2]) / 2 / 64) + "," + Math.floor((e.rect[1] + e.rect[3]) / 2 / 64); if (!cells.has(k)) cells.set(k, []); cells.get(k).push(e); }
+    for (const [k, els] of [...cells].sort()) {
+      const cx = els.reduce((a, e) => a + (e.rect[0] + e.rect[2]) / 2, 0) / els.length, cz = els.reduce((a, e) => a + (e.rect[1] + e.rect[3]) / 2, 0) / els.length;
+      plans.push({ ...base('song-kaifeng-interiors-' + k, els), near: 64, center: [cx, cz] });
+    }
+  }
   plans.push(base('song-kaifeng-interior-life', interiorLife(), 'life'));
   plans.push(...streetPlans(base));
   { const cells = new Map(), all = outerLife(lots()); for (const e of all) { const k = Math.floor(e.at[0] / 260) + ',' + Math.floor(e.at[1] / 260); if (!cells.has(k)) cells.set(k, []); cells.get(k).push(e); } for (const [k, es] of cells) plans.push(base(`song-kaifeng-outer-life-${k}`, es, 'life')); }
   return plans;
 }
+// the lit lattices are put on once every style file has registered its houses (nightlight.js)
+registerNight();
