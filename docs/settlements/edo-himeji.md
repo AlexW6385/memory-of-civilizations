@@ -198,3 +198,26 @@ The settlement's position in `src/planet/sites.js` may be nudged inland so that 
 - **Upstairs:** a floor of boards under tatami (boards bare in the craftsman's, store and apothecary's family room), the walls plastered with a wooden band at head height, a ceiling of boards with battens and cross beams under the tiled roof (the upper storey is low, about 2.4 m clear), a front room over the shop and a room behind, parted by paper doors (fusuma) with a doorway; by use: guest room with low tables, tea things, cushions, scroll and chest (merchant, inn), the sunken hearth with its hanging kettle, drug chests, jars and herbs drying (apothecary), drying poles hung with indigo cloth, jars or hooped tubs and a bench (craftsman), sacks, chests and casks (store), a brazier, laundry on a pole and bedding behind paper walls (tenement), bedding, paper lamps, folding screens and chests of drawers in the rooms behind. [inferred: furnishing after general Edo townsmen's practice]
 - **Street side:** two slatted windows (mushiko-mado) as open reveals with the slats before them and a paper door half across; merchants' and teahouses' houses carry in place of the pent roof a balcony 0.85 m deep on cantilevered joists with a railing of lattice and a bench, reached through a sliding door that stands open, a lantern on the corner post [inferred]. A yard window in the back wall.
 - **Not built:** the roof space and any roof terrace (a machiya has none), the samurai houses' and retainers' rows (single-storey), the other machiya (still shut above).
+
+## 10. Night, sound, animals, wear and writing (round "match Suzhou", 2026-11-19)
+
+Scope of this round: bring the settlement toward the Suzhou reference (docs/suzhou-method.md). The sections below are written before the code; each thing is marked [stated] with its source or [inferred] with its reason. Nothing is claimed that is not built; what was not reached is listed at the end of the section.
+
+### 10.1 The night (`src/settlements/edo-himeji/nightlight.js`; the `halo` material)
+
+**What lit the castle town at night, c. 1620** [inferred from general Edo practice; the sources below are what could be consulted; the shell reaches few sites, so the first two are from memory of their content and marked so]:
+- Oil lamps (andon) of paper on a wooden frame, lit with rapeseed or fish oil in a dish with a rush wick, were the room lamp of townsmen and samurai alike; the wax candle (rōsoku) was dear and the lord's and temples' [stated in general terms: Wikipedia "Andon (lantern)"; Wikipedia "Chōchin"; the exact cost and date of rapeseed oil's spread to commoners is not checked and is left out].
+- Paper lanterns (chōchin) hung at eaves, inns, teahouses and the gates of samurai compounds [stated for their use as shop and inn signs after dark: Wikipedia "Chōchin"; the samurai gate's lantern is [inferred] and already stands in dossier §5.7].
+- Watch fires (kagaribi): iron baskets on legs holding burning pine billets, set at castle gates and in camps; the word and the object are standard for castles and the military [stated in general: JAANUS "kagaribi" was not opened here; the use at gates is [inferred]]. Ours: one pair at the foot of the main gate's stair on the causeway, one pair at the head of the stair to the Hishi gate, one pair inside the keep base's gate, one pair north of the middle moat's gate.
+- Ward gates (kido) shut and the fire-watch towers (hinomi-yagura) kept at night [stated: dossier §5.7, JAANUS "hi-no-mi yagura"]; the watch kept a lantern [inferred].
+- Lit rooms: the paper of a window (shoji) or the lattice of a machiya front glows with the lamp inside [inferred; the light of an andon through paper is the commonplace of Edo prints].
+- Votive lamps (tōmyō) before roadside Jizō and Inari shrines [inferred].
+- No electric light.
+
+**Built.** All by the one `halo` material (light added over what lies behind it, at night only, by the glow shades' own switch; no light, no shadow, no collision; invisible by day):
+- every paper lantern and andon that any builder of the style makes (found by their shade's material, `lamp_paper` / `lamp_white`) gets a glow, and an eave or gate lantern (1.9–3.1 m up) a pool on the ground; a hash of its place keeps 65–100 % lit;
+- the latticed (koshi) and paper (shoji) leaves of the machiya, samurai compounds, the lord's halls, the stores and the turrets get a pane of lamp-light in front of them on both faces, a share of the rooms by hash (machiya 42 %, yashiki 40 %, halls 60 %), each at its own strength;
+- the watch fires (kagaribi) of the four gates, with their glow and pool, and the main gate's two with a streak on the moat beside them;
+- a paper lantern under the roof of each fire-watch tower; a votive glow at each Jizō and the Inari shrine.
+
+**Not done:** the keep's own windows (nothing lit in the great keep at night: a castle's keep stood dark and empty [inferred]); a lantern on the moored boats; the watchman; lit hearths seen through the open shops' passages; shutters drawn at night (the engine has no day/night geometry switch for this settlement's fronts).

@@ -135,6 +135,12 @@ E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, p
   for (let c = 0; c < 5; c++) for (let r = 0; r < 3; r++) { E.push({ t: 'kura', rect: [-200 + c * 22, 112 + r * 22, -193 + c * 22, 118 + r * 22], y: BANK }); E.push({ t: 'kura', rect: [78 + c * 22, 112 + r * 22, 85 + c * 22, 118 + r * 22], y: BANK }); }
 }
 
+// the watch fires (kagaribi, nightlight.js; docs §10): iron baskets at the gates, unlit by day — before the main gate on the causeway (the moat's water beside them), at the head of the stair to the Hishi gate, inside the keep base's gate, and north of the middle moat's gate
+for (const sx of [-1, 1]) E.push({ t: 'kagaribi', at: [sx * 4.6, iz1 + 11.5], y: 0, water: [sx, 0], d: 8 - 4.6, wy: LEVEL.water });
+for (const sx of [-1, 1]) E.push({ t: 'kagaribi', at: [sx * 6.6, NINO.rect[3] + 2.4], y: NINO.top });
+for (const x of [-35.6, -27.6]) E.push({ t: 'kagaribi', at: [x, -38.6], y: DAI.top });
+for (const sx of [-1, 1]) E.push({ t: 'kagaribi', at: [sx * 5.2, MIDDLE.z0 - 11.5], y: 0 });
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // the keep cluster's base is a walled yard under the sky between the roofed keeps and passages, so its room is open (no roof is owed over its whole floor)
 const rooms = [room('main keep', [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], DAI.top, 'hall'), room('inner', INNER, BANK, 'open'), room('honmaru', HON.rect, HON.top, 'open'), room('keep', DAI.rect, DAI.top, 'open'),
