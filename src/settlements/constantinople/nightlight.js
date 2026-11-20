@@ -17,7 +17,6 @@ import { lathe, rod } from '../../core/geom.js';
 import { MESE_STOAS } from './stoas.js';
 import { height } from './layout.js';
 
-const NO = (typeof process !== 'undefined' && process.env?.CN_NO) || '';
 const TAU = Math.PI * 2;
 const MAT = 'halo';
 const hashAt = (x, z, s = 0) => { let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
@@ -99,7 +98,6 @@ function flame(el, { lights, bag }) {
 /** The lamps hung from the architrave of every portico, one between every second pair of columns: [{ x, z, y (the hook), fy (the floor) }]. [inferred, after the lit streets of Antioch] */
 export function porticoLamps() {
   const out = [];
-  if (NO.includes('lamps')) return out;
   for (const st of MESE_STOAS) {
     const [ax, az] = st.a, [bx, bz] = st.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], n = Math.max(1, Math.round(L / 3.8)), step = L / n, y0 = height(ax, az), fy = y0 + 0.18;
     for (let k = 0; k < n; k++) {
@@ -175,7 +173,6 @@ function litDome(fn) {
  * pilgrims sleep in the porch on the great feasts [inferred: the lamps within, the door open; the porch-sleepers are not built].
  */
 export function fires() {
-  if (NO.includes('fires')) return [];
   const [dx, dz] = [-10, 36], y = height(dx, dz);
   return [
     { t: 'cn_flame', at: [dx, y + 2.4, dz - 1.2], intensity: 3, distance: 12, floor: y, r: 1.8 },
@@ -191,11 +188,11 @@ export function registerNight() {
   const R = STYLES.roman?.elements;
   if (!R) return;
   for (const k of ['byz_shopfit', 'byz_home', 'cn_home', 'byz_chapel', 'byz_bath', 'thermae']) if (!NO.includes(k) && typeof R[k] === 'function') R[k] = wrap(R[k]);
-  if (!NO.includes('houses') && typeof R.cn_house === 'function') R.cn_house = litHouse(R.cn_house);
+  if (typeof R.cn_house === 'function') R.cn_house = litHouse(R.cn_house);
   const S = STYLES['constantinople-site']?.elements;
   if (S && typeof S.candle === 'function') S.candle = wrap(S.candle);
   const HS = STYLES['byzantine-hs'];
-  if (!NO.includes('sophia') && HS?.objects?.polykandelon) HS.objects.polykandelon = wrap(HS.objects.polykandelon, 1.6);
-  if (!NO.includes('sophia') && HS?.elements?.hs_dome_windows) HS.elements.hs_dome_windows = litDome(HS.elements.hs_dome_windows);
+  if (HS?.objects?.polykandelon) HS.objects.polykandelon = wrap(HS.objects.polykandelon, 1.6);
+  if (HS?.elements?.hs_dome_windows) HS.elements.hs_dome_windows = litDome(HS.elements.hs_dome_windows);
 }
 Object.assign(STYLES.roman.elements, { cn_flame: flame, cn_lamps: lamps });

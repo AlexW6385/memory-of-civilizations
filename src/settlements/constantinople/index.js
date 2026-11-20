@@ -21,10 +21,12 @@ import { laneLifePlans } from './lanelife.js';
 import { outerLifePlans } from './outerlife.js';
 import { hippodromePlan } from './hippodrome.js';
 import { interiorPlan, interiorLifePlan, houseWalks } from './interiors.js';
+import { walkRoutes } from './walk.js';
+import { counterSide } from './walkside.js';
 export { music };
 registerNight();                      // after every file has put its elements into the styles: those that make lights gain their halo (docs §16.2)
 // the walk-check routes up the enterable houses' stairs to their upper rooms and roof terraces ride on the landmark's plan (as Amsterdam's)
-export const landmarks = [{ plan: { ...sophia, walks: [...(sophia.walks ?? []), ...houseWalks()] }, music }];
+export const landmarks = [{ plan: { ...sophia, walks: [...(sophia.walks ?? []), ...houseWalks(), ...walkRoutes(counterSide)] }, music }];
 // the Column of Justinian's rider in two forms by distance: the old statue beyond 110 m, the modelled bronze rider within (the column's capital tops at y = 45.1)
 const riderPlans = () => {
   const mk = (id, t, o) => ({ id, style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t, at: JUSTINIAN, y: 0, h: 34, d: 3.2, ...(t === 'cn_rider' ? { y: 45.12, s: 3.4 } : {}) }], rooms: [], bounds: [-400, -160, 262, 362], entrance: { at: [-150, 110], facing: 'e' }, center: JUSTINIAN, nocollide: true, ...o });
