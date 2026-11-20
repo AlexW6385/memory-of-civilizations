@@ -77,6 +77,8 @@ export function arrivalStreet() {
   // the stone yard at the façade's foot, inside the hoarding: north and south of the walk to the gate (z = the temple's ±5)
   const yx = SAGRADA[0] + 22 + 8.8, yw = EDGE - 1.2 - yx;
   out.push({ t: 'stone_yard', at: [yx, SAGRADA[1] - 26], size: [yw, 21], y: Y(yx, SAGRADA[1]), seed: 31 }, { t: 'stone_yard', at: [yx, SAGRADA[1] + 6], size: [yw, 20], y: Y(yx, SAGRADA[1]), seed: 32 });
+  // the watchman's fire-basket just inside the gate, north of the lane (night: nightlight.js)
+  out.push({ t: 'brazier', at: [EDGE - 0.8, SAGRADA[1] - 4.0], y: Y(EDGE - 0.8, SAGRADA[1] - 4.0) });
   out.push({ t: 'tram', at: [XM + 1.55, zt], y: Y(XM + 1.55, zt) + 0.03, rot: 0, kind: 'closed', wire: 5.87, seed: 4201 });
   for (const [z, s] of [[SAGRADA[1] + 25, 4202], [SAGRADA[1] + 31, 4203]]) { const x = XM + 6.2; out.push({ t: 'carriage', at: [x, z], y: Y(x, z), rot: 0, rect: [x - 0.9, z - 2.6, x + 0.9, z + 2.6], seed: s }); }
   return out;

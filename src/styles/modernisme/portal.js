@@ -65,7 +65,9 @@ export function makePortals(H) {
     b.lathe('terracotta', [[0.001, Y0], [0.17, Y0], [0.24, Y0 + 0.36], [0.27, Y0 + 0.38], [0.27, Y0 + 0.44], [0.22, Y0 + 0.44], [0.001, Y0 + 0.4]], 8, 0.9, 0, Z1 - 0.5);
     for (let k = 0; k < 7; k++) { const a = k / 7 * Math.PI * 2, r = 0.3 + (k % 2) * 0.08, cx = 0.9, cz = Z1 - 0.5, h = 0.44 + 0.12; rd('cloth_green', [cx, cz, h], [cx + Math.cos(a) * r * 0.5, cz + Math.sin(a) * r * 0.5, h + 0.75 + (k % 3) * 0.14], 0.018, 4); rd('cloth_green', [cx + Math.cos(a) * r * 0.5, cz + Math.sin(a) * r * 0.5, h + 0.75 + (k % 3) * 0.14], [cx + Math.cos(a) * r, cz + Math.sin(a) * r, h + 0.5 + (k % 3) * 0.1], 0.016, 4); }
     // the doorway's step, the fanlight's glass and iron (rectangular, elliptical or a gate's overthrow), the plate and the bell-pull on the right pillar
-    bx('granite_grey', -1.15, 1.15, -0.55, 0.0, -0.25, 0.1);
+    // the stoop, worn by the tenants' feet: the cheeks keep their height, the lane to the door is dished 1 cm with a rounded lip
+    bx('granite_grey', -1.15, -0.6, -0.55, 0.0, -0.25, 0.1); bx('granite_grey', 0.6, 1.15, -0.55, 0.0, -0.25, 0.1);
+    bx('granite_grey', -0.6, 0.6, -0.16, 0.0, -0.25, 0.1); bx('granite_grey', -0.6, 0.6, -0.42, -0.16, -0.25, 0.09); bx('granite_grey', -0.6, 0.6, -0.55, -0.42, -0.25, 0.097);
     if (v === 0) { bx(IRON, -OW, OW, 0.16, 0.2, 2.95, 3.0); bx('glass_outer', -OW, OW, 0.17, 0.19, 3.0, OH); for (const x of [-0.5, 0, 0.5]) bx(IRON, x - 0.015, x + 0.015, 0.16, 0.2, 3.0, OH); }
     else if (v === 1) {
       const cy = 3.0, a = OW, bb = OH - cy, el = (t) => [a * Math.cos(t), cy + bb * Math.sin(t)];
