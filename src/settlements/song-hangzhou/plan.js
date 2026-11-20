@@ -4,6 +4,7 @@
 // on the bank, the river with its boats; the canal and its lock, bridges and boats.
 
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, T1, T2, CANAL, CANAL_STREETS, CANAL_BRIDGES, WAREHOUSES } from './layout.js';
+import './writing.js';
 import { interiorRooms, dwellingRooms, upLots, walkLots, frontOf } from './life.js';
 import { storeyWalk } from './storeys.js';
 import './pagoda-upper.js';
@@ -66,6 +67,7 @@ E.push({ t: 'ming_hall', rect: [-89, 58, -79.5, 94], y: T1.y, H: 4.4, front: 'w'
   wall([wx0 + 0.3, wz0 + 0.6], [gc - gw - 1.0, wz0 + 0.6]); wall([gc + gw + 1.0, wz0 + 0.6], [wx1 - 0.3, wz0 + 0.6]);
   wall([wx0 + 0.3, wz0 + 0.6], [wx0 + 0.3, wz1 - 1.0]); wall([wx1 - 0.3, wz0 + 0.6], [wx1 - 0.3, wz1 - 1.0]);
   E.push({ t: 'temple_gate', c: [gc, wz1 - 1.0], y: yT, w: gw * 2, dir: 's' });
+  E.push({ t: 'hz_gate_name', c: [gc, wz1 - 1.0], y: yT, dir: 's', text: '六和塔' });
   E.push({ t: 'temple_gate', c: [gc, wz0 + 0.6], y: yT, w: gw * 2, dir: 'n' });
   // in the court: the great censer before the stair to the pagoda, the sutra pillars either side of the way
   E.push({ t: 'court_censer', at: [gc, wz1 - 5.4], y: yT });
