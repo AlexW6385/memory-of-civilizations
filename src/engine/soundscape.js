@@ -86,6 +86,7 @@ import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as HIMEJI from '../settlements/edo-himeji/soundmap.js';
 import * as SEOUL from '../settlements/joseon-seoul/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
+import * as MADURAI from '../settlements/madurai/soundmap.js';
 import * as MUSCOVY from '../settlements/muscovy/soundmap.js';
 import './voices-muscovy.js';
 import * as NARA from '../settlements/nara/soundmap.js';
@@ -225,7 +226,7 @@ export const PROFILES = {
   lhasa: T({ crow: 1, sparrow: 0.7, kite: 0.4 }, { animals: { dog: 0.8, cattle: 0.3 }, roof: 'flat', bells: 'dungchen' }),
   london: T({ ...EU, gull: 0.5 }, { animals: withLife({ horse: 0.8, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: LONDON }), roof: 'slate', bells: 'westminster' }),
   'machu-picchu': T({ warbler: 0.6, tropic: 0.4, dove: 0.4 }, { animals: { dog: 0.2 }, roof: 'thatch' }),
-  madurai: T(IND, { cicadas: 0.5, frogs: 0.5, animals: { cattle: 0.7, rooster: 0.4, goat: 0.4, dog: 0.3 }, roof: 'tile', bells: 'puja' }),
+  madurai: T(IND, { cicadas: 0.5, frogs: 0.5, animals: withLife({ cattle: 0.7, rooster: 0.4, goat: 0.4, dog: 0.3 }, { market: 1, eaves: 1, map: MADURAI }), roof: 'tile', bells: 'puja' }),
   'mamluk-cairo': T(NEAR, { animals: withLife({ donkey: 0.8, horse: 0.3, rooster: 0.3, dog: 0.4 }, { market: 1, map: CAIRO }), roof: 'flat', adhan: 1 }),
   maori: T({ warbler: 1, tropic: 0.5 }, { cicadas: 0.6, animals: { dog: 0.3 }, roof: 'thatch' }),
   'ming-suzhou': T(EAS, {

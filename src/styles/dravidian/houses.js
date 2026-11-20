@@ -8,6 +8,7 @@
 
 import { box, lathe, fromTriangles, disc, clothBox, addCloth } from '../../core/geom.js';
 import * as IN from './interiors.js';
+import { vessel } from './vessel.js';
 
 const G = 'granite_tamil';
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -65,7 +66,7 @@ const WASHES = ['plaster_white', 'stucco_cream', 'limewash_white', 'limewash_yel
 const pick = (r, a) => a[Math.floor(r() * a.length)];
 
 /** Little brass vessel (kudam): foot, belly, neck, flared lip. */
-export const vessel = (bag, x, y, z, s = 1, mat = 'bronze') => bag.add(mat, lathe([[0.001, 0], [0.07 * s, 0], [0.1 * s, 0.05 * s], [0.17 * s, 0.17 * s], [0.18 * s, 0.26 * s], [0.12 * s, 0.38 * s], [0.07 * s, 0.44 * s], [0.1 * s, 0.5 * s], [0.07 * s, 0.5 * s]], 8, null, x, y, z));
+export { vessel };
 /** A tall Tamil standing lamp (kuttuvilakku): a round foot, a slender stem with rings, a dish with a lit wick. */
 export function lampStand(bag, x, y, z, h = 1.2) {
   bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.13, 0.03], [0.07, 0.08], [0.04, 0.16], [0.05, 0.28], [0.035, 0.36], [0.035, h - 0.14], [0.06, h - 0.1], [0.1, h - 0.04], [0.12, h], [0.001, h]], 10, null, x, y, z));
@@ -246,7 +247,7 @@ export function tamilHouse(el, ctx) {
   // the front
   const wins = [];
   if (!shop) {
-    if (rich) IN.openDoor(F, uc, ver); else if (!simple) door(F, uc, ver, 1.0, zone !== 'outer');
+    if (rich) IN.openDoor(F, (pl.g0 + pl.g1) / 2, ver, pl.g1 - pl.g0); else if (!simple) door(F, uc, ver, 1.0, zone !== 'outer');
     if (W > 5.6 && !simple) for (const u of [uc - Math.min(2.3, (uc - 0.4) * 0.62 + 0.5), uc + Math.min(2.3, (W - uc - 0.4) * 0.62 + 0.5)]) if (u > 0.7 && u < W - 0.7) { window(F, u, ver); wins.push(u); }
     if (!hut && !simple && rand() < 0.5) kolam(F, uc, -1.05, rand);
     if (!hut && !simple) { const [lx, , lz] = F.P(uc + 1.0, 0, ver - 0.12); B('wood_dark', uc + 0.95, 1.5, ver - 0.12, uc + 1.2, 1.78, ver - 0.05); bag.add('lamp_glass', lathe([[0.001, 0], [0.03, 0.02], [0.001, 0.07]], 5, null, lx + (F.dv[0] * 0.0), 1.5, lz)); }
@@ -254,7 +255,7 @@ export function tamilHouse(el, ctx) {
     // the shop: the open front on the platform, shelves along the back wall with their goods, the shutter planks above
     const gs = rich ? [[0.2, pl.g0 - 0.1], [pl.g1 + 0.1, W - 0.2]] : [[0.2, W - 0.2]], inGap = (u) => rich && u > pl.g0 - 0.25 && u < pl.g1 + 0.25;
     for (const [a, b] of gs) { B('wood_dark', a, py, ver - 0.5, b, 2.2, ver - 0.04); for (const y of [0.95, 1.4, 1.85]) B('timber', a, y, ver - 0.55, b, y + 0.04, ver - 0.04); }
-    if (rich) { B('stucco_cream', pl.g0 - 0.16, py, ver - 0.5, pl.g0 - 0.1, 2.2, ver - 0.04); B('stucco_cream', pl.g1 + 0.1, py, ver - 0.5, pl.g1 + 0.16, 2.2, ver - 0.04); B('wood_dark', pl.g0 - 0.1, 2.2, ver - 0.5, pl.g1 + 0.1, 2.35, ver - 0.04); }
+    if (rich) { B('stucco_cream', pl.g0 - 0.16, py, ver - 0.5, pl.g0 - 0.1, 2.65, ver - 0.04); B('stucco_cream', pl.g1 + 0.1, py, ver - 0.5, pl.g1 + 0.16, 2.65, ver - 0.04); B('wood_dark', pl.g0 - 0.1, 2.65, ver - 0.5, pl.g1 + 0.1, 2.78, ver - 0.04); }
     if (!simple) for (let i = 0; i < Math.round(W * 1.5); i++) { if (inGap(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1))) continue; const [x, , z] = F.P(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1), 0, ver - 0.3); vessel(bag, x, [py + 0.35, py + 0.82, py + 1.27][i % 3] + 0.04, z, 0.45, ['bronze', 'terracotta', 'bronze'][(i + el.seed) % 3]); }
     B('wood_dark', 0.2, 2.35, ver - 0.12, W - 0.2, 2.62, ver - 0.04);
     if (!simple) goods(F, el.trade ?? 'cloth', py, W, ver, rand, { ay: yb - 0.04 });

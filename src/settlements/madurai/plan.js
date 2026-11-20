@@ -3,6 +3,7 @@
 // Meenakshi with their own gopurams and gilded vimanas, the Golden Lotus tank in its colonnade,
 // the Thousand-Pillar Hall, the pillared entrance hall from the east gate, the flagstaffs.
 
+import { visitorRoutes } from './openwalk.js';
 import { WALL, SUNDARA, MEENAKSHI, TANK, HALL, GATES, PUDHU } from './layout.js';
 
 const E = [];
@@ -89,6 +90,7 @@ const rooms = [
 ];
 const walks = [[[GATES.s[0], 200], [GATES.s[0], 126], [GATES.s[0], 100], [GATES.s[0], 75]]];
 walks[0].y0 = 0;
+for (const r of visitorRoutes()) { r.y0 = 0; walks.push(r); }
 
 export const temple = {
   id: 'madurai-meenakshi',
