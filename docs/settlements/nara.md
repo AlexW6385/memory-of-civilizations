@@ -202,5 +202,13 @@ Nothing of Nara in 752 was recorded; every voice is synthesised and [inferred] f
 - **Service quarter and trades**: the scribes' brush and paper in the scriptorium, the kitchen's bowls and the carpenters' adze in their houses, and the sounds of the weavers, smiths, potters and straw-workers in the open craft houses; heard by day [inferred from the uses of §16-§17].
 - **Pedlars** crying salt, greens, fish and oil in the streets (wordless contours) [inferred from the goods of the East Market].
 - **Birds and insects** by season and hour: bush warbler (spring), lesser cuckoo (summer nights), evening cicada (late summer), bell cricket (autumn nights), owl; **stags** calling from the hills in the autumn rut [stated in general: the Man'yōshū has many poems of the calling stag and the cuckoo; the voices' contours are ours].
-- **Rooms**: the open houses by use (their own tone, small sounds), the Great Buddha Hall (low, vast, hushed). Wells (18 of the yards and two at the service lane) are the engine's `wellBucket` places.
+- **Rooms**: the open houses by use (their own tone, small sounds), the Great Buddha Hall (low, vast, hushed). Wells (16: one in each yard and two at the service lane) are the engine's `wellBucket` places.
 - Measured (tools/sound-render.mjs): bell centroid 77 Hz peak 63 Hz before raising to 80 Hz; gagaku centroid 461 Hz; drum 98 Hz, 14 onsets in 14 s; adze 15 onsets; scribe centroid 4.3 kHz. Test `tests/nara-sound.test.mjs` (8 tests, 10 s).
+
+### 19.4 Animals (critters)
+`critters` in `src/settlements/nara/fauna.js`, run by the engine's rigs (no new models): 21 in all, with a black-kite flight over the temple and hills added to the flights [inferred].
+- **Fowl**: a cock and two hens (brown, white) beside the well of each of the three yards nearest the avenue (9) [inferred: households kept fowl; the cock and hen are old domestic animals of Japan].
+- **Dogs**: one lying at the wardens' lodge's door, one at the market's corner on the avenue (2) [inferred].
+- **Cats**: one on the scriptorium's step, one at the foot of the storehouse (2). Cats are said to have come to Japan with Buddhist sutras to keep rats off the scrolls [stated in popular histories; not re-sourced here; treat as [inferred]].
+- **Swallows' nests** on the walls under the eaves of eight open houses (the birds go out over the street and come home) [inferred: house swallows nest on houses wherever they are kept].
+- Test `tests/nara-critters.test.mjs` (4 tests). Not seen: the cats and dogs in a render (the camera put in the lane saw only house fronts); draw-count unchanged (main 260).
