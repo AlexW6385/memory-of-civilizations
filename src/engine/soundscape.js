@@ -69,6 +69,7 @@
 //   Constantinople in the 9th century) [inferred; the semantron is in the dossier's music].
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
+import * as BAGHDAD from '../settlements/abbasid-baghdad/soundmap.js';
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
 import * as AGRA from '../settlements/mughal-agra/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
@@ -176,7 +177,7 @@ export const PROFILES = {
   shibam: T(NEAR, { animals: { donkey: 0.3, goat: 0.3 }, roof: 'flat' }),
   delphi: T(MED, { cicadas: 0.7, animals: { sheepbell: 0.7, donkey: 0.3, dog: 0.25, rooster: 0.3 }, roof: 'tile' }),
   mycenae: T(MED, { cicadas: 0.9, animals: { goat: 0.5, sheepbell: 0.5, donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
-  'abbasid-baghdad': T(NEAR, { animals: { donkey: 0.6, dog: 0.3, rooster: 0.2 }, frogs: 0.3, roof: 'flat', adhan: 1 }),
+  'abbasid-baghdad': T(NEAR, { animals: withLife({ donkey: 0.6, dog: 0.3, rooster: 0.2 }, { market: 1, map: BAGHDAD }), frogs: 0.3, roof: 'flat', adhan: 1 }),
   alexandria: T({ ...MED, gull: 1, kite: 0.3 }, { cicadas: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'flat' }),
   'han-changan': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3, camel: 0.2 }, roof: 'tile' }),
   'tang-changan': T(EAS, { cicadas: 0.4, animals: withLife({ rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, { market: 1, eaves: 1, map: TANGCA }), roof: 'tile', bells: 'tang-changan' }),
