@@ -11,7 +11,8 @@ import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import '../../styles/japanese/index.js';
 import '../../buildings/byodo-in-phoenix-hall/style.js';
-import { RIVER, BRIDGE, POND_LEVEL, HALL, SHRINE, height } from './layout.js';
+import { RIVER, POND_LEVEL, HALL } from './layout.js';
+import { riverX, fireSpots, sanNoMa, deckY } from './fires.js';
 import { tiled } from './street.js';
 
 /** A number in [0, 1) from a position alone. */
@@ -134,18 +135,13 @@ export function registerNight() {
 registerNight();
 
 // ── where they stand ──────────────────────────────────────────────────────────────────────────────────
-const rx = (z) => RIVER.x + 15 * Math.sin(z / 110);
+const rx = riverX;
 /** The night's elements: world coordinates (the hall's own is in plan.js). */
 export function nightElements() {
-  const E = [], bx0 = rx(BRIDGE.z) - RIVER.w / 2 - 8, bx1 = bx0 + RIVER.w + 16;
-  const at = (x, z) => ({ at: [x, z], y: height(x, z) });
-  // the heads of the bridge: a kagaribi each side of the road, a little off the deck's end
-  for (const [x, dx] of [[bx0 - 3.5, 1], [bx1 + 3.5, -1]]) for (const dz of [-5.2, 5.2]) E.push({ t: 'uji_kagaribi', ...at(x, BRIDGE.z + dz) });
-  // the san-no-ma, third bay from the west: the tōdai at Hashihime's place on the platform
-  const n = Math.round((RIVER.w + 16) / 5.4), sx = bx0 + 2.5 * (RIVER.w + 16) / n, Y = (x) => 0.2 + 1.4 * Math.sin(Math.PI * Math.max(0, Math.min(1, (x - bx0) / (bx1 - bx0))));
-  E.push({ t: 'uji_todai', at: [sx, BRIDGE.z + 3.6], y: Y(sx) + 0.0, h: 1.1 });
-  // the Ujigami shrine's gate on the far bank
-  E.push({ t: 'uji_kagaribi', at: [SHRINE.terrace[0] + 4, SHRINE.axis - 6], y: SHRINE.level });
+  const E = [];
+  for (const f of fireSpots()) E.push({ t: 'uji_kagaribi', at: f.at, y: f.y });
+  const [sx, sz] = sanNoMa();
+  E.push({ t: 'uji_todai', at: [sx, sz], y: deckY(sx), h: 1.1 });             // at Hashihime's place on the san-no-ma
   // the fire boats of the river, moored in the shallows of the west bank (the fishers' craft, not fishing: §19.2)
   for (const [z, xo, rot] of [[-70, -17, 0.25], [-30, -19, -0.2], [20, -18, 0.1]]) E.push({ t: 'uji_hibune', at: [rx(z) + xo, z], y: RIVER.level, rot });
   return E;
