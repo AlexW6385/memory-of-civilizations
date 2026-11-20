@@ -252,12 +252,12 @@ Marking: [stated] has a source named beside it; [inferred] is this dossier's rea
 - [inferred] Candle and rushlight behind the small panes of the houses, more on the lower floors and fewer upstairs; shops open into the early evening with a hanging lantern over the counter; a lantern at the Weigh House door. The shares of lit windows are a hash of the house and the pane, not a count of households.
 
 ### 10.3 Sound
-- [stated] Five carillons sounded in the town (the Town Hall, the Westerkerk, the Zuiderkerk, the Oude Kerk, the Nieuwe Kerk's tower) and struck the quarters and hours (the profile's `carillon` hours were already set).
-- [stated] Transport of goods in the old town went on sledges, not carts, and by boat (§5.6 of this dossier; Amsterdam ordinances against carts in the centre, as cited there). Hence `amSledge` and `amPraam`.
+- [stated] Carillons sounded in the town (the Town Hall's dome and the Westerkerk among them, §5 and §9 of this dossier) and struck the hours (the profile's `carillon` hours were already set).
+- [inferred] Transport of goods in the old town went on sledges, not carts, and by boat (the sledges of the Dam in §5.6 of this dossier; the ordinance against carts is from memory, not re-checked). Hence `amSledge` and `amPraam`.
 - [inferred] The rest is reasoning from the trades: the Weigh House's weights and chains (the building weighed goods, §5.4), the treadwheel cranes of the warehouses, caulkers' mallets at the IJ's yards, the fishwives' market at the Damrak's head, a lute on the Dam, the Nieuwe Kerk's bell before the sermons, the rattle-watch at night (the night watch in Dutch towns carried rattles: attested for the Dutch Republic generally, not confirmed for Amsterdam in 1670), the cries of milk, fish, peat, sand and old clothes. Every melody is invented; no word is sung.
 
 ### 10.4 Animals
-- [stated] The canals held domestic ducks and geese; pigeons and sparrows lived on the squares and quays (the dossier §11 lists the town's fauna).
+- [inferred] Domestic ducks on the canals; pigeons and sparrows on the squares and quays (the town's carp, swallows, gulls, rooks and heron were already in fauna.js).
 - [inferred] Cats before open shops (against rats in the goods), dogs at the warehouse doors (watchdogs; dogs also drew small carts in the Netherlands), pigeons on the Dam's paving. No census exists.
 
 ### 10.5 Writing
