@@ -69,7 +69,7 @@ function yard() {
 export async function town() {
   const plans = [harbour(), civic(), yard(), streets()];
   const els = lots().map((l) => (l.kind === 'yard' ? { t: 'manu_yard', rect: l.rect, seed: l.seed, y: l.y, front: l.front } : { t: 'manu_house', rect: l.rect, seed: l.seed, y: l.y, plinth: l.plinth, front: l.front, kind: l.kind, ...(l.storeys ? { storeys: l.storeys } : {}), ...(l.open ? { open: true, use: l.use } : {}), ...(l.up ? { up: l.up } : {}) }));
-  plans.push(...lodTiles('lisbon-houses', 'manueline', els, { R: RADIUS }));
+  plans.push(...lodTiles('lisbon-houses', 'manueline', [...els, ...haloElements()], { R: RADIUS }));
   plans.push(...streetLife());
   return plans;
 }
@@ -77,7 +77,6 @@ export async function town() {
 // ── the goods and the people (life.js) ──
 function streetLife() {
   const tiles = lifeElements();
-  for (const e of haloElements()) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`lisbon-life-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
 }
 void SEA;

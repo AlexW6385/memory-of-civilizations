@@ -206,7 +206,8 @@ function litShip(base) {
 }
 
 // ── lamps in the open: a lane's shrine, a brazier, a torch on a bracket, the iron lanterns on their posts ──────────
-// { t: 'lisbon_halo', at, y, rot, kind } — elements of the street life (instanced, near only)
+// { t: 'lisbon_halo', at, y, rot, kind } — elements of the houses' tiles (style manueline: merged with the tile's own detail, so that the
+// lamps add no draw of their own), near copies only
 const KINDS = { shrine: 0, brazier: 1, torch: 2, post: 3 };
 function unitOf(kind) {
   return assembly(`lisbon-halo|${kind}`, (a) => {
@@ -220,8 +221,7 @@ function unitOf(kind) {
       a('opening', box(-0.14, 1.15, 0.2, 0.14, 1.85, 0.27));
       a('limestone_carved', lathe([[0.001, 1.2], [0.07, 1.22], [0.06, 1.5], [0.05, 1.62], [0.035, 1.7], [0.04, 1.78], [0.001, 1.8]], 7, null, 0, 0, 0.22));
       a('iron', rod([0, 1.75, 0.27], [0, 1.98, 0.55], 0.012, 4));
-      a('glass_lamp', lathe([[0.001, 0], [0.04, 0.02], [0.06, 0.1], [0.03, 0.15], [0.001, 0.16]], 7, null, 0, 1.78, 0.58));
-      a('flame', lathe([[0.001, 0], [0.012, 0.03], [0.001, 0.07]], 4, null, 0, 1.83, 0.58));
+      a('iron', lathe([[0.001, 0], [0.04, 0.02], [0.06, 0.1], [0.03, 0.15], [0.001, 0.16]], 7, null, 0, 1.78, 0.58));      // (the lamp's flame is the halo's glow: no flame piece, which would cost a draw)
       H.ball(0, 1.84, 0.58, 0.6); H.wall(0, 1.5, 0.3, [0, 1], 1.3, 1.1); H.floor(0, 0.06, 1.0, 1.9, 1.5);
     } else if (kind === 'brazier') {
       // the guards' fire-basket: an iron cresset on three legs with embers and a flame, a woodpile beside it
@@ -242,11 +242,11 @@ function unitOf(kind) {
     const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(H.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(H.nor, 3)); a('halo', g);
   });
 }
-const REACH = 90;
 function lisbonHalo(el, { bag }) {
+  if (el.simple) return;
   const U = unitOf(el.kind in KINDS ? el.kind : 'shrine'), [x, z] = el.at;
   const M = new Matrix4().compose(new Vector3(x, el.y ?? 0, z), new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), el.rot ?? 0), new Vector3(1, 1, 1));
-  for (const [mat, g] of Object.entries(U)) { if (bag.addInstance) bag.addInstance(mat, g.clone(), M, { reach: REACH }); else bag.add(mat, placeHanging(g.clone(), M)); }
+  for (const [mat, g] of Object.entries(U)) bag.add(mat, placeHanging(g.clone(), M));
 }
 
 /** Wrap the builders of the Manueline style and register the street life's lamp element. Safe to call once. */
@@ -254,8 +254,8 @@ let DONE = false;
 export function registerNight() {
   if (DONE) return;
   DONE = true;
-  if (STYLES.life) STYLES.life.elements.lisbon_halo = lisbonHalo;
   const E = STYLES.manueline.elements;
+  E.lisbon_halo = lisbonHalo;
   const wrap = (k, fn) => { if (E[k] && !E[k].__lit) E[k] = fn(E[k]); };
   wrap('manu_house', (b) => lit(b, 'house'));
   wrap('jeron_church', litChurch);

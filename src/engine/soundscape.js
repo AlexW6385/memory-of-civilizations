@@ -103,6 +103,7 @@ import * as LONDON from '../settlements/london/soundmap.js';
 import './voices-amsterdam.js';
 import './voices-london.js';
 import * as CAIRO from '../settlements/mamluk-cairo/soundmap.js';
+import * as LISBON from '../settlements/manueline-lisbon/soundmap.js';
 import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
 import * as PARIS from '../settlements/paris/soundmap.js';
 import './voices-paris.js';
@@ -189,7 +190,7 @@ export const PROFILES = {
   ayutthaya: T(TROP, { cicadas: 0.7, frogs: 0.9, animals: { rooster: 1, dog: 0.5, duck: 0.4 }, roof: 'thatch' }),
   'lu-qufu': T(EAS, { cicadas: 0.5, frogs: 0.2, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
   'shang-yinxu': T(EAS, { cicadas: 0.4, frogs: 0.5, animals: { cattle: 0.5, dog: 0.5, rooster: 0.4, horse: 0.2 }, roof: 'thatch' }),
-  'manueline-lisbon': T({ ...MED, gull: 1, kite: 0.3 }, { animals: { donkey: 0.3, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
+  'manueline-lisbon': T({ ...MED, gull: 1, kite: 0.3 }, { animals: withLife({ donkey: 0.3, dog: 0.4, rooster: 0.3 }, { market: 1, eaves: 1, map: LISBON }), roof: 'tile', bells: 'angelus' }),
   'bali-village': T(TROP, { cicadas: 0.6, frogs: 0.9, animals: { rooster: 1, dog: 0.4 }, roof: 'thatch' }),
   bagan: T(NEAR, { animals: { buffalo: 1, dog: 1, goat: 1 }, roof: 'thatch' }),
   kakadu: T({ tropic: 0.8, warbler: 0.3, crow: 0.4 }, { cicadas: 0.4, frogs: 0.5, animals: { dog: 0.3 }, roof: 'thatch' }),
