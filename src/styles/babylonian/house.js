@@ -80,6 +80,24 @@ function babylonHouse(el, ctx) {
     bag.add('pottery_dark', lbox(du - 0.09, 0.02, du + 0.09, 0.115, 2.4, 2.5));
     for (const yy of [0.5, 0.95, 1.4, 1.85]) for (const dx of [-0.3, 0.3]) bag.add('bronze', lbox(du + dx - 0.03, 0.0, du + dx + 0.03, 0.03, yy, yy + 0.06));
   }
+  // wear (docs/settlements/babylon.md §22): the soot of the door lamp fanning up the wall over its niche; salt bloom on the mud brick just above the tarred plinth (the
+  // alluvial earth's salts rise with the damp: white crusts at the foot of the walls); dust drifted against the foot of the wall on either side of the door. A stream of its own
+  // numbers, so that the dressing above is as it was. [inferred]
+  if (full) {
+    const rw = rng((el.seed || 1) * 31 + 7);
+    const sh = 0.5 + rw() * 0.35;
+    bag.add('pottery_dark', lbox(du - 0.08 - rw() * 0.04, 0, du + 0.08 + rw() * 0.04, 0.012, 2.64, 2.64 + sh));
+    bag.add('pottery_dark', lbox(du - 0.04, 0, du + 0.04, 0.012, 2.64 + sh, 2.64 + sh + 0.28 * rw()));
+    for (let k = 0; k < 3; k++) {
+      const w = 0.35 + rw() * 0.8, u = fa + 0.3 + rw() * Math.max(0.1, fb - fa - w - 0.6), h = 0.12 + rw() * 0.2;
+      if (Math.abs(u + w / 2 - du) < w / 2 + 0.9) continue;
+      bag.add('limewash_white', lbox(u, 0, u + w, 0.011 + 0.003 * k, 0.33, 0.33 + h));
+    }
+    for (const sg of [-1, 1]) {
+      const a = sg < 0 ? fa : du + 1.0, b = sg < 0 ? du - 1.0 : fb;
+      if (b - a > 0.8) { const w = Math.min(b - a, 1.4 + rw() * 1.6), u = sg < 0 ? b - w : a; bag.add('silt', lbox(u, 0.0, u + w, 0.34 + rw() * 0.12, 0, 0.05)); }
+    }
+  }
   // at the door: a brick bench, or the shop's counter; the water jar on its stand beside the door
   if (!shop && !open) bag.add('mudbrick', lbox(du + sd * 0.8, 0, du + sd * 2.1, 0.5, 0, 0.45));
   else if (open && full) bag.add('mudbrick', lbox(du + 1.0, 0, du + 2.2, 0.5, 0, 0.45));
