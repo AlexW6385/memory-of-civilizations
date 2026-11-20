@@ -136,7 +136,7 @@ function shell(el, ctx) {
     const Hg = 3.1;
     facade('door', 0, da, 1.4, Hg);
     bx(A0 + TH, A1 - TH, 0, TH, Hg, Hg + 0.08, 'tile_dark');
-    rectRoof({ c: [da, bw(0.1)], A: 1.4 / 2 + 0.85, B: 0.95, alongZ: false, y: Y + Hg + 0.02, rise: 0.55, kind: 'gable', sweep: 0.1, mat: 'tile_dark', soffit: 'timber', p: 1.4 }, bag);
+    rectRoof({ c: [da, bw(0.1)], A: 1.4 / 2 + 0.85, B: 0.95, alongZ: false, y: Y + Hg + 0.02, rise: 0.55, kind: 'gable', sweep: 0.1, mat: 'tile_dark', soffit: 'timber', p: 1.4, curl: false }, bag);
     for (const s of [-1, 1]) bx(A0 + (s < 0 ? 0 : L - TH) - 0.03, A0 + (s < 0 ? TH : L) + 0.03, 0, Cd, H, H + 0.08, 'tile_dark');
     bag.add('bluestone', box(A0 + TH, Y, bw(Cd), A1 - TH, Y + 0.02, bw(TH)));
     // a jar of water and a pot of plum in the court
@@ -145,7 +145,7 @@ function shell(el, ctx) {
   // the roof of the building: a gable roof along the front, eaves 0.55 m out (not at the gate or the court)
   {
     const wf0 = Cd, B = (wB - wf0) / 2 + 0.55, cb = D / 2 - (wf0 + wB) / 2, rise = Math.min(0.3 * (wB - wf0), 3.0), A = L / 2 + 0.25, yR = Y + H - 0.05;
-    rectRoof({ c: [0, cb], A, B, alongZ: false, y: yR, rise, kind: 'gable', sweep: 0.15, mat: S.roofMat, soffit: 'timber', p: 1.4 }, bag);
+    rectRoof({ c: [0, cb], A, B, alongZ: false, y: yR, rise, kind: 'gable', sweep: 0.15, mat: S.roofMat, soffit: 'timber', p: 1.4, curl: false }, bag);
     const prof = (b) => { const t = Math.max(0, Math.min(1, (B - Math.abs(b - cb)) / B)); return yR + rise * Math.pow(t, 1.4); };
     const n = 14;
     for (const [a0, a1] of [[A0, A0 + TH], [A1 - TH, A1]]) for (let i = 0; i < n; i++) {

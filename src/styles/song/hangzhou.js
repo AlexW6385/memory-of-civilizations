@@ -563,6 +563,26 @@ function songSpire(bag, cx, y, cz, R, ycorner) {
  * The niches of a walkable pagoda's corridor { c, y, base, tiers }: on the inner wall of every storey, on the four faces the stair leaves free, a niche with a
  * red frame, a sill and a small hood, in it a small seated Buddha on a lotus.
  */
+/** The niche Buddha, built once and laid as copies of one prototype turned to face (mx, mz): twenty-eight of one shape in the Liuhe Pagoda, twenty in Leifeng, each 8 000 triangles before. */
+let NICHE_KIT = null;
+function nicheBuddha(bag, px, y0, pz, mx, mz) {
+  if (!bag.addInstance) { STYLES.chinese.objects.buddha({ at: [px, pz], y: y0, h: 0.95, dir: [mx, mz], robe: 'clay_robe', gilt: 'clay_gilt', noHalo: true }, { bag }); return; }
+  if (!NICHE_KIT) {
+    const m = new Map();
+    STYLES.chinese.objects.buddha({ at: [0, 0], y: 0, h: 0.95, dir: [1, 0], robe: 'clay_robe', gilt: 'clay_gilt', noHalo: true }, { bag: { add: (mat, g) => { if (g) (m.get(mat) || m.set(mat, []).get(mat)).push(g); } } });
+    // one prototype to a material (the pieces of the figure one geometry): the small ones would not be instanced by themselves
+    NICHE_KIT = new Map();
+    for (const [mat, list] of m) {
+      const P = [], N = [];
+      for (const g0 of list) { const g = g0.index ? g0.toNonIndexed() : g0; P.push(...g.attributes.position.array); N.push(...g.attributes.normal.array); }
+      const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(P, 3)); g.setAttribute('normal', new Float32BufferAttribute(N, 3));
+      NICHE_KIT.set(mat, [g]);
+    }
+  }
+  const M = new Matrix4().makeRotationY(Math.atan2(-mz, mx)).setPosition(px, y0, pz);
+  for (const [mat, list] of NICHE_KIT) for (const g of list) bag.addInstance(mat, g.clone(), M);
+}
+
 function pagodaNiches(bag, el) {
   const [cx, cz] = el.c, C8 = Math.cos(Math.PI / 8), T8 = Math.tan(Math.PI / 8), rt = el.tiers[el.tiers.length - 1].r * C8, aw = rt - Math.max(1.4, rt * 0.22), ac = aw - 2.0;
   let y = el.y + el.base.h;
@@ -576,7 +596,7 @@ function pagodaNiches(bag, el) {
       bx(ac, ac + 0.42, -0.64, 0.64, y1, y1 + 0.14); bx(ac, ac + 0.5, -0.7, 0.7, y1 + 0.14, y1 + 0.22); bx(ac, ac + 0.4, -0.7, 0.7, y0 - 0.08, y0);
       bx(ac, ac + 0.05, -0.5, 0.5, y0, y1);
       const [px, , pz] = Q(ac + 0.22, 0, 0);
-      B({ at: [px, pz], y: y0, h: 0.95, dir: [mx, mz], robe: 'clay_robe', gilt: 'clay_gilt', noHalo: true }, { bag });
+      nicheBuddha(bag, px, y0, pz, mx, mz);
     }
     y += t.h;
   }
@@ -833,7 +853,7 @@ function hzShell(el, ctx) {
   // a hip roof runs its ridge along the longer side (the roof's ridge is the longer axis; a lot deeper than it is wide has the ridge from front to back)
   const hip = el.roof === 'hip' && kind !== 'winehouse', RA = L / 2 + 0.25, RB = D / 2 + 0.55, deep = hip && RB > RA;
   const rise = Math.min((deep ? L : D) * 0.3, 3.6) + (two ? 0.4 : 0);
-  rectRoof({ c: [0, 0], A: deep ? RB : RA, B: deep ? RA : RB, alongZ: deep, y: Y + H - 0.05, rise, kind: hip ? 'hip' : 'gable', sweep: 0.15, mat: 'tile_dark', soffit: 'timber', p: 1.4 }, bag);
+  rectRoof({ c: [0, 0], A: deep ? RB : RA, B: deep ? RA : RB, alongZ: deep, y: Y + H - 0.05, rise, kind: hip ? 'hip' : 'gable', sweep: 0.15, mat: 'tile_dark', soffit: 'timber', p: 1.4 , curl: Math.hypot(cx + 110, cz - 138) < 110}, bag);
   if (!hip) for (const x of [a0, a1 - th]) { const t = [], top = Y + H + rise - 0.25, e0 = b0 + th, e1 = kind === 'house' ? b1 - th : fz; t.push(x, Y + H, e0, x, Y + H, e1, x, top, 0, x + th, Y + H, e0, x + th, top, 0, x + th, Y + H, e1); bag.add('plaster_white', fromTriangles(t.concat([x, Y + H, e0, x + th, Y + H, e0, x + th, top, 0, x, Y + H, e0, x + th, top, 0, x, top, 0, x, Y + H, e1, x, top, 0, x + th, top, 0, x, Y + H, e1, x + th, top, 0, x + th, Y + H, e1]))); }
   void rand;
 }
@@ -1057,18 +1077,21 @@ function hzLionPair(el, { bag, col }) {
  * the outside of the crown, so a crown shades as one rounded mass as the engine's flora does; one
  * geometry per material (cards: [[cx, cy, cz, ux, uy, uz, vx, vy, vz, hw, hl]...]).
  */
+/** A crown's cards: fewer and larger than the first version's (a card's area times their number kept at about one), the memory and the triangles of forty-two trees a third of what they were. */
+const LEAF = { share: 0.6, size: 1.3 };
 function leafCards(list, centre, bend = 0.7) {
   const pos = [], nor = [];
   for (const c of list) {
     const [cx, cy, cz, ux, uy, uz, vx, vy, vz, hw, hl] = c;
     // the outline in the card's plane: base, two shoulders, tip (u across, v along)
-    const P = [[0, -hl], [-hw, -hl * 0.1], [hw, -hl * 0.1], [-hw * 0.55, hl * 0.55], [hw * 0.55, hl * 0.55], [0, hl]];
+    // (a kite of two triangles: the crown has thousands of cards, and at a card's size the shoulders of the older six-point outline were not seen)
+    const P = [[0, -hl], [-hw, -hl * 0.1], [hw, -hl * 0.1], [0, hl]];
     const W = P.map(([a, b]) => [cx + ux * a + vx * b, cy + uy * a + vy * b, cz + uz * a + vz * b]);
     let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
     const nl = Math.hypot(nx, ny, nz) || 1; nx /= nl; ny /= nl; nz /= nl;
     // wound so that the front face looks out of the crown (the two-sided material would otherwise turn the bent normal in)
     const wox = cx - centre[0], woy = cy - centre[1], woz = cz - centre[2], fl = -(nx * wox + ny * woy + nz * woz) < 0;
-    for (const [a, b, d] of [[0, 1, 2], [1, 3, 2], [2, 3, 4], [3, 5, 4]]) for (const k of (fl ? [a, d, b] : [a, b, d])) {
+    for (const [a, b, d] of [[0, 1, 2], [1, 3, 2]]) for (const k of (fl ? [a, d, b] : [a, b, d])) {
       pos.push(...W[k]);
       let ox = W[k][0] - centre[0], oy = W[k][1] - centre[1], oz = W[k][2] - centre[2]; const ol = Math.hypot(ox, oy, oz) || 1; ox /= ol; oy /= ol; oz /= ol;
       let sx = nx * (1 - bend) + ox * bend, sy = ny * (1 - bend) + oy * bend, sz = nz * (1 - bend) + oz * bend;
@@ -1126,7 +1149,7 @@ function hzTree(el, { bag, col }) {
   const coreMat = kind === 'ginkgo' ? 'palm_leaf' : 'flax_leaf';
   // the lobe over the fork stands on a leader carried up from the fork through the crown, so that no lobe of the crown hangs free of the wood
   if (kind !== 'willow') bag.add('bark_grey', rod([fx, fy - 0.1, fz], [cx, cy + cr * 0.45, cz], trunkR * 0.32, 5));
-  const R = cr * (kind === 'willow' ? 0.75 : 0.9), per = Math.round(kind === 'peach' ? 60 : kind === 'willow' ? 90 : 200 * (R / 3) ** 2 + 60);
+  const R = cr * (kind === 'willow' ? 0.75 : 0.9), per = Math.round((kind === 'peach' ? 60 : kind === 'willow' ? 90 : 200 * (R / 3) ** 2 + 60) * LEAF.share);
   for (const [lx, ly, lz] of lobes) {
     const ry = R * (kind === 'willow' ? 0.8 : 0.85);
     // a dark underside under each lobe (a disc a little way under its equator, facing down): the collision's top field takes a crown for a roof, and a column through
@@ -1136,7 +1159,7 @@ function hzTree(el, { bag, col }) {
       for (let q = 0; q < 10; q++) { const a1 = q * 0.6283, a2 = (q + 1) * 0.6283; fan.push(lx, uy, lz, lx + Math.cos(a1) * ur, uy, lz + Math.sin(a1) * ur, lx + Math.cos(a2) * ur, uy, lz + Math.sin(a2) * ur); }
       bag.add(kind === 'willow' ? spec.mats[1] : coreMat, fromTriangles(fan));
     }
-    if (kind !== 'willow') bag.add(coreMat, lathe(Array.from({ length: 9 }, (_, q) => { const t = q / 8 * Math.PI; return [Math.max(0.001, Math.sin(t)), -Math.cos(t)]; }), 14).scale(R * 0.8, ry * 0.8, R * 0.8).translate(lx, ly, lz));
+    if (kind !== 'willow') bag.add(coreMat, lathe(Array.from({ length: 7 }, (_, q) => { const t = q / 6 * Math.PI; return [Math.max(0.001, Math.sin(t)), -Math.cos(t)]; }), 10, (th) => 1 + 0.05 * Math.sin(th * 3 + lx * 1.7 + lz * 2.3)).scale(R * 0.8, ry * 0.8, R * 0.8).translate(lx, ly, lz));   // (each core its own shape, from its place: they are not instanced, as seven near-identical cores to a tree made seven draws)
     for (let t = 0; t < per; t++) {
       const th = rand() * 6.28, ph = Math.acos(rand() * 1.7 - 0.7);                    // not much of the underside
       let nx = Math.cos(th) * Math.sin(ph), ny = Math.cos(ph), nz = Math.sin(th) * Math.sin(ph);
@@ -1147,7 +1170,7 @@ function hzTree(el, { bag, col }) {
       const vl2 = Math.hypot(vx, vy, vz); vx /= vl2; vy /= vl2; vz /= vl2;
       let ux = vy * nz - vz * ny, uy = vz * nx - vx * nz, uz = vx * ny - vy * nx; const ul = Math.hypot(ux, uy, uz) || 1; ux /= ul; uy /= ul; uz /= ul;
       const sz = 0.85 + rand() * 0.5;
-      cards[t % 3].push([px, py, pz, ux, uy, uz, vx, vy, vz, spec.w * sz * 1.15, spec.l * sz * 1.15]);
+      cards[t % 3].push([px, py, pz, ux, uy, uz, vx, vy, vz, spec.w * sz * 1.15 * LEAF.size, spec.l * sz * 1.15 * LEAF.size]);
       if (kind === 'peach' && rand() < 0.45) {
         const ax = Math.abs(ny) > 0.9 ? [1, 0, 0] : [0, 1, 0];
         const bx = ax[1] * nz - ax[2] * ny, by = ax[2] * nx - ax[0] * nz, bz = ax[0] * ny - ax[1] * nx, bl = Math.hypot(bx, by, bz) || 1;
