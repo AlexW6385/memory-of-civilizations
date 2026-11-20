@@ -136,11 +136,13 @@ export function door(bag, f, u0, u1, y, h, d = 0.04, o = {}) {
 }
 /** A small fountain basin (octagon-ish, round) with a jet at (x, z) on y; r its radius; marble rim, zellij-green inside. */
 export function basin(bag, col, x, z, y, r = 0.9, o = {}) {
-  bag.add('marble_smooth', lathe([[r + 0.14, 0], [r + 0.14, 0.28], [r + 0.02, 0.32], [r, 0.22], [0.001, 0.22]], 16, null, x, y, z));
-  bag.add('glaze_green', lathe([[r, 0.2], [r - 0.01, 0.03], [0.001, 0.03]], 16, null, x, y, z));
-  bag.add('water', disc(r - 0.02, y + 0.2, 16, x, z));
-  bag.add('marble_smooth', lathe([[0.001, 0], [0.12, 0], [0.08, 0.1], [0.05, 0.4], [0.001, 0.46]], 10, null, x, y + 0.22, z));
-  bag.add('water_jet', rod([x, y + 0.64, z], [x, y + 0.95, z], 0.014, 4));
+  // (the shapes turned by the basin's own place: identical basins would be one instanced draw per part)
+  const h = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453, k = 0.94 + 0.12 * (h - Math.floor(h)); r *= k;
+  bag.add('marble_smooth', lathe([[r + 0.14, 0], [r + 0.14, 0.28 * k], [r + 0.02, 0.32 * k], [r, 0.22 * k], [0.001, 0.22 * k]], 16, null, x, y, z));
+  bag.add('glaze_green', lathe([[r, 0.2 * k], [r - 0.01, 0.03], [0.001, 0.03]], 16, null, x, y, z));
+  bag.add('water', disc(r - 0.02, y + 0.2 * k, 16, x, z));
+  bag.add('marble_smooth', lathe([[0.001, 0], [0.12 * k, 0], [0.08 * k, 0.1], [0.05 * k, 0.4], [0.001, 0.46 * k]], 10, null, x, y + 0.22 * k, z));
+  bag.add('water_jet', rod([x, y + 0.64 * k, z], [x, y + 0.95 * k, z], 0.014, 4));
   col.circle(x, z, r + 0.16, y, y + 0.3);
 }
 /** A pitched roof of green tiles on a rectangle: ridge along x or z, eaves overhanging by `e`, gable ends of plaster. */
