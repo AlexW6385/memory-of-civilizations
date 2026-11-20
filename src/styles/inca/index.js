@@ -266,7 +266,7 @@ function incaHouse(el, { bag, col, lights }) {
     const L = k === 'n' || k === 's' ? x1 - x0 : z1 - z0, list = (ops[k] = []);
     // a kallanka (el.doors: n): "the entrance normally on one of the long sides, with equally spaced doors; the opposite side niches or windows but no doors" [stated: Wikipedia, "Kallanka"]
     const doors = k === f && el.doors > 1 ? Array.from({ length: el.doors }, (_, i) => (i + 0.5) * L / el.doors) : k === f ? [L / 2] : [];
-    for (const d of doors) list.push({ kind: 'door', at: d, w: el.humble ? 0.9 : 1.0, h: el.humble ? 1.8 : 1.95, jamb: !!el.jamb });
+    for (const d of doors) list.push({ kind: 'door', at: d, w: el.doorW ?? (el.humble ? 0.9 : 1.0), h: el.doorH ?? (el.humble ? 1.8 : 1.95), jamb: !!el.jamb });
     // a row of niches inside, at chest height; a small window now and then on a long wall
     const n = Math.floor((L - 1.2) / 1.35), gable = along ? k === 'e' || k === 'w' : k === 'n' || k === 's';
     for (let i = 0; i < n; i++) {
@@ -293,8 +293,8 @@ function incaHouse(el, { bag, col, lights }) {
   if (!el.doors && walls[f]) {
     const { F, off } = walls[f], u = F.L / 2, p = F.at(u), tg = F.t(u), nn = F.n(u), jm = el.jamb ? 0.14 : 0.02;
     const bx = (k0, k1, w) => { const c = [[-w / 2, k0], [w / 2, k0], [w / 2, k1], [-w / 2, k1]].map(([a, k]) => [p[0] + tg[0] * a + nn[0] * k, p[1] + tg[1] * a + nn[1] * k]); return [Math.min(...c.map((q) => q[0])), Math.min(...c.map((q) => q[1])), Math.max(...c.map((q) => q[0])), Math.max(...c.map((q) => q[1]))]; };
-    if (el.lintel) { const v0 = (el.humble ? 1.8 : 1.95) + jm + 0.02; bag.add('granite_inca', frustum(bx(-(off(v0) + 0.06), -0.02, 1.7), y + v0, y + v0 + 0.27, 0.01, 0.01, 0.01, 0.01)); }
-    if (el.step) { const r = bx(-(off(0) + 0.5), -(off(0) - 0.1), 1.6); bag.add('granite_inca', frustum(r, y - 0.02, y + 0.1, 0.02, 0.02, 0.02, 0.02)); }
+    if (el.lintel) { const v0 = (el.doorH ?? (el.humble ? 1.8 : 1.95)) + jm + 0.02; bag.add('granite_inca', frustum(bx(-(off(v0) + 0.06), -0.02, Math.max(1.7, (el.doorW ?? 0) + 0.7)), y + v0, y + v0 + 0.27, 0.01, 0.01, 0.01, 0.01)); }
+    if (el.step) { const r = bx(-(off(0) + 0.5), -(off(0) - 0.1), Math.max(1.6, (el.doorW ?? 0) + 0.3)); bag.add('granite_inca', frustum(r, y - 0.02, y + 0.1, 0.02, 0.02, 0.02, 0.02)); }
     if (el.use === 'noble') {
       const back = { n: 's', s: 'n', e: 'w', w: 'e' }[f], B = walls[back];
       if (B) for (let uu = 0.9, i = 0; uu < B.F.L - 0.5; uu += 1.6, i++) if (i % 2 === 1) banner(bag, B.F, B.off, y, uu, h - 0.32, 0.55, 0.7, i % 4 === 1 ? 'cloth_red' : 'cloth_brown', 0.16);

@@ -2,12 +2,14 @@
 import { inHouse, houseKind, laneLevel, STAIRS, STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, houses, kanchas, kanchaWalls, outside } from './layout.js';
 import { ground } from './ground.js';
 import { people } from './people.js';
+import { openKanchas, openHouse } from './walkroutes.js';
+import { OPEN_DOOR, OPEN_WALL_H } from './walk.js';
 
 const ARRIVAL = [-21, 129.8];
 const base = (id, elements) => ({ id, style: 'inca', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [2, 110], facing: 'n' } });
 export async function town() {
   const all = houses(), plans = [];
-  for (let i = 0; i < all.length; i += 50) plans.push(base(`machu-picchu-houses-${i / 50}`, all.slice(i, i + 50).map((h) => {
+  for (let i = 0; i < all.length; i += 50) plans.push(base(`machu-picchu-houses-${i / 50}`, all.slice(i, i + 50).map((h, j) => {
     const [x0, z0, x1, z1] = h.rect, y = Math.min(ground.height(x0, z0), ground.height(x1, z0), ground.height(x0, z1), ground.height(x1, z1));
     // the front by rule, from the house's rank (layout houseKind): the nobles' of fine ashlar with the double jamb, the lintel, the threshold stone and the two small
     // windows; the middling of rough stones with a lintel, now and then a step, a window, the newly thatched pale ichu or a tall house; the humble at the town's edge
@@ -16,7 +18,9 @@ export async function town() {
     const v = rank === 0 ? { mat: 'granite_inca', jamb: true, lintel: true, step: true, frontWin: true, tall: s % 3 === 0 }
       : rank === 1 ? { lintel: true, step: s % 2 === 0, frontWin: s % 3 === 0, ...(s % 7 === 0 ? { mat: 'granite_inca', jamb: true } : {}), ...(s % 3 === 1 ? { roofMat: 'ichu' } : {}), tall: s % 11 === 0 }
       : { humble: true, ...(s % 4 === 1 ? { roofMat: 'ichu' } : {}) };
-    return { t: 'inca_house', ...h, y, h: (rank === 2 ? 2.15 : 2.45) + (s % 9) * 0.07 + (v.tall ? 0.55 : 0), ...v, use, ...(near ? { lit: true } : {}) };
+    // the houses of the kanchas on the visitor's walk are opened: a door 1.7 m wide, its lintel 2.2 m up, the wall high enough for the stone over it (walk.js, docs §13)
+    const open = openHouse(i + j), hh = (rank === 2 ? 2.15 : 2.45) + (s % 9) * 0.07 + (v.tall ? 0.55 : 0);
+    return { t: 'inca_house', ...h, y, h: open ? Math.max(hh, OPEN_WALL_H) : hh, ...v, use, ...(near ? { lit: true } : {}), ...(open ? { doorW: OPEN_DOOR.w, doorH: OPEN_DOOR.h, lintel: true } : {}) };
   })));
   // the strings of maize cobs under the eaves, either side of the door, on about half the houses
   { const items = [];
@@ -50,7 +54,9 @@ export async function town() {
     for (const [a, b, h] of [[[-5.6, -2.4], [5.6, -2.4], 2.6], [[-5.6, -2.4], [-5.6, 2.0], 1.9], [[5.6, -2.4], [5.6, 2.0], 1.9]]) E.push({ t: 'stone_block', a: P(...a), b: P(...b), w: 0.38, y0: y - 0.3, y1: y + h });
     plans.push(base('machu-picchu-condor', E)); }
   // the kanchas' walls, battered, of rough stones, each with its gateway
-  const walls = kanchaWalls().map(({ a, b, y1, door, w = 0.35 }) => {
+  const openK = openKanchas();
+  const walls = kanchaWalls().map(({ a, b, y1, door, w = 0.35 }, wi) => {
+    if (door && wi % 7 === 0 && openK.has(wi / 7) && wi < kanchas().length * 7) door = { ...door, w: 1.75, h: 2.15 };
     // the wall stands on its platform and holds it up: down past the lane's ground beside it, the stones facing the drop
     const yp = Math.min(ground.height(...a), ground.height(...b)), mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2, dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1;
     let yl = yp;
