@@ -4,7 +4,7 @@
 // on the bank, the river with its boats; the canal and its lock, bridges and boats.
 
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, T1, T2, CANAL, CANAL_STREETS, CANAL_BRIDGES, WAREHOUSES } from './layout.js';
-import { interiorRooms, dwellingRooms, upLots } from './life.js';
+import { interiorRooms, dwellingRooms, upLots, walkLots, frontOf } from './life.js';
 import { storeyWalk } from './storeys.js';
 import './pagoda-upper.js';
 
@@ -101,6 +101,17 @@ const walks = [
   [[-110, 136], [-110, 104], [-108, 98.4], [-108, 95.5], [-108, 90], [-113, 88], [-117, 84], [-114, 80]],
 ];
 for (const l of upLots()) walks.push(storeyWalk({ ...l, y: LEVEL.street }));
+// the visitor's walk into the opened fronts: from the street, through the open front of each furnished shop, tea house and wine house nearest the Way's core
+// (those opened upstairs have their own route above), two metres into the front room [inferred: the front's centre is the way in]
+{
+  // (where a counter or a post stands in the middle of the front, the route enters beside it or stops short: by lot seed)
+  const TWAY = { 411839: 0.38, deep: { 955396: -1.2 } };
+  walkLots().forEach((l) => {
+    const F = frontOf(l);
+    const t = TWAY[l.seed] ?? 0.5;
+    walks.push([F.P(t, 3.5), F.P(t, 1.2), F.P(t, -0.6), F.P(t, TWAY.deep[l.seed] ?? -2.2)]);
+  });
+}
 walks.forEach((w) => { w.y0 = 0; });
 
 export const pagoda = {

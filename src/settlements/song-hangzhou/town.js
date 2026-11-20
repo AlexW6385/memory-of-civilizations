@@ -4,7 +4,7 @@
 // peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
 // their shoulder poles, a fruit seller under a parasol.
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, canalLandings, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
-import { lifePlans, upLots, interiorLots, dwellingLots, dwellingPlans, dwellingShells } from './life.js';
+import { lifePlans, upLots, walkLanes, interiorLots, dwellingLots, dwellingPlans, dwellingShells } from './life.js';
 import './townscape.js';
 import './houses.js';
 import { streetsideElements } from './houses.js';
@@ -226,7 +226,7 @@ export async function town() {
   plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base), ...dwellingPlans(base));
   plans.push(...streetPlans(base));
   // nothing of the street's life stands in the way to the doors of the houses opened upstairs
-  { const lanes = doorLanes(upLots()), inL = (p) => p && lanes.some((r) => p[0] > r[0] && p[0] < r[2] && p[1] > r[1] && p[1] < r[3]);
+  { const lanes = [...doorLanes(upLots()), ...walkLanes()], inL = (p) => p && lanes.some((r) => p[0] > r[0] && p[0] < r[2] && p[1] > r[1] && p[1] < r[3]);
     for (const p of plans) p.elements = p.elements.filter((e) => !(Array.isArray(e.at) && inL(e.at))).map((e) => (e.items ? { ...e, items: e.items.filter((i) => !inL(i.at)) } : e)); }
   // life at the water and at the city's posts (§25), in 100 m tiles of the street life; the river's stairs
   const tiles = new Map();

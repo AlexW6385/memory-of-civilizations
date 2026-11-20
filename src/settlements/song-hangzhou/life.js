@@ -74,6 +74,15 @@ export function interiorLots() {
   CHOSEN.teahouse.forEach((l) => { l.trade = 'tea'; });
   return CHOSEN;
 }
+/** The furnished fronts the visitor's walk goes into (plan.js `walks`): the open ones nearest the Way's core, not those opened upstairs. */
+export function walkLots() {
+  const C = interiorLots(), up = new Set(upLots()), core = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - 28, (l.rect[1] + l.rect[3]) / 2 + 120);
+  return [...C.teahouse, ...C.winehouse, ...C.shop].filter((l) => !up.has(l)).sort((a, b) => core(a) - core(b)).slice(0, 14);
+}
+/** The clear lane before each of those fronts (world rectangles, 3 m wide, 4.5 m out from the front): nothing of the street's life stands there. */
+export function walkLanes() {
+  return walkLots().map((l) => { const F = frontOf(l), a = F.P(0.5 - 1.5 / F.L, 4.5), b = F.P(0.5 + 1.5 / F.L, -0.3); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; });
+}
 let UP = null;
 /** The furnished lots opened upstairs (storeys.js): chosen above, built there as two-storey houses with a stair. */
 export function upLots() { if (!UP) UP = Object.values(interiorLots()).flat().filter((l) => storeyKind(l)); return UP; }
