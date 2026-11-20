@@ -33,8 +33,8 @@ export function avenueItems() {
     for (let n = 0; n < Math.round(L / 30 * dens) + 1; n++) { const sx = r() < 0.5 ? -1 : 1, z = za + 10 + r() * L; if (!clear(sx * 15.5, z, 2)) continue; out.push({ k: 'seller', x: sx * 15.5, z, y, rot: 0, side: r() < 0.5 ? 1 : -1, seed: 120 + n + i * 10, goods: [['basket', 'water_pot', 'dark_pot', 'heap'], ['basket', 'basket', 'heap'], ['water_pot', 'dark_pot', 'amphora']][n % 3], who: r() < 0.75 ? 'woman' : 'man' }); }
     for (let n = 0; n < Math.round(L / 22 * dens); n++) { const [x, z] = spot(16); out.push({ k: 'group', x, z, y, n: 2 + Math.floor(r() * 3), seed: 200 + n * 7 + i * 30 }); }
     for (let n = 0; n < Math.round(L / 80 * dens) + 1; n++) { const [x, z] = spot(15); out.push({ k: 'boys', x, z, y, seed: 300 + n * 5 + i * 20 }); }
-    for (let n = 0; n < (i === 2 ? 3 : 1); n++) { const [x, z] = spot(16); out.push({ k: 'dog', x, z, y, rot: r() * 6.28, seed: 400 + n + i * 3 }); }
-    if (i === 2 || i === 3) { const [x, z] = spot(15); out.push({ k: 'turkey', x, z, y, rot: r() * 6.28, seed: 450 + i }); }
+    for (let n = 0; n < (i === 2 ? 3 : 1); n++) { const [x, z] = spot(16); out.push({ k: 'dog', x, z, y, rot: r() * 6.28, seed: 400 + n + i * 3, crit: true }); }
+    if (i === 2 || i === 3) { const [x, z] = spot(15); out.push({ k: 'turkey', x, z, y, rot: r() * 6.28, seed: 450 + i, crit: true }); }
     if (i >= 1 && i <= 3) { const z = za + 20 + r() * (L - 40), x = -13; if (clear(x, z, 4)) out.push({ k: 'crew', x, z, y, seed: 500 + i * 10 }); }
     // offerings at the middle altars
     for (const [ax, az, rr] of altars) if (az >= za && az <= zb) for (let q = 0; q < 5; q++) { const a = q * 1.3 + 0.3; out.push({ k: 'offering', x: ax + Math.cos(a) * (rr + 1.0), z: az + Math.sin(a) * (rr + 1.0), y, seed: q + 7 }); }
