@@ -1,6 +1,6 @@
 // Timurid Samarkand — wear and use (docs/settlements/timurid-samarkand.md §20.5): thresholds hollowed in the middle where the feet go, at the street door
 // of every house built in full and at the doors of the great portals' passages; the smoke-black above the lamp that stands by a door. Geometry only, in
-// materials the plans already hold as whole pieces (limestone, bitumen), so that no mesh and no draw is added; a hash of each piece's own place varies it.
+// materials the plans already hold as whole pieces (limestone, wood_dark), so that no mesh and no draw is added; a hash of each piece's own place varies it.
 // Dry climate: no moss, no waterline; the dust is the ground's.
 
 import { fromTriangles, box } from '../../core/geom.js';
@@ -49,7 +49,7 @@ function houseWear(el, { bag }) {
     const u = xd + lampSide(h) * 1.45, p = G.toWorld(u, G.D / 2), q = G.toWorld(u, G.D / 2 + 1), dx = q[0] - p[0], dz = q[1] - p[1];
     const along = Math.abs(dx) > 0.5 ? 'z' : 'x', hw = 0.2 + 0.08 * hashAt(h.seed, 6, 7);
     const wx = p[0] + dx * 0.004, wz = p[1] + dz * 0.004;
-    bag.add('bitumen', along === 'x' ? box(wx - hw, 2.0, Math.min(wz, wz + dz * 0.012), wx + hw, 2.62 + 0.15 * hashAt(h.seed, 7, 7), Math.max(wz, wz + dz * 0.012)) : box(Math.min(wx, wx + dx * 0.012), 2.0, wz - hw, Math.max(wx, wx + dx * 0.012), 2.62 + 0.15 * hashAt(h.seed, 7, 7), wz + hw));
+    bag.add('wood_dark', along === 'x' ? box(wx - hw, 2.0, Math.min(wz, wz + dz * 0.012), wx + hw, 2.62 + 0.15 * hashAt(h.seed, 7, 7), Math.max(wz, wz + dz * 0.012)) : box(Math.min(wx, wx + dx * 0.012), 2.0, wz - hw, Math.max(wx, wx + dx * 0.012), 2.62 + 0.15 * hashAt(h.seed, 7, 7), wz + hw));
   }
 }
 
