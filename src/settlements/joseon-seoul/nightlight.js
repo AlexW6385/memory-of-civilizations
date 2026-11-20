@@ -1,5 +1,5 @@
 // Hanyang by night, c. 1888: the light its lanterns, watch fires, hearths, lit rooms and the first electric lamps throw (docs/settlements/joseon-seoul.md §19).
-// The shades (lamp_paper, lamp_white, lamp_glass) are lit from within by their own material; what they lack, where the pool of real lamps is off
+// The shades (lamp_paper, lamp_white) are lit from within by their own material; what they lack, where the pool of real lamps is off
 // (the low preset), is the light they give the things round them. It is made here of geometry in one material, `halo` (palette.js, materials.js
 // 'halo'): light ADDED over what is behind it, at night only, with no light, no shadow and no collision, so the day view is unchanged. The shape of
 // each piece is carried by its normals (y: 1 at a disc's middle, 0 at its rim): a glow round each flame (three crossed discs), a pool on the ground
@@ -73,7 +73,7 @@ function sachorong(P, k = 1) {
 function bulb(P) {
   P.add('lacquer_black', rod([0, 0, 0], [0, -0.16, 0], 0.005, 3));
   P.add('bronze', lathe([[0.001, -0.16], [0.022, -0.16], [0.022, -0.2], [0.001, -0.2]], 6));
-  P.add('lamp_glass', lathe([[0.022, -0.2], [0.05, -0.25], [0.062, -0.29], [0.05, -0.33], [0.02, -0.35], [0.001, -0.35]], 8));
+  P.add('paint_white', lathe([[0.022, -0.2], [0.05, -0.25], [0.062, -0.29], [0.05, -0.33], [0.02, -0.35], [0.001, -0.35]], 8));
 }
 /** A fire basket (a brazier of iron straps on three legs, split pine in it), on the ground at the origin; 1.0 m high. */
 function basket(P) {
@@ -221,17 +221,40 @@ function wrap(S, name, share, lanterns, extra = null) {
   S.elements[name] = f;
 }
 
-/** Register the elements, and the lit windows and lamps of the houses, the offices, the shops, the bell pavilion and the inner halls. */
+// ── the glow of the houses, built apart from the houses ──────────────────────────────────────────
+// A town plan's halo mesh is one draw wherever the plan's bounds meet the view, so the houses' light is not put into the houses' own plans
+// (which span the town) but into small plans of its own that are drawn only near the visitor: `seoul_glow` runs the house's own builder against
+// a spy (its geometry thrown away) and keeps only what the lit-window wrapper sees.
+const ORIG = {};
+const nop = () => {};
+const SPY = { add: nop, addInstance: nop }, COL = new Proxy({}, { get: () => nop });
+/** The share of the windows lit, the share of the lanterns, and the stoves' share, of each house kind. */
+const GLOW = {
+  hanok_home: [0.42, 0.85, (el, H) => { const L = homeLayout({ ...el, cls: el.cls || classOf(el) }); stoves(H, L.ranges, 0.55); }],
+  hanok: [0.34, 0.6, null],
+  joseon_precinct_range: [0.55, 0.9, (el, H) => stoves(H, [el], 0.6)],
+  sijeon: [0, 1, null],
+  bell_pavilion: [0.3, 1, null],
+};
+/** seoul_glow { of ('hanok_home' | 'hanok' | 'joseon_precinct_range' | 'sijeon' | 'bell_pavilion'), ...the house's own fields }: the light of one house, and nothing else. */
+function glowEl(el, { bag }) {
+  const base = ORIG[el.of], [share, lanterns, extra] = GLOW[el.of];
+  if (!base) return;
+  const L = litWindows({ bag: SPY, col: COL }, share, 0, lanterns);
+  const house = { ...el, t: el.of, rect: el.box ?? el.rect };
+  base(house, L.ctx);
+  if (extra) extra(house, L.H);
+  L.H.flush(bag);
+}
+
+/** Register the elements, and the lit windows and lamps of the shops, the bell pavilion, the yangban house and the inner halls. */
 export function registerNight() {
   const J = STYLES.joseon, Lf = STYLES.life;
-  if (J) {
+  if (J && !J.elements.seoul_glow) {
+    for (const k of Object.keys(GLOW)) ORIG[k] = J.elements[k];
+    J.elements.seoul_glow = glowEl; J.elements.seoul_halo = haloEl;
     J.elements.seoul_lanterns = lanternsEl; J.elements.seoul_fires = firesEl;
-    wrap(J, 'hanok_home', 0.42, 0.85, (el, H) => { const L = homeLayout({ ...el, cls: el.cls || classOf(el) }); stoves(H, L.ranges, 0.55); });
-    wrap(J, 'hanok', 0.34, 0.6);
     wrap(J, 'yangban_house', 0.6, 0.9, (el, H) => { const [x0, z0] = el.rect; stoves(H, [{ org: [x0 + 5.5, z0 + 1.6], face: 's', L: 5 * 2.75, kinds: [['kitchen', 1], ['anbang', 2], ['daecheong', 1], ['room', 1]] }], 1); });
-    wrap(J, 'joseon_precinct_range', 0.55, 0.9, (el, H) => { stoves(H, [el], 0.6); });
-    wrap(J, 'sijeon', 0, 1);
-    wrap(J, 'bell_pavilion', 0.3, 1);
     wrap(J, 'joseon_inner', 0.5, 0.9);
     wrap(J, 'ming_hall', 0, 0.8);
   }
@@ -267,4 +290,9 @@ export function lanternHalos(list) {
   const out = [];
   for (const e of list) if (e.t === 'hang_lantern') out.push({ x: e.at[0], y: (e.y ?? 2.5) - 0.3, z: e.at[1], fy: 0, s: 0.9 });
   return out;
+}
+
+/** The light of the palace's offices in the Heungnyemun court, for the palace plan (the offices' own plan carries none: one halo draw more at the arrival): `seoul_glow` of each range. */
+export function officeGlow(OFFICES) {
+  return OFFICES.map((o) => ({ t: 'seoul_glow', of: 'joseon_precinct_range', org: o.org, face: o.face ?? 's', L: o.L, kinds: o.kinds, seed: o.seed }));
 }
