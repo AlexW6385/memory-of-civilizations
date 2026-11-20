@@ -52,7 +52,7 @@ export function dressHouse(el, { bag, col }, g) {
         for (const x of [u, u + 2.4]) { const p = P(x, -1.3); bag.add('bamboo_culm', rod([p[0], y, p[1]], [p[0], y + 2.1, p[1]], 0.04, 5)); }
         const a = P(u, -1.3), b = P(u + 2.4, -1.3);
         bag.add('bamboo_culm', rod([a[0], y + 2.05, a[1]], [b[0], y + 2.05, b[1]], 0.025, 5));
-        bag.add('rope_fibre', box(Math.min(a[0], b[0]) - 0.02, y + 0.9, Math.min(a[1], b[1]) - 0.02, Math.max(a[0], b[0]) + 0.02, y + 2.0, Math.max(a[1], b[1]) + 0.02));
+        bag.add('reed_mat', box(Math.min(a[0], b[0]) - 0.02, y + 0.9, Math.min(a[1], b[1]) - 0.02, Math.max(a[0], b[0]) + 0.02, y + 2.0, Math.max(a[1], b[1]) + 0.02));
       }
       for (let i = 0; i < 3; i++) { const p = P(lane(0.5 + r() * (L - 1) - 0.26, 0.52) + 0.26, -0.6 - r() * 0.5); bag.add('wicker', lathe([[0.18, 0], [0.24, 0.35], [0.2, 0.7], [0.1, 0.9], [0.001, 0.9]], 8, null, p[0], y, p[1])); }
       break;
@@ -136,7 +136,7 @@ export function furnishTrade(el, { bag, col }, g) {
       break;
     }
     case 'fisher': {                                            // nets heaped, a fish trap, an oar along the wall
-      const p = P(L - T - 0.9, g0 + 0.8); bag.add('rope_fibre', lathe([[0.5, 0], [0.55, 0.15], [0.35, 0.35], [0.001, 0.4]], 9, null, p[0], ry, p[1]));
+      const p = P(L - T - 0.9, g0 + 0.8); bag.add('reed_mat', lathe([[0.5, 0], [0.55, 0.15], [0.35, 0.35], [0.001, 0.4]], 9, null, p[0], ry, p[1]));
       const q = P(T + 0.6, g0 + 0.7); bag.add('wicker', lathe([[0.2, 0], [0.26, 0.4], [0.2, 0.8], [0.001, 0.85]], 8, null, q[0], ry, q[1]));
       break;
     }

@@ -84,3 +84,11 @@ export function doorLanePlans() {
     return { id: `heian-uji-doorlanes-${k}`, style: 'japanese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], elements, bounds: [-460, -460, 460, 460], entrance: { at: [0, 0], facing: 'n' }, center: [i * 100 + 100, j * 100 + 100], far: 220, nocollide: true };
   });
 }
+
+/**
+ * Whether a walked house has its keeper built into the near form. A keeper brings the skin, hair and cloth materials, and a merged detail mesh of each
+ * costs a draw in every tile the view reaches; at the arrival (the pier, looking west over the garden) that was +15 draws against a ceiling of +2, so the
+ * houses within `KEEPER_MIN` m of it keep the street-life folk by their doors (town.js homeFolk) and the farther ones, which the visitor comes to on foot, a keeper inside.
+ */
+export const KEEPER_MIN = 165, ARRIVAL = [6.5, 0];
+export function keeperLot(l) { const p = frontPoint(l); return Math.hypot(p[0] - ARRIVAL[0], p[1] - ARRIVAL[1]) >= KEEPER_MIN; }

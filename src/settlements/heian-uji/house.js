@@ -175,7 +175,7 @@ function ujiHouse(el, { bag, col }) {
     else {
       B('reed_mat', door - dw / 2 + 0.03, -0.075, door + dw / 2 - 0.03, -0.05, open ? fy + 1.78 : fy, fy + 1.88);           // (an opened house's mat is rolled up under the lintel, clear of the walker's head)
       B('wood_dark', door - dw / 2 - 0.02, -0.09, door + dw / 2 + 0.02, -0.065, fy + 1.86, fy + 1.93);
-      for (const k of [0.25, 0.75]) B('rope_fibre', door - dw / 2 + dw * k - 0.01, -0.08, door - dw / 2 + dw * k + 0.01, -0.07, open ? fy + 1.78 : fy + 0.1, fy + 1.86);
+      for (const k of [0.25, 0.75]) B('wood_dark', door - dw / 2 + dw * k - 0.01, -0.08, door - dw / 2 + dw * k + 0.01, -0.07, open ? fy + 1.78 : fy + 0.1, fy + 1.86);
     }
     B('wood_dark', door - dw / 2 - 0.1, -0.08, door + dw / 2 + 0.1, 0.02, fy + 1.9, fy + 2.05);
     const win = (a, b) => { B('opening', a, -0.012, b, 0.0, fy + 0.85, y + H - 0.4); B('koshi', a, -0.05, b, -0.012, fy + 0.85, y + H - 0.4); B('wood_dark', a - 0.06, -0.07, b + 0.06, -0.02, y + H - 0.4, y + H - 0.32); B('wood_dark', a - 0.06, -0.07, b + 0.06, -0.02, fy + 0.78, fy + 0.85); };
