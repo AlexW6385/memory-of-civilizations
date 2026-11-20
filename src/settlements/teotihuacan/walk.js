@@ -73,3 +73,11 @@ export const MARKET_STAIR = { rect: [-54.25, 248.5, -52, 253.5], y0: 0, y1: 1.53
 export function marketRoutes() {
   return [[[0, 70], [2, 73], [2, 82], [0, 85], [0, 166], [8, 172], [8, 186], [0, 190], [0, 255], [-8, 265.25], [-17.5, 265.25], [-21.4, 265.25], [-21.4, 251], [-48, 251], [-52.5, 251], [-56.5, 251], [-62, 255], [-66, 259], [-72, 259], [-90, 259], [-108, 259]]];
 }
+
+/**
+ * Up the stair of the big temple on the west platform at z (53 in plaza 3, 178 in plaza 4: layout of plan.js, platforms 2.4 m over the plaza), 5 m wide, 8 m
+ * to the summit, and in by the door in the front wall (2.4 m) to the chamber: the altar, the censers and the priest are within.
+ */
+export function templeRoute(z, lv) {
+  return [[-8, z + 7], [-13, z + 4], [-17.5, z + 0.5], [-21.4, z], [-26, z], [-29.5, z], [-31.5, z], [-35, z]];
+}

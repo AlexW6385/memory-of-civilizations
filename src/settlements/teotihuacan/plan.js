@@ -3,7 +3,7 @@
 // stepped into sunken plazas by talud-tablero platforms, the Ciudadela's banks with the Feathered Serpent Pyramid and its Adosada.
 
 import { avenueItems } from './dress.js';
-import { platformRoutes, barrioRoutes, compoundRoutes, marketRoutes, WEST_STAIR, MARKET_STAIR } from './walk.js';
+import { platformRoutes, barrioRoutes, compoundRoutes, marketRoutes, templeRoute, WEST_STAIR, MARKET_STAIR } from './walk.js';
 import { compounds, MARKET, lodges } from './layout.js';
 import { AVENUE, MOON, PLAZA, SUN, CIUD, KEEP_CLEAR, RADIUS, CROSS, STEP, BANK, LEVELS, QPP, JAGUARS } from './layout.js';
 
@@ -131,7 +131,7 @@ const rooms = [room('avenue', AVENUE, 0, 'open'), room('plaza', PLAZA, MOON.rise
 const walks = [[[0, 300], [0, 100], [3, 85], [0, 60], [0, -80], [0, -160], [0, -194], [-18, -200], [-30, -236]]];
 walks[0].y0 = 0;
 // the houses of those who serve the avenue: up the west platform, and along the barrio's lane east of the avenue (walk.js)
-for (const r of [...platformRoutes(), ...barrioRoutes(), ...compoundRoutes(), ...marketRoutes()]) { r.y0 = 0; walks.push(r); }
+for (const r of [...platformRoutes(), ...barrioRoutes(), ...compoundRoutes(), ...marketRoutes(), templeRoute(53), templeRoute(178)]) { r.y0 = 0; walks.push(r); }
 
 export const city = {
   id: 'teotihuacan-centre',

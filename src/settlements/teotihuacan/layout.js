@@ -99,3 +99,24 @@ export function inStreet(x, z) {
 }
 /** The lots left without a compound (kept as plots of maguey and nopal). */
 export function emptyLots() { compounds(); return EMPTY; }
+
+/**
+ * The temples on the avenue's side platforms, each with the stair up to the platform from the plaza at its z (x −20…−16.4 on the west, 16.4…20 on the east, 5 m wide):
+ * [{ sd (−1 west, 1 east), z, lv (the plaza's level), big (the one with a chamber) }]. The same rule as plan.js's.
+ */
+export function platformTemples() {
+  const out = [], ends = [-189, ...CROSS.flatMap((z) => [z, z + 6]), AVENUE[3]];
+  for (let i = 0; i < ends.length; i += 2) {
+    for (const sd of [-1, 1]) {
+      let runs = [[ends[i], ends[i + 1]]];
+      for (const k of KEEP_CLEAR) if (sd > 0 && k[0] < BANK) runs = runs.flatMap(([a, b]) => (b <= k[1] || a >= k[3] ? [[a, b]] : [[a, Math.min(b, k[1])], [Math.max(a, k[3]), b]]).filter(([u, v]) => v - u > 12));
+      for (const [a, b] of runs) {
+        const zz0 = Math.max(a, -RADIUS), zz1 = Math.min(b, Math.sqrt((RADIUS - 30) ** 2 - BANK * BANK));
+        if (zz1 - zz0 < 12) continue;
+        const n = Math.max(1, Math.floor((zz1 - zz0 - 8) / 30));
+        for (let j = 0; j < n; j++) out.push({ sd, z: zz0 + (zz1 - zz0) * (j + 0.5) / n, lv: LEVELS[i / 2], big: n > 2 && j === Math.floor(n / 2) });
+      }
+    }
+  }
+  return out;
+}
