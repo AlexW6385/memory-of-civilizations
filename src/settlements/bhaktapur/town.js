@@ -6,6 +6,7 @@ import { RADIUS, lots, waysides, PAVED, SQ, POT, KEEP, HOUSE, STALLS, inRect, on
 import { openedLots } from './upstairs.js';
 import taumadhi, { POT_WHEELS, POT_KILNS } from './plan.js';
 import './../../styles/newar/index.js';
+import { nightElements } from './nightlight.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [16, 6], facing: 'n' } });
@@ -140,6 +141,6 @@ export async function town() {
   // the arrival (src/planet/arrivals.js, 19 m, 21 m): no figure within 6 m of the visitor's feet, and none close on the right of the lens
   const AR = [19, 21];
   const awayFromArrival = (e) => Math.hypot(e.at[0] - AR[0], e.at[1] - AR[1]) > 6;
-  out.push({ ...base('bhaktapur-people', 'life', [...P.filter(awayFromArrival), ...A.filter(awayFromArrival)]), feature: true });
+  out.push({ ...base('bhaktapur-people', 'life', [...P.filter(awayFromArrival), ...A.filter(awayFromArrival), ...nightElements()]), feature: true });
   return out;
 }

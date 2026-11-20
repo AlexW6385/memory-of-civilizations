@@ -88,3 +88,18 @@ export function bunting(el, { bag }) {
     }
   }
 }
+
+/** The places of the Nyatapola's oil lamps [x, y, z], as `offerings` stands them (the same stream of the seed): the rows on the stages' treads and the tray at the door. Pure. */
+export function offeringLamps(el) {
+  const P = el.pagoda, [cx, cz] = P.c, sx = P.front === 'w' ? -1 : 1, pl = P.plinth, h = pl.h, n = pl.hw.length, rand = rng(el.seed ?? 11), out = [];
+  const X = (u) => cx + sx * u;
+  const uFace = []; for (let k = n - 1, u = pl.hw[n - 1] + (pl.top ?? 1); k >= 0; k--, u += pl.tread) uFace[k] = u;
+  const W = pl.stair ?? 4.4;
+  for (let k = 0; k < n - 1; k++) {
+    const y = (k + 1) * h;
+    for (const side of [-1, 1]) for (let v = W / 2 + 0.7; v < pl.hw[k] - 0.5; v += 0.52) if (rand() < 0.78) out.push([X(uFace[k] - 0.3), y, cz + side * v]);
+  }
+  const yT = n * h;
+  for (let j = 0; j < 7; j++) out.push([X(uFace[n - 1] - 0.6), yT, cz - 1.2 + j * 0.4]);
+  return out;
+}
