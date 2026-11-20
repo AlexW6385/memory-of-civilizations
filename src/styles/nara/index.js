@@ -19,6 +19,7 @@ import { naraHall } from './hall.js';
 import { naraTsuiji } from './tsuiji.js';
 import { yardElements } from './yard.js';
 import { houseElements } from './house.js';
+import { naraPlaque } from './plaque.js';
 
 export const NPAL = { wood: 'timber_red', column: 'timber_red', soffit: 'plaster_white', base: 'granite_block', floor: 'granite_block', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_block', roof: 'tile_grey', doors: 'plank' };
 const withN = (fn) => (el, ctx) => fn({ ...el, pal: { ...NPAL, ...(el.pal || {}) } }, ctx);
@@ -39,6 +40,7 @@ registerStyle('nara', {
     nara_tsuiji: naraTsuiji,
     ...yardElements,
     ...houseElements,
+    nara_plaque: naraPlaque,
     door_clear: () => {},               // (nothing built: the street life's pass reads its rectangle as a footprint, so none of its things stands in a doorway's lane)
   },
   objects: { hakkaku_toro: hakkakuToro, daibutsu: remapped(daibutsu), daibutsu_mid: buddhaLevel('mid'), daibutsu_fine: buddhaLevel('fine'), bosatsu_mid: bosatsuMid, nio_mid: nioMid, hakkaku_toro_figs: hakkakuToroFigures, bosatsu: remapped(bosatsu), nio: remapped(nio), shika },

@@ -212,3 +212,11 @@ Nothing of Nara in 752 was recorded; every voice is synthesised and [inferred] f
 - **Cats**: one on the scriptorium's step, one at the foot of the storehouse (2). Cats are said to have come to Japan with Buddhist sutras to keep rats off the scrolls [stated in popular histories; not re-sourced here; treat as [inferred]].
 - **Swallows' nests** on the walls under the eaves of eight open houses (the birds go out over the street and come home) [inferred: house swallows nest on houses wherever they are kept].
 - Test `tests/nara-critters.test.mjs` (4 tests). Not seen: the cats and dogs in a render (the camera put in the lane saw only house fronts); draw-count unchanged (main 260).
+
+### 19.5 Writing
+- **Name board of the Middle Gate**: 東大寺 in gilt characters raised on a black lacquer board with a gilt rim, hung by two straps in the central bay, on both faces, read from the right (`nara_plaque`, `src/styles/nara/plaque.js`). Tōdai-ji is the temple's name in the period [stated: Wikipedia "Tōdai-ji"]; that the gate carried a name board in 752 and what it read is [inferred] (gates of Chinese-model temples carried boards; the present Nandaimon board reads 大華嚴寺, which is not written here because 華 and 嚴 are not in the verified brush data).
+- Characters: 東 from `src/styles/muromachi/script.js`, 大 and 寺 from `src/settlements/ming-suzhou/brush-data.js`, all read unchanged through `canWrite`; they were verified by their authors against a typeface stroke by stroke, and were not re-verified here (only the render at the gate was looked at, from 70 m: the three characters read). No new characters were drawn; no data file of Nara's own was needed.
+- Not done: signboards of the shops (a shop's goods are shown by the goods; no characters written), the Great South Gate's board.
+
+### 19.6 Not done in this pass
+- Wear and weathering of the court's stone (worn steps and thresholds, grass in the joints); the bell in the tower; the landmark gaps of §14-§18 beyond what is listed there.

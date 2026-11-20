@@ -50,6 +50,8 @@ const rooms = [room('court', COURT, 0, 'open'), room('great buddha hall', HALL, 
 E.push({ t: 'obj', kind: 'hakkaku_toro', fig: 'none', at: [0, -16], y: 0 });
 const walks = [[[0, 180], [0, 146], [0, 60], [0, 40], [0, -8], [2.8, -12], [2.8, -20]]];
 walks[0].y0 = 0;
+// the name board over the Middle Gate's central bay, on both faces (plaque.js, docs §19.5)
+E.push({ t: 'nara_plaque', at: [0, cz1], y: 5.2, w: 3.2, h: 1.0, text: '東大寺' });
 // the lamps of the court and the gates (nightlight.js, docs §19.2): iron fire-baskets on tripods either side of the flagged way and before the two gates,
 // lamp stands in a row across the court before the hall and along the way's edge, torch posts where the avenue crosses the service lane; cold by day
 for (const z of [10, -2, -14]) for (const s of [-1, 1]) E.push({ t: 'kagaribi', at: [s * 3.4, z], y: 0 });
