@@ -11,6 +11,7 @@ import { RADIUS, lots, SHOPS, BELL, JONGNO, AVENUE, YANGBAN } from './layout.js'
 import { ground } from './ground.js';
 import { homeLayout, classOf } from '../../styles/joseon/home.js';
 import { blocksOf, shopsOf, enterable } from './openwalk.js';
+import { lanternHalos } from './nightlight.js';
 import { rangeFrame } from '../../styles/joseon/house.js';
 const base = (id, elements) => ({ id, style: 'joseon', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 70], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -176,5 +177,7 @@ export async function town() {
   for (let i = 0; i < homes.length; i += 12) plans.push(base(`joseon-seoul-homes-${i / 12}`, homes.slice(i, i + 12).map((l) => ({ t: 'hanok_home', ...l, cls: classOf(l) }))));
   plans.push({ ...base('joseon-seoul-yangban', [{ t: 'yangban_house', rect: YANGBAN, seed: 1888 }]), feature: false });
   plans.push(...courtPlans(), ...officePlans(), jongno(), shopfronts(), ...lanedress(), ...street(), ...homefolk());
+  // the light of the lanterns the life plans hang (nightlight.js): one halo element in each plan that has any
+  for (const p of plans) if (p.style === 'life') { const list = lanternHalos(p.elements); if (list.length) p.elements.push({ t: 'seoul_halo', list }); }
   return plans;
 }
