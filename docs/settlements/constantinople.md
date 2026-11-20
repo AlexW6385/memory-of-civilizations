@@ -187,10 +187,10 @@ Marks: [stated] with its source, [inferred] where the place and date suggest it.
 - [inferred] Street lighting by the city (Constantinople had none by the state at this date): none is made. Torches and lanterns carried by walkers are not built.
 
 ### 16.3 Sound
-- [stated] Chant (Kyrie, psalmody, acclamations of the emperor) and the church organ's absence: the organ was a court instrument in the Hippodrome and palace ceremony, not in the church (Byzantine liturgy was unaccompanied). The voice `cnOrgan` is therefore for the palace and is placed only there; marked [inferred] for its tone.
+- [stated] Chant (Kyrie, psalmody, acclamations of the emperor) and the church organ's absence: the organ was a court instrument in the Hippodrome and palace ceremony, not in the church (Byzantine liturgy was unaccompanied). The voice `cnOrgan` is therefore placed only at the Hippodrome's end, where the games had their organ; marked [inferred] for its tone and place.
 - [stated] Chariot racing in the Hippodrome, with the factions' acclamations, is in §4.1 and in Procopius' Wars (the Nika riot, 532). The racing hours and the pace are [inferred].
 - [inferred] Hawkers' cries (candles, bread, water, fruit, cloth) by the shops and the forecourt; mules and carts on the Mese; windlass and well at the cistern head; fountain and bath; hammering and chasing in the silversmiths; bellows in smithies; doves; a household's supper. Wordless, synthesised (`voices-constantinople.js`, `soundmap.js`). Not heard by the author: measured only (about 4.5e-3 RMS per voice).
-- Not built: the semantron (the wooden board struck to call to prayer, [stated] in monastic use) and bells at the church (bells were in use in Constantinople by this date only in a few places; left out).
+- Not built: the semantron (the wooden board struck to call to prayer, [stated] in monastic use) and bells (left out: their use in the city's churches at this date is not settled in the dossier).
 
 ### 16.4 Animals
 - [inferred] Dogs and cats lying by the piers of the shop porticoes, a caged songbird at one door, doves on the paving of the forecourt and the Augustaion, fowl before the bakery and the weaver's, a dog at two house doors, crows, swallows and sparrows already in `fauna.js`. Code: the `critters` list of `fauna.js`.
