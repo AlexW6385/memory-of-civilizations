@@ -4,6 +4,7 @@
 import '../../styles/manueline/index.js';
 import { lodTiles } from '../lod.js';
 import { lifeElements } from './life.js';
+import { haloElements } from './nightlight.js';
 import { RADIUS, GROUND, SEA, QUAY, PALACE, TERREIRO, YARD, SE, CASTLE, SQUARE, SHIPS, SLIPS, PLAZA, RUA_NOVA, ZS, ALLEYS, shore, height, lots, onStreet, inRect, wet } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -76,6 +77,7 @@ export async function town() {
 // ── the goods and the people (life.js) ──
 function streetLife() {
   const tiles = lifeElements();
+  for (const e of haloElements()) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`lisbon-life-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
 }
 void SEA;
