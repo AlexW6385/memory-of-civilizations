@@ -50,6 +50,18 @@ E.push({ t: 'megaron', ...M, y: PY, seed: 3 });
 // the way up to the propylon: three steps of limestone across the last of the ramp
 E.push({ t: 'stair', rect: [18, 0.5, 24, 5.5], dir: 'e', y0: yIn(18) + 0.2, y1: PY, riser: 0.2, base: yIn(18) - 1, mat: 'limestone_yellow' });
 
+// ── by night (docs §16.2; nightlight.js): torches on the faces of the approach court, braziers in the Great Court and at the ramp, torches in the megaron's porch, the drovers' fire at the halt, lamps at the stalls ──
+const NIGHT = [
+  ...[-103.5, -97.5].map((x) => ({ t: 'my_torch', at: [x, STUB[3] + 0.0], y: approachY(x), mount: [0, 1] })),
+  ...[-104.5, -98.5].map((x) => ({ t: 'my_torch', at: [x, BASTION[1] - 0.0], y: approachY(x), mount: [0, -1] })),
+  { t: 'my_brazier', at: [-72.5, 0.6], y: terrain(-72.5, 0.6) },
+  ...[[34, -6.2], [34, 12], [52.5, -6.2], [52.5, 11.6]].map(([x, z]) => ({ t: 'my_brazier', at: [x, z], y: PAL_Y })),
+  ...[-1.0, 7.0].map((z) => ({ t: 'my_torch', at: [58.0, z], y: PAL_Y })),
+  { t: 'my_fire', at: [-124.5, -5.4], y: terrain(-124.5, -5.4) },
+  { t: 'my_lamp', at: [-129.0, 3.0], y: terrain(-129.0, 3.0) }, { t: 'my_lamp', at: [-120.3, 3.0], y: terrain(-120.3, 3.0) },
+];
+E.push(...NIGHT);
+
 const room = (id, rect, y, kind, extra = {}) => ({ id, rect, y, kind, ...extra });
 const wr = (id, r) => room(id, [r[0] + 0.5, r[1] + 0.5, r[2] - 0.5, r[3] - 0.5], PAL_Y, 'inner');
 const rooms = [

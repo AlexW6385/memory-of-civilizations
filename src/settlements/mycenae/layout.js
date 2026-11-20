@@ -165,7 +165,7 @@ export function lots() {
   // is opened by day: a wide door (1.8 m a house, 2.2 m a shop or store) under a lintel 2.45 m high, with a counter and the goods outside the shop
   for (const l of LOTS_CACHE) {
     if (!l.inside) for (const [trade, [x, z]] of Object.entries(ROAD_SHOPS)) if (inRect(l.rect, x, z)) { l.kind = trade === 'store' ? 'store' : 'workshop'; l.trade = trade === 'store' ? undefined : trade; l.storeys = 1; }
-    if (l.kind !== 'granary' && walkDistance(frontPoint(l)) <= WALK_REACH) l.open = true;
+    if (l.kind !== 'granary' && walkDistance(frontPoint(l)) <= WALK_REACH) { l.open = true; l.lit = true; }
   }
   // every lot gets its door's place along the front (the house builder uses it), then the pads are indexed
   for (const l of LOTS_CACHE) {

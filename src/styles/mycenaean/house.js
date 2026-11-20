@@ -55,6 +55,12 @@ export function house(el, ctx) {
     let c = s0;
     for (const o of list) {
       const a = o.c - o.w / 2, b = o.c + o.w / 2;
+      // (a window: its sill above the floor; handed to the night wrapper, which lights some of them from inside)
+      if (ctx.onWindow && o.y0 > ya + 0.3 && o.y1 - o.y0 < 1.3) {
+        const outward = axis === 'u' ? (fixed0 === 0 ? 'f' : 'b') : (fixed0 === 0 ? 'l' : 'r');
+        const p0 = axis === 'u' ? m.P(a, outward === 'f' ? 0 : D) : m.P(outward === 'l' ? 0 : W, a), p1 = axis === 'u' ? m.P(b, outward === 'f' ? 0 : D) : m.P(outward === 'l' ? 0 : W, b), q = axis === 'u' ? m.P(a + 1, outward === 'f' ? -1 : D + 1) : m.P(outward === 'l' ? -1 : W + 1, a + 1), r0 = axis === 'u' ? m.P(a + 1, outward === 'f' ? 0 : D) : m.P(outward === 'l' ? 0 : W, a + 1);
+        ctx.onWindow({ a: p0, b: p1, y0: o.y0, y1: o.y1, n: [q[0] - r0[0], q[1] - r0[1]] });
+      }
       pcs(c, a, ya, yb);
       if (o.y0 > ya) pcs(a, b, ya, o.y0);
       pcs(a, b, o.y1, yb);

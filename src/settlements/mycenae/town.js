@@ -200,7 +200,7 @@ function verge() {
   put('sacks', -126.6, -4.7, 0.4, { n: 4 }); put('sacks', -121, -4.8, -0.3, { n: 3 }); put('crates', -123.8, -4.6, 0.1, { n: 2 });
   put('trough', -123.9, -7.6, 0, {}); put('haystack', -116, -8.6, 0, {}); put('firewood', -128.2, -7.4, 0, { len: 1.4 });
   put('barrel', -118.4, -4.7, 0, { n: 2 });
-  put('pot', -124.2, -4.1, 0, { kind: 'dark_pot', n: 1 }); put('firewood', -125.4, -4.5, 0.6, { len: 1.0 });
+  put('firewood', -125.4, -4.5, 0.6, { len: 1.0 });                  // (the cooking fire itself, with its pot, is my_fire in plan.js)
   // south verge: the stall of the potter and the cloth-seller, the jar-seller's row, goods on mats, a boy's basket of figs
   put('stall', -130.8, 5.9, Math.PI, { w: 2.8, d: 1.5, awning: 'cloth_ochre', stripe: 'cloth_red' });
   put('stall', -118.5, 6.1, Math.PI, { w: 2.6, d: 1.4, awning: 'cloth_white', stripe: 'cloth_indigo' });
