@@ -172,6 +172,20 @@ Brought toward the reference (Ming Suzhou) in the order of docs/suzhou-method.md
 | Tray lamps | a lamp on the tray of each tea-house platform | [inferred] |
 Not lit: the minarets, the domes, the pishtaq (no light was kept on them); the observatory's upper floors (shut).
 
+### 20.2 The visitor's walk (plan.js `walks`)
+
+Every route below is a line of the plan's `walks`, walked by tools/walk-check.mjs with the viewer's own body (radius 0.3 m, step 0.5 m). 34 routes in all: the arrival's way along the aisle, the upper-room routes of §19, and the new ones, from the aisle or the lane into the places opened to the visitor.
+
+| Opened place | How the route goes | Basis |
+|---|---|---|
+| The ten entered shops (five on each row) | from the aisle, through the one gap of the stalls' rows that lies nearest, along the shop row's front, in at the side of the sill's tray table, to the back of the shop | [inferred] the rows of booths leave gaps; the sill platform is 0.5 m, the first step of the shopkeeper's seat |
+| The classroom and the library (the madrasa's two east corner halls) | through the pishtaq passage into the court, along the gallery to the hall's door | [stated] §17: the classroom is entered from the court's gallery |
+| The khanqah's hall | through its portal passage on the Registan's side | [stated] §2 |
+| Ten furnished houses nearest the arrival | lane, the street door's passage, the court's edge, then alternately the talar (the porch of the court) or the room of the trade at the wing's door | [inferred] §17 plan of the house; the room door is 1.1 m wide |
+| Upper rooms (§19) | stair, roof, room, for the merchants' houses and one of each trade | [inferred] §19 |
+
+Three courts (seeds 954925, 423350, 725441) have the side path shut by the furniture of their trade; they are left out of the routes (not opened to the walk by design), and the smith's room 395356 is reached only to its talar. [inferred] Nothing of this is a source fact; it is the walk made checkable.
+
 ### 20.3 Sound (soundmap.js, src/engine/voices-timurid.js, tests/samarkand-sound.test.mjs)
 
 The call to prayer stays the engine's (profile `adhan`: five a day from the madrasa's and the mosques' minarets; no bells, none in a Muslim city). The rest is placed where it is made, by hour, season and weather (rain stops the open-air trades and the tea-house music). All voices are synthesised (`tim…`); levels set by measuring renders (tools/sound-render.mjs). [inferred throughout: no recording of 1420 exists]
@@ -201,3 +215,13 @@ Rigged small animals (src/engine/fauna-critters.js), existing models only, each 
 | Dogs | asleep against the walls of the two nearest houses beyond 40 m, one by the camp | lie, stand when the visitor is near |
 | Hens and a cock | in the courts of the six furnished houses nearest the arrival, in the free half of the court between the pool and the south wing (the pool, tandoor, charpoy, washing line and stair are at the court's middle and edges) | scratch and peck within a metre |
 Working animals (camels and donkeys at the camp, donkeys at doors) are still the street life's still figures, not rigged: no critter model of either yet.
+
+### 20.5 Wear and writing (wear.js)
+
+Wear [inferred, from the general character of sun-dried-brick and stone towns]: at every street door of a furnished house the limestone sill is hollowed by use, and the lane outside is trodden; at the back wall of the madrasa's and the khanqah's pishtaq passages, the same hollowed sill; over the lamp at a door a smoke-black patch of bitumen-dark on the brick above the lamp's flame. Each is a thin additive piece on the plan's own mesh, not a new texture.
+
+Writing: none added. No Arabic-script inscription was written, because none could be verified here, joined letter by letter, from a source in hand; the banna'i bands (kufic in lapis, cream and turquoise, §17) stay pattern, as the earlier passes left them, and the dossier does not claim they read. A named verified phrase (a basmala or the like) would come only with a source checked and a joined shaping shown in the engine's renderer.
+
+### 20.6 Level statement
+
+Brought to the match standard in item order: the walk (34 routes, ten shops, three halls, ten houses and their upper rooms), the night (halo lamps of every building, lit lattice windows, door lamps, hung lanterns, braziers, at the low preset), the sound (a placed map with rooms, tracks and thirteen `tim` voices), the animals (doves, cats, dogs, hens as critters), the wear. Short of the Suzhou standard: the madrasa's upper storeys and three corner halls stay shut; the minaret stairs, the Gur-e Amir crypt, the observatory's upper floors are not entered; no script; no rigged camel or donkey; the houses' room doors are 1.1 m (the walker passes, the guideline asks 1.5 m).
