@@ -1,7 +1,9 @@
 // Alexandria about 250 BC — the animals (src/engine/fauna.js; docs/settlements/alexandria.md §10): mullet in the harbour and at the
 // quays, swifts and swallows over the water and the Canopic Way, black kites (the dark birds of the engine) circling over the
 // Museion and the Pharos, sparrows on the paving, a heron and little egrets on the quay and at the lake.
-import { SEA, GROUND, QUAY, PHAROS, MUSEION, AGORA, SEROUTE, wet, lots } from './layout.js';
+import { SEA, GROUND, QUAY, PHAROS, MUSEION, AGORA, SEROUTE, wet, lots, isle } from './layout.js';
+import { opened, walkDist } from './walk.js';
+import { hash } from './soundmap.js';
 
 const inWater = (x, z) => wet(x, z);
 const fish = [];
@@ -32,5 +34,24 @@ for (const [x, z] of [[AGORA[0] + 10, AGORA[1] + 20], [AGORA[0] + 30, AGORA[1] +
 perches.push({ kind: 'heron', x: 170, z: -91.5, y: GROUND, rot: -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'egret', x: -40, z: 240, y: GROUND, rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 });
 perches.push({ kind: 'egret', x: 120, z: 244, y: GROUND, rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 });
-void QUAY;
-export default { fish, flights, perches };
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §16.4) ──
+// at the houses of the walk (nearest first): a dog at the door of the first four, a cat asleep on the sill or the threshold of the next four [stated: the cat revered in
+// Egypt, Diodorus 1.83], hens and a cock in the court of two, pigeons before the harbour gate and the horrea, cormorants on the quay's edge and the pier [inferred: fishing in the
+// harbour], geese and ducks at the water stairs, a kingfisher on the island's quay, goats in Rhakotis, cats in the Museion's colonnade
+const critters = [], O = opened(), FRn = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+O.slice(0, 4).forEach(({ l, F, door }, i) => { const [x, z] = F.P(door + (i % 2 ? 1.6 : -1.6), -1.5), [ox, oz] = F.out; critters.push({ model: 'dog', at: [x, l.y, z], rot: Math.atan2(ox, oz) + (i % 2 ? 0.6 : -0.6), range: [9, 3.5] }); });
+O.slice(4, 8).forEach(({ l, F, door, K }, i) => { const [x, z] = F.P(door - K.dw / 2 - 0.5, -0.5); critters.push({ model: i % 2 ? 'cat_orange' : 'cat_tabby', at: [x, l.y + 0.02, z], rot: Math.atan2(F.out[0], F.out[1]) + 1.2, range: [7, 2.5] }); });
+O.slice(1, 3).forEach(({ l, F, K }, i) => {
+  const [x, z] = F.P(K.sw + 2.2 + i, K.cv0 + 1.8);
+  for (const [model, dx, dz, size] of [['rooster', 0, 0, 1], ['hen_brown', 1.0, 0.5, 1], ['hen_white', -0.9, 0.8, 0.96], ['hen_brown', 0.3, -0.9, 0.94]]) critters.push({ model, at: [x + dx, l.y + 0.03, z + dz], rot: i + dx, range: [3, 1.4], size });
+});
+for (const [x, z] of [[58, -81.8], [63.5, -81.8], [92, -82.6], [10, -82.4]]) critters.push({ model: x > 60 && x < 70 ? 'pigeon_white' : 'pigeon_grey', at: [x, GROUND + 0.05, z], rot: hash(x, z) * 6.28, range: [2.4, 1.6] });
+[[96, -88.7], [118, -88.7], [150, -88.7], [-20, -88.7], [77.4, -117]].forEach(([x, z], i) => critters.push({ model: 'cormorant', at: [x, GROUND + 0.06, z], rot: Math.PI, cycle: 46 + 7 * (i % 3) }));
+for (const [x, z] of [[113.2, -88.4], [188.8, -88.4], [-36.2, -88.4]]) {
+  critters.push({ model: 'goose_white', at: [x + 1.6, GROUND + 0.05, z + 0.6], rot: 2.2, range: [3.2, 1.4] }, { model: 'goose_grey', at: [x - 0.6, GROUND + 0.05, z + 1.4], rot: 3.4, range: [3.2, 1.4] }, { model: 'duck_brown', at: [x + 3.0, GROUND + 0.05, z + 1.0], rot: 1.1, range: [3, 1.4] });
+}
+{ const I = isle(), [nx, nz] = I.nets[0] || [-190, -255.4]; critters.push({ model: 'kingfisher', at: [nx + 4, GROUND + 0.06, -249.5], rot: Math.PI, water: [nx + 4, -247.8, SEA], cycle: 34 }); }
+{ let k = 0; for (const l of lots()) { if (l.quarter !== 'egyptian' || hash(l.rect[0], l.rect[1]) > 0.06 || k >= 8) continue; k++; const [x0, z0, x1, z1] = l.rect, f = FRn[l.front], x = (x0 + x1) / 2 + 1.5, z = l.front === 'n' ? z0 - 1.5 : z1 + 1.5; critters.push({ model: k % 2 ? 'goat_black' : 'goat_white', at: [x, l.y, z], rot: Math.atan2(f[0], f[1]), range: [8, 3] }); } }
+for (const [x, z, m] of [[212, -66.8, 'cat_tabby'], [262, -66.8, 'cat_orange']]) critters.push({ model: m, at: [x, GROUND + 0.3, z], rot: 0.5, range: [7, 2.5] });
+void QUAY; void walkDist;
+export default { fish, flights, perches, critters };
