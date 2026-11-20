@@ -251,7 +251,7 @@ export function litWindows(ctx, share = 0.5) {
     get(t, k) {
       if (k === LIT) return true;
       if (k === 'add') return (mat, g) => {
-        if (typeof mat === 'string' && g?.attributes?.position && mat.startsWith('lattice') && mat !== 'lattice_red') for (const b of slabsOf(g, 0.2)) if (lit(b)) panesOf(H, b, 0.03);
+        if (typeof mat === 'string' && g?.attributes?.position && mat.startsWith('lattice') && mat !== 'lattice_red') for (const b of slabsOf(g, 0.2)) if (lit(b)) panesOf(H, b, 0.06 + 0.015 * hashAt(b.x0 * 3.1, b.z0 * 2.7, 41));
         return t.add(mat, g);
       };
       const v = t[k];

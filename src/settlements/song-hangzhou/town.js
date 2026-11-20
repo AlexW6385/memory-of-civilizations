@@ -226,8 +226,13 @@ export async function town() {
   plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base), ...dwellingPlans(base));
   plans.push(...streetPlans(base));
   // nothing of the street's life stands in the way to the doors of the houses opened upstairs
-  { const lanes = [...doorLanes(upLots()), ...walkLanes()], inL = (p) => p && lanes.some((r) => p[0] > r[0] && p[0] < r[2] && p[1] > r[1] && p[1] < r[3]);
+  { const lanes = [...doorLanes(upLots())], inL = (p) => p && lanes.some((r) => p[0] > r[0] && p[0] < r[2] && p[1] > r[1] && p[1] < r[3]);
     for (const p of plans) p.elements = p.elements.filter((e) => !(Array.isArray(e.at) && inL(e.at))).map((e) => (e.items ? { ...e, items: e.items.filter((i) => !inL(i.at)) } : e)); }
+  // and none of the street's furniture or people stands before the opened fronts the visitor's walk goes into: moved sideways along the front, not deleted
+  // (a plan's bounds set the collision raster's phase, so nothing may be taken out of the plans)
+  { const lanes = walkLanes(), free = new Set(['figure', 'tea_table', 'bench', 'stall', 'chickens', 'animal', 'lantern', 'goods_mat', 'handcart']);
+    const shift = (e) => { const p = e.at; if (!(free.has(e.t) && Array.isArray(p))) return e; for (const r of lanes) if (p[0] > r[0] && p[0] < r[2] && p[1] > r[1] && p[1] < r[3]) { const ax = r[2] - r[0] < r[3] - r[1] ? 0 : 1, m = (r[ax] + r[ax + 2]) / 2, w = (r[ax + 2] - r[ax]) / 2 + 1.5, q = p.slice(); q[ax] = m + (p[ax] < m ? -w : w); return { ...e, at: q }; } return e; };
+    for (const p of plans) p.elements = p.elements.map((e) => { const f = shift(e); return f.items ? { ...f, items: f.items.map(shift) } : f; }); }
   // life at the water and at the city's posts (§25), in 100 m tiles of the street life; the river's stairs
   const tiles = new Map();
   for (const e of [...watersideLife(LEVEL.street), ...wayMarket(LEVEL.street)]) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
