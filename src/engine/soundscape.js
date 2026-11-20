@@ -82,6 +82,7 @@ import * as HIMEJI from '../settlements/edo-himeji/soundmap.js';
 import * as SEOUL from '../settlements/joseon-seoul/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
+import * as UJI from '../settlements/heian-uji/soundmap.js';
 import * as ISFAHAN from '../settlements/isfahan/soundmap.js';
 import './voices-isfahan.js';
 import * as JERUSALEM from '../settlements/jerusalem/soundmap.js';
@@ -197,7 +198,7 @@ export const PROFILES = {
   giza: T(NEAR, { animals: { donkey: 0.5, cattle: 0.4, dog: 0.3 }, roof: 'flat' }),
   granada: T(MED, { cicadas: 0.7, animals: { donkey: 0.4, rooster: 0.4, horse: 0.2 }, adhan: 1 }),
   'great-zimbabwe': T({ dove: 1, tropic: 0.7, kite: 0.3 }, { cicadas: 0.7, frogs: 0.4, animals: { cattle: 0.8, goat: 0.4, rooster: 0.3, dog: 0.3 }, roof: 'thatch' }),
-  'heian-uji': T(EAS, { cicadas: 0.5, frogs: 0.8, animals: { dog: 0.2 }, roof: 'shingle', bells: 'bonsho' }),
+  'heian-uji': T(EAS, { cicadas: 0.5, frogs: 0.8, animals: withLife({ dog: 0.2 }, { market: 0.5, canal: 0.6, eaves: 1, map: UJI }), roof: 'shingle', bells: 'bonsho' }),
   isfahan: T(NEAR, { cicadas: 0.4, animals: withLife({ donkey: 0.5, horse: 0.3, dog: 0.2 }, { market: 1, map: ISFAHAN }), roof: 'flat', adhan: 1 }),
   jerusalem: T(NEAR, { cicadas: 0.6, animals: withLife({ donkey: 0.5, goat: 0.4, rooster: 0.4, dog: 0.3 }, { market: 1, map: JERUSALEM }), roof: 'flat', adhan: 1 }),
   'joseon-seoul': T(EAS, { cicadas: 0.6, frogs: 0.5, animals: withLife({ rooster: 0.6, dog: 0.4, cattle: 0.2 }, { canal: 1, market: 0.7, eaves: 1, map: SEOUL }), roof: 'tile', bells: 'bosingak' }),
