@@ -1,14 +1,19 @@
 // Edo Himeji — the animals (src/engine/fauna.js; docs/settlements/edo-himeji.md §5.5): carp in the moats, house swallows over the
 // moats and the avenue, tree sparrows on the paving and on the copings of the castle's walls, crows at twilight over the
 // keep, a grey heron on the moat's bank and a little egret on the middle moat's edge.
-import { INNER, OUTER, LEVEL, MIDDLE, RADIUS, BANK, HON, DAI } from './layout.js';
+import { INNER, OUTER, LEVEL, MIDDLE, RADIUS, BANK, HON, DAI, lots, isOpen, furniture, upperHouses } from './layout.js';
+import { yardFree, yashikiParts } from '../../styles/edo/yard.js';
 
 const WATER = LEVEL.water;
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** Is the entrance of a machiya on the left of its front (style town.js machiyaFront draws it from the lot's seed: its first two random numbers)? */
+const entranceLeft = (seed) => { const r = rng((seed || 1) * 7 + 3); r(); return r() < 0.5; };
 // the inner moat's ring: distance to its edge (negative inside the water)
 const inRing = (x, z) => x > OUTER[0] && x < OUTER[2] && z > OUTER[1] && z < OUTER[3] && !(x > INNER[0] && x < INNER[2] && z > INNER[1] && z < INNER[3]);
 const ringDist = (x, z) => {
   if (!inRing(x, z) || (Math.abs(x) < 10 && z > INNER[3] - 2)) return 3;
-  return Math.min(-Math.min(x - OUTER[0], OUTER[2] - x, z - OUTER[1], OUTER[3] - z), -Math.max(INNER[0] - x, x - INNER[2], INNER[1] - z, z - INNER[3]));
+  // (the distance to the nearer bank, negative in the water: the larger of the two negatives — the smaller left loops touching the inner rampart)
+  return Math.max(-Math.min(x - OUTER[0], OUTER[2] - x, z - OUTER[1], OUTER[3] - z), -Math.max(INNER[0] - x, x - INNER[2], INNER[1] - z, z - INNER[3]));
 };
 const midDist = (x, z) => (z > MIDDLE.z0 && z < MIDDLE.z1 && Math.abs(x) > MIDDLE.gap / 2 && Math.hypot(x, z) < RADIUS - 28 ? -Math.min(z - MIDDLE.z0, MIDDLE.z1 - z, Math.abs(x) - MIDDLE.gap / 2) : 3);
 
@@ -41,4 +46,45 @@ for (const [x, z, rot] of [[-45, DAI.rect[3] - 1, 0], [-12, DAI.rect[3] - 1, 0]]
 perches.push({ kind: 'heron', x: OUTER[2] - 1.5, z: 40, y: 0.3, rot: 0, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'heron', x: OUTER[0] + 1.5, z: -60, y: 0.3, rot: Math.PI, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'egret', x: 60, z: MIDDLE.z1 + 1.2, y: 0.3, rot: -Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 });
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §10.3) ──
+const critters = [];
+// ducks on the moats: spot-billed duck pairs (karugamo, the resident duck) on the long reaches, mandarin pairs (oshidori) on the west reach and the middle moat
+for (const [x0, z0, x1, z1, rot, models] of [
+  [OUTER[0] + 4, OUTER[1] + 3, OUTER[2] - 4, INNER[1] - 3, 0, ['duck_brown', 'duck_brown']],
+  [INNER[2] + 3, OUTER[1] + 30, OUTER[2] - 3, OUTER[3] - 30, Math.PI / 2, ['duck_brown', 'duck_brown']],
+  [OUTER[0] + 3, OUTER[1] + 30, INNER[0] - 3, OUTER[3] - 30, Math.PI / 2, ['mandarin_drake', 'mandarin_hen']],
+  [OUTER[0] + 4, OUTER[3] - 19, -12, OUTER[3] - 2, 0, ['duck_brown', 'duck_brown']]])
+  critters.push({ type: 'floaters', models, area: [x0, z0, x1, z1], dist: ringDist, a: [10, 3.4], ratio: 0.35, margin: 1.3, y: WATER, speed: 0.22, cycle: [18, 24], rot });
+for (const [sx, models] of [[1, ['mandarin_drake', 'mandarin_hen']], [-1, ['duck_brown', 'duck_brown']]]) critters.push({ type: 'floaters', models, area: sx > 0 ? [MIDDLE.gap / 2 + 20, MIDDLE.z0 + 3, 190, MIDDLE.z1 - 3] : [-190, MIDDLE.z0 + 3, -MIDDLE.gap / 2 - 20, MIDDLE.z1 - 3], dist: midDist, a: [12, 3.4], ratio: 0.3, margin: 1.3, y: WATER, speed: 0.22, cycle: [18, 24], rot: 0 });
+// a cock and two hens in the free yard of each of three open samurai compounds nearest the avenue (the retainers' wives kept fowl [inferred]), by the row house
+{ const Y = lots().filter((l) => l.t === 'yashiki' && isOpen(l) && l.rect[1] > OUTER[3] && l.rect[3] < MIDDLE.z0 - 4).sort((a, b) => Math.abs(a.rect[0] + a.rect[2]) - Math.abs(b.rect[0] + b.rect[2])).slice(0, 3);
+  for (const l of Y) {
+    const P = yashikiParts(l), nc = [(P.nagaya[0] + P.nagaya[2]) / 2, (P.nagaya[1] + P.nagaya[3]) / 2];
+    let best = null;
+    for (let x = l.rect[0] + 3; x < l.rect[2] - 3; x += 1) for (let z = l.rect[1] + 3; z < l.rect[3] - 3; z += 1) {
+      if (![[1.5, 0], [-1.5, 0], [0, 1.5], [0, -1.5], [0, 0]].every(([dx, dz]) => yardFree(l, x + dx, z + dz))) continue;
+      const d = Math.hypot(x - nc[0], z - nc[1]); if (!best || d < best.d) best = { d, x, z };
+    }
+    if (!best) continue;
+    for (const [model, dx, dz, size] of [['rooster', 0, 0, 1], ['hen_brown', 0.9, 0.4, 1], ['hen_white', -0.8, -0.4, 0.96]]) critters.push({ model, at: [best.x + dx, 0.02, best.z + dz], rot: 0.5 + dx, range: [1.3, 0.8], size });
+  } }
+// a songbird in a cage (a bush warbler or white-eye, the Edo townsman's pleasure [inferred]) at the eave of each teahouse's front, beside its lantern
+for (const l of lots().filter((q) => q.t === 'machiya' && q.trade === 'tea').sort((a, b) => Math.abs(a.rect[0] + a.rect[2]) - Math.abs(b.rect[0] + b.rect[2])).slice(0, 3)) {
+  const [x0, z0, x1, z1] = l.rect, f = l.front || 's', sg = f === 's' ? 1 : -1, fz = f === 's' ? z1 : z0;
+  critters.push({ model: 'cagebird', at: [entranceLeft(l.seed) ? x1 - 1.1 : x0 + 1.1, 2.5, fz + sg * 0.55], rot: f === 's' ? 0 : Math.PI });
+}
+// house swallows' nests (tsubame; they bring luck to the house) under the eaves of the open machiya on the street's middle stretch, the opening to the street
+{ let k = 0; for (const l of lots()) {
+    if (l.t !== 'machiya' || !isOpen(l) || upperHouses().has(l) || Math.abs((l.rect[0] + l.rect[2]) / 2) > 110 || k > 7) continue;
+    const f = l.front || 's', sg = f === 's' ? 1 : -1, fz = f === 's' ? l.rect[3] : l.rect[1], x = entranceLeft(l.seed) ? l.rect[2] - 0.4 : l.rect[0] + 0.4;
+    if (critters.some((c) => c.model === 'swallow_nest' && Math.abs(c.at[0] - x) < 12)) continue;
+    critters.push({ model: 'swallow_nest', at: [x, 3.0, fz + sg * 0.14], rot: f === 's' ? Math.PI / 2 : -Math.PI / 2, cycle: 33 + (l.seed % 5), flight: 9, radius: 10, side: k % 2 ? 1 : -1, rise: -0.8 }); k++;
+  } }
+// a kingfisher (kawasemi) on the stone edge of the middle moat's south bank, clear of the landings, watching the water
+{ const lx = furniture().filter((f) => f.t === 'landing').map((f) => f.x), x = [-60, -100, 60, 100, -140].find((q) => lx.every((v) => Math.abs(v - q) > 9)) ?? -60;
+  critters.push({ model: 'kingfisher', at: [x, 0.32, MIDDLE.z1 + 0.5], rot: Math.PI, water: [x, MIDDLE.z1 - 1.7, WATER], cycle: 34 }); }
+// cats asleep in the sun at the Honmaru's storehouses (the stores kept cats against rats [inferred]), in the gap between the two doors' lanes
+critters.push({ model: 'cat_tabby', at: [16, HON.top + 0.02, -18.8], rot: 0.6, range: [7, 2.5] });
+critters.push({ model: 'cat_orange', at: [-88, 30.02, 11.6], rot: 2.4, range: [7, 2.5] });
+export default { fish, flights, perches, critters };

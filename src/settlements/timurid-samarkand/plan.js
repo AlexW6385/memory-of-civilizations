@@ -3,6 +3,7 @@
 // classroom), the khanqah on the east, the rows of shops on the north and south. The other monuments are in town.js.
 
 import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S, TAPCHANS, marketLayout, houses, houseGeom } from './layout.js';
+import { ENTERED } from './soundmap.js';
 import { upperRoute } from '../../styles/timurid/upper.js';
 
 const E = [];
@@ -17,6 +18,10 @@ E.push({ t: 'shop_row', rect: SHOPS_S, front: 'n', unit: 3.6, enter: [5, 11, 17,
   E.push({ t: 'tim_market', rect: SQUARE, seed: 5, stalls, spreads, litter: 260 });
   for (const [x, z, yaw] of TAPCHANS) E.push({ t: 'tim_tapchan', at: [x, z], yaw, seed: Math.floor(x * 7 + z) });
 }
+// worn sills at the doors of the madrasa's and the khanqah's portal passages (wear.js; the back wall of each iwan, pishtaq() in the style's index.js)
+E.push({ t: 'tim_wear', doors: [{ at: [-54.4, 0], axis: 'z', w: 4.5, dep: 0.5 }, { at: [KHANQAH.rect[0] + 0.6 + 5.8, 0], axis: 'z', w: 3.5, dep: 0.5 }] });
+// the night's lamps of the square: stands, braziers, hung lanterns, the tea-houses' lamps (nightlight.js)
+E.push({ t: 'tim_night', part: 'square' });
 // a paved apron of limestone flags before the pishtaq, worn in the middle (the students' and the faithful's way), edged with a kerb of dressed stone
 E.push({ t: 'block', walk: true, rect: [-45, -9, -33, 9], y0: 0, y1: 0.04, mat: 'flagstone' });
 E.push({ t: 'block', walk: true, rect: [-33.3, -9, -33, 9], y0: 0.04, y1: 0.09, mat: 'limestone' });
@@ -48,6 +53,40 @@ walks[0].y0 = 0;
     const G = houseGeom(h), w = R.map(([x, z]) => G.toWorld(x, z));
     w.y0 = 0; walks.push(w);
   }
+}
+
+// ---- the visitor's walk into the opened places (match pass, docs §20.2): every route below is walked by tools/walk-check.mjs
+// the shops: a gap of the stalls' rows (the market's rows leave a column here and there), then in at the side of the sill's tray table
+{
+  const AISLE = { 'shop:n3': -40.5, 'shop:n8': -16, 'shop:n14': 7, 'shop:n19': 22.5, 'shop:n24': 43, 'shop:s5': -37.5, 'shop:s11': -15, 'shop:s17': 31.5, 'shop:s21': 34, 'shop:s24': 43 };
+  for (const s of ENTERED) {
+    const g = s.rect[1] > 0 ? 1 : -1, xe = (s.rect[0] + s.rect[2]) / 2 - 0.8, xp = AISLE[s.id];
+    if (xp === undefined) continue;
+    const w = [[14, 0], [xp, 0], [xp, g * 40], [xe, g * 40], [xe, g * 44.5], [xe, g * 46.5]];
+    w.y0 = 0; walks.push(w);
+  }
+}
+// the madrasa's two corner halls from the court's gallery, the khanqah's hall through its portal
+{
+  const a = [[14, 0], [-40, 0], [-52, 0], [-66, 0], [-64, -17], [-60, -17], [-56.5, -21.5]];
+  const b = [[14, 0], [-40, 0], [-52, 0], [-66, 0], [-64, 17], [-60, 17], [-56.5, 21.5]];
+  const k = [[14, 0], [40, 0], [KHANQAH.rect[2] - 17 + 0.5, 0], [KHANQAH.rect[2] - 11, 0]];
+  for (const w of [a, b, k]) { w.y0 = 0; walks.push(w); }
+}
+// the houses nearest the arrival: lane, the passage of the street door, the court, the talar (the porch of the court), and the room of the trade at its wing
+{
+  const BLOCKED = new Set([954925, 423350, 725441]);      // courts whose side path is shut by the furniture of their trade (a walked check, not a design)
+  const rng = (seed) => { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); };
+  const near = houses().filter((h) => h.full && !h.garden && !BLOCKED.has(h.seed)).map((h) => ({ h, d: Math.hypot((h.rect[0] + h.rect[2]) / 2 - 14, (h.rect[1] + h.rect[3]) / 2) })).sort((x, y) => x.d - y.d).slice(0, 10);
+  near.forEach(({ h }, i) => {
+    const G = houseGeom(h), W = G.W, D = G.D, zf = -D / 2 + 4.8, zs = D / 2 - 4.6, xl = -W / 2 + 4.3, xr = W / 2 - 4.3, zc = (zf + zs) / 2;
+    const xd = Math.max(-W / 2 + 3.2, Math.min(W / 2 - 3.2, h.xd));
+    const q = rng(h.seed + 7); q(); if (!h.rich) q(); const rsgn = q() < 0.5 ? -1 : 1, X = 2.4 * rsgn;
+    let r;
+    if (i % 2 === 0 || h.trade === 'smith') r = [[xd, D / 2 + 3], [xd, zs + 1], [xd, zs - 0.3], [X, zs - 0.3], [X, zf + 0.6], [X, zf - 1.2]];
+    else { const ex = rsgn < 0 ? xl + 1.6 : xr - 1.6, dx = rsgn < 0 ? xl - 0.25 : xr + 0.25, ix = rsgn < 0 ? -W / 2 + 2.2 : W / 2 - 2.2; r = [[xd, D / 2 + 3], [xd, zs + 1], [xd, zs - 0.3], [X, zs - 0.3], [X, zc], [ex, zc], [dx, zc], [ix, zc]]; }
+    const w = r.map(([u, v]) => G.toWorld(u, v)); w.y0 = 0; walks.push(w);
+  });
 }
 
 export const registan = {

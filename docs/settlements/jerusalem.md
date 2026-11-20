@@ -196,3 +196,25 @@ As for the Dome of the Rock (`docs/buildings/dome-of-the-rock.md` §9).
 ## 1h. The Dome seen first and close (landmark pass, 2026-11-17)
 
 - Built, all [inferred] from the building's dossier (`docs/buildings/dome-of-the-rock.md` §4, §7) since the exterior mosaics of 691/92 do not survive: (1) the upper walls' green mosaic field now carries a tree of turquoise and gold leaves with lapis stones in the field over each window (a larger one over each door), and round each window a turquoise-and-gold archivolt with lapis studs between its frame and the blind arch; (2) the dome's outer shell has 32 raised tapering ribs (the seams of the sheathing plates) and four ring mouldings, and a finial of collar, bulb, two balls and spire (no crescent: later); (3) the drum has a pilaster with base and capital between each two windows and a banded top; (4) the porches have a painted soffit with cedar beams over the four columns and above the slab a moulded base, a frieze of gold-ruled green mosaic with gilt roundels, dentils and a projecting cornice; (5) eight hip rolls run up the lead roof from the octagon's corners to the drum.
+
+## 12. Matching the reference: walk, night, sound, animals, wear (2026-11-20)
+
+Marks: [stated] with its source (an earlier section of this dossier or its sources), [inferred] from the date, the trade or the place. Nothing here contradicts §1–§11.
+
+### 12.1 The visitor's walk
+- Routes (walk-check, local to the landmark plan) from the street into: four open shops of the Cardo (four different trades, spread from z -150 to 150), two open shops of the market street, three open houses without a stair (court, then the main room), and three servants' lodges on the esplanade (oil store, wick-makers, glass-lamp makers). Twelve routes beside the twelve upper-storey routes of §5d. [built; positions follow the style's own dice and lot grid]
+- Shops: about nine in ten open, each with a trade [stated: §4d]; which shop is which is the style's draw, baked in `shopline.js` and checked in the test. Houses and lodges: open as §5a, §5c.
+- Not done: the long walk from the arrival to the Cardo as one route (the walker steers in straight legs only).
+
+### 12.2 Night
+- Oil lamps of clay and glass in shops and porticoes, a lamp in a niche of each open house's main room [inferred from the trade and the style's builders]; the glass lamps on chains in the Dome, the Aqsa and the Sepulchre [stated: §1c, §1e]; censer coals [stated: §1c, attendants burned incense]; candle stands at the Tomb [inferred]; the glass-lamp makers' furnace [stated: §5c, glass for the lamps]; watch braziers at the three gates, the head of the Haram's west stair and the Sepulchre's atrium [inferred]. Light only as additive halo geometry; day unchanged.
+
+### 12.3 Sound
+- Readers, doves, cisterns and water on the Haram; coppersmiths, potters, weavers, oil crushers, bakers' ovens and quern in the shops and open houses; hawkers' wordless cries in the Cardo and the market street; donkey and camel trains at the gates; plainchant and the semantron at the Sepulchre; jackals on the Kidron slope at night. [inferred throughout; the presence of the readers, attendants, incense, oil and markets is stated: §1d, §4d, §4e; Christian worship under Muslim rule: Arculf, §1b]. 17 voices prefixed `jer`, levels measured with tools/sound-render.mjs.
+
+### 12.4 Animals
+- Critters: eight cats before shut shops of the Cardo and the market street, two street dogs, four households of fowl (cock and two hens) in the courts of open houses with no stair, nine doves feeding by three Haram cisterns. [inferred: places chosen off the ways walked]. Goats, sheep and the donkey of the yards remain the static animals of §5, §10. Doves on the Haram [stated: §1d].
+
+### 12.5 Wear and writing
+- Worn: a band of smoothed pale stone along the middle of every tread of the Sepulchre's 17 m stair and of the Haram's west-gate stair; a worn centre line down every colonnade's portico floor and a worn patch before each open shop door. The Cardo's colonnades are Justinian's street of the 6th century, about 150 years old [stated: §4a]; the wear is [inferred] from age and traffic. The Dome (691/92) is new and is not worn.
+- Writing: none added. No Arabic, Greek or Hebrew text was written, because no phrase could be verified here; the Dome's inscription band stays as it is in its own dossier.

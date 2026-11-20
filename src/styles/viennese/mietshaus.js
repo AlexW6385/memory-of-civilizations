@@ -7,7 +7,7 @@ import { box, frustum, lathe } from '../../core/geom.js';
 import { faceFrame, prism, outline, ngon, fbox } from '../dutch/facade.js';
 import { weather, flowerBox, curtains, enamelSign, numberPlate, oriel, turret, rearFace, passage } from './detail.js';
 import { lettering } from './lettering.js';
-import { shopFront, shopRoom, SHOP_T, SHOP_RD, NAMES } from './shopint.js';
+import { shopFront, shopRoom, lampPoints, SHOP_T, SHOP_RD, NAMES } from './shopint.js';
 import { upHouse, upGeometry } from './upper.js';
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -18,6 +18,7 @@ export const rectOf = (pts) => [Math.min(pts[0][0], pts[1][0]), Math.min(pts[0][
 /** A double casement window in white with a transom and a middle post; `head`: 'tri', 'seg', 'cornice' or 'plain'. */
 export function sashWindow(bag, F, y, u, v0, ww, hh, o = {}) {
   const A = (m, ...r) => bag.add(m, fbox(F, y, ...r)), u0 = u - ww / 2, u1 = u + ww / 2, b = 0.07, trim = o.trim ?? TRIM, vt = v0 + hh;
+  bag.window?.(F, y, u, v0, ww, hh, o);                                  // (night.js: the lamp-light of the room behind a window)
   if (!o.open) A('opening', u0, u1, v0, vt, -0.02, 0.05);
   A('paint_white', u0, u0 + b, v0, vt, 0, 0.1); A('paint_white', u1 - b, u1, v0, vt, 0, 0.1);
   A('paint_white', u0 + b, u1 - b, vt - b, vt, 0, 0.1); A('paint_white', u0 + b, u1 - b, v0, v0 + b, 0, 0.1);
@@ -57,6 +58,7 @@ const SHOPWORDS = ['BÄCKEREI', 'TABAK', 'WEIN', 'FLEISCH', 'SCHUHE', 'HÜTE', '
 function shop(bag, F, y, u0, u1, g, o, r) {
   const A = (m, ...q) => bag.add(m, fbox(F, y, ...q)), w = u1 - u0, sill = 0.6, top = Math.min(g - 1.0, 3.4);
   A('opening', u0 + 0.12, u1 - 0.12, sill, top, -0.02, 0.05);
+  bag.shop?.(F, y, u0 + 0.12, u1 - 0.12, sill, top, 0.055, null);
   A('wood_dark', u0 + 0.08, u0 + 0.16, sill - 0.1, top + 0.08, 0, 0.12); A('wood_dark', u1 - 0.16, u1 - 0.08, sill - 0.1, top + 0.08, 0, 0.12);
   A('wood_dark', u0 + 0.08, u1 - 0.08, top, top + 0.1, 0, 0.12); A('wood_dark', u0 + 0.08, u1 - 0.08, sill - 0.1, sill, 0, 0.12);
   const posts = Math.round(w / 1.6); for (let k = 1; k < posts; k++) { const x = u0 + k * w / posts; A('wood_dark', x - 0.03, x + 0.03, sill, top, 0, 0.1); }
@@ -224,7 +226,7 @@ export function mietshaus(el, ctx) {
   } else if (wantOpen) {
     if (UPD && ug) {
       const hi = ug.hi, off = UPD.left ? hi : 0, w2 = W - hi, F2 = { w: w2, D, at: (u, d) => F.at(u + off, d) }, b2 = Math.max(2, Math.round(w2 / 3.3));
-      shopRoom(ctx, F2, y, { w: w2, D, g: G, H: G, mat, bays: b2, trade: el.open, seed: el.seed || 1 });
+      if (el.night) for (const p of lampPoints(F2, y, w2, G)) bag.lamp?.(p[0], p[1], p[2], el.open); else shopRoom(ctx, F2, y, { w: w2, D, g: G, H: G, mat, bays: b2, trade: el.open, seed: el.seed || 1 });
       shopFront(bag, F2, y, { w: w2, g: G, bays: b2, trade: el.open, seed: el.seed || 1, lod });
       // the hall's bay of the front: plinth and string course either side of the Haustor (drawn by upHouse)
       const h0 = UPD.left ? 0 : W - hi, h1 = h0 + hi;
@@ -234,9 +236,9 @@ export function mietshaus(el, ctx) {
         const rb2 = Math.max(2, Math.round(W / 3.1)), rw = W / rb2;
         for (let s = 1; s <= 2; s++) for (let i = 0; i < rb2; i++) { const fh = (info.floors[s + 1] ?? H) - info.floors[s] - (s === n - 1 ? 0.6 : 0); rear.push({ u: W - ((i + 0.5) * rw + (s % 2 ? 0.25 : -0.1)), s, w: 1.05, h: Math.min(1.7, fh - 1.5) }); }
       }
-      upHouse(ctx, F, y, { W, D, G, floors: info.floors, H, mat, left: UPD.left, hi, kind: UPD.kind, seed: el.seed || 1, windows: info.windows, rear, gallery: rear.length > 0, lod });
+      if (!el.night) upHouse(ctx, F, y, { W, D, G, floors: info.floors, H, mat, left: UPD.left, hi, kind: UPD.kind, seed: el.seed || 1, windows: info.windows, rear, gallery: rear.length > 0, lod });
     } else {
-    shopRoom(ctx, F, y, { w: W, D, g: G, H, mat, bays, trade: el.open, seed: el.seed || 1 });
+    if (el.night) for (const p of lampPoints(F, y, W, G)) bag.lamp?.(p[0], p[1], p[2], el.open); else shopRoom(ctx, F, y, { w: W, D, g: G, H, mat, bays, trade: el.open, seed: el.seed || 1 });
     shopFront(bag, F, y, { w: W, g: G, bays, trade: el.open, seed: el.seed || 1, lod });
     }
   } else { bag.add(mat, box(x0, y - 0.6, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.6, y + H); }
@@ -245,6 +247,7 @@ export function mietshaus(el, ctx) {
     const Fr = faceFrame(el.rect, OPP[f]);
     rearFace(bag, Fr, y, { n, floors: info.floors, H, r: rb, lod, gallery: wantPass || rb() < 0.5 || !!UPD }, sashWindow);
   }
+  if (el.night) return;                                                  // (night.js wants the windows only: not the turret, the roof, the mass)
   // the corner turret of a corner house
   if (el.side && !far && kind !== 'biedermeier' && n >= 5 && rng((el.seed || 1) * 17 + 3)() < 0.55) {
     const cu = F2 && (el.side === 'w' ? (f === 's' || f === 'w' ? 0 : W) : el.side === 'e' ? (f === 's' ? W : f === 'n' ? 0 : W) : 0);
