@@ -21,7 +21,7 @@ export const WALK = [
   arc(RINGS[0] - STREET_OFF, 0.55, 2.6),         // the Singel's inner quay street
   arc(RINGS[0] + STREET_OFF, 0.55, 2.6),         // and its outer one
 ];
-export const WALK_REACH = 9, WALK_MAX = 44;
+export const WALK_REACH = 9, WALK_MAX = 12;
 const mid = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
 /** The middle of a lot's street front. */
 export const frontAt = (l) => (l.front === 's' ? [mid(l)[0], l.rect[3]] : l.front === 'n' ? [mid(l)[0], l.rect[1]] : l.front === 'e' ? [l.rect[2], mid(l)[1]] : [l.rect[0], mid(l)[1]]);

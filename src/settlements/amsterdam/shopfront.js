@@ -10,7 +10,7 @@ import { profile } from '../../styles/dutch/upper.js';
 
 export const TRADES = ['baker', 'cheese', 'draper', 'grocer', 'delft', 'tobacco'];
 /** Awning cloth and the board's emblem colours by trade. */
-const LOOK = { baker: ['cloth_ochre', 'hide_tan'], cheese: ['cloth_red', 'cloth_ochre'], draper: ['cloth_indigo', 'cloth_red'], grocer: ['cloth_green', 'cloth_brown'], delft: ['cloth_white', 'glaze_blue'], tobacco: ['cloth_brown', 'cloth_ochre'] };
+const LOOK = { baker: ['cloth_ochre', 'hide_tan'], cheese: ['cloth_red', 'cloth_ochre'], draper: ['cloth_indigo', 'cloth_red'], grocer: ['cloth_green', 'hide_brown'], delft: ['cloth_white', 'paint_blue'], tobacco: ['hide_brown', 'cloth_ochre'] };
 const BASE = 1.0, SILL = BASE + 0.45;
 
 /** The window bay the shop takes, and the door's: { uw, ud, bw, ww } in the lot's front frame (u along the front), or null for a house with no window bay beside its door. */
@@ -46,15 +46,15 @@ function amShopfront(el, { bag, col }) {
   } else if (kind === 'draper') {
     for (const [f, m, h] of [[0.2, 'cloth_indigo', 0.12], [0.2, 'cloth_red', 0.12], [0.2, 'cloth_grey', 0.12], [0.62, 'cloth_green', 0.12], [0.62, 'cloth_white', 0.12]]) slabAt(m, f, 0.55, 0.4, h, 0.3, T + (m === 'cloth_red' ? 0.12 : m === 'cloth_grey' ? 0.24 : m === 'cloth_white' ? 0.12 : 0));
   } else if (kind === 'grocer') {
-    for (const f of [0.2, 0.6]) { disc('sacking', f, 0.5, 0.2, 0.28); disc('cloth_brown', f, 0.5, 0.15, 0.04, T + 0.3); }
+    for (const f of [0.2, 0.6]) { disc('rope_fibre', f, 0.5, 0.2, 0.28); disc('hide_brown', f, 0.5, 0.15, 0.04, T + 0.3); }
     slabAt('iron', 0.9, 0.2, 0.12, 0.02, 0.12); ball('iron', 0.9, 0.2, 0.05, T + 0.02);
   } else if (kind === 'delft') {
-    for (const f of [0.15, 0.4, 0.65]) { const [u, d] = at(f, 0.78); A('glaze_white', u - 0.12, u + 0.12, T + 0.02, T + 0.28, d - 0.012, d + 0.012); A('glaze_blue', u - 0.08, u + 0.08, T + 0.1, T + 0.2, d + 0.012, d + 0.02); }
-    disc('glaze_blue', 0.2, 0.3, 0.09, 0.2); disc('glaze_white', 0.5, 0.3, 0.08, 0.17); disc('steel_grey', 0.8, 0.3, 0.07, 0.2);
+    for (const f of [0.15, 0.4, 0.65]) { const [u, d] = at(f, 0.78); A('glaze_white', u - 0.12, u + 0.12, T + 0.02, T + 0.28, d - 0.012, d + 0.012); A('paint_blue', u - 0.08, u + 0.08, T + 0.1, T + 0.2, d + 0.012, d + 0.02); }
+    disc('paint_blue', 0.2, 0.3, 0.09, 0.2); disc('glaze_white', 0.5, 0.3, 0.08, 0.17); disc('iron', 0.8, 0.3, 0.07, 0.2);
   } else {
-    for (const f of [0.15, 0.3, 0.45]) { const [u, d] = at(f, 0.35); A('cloth_brown', u - 0.05, u + 0.05, T, T + 0.1, d - 0.12, d + 0.12); }
+    for (const f of [0.15, 0.3, 0.45]) { const [u, d] = at(f, 0.35); A('hide_brown', u - 0.05, u + 0.05, T, T + 0.1, d - 0.12, d + 0.12); }
     for (let k = 0; k < 6; k++) { const [u, d] = at(0.62 + k * 0.05, 0.6); A('glaze_white', u - 0.006, u + 0.006, T, T + 0.012, d - 0.1, d + 0.1); }
-    disc('pottery_dark', 0.85, 0.35, 0.08, 0.1);
+    disc('wood_dark', 0.85, 0.35, 0.08, 0.1);
   }
   // the awning: canvas sloping from over the lintel to a rail on two brackets, a valance; goods hanging from the rail
   const au0 = uw - ww / 2 - 0.4, au1 = uw + ww / 2 + 0.4, vh = 4.55, vr = 3.85, dr = 1.0;
@@ -67,8 +67,8 @@ function amShopfront(el, { bag, col }) {
   else if (kind === 'cheese') for (let k = 0; k < 4; k++) hang(hu(k), 0.22, 'cloth_ochre', 0.1);
   else if (kind === 'draper') for (let k = 0; k < 4; k++) hang(hu(k), 0.55 + 0.06 * (k & 1), ['cloth_red', 'cloth_indigo', 'cloth_white', 'cloth_green'][k], 0.14);
   else if (kind === 'grocer') for (let k = 0; k < 4; k++) hang(hu(k), k & 1 ? 0.3 : 0.2, k & 1 ? 'hide_brown' : 'cloth_ochre', 0.08);
-  else if (kind === 'delft') for (let k = 0; k < 4; k++) hang(hu(k), 0.16, k & 1 ? 'glaze_blue' : 'pottery_dark', 0.1);
-  else for (let k = 0; k < 4; k++) hang(hu(k), 0.4, 'cloth_brown', 0.07);
+  else if (kind === 'delft') for (let k = 0; k < 4; k++) hang(hu(k), 0.16, k & 1 ? 'paint_blue' : 'wood_dark', 0.1);
+  else for (let k = 0; k < 4; k++) hang(hu(k), 0.4, 'hide_brown', 0.07);
   // the board on its bracket in the pier beyond the window (away from the door): the trade's emblem painted on it, readable along the street
   const pu = uw + (uw + bw / 2 < B.w - 0.4 && Math.abs(uw + bw / 2 - B.ud) > 0.9 ? bw / 2 : -bw / 2), bv = 4.95;
   if (Math.abs(pu - B.ud) > 0.9) {
@@ -81,7 +81,6 @@ function amShopfront(el, { bag, col }) {
     E(accent, mid - 0.2, mid + 0.2, vm - 0.12, vm + 0.12); E(cloth, mid - 0.1, mid + 0.1, vm - 0.06, vm + 0.06);
   }
   // the keeper, inside at the window
-  if (el.keeper && STYLES.life) STYLES.life.elements.figure({ ...el.keeper }, { bag, col });
 }
 STYLES.dutch.elements.am_shopfront = amShopfront;
 export default amShopfront;

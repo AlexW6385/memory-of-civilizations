@@ -15,7 +15,7 @@ export function shopLots() {
   SHOPS = [];
   const d = (l) => Math.hypot(mid(l)[0] - ARRIVAL[0], mid(l)[1] - ARRIVAL[1]);
   let k = 0;
-  for (const l of [...walkSet()].filter((q) => isOpen(q) && shopBay(q) && !(q.rect[0] <= HALL[2] + 0.5 && q.rect[1] - HALL[3] < 3)).sort((a, b) => d(a) - d(b)).slice(0, 18)) {
+  for (const l of [...walkSet()].filter((q) => isOpen(q) && shopBay(q) && !(q.rect[0] <= HALL[2] + 0.5 && q.rect[1] - HALL[3] < 3)).sort((a, b) => d(a) - d(b)).slice(0, 8)) {
     let t = TRADES[(l.seed + k) % TRADES.length];
     if (SHOPS.length && SHOPS[SHOPS.length - 1].trade === t) t = TRADES[(TRADES.indexOf(t) + 1) % TRADES.length];
     SHOPS.push({ lot: l, trade: t }); k++;
@@ -27,8 +27,13 @@ function keeper(l, trade, rand) {
   const B = shopBay(l), F = faceFrame(l.rect, l.front), [x, z] = F.at(B.uw, -0.8), out = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[l.front];
   return person(rand, trade === 'draper' || trade === 'delft' ? 'burgher' : trade === 'tobacco' ? 'worker' : 'wife', [x, z], Math.atan2(-out[0], -out[1]), { y: (l.y ?? GROUND) + 1.03, pose: 'stand' });
 }
+/** The shop fronts, as elements of the house plans that hold their lots (index.js puts them there: their fine pieces then merge with the houses', one draw per material). */
+export function shopElements() {
+  const rand = rng(1670);
+  return shopLots().map(({ lot, trade }) => ({ t: 'am_shopfront', rect: lot.rect, front: lot.front, y: lot.y ?? GROUND, seed: lot.seed, storeys: lot.storeys, gable: lot.gable, trade, keeper: keeper(lot, trade, rand) }));
+}
 export function shopPlans() {
-  const rand = rng(1670), els = shopLots().map(({ lot, trade }) => ({ t: 'am_shopfront', rect: lot.rect, front: lot.front, y: lot.y ?? GROUND, seed: lot.seed, storeys: lot.storeys, gable: lot.gable, trade, keeper: keeper(lot, trade, rand) }));
+  const els = shopElements();
   return [{ id: 'amsterdam-shops', style: 'dutch', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: els, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' }, near: 150, center: [10, -225] }];
 }
 /**
