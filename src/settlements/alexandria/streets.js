@@ -99,6 +99,7 @@ function quayLife() {
     E.push({ t: 'cargo_pile', at: [px1 - 1.4, -112], y: py, rot: Math.PI / 2, kind: 'crates', n: 3, seed: 504 });
     E.push({ t: 'cargo_pile', at: [px0 + 1.5, -117], y: py, rot: Math.PI / 2, kind: 'ingots', n: 3, seed: 505 });
     E.push({ t: 'crane', at: [pc + 1.2, pz0 + 3.2], y: py, rot: 0 });
+    E.push({ t: 'quay_lamp', at: [px0 + 2.4, pz0 + 0.8], y: py });                     // the brazier at the pier's head: the night's fire for the ships coming in
     for (const z of [-96, -104, -114, -122]) for (const x of [px0 + 0.35, px1 - 0.35]) E.push({ t: 'mooring', at: [x, z], y: py, rot: z * 3 + x, seed: Math.round(-z * 7 + x) });
     E.push({ t: 'net_rack', at: [px1 + 1.2, -92.5], y: g + 0.04, rot: Math.PI / 2, len: 3.0, seed: 506 });
     const f = (at, o) => FIG.push({ at, rot: fa(at), dress: 'tunic', hair: 'short', skin: 'skin_medium', seed: Math.round(at[0] * 13 - at[1] * 7), ...o });
@@ -160,7 +161,7 @@ export function streetLife() {
   }
   // beasts at the quay's work: donkeys under their loads by the piles, carts with a donkey in the shafts, a pair of camels resting
   for (const [x, z, k, r] of [[68, -83.6, 'donkey', 0.2], [-30, -83.8, 'donkey', 3.3], [-120, -83.6, 'donkey', 0.1], [-176, -83.8, 'donkey', 3.0], [210, -84, 'donkey', 0.3], [258, -83.8, 'camel', 1.57], [264, -83.5, 'camel', 1.4]]) if (dry(x, z, 1)) L.push({ t: 'animal', kind: k, at: [x, z], y: g + 0.04, rot: r, seed: Math.round(x * 7), gear: k === 'donkey' });
-  for (const [x, z] of [[-90, -83.5], [138, -83.5], [-190, -83.5]]) if (dry(x, z, 1)) L.push({ t: 'cart', at: [x, z], y: g + 0.04, rot: Math.PI / 2, beast: 'donkey', seed: Math.round(x * 5) });
+  for (const [x, z] of [[-90, -83.5], [112, -83.5], [-190, -83.5]]) if (dry(x, z, 1)) L.push({ t: 'cart', at: [x, z], y: g + 0.04, rot: Math.PI / 2, beast: 'donkey', seed: Math.round(x * 5) });
   for (const f of FIG) L.push({ t: 'figure', y: g + 0.04, ...f });
   for (const e of L) e.at = laneClear(e.at);                     // nothing stands in the lane of a door that is walked through (walk.js)
   const tiles = new Map();

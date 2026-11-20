@@ -2,6 +2,7 @@
 // Museion with its Library in the royal quarter on the Great Harbour.
 import { GROUND, PHAROS, ISLAND, MUSEION, ROYAL, LOCHIAS } from './layout.js';
 import { walkRoutes } from './walk.js';
+import { fires } from './nightlight.js';
 
 const g = GROUND;
 // ── the Pharos ──
@@ -19,6 +20,7 @@ export const pharos = {
   elements: [
     { t: 'pharos', c: PH, y: g, base: PHAROS.base },
     { t: 'pharos_fit', c: PH, y: g, seed: 9 },
+    ...fires().pharos,                                   // the torches at the tower's door (nightlight.js)
     // the island's paved court round the tower
     { t: 'floor', rect: [PH[0] - 36, PH[1] - 36, PH[0] + 36, PH[1] + 36], y: g + 0.05, th: 0.2, mat: 'travertine' },
   ],
@@ -49,6 +51,7 @@ const E = [
   // the royal enclosure's long wall over the Museion's north colonnade, seen from the harbour: pilasters, painted relief, a gateway
   { t: 'wall_front', x0: 190, x1: 302, z: -80.6, face: 'n', y: g, h: 8.4, gate: 246 },
   { t: 'palace_front', rect: [LOCHIAS[0] + 10, -150, LOCHIAS[2] - 10, -134], front: 's', y: g, seed: 33 },
+  ...fires().museion,                                  // the torches at the enclosure's gateway
 ];
 export const museion = {
   id: 'alexandria-museion',
