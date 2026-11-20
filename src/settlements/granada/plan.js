@@ -1,6 +1,7 @@
 // The Alhambra about 1390 (docs/settlements/granada.md §2–§4): the Nasrid palaces' two courts and
 // the Comares Tower, the Alcazaba, the walls and towers round the hill.
 import { HILL, MYRTLES, COMARES, LIONS, ALCAZABA, PARTAL, RAUDA, GEN, height } from './layout.js';
+import { routes } from './walk.js';
 
 const T = HILL.top, E = [];
 // the Comares palace: the Court of the Myrtles, its porticoes, the Sala de la Barca, the Comares Tower
@@ -68,7 +69,7 @@ export const alhambra = {
     room('tower of the ladies', [PARTAL.tower[0] + 1.4, PARTAL.tower[1] + 1.4, PARTAL.tower[2] - 1.4, PARTAL.tower[3] - 1.4], T, 'hall'),
     room('rauda', [RAUDA.rect[0] + 0.8, RAUDA.rect[1] + 0.8, RAUDA.rect[2] - 0.8, RAUDA.rect[3] - 0.8], T, 'hall'),
     room('hall of the kings', [LIONS[2] + 0.8, LIONS[1] - 2.2, LIONS[2] + 5.6, LIONS[3] + 2.2], T, 'hall')],
-  walks: [Object.assign([[20, 30], [20, 14]], { y0: T })],
+  walks: [Object.assign([[20, 30], [20, 14]], { y0: T }), ...routes()],      // the visitor's walk (walk.js): the palaces, and the houses and shops opened along it
 };
 void height;
 export default alhambra;
