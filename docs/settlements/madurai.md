@@ -141,6 +141,18 @@ Sources added:
 - **The Nandi.** The bull before Sundareswarar's flagstaff, seated, the humped back, folded legs, raised head with horns, dewlap, collar of bells, cloth on his back, 1.8 m long on a pedestal of three courses; he stands in the pillared corridor from the east gate, which is his pavilion (the pavilion itself is not added) [inferred].
 - **What was cut to pay for it (arrival frame: main 5.51 M triangles / 581 draws before, 3.40 M / 444 after).** The houses and shops are built twice, as in the other cities: in full (interiors, goods, doors, carved posts) within 210 m of the visitor, simple (solid, a thatch or tile roof, plain posts) beyond: this removes the furnished interiors behind the temple and the far rings from the frame. Gopuram pots and the far figures as above.
 
+## 18. Sound (2026-11 match pass: the sound map)
+
+Every sound below is [inferred] unless marked; the hours follow the temple's daily services (the reed and drum at the opening at dawn, noon, dusk and the closing of the shrines) and the market's day. All calls and chants are wordless: no Tamil or Sanskrit text is sung or written.
+
+- **Where.** `src/settlements/madurai/soundmap.js` (the map the engine reads, as for Suzhou and Agra) and `src/engine/voices-madurai.js` (voices prefixed `mdu`), test `tests/madurai-sound.test.mjs`.
+- **The temple.** The nadaswaram (the double-reed pipe) with the tavil (the barrel drum) at the two shrines' gopurams at dawn, noon, dusk and the closing, over the raga of music.js; the hand bell and a monotone priest's chant before each sanctum through the services; the conch at the opening and the closing [inferred: the six daily services of the Agamic temple; Nayaka-period practice taken as the same]. The bell and the conch already in the profile (`bells: 'puja'`) stay.
+- **Water.** Bathers on the Golden Lotus tank's steps by day (water poured, the slap on stone), the lap of the pool in the cloister at all hours; no frogs or fish in it [stated: tamilnadu-favtourism, "neither fish or other lives are found in this miraculous sacred pond"].
+- **The streets.** The jasmine sellers' calls (a woman's rising and falling contour) from their mats before the south gopuram and a seller walking the ring streets; bullock carts creaking with bells on the ring streets by day; brass-smiths' hammers on the Masi streets [stated: metalworkers on the processional routes, aimsr.edu.in]; stone grinders in the kitchens of the early morning; cows with brass bells lying in the lanes at night; dogs far off at night.
+- **The market and the hall.** The murmur of buyers in the Pudhu Mandapam with bangles shaken on trays [stated: tailors, cloth and bangle sellers, maduraitourism]; pilgrims fed at noon in the Ashta Shakti hall [stated: built to feed pilgrims, templesyatra]; a chant in the stone-roofed Thousand-Pillar Hall.
+- **The elephants.** The two temple elephants by the south gate: the bell at the neck, the chain, a rumble, rarely a trumpet [stated: elephants kept at the temple, §10].
+- **Rooms.** Hall, mandapa, shop, court house and house tones (stone roofs take no rain) [inferred].
+
 ## Sources
 
 - [Meenakshi Temple — Wikipedia](https://en.wikipedia.com/wiki/Meenakshi_Temple)
