@@ -100,6 +100,10 @@ E.push({ t: 'steps', rect: [T0 + 14, T1 - 0.4, T0 + 22, T1 + 10], n: 18, rise: 0
 E.push({ t: 'block', rect: [T0 + 15.5, T1 + 10, T0 + 22, T1 + 16], y0: -0.5, y1: 2.16, mat: 'gypsum_minoan', walk: true });
 E.push({ t: 'portico', a: [T0 + 16.2, T1 + 15.4], b: [T0 + 16.2, T1 + 10.6], n: 2, depth: 5, side: 1, y: 2.16, h: 2.8 });
 
+// the wayside shrine at the south passage's mouth (§20.1): a stand of gypsum carrying the horns of consecration, jar stands and a tub either side of the propylon, a torch post
+E.push({ t: 'court_dress', y: 0.0, seed: 6, horns: [[-6.4, 62.4, 1], [6.4, 62.4, 1]], tubs: [[-8.2, 63.4], [8.2, 63.4]], stands: [[-4.6, 62.6], [4.6, 62.6]], torches: [[-9.6, 62.2], [9.6, 62.2]] });
+E.push({ t: 'court_shrubs', at: [[-8.2, 63.4], [8.2, 63.4]], y: 0.0, seed: 8 });
+
 // the West Court furnished (docs/settlements/knossos.md §4e): the raised causeways of limestone slabs that cross it (the way from the west entrance
 // out to the Royal Road and the theatral area), the three stone-lined pits (kouloures) at its north-west, benches of gypsum along the façade between
 // the setbacks, tubs of plants and jar stands along the causeways, torch stands either side of the west entrance, a cult stand with horns
