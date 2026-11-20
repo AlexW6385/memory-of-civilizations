@@ -34,7 +34,7 @@ function yards() {
     if (!near) continue;
     // the fences: back and sides, the front left open (the stair and the yard); only where the neighbours are not
     const back = W(0, -hF - 2.2);
-    if (rand() < 0.7 && free(back[0], back[1], 0.6) && free(...W(-hS - 1.3, -hF - 2.2), 0.4) && free(...W(hS + 1.3, -hF - 2.2), 0.4)) {
+    if (rand() < 0.7 && free(back[0], back[1], 0.6) && !inShop(back[0], back[1], 4.5) && free(...W(-hS - 1.3, -hF - 2.2), 0.4) && free(...W(hS + 1.3, -hF - 2.2), 0.4)) {
       const vs = hF + 1.2, seed = h.seed;
       K.push({ t: 'k_fence', a: W(-hS - 1.3, -hF - 2.2), b: W(hS + 1.3, -hF - 2.2), seed }, { t: 'k_fence', a: W(-hS - 1.3, -hF - 2.2), b: W(-hS - 1.3, vs), seed: seed + 1 }, { t: 'k_fence', a: W(hS + 1.3, -hF - 2.2), b: W(hS + 1.3, vs), seed: seed + 2 });
     }
@@ -72,12 +72,14 @@ function yards() {
         if (h.seed % 2) (rand() < 0.5 ? man : woman)(W(-hS + 1.1, -hF + 1.7), up, D(1, 0.3), { pose: 'sit', cloth: pick(CLOTH), arms: 'hang' });
         else fig(W(-hS + 1.2, -hF + 1.6), up, D(0.5, 1), { pose: 'cross', child: true, hair: 'short', cloth: pick(CLOTH) });
       }
-      if (v === 'shop' && h.kind !== 'small') woman(W(0.95, hF - 0.8), up, D(0, 1), { pose: 'cross', cloth: pick(CLOTH), over: 'shawl' }); }
+      if (v === 'shop' && h.kind !== 'small') woman(W(Math.max(1.2, Math.min(1.45, hS - 0.5)), hF - 0.8), up, D(0, 1), { pose: 'cross', cloth: pick(CLOTH), over: 'shawl' }); }
     // on the deck at the door: a woman or a man sitting in the shade of the eaves, now and then with a child
     if (h.kind !== 'small' && rand() < 0.5) {
-      const p = W((rand() - 0.5) * 1.2, hF + 0.5);
+      // (to one side of the stair and the door, whose lane is 1.5 m wide: docs §31)
+      const q = rand(), sd = q < 0.5 ? -1 : 1, du = Math.min(1.25 + Math.abs(q - 0.5) * 0.6, Math.max(1.1, hS - 0.5));
+      const p = W(sd * du, hF + 0.5);
       (rand() < 0.65 ? woman : man)(p, up, [F[0], F[1]], { pose: rand() < 0.6 ? 'cross' : 'sit_ground', cloth: pick(CLOTH) });
-      if (rand() < 0.3) fig(W(0.7, hF + 0.55), up, [F[0], F[1]], { pose: 'cross', child: true, hair: 'short', cloth: pick(CLOTH) });
+      if (rand() < 0.3) fig(W(sd * Math.min(du + 0.7, Math.max(du, hS - 0.2)), hF + 0.55), up, [F[0], F[1]], { pose: 'cross', child: true, hair: 'short', cloth: pick(CLOTH) });
     }
     // the yard: hens and a cock, a dog, a pig on a cord, washing on a line, a woman drawing water, a child at play
     const y1 = W((rand() - 0.5) * 3, hF + 3.4);
@@ -113,7 +115,7 @@ function workshops() {
     else if (s.trade === 'sugar') { fig(W(0, -hF + 2.2), up, [-F[0], -F[1]], { pose: 'squat', hair: 'bun' }); if (rand() < 0.5) fig(W(hS * 0.5, 0.5), up, [-S[0], -S[1]], { pose: 'cross' }); }
     else { fig(W(hS * 0.35, 0.9), up, [-S[0], -S[1]], { pose: 'stand', carry: 'staff', len: 1.4 }); fig(W(-hS + 0.9, 0.2), up, F, { pose: 'cross', hair: 'bun' }); }
     // customers at the steps
-    if (rand() < 0.7) fig(W(rand() * 1.4 - 0.7, hF + 2.4), 0, face, { pose: 'stand', carry: pick(['basket', 'pot', 'none']) });
+    if (rand() < 0.7) fig(W(((q) => (q < 0.5 ? -1 : 1) * (1.3 + Math.abs(q - 0.5) * 0.8))(rand()), hF + 2.4), 0, face, { pose: 'stand', carry: pick(['basket', 'pot', 'none']) });
     L.push({ t: 'chickens', at: W(hS + 2.2, hF * 0.3), y: 0, rot: rand() * 6.28, n: 3, seed: Math.floor(rand() * 1e9) });
   }
   return { K, L };
