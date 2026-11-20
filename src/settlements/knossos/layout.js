@@ -5,7 +5,7 @@
 // out in rows of houses with party walls along paved lanes (§5a). Pure data. +x east, +z south.
 
 import { dwellingStoreys } from '../../styles/minoan/town.js';
-import { walkDistance, frontPoint, WALK_REACH, WALK_KINDS, WALK_MAX, ARRIVAL as WALK_START } from './walk.js';
+import { walkDistance, frontPoint, WALK_REACH, WALK_KINDS, WALK_TRADES, WORKSHOP_Z, WALK_MAX, ARRIVAL as WALK_START } from './walk.js';
 export const RADIUS = 350;
 export const COURT = [-13.5, -25, 13.5, 25];
 export const PALACE = [-64, -72, 64, 60];
@@ -114,8 +114,8 @@ export function openHouses() {
   const pick = (c, n, test = () => true) => { const d = dist(c); let k = 0; for (const l of ok.filter(test).sort((a, b) => d(a) - d(b))) { if (k >= n) break; if (!m.has(l)) { m.set(l, kinds[Math.floor(l.seed / 8) % kinds.length]); k++; } } };
   // the visitor's walk (walk.js, dossier §20.1): the lots whose fronts are on it, nearest the arrival first, all opened, each of a trade in turn
   { const d = dist(WALK_START), on = lots().filter((l) => walkDistance(frontPoint(l)) <= WALK_REACH && l.rect[2] - l.rect[0] >= 6.3 && l.rect[3] - l.rect[1] >= 10.5).sort((a, b) => d(a) - d(b)).slice(0, WALK_MAX);
-    on.forEach((l, i) => m.set(l, WALK_KINDS[i % WALK_KINDS.length])); walkN = on.length; }
-  pick(ARRIVAL, Math.max(14, 40 - walkN));
+    let a = 0, b = 0; for (const l of on) m.set(l, (l.rect[1] + l.rect[3]) / 2 >= WORKSHOP_Z ? WALK_TRADES[b++ % WALK_TRADES.length] : WALK_KINDS[a++ % WALK_KINDS.length]); walkN = on.length; }
+  pick(ARRIVAL, Math.max(8, 26 - walkN));
   pick([-100, 0], 16, (l) => l.rect[0] > -165 && l.rect[2] < 62);
   // the outer town (§4h): in each of twelve sectors round the palace the houses nearest the rings at 175 and 225 m can be entered too, most of them the trades of the town
   const trades = ['potter', 'dyer', 'smith', 'press', 'sealcutter', 'weaver', 'home', 'store'], far = lots().filter((l) => l.r >= 125 && l.r <= 262 && l.rect[2] - l.rect[0] >= 6.3 && l.rect[3] - l.rect[1] >= 10.5 && !m.has(l));

@@ -178,15 +178,14 @@ export function life() {
     const at = (u, v) => F.P(u, v), y = (a) => height(a[0], a[1]) + 0.06;
     const room = F.du >= 3.5, uM = F.du - 2.4, uP = F.du - 1.75;           // (the mat's centre, a pot's: on the side away from the bench, if the lot has room there)
     const pot = (k, n = 1, uu = uP) => { if (F.du < 2.7) return; const a = at(uu, -0.95); L.push({ t: 'pot', kind: k, at: a, y: y(a), n, seed: seed() }); };
-    const mat = (goods) => { if (!room) return pot('water_pot'); const a = at(uM, -0.85); L.push({ t: 'goods_mat', at: a, y: y(a), rot: out, seed: seed(), goods }); };
-    const one = (t, o = {}) => { if (F.du < 2.7) return; const a = at(uP, -0.95); L.push({ t, at: a, y: y(a), rot: out, seed: seed(), ...o }); };
-    if (kind === 'shop') mat(['amphora', 'water_pot', 'basket', 'amphora']);
+    const mat = (goods) => { pot(goods[0], 1); if (room) pot(goods[1], 1, uM); };            // (pots only: a new kind of life object near the arrival costs a draw)
+    if (kind === 'shop') mat(['amphora', 'water_pot']);
     else if (kind === 'store') { pot('pithos', 1); }
-    else if (kind === 'potter') mat(['water_pot', 'amphora', 'water_pot', 'amphora']);
+    else if (kind === 'potter') mat(['water_pot', 'amphora']);
     else if (kind === 'weaver') { if (room) { const a = at(uM, -0.95); woman(a, f, { y: y(a), pose: 'sit_low', cloth: 'cloth_red' }); } else pot('water_pot'); }
     else if (kind === 'press') pot('amphora', 1);
-    else if (kind === 'dyer') one('laundry');
-    else if (kind === 'smith') one('firewood', { len: 1.0 });
+    else if (kind === 'dyer') pot('water_pot', 1);
+    else if (kind === 'smith') pot('amphora', 1);
     else if (kind === 'sealcutter') { if (room) { const a = at(uM, -0.95); man(a, f, { y: y(a), pose: 'sit_ground', child: true, h: 1.1 }); } }
     else pot('water_pot', 1);
   }

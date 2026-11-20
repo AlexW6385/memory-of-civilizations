@@ -16,7 +16,7 @@ import '../../styles/minoan/town.js';
 import '../../styles/minoan/court.js';
 import '../../styles/minoan/upper.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { box, lathe } from '../../core/geom.js';
+import { lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { dwellingFrame } from '../../styles/minoan/town.js';
 
@@ -128,15 +128,14 @@ const wrap = (name, fn) => function haloed(el, ctx) {
  * and its base, the bowl with two wicks burning; the glow and its pool on the floor.
  */
 function lampstand({ at, y = 0, h = 1.1 }, { bag, col, lights }) {
-  const [x, z] = at, H = new Halo(), s = h / 1.1;
-  bag.add('serpentine', lathe([[0.001, 0], [0.16, 0], [0.16, 0.05], [0.07, 0.12], [0.055, 0.5 * s], [0.075, 0.62 * s], [0.055, 0.7 * s], [0.052, 0.92 * s], [0.14, 1.02 * s], [0.17, 1.08 * s], [0.15, 1.1 * s], [0.11, 1.07 * s], [0.001, 1.03 * s]], 14, null, x, y, z));
-  for (const dx of [-0.07, 0.07]) bag.add('flame', lathe([[0.001, 0], [0.014, 0.012], [0.01, 0.05], [0.001, 0.09]], 6, null, x + dx, y + 1.09 * s, z));
+  const [x, z] = at, H = new Halo(), q = hashAt(x, z, 5), s = (h / 1.1) * (0.94 + 0.12 * q), w = 0.9 + 0.2 * hashAt(x, z, 6);   // (no two feet alike: a shape repeated twelve times would be an instanced draw of its own)
+  bag.add('serpentine', lathe([[0.001, 0], [0.16 * w, 0], [0.16 * w, 0.05], [0.07 * w, 0.12], [0.055 * w, 0.5 * s], [0.075 * w, (0.58 + 0.08 * q) * s], [0.055 * w, 0.7 * s], [0.052 * w, 0.92 * s], [0.14 * w, 1.02 * s], [0.17 * w, 1.08 * s], [0.15 * w, 1.1 * s], [0.11 * w, 1.07 * s], [0.001, 1.03 * s]], 14, null, x, y, z));
+  for (const dx of [-0.07, 0.07]) bag.add('flame', lathe([[0.001, 0], [0.014 * (0.8 + 0.4 * hashAt(x + dx, z, 8)), 0.012], [0.01, 0.05], [0.001, 0.07 + 0.04 * hashAt(x, z + dx, 9)]], 6, null, x + dx * w, y + 1.09 * s, z));
   col.circle(x, z, 0.2, y, y + 1.1 * s);
   const l = { at: [x, y + 1.25 * s, z], color: '#ffb46b', intensity: 3.2, distance: 9 };
   lights.push(l);
   lightHalo(H, l, y);
   H.flush(bag);
-  void box;
 }
 
 let done = false;
