@@ -5,6 +5,7 @@
 
 import { frame } from '../../styles/greek/agora.js';
 import { houseLayout } from '../../styles/ptolemaic/house.js';
+import { laneClear } from './walk.js';
 import { RADIUS, GROUND, SEA, QUAY, PIER, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, PHAROS, lots, isle, wet, inRect, inLot } from './layout.js';
 
 const g = GROUND;
@@ -159,8 +160,9 @@ export function streetLife() {
   }
   // beasts at the quay's work: donkeys under their loads by the piles, carts with a donkey in the shafts, a pair of camels resting
   for (const [x, z, k, r] of [[68, -83.6, 'donkey', 0.2], [-30, -83.8, 'donkey', 3.3], [-120, -83.6, 'donkey', 0.1], [-176, -83.8, 'donkey', 3.0], [210, -84, 'donkey', 0.3], [258, -83.8, 'camel', 1.57], [264, -83.5, 'camel', 1.4]]) if (dry(x, z, 1)) L.push({ t: 'animal', kind: k, at: [x, z], y: g + 0.04, rot: r, seed: Math.round(x * 7), gear: k === 'donkey' });
-  for (const [x, z] of [[-90, -83.5], [124, -83.5], [-190, -83.5]]) if (dry(x, z, 1)) L.push({ t: 'cart', at: [x, z], y: g + 0.04, rot: Math.PI / 2, beast: 'donkey', seed: Math.round(x * 5) });
+  for (const [x, z] of [[-90, -83.5], [138, -83.5], [-190, -83.5]]) if (dry(x, z, 1)) L.push({ t: 'cart', at: [x, z], y: g + 0.04, rot: Math.PI / 2, beast: 'donkey', seed: Math.round(x * 5) });
   for (const f of FIG) L.push({ t: 'figure', y: g + 0.04, ...f });
+  for (const e of L) e.at = laneClear(e.at);                     // nothing stands in the lane of a door that is walked through (walk.js)
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`alexandria-streetlife-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 200 }; });

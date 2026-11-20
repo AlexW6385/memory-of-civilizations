@@ -1,6 +1,7 @@
 // Ptolemaic Alexandria about 250 BC: the two landmarks (docs/settlements/alexandria.md §3–§4) — the Pharos on its island, and the
 // Museion with its Library in the royal quarter on the Great Harbour.
 import { GROUND, PHAROS, ISLAND, MUSEION, ROYAL, LOCHIAS } from './layout.js';
+import { walkRoutes } from './walk.js';
 
 const g = GROUND;
 // ── the Pharos ──
@@ -65,6 +66,6 @@ export const museion = {
     ...halls.map((r, i) => ({ id: `reading hall ${i + 1}`, rect: [r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 1], y: g, kind: 'hall' })),
     { id: 'dining hall', rect: [314.8, -65.3, 327.3, -36.7], y: g, kind: 'inner' },
   ],
-  walks: [Object.assign([[100, -86], [180, -86], [180, -58], [196, -48], [210.5, -42], [210.5, -20]], { y0: g })],
+  walks: [Object.assign([[100, -86], [180, -86], [180, -58], [196, -48], [210.5, -42], [210.5, -20]], { y0: g }), ...walkRoutes()],
 };
 void ISLAND; void MUSEION;

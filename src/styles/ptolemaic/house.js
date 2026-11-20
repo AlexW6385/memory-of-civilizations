@@ -24,7 +24,7 @@ export function houseLayout(el) {
   const rand = rng(el.seed || 1), F = frame(el.rect, el.front ?? 's'), { L, D } = F;
   const wall = pick(rand, WALLS), dado = pick(rand, DADO);
   const two = rand() < 0.45, H1 = 3.6, H = two ? 7.0 : H1;
-  const dw = 1.5, wA = Math.min(L - dw - 4.8, 4.2 + rand() * 3.2), du = wA + 0.4;
+  const dw = 1.8, wA = Math.min(L - dw - 4.8, 4.2 + rand() * 3.2), du = wA + 0.4;
   const aShop = rand() < 0.65, trade = pick(rand, SHOP_TRADES);
   const df = 4.2, sw = L < 15 ? 3.0 : 3.4, db = 4.6, cv0 = df + 0.2, cv1 = D - db;
   const left = rand() < 0.5, split = Math.min(L - 4.5, L * (0.5 + rand() * 0.15));
@@ -89,15 +89,15 @@ function house(el, ctx) {
   R(du + 0.04, 0.7, du + 0.12, 1.9, 0, 2.35, 'wood_dark', false); R(du + 0.02, 0.62, du + 0.14, 0.72, 1.0, 1.1, 'bronze', false);
   // ── the interior walls: the partitions of the front range, the court's front, the sides, the back range ──
   const IW = 0.4, door = (a, b) => [a, b, 2.4];
-  W(false, wA + 0.2, 0.6, df, H1, [door(1.3, 2.5)], 'plaster_white', IW);                    // room A | passage
-  W(false, du + dw + 0.2, 0.6, df, H1, [door(1.3, 2.5)], 'plaster_white', IW);              // passage | room B
+  W(false, wA + 0.2, 0.6, df, H1, [door(1.1, 2.7)], 'plaster_white', IW);                    // room A | passage
+  W(false, du + dw + 0.2, 0.6, df, H1, [door(1.1, 2.7)], 'plaster_white', IW);              // passage | room B
   W(true, df, 0.6, L - 0.6, H1, [door(du, du + dw)], 'plaster_white', IW);                  // the front range's back wall (the passage opens on the court)
   const sideX = left ? sw + 0.4 : L - sw - 0.4, mid = (cv0 + cv1) / 2 - 0.3;
-  W(false, sideX, df + 0.2, cv1, H1, [door(mid - 0.3, mid + 1.1)], 'plaster_white', IW);   // the kitchen's wall, the other side's too
+  W(false, sideX, df + 0.2, cv1, H1, [door(mid - 0.5, mid + 1.2)], 'plaster_white', IW);   // the kitchen's wall, the other side's too
   const otherX = left ? L - sw - 0.4 : sw + 0.4;
-  W(false, otherX, df + 0.2, cv1, H1, [door(mid - 0.3, mid + 1.1)], 'plaster_white', IW);
+  W(false, otherX, df + 0.2, cv1, H1, [door(mid - 0.5, mid + 1.2)], 'plaster_white', IW);
   const a0 = (0.6 + split) / 2, b0 = (split + L - 0.6) / 2;
-  W(true, cv1, 0.6, L - 0.6, H1, [door(a0 - 1.1, a0 + 1.1), door(b0 - 0.6, b0 + 0.6)], 'plaster_white', IW);   // the back range: the andron's wide door, the bedroom's
+  W(true, cv1, 0.6, L - 0.6, H1, [door(a0 - 1.1, a0 + 1.1), door(b0 - 0.8, b0 + 0.8)], 'plaster_white', IW);   // the back range: the andron's wide door, the bedroom's
   W(false, split, cv1, D - 0.6, H1, [door(1.4, 2.4)], 'plaster_white', 0.3);
   // ── the court: cobbles, the peristyle on the back, a well, an altar, a tree, pots ──
   const cu0 = sw + 0.8, cu1 = L - sw - 0.8;
@@ -117,7 +117,8 @@ function house(el, ctx) {
   if (cv1 - cv0 > 6.2) { const [tx, tz] = F.P(cu0 + 0.9, cv0 + 1.1); if (two || rand() < 0.5) fig(bag, col, tx, y, tz, 3.4, el.seed); else palm(bag, col, tx, y, tz, 5.2, el.seed); }
   { const [px, pz] = F.P(cu1 - 0.6, cv0 + 0.7); bag.add('terracotta', lathe([[0.001, 0], [0.18, 0.02], [0.3, 0.3], [0.32, 0.6], [0.2, 0.75], [0.22, 0.82], [0.001, 0.8]], 8, null, px, y, pz)); col.circle(px, pz, 0.3, y, y + 0.8);
     const [qx, qz] = F.P(cu0 + 0.5, cv1 - 1.3); basket(bag, qx, y, qz, 0.3, 0.3, 'lotus_leaf'); }
-  if (rand() < 0.5) { const [ax, az] = F.P(cmid, cv0 + 0.6); bag.add('limestone', box(ax - 0.3, y, az - 0.3, ax + 0.3, y + 0.9, az + 0.3)); col.rect([ax - 0.3, az - 0.3, ax + 0.3, az + 0.3], y, y + 0.9); bag.add('flame', lathe([[0.001, 0], [0.1, 0.02], [0.001, 0.3]], 5, null, ax, y + 0.9, az)); }
+  if (rand() < 0.5) { const [ax, az] = F.P(du + dw / 2 < cmid ? cu1 - 1.7 : cu0 + 1.7, cv0 + 0.6);        // (to the side of the passage's line: the way from the street door runs straight into the court)
+    bag.add('limestone', box(ax - 0.3, y, az - 0.3, ax + 0.3, y + 0.9, az + 0.3)); col.rect([ax - 0.3, az - 0.3, ax + 0.3, az + 0.3], y, y + 0.9); bag.add('flame', lathe([[0.001, 0], [0.1, 0.02], [0.001, 0.3]], 5, null, ax, y + 0.9, az)); }
   // painted panels (the Masonry style) on the back range's wall facing the court
   { const pw = ['wall_red', 'paint_ochre', 'egyptian_blue', 'plaster_white']; for (let u = cu0 + 0.3; u + 1.5 < cu1; u += 1.9) { if (Math.abs(u + 0.75 - a0) < 1.6 || Math.abs(u + 0.75 - b0) < 1.0) continue; R(u, cv1 - 0.2, u + 1.5, cv1 - 0.18, 1.4, 2.7, pick(rand, pw), false); } }
   // ── room A: the shop (counter at the window, goods, shelves, the shopkeeper) or a store ──
