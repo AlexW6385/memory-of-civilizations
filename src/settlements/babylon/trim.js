@@ -46,4 +46,11 @@ export function varied(fn) {
 
 
 /** The Babylonian style with every element's small turned pieces varied (the houses, shops, yards and lanes use it; the landmark keeps the style itself). */
-registerStyle('babylonian-g', { ...STYLES.babylonian, elements: Object.fromEntries(Object.entries(STYLES.babylonian.elements).map(([k, fn]) => [k, varied(fn)])) });
+registerStyle('babylonian-g', {
+  ...STYLES.babylonian,
+  elements: {
+    ...Object.fromEntries(Object.entries(STYLES.babylonian.elements).map(([k, fn]) => [k, varied(fn)])),
+    // a door's lane: nothing is built; the street-life pass of src/objects/life.js reads its rectangle as a footprint, so that none of its animals, people or things is put in front of a door (openwalk.js)
+    door_clear: () => {},
+  },
+});

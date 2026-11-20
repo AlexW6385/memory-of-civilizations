@@ -7,6 +7,7 @@ import { lifePlans } from './life.js';
 import { height as ground0 } from './layout.js';
 import { QUFFAS } from './plan.js';
 import './trim.js';
+import { doorClear } from './openwalk.js';
 import { esagilaStatue } from '../../styles/babylonian/temple.js';
 
 const base = (id, elements) => ({ id, style: 'babylonian-g', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, -370], facing: 's' } });
@@ -121,6 +122,7 @@ export async function houses() {
       : { t: 'babylon_house', rect: l.rect, seed: l.seed, door: l.door, open: !!l.open, school: !!l.school, white: l.open && l.seed % 3 === 0, storeys: l.open ? 1 : storeysOf(l.seed), front: l.door, lite, grade };
     if (!tiles.has(key)) tiles.set(key, []);
     tiles.get(key).push(e);
+    if (l.open || l.shop) tiles.get(key).push({ t: 'door_clear', rect: doorClear(l) });     // (the lane before a door: no animal or thing of the street life stands in it)
   }
   let n = 0;
   for (const E of tiles.values()) for (let i = 0; i < E.length; i += 120) {

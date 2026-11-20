@@ -4,6 +4,7 @@
 
 import { esagilaChambers, RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height, lots } from './layout.js';
 import { frame } from '../../styles/sumerian-ur/upper.js';
+import { routes as openRoutes } from './openwalk.js';
 
 const E = [];
 // the level of detail of the modelled relief by distance from the arrival (src/planet/arrivals.js): full to the gate, reduced beyond
@@ -72,6 +73,8 @@ for (const l of lots()) if ([216624, 47731].includes(l.seed)) {
   const r = [W(dc, -2.2), W(dc, 0.3), W(dc, t + 0.9), W(t + 1.4, t + dF - 0.3), W(t + 1.4, vC0 + 1.3), W(t + 1.4, vC0 + 0.5)];
   r.y0 = 0; walks.push(r);
 }
+// the shops and furnished houses nearest the arrival (the gate quarter), docs/settlements/babylon.md §18
+walks.push(...openRoutes(15));
 
 export const babylon = {
   id: 'babylon-centre',
