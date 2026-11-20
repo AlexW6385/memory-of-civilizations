@@ -104,7 +104,7 @@ export async function town() {
   for (const z of [78, 88, 98, 108, 118, 156, 167, 178, 190, 199]) E.push({ t: 'flag_line', a: [STREET[0] - 0.4, z], b: [STREET[2] + 0.4, z + 1.5], y0: 8.2, y1: 8.4, sag: 0.8, poles: ![78, 88, 98, 108, 118, 178, 190].includes(z) });
   E.push({ t: 'sangkhang', at: SANG, rot: 0 });
   // two mani walls of the pilgrims' stones: on the open ground below the palace (west of the stairs' foot) and along the circuit's south leg outside the gate (docs §19)
-  E.push({ t: 'mani_wall', a: [-84, 57], b: [-64, 57], y: 0, seed: 7 }, { t: 'mani_wall', a: [34, 216], b: [58, 216], y: 0, seed: 11 });
+  E.push({ t: 'mani_wall', a: [34, 216], b: [58, 216], y: 0, seed: 11 });
   plans.push(base('lhasa-shops', E));
   // sangkhang in the street, its smoke (smoke.js)
   plans.push(base('lhasa-street-life', [
