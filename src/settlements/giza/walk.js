@@ -5,6 +5,7 @@
 import { town as townLots, CAUSEWAY, CROW_WALL, HARBOUR, furnished } from './layout.js';
 import { LODGES } from './lodges.js';
 import { ground } from './ground.js';
+import { STALLS } from './rations.js';
 import { plan as housePlan, BAKERY_DOOR, DOOR } from '../../styles/oldkingdom-giza/walkhouse.js';
 
 export const ARRIVAL = [242, -50];
@@ -52,6 +53,10 @@ export function placeRoutes() {
     const d = { w: [-1, 0], e: [1, 0], n: [0, -1], s: [0, 1] }[l.door], door = [l.door === 'w' ? x0 : l.door === 'e' ? x1 : cx, l.door === 'n' ? z0 : l.door === 's' ? z1 : cz];
     out.push({ kind: 'lodge:' + l.kind, rect: l.rect, route: [[door[0] + d[0] * 2.6, door[1] + d[1] * 2.6], [door[0] - d[0] * 0.6, door[1] - d[1] * 0.6], [door[0] - d[0] * Math.min(2.2, D * 0.45), door[1] - d[1] * Math.min(2.2, D * 0.45)]] });
   }
+  for (const S of STALLS) {
+    const c = Math.cos(S.rot), sn = Math.sin(S.rot), P = (u, v) => [S.at[0] + c * u - sn * v, S.at[1] + sn * u + c * v];
+    out.push({ kind: 'stall:' + S.name, rect: [S.at[0] - 2, S.at[1] - 2, S.at[0] + 2, S.at[1] + 2], route: [P(-1.4, 3.2), P(-1.4, 1.6), P(-1.4, 0.95)] });
+  }
   return out;
 }
 
@@ -63,7 +68,7 @@ export function walkRoutes(n = { house: 7, bakery: 3, gallery: 2 }) {
   const out = [], count = {};
   for (const W of [WALKS.causeway, WALKS.quay, WALKS.town, WALKS.gate]) { const r = W.map((p) => [...p]); r.y0 = startY(r[0]); out.push(r); }
   for (const p of placeRoutes()) {
-    const k = p.kind.startsWith('lodge') ? 'lodge' : p.kind;
+    const k = p.kind.startsWith('lodge') ? 'lodge' : p.kind.startsWith('stall') ? 'stall' : p.kind;
     if ((count[k] = (count[k] || 0) + 1) > (n[k] ?? 99)) continue;
     const r = p.route.map((q) => [...q]); r.y0 = startY(r[0]); out.push(r);
   }
