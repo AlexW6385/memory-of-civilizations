@@ -8,6 +8,7 @@
 import { HW as PORTAL_HW } from './portal.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
+import { signText, writeSign } from './signs.js';
 
 const IRON = 'iron';
 const TIN = [[0.001, 0], [0.12, 0], [0.14, 0.24], [0.001, 0.24]];            // the ironmonger's tins and pots: one shape
@@ -18,11 +19,11 @@ export const TRADES = {
   colmado:    { floor: 'cotto_floor', wall: 'lime_plaster',  fascia: 'cloth_green',  letters: 'gilt_bronze', wood: 'wood_dark', w: 3 },
   forn:       { floor: 'tile_cream',  wall: 'plaster_white', fascia: 'wood_dark',    letters: 'gilt_bronze', wood: 'wood_ochre', w: 2 },
   bodega:     { floor: 'cotto_floor', wall: 'lime_plaster',  fascia: 'cloth_maroon', letters: 'gilt_bronze', wood: 'wood_dark', w: 2 },
-  ferreteria: { floor: 'cotto_floor', wall: 'plaster_grey',  fascia: 'cloth_indigo', letters: 'paint_white', wood: 'wood_dark', w: 1.5 },
+  ferreteria: { floor: 'cotto_floor', wall: 'plaster_grey',  fascia: 'cloth_indigo', letters: 'gilt_bronze', wood: 'wood_dark', w: 1.5 },
   draperia:   { floor: 'wood_ochre',  wall: 'plaster_white', fascia: 'cloth_black',  letters: 'gilt_bronze', wood: 'wood_painted', w: 2 },
-  farmacia:   { floor: 'marble_floor', wall: 'plaster_white', fascia: 'paint_white', letters: 'cloth_green', wood: 'wood_dark', w: 1 },
-  sabater:    { floor: 'wood_ochre',  wall: 'lime_plaster',  fascia: 'cloth_brown',  letters: 'paint_white', wood: 'wood_dark', w: 1 },
-  perruqueria: { floor: 'tile_cream', wall: 'plaster_white', fascia: 'cloth_blue',   letters: 'paint_white', wood: 'wood_painted', w: 1 },
+  farmacia:   { floor: 'marble_floor', wall: 'plaster_white', fascia: 'paint_white', letters: 'gilt_bronze', wood: 'wood_dark', w: 1 },
+  sabater:    { floor: 'wood_ochre',  wall: 'lime_plaster',  fascia: 'cloth_brown',  letters: 'gilt_bronze', wood: 'wood_dark', w: 1 },
+  perruqueria: { floor: 'tile_cream', wall: 'plaster_white', fascia: 'cloth_blue',   letters: 'gilt_bronze', wood: 'wood_painted', w: 1 },
 };
 const TRADE_LIST = Object.keys(TRADES);
 const DD = 8.8;                                   // the inside face of the back wall, d from the street line
@@ -246,7 +247,7 @@ export function makeShops(H) {
   function shell(ctx, fr, sh, D, y, top, mat, yS) {
     const { bag, col, lights } = ctx, F = fr.F, T = TRADES[sh.trade], { s0, s1, bw } = sh, W = s1 - s0, flip = sh.door === 'R';
     const wr = (a0, a1, t0, t1, y0, y1) => { const p = fr.at(a0, t0), q = fr.at(a1, t1); col.rect([p[0], p[1], q[0], q[1]], y0, y1); };
-    const dc = bw / 2, dS = flip ? s1 - dc : s0 + dc, FL = yS + 0.12, r = rng(sh.seed);
+    const dc = bw / 2, dS = flip ? s1 - dc : s0 + dc, FL = yS + 0.12;
     // the back of the shop's ground floor (solid behind its wall), the front wall with its openings
     bag.add(mat, F(s0, s1, -D, -(DD + 0.02), y - 1.2, top)); wr(s0, s1, -D, -(DD + 0.02), y - 1.2, top);
     const cuts = [[dS - DW, dS + DW]];                              // the door
@@ -279,12 +280,14 @@ export function makeShops(H) {
     bag.add('wood_painted', F(Math.min(lf, lf + (flip ? 0.05 : -0.05)), Math.max(lf, lf + (flip ? 0.05 : -0.05)), -1.3, -FW, yS + 0.12, yS + 3.0));
     bag.add('glass_outer', F(Math.min(lf, lf + (flip ? 0.065 : -0.065)) - 0.003, Math.max(lf, lf + (flip ? 0.065 : -0.065)) + 0.003, -1.1, -0.7, yS + 1.1, yS + 2.6));
     bag.add('wood_painted', F(dS - DW, dS + DW, -0.05, 0.08, yS + 3.05, yS + 3.3)); bag.add('glass_outer', F(dS - (DW - 0.04), dS + (DW - 0.04), -0.16, -0.12, yS + 3.1, yS + 3.28));
-    bag.add('granite_grey', F(dS - (DW + 0.23), dS + (DW + 0.23), 0, 0.55, yS - 0.25, yS + 0.1));
+    // (the step worn by a century's feet: the cheeks keep their height, the lane to the door is dished 1 cm with a rounded lip)
+    bag.add('granite_grey', F(dS - (DW + 0.23), dS - 0.6, 0, 0.55, yS - 0.25, yS + 0.1)); bag.add('granite_grey', F(dS + 0.6, dS + (DW + 0.23), 0, 0.55, yS - 0.25, yS + 0.1));
+    bag.add('granite_grey', F(dS - 0.6, dS + 0.6, 0, 0.16, yS - 0.25, yS + 0.1)); bag.add('granite_grey', F(dS - 0.6, dS + 0.6, 0.16, 0.42, yS - 0.25, yS + 0.09)); bag.add('granite_grey', F(dS - 0.6, dS + 0.6, 0.42, 0.55, yS - 0.25, yS + 0.097));
     // the fascia board with its gilt letters and the cornice over it
     bag.add(T.fascia, F(s0 + 0.12, s1 - 0.12, 0.1, 0.2, yS + 3.45, yS + 4.12));
     bag.add('limestone_yellow', F(s0, s1, 0, 0.3, yS + 4.12, yS + 4.42)); bag.add('limestone_yellow', F(s0, s1, 0.02, 0.12, yS + 3.3, yS + 3.45));
-    const nl = Math.floor((W - 1.2) / 0.34);
-    for (let k = 0, x = s0 + (W - nl * 0.34) / 2; k < nl; k++, x += 0.34) { if (r() < 0.12) continue; const lw = 0.12 + r() * 0.1; bag.add(T.letters, F(x, x + lw, 0.2, 0.225, yS + 3.58, yS + 3.58 + 0.2 + (k % 3 === 0 ? 0.1 : 0))); }
+    // the name on the board in block capitals (signs.js: the trade in Catalan or Castilian, sometimes with the house's name), between two gilt rules
+    { const u0 = s0 + 0.35, u1 = s1 - 0.35, tx = signText(sh.seed, sh.trade, u1 - u0); writeSign({ F, add: (m, g) => bag.add(m, g) }, tx, u0, u1, yS + 3.58, yS + 3.96, 0.2, 0.225, T.letters); }
     bag.add(T.letters, F(s0 + 0.2, s1 - 0.2, 0.2, 0.215, yS + 3.5, yS + 3.53)); bag.add(T.letters, F(s0 + 0.2, s1 - 0.2, 0.2, 0.215, yS + 4.06, yS + 4.09));
     // the room: floor, lining, ceiling with beams
     bag.add(T.floor, F(s0, s1, -DD, -FW, yS - 0.4, FL)); col.floor([...(() => { const p = fr.at(s0, -DD), q = fr.at(s1, 0.15); return [p[0], p[1], q[0], q[1]]; })()], FL);
