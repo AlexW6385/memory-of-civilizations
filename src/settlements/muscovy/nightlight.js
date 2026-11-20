@@ -10,7 +10,8 @@
 
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { box, lathe, rod } from '../../core/geom.js';
-import { STYLES } from '../../core/build.js';
+import { STYLES, registerStyle } from '../../core/build.js';
+import '../../styles/muscovite/index.js';
 import { KITAI, KITAI_GATES, SPASSKY, NIKOLSKY, MOAT, wallX, gateZ, height } from './layout.js';
 
 /** A number in [0, 1) from a position alone. */
@@ -199,13 +200,14 @@ function litWall(base) {
 /** Register the lights of Muscovy: the cresset as an element; the lit houses, churches, palace and wall as wrappers of the builders that make them. */
 export function registerNight() {
   const S = STYLES.muscovite;
-  if (!S) return;
-  S.elements.cresset = cresset;
-  const wrap = (name, make) => { const base = S.elements?.[name]; if (base && !base.__lit) S.elements[name] = make(base); };
+  if (!S || S.elements.cresset) return;
+  const E = { ...S.elements, cresset };
+  const wrap = (name, make) => { const base = E[name]; if (base && !base.__lit) E[name] = make(base); };
   wrap('izba', litIzba);
   wrap('russian_church', litHall(0.8, 1)); wrap('archangel', litHall(0.7, 1)); wrap('annunciation', litHall(0.7, 1)); wrap('pokrov', litHall(0.8, 1));
   wrap('facets_palace', litHall(0.45, 0.9)); wrap('log_church', litHall(0.7, 0.9)); wrap('wayside', litHall(1, 0.8));
   wrap('kremlin_wall', litWall);
+  registerStyle('muscovite', { ...S, elements: E });
 }
 registerNight();
 
