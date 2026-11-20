@@ -323,7 +323,7 @@ Code: `walk.js` (routes), `yards.js`, `src/styles/khmer/village.js`. Walk-check 
 
 Code: `nightlight.js` (halo geometry), wired in `town.js`. The engine's additive `halo` material: lamps, hearths and torches as crossed discs and floor pools; the brightness is carried by the normals' y, so that the day view does not change (a halo is invisible by day).
 
-- Lamps of the temple: the lamp-stands (iron stands holding oil lamps) along the causeways and the court, the offering tables, and the lamps of the libraries. [inferred] Candles and torches were carried in processions at night [stated: Zhou Daguan on the king's evening processions with candles]; the old Khmer words for lamp, candle and oil are in the inscriptions [stated: Cambodian inscriptions as listed in `docs/sources`; the vocabulary only, not a count of lamps].
+- Lamps of the temple: the lamp-stands (iron stands holding oil lamps) along the causeways and the court, the offering tables, and the lamps of the libraries. [inferred] Candles and torches were carried in processions at night [stated: Zhou Daguan on the king's evening processions with candles]; the old Khmer words for lamp, candle and oil are in the inscriptions [stated: the Old Khmer inscriptions; the vocabulary only, not a count of lamps].
 - Houses: half the houses (a hash of their place) show a lit doorway and hearth through the floor boards; the forges and kilns of the workshops glow. [inferred]
 - Budget: the arrival's main draws are held at 293 (baseline 291) by drawing the court's and the causeway's lights in a plan within 45 m of the causeway's middle (the arrival is 48 m from it, so the lights of the first metres appear when the visitor has walked a few steps), the sanctuary's in a plan within 50 m of it, and the houses' and forges' in plans of 40 m drawn within 38 m of the visitor.
 - Not done: no lit windows in the galleries (their bays are blind windows, §10), no light in the paddies.
@@ -338,10 +338,10 @@ Code: `soundmap.js`, `src/engine/voices-angkor.js` (voices with the `ak` prefix,
 
 ## 34. The animals (item 4)
 
-Code: `fauna.js` (`critters`), `tests/angkor-critters.test.mjs`. Ducks (brown and white) on the moat's west arm by the causeway's foot; a cock and two hens, a dog or a cat in the yard of each of the eight houses of the walk (a hen group at one in three, then a dog, then a cat), off the stair lane. [inferred: domestic fowl, dogs and cats of a Khmer village; ducks and fowl are stated for the region by Zhou Daguan] The engine's existing models only: no buffalo model was added (the buffalo are heard, §33, not seen). The critters are one more mesh and are not counted by `tools/draw-count.mjs`.
+Code: `fauna.js` (`critters`), `tests/angkor-critters.test.mjs`. Ducks (brown and white) on the moat's west arm by the causeway's foot; a cock and two hens, a dog or a cat in the yard of each of the eight houses of the walk (a hen group at one in three, then a dog, then a cat), off the stair lane. [inferred: domestic fowl, dogs and cats of a Khmer village; the species are [inferred], not counted in any source] The engine's existing models only: no buffalo model was added (the buffalo are heard, §33, not seen). The critters are one more mesh and are not counted by `tools/draw-count.mjs`.
 
 ## 35. Wear and writing (items 5 and 6): what was not done
 
 - Wear: not added as geometry. The monsoon's damp (`damp: 0.9` in plan.js) already stains the stone and posts; worn treads or thresholds would have needed new coplanar pieces on a plan at its draw budget, and were left out rather than made wrongly.
-- Writing: the Old Khmer of the inscriptions is not drawn: a script written wrongly would be worse than a plain face. The Sanskrit and Khmer inscribed door jambs [stated: the temple's inscriptions are on door jambs] are left plain.
+- Writing: the Old Khmer of the inscriptions is not drawn: a script written wrongly would be worse than a plain face. The door jambs that carry inscriptions in Khmer temples are left plain.
 - Remaining landmark gaps (the cella and the Hall of Echoes, extra temple walk routes): not done in this pass.
