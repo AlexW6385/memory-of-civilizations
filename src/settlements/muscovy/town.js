@@ -1,4 +1,8 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
+import { openShops } from './openwalk.js';
+import { cressets } from './nightlight.js';
+import { keeperOf, TRADE_SHELF } from './lavki.js';
+import { openIzba, waysides } from './layout.js';
 import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, NIKOLSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ, streetSkip, inLot } from './layout.js';
 const base = (id, elements, rooms = []) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
@@ -8,7 +12,7 @@ function front([x0, z0, x1, z1]) {
   const sz = Math.round((cz + 385) / 70) * 70 - 385; return sz < cz ? 'z0' : 'z1';
 }
 /** The izby furnished inside and open (docs §5.1): one in two within reach of Red Square, one in two to 200 m, one in four beyond. */
-export const openIzba = (l) => { if (l.kind === 'barn') return false; const d = Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20); return d < 90 ? l.seed % 2 === 0 : d < 200 ? l.seed % 2 === 1 : l.seed % 4 === 1; };
+export { openIzba };
 /** Which build a lot has: the storehouse (barn), the two-storey house (a boyar's or a rich merchant's court: half the courts inside the Kremlin, one in eight near the square, one in twenty-five beyond), else the plain izba. */
 export function variantOf(l) {
   if (l.kind === 'barn') return 'barn';
@@ -24,6 +28,7 @@ export async function houses() {
   const yb = yards(all); for (let i = 0; i < yb.length; i += 300) plans.push(base(`muscovy-yards-${i / 300}`, yb.slice(i, i + 300)));
   plans.push(base('muscovy-streets', streets()), base('muscovy-market', market()), base('muscovy-churches', CHURCHES.map(([x, z, yaw]) => ({ t: 'log_church', c: [x, z], y: height(x, z), yaw }))));
   plans.push(base('muscovy-waysides', waysides()), base('muscovy-stages', stages()), { ...base('muscovy-river-life', riverLife()), style: 'life' });
+  plans.push(...lavkaPlans(), base('muscovy-cressets', cressets()));
   plans.push({ ...base('muscovy-people', people()), style: 'life' });
   return plans;
 }
@@ -32,18 +37,7 @@ export async function houses() {
  * What stood at the crossings (docs/settlements/muscovy.md §5.4): at a corner of about two crossings in five of the posad's street grid, a street well,
  * a wayside chapel or a wayside cross, none within the first 45 m of the arrival nor on the paving or in a house's lot.
  */
-export function waysides() {
-  const E = [], H = (i, j) => { let h = (i * 73856093) ^ (j * 19349663); h = Math.imul(h ^ (h >>> 13), 0x5bd1e995); return (h ^ (h >>> 15)) >>> 0; };
-  for (let i = 0; i < 10; i++) for (let j = 0; j < 12; j++) {
-    const sx = -378 + 84 * i, sz = -385 + 70 * j, h = H(i, j), k = h % 10;
-    if (k > 5 || Math.hypot(sx, sz) > 340 || Math.hypot(sx - 40, sz - 20) < 45) continue;
-    const ox = h & 16 ? 5.2 : -5.2, oz = h & 32 ? 5.2 : -5.2, x = sx + ox, z = sz + oz;
-    const ok = [[0, 0], [1.6, 0], [-1.6, 0], [0, 1.6], [0, -1.6]].every(([a, b]) => !streetSkip(x + a, z + b) && !inLot(x + a, z + b, 1.2));
-    if (!ok) continue;
-    E.push({ t: 'wayside', kind: k < 3 ? 'well' : k < 5 ? 'chasovnya' : 'cross', c: [x, z], y: Math.max(height(x - 1, z - 1), height(x + 1, z + 1), height(x - 1, z + 1), height(x + 1, z - 1)), face: h & 64 ? (ox > 0 ? 3 : 1) : (oz > 0 ? 2 : 0) });
-  }
-  return E;
-}
+export { waysides };
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const CLOTH = ['cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_green', 'cloth_grey', 'cloth_ochre', 'cloth_brown'];
 /**
@@ -220,3 +214,15 @@ function riverLife() {
   [-215, -95, 25, 150].forEach((x, i) => L.push({ t: 'boat', kind: 'barge', at: [x, riverZ(x) - 24 + i * 6], y: RIVER.level - 0.05, rot: Math.PI / 2 + (rand() - 0.5) * 0.08, seed: 120 + i }));
   return L;
 }
+
+// ── the opened shops of the trading rows (openwalk.js, lavki.js): per 24 m cell a plan drawn only within 40 m of the cell's middle ──
+const LAVKA_CELL = 24, LAVKA_NEAR = 40;
+function lavkaPlans() {
+  const cells = new Map();
+  for (const s of openShops().values()) { const k = `${Math.floor(s.fx / LAVKA_CELL)},${Math.floor(s.zc / LAVKA_CELL)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(s); }
+  return [...cells].map(([k, list]) => {
+    const [i, j] = k.split(',').map(Number);
+    return { ...base(`muscovy-lavki-${k}`, [{ t: 'lavka_open', y: height(ROWS[0] + 10, 0), list: list.map((s) => ({ s, trade: s.trade, seed: Math.floor(s.fx * 7 + s.zc * 131) >>> 0, keeper: keeperOf(Math.floor(s.fx * 3 + s.zc * 17) >>> 0) })) }]), near: LAVKA_NEAR, center: [i * LAVKA_CELL + LAVKA_CELL / 2, j * LAVKA_CELL + LAVKA_CELL / 2] };
+  });
+}
+void TRADE_SHELF;
