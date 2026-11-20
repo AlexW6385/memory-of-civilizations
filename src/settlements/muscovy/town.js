@@ -224,8 +224,8 @@ function riverLife() {
   return L;
 }
 
-// ── the opened shops of the trading rows (openwalk.js, lavki.js): per 36 m cell a plan drawn only within 58 m of the cell's middle ──
-const LAVKA_CELL = 36, LAVKA_NEAR = 58;
+// ── the opened shops of the trading rows (openwalk.js, lavki.js): per 24 m cell a plan drawn only within 40 m of the cell's middle ──
+const LAVKA_CELL = 24, LAVKA_NEAR = 40;
 function lavkaPlans() {
   const cells = new Map();
   for (const s of openShops().values()) { const k = `${Math.floor(s.fx / LAVKA_CELL)},${Math.floor(s.zc / LAVKA_CELL)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(s); }

@@ -53,8 +53,8 @@ function lavka(el, { bag, col }) {
       B('hide_tan', 0.28, 0.6, on, on + 0.4, 0.3, 0.46);
       break;
     case 'icons':
-      for (let k = 0; k < 5; k++) { const w = 0.25 + k * 0.4; B('wood_painted', wallU - 0.05, wallU - 0.02, 1.3 + (k % 2) * 0.35, 1.78 + (k % 2) * 0.35, w, w + 0.32); B('gilt_bronze', wallU - 0.056, wallU - 0.05, 1.5 + (k % 2) * 0.35, 1.7 + (k % 2) * 0.35, w + 0.06, w + 0.26); }
-      for (let k = 0; k < 2; k++) { B('wood_painted', 0.3 + k * 0.1, 0.34 + k * 0.1, on, on + 0.34, 0.3 + k * 0.4, 0.6 + k * 0.4); B('gilt_bronze', 0.346 + k * 0.1, 0.35 + k * 0.1, on + 0.1, on + 0.26, 0.36 + k * 0.4, 0.54 + k * 0.4); }
+      for (let k = 0; k < 5; k++) { const w = 0.25 + k * 0.4; B('wood_painted', wallU - 0.05, wallU - 0.02, 1.3 + (k % 2) * 0.35, 1.78 + (k % 2) * 0.35, w, w + 0.32); B('gilt_bronze', wallU - 0.07, wallU - 0.04, 1.5 + (k % 2) * 0.35, 1.7 + (k % 2) * 0.35, w + 0.06, w + 0.26); }
+      for (let k = 0; k < 2; k++) { B('wood_painted', 0.3 + k * 0.1, 0.34 + k * 0.1, on, on + 0.34, 0.3 + k * 0.4, 0.6 + k * 0.4); B('gilt_bronze', 0.33 + k * 0.1, 0.36 + k * 0.1, on + 0.1, on + 0.26, 0.36 + k * 0.4, 0.54 + k * 0.4); }
       break;
     case 'pots':
       for (let k = 0; k < 5; k++) pot('terracotta', 0.4 + (k % 2) * 0.25, 0.3 + k * 0.28, on, 0.9);
