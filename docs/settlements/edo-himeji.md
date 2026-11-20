@@ -221,3 +221,28 @@ Scope of this round: bring the settlement toward the Suzhou reference (docs/suzh
 - a paper lantern under the roof of each fire-watch tower; a votive glow at each Jizō and the Inari shrine.
 
 **Not done:** the keep's own windows (nothing lit in the great keep at night: a castle's keep stood dark and empty [inferred]); a lantern on the moored boats; the watchman; lit hearths seen through the open shops' passages; shutters drawn at night (the engine has no day/night geometry switch for this settlement's fronts).
+
+### 10.2 The sound of the place, placed (`src/settlements/edo-himeji/soundmap.js`, `src/engine/voices-himeji.js`, `tests/himeji-sound.test.mjs`)
+
+As in Suzhou (§22 of its dossier) each sound is made at a position of the settlement and heard from the listener's; the profile now carries the town's `LIFE` with its map. All synthesised; nothing is heard by this agent (the sounds were measured with `tools/sound-render.mjs`, not listened to). The hours of the time bell stay the engine's (`bells: 'toki'`: nine, eight, seven … strokes at the koku; a bell in the castle town [inferred], see soundscape.js).
+
+| Voice | Where | When | Source mark |
+|---|---|---|---|
+| Lap of the moats; a carp rising | nearest point of the inner or middle moat within 24 m (`canalSpot`, `pondSpot`) | always; carp by day, fewer in the cold | [inferred] from the moats of §2 and the carp of §5.5 |
+| Wells (pulley bucket, pour) | the town's public wells of the merchants' street and the three wells of the baileys | 6-19 h, dry | [inferred]; the engine's windlass voice stands for the rope-and-bucket |
+| Pedlars' cries (`hjPedlar`): greens (a stepwise climb), fish (high to low), lamp oil (low, long), charcoal and firewood (cold months), cold water (the heat, a boy's high call), the tofu seller's two-note horn | a walker on the street nearest the listener, ~1 m/s | by trade and hour, 6-17:30 | [inferred] from the street trades of Edo castle towns; none is dated to Himeji, the tofu horn's date c. 1620 not checked |
+| Palanquin (`hjKago`): bearers' quick steps in sandals, the pole's creak, "ei" answered by "ho" | a street walker, 1.5 m/s | 8-17 h, dry, rare | [stated] the kago and its bearers: Wikipedia "Kago" (§5.2); [inferred] the call |
+| Night watch (`hjHyoshigi`): two blows of wooden clappers, a pause, and now and then the call against fire | a street walker | 19:30-4:30, not in heavy rain | [inferred]: the clapper-and-call watch of Edo-period towns; the fire-watch towers are in §5.7 |
+| Fulling block (`hjKinuta`): a wooden mallet on a block, a slow even rhythm | the yards of the four open samurai compounds nearest the avenue | autumn nights, 19-23:30 | [inferred]: the sound of the autumn night in Japanese verse; its placement in these yards is ours |
+| The trades: shears (cloth), wheel (pottery), pestle (rice), washing (dye), wedge press (`hjWedge`, oil), straw beaten (sandals), kettle and cups (tea), mortar (medicine), paper dipped (paper), board and knife (fish), water and kitchen (tofu), hoop driven (`hjHoop`, cooper), vat stirred (sake) | a third of the open machiya of each trade | each trade's hours | [inferred] from the trades of §5.3 |
+| Inari shrine (`hjSuzu`): rope shaken, the bell rattled, two claps | the shrine on the avenue (14, 262) | 7-17 h, dry | [inferred]; the shrine itself is §5.7 |
+| Horse at its post (`hjHorse`): stamp, snort, a short neigh | the horse at the Honmaru wall (22.5, -12.2), as props.js | 5-19 h | [inferred] |
+| The Honmaru's broom on the gravel | where the servant stands (-12, -14.5) | 6-9 h, dry | [inferred] §4.1 |
+| Komusō's shakuhachi | the middle moat's bridge | dusk, dry | [inferred]: wandering shakuhachi monks (komusō) of the Edo period; the date for Himeji c. 1620 not checked |
+| Birds and insects (the engine's Japanese voices from Kyoto's set, reused): evening cicada, bush warbler, cuckoo, bell cricket, owl; cicadas, frogs, crickets by the engine's seasons | trees of the hill and yards (`treeSpot`, 41 m), the moats' banks | by season and hour | [inferred] |
+| The women washing at the moat landings | the four landings of the middle moat | 6:30-16:30, dry | [inferred] §5.7 |
+| The lord's kitchens | behind the residence | 5-20 h | [inferred] |
+
+**Rooms.** From inside (`roomAt`): each trade's house by its lot, a samurai house, the guards' hall and the lord's residence (`hall`: dull and quiet), a storehouse (`kura`: thick earthen walls, the street almost gone), the great keep (`keep`: timber on timber, high and dark); each with its tone, its rain on the tiles and its small sounds.
+
+**Not done.** The poled boats of the moats make no sound (nothing is sculled in the map); the tower of the fire watch has no bell stroke; the castle's drums and conch horn are not made (no source read); the grunt of horses at other hitching posts; footsteps of the visitor; the keep's creaks in wind.
