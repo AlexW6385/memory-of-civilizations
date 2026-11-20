@@ -301,3 +301,10 @@ Sources added:
 - [Ta Thnu Temple: an Angkorian Holy Place's Fading Pulse — Cambodianess](https://www.cambodianess.com/article/ta-thnu-temple-an-angkorian-holy-places-fading-pulse)
 
 Still below L3: the galleries' bare stone, the carved lintels and colonnettes in full, no standing water or reflections in the paddies, one moving boat hull, the village houses' fronts four designs plus three dressings.
+
+## 30. Geometry slimmed (match-up pass, step 0)
+
+No new subject: the same carving, built lighter, so that the visitor's walk can be built within the budget. Geometry 134.8 MB to 109.0 MB (meshes 2065 to 2152); at the arrival main draws 291 to 291, main triangles 3.05 M to 2.50 M.
+
+- The carving of the galleries (devatas, windows, pillars, pilasters), of the cloister and the whole bas-relief are built in plans drawn only within reach of each piece of wall (`CARVED` in plan.js, built in town.js), their repeated figures and mouldings as instances of one shape each (the files of soldiers, apsaras, fish of the panels: `relief.js`, `panels.js` groups). What lies within 150 m of the arrival (the enclosure's gate, the third gallery's west pieces) stays merged as before. [inferred: engineering only; the carving itself is unchanged]
+- The far forms of the village houses and sugar palms are lighter (corner posts only, no ridge roll, finials or door frame; tile roofs as four planes; twelve fans on the far palm): details of a pixel or less from 170 m or 260 m. [inferred]

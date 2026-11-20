@@ -42,7 +42,7 @@ export function facade(F, rand, o) {
   const patches = lod >= 1 ? 2 + Math.floor(rand() * 3) : 1;
   for (let k = 0; k < patches; k++) {
     const w = 0.5 + rand() * 1.1, h = 0.4 + rand() * 0.9, u = 0.2 + rand() * (W - w - 0.4), y = 0.7 + rand() * Math.max(0.1, H - h - 1.2);
-    if (!clear(u, u + w)) continue;
+    if (!clear(u, u + w) || (o.hole && u < o.hole[1] && u + w > o.hole[0] && y < 2.25)) continue;
     const m = pick(rand, WALL_MATS.filter((x) => x !== wm));
     F.b(m, u, y, -0.02 - k * 0.003, u + w, y + h, -0.005, false);
   }
@@ -73,20 +73,20 @@ export function facade(F, rand, o) {
   // the bench of mud brick beside the door, a mat on it; or the jars in their stand
   const room = (side) => (side > 0 ? W - dr : dl);
   const side = room(1) > room(-1) ? 1 : -1;
-  if (room(side) > 1.9 && rand() < 0.62) {
+  if (room(side) > 1.9 && rand() < 0.62 && !o.shop) {
     const b0 = side > 0 ? dr + 0.1 : dl - 1.7, b1 = b0 + 1.6;
     F.b('mud_plaster', b0, 0, -0.55, b1, 0.44, -0.0, false);
     F.b('reed_mat', b0 + 0.05, 0.44, -0.5, b1 - 0.05, 0.47, -0.05, false);
     if (rand() < 0.4) F.lathe('terracotta', POT(0.14, 0.9), b0 + 0.4, 0.47, -0.3, 8);
   }
   const jo = side > 0 ? dl - 0.45 : dr + 0.45;
-  if (jo > 0.5 && jo < W - 0.5 && rand() < 0.6) {
+  if (jo > 0.5 && jo < W - 0.5 && rand() < 0.6 && !o.shop) {
     F.b('mud_plaster', jo - 0.34, 0, -0.62, jo + 0.34, 0.22, -0.02, false);
     F.lathe('terracotta', POT(0.24, 1.15), jo - 0.01, 0.22, -0.32, 10);
     if (rand() < 0.5) F.lathe('terracotta', POT(0.18, 0.95), jo + 0.2, 0.22, -0.5, 9);
   }
   const fo = side > 0 ? W - 0.9 : 0.7;
-  const r = rand();
+  const r = o.shop ? 1 : rand();
   if (r < 0.28 && clear(fo - 0.6, fo + 0.6)) {                                                 // the fuel: palm ribs stacked against the wall
     for (let i = 0; i < 4; i++) F.b('palm_trunk', fo - 0.5 + i * 0.01, i * 0.11, -0.55, fo + 0.5 - i * 0.02, i * 0.11 + 0.1, -0.2 - i * 0.02, false);
   } else if (r < 0.5 && clear(fo - 0.5, fo + 0.5)) {                                           // dung cakes stacked to dry

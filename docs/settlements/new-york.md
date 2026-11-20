@@ -206,3 +206,22 @@ Ten shop rooms stand within 120 m of the arrival; each has its keeper, lights an
 - [inferred] Eight shop lots near the arrival (deli, haberdasher, bakery, two hatters, drugstore, lunchroom, barber) open a 1.9 m stair hall at the end away from the shop door; a straight stair with a door at each landing leads to the second and third floors (flat, office, loft or rooming house by the shop's trade). The narrowed lot is replayed in the far form.
 - [inferred] The walk-up at the diner's lot has a two-lane stair in the hall, flats on floors 2 to 5, windows onto the street with a door-window to the fire escape (decks are floors, rails block), and the roof with bulkhead, tank and coop.
 - [inferred] Still shut: floors above those, other room lots, row houses (brownstone parlours), the diner's upper room, iron-front lots. Sources not yet cited; layouts follow the Tenement Museum flat of §1f.
+
+## §14 Match round: night, sound, animals (2026-11-19)
+
+Make room first: far forms and shop furniture were slimmed without visible change (one-sided faces on far bodies, fewer lathe segments on tanks, merged street and yard plans): 124.7 MB / 2776 meshes down to 105.3 MB / 2253 meshes.
+
+Night (`nightlight.js`, the engine's additive `halo` material, night only):
+- Shop windows lit, each about six metres of front with a pool of light on the pavement. [inferred: Depression-era shops kept their window lights on in the evening; Times Square's and Broadway's electric signs are [stated] in the dossier §9 (Wikipedia "Jazz Age").]
+- A share (15 %) of the offices' and lofts' windows lit, on the facade shader's own grid, within 160 m of the arrival. [inferred: late workers and cleaners, a Midtown that never emptied.]
+- Street lamps: a warm globe and a pool under each (the layout's lamps, 5.5 m). [inferred: gas gave way to electric street lighting in Manhattan by the 1920s.]
+
+Sound (`soundmap.js`, `voices-ny.js`, tests/new-york-sound.test.mjs), every voice `ny`-prefixed, all [inferred] in pitch and contour:
+- The Sixth Avenue El overhead (a train on the avenue's line every 80 to 170 s from 5 to 1:30), its station gongs. [stated: the El ran on Sixth Avenue until 1938, Wikipedia "IRT Sixth Avenue Line".]
+- Taxi and car horns, engines on the avenues, a milk-wagon horse by morning. [inferred: horse-drawn milk wagons were a fading sight in 1931.]
+- Newsboys' cries, radios playing dance bands in shops and the walk-up, the subway's rumble under the avenues and Grand Central, typewriters upstairs, a lift's ding in the Empire State lobby, the train call under Grand Central's vault, an automat's coin drop. [inferred; radios [stated] common by 1931, Wikipedia "Golden Age of Radio".]
+- Rooms: shops, diner, walk-up, the Empire State lobby, the concourse.
+
+Animals (`fauna.js` `critters`, one mesh): pigeons feeding on the pavements of Sixth, Fifth and Madison Avenues in twos to fours, a tabby on the walk-up's step, a dog by a newsstand. [inferred: the city's pigeons and stray cats and dogs; no horse model exists in the critter set, so the milk horse is sound only.]
+
+Not done in this round: new opened shops and routes, street-name and subway lettering, wear. [stated plainly so a later round picks them up.]

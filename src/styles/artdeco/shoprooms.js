@@ -4,8 +4,8 @@
 // is open at its door; inside, the counter stands across the room 3 m from the back wall (the keeper's side behind it).
 // All laid out on the lot's street face: u along it, d inward from the front plane.
 
-import { box, lathe, rod } from '../../core/geom.js';
-import { face } from './blocks.js';
+import { box, lathe, rod, frustum } from '../../core/geom.js';
+import { face, LEAN } from './blocks.js';
 import { Quads, shopSign, rng } from './dress.js';
 
 /** The kinds, in the order the lots near the arrival get them: the name, the lining of the walls, the floor, the lamp's colour. */
@@ -39,7 +39,7 @@ export function shopRoom(bag, col, lights, el, r) {
   const Dr = el.room.depth, T = 0.3, fy = y + 0.06, HC = y + 4.18, doorR = el.room.door === 1;
   const I = (u0, u1, y0, y1, d0, d1) => R(u0, u1, y0, y1, -d1, -d0);          // d inward from the front plane
   const RC = (u0, u1, d0, d1) => F.rc(u0, u1, -d1, -d0);
-  const solid = (m, u0, u1, y0, y1, d0, d1, hit = true) => { bag.add(m, I(u0, u1, y0, y1, d0, d1)); if (hit) col.rect(RC(u0, u1, d0, d1), y0, y1); };
+  const solid = (m, u0, u1, y0, y1, d0, d1, hit = true) => { const sg = I(u0, u1, y0, y1, d0, d1); if (LEAN.rooms && Math.abs(y0 - fy) < 0.01) { sg.computeBoundingBox(); const b = sg.boundingBox; bag.add(m, frustum([b.min.x, b.min.z, b.max.x, b.max.z], b.min.y, b.max.y, 0, 0, 0, 0, { noBottom: true })); } else bag.add(m, sg); if (hit) col.rect(RC(u0, u1, d0, d1), y0, y1); };
   const P = (u, d, yy) => F.P(u, -d, yy);
   // the body: the upper storeys on the tin ceiling, the solid rear, the party walls and the back wall
   bag.add(mat, R(0, L, y + 4.5, y + h, -ext, 0)); col.rect(F.rc(0, L, -ext, 0), y + 4.5, y + h);
@@ -86,7 +86,7 @@ export function shopRoom(bag, col, lights, el, r) {
     for (let k = 0; k < rows; k++) {
       const yy = fy + 0.5 + k * 0.5;
       solid('wood_dark', u0, u1, yy, yy + 0.03, Dr - 0.05 - deep, Dr - 0.05, false);
-      for (let u = u0 + 0.1; u < u1 - 0.2;) { const w = 0.1 + r() * 0.18, hh = 0.14 + r() * hmax; if (r() < 0.85) bag.add(pal[Math.floor(r() * pal.length)], I(u, u + w, yy + 0.03, yy + 0.03 + hh, Dr - 0.05 - deep + 0.04, Dr - 0.08)); u += w + 0.02 + r() * 0.05; }
+      for (let u = u0 + 0.1; u < u1 - 0.2;) { const w = 0.1 + r() * 0.18, hh = 0.14 + r() * hmax; if (r() < 0.85) { const gm = pal[Math.floor(r() * pal.length)], gg = I(u, u + w, yy + 0.03, yy + 0.03 + hh, Dr - 0.05 - deep + 0.04, Dr - 0.08); if (LEAN.rooms) { gg.computeBoundingBox(); const b = gg.boundingBox; bag.add(gm, frustum([b.min.x, b.min.z, b.max.x, b.max.z], b.min.y, b.max.y, 0, 0, 0, 0, { noBottom: true })); } else bag.add(gm, gg); } u += w + 0.02 + r() * 0.05; }
     }
     solid('wood_dark', u0 - 0.04, u0, fy, fy + 0.5 + rows * 0.5, Dr - 0.05 - deep, Dr - 0.05, false); solid('wood_dark', u1, u1 + 0.04, fy, fy + 0.5 + rows * 0.5, Dr - 0.05 - deep, Dr - 0.05, false);
     solid('wood_dark', u0, u1, fy, fy + 0.4, Dr - 0.05 - deep, Dr - 0.05, false);

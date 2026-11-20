@@ -2,6 +2,8 @@
 import '../../styles/safavid/index.js';
 import square from './plan.js';
 import music from './music.js';
+import { registerNight } from './nightlight.js';
+registerNight();
 export { town } from './town.js';
 export { music };
 export const landmarks = [{ plan: square, music }];
