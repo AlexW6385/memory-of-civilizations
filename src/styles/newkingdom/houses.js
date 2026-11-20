@@ -66,7 +66,11 @@ export function door(F, wallMat, u, w, h, v0, v1, open, H) {
   F.b(wallMat, 0, 0, v0, u - w / 2, H, v1); F.b(wallMat, u + w / 2, 0, v0, F.W, H, v1);
   F.b(wallMat, u - w / 2, h, v0, u + w / 2, H, v1);
   F.b('palm_trunk', u - w / 2 - 0.15, h - 0.16, v0 - 0.06, u + w / 2 + 0.15, h + 0.08, v1 + 0.06, false);
-  F.b('limestone_core', u - w / 2 - 0.05, -0.04, v0 - 0.12, u + w / 2 + 0.05, 0.1, v1 + 0.08, false);
+  if (open && w > 1.2) {                                                                          // a much-trodden sill: the stone worn to a dip where the feet fall (§15e)
+    const m = Math.min(0.45, w / 2 - 0.2);
+    F.b('limestone_core', u - w / 2 - 0.05, -0.04, v0 - 0.12, u - m, 0.1, v1 + 0.08, false); F.b('limestone_core', u + m, -0.04, v0 - 0.12, u + w / 2 + 0.05, 0.1, v1 + 0.08, false);
+    F.b('limestone_core', u - m, -0.04, v0 - 0.12, u + m, 0.05, v1 + 0.08, false);
+  } else F.b('limestone_core', u - w / 2 - 0.05, -0.04, v0 - 0.12, u + w / 2 + 0.05, 0.1, v1 + 0.08, false);
   F.b('timber', u - w / 2 - 0.06, 0, v0 - 0.03, u - w / 2 + 0.02, h, v1 + 0.03, false); F.b('timber', u + w / 2 - 0.02, 0, v0 - 0.03, u + w / 2 + 0.06, h, v1 + 0.03, false);
   if (!open) F.b('cedar', u - w / 2 + 0.02, 0.02, v0 + 0.1, u + w / 2 - 0.02, h - 0.02, v0 + 0.2);
   else if (w > 1.2) F.b('cedar', u - w / 2 + 0.04, 0.02, v1 + 0.02, u - w / 2 + 0.12, h - 0.03, v1 + 0.62, false);        // the leaf stands open against the inside of the wall
