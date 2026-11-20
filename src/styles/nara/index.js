@@ -39,6 +39,7 @@ registerStyle('nara', {
     nara_tsuiji: naraTsuiji,
     ...yardElements,
     ...houseElements,
+    door_clear: () => {},               // (nothing built: the street life's pass reads its rectangle as a footprint, so none of its things stands in a doorway's lane)
   },
   objects: { hakkaku_toro: hakkakuToro, daibutsu: remapped(daibutsu), daibutsu_mid: buddhaLevel('mid'), daibutsu_fine: buddhaLevel('fine'), bosatsu_mid: bosatsuMid, nio_mid: nioMid, hakkaku_toro_figs: hakkakuToroFigures, bosatsu: remapped(bosatsu), nio: remapped(nio), shika },
 });

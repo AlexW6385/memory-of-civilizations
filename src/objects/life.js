@@ -281,6 +281,7 @@ const rectOf = (plan, [x0, z0, x1, z1]) => { const a = toSettle(plan, x0, z0), b
 // landmarks whose plan is the town itself (their elements are read like a townscape's)
 const OWN_FRONTS = new Set(['ming-suzhou']);          // settlements that dress their own house fronts (their town.js)
 OWN_FRONTS.add('song-kaifeng');      // (Kaifeng's shops and houses carry their own signs, lantern boxes and washing: houses.js, shops.js; a generic lantern hung in a door bay is lower than the plinth's headroom)
+OWN_FRONTS.add('nara');            // (Nara's houses dress their own fronts (nara_house: noren, trestle, signboard); a generic lantern hung at a lot's middle is in the doorway's lane)
 const TOWN_LANDMARKS = new Set(['machu-picchu-town', 'taos-pueblo']);
 const isFull = (plan, R) => TOWN_LANDMARKS.has(plan.id) || (plan.bounds && plan.bounds[2] - plan.bounds[0] >= R * 1.5);
 

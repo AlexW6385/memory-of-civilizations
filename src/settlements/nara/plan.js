@@ -3,6 +3,7 @@
 // lecture hall and the monks' quarters.
 
 import { HALL, COURT, SOUTH_GATE, PAGODAS } from './layout.js';
+import { ARRIVAL, WALK, walkLots, routeInto } from './walk.js';
 
 const E = [];
 // the Great Buddha Hall: eleven bays by seven, two roofs, about 49 m high to the ridge (§1)
@@ -49,6 +50,10 @@ const rooms = [room('court', COURT, 0, 'open'), room('great buddha hall', HALL, 
 E.push({ t: 'obj', kind: 'hakkaku_toro', fig: 'none', at: [0, -16], y: 0 });
 const walks = [[[0, 180], [0, 146], [0, 60], [0, 40], [0, -8], [2.8, -12], [2.8, -20]]];
 walks[0].y0 = 0;
+// the visitor's walk (walk.js, docs §20): from the arrival down the axis through the gates to the avenue and the market, and into the opened houses and shops along it
+walks.push(WALK[0].map(([x, z]) => [x, z]));
+for (const l of walkLots().slice(0, 40)) { const r = routeInto(l); r.y0 = 0; walks.push(r); }
+void ARRIVAL;
 
 export const todaiji = {
   id: 'nara-todaiji',

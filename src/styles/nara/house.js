@@ -18,7 +18,10 @@ const jar = (r, h, x, y, z) => lathe([[0.001, 0], [r * 0.5, 0], [r, h * 0.25], [
 
 export function naraHouse(el, ctx) {
   const { bag, col, lights } = ctx;
-  STYLES.vernacular.elements.house_japan(el, ctx);
+  // (the shared open house has a 0.2 m collidable step before its door, and the walker standing on it, head at 1.95 m, meets the deep eave's low edge (1.84 m):
+  // the step is drawn but not collided with, so the walker goes up the 0.45 m to the floor in one stride, as it can, and keeps clear of the eave)
+  const y0 = el.y ?? 0, noStep = new Proxy(col, { get: (t, k) => (k === 'floor' ? (r, h) => (Math.abs(h - (y0 + 0.2)) < 1e-6 ? undefined : t.floor(r, h)) : typeof t[k] === 'function' ? t[k].bind(t) : t[k]) });
+  STYLES.vernacular.elements.house_japan(el, { ...ctx, col: noStep });
   if (el.simple) return;
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, f = el.front || 's', rand = rng((el.seed || 1) * 7 + 3);
   const L = x1 - x0, D = z1 - z0, nb = Math.max(2, Math.floor(L / 3.2)), du = (Math.floor(nb / 2) + 0.5) * L / nb;
@@ -33,10 +36,14 @@ export function naraHouse(el, ctx) {
   const use = USES.includes(el.use) ? el.use : null, craft = craftOf(el), working = craft && craft !== 'home', trade = el.trade ?? TRADES[Math.floor(rand() * TRADES.length)];
   const CL = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_brown'];
   const side = rand() < 0.5 ? -1 : 1;                       // which side of the door the goods stand
-  const su = du + side * (1.5 + rand() * 0.5);
+  const su = du + side * (1.95 + rand() * 0.4);             // (a trestle or bench keeps 1.1 m off the door's middle: the door lane, 1.1 m wide, stays free)
   // the noren in the door, under the eave; a shop's is longer and darker
-  Bx(shop ? 'cloth_indigo' : CL[Math.floor(rand() * 6)], du - 0.55, -0.1, du + 0.55, -0.07, y + (shop ? 0.9 : 1.2), y + 2.05);
-  Bx('wood_dark', du - 0.62, -0.13, du + 0.62, -0.07, y + 2.05, y + 2.12);
+  // (drawn aside: a valance above the head's height (2.25 m over the earth) and a panel hanging at each jamb, so that the doorway between stays open to the walker, who
+  // reads any standing slab in its band as a wall)
+  { const nm = shop ? 'cloth_indigo' : CL[Math.floor(rand() * 6)], lo = y + (shop ? 0.9 : 1.2);
+    Bx(nm, du - 0.55, -0.1, du + 0.55, -0.07, y + 2.28, y + 2.5);
+    for (const sg of [-1, 1]) Bx(nm, du + sg * 0.41, -0.1, du + sg * 0.55, -0.07, lo, y + 2.28);
+    Bx('wood_dark', du - 0.62, -0.13, du + 0.62, -0.07, y + 2.5, y + 2.57); }
   const inside = su > 0.9 && su < L - 0.9 && !(use && use !== 'incense' && use !== 'oil') && !working;
   if (inside) {
     if (shop) {
@@ -60,8 +67,9 @@ export function naraHouse(el, ctx) {
     } else {
       // a house: a bench, a water jar, firewood stacked to the eave on the wall, a basket
       Bx('timber', su - 0.7, -0.5, su + 0.7, -0.15, y + 0.38, y + 0.45, true);
-      Jr(0.28, 0.65, su + (rand() < 0.5 ? 1.2 : -1.2), -0.45, y);
-      Bx('log_pine', su - 1.6 * side - 0.5, -0.45, su - 1.6 * side + 0.5, -0.05, y, y + 1.0 + rand() * 0.3, true);
+      const jarU = su + side * 1.2 * (rand() < 0.5 ? 1 : -0.7), stackU = du - side * 2.1;   // the jar beside the bench, the firewood on the other side of the door (never in its lane)
+      if (jarU > 0.6 && jarU < L - 0.6 && Math.abs(jarU - du) > 1.1) Jr(0.28, 0.65, jarU, -0.45, y);
+      if (stackU - 0.5 > 0.3 && stackU + 0.5 < L - 0.3) Bx('log_pine', stackU - 0.5, -0.45, stackU + 0.5, -0.05, y, y + 1.0 + rand() * 0.3, true);
       if (rand() < 0.6) { Bx('wicker', su + 0.9 * side, -0.5, su + 1.3 * side, -0.15, y + 0.45, y + 0.7); }
     }
   }
