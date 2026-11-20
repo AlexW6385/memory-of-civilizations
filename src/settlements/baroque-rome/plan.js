@@ -4,6 +4,7 @@ import { upRoute, balconyU } from '../../styles/baroque/upstairs.js';
 import { PALAZZO_STOREYS, CASA_STOREYS } from '../../styles/baroque/borgo.js';
 import { rows, GARDEN, RADIUS, CROSSING, FRONT_X, FLOOR, OVAL, RETTA, PALACE, COURT, SISTINA_C, CASTEL, TIBER, tiberX, height } from './layout.js';
 
+import { shopWalks } from './openwalk.js';
 // the climbed houses (§5c): for each, the way from the street up the stair to a room of its top floor, and one to the first floor's balcony
 const upWalks = [];
 for (const r of rows()) {
@@ -42,7 +43,7 @@ export const stpeter = {
     { id: 'nave', rect: [CROSSING[0] + 21, -13.75, FRONT_X - 4 - 9.2, 13.75], y: FLOOR, kind: 'hall' },
     { id: 'crossing', rect: [CROSSING[0] - 21, -21, CROSSING[0] + 21, 21], y: FLOOR, kind: 'hall', sealed: true },
   ],
-  walks: [...upWalks, Object.assign([[125, 0], [58, 0], [56, 11], [24, 11], [22, 0], [FRONT_X + 26, 0], [FRONT_X - 3, 0], [FRONT_X - 20, 0]], { y0: 0 })],   // (round the obelisk, up the steps, through the portico into the nave)
+  walks: [...upWalks, ...shopWalks(), Object.assign([[125, 0], [58, 0], [56, 11], [24, 11], [22, 0], [FRONT_X + 26, 0], [FRONT_X - 3, 0], [FRONT_X - 20, 0]], { y0: 0 })],   // (round the obelisk, up the steps, through the portico into the nave)
 };
 export const vatican = {
   id: 'baroque-rome-vatican', style: 'baroque', origin: [0, 0], base: 0, yaw: 0, feature: true,
