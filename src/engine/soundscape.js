@@ -76,6 +76,7 @@ import * as ANGKOR from '../settlements/angkor/soundmap.js';
 import './voices-angkor.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
 import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
+import * as BHAKTAPUR from '../settlements/bhaktapur/soundmap.js';
 import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as HIMEJI from '../settlements/edo-himeji/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
@@ -107,6 +108,8 @@ import './voices-tenochtitlan.js';
 import * as THEBES from '../settlements/thebes/soundmap.js';
 import * as TIMURID from '../settlements/timurid-samarkand/soundmap.js';
 import './voices-timurid.js';
+import * as VERSAILLES from '../settlements/versailles/soundmap.js';
+import './voices-versailles.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -168,7 +171,7 @@ export const PROFILES = {
   'han-changan': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3, camel: 0.2 }, roof: 'tile' }),
   'tang-changan': T(EAS, { cicadas: 0.4, animals: withLife({ rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, { market: 1, eaves: 1, map: TANGCA }), roof: 'tile', bells: 'tang-changan' }),
   'wei-ye': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
-  bhaktapur: T(IND, { cicadas: 0.2, animals: { dog: 0.4, rooster: 0.4, cattle: 0.3, goat: 0.2 }, roof: 'tile', bells: 'puja' }),
+  bhaktapur: T(IND, { cicadas: 0.2, animals: withLife({ dog: 0.4, rooster: 0.4, cattle: 0.3, goat: 0.2 }, { market: 1, eaves: 1, map: BHAKTAPUR }), roof: 'tile', bells: null }),
   nalanda: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.5, goat: 0.3, rooster: 0.3, dog: 0.2 }, roof: 'flat', bells: 'puja' }),
   'hakka-tulou': T(EAS, { cicadas: 0.7, frogs: 0.9, animals: { rooster: 0.7, dog: 0.4, cattle: 0.3 }, roof: 'tile' }),
   ajanta: T(IND, { cicadas: 0.4, frogs: 0.3, animals: { goat: 0.4, cattle: 0.3, dog: 0.3 }, roof: 'thatch', bells: 'monastery' }),
@@ -232,7 +235,7 @@ export const PROFILES = {
   teotihuacan: T({ warbler: 0.8, dove: 0.5 }, { cicadas: 0.4, animals: { dog: 0.3 }, roof: 'flat' }),
   ur: T({ ...NEAR, gull: 0 }, { frogs: 0.5, animals: { donkey: 0.6, goat: 0.4, dog: 0.3 }, roof: 'flat' }),
   venice: T({ ...MED, gull: 1 }, { cicadas: 0.2, animals: withLife({ dog: 0.2 }, { canal: 1, market: 1, map: VENICE }), roof: 'tile', bells: 'venice' }),
-  versailles: T(EU, { animals: { horse: 0.8, dog: 0.4 }, roof: 'slate', bells: 'angelus' }),
+  versailles: T(EU, { animals: withLife({ horse: 0.8, dog: 0.4 }, { canal: 0.6, market: 0.8, eaves: 1, map: VERSAILLES }), roof: 'slate', bells: 'angelus' }),
 };
 const DEFAULT = T({ warbler: 1, sparrow: 0.5 });
 export const profileOf = (id) => PROFILES[id] || DEFAULT;
