@@ -4,7 +4,7 @@
 // going up to the stadium. Data for the engine's movers (src/engine/movers.js, read in its worker); the ways come from layout.js.
 // No boats.
 
-import { RADIUS, WAY, WAY2, TT, FC, SPRING, STADIUM, STOA, lanes, alleys } from './layout.js';
+import { RADIUS, WAY, WAY2, TT, FC, SPRING, STADIUM, STOA, VROADS, VROAD_X, lanes, alleys } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -21,6 +21,9 @@ export function walkways() {
   for (let i = 0; i < WAY.length - 1; i++) links.push({ a: WAY[i], b: WAY[i + 1], w: 3.0, kind: 'street', weight: 3.4 });
   for (let i = 0; i < WAY2.length - 1; i++) links.push({ a: WAY2[i], b: WAY2[i + 1], w: 2.0, kind: 'street', weight: 1.4 });
   // the village: along each lane, and down the alleys' stairs
+  // the village road from the side gate, and from it to the west end of each lane
+  for (const V of VROADS) for (let i = 0; i + 1 < V.P.length; i++) links.push({ a: V.P[i], b: V.P[i + 1], w: 2.4, kind: 'lane', weight: 1.0 });
+  for (const r of lanes()) if (r.x0 < VROAD_X + 5 && r.x0 > VROAD_X) links.push({ a: [VROAD_X, r.z - 0.3], b: [r.x0, r.z - 0.3], w: 2.0, kind: 'lane', weight: 0.8 });
   for (const r of lanes()) links.push({ a: [r.x0, r.z - 0.3], b: [r.x1, r.z - 0.3], w: 2.2, kind: 'lane', weight: 0.9 });
   for (const q of alleys()) if (q.up && q.dn) links.push({ a: [(q.x0 + q.x1) / 2, q.up.z + 1.4], b: [(q.x0 + q.x1) / 2, q.dn.z - 0.3], w: 1.6, kind: 'lane', weight: 0.5 });
   rects.push({ r: [33, -20, 90, 24], weight: 2.2, market: 1.2, kind: 'street' });
