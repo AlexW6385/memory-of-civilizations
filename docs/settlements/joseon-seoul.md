@@ -226,3 +226,9 @@ Each item is marked [stated] (with its source) or [inferred]. Code: `src/settlem
 - **Mandarin ducks** in a pair on Gyeonghoeru's pond and on Hyangwonji [inferred: the ducks; the ponds are §6]. **A crane** on the pond's south-east bank [inferred: a bird of palace gardens]. **A kingfisher** on Hyangwonji's south bank [inferred].
 - **Swallows' nests** under the head beam of the two shops of Jongno nearest the avenue, the birds sweeping down the street; **a caged songbird** at a one-bay shop [inferred].
 - **Hens, a rooster, a dog at the gate and a cat on the wall** of the first hanok yard on the walk [inferred: household animals]. **Magpies** (kkachi) on the palace walls as perches [inferred].
+
+### 19.5 Writing and wear
+
+- **Hyangwonjeong's name board** 香遠亭, gilt on black under the upper eave on the face toward the bridge, built only from Suzhou's glyph data, whose strokes were verified there against the reference typeface (`ming-suzhou/brush-data.js`, read-only) [stated: the pavilion's name; the board's size and place are inferred].
+- **Not written, for want of verified glyphs:** 勤政殿, 勤政門, 興禮門, 光化門, 慶會樓, the hamabi's 下馬 and the shop names (紙廛, 綿布廛, 苧布廛, 魚物廛). Each needs its characters (勤 興 禮 光 化 慶 會 下 馬 紙 廛 綿 苧 魚 物 among them) laid stroke by stroke over the typeface; none was done, and the boards stay plain. No hangul was written.
+- **Wear** (steps, thresholds, stains, moss) was not added in this pass.

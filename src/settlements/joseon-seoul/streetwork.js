@@ -4,6 +4,8 @@
 import { STYLES } from '../../core/build.js';
 import { box, fromTriangles, orientOutward } from '../../core/geom.js';
 import { Parts } from '../../styles/qing/carving.js';
+import { relief } from '../ming-suzhou/brush.js';
+import { GLYPH } from '../ming-suzhou/brush-data.js';
 
 /**
  * hamabi { at: [x, z], face: [fx, fz] (toward the road), y, text? }: a granite stele 0.5 m wide, 0.18 m thick and 1.3 m high with a hipped cap, on a
@@ -29,8 +31,26 @@ function hamabi(el, { bag, col }) {
   col.rect([x - 0.5, z - 0.38, x + 0.5, z + 0.38], y, y + h1);
 }
 
+/**
+ * hyang_board { c: [x, z] (the hexagon's centre), y (the board's middle), d (the face's distance from the centre), text }: the name board of Hyangwonjeong
+ * on its north face (toward the bridge), a black board with gilt characters read from the right, built only of characters whose strokes were laid over
+ * the reference typeface for Suzhou (src/settlements/ming-suzhou/brush-data.js, read-only): 香遠亭 are all there. [inferred: the board's size and place;
+ * the pavilion's name is the dossier's §12]. A text with a character not in the data is not written (the board stays blank).
+ */
+function hyangBoard(el, { bag }) {
+  const [cx, cz] = el.c, text = [...(el.text ?? '香遠亭')], zf = cz - el.d - 0.04, y = el.y;
+  bag.add('lacquer_black', box(cx - 0.9, y - 0.22, zf - 0.05, cx + 0.9, y + 0.22, zf + 0.0));
+  if (!text.every((c) => GLYPH[c])) return;
+  const out = [], pitch = 0.5;
+  text.forEach((c, i) => relief(out, GLYPH[c], (-(i - (text.length - 1) / 2)) * pitch, 0, 0.34, 0, 0.012, { top: 0.55 }));
+  // facing -z: turned half a turn about the vertical, the first character at the reader's right
+  const t = [];
+  for (let k = 0; k < out.length; k += 3) t.push(cx - out[k], y + out[k + 1], zf - 0.005 - out[k + 2]);
+  bag.add('gold', fromTriangles(orientOutward(t)));
+}
+
 /** Register the elements (idempotent). */
 export function registerStreet() {
-  if (STYLES.joseon) STYLES.joseon.elements.hamabi = hamabi;
+  if (STYLES.joseon) { STYLES.joseon.elements.hamabi = hamabi; STYLES.joseon.elements.hyang_board = hyangBoard; }
 }
 registerStreet();
