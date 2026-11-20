@@ -120,8 +120,8 @@ export function ttAvenue(el, ctx) {
         bag.add('maya_blue', lathe([[0.001, 0], [0.05, 0.05], [0.001, 0.1]], 8).translate(o.x + 0.2, y, o.z + 0.4));
         break;
       }
-      case 'dog': L.animal({ t: 'animal', kind: 'dog', at: [o.x, o.z], y, rot: o.rot || 0, seed: o.seed, mat: 'hide_tan' }, ctx); break;
-      case 'turkey': L.chickens({ t: 'chickens', kind: 'turkey', n: 3, at: [o.x, o.z], y, rot: o.rot || 0, seed: o.seed }, ctx); break;
+      case 'dog': if (o.crit) break; L.animal({ t: 'animal', kind: 'dog', at: [o.x, o.z], y, rot: o.rot || 0, seed: o.seed, mat: 'hide_tan' }, ctx); break;
+      case 'turkey': if (o.crit) break; L.chickens({ t: 'chickens', kind: 'turkey', n: 3, at: [o.x, o.z], y, rot: o.rot || 0, seed: o.seed }, ctx); break;
       case 'priest': fig(ctx, { who: 'man', at: [o.x, o.z], y, rot: o.rot || 0, seed: o.seed, pose: 'stand' }); break;
       default: break;
     }

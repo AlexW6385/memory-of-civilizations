@@ -19,6 +19,8 @@ export function pier(bag, col, x, z, y) {
  * An arcade along z at X from za to zb on piers at the stations zs: the wall 0.5 thick, horseshoe arches between the piers,
  * a rim of moulding round each arch, a carved lozenge in each spandrel, a string course under the top. Faces: both sides.
  */
+/** 1 ± 3 % from a place: the hand-cut mouldings are not one shape repeated (identical pieces would be instanced, a draw each; varied ones merge into one fine-detail mesh). */
+const jit = (x, y) => { const h = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453; return 1 + 0.06 * (h - Math.floor(h) - 0.5); };
 export function arcade(bag, X, za, zb, zs, y, hc = 4.2, top = 6.4) {
   const th = 0.5, t2 = th / 2, ys = y + hc, yt = y + top, tri = [], deco = [], rods = [], L = zb - za;
   const P = (u, yy, o) => [X + o, yy, za + u];
@@ -35,7 +37,7 @@ export function arcade(bag, X, za, zb, zs, y, hc = 4.2, top = 6.4) {
     pts.push([ub, ys]);
     for (let k = 0; k + 1 < pts.length; k++) { strip(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]); under(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]); }
     // the moulding round the extrados: a rod a little proud of the face, and a second, lighter one behind it
-    for (let k = 0; k < K; k++) { const a = pts[k + 1], b = pts[k + 2]; for (const o of [-t2 - 0.012, t2 + 0.012]) { rods.push([P(a[0], a[1] + 0.1, o), P(b[0], b[1] + 0.1, o), 0.032]); rods.push([P(a[0], a[1] + 0.22, o), P(b[0], b[1] + 0.22, o), 0.016]); } }
+    for (let k = 0; k < K; k++) { const a = pts[k + 1], b = pts[k + 2]; for (const o of [-t2 - 0.012, t2 + 0.012]) { rods.push([P(a[0], a[1] + 0.1, o), P(b[0], b[1] + 0.1, o), 0.032 * jit(X + o, a[0] + k)]); rods.push([P(a[0], a[1] + 0.22, o), P(b[0], b[1] + 0.22, o), 0.016 * jit(X - o, a[0] - k)]); } }
   }
   // the spandrels: a carved lozenge over each pier (the darj wa ktaf of the stucco), two faces
   for (const u of us) {

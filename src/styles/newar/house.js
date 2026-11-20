@@ -339,6 +339,7 @@ export function houseParts(el, ctx, { hipRoof }) {
 
   /** A lattice window at (lx, y) of width w and height h: the dark recess, a carved frame, the screen of bars. */
   function lattice(lx, y, w, h, d) {
+    if (el.__win) el.__win.push([lx, y, w, h]);                                          // (a replay of the builder, settlements/bhaktapur/nightlight.js, collects the windows for the night's lit panes)
     if (recFloor > 0) wins[recFloor].push([lx, lx + w, y, y + h]); else B(lx, y, -0.05, lx + w, y + h, 0.0, 'opening');
     const t = 0.09;
     B(lx - t, y - t, -0.11, lx + w + t, y, 0.02, 'wood_dark'); B(lx - t, y + h, -0.11, lx + w + t, y + h + t, 0.02, 'wood_dark');

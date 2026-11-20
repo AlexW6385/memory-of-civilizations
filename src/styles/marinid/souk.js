@@ -127,6 +127,14 @@ export function souk(el, { bag, col }) {
   for (let i = 0; i <= n; i++) { const u = u0 + 0.2 + (L - 0.4) * i / n; bag.add('cedar', lane(u - 0.09, u + 0.09, c - hw - 0.2, c + hw + 0.2, yR(u) - 0.24, yR(u))); }
   const m = Math.floor(w / 0.26);
   for (let k = 0; k < m; k++) { const v = c - hw + (k + 0.5) * w / m; for (let i = 0; i < n; i++) { if ((i + k) % 7 === 3) continue; const a = u0 + 0.2 + (L - 0.4) * i / n, b = u0 + 0.2 + (L - 0.4) * (i + 1) / n; bag.add('timber', lane(a + 0.02, b - 0.02, v - 0.06, v + 0.06, yR((a + b) / 2), yR((a + b) / 2) + 0.05)); } }
+  // the lanterns hung from the beams every 9 m along the middle (lit at night: settlements/fez/nightlight.js soukLamps)
+  for (let t = 6; t < L - 4; t += 9) {
+    const u = (alongX ? ax : az) + t * Math.sign((alongX ? bx - ax : bz - az) || 1);
+    if (el.gaps?.some(([g0, g1]) => u > g0 - 1 && u < g1 + 1)) continue;
+    const lx = alongX ? u : c, lz = alongX ? c : u, ly = yy(u) + 4.0;
+    bag.add('iron', rod([lx, ly + 0.45, lz], [lx, ly + 0.16, lz], 0.007, 3));
+    bag.add('bronze', lathe([[0.001, 0], [0.06, 0.01], [0.11, 0.08], [0.09, 0.15], [0.001, 0.17]], 8, null, lx, ly - 0.02, lz));
+  }
   // the shops' wall above the slats is the same plaster; the lane's ends get a lintel with green tiles
   for (const e of [u0, u0 + L]) bag.add('cedar', lane(e - 0.12, e + 0.12, c - hw - 0.1, c + hw + 0.1, yR(e) - 0.5, yR(e) - 0.1));
 }

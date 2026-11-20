@@ -19,6 +19,8 @@ export const KEEP_CLEAR = [[-100, -420, 100, -190], [22, -215, 315, 95], [22, 16
 export const QPP = { rect: [-93, -183, -52, -147], y: 4.2 };
 export const JAGUARS = { rect: [-98, -141, -60, -111], y: 0.6 };
 /** The Great Compound's market plaza west of the avenue, opposite the Ciudadela; its central platform. */
+/** Where the street along the avenue's west platform meets the way down from it (walk.js): the middle of the opened compounds' lane. */
+export const WEST_STREET = [-57, 40];
 export const MARKET = [-190, 172, -66, 346];
 export const MARKET_PLATFORM = [-142, 245, -114, 273];
 export const PALACE_CLEAR = [-112, -190, -52, -104];
@@ -54,7 +56,9 @@ export function compounds() {
     // the compounds with a painted room (Tepantitla's) and those of the obsidian workers (nearer the Ciudadela and the Moon)
     const h2 = ((seed ^ 0x9e3779b9) >>> 0) / 4294967296, mural = h < 0.2, workshop = h > 0.8 && (cz > 120 || cz < -300 || h > 0.93);
     // the potters' and the weavers' compounds (the rest are households)
-    LOTS.push({ rect: r, seed, mural, workshop, craft: !mural && !workshop && h2 < 0.32 ? (h2 < 0.17 ? 'potter' : 'weaver') : null });
+    // the compounds the visitor can walk into (walk.js): the three nearest the avenue's west platform, their gate on the east side toward the street along it
+    const open = r[2] < -50 && r[2] > -75 && Math.hypot(cx - WEST_STREET[0], cz - WEST_STREET[1]) < 150;
+    LOTS.push({ rect: r, seed, open, gate: open ? 3 : undefined, mural, workshop: open ? false : workshop, craft: !mural && !workshop && h2 < 0.32 ? (h2 < 0.17 ? 'potter' : 'weaver') : null });
   }
   return LOTS;
 }
@@ -95,3 +99,24 @@ export function inStreet(x, z) {
 }
 /** The lots left without a compound (kept as plots of maguey and nopal). */
 export function emptyLots() { compounds(); return EMPTY; }
+
+/**
+ * The temples on the avenue's side platforms, each with the stair up to the platform from the plaza at its z (x −20…−16.4 on the west, 16.4…20 on the east, 5 m wide):
+ * [{ sd (−1 west, 1 east), z, lv (the plaza's level), big (the one with a chamber) }]. The same rule as plan.js's.
+ */
+export function platformTemples() {
+  const out = [], ends = [-189, ...CROSS.flatMap((z) => [z, z + 6]), AVENUE[3]];
+  for (let i = 0; i < ends.length; i += 2) {
+    for (const sd of [-1, 1]) {
+      let runs = [[ends[i], ends[i + 1]]];
+      for (const k of KEEP_CLEAR) if (sd > 0 && k[0] < BANK) runs = runs.flatMap(([a, b]) => (b <= k[1] || a >= k[3] ? [[a, b]] : [[a, Math.min(b, k[1])], [Math.max(a, k[3]), b]]).filter(([u, v]) => v - u > 12));
+      for (const [a, b] of runs) {
+        const zz0 = Math.max(a, -RADIUS), zz1 = Math.min(b, Math.sqrt((RADIUS - 30) ** 2 - BANK * BANK));
+        if (zz1 - zz0 < 12) continue;
+        const n = Math.max(1, Math.floor((zz1 - zz0 - 8) / 30));
+        for (let j = 0; j < n; j++) out.push({ sd, z: zz0 + (zz1 - zz0) * (j + 0.5) / n, lv: LEVELS[i / 2], big: n > 2 && j === Math.floor(n / 2) });
+      }
+    }
+  }
+  return out;
+}

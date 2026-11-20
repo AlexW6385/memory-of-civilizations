@@ -3,6 +3,7 @@
 // the people about: neighbours in talk at their doors, a maid sweeping her step, a child at play, a water-carrier with his pails, a
 // carter with his horse, dogs and cats. Derived from layout.js (the lots and their fronts), in 100 m tiles drawn near the visitor.
 import { RADIUS, RISE, PLACE, lots } from './layout.js';
+import { keeperElements, wellElements } from './keepers.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const OUT = { n: [0, -1], s: [0, 1] };
@@ -52,6 +53,8 @@ export function streetPlans() {
     put({ t: 'cart', at: [x - Math.sin(r) * -3.6, z], y: RISE, rot: r, seed: Math.floor(x * 3) });
     put(fig(rand, { at: [x + Math.sin(r) * -1.2, z + 1.1], rot: r, cloth: 'cloth_brown', cloth2: 'cloth_grey', pose: 'stand', hat: 'brim' }));
   }
+  // the keepers behind the opened shops' counters and the wells of the walk (keepers.js)
+  for (const e of [...keeperElements(), ...wellElements()]) put(e);
   const out = [];
   for (const [k, E] of tiles) { const [i, j] = k.split(',').map(Number); out.push({ id: `versailles-streets-${k}`, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [], elements: E, entrance: { at: [180, 0], facing: 'w' }, center: [i * 100 + 50, j * 100 + 50], near: 190 }); }
   return out;

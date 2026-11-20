@@ -3,14 +3,21 @@
 // wall to the upper room whose lane windows are closed by wooden lattices, a second flight to the flat roof (terrado) with its
 // parapet, its water jars and washing. Built in a frame u along the front, v in from it; every storey walkable.
 
-import { box, lathe, rod, clothBox, addCloth } from '../../core/geom.js';
+import { box, lathe, rod, clothBox, addCloth, fromTriangles } from '../../core/geom.js';
 import { holedWall, archHead, face } from './halls.js';
 
 const LW = 'limewash_white', T = 0.4, ST = 3.1;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** Whether the house with this seed keeps a shop on its ground floor (shared with the lane's dressing). */
 export const isShop = (seed) => seed % 7 < 2;
-const TRADES = ['potter', 'cloth', 'grocer'];
+/** The trades of the shops: the potter, the cloth merchant and the grocer, and (docs/settlements/granada.md §20) the coppersmith and the baker; by the house's own seed, apart from the one that makes it a shop. */
+export const TRADES = ['potter', 'cloth', 'grocer', 'smith', 'baker'];
+export const tradeOf = (seed) => TRADES[Math.floor(seed / 7) % TRADES.length];
+/** What the ground room of a house that is not a shop is used for: a divan-room, a kitchen's hearth, a loom, a store of jars and sacks. */
+export const HOUSE_USES = ['home', 'kitchen', 'weaver', 'store'];
+export const useOf = (seed) => HOUSE_USES[Math.floor(seed / 13) % HOUSE_USES.length];
+/** Half the width of a house's street opening: 0.6 for a door, 1.1 for a shop (its whole front open by day: the shutter folded up, the counter at the threshold). */
+export const openHalf = (seed) => (isShop(seed) ? 1.1 : 0.6);
 
 /**
  * andalusi_house: { rect, y, foot, front ('n' | 's'), seed, storeys (1 | 2), solid } — `solid`: the shell only (a closed block)
@@ -34,20 +41,23 @@ function house(el, { bag, col }) {
   const hx = (ua, ub, ya, yb) => [Math.min(wx(ua), wx(ub)), Math.max(wx(ua), wx(ub)), ya, yb];
   const hz = (va, vb, ya, yb) => [Math.min(wz(va), wz(vb)), Math.max(wz(va), wz(vb)), ya, yb];
   // the front: the door, and on the upper floor a window in every bay
-  const frontHoles = [hx(du - 0.6, du + 0.6, y + 0.12, y + 2.45)];
+  const dw = openHalf(el.seed), frontHoles = [hx(du - dw, du + dw, y + 0.12, y + 2.45)];
   for (let q = 1; q < N; q++) for (let b = 0; b < bays; b++) { const u = (b + 0.5) * L / bays; frontHoles.push(hx(u - 0.36, u + 0.36, y + q * ST + 1.0, y + q * ST + 2.05)); }
   wall(0, 0, L, T, frontHoles, true);
   wall(0, D - T, L, D, [hx(L * 0.3 - 0.3, L * 0.3 + 0.3, y + 1.5, y + 2.2), ...(N > 1 ? [hx(L * 0.7 - 0.3, L * 0.7 + 0.3, y + ST + 1.0, y + ST + 1.9)] : [])], true);
   const sideHoles = (k) => { const h = []; for (let q = 0; q < N; q++) for (const v of [2.5 + k, 6.0 - k]) if (v < D - 1) h.push(hz(v - 0.28, v + 0.28, y + q * ST + 1.6, y + q * ST + 2.2)); return h; };
   wall(0, T, T, D - T, sideHoles(0), false); wall(L - T, T, L, D - T, sideHoles(0.3), false);
   // collision of the walls (the door left open) and the parapet's coping
-  col.rect(R(0, 0, du - 0.6, T), y, top); col.rect(R(du + 0.6, 0, L, T), y, top); col.rect(R(du - 0.6, 0, du + 0.6, T), y + 2.45, top);
+  col.rect(R(0, 0, du - dw, T), y, top); col.rect(R(du + dw, 0, L, T), y, top); col.rect(R(du - dw, 0, du + dw, T), y + 2.45, top);
   col.rect(R(0, D - T, L, D), y, top); col.rect(R(0, T, T, D - T), y, top); col.rect(R(L - T, T, L, D - T), y, top);
   B('roof_tile', -0.06, -0.06, L + 0.06, D + 0.06, top, top + 0.1);
   // the horseshoe arch over the door, the leaf folded back, the step
-  archHead(bag, face('z', s ? z1 : z0, s ? -1 : 1), Math.min(wx(du - 0.6), wx(du + 0.6)), Math.max(wx(du - 0.6), wx(du + 0.6)), y + 1.9, y + 2.45, T, ['horseshoe', 'pointed', 'horseshoe', 'lobed'][VAR], { alfiz: true });
-  B('wood_dark', du - 0.55, 0.08, du - 0.05, 0.16, y + 0.12, y + 2.0);
-  B(LW, du - 0.9, -0.5, du + 0.9, 0, y - 0.1, y + 0.12); col.floor(R(du - 0.9, -0.5, du + 0.9, 0), y + 0.12);
+  archHead(bag, face('z', s ? z1 : z0, s ? -1 : 1), Math.min(wx(du - dw), wx(du + dw)), Math.max(wx(du - dw), wx(du + dw)), y + 1.9, y + 2.45, T, SHOP ? 'round' : ['horseshoe', 'pointed', 'horseshoe', 'lobed'][VAR], { alfiz: true });
+  // the door's leaf folded back; a shop's two leaves stand folded against its jambs (shutters up: the front open)
+  if (SHOP) for (const sg of [-1, 1]) B('wood_dark', du + sg * dw - (sg > 0 ? 0 : 0.07), T, du + sg * dw + (sg > 0 ? 0.07 : 0), 1.0, y + 0.12, y + 2.1);
+  else B('wood_dark', du - 0.55, 0.08, du - 0.05, 0.16, y + 0.12, y + 2.0);
+  sill(bag, F, du - dw, du + dw, y + 0.12, el.seed);
+  B(LW, du - dw - 0.3, -0.5, du + dw + 0.3, 0, y - 0.1, y + 0.12); col.floor(R(du - dw - 0.3, -0.5, du + dw + 0.3, 0), y + 0.12);
   // a wooden lattice over each upper window, standing a hand off the wall (the middle bay of the first upper floor of some houses is a mirador, an enclosed lattice bay on corbels)
   for (let q = 1; q < N; q++) for (let b = 0; b < bays; b++) {
     const u = (b + 0.5) * L / bays, yq = y + q * ST;
@@ -104,42 +114,120 @@ function house(el, { bag, col }) {
     bag.add('rope_fibre', rod([a[0], ry + 1.65, a[1]], [b[0], ry + 1.6, b[1]], 0.007, 3));
     for (let i = 0; i < 3; i++) { const t = 0.15 + i * 0.3, x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t; addCloth(bag, ['cloth_white', 'cloth_indigo', 'cloth_ochre'][i], clothBox(x - 0.28, ry + 0.8, z - 0.01, x + 0.28, ry + 1.62, z + 0.01, 0.2), ry + 1.62); } }
   const shop = isShop(el.seed);
-  room(bag, B, F, { L, D, y, fy, N, shop, rand, trade: TRADES[el.seed % 3] });
+  room(bag, B, F, { L, D, y, fy, N, shop, rand, trade: tradeOf(el.seed), use: useOf(el.seed), du, dw, col });
   // the sign of the shop, a painted board on an iron bracket by its door
   if (shop) {
-    const a = F(du + 1.25, 0), b = F(du + 1.25, -0.55);
+    const a = F(du + dw + 0.65, 0), b = F(du + dw + 0.65, -0.55);
     bag.add('iron', rod([a[0], y + 2.65, a[1]], [b[0], y + 2.65, b[1]], 0.012, 4));
     bag.add('wood_painted', box(b[0] - 0.22, y + 2.2, b[1] - 0.03, b[0] + 0.22, y + 2.62, b[1] + 0.03));
     bag.add(['glaze_blue', 'glaze_green', 'cloth_red'][el.seed % 3], box(b[0] - 0.17, y + 2.3, b[1] - 0.035, b[0] + 0.17, y + 2.52, b[1] + 0.035));
   }
 }
+/** a size by the place alone, every piece its own (to a tenth of a millimetre: a repeated shape would become an instanced draw of its own) */
+function jit(x, z) { const f = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return 0.9 + 0.2 * (f - Math.floor(f)); }
+/**
+ * The door's sill: a slab of brick through the wall's thickness, its top worn to a hollow in the middle by the feet that crossed it (a shop's, wider and busier,
+ * more than a house's), the arrises bevelled. Every one its own depth of hollow (by the seed), so none is a repeated shape. Geometry only; the walker's floor is unchanged.
+ */
+function sill(bag, F, u0, u1, y, seed) {
+  const dip = (0.014 + 0.016 * ((seed * 7919) % 100) / 100) * (u1 - u0 > 1.5 ? 1.4 : 1), N = 4, hi = 0.05, bev = 0.015, tris = [];
+  const P = (u, v, h) => { const f = F(u, v); return [f[0], y + h, f[1]]; };
+  const top = (u) => { const m = (u - (u0 + u1) / 2) / ((u1 - u0) / 2); return hi - dip * Math.exp(-m * m * 4); };
+  const q = (a, b, c, d) => tris.push(...a, ...b, ...c, ...a, ...c, ...d);
+  for (let i = 0; i < N; i++) {
+    const ua = u0 + (u1 - u0) * i / N, ub = u0 + (u1 - u0) * (i + 1) / N, ha = top(ua), hb = top(ub);
+    q(P(ua, bev, ha), P(ua, T - bev, ha), P(ub, T - bev, hb), P(ub, bev, hb));
+    q(P(ua, 0, ha - bev), P(ua, bev, ha), P(ub, bev, hb), P(ub, 0, hb - bev));
+    q(P(ua, T - bev, ha), P(ua, T, ha - bev), P(ub, T, hb - bev), P(ub, T - bev, hb));
+    q(P(ua, 0, 0), P(ua, 0, ha - bev), P(ub, 0, hb - bev), P(ub, 0, 0));
+    q(P(ub, T, 0), P(ub, T, hb - bev), P(ua, T, ha - bev), P(ua, T, 0));
+  }
+  q(P(u0, T, 0), P(u0, T, top(u0) - bev), P(u0, 0, top(u0) - bev), P(u0, 0, 0));
+  q(P(u1, 0, 0), P(u1, 0, top(u1) - bev), P(u1, T, top(u1) - bev), P(u1, T, 0));
+  bag.add('brick_paving', fromTriangles(tris));
+}
 function jar(bag, x, y, z, s) {
+  s *= jit(x, z);
   bag.add('terracotta', lathe([[0.001, 0], [0.16 * s, 0.01], [0.27 * s, 0.25 * s], [0.31 * s, 0.5 * s], [0.25 * s, 0.7 * s], [0.14 * s, 0.82 * s], [0.17 * s, 0.9 * s], [0.001, 0.9 * s]], 10, null, x, y, z));
 }
 
-/** The furniture of the ground room (a divan-room or a shop) and of the upper room (a divan under the lattice, a chest, a lamp). */
-function room(bag, B, F, { L, D, y, fy, N, shop, rand, trade }) {
-  const h = (mat, u, v, r, ht, ya) => { const p = F(u, v); bag.add(mat, lathe([[r * 0.6, 0], [r, ht * 0.4], [r * 0.7, ht * 0.85], [r * 0.4, ht], [0.001, ht]], 10, null, p[0], ya, p[1])); };
-  const cush = ['cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_white', 'cloth_blue'];
+/** The furniture of the ground room (a shop by its trade, or a room by its use) and of the upper room (a divan under the lattice, a chest, a lamp). */
+function room(bag, B, F, { L, D, y, fy, N, shop, rand, trade, use, du, dw, col }) {
+  const jt = jit;
+  const h = (mat, u, v, r, ht, ya) => { const p = F(u, v), j = jt(p[0], p[1]); r *= j; ht *= 2 - j; bag.add(mat, lathe([[r * 0.6, 0], [r, ht * 0.4], [r * 0.7, ht * 0.85], [r * 0.4, ht], [0.001, ht]], 10, null, p[0], ya, p[1])); };
+  const cush = ['cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_white', 'cloth_blue'], bolt = ['glaze_blue', 'terracotta', 'glaze_white', 'glaze_green', 'terracotta'];
   const divan = (u0, v0, u1, v1, yb) => { B('timber', u0, v0, u1, v1, yb, yb + 0.3, true); B(cush[Math.floor(rand() * 5)], u0 + 0.03, v0 + 0.03, u1 - 0.03, v1 - 0.03, yb + 0.3, yb + 0.36); };
   const lamp = (u, v, yb) => { const p = F(u, v); bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.15, 0.2], [0.08, 0.3], [0.001, 0.32]], 10, null, p[0], yb, p[1])); bag.add('iron', rod([p[0], yb + 0.32, p[1]], [p[0], yb + 1.0, p[1]], 0.006, 3)); };
+  const at = (u, v, f) => { const p = F(u, v); f(p[0], p[1]); };
+  const tin = (u, v, sc, ya = fy) => at(u, v, (x, z) => { jar(bag, x, ya, z, sc); col?.circle(x, z, 0.31 * sc, ya, ya + 0.9 * sc); });
+  const pan = (mat, u, v, r, ya, hang = false) => at(u, v, (x, z) => (r *= jt(x, z)) && bag.add(mat, lathe(hang ? [[0.001, 0.2], [r * 0.9, 0.17], [r, 0.04], [r * 0.9, 0], [0.001, 0]] : [[0.001, 0], [r * 0.7, 0.005], [r, 0.09], [r * 0.9, 0.1], [0.001, 0.08]], 10, null, x, ya, z)));
   if (shop) {
     B('wood_dark', 0.9, 2.2, L - 0.9, 2.7, fy, fy + 1.0, true); B('timber', 0.85, 2.15, L - 0.85, 2.75, fy + 1.0, fy + 1.05);
     for (let q = 0; q < 3; q++) B('wood_dark', 0.5, D - 0.65, L - 0.5, D - 0.4, fy + 0.4 + q * 0.6, fy + 0.45 + q * 0.6, q === 0);
     for (let i = 0; i < 7; i++) {
       const u = 1.2 + i * (L - 2.4) / 6, q = i % 3;
       if (trade === 'potter') { h(i % 2 ? 'terracotta' : 'glaze_blue', u, 2.45, 0.1, 0.28, fy + 1.05); h(i % 2 ? 'glaze_white' : 'terracotta', u, D - 0.52, 0.11, 0.3, fy + 0.45 + q * 0.6); }
-      else if (trade === 'cloth') { B(cush[(i * 2) % 5], u - 0.25, 2.3, u + 0.25, 2.6, fy + 1.05, fy + 1.3); B(cush[(i * 3 + 1) % 5], u - 0.28, D - 0.6, u + 0.28, D - 0.45, fy + 0.45 + q * 0.6, fy + 0.7 + q * 0.6); }
+      else if (trade === 'cloth') { B(bolt[(i * 2) % 5], u - 0.25, 2.3, u + 0.25, 2.6, fy + 1.05, fy + 1.3); B(bolt[(i * 3 + 1) % 5], u - 0.28, D - 0.6, u + 0.28, D - 0.45, fy + 0.45 + q * 0.6, fy + 0.7 + q * 0.6); }
+      else if (trade === 'smith') { pan(i % 2 ? 'terracotta' : 'iron', u, 2.45, 0.17 + 0.02 * (i % 3), fy + 1.05); h(i % 2 ? 'terracotta' : 'terracotta', u, D - 0.52, 0.12, 0.3, fy + 0.45 + q * 0.6); }
+      else if (trade === 'baker') { at(u, 2.45, (x, z) => bag.add('stucco_cream', lathe([[0.001, 0], [0.13, 0.01], [0.15, 0.05], [0.1, 0.09], [0.001, 0.1]], 8, null, x, fy + 1.05, z))); h('wicker', u, D - 0.52, 0.16, 0.3, fy + 0.45 + q * 0.6); }
       else { const p = F(u, 2.45); bag.add('wicker', lathe([[0.12, 0], [0.2, 0.2], [0.001, 0.22]], 8, null, p[0], fy + 1.05, p[1])); h('terracotta', u, D - 0.52, 0.1, 0.25, fy + 0.45 + q * 0.6); }
     }
     B('cloth_red', 2.2, 3.4, L - 2.2, 5.0, fy + 0.01, fy + 0.025);
     lamp(L / 2, 1.2, fy + 1.9);
+    // the trade's own work in the room, kept to the sides of the opening (the way in from the lane stays clear)
+    const wl = du - dw - 1.0, er = du + dw + 1.0;
+    if (trade === 'smith') {
+      // the stake: a stump with an anvil and a hammer, a charcoal forge on a brick bed, the bellows, copper pans hung on pegs along the front wall
+      at(wl - 0.4, 1.3, (x, z) => { bag.add('timber', lathe([[0.2, 0], [0.22, 0.25], [0.2, 0.5], [0.001, 0.5]], 9, null, x, fy, z)); bag.add('iron', box(x - 0.1, fy + 0.5, z - 0.05, x + 0.12, fy + 0.62, z + 0.05)); bag.add('iron', box(x - 0.16, fy + 0.58, z - 0.025, x - 0.1, fy + 0.62, z + 0.025)); col?.circle(x, z, 0.24, fy, fy + 0.62); });
+      B('brick', er + 0.2, 0.8, er + 1.1, 1.6, fy, fy + 0.55, true); B('iron', er + 0.3, 0.9, er + 1.0, 1.5, fy + 0.55, fy + 0.6);
+      B('lamp_glass', er + 0.45, 1.05, er + 0.85, 1.35, fy + 0.6, fy + 0.66); B('wood_dark', er + 1.15, 1.0, er + 1.45, 1.3, fy, fy + 0.4);
+      for (let k = 0; k < 5; k++) { const u = 0.8 + k * 0.5; if (u < wl - 1.0) { pan(k % 2 ? 'terracotta' : 'iron', u, 0.5, 0.17, fy + 1.55, true); } }
+      for (let k = 0; k < 4; k++) { const u = er + 1.8 + k * 0.5; if (u < L - 0.8) pan('terracotta', u, 0.5, 0.17, fy + 1.55, true); }
+    } else if (trade === 'baker') {
+      // the oven: a clay dome on a brick base with its mouth to the front, a glow in it; the peel, the sacks of flour, the wood for it
+      const ou = L - 2.4, ov = D - 2.4;
+      at(ou, ov, (x, z) => { bag.add('brick', lathe([[0.95, 0], [0.95, 0.5], [0.001, 0.5]], 12, null, x, fy, z)); bag.add('earth_wall', lathe([[0.9, 0.5], [0.85, 0.9], [0.6, 1.25], [0.2, 1.5], [0.001, 1.55]], 12, null, x, fy, z)); col?.circle(x, z, 0.98, fy, fy + 1.6); });
+      const m = F(ou, ov - 0.9); bag.add('opening', box(m[0] - 0.28, fy + 0.62, m[1] - 0.04, m[0] + 0.28, fy + 1.0, m[1] + 0.04));
+      B('lamp_glass', ou - 0.22, ov - 0.96, ou + 0.22, ov - 0.9, fy + 0.62, fy + 0.74);
+      for (let k = 0; k < 6; k++) B('timber', ou + 1.3 - (k % 3) * 0.03, ov - 1.3 + k * 0.17, ou + 1.9, ov - 1.3 + k * 0.17 + 0.14, fy, fy + 0.14);
+      for (let k = 0; k < 3; k++) h('wicker', 0.9 + k * 0.45, D - 0.9, 0.22, 0.55, fy);
+      B('timber', 0.5, D - 0.5, 0.56, D - 0.38, fy + 0.1, fy + 1.7);
+    }
   } else {
     divan(0.5, D - 1.3, L - 0.5, D - 0.5, fy);
     B('cloth_red', 2.0, 2.4, L - 2.0, D - 1.6, fy + 0.01, fy + 0.025); B('cloth_ochre', 2.3, 2.7, L - 2.3, D - 1.9, fy + 0.025, fy + 0.03);
-    const p = F(L / 2, D / 2 - 0.2); bag.add('wood_dark', lathe([[0.25, 0], [0.18, 0.15], [0.22, 0.38], [0.001, 0.38]], 8, null, p[0], fy + 0.03, p[1])); bag.add('gilt_bronze', lathe([[0.001, 0], [0.42, 0.01], [0.4, 0.04], [0.001, 0.05]], 12, null, p[0], fy + 0.41, p[1]));
     B('wood_painted', L - 1.6, 0.6, L - 0.5, 1.2, fy, fy + 0.7, true); h('terracotta', 1.0, 0.9, 0.2, 0.7, fy);
     lamp(L / 2, D / 2, fy + 1.6);
+    // what the room is used for, along the east wall (clear of the door's way and of the stair on the west side)
+    const E = L - 0.45, ph = (mat, u, v, r, ht, ya) => h(mat, u, v, r, ht, ya);
+    if (use === 'kitchen') {
+      // the hearth: a stone bed with a fire in it, a pot on a trivet, a stew-pan; the shelf of plates above, a mortar, the wood, jars of water
+      B('limestone', E - 1.35, 3.0, E, 4.5, fy, fy + 0.4, true); B('iron', E - 1.15, 3.2, E - 0.2, 4.3, fy + 0.4, fy + 0.43);
+      B('lamp_glass', E - 0.85, 3.5, E - 0.45, 3.9, fy + 0.43, fy + 0.49);
+      at(E - 0.65, 3.7, (x, z) => { bag.add('terracotta', lathe([[0.001, 0.4], [0.13, 0.43], [0.2, 0.6], [0.22, 0.78], [0.18, 0.84], [0.001, 0.84]], 10, null, x, fy + 0.4, z)); });
+      pan('terracotta', E - 1.05, 4.0, 0.15, fy + 0.43);
+      B('wood_dark', E - 0.22, 2.9, E, 4.7, fy + 1.55, fy + 1.6);
+      for (let k = 0; k < 5; k++) at(E - 0.12, 3.05 + k * 0.33, (x, z) => bag.add(k % 2 ? 'glaze_white' : 'glaze_blue', box(x - 0.02, fy + 1.6, z - 0.12, x + 0.02, fy + 1.9, z + 0.12)));
+      at(E - 0.5, 2.3, (x, z) => bag.add('stucco_cream', lathe([[0.001, 0], [0.11, 0.01], [0.13, 0.12], [0.1, 0.17], [0.001, 0.17]], 9, null, x, fy, z)));
+      for (let k = 0; k < 6; k++) B('timber', E - 0.6, 1.5 + k * 0.1 - (k % 2) * 0.0, E - 0.2, 1.5 + k * 0.1 + 0.08, fy + (k % 3) * 0.0, fy + 0.1);
+      tin(E - 0.55, 5.1, 1.1); tin(E - 1.35, 5.4, 0.9); tin(E - 0.55, 5.8, 1.0);
+    } else if (use === 'weaver') {
+      // the upright loom: two posts and a beam, the crimson warp with a woven band at its foot, a stool, a basket of skeins
+      const lu0 = E - 2.5, lu1 = E - 1.2, lv = 3.6;
+      for (const u of [lu0, lu1]) { B('timber', u - 0.05, lv - 0.05, u + 0.05, lv + 0.05, fy, fy + 1.8, true); }
+      B('timber', lu0 - 0.05, lv - 0.05, lu1 + 0.05, lv + 0.05, fy + 1.75, fy + 1.85); B('timber', lu0, lv - 0.04, lu1, lv + 0.04, fy + 0.45, fy + 0.5);
+      B('cloth_red', lu0 + 0.06, lv - 0.01, lu1 - 0.06, lv + 0.01, fy + 0.5, fy + 1.75);
+      B('cloth_indigo', lu0 + 0.06, lv - 0.02, lu1 - 0.06, lv + 0.02, fy + 0.5, fy + 0.72); B('cloth_ochre', lu0 + 0.06, lv - 0.02, lu1 - 0.06, lv + 0.02, fy + 0.72, fy + 0.8);
+      B('wood_dark', lu0 + 0.3, lv + 0.45, lu0 + 0.7, lv + 0.8, fy, fy + 0.4);
+      at(E - 0.7, 4.5, (x, z) => { bag.add('wicker', lathe([[0.2, 0], [0.3, 0.3], [0.001, 0.32]], 10, null, x, fy, z)); for (let k = 0; k < 4; k++) bag.add(bolt[k], box(x - 0.2 + k * 0.1, fy + 0.28, z - 0.08 + (k % 2) * 0.08, x - 0.12 + k * 0.1, fy + 0.4, z + 0.04 + (k % 2) * 0.08)); });
+      ph('terracotta', E - 0.5, 2.4, 0.15, 0.4, fy);
+    } else if (use === 'store') {
+      // the household's store: tall jars of oil and grain along the wall, sacks stacked in the corner, a bin
+      for (let k = 0; k < 4; k++) tin(E - 0.5, 2.0 + k * 0.9, 1.25 - 0.1 * (k % 2));
+      for (let k = 0; k < 4; k++) ph('wicker', E - 1.6 - (k % 2) * 0.42, 5.7 + (k > 1 ? 0.0 : 0.0) + (k >> 1) * 0.0, 0.22, 0.55, fy + (k > 1 ? 0.5 : 0));
+      B('wood_dark', E - 2.4, 2.1, E - 1.4, 2.9, fy, fy + 0.7, true); B('timber', E - 2.45, 2.05, E - 1.35, 2.95, fy + 0.7, fy + 0.74);
+      for (let k = 0; k < 3; k++) at(E - 2.1 + k * 0.3, 2.5, (x, z) => bag.add('stucco_cream', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.12], [0.001, 0.14]], 7, null, x, fy + 0.74, z)));
+    }
   }
   if (N > 1) {
     const yk = y + ST + 0.03;

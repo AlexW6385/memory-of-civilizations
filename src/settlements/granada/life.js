@@ -3,7 +3,7 @@
 // seated, women walking in the Sultana's garden, a man at prayer, horses and grooms in the Dismount court.
 
 import { darroSlots } from '../../styles/nasrid/streets.js';
-import { isShop } from '../../styles/nasrid/houses.js';
+import { isShop, useOf } from '../../styles/nasrid/houses.js';
 import { patioHall } from '../../styles/nasrid/albaicin.js';
 import { albaicinPatios } from './town.js';
 import { RADIUS, lots, gardens, DARRO, DARRO_BRIDGES, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL } from './layout.js';
@@ -103,6 +103,8 @@ function streets(P, man, woman, L) {
       if (n >= 16 || l.seed % 3 === 1) continue;
       const [x0, z0, x1, z1] = l.rect, sf = l.front === 's', Ln = x1 - x0, D = z1 - z0, F = (u, v) => (sf ? [x1 - u, z1 - v] : [x0 + u, z0 + v]), y = l.y + 0.15, face = sf ? Math.PI : 0;
       if (isShop(l.seed)) woman(F(Ln / 2 + 0.4, 3.25), y, face, { cloth: ['cloth_ochre', 'cloth_red', 'cloth_indigo'][l.seed % 3] }), n++;
+      else if (useOf(l.seed) === 'kitchen') { woman(F(Ln - 2.3, 3.75), y, sf ? Math.PI / 2 : -Math.PI / 2, { cloth: 'cloth_ochre', carry: 'pot' }); n++; }       // the cook at her hearth (§20)
+      else if (useOf(l.seed) === 'weaver') { woman(F(Ln - 2.45, 4.22), y + 0.4, face, { pose: 'sit', cloth: 'cloth_red' }); n++; }                                // the weaver on her stool at the loom
       else if (l.seed % 2) { woman(F(Ln * 0.38, D - 0.9), y + 0.36, face, { pose: 'sit', cloth: 'cloth_ochre' }); n++; }
       else { man(F(Ln * 0.62, D - 0.9), y + 0.36, face, { pose: 'sit', cloth: 'cloth_white' }); n++; }
     }
