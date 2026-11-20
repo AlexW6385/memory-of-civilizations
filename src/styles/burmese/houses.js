@@ -109,7 +109,8 @@ export function houseSpots(el) {
   const hw = Math.min(W - 2.2, big ? 7 + r() * 1.5 : 5 + r() * 1.2), hd = Math.min(D - 5.5, big ? 8.5 + r() * 1.5 : 6.2 + r());
   if (hw < 3.5 || hd < 4) return null;
   const u0 = (W - hw) / 2 + (r() - 0.5) * 0.8, u1 = u0 + hw, v0 = 3.2, v1 = v0 + hd;
-  return { fl: 1.35, hearth: F.pt(u1 - 1.55, v1 - 1.3), mat: F.pt(u0 + 1.7, v0 + 1.9), door: F.pt((u0 + u1) / 2, v0 + 0.3), F };
+  const du = u0 + hw * (0.3 + r() * 0.4);     // (the door's place along the front: the next draw house() makes)
+  return { fl: 1.35, hearth: F.pt(u1 - 1.55, v1 - 1.3), mat: F.pt(u0 + 1.7, v0 + 1.9), door: F.pt((u0 + u1) / 2, v0 + 0.3), F, du, u0, u1, v0, v1, big, W, D };
 }
 
 /** A granary on posts: a small raised store with a thatch roof and a ladder (for lots too small for a house). */

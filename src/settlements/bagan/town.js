@@ -6,6 +6,7 @@ import { dressing } from './dressing.js';
 import { sculpture, gateLions } from './sculpt.js';
 import { houseSpots } from '../../styles/burmese/houses.js';
 import { lodTiles } from '../lod.js';
+import { torchEls, GATES } from './nightlight.js';
 import {
   RADIUS, RIVER_Y, bankX, CITY, WALL, GATE, THAT, THAT_ENC, PALACE, PAL_HALL, SHWE, SHWE_PREC, SULA, SULA_PREC, TANK, TANK_Y, KILNS, KYAUNGS, PRECINCT, MAIN_ROAD,
   ANANDA, OKKYAUNG, lots, plainTemples, cityWalls, streets, inLot, inPlainTemple, inRect, inRiver, inTank,
@@ -64,6 +65,7 @@ function city() {
     const part = edge.slice(i, i + 15), zm = Math.max(...part.map((q) => Math.abs(q[0])));
     RIV.push(base('bagan-river-' + RIV.length, [{ t: 'bgn_river', edge: part, y: RIVER_Y, x0: -Math.min(RADIUS + 4, Math.floor(Math.sqrt(460 * 460 - zm * zm))) }]));
   }
+  E.push(...torchEls(GATES.tharabar));
   E.push({ t: 'bgn_ghat', at: [bankX(0) - 1, 0], y: RIVER_Y, w: 7 });
   for (const b of moored()) E.push({ t: 'bgn_boat', ...b });
   E.push({ t: 'bgn_tank', rect: TANK, y: TANK_Y });
@@ -184,6 +186,7 @@ function temples() {
   const goods = ['flowers', 'candles', 'pots', 'fruit'];
   [[26, -8, 0], [26, 8, Math.PI], [105 - 9, 100, Math.PI], [105 + 9, -100, 0], [96, -112, Math.PI / 2], [96, 112, Math.PI / 2]].forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 40, goods: goods[(i + 1) % 4] }));
   E.push(...courts());
+  E.push(...torchEls(GATES.courts));
   E.push({ t: 'bgn_props', items: [...anandaCourt(), ...roadside(), ...walkProps()] });
   E.push(...gateLions());   // the modelled chinthe of the Ananda's four gates (sculpt.js)
   // more stalls inside the Ananda's west gate and by the gates of the other two great temples (flowers, candles, gold leaf, water-pots for the pilgrims)

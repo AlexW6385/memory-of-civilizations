@@ -3,6 +3,7 @@
 import '../../styles/burmese/index.js';
 import { ANANDA, PRECINCT, OKKYAUNG, RADIUS } from './layout.js';
 import { walkRoutes } from './walkroutes.js';
+import { torchEls, GATES } from './nightlight.js';
 
 const [px0, pz0, px1, pz1] = PRECINCT, [ax, az] = ANANDA.c, f = ANANDA.f;
 const E = [];
@@ -17,6 +18,7 @@ E.push({ t: 'bgn_gate', c: [ax, pz0], axis: 'z', th: 1.1, h: 5.4, pw: 3.6 });
 E.push({ t: 'bgn_gate', c: [ax, pz1], axis: 'z', th: 1.1, h: 5.4, pw: 3.6 });
 E.push({ t: 'bgn_gate', c: [px0, az], axis: 'x', th: 1.1, h: 5.4, pw: 3.6 });
 E.push({ t: 'bgn_gate', c: [px1, az], axis: 'x', th: 1.1, h: 5.4, pw: 3.6 });
+E.push(...torchEls(GATES.ananda));    // the torches at the four gates (nightlight.js)
 // the Ananda Okkyaung, the brick monastery of 1137 beside the precinct's east wall
 E.push({ t: 'bgn_okkyaung', rect: OKKYAUNG, front: 'w', seed: 1137 });
 
