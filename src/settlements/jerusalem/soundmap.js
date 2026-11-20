@@ -29,7 +29,7 @@ export const CHURCH = [SEPULCHRE[0] + 2, SEPULCHRE[1] + 2, SEPULCHRE[2] - 17 - 1
 const aqsaY = HARAM.top;
 
 /** The open houses' rooms (as the style's openLayout lays them out): the main room on the north, the court, the store on the west. */
-function houseRooms(l) {
+export function houseRooms(l) {
   const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, T = 0.65;
   const dN = clamp(D * 0.36, 4.2, 5.4), dW = clamp(W * 0.27, 3.4, 4.2), xc0 = x0 + dW, xc1 = x1 - 3.4, zc0 = z0 + dN;
   return { room: [x0 + T, z0 + T, x1 - T, zc0 - T], court: [xc0, zc0, xc1, z1 - T], store: [x0 + T, zc0, xc0 - T, z1 - T] };
