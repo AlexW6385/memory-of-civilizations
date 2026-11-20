@@ -79,6 +79,8 @@ import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
 import * as PARIS from '../settlements/paris/soundmap.js';
 import './voices-paris.js';
 import * as ROME from '../settlements/rome/soundmap.js';
+import * as TANGCA from '../settlements/tang-changan/soundmap.js';
+import './voices-tang.js';
 
 /**
  * Per settlement: birds (voices and weights), cicadas (0…1, warm, by day), frogs (0…1, night, by
@@ -138,7 +140,7 @@ export const PROFILES = {
   'abbasid-baghdad': T(NEAR, { animals: { donkey: 0.6, dog: 0.3, rooster: 0.2 }, frogs: 0.3, roof: 'flat', adhan: 1 }),
   alexandria: T({ ...MED, gull: 1, kite: 0.3 }, { cicadas: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'flat' }),
   'han-changan': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3, camel: 0.2 }, roof: 'tile' }),
-  'tang-changan': T(EAS, { cicadas: 0.4, animals: { rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, roof: 'tile', bells: 'monastery' }),
+  'tang-changan': T(EAS, { cicadas: 0.4, animals: withLife({ rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, { market: 1, eaves: 1, map: TANGCA }), roof: 'tile', bells: 'tang-changan' }),
   'wei-ye': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
   bhaktapur: T(IND, { cicadas: 0.2, animals: { dog: 0.4, rooster: 0.4, cattle: 0.3, goat: 0.2 }, roof: 'tile', bells: 'puja' }),
   nalanda: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.5, goat: 0.3, rooster: 0.3, dog: 0.2 }, roof: 'flat', bells: 'puja' }),
@@ -237,6 +239,8 @@ const HOURS = {
   // Paris 1248: the canonical hours from Notre-Dame's north tower and the parish churches, the curfew bell at 7:30 (the equinox between seven in winter and eight in summer)
   paris: [[2, 'paris:matins'], [5, 'paris:lauds'], [6, 'paris:prime'], [9, 'paris:terce'], [12, 'paris:sext'], [15, 'paris:none'], [17.5, 'paris:vespers'], [19.5, 'paris:curfew']],
   monastery: [[5, 'zhong'], [18.5, 'gu']],
+  // Tang Chang'an: Daci'en's bell and drum at dawn and dusk (the street drums sound from the map), the city's drum far off (docs/settlements/tang-changan.md §19)
+  'tang-changan': [[4.6, 'temple-am'], [5.1, 'tower:am'], [18.4, 'temple-pm'], [18.7, 'tower:pm']],
   bonsho: [[5.5, 'bonsho'], [18.2, 'bonsho']],
   zvon: [[6.5, 'zvon'], [17, 'zvon']],
   dungchen: [[5.5, 'dungchen'], [18.5, 'dungchen']],
