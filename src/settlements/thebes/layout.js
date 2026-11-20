@@ -102,9 +102,24 @@ export function lots() {
     }
   }
   templeLots(LOTS);
+  shopsAlongTheWalk(LOTS);
   return LOTS;
 }
 const SHOPS = ['bread', 'pots', 'beer', 'fruit', 'cloth', 'leather'];
+/**
+ * The shops of the visitor's streets (docs/settlements/thebes.md §15a): an entered row house within 150 m of the arrival whose front is wide enough
+ * (the opening and the door both fit) becomes a shop, by its seed, the trades in turn; a shop never stands next to another. A post-pass: no draw is made from the layout's stream.
+ */
+export const ARRIVAL = [-236, 0];
+function shopsAlongTheWalk(out) {
+  let last = null, k = 0;
+  const near = out.filter((l) => l.kind === 'row' && l.open && !l.temple && l.rect[2] - l.rect[0] >= 5.9 && Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVAL[0], (l.rect[1] + l.rect[3]) / 2 - ARRIVAL[1]) < 150)
+    .sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - ARRIVAL[0], (a.rect[1] + a.rect[3]) / 2 - ARRIVAL[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - ARRIVAL[0], (b.rect[1] + b.rect[3]) / 2 - ARRIVAL[1]));
+  for (const l of near) {
+    if (last && Math.abs(last.rect[0] - l.rect[0]) < 14 && Math.abs(last.rect[1] - l.rect[1]) < 1) continue;     // not two side by side
+    l.shop = SHOPS[k++ % SHOPS.length]; last = l;
+  }
+}
 /** How much detail a lot at c gets: 2 round the quay, the avenue and the hall, 1 in the middle town, 0 in the outskirts. */
 const lodOf = (c) => { const d = Math.hypot(c[0] + 120, c[1]); return d < 150 ? 2 : d < 240 ? 1 : 0; };
 

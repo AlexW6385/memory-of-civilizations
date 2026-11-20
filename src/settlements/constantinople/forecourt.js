@@ -38,11 +38,11 @@ export function forecourt({ person, push, rand, pick }) {
     if (rand() < 0.5) person([x + 1.7, z + 1.5], faceTo([x + 1.7, z + 1.5], [x, z]), { pose: 'talk' });
   });
   // sacks, crates and barrels stacked against the shop fronts, an amphora cart
-  for (const [x, z] of [[-57, 58], [-56.5, 71], [-57.4, 83], [45.5, 60], [45.2, 72], [45.4, 85]]) {
+  for (const [x, z] of [[-57, 58.4], [-56.5, 71], [-57.4, 83.6], [45.5, 60.4], [45.2, 73], [45.4, 85.6]]) {
     const t = pick(['barrel', 'sacks', 'crates']);
     push(t === 'barrel' ? { t, at: [x, z], y: Y([x, z]), n: 2, seed: S() } : { t, at: [x, z], y: Y([x, z]), rot: x < 0 ? Math.PI / 2 : -Math.PI / 2, seed: S() });
   }
-  for (const [x, z, k] of [[-56.6, 62, 'amphora'], [-56.8, 63, 'water_pot'], [-57, 78, 'amphora'], [45.6, 66, 'amphora'], [45.5, 79, 'water_pot'], [45.4, 80, 'amphora']]) push({ t: 'pot', kind: k, at: [x, z], y: Y([x, z]), n: 1, seed: S() });
+  for (const [x, z, k] of [[-56.6, 62.3, 'amphora'], [-56.8, 62.9, 'water_pot'], [-57, 79.4, 'amphora'], [45.6, 64.6, 'amphora'], [45.5, 77.2, 'water_pot'], [45.4, 76.6, 'amphora']]) push({ t: 'pot', kind: k, at: [x, z], y: Y([x, z]), n: 1, seed: S() });
   // ── the cistern head and the water-carriers ──
   push({ t: 'well', at: WELL, y: Y(WELL), kind: 'windlass', mat: 'marble', mould: true, roof: true, seed: S() });
   for (let k = 0; k < 5; k++) {

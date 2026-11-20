@@ -19,6 +19,7 @@ import * as F from '../mughal/furnish.js';
 import { upPlan, P as upP, STRIP as UP_STRIP } from './stairplan.js';
 import { houseUpstairs } from './upstairs.js';
 import { arcadeUpper, SHOP_CH, UP_FLOOR, UP_ARCH_TOP } from './arcadeup.js';
+import { wornSill, dovecoteStreaks, sootSmear } from './wear.js';
 
 const B = 'brick_buff', T = 'tile_lapis', Q = 'tile_turquoise';
 const boxR = (r, y0, y1) => box(r[0], y0, r[1], r[2], y1, r[3]);
@@ -189,6 +190,7 @@ function squareArcade(el, { bag, col, lights }) {
     bag.add('lattice', boxR(R(c - dw, c + dw, df - 0.04, df), y + dh + 0.14, y + dh + 1.3));
     bag.add('wood_dark', boxR(R(c - dw - 0.12, c + dw + 0.12, df - 0.06, df), y + dh + 1.3, y + dh + 1.42));
     if (!open) bag.add('opening', boxR(R(c - dw, c + dw, df - 0.02, df), y, y + dh));
+    wornSill(bag, (ss, dd) => Q(c + ss, df + dd), dw, 0.3, y);                                       // the door's stone sill, dished by the feet (wear.js)
     // the platform and the wares on it (an open shop's platform is two pieces, the way in between)
     const pw = Math.min(w * 0.28, 1.9), ph = 0.45, pr = R(c - pw, c + pw, df - 1.3, df - 0.95);
     if (open) for (const [s0, s1] of [[c - pw, c - dw - 0.15], [c + dw + 0.15, c + pw]]) { const q = R(s0, s1, df - 1.3, df - 0.95); bag.add('limestone', boxR(q, y, y + ph)); col.rect(q, y, y + ph); }
@@ -1305,6 +1307,7 @@ function khanehOpen(el, { bag, col, lights }) {
     const [fx, fz] = f.at(f.w * 0.28, 0.08);
     bag.add('lacquer_black', place(box(-0.5, 0.88, -0.04, 0.5, 2.3, 0.04), fx, f.y, fz, f.yaw));
     lights.push({ at: [hx, f.y + 0.95, hz], color: '#ff8a40', intensity: 1.6 * s, distance: 4.5 });
+    sootSmear(bag, f.at, f.w * 0.28, f.y + 2.3, 1.05);                                      // the smoke's smear over the hood (wear.js)
     const [qx, qz] = f.at(-f.w * 0.3, 0.3);
     bag.add('wood_painted', place(box(-0.55, 0, -0.25, 0.55, 1.9, 0.25), qx, f.y, qz, f.yaw));
     for (let i = 0; i < 6; i++) { const [hx2, hz2] = f.at(-f.w * 0.05 + i * 0.28, 0.04); bag.add(i % 2 ? 'cloth_green' : 'cloth_ochre', place(box(-0.03, 1.9, -0.03, 0.03, 2.4, 0.03), hx2, f.y, hz2, f.yaw)); }
@@ -1389,6 +1392,7 @@ function dovecote(el, { bag, col }) {
     const yy = yw - 1.2 - q * 1.3, n = Math.round(Math.PI * 2 * r / 1.5);
     for (let k = 0; k < n; k++) { const a = (k + (q % 2) * 0.5) / n * Math.PI * 2, rr = Rw(yy); const t = []; const px = x + Math.cos(a) * rr, pz = z + Math.sin(a) * rr, sx = Math.sin(a) * 0.17, sz = Math.cos(a) * 0.17; beamTris(t, [px + sx, yy, pz - sz], [px - sx, yy, pz + sz], 0.04, 0.3); bag.add('lacquer_black', fromTriangles(t)); }
   }
+  dovecoteStreaks(bag, x, z, r, yw, rows);                                                  // the pigeons' droppings down the wall (wear.js)
   // the door of fired brick at the foot, toward +x
   { const px = x + r * 1.06; bag.add('brick_buff', box(px - 0.16, 0, z - 1.0, px + 0.5, 2.4, z + 1.0)); bag.add('wood_dark', box(px + 0.5, 0, z - 0.6, px + 0.53, 1.9, z + 0.6)); }
   // the roof: a plastered terrace, a dome in the middle with a lantern of openings, small turrets round it

@@ -8,8 +8,13 @@ import { concoursePeople } from '../../styles/artdeco/concourse.js';
 import { libraryPeople } from '../../styles/artdeco/library.js';
 import './far.js';
 import { upOf } from './upper-plan.js';
+import { nightPlan } from './nightlight.js';
+/** The street lamps' places (grid frame [x, z, y, h]), for the night's light. */
+const LAMPS = [];
 /** How far from the visitor the blocks are built in full (m, to a tile's middle); beyond, the simple form (far.js). */
-const NEAR = 200, TILE = 220, OFF = 160;   // (tiles of 220 m, their grid shifted 160 m: every tile is a plan of its own per form, and the count of meshes and of the arrival's draws depend on where the cuts fall)
+const NEAR = 200, TILE = 220, OFF = 160;
+/** The pavements' and the yards' tiles: 300 m (every tile is a plan, and every plan a mesh for each material it holds: 150 m tiles made 835 meshes of the streets alone). */
+const ST_TILE = 300, ST_NEAR = 340;   // (tiles of 220 m, their grid shifted 160 m: every tile is a plan of its own per form, and the count of meshes and of the arrival's draws depend on where the cuts fall)
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
 // settlement's by the style's `turned`, the life of the streets — single placed things — moved and
 // turned here, and each tile's centre with it)
@@ -118,7 +123,7 @@ function streetLife() {
       const woman = rand() < 0.4;
       L.push({ t: 'figure', at: [x + (rand() - 0.5) * 1.6, z], y: height(x, z), rot: rand() < 0.5 ? 0 : Math.PI, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'trousers', cloth: pick(DRESS), cloth2: pick(['cloth_white', 'cloth_grey', 'cloth_black']), skin: pick(['skin_light', 'skin_light', 'skin_medium', 'skin_dark']), hat: woman ? pick(['cap', 'none']) : 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']) });
     }
-    for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1) && !onElStair(xx, z, 0.5) && !inSpecial(xx, z, 0.4) && !nearStand(xx, z, 1.8)) L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); }
+    for (let z = -RADIUS + 10; z < RADIUS; z += 30) { const xx = ax + sg * (w / 2 + 0.5); if (inside(xx, z) && !inLot(xx, z, 0.4) && !crossing(xx, z, 1) && !onElStair(xx, z, 0.5) && !inSpecial(xx, z, 0.4) && !nearStand(xx, z, 1.8)) { L.push({ t: 'street_lamp', at: [xx, z], y: height(xx, z), h: 5.5, seed: z }); LAMPS.push([xx, z, height(xx, z), 5.5]); } }
   }
   // people waiting at the crossings: at about half the corners a knot of two to five on the kerb, facing across the
   // avenue or the street, a policeman in blue on some corners of Fifth Avenue
@@ -171,9 +176,8 @@ function yards() {
     if (!lines.length) continue;
     out.push({ t: 'laundry', pole: [cx, zm], y: height(cx, zm), h: Math.min(16, Math.max(...lines.map((p) => p[1])) - l.y + 2), lines, seed: Math.floor(rand() * 1e6) });
   }
-  const tiles = new Map();
-  for (const e of out) { const p = e.at ?? e.pole, k = `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
-  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-yards-${k}`, list), center: toCity(i * 150 + 75, j * 150 + 75), near: 300 }; });
+  // (one plan: the newsstands and the yards' washing are 0.7 MB in all, and a plan's every material is a mesh)
+  return [{ ...base('new-york-yards', out), center: [0, 0], near: RADIUS + 400 }];
 }
 /**
  * The pavements and what stands on them (docs §1i), in tiles: the flags and curbs of every block, then the street furniture
@@ -213,12 +217,17 @@ function pavePlans() {
   for (const v of EXTRA.vehicles) items.push({ k: v.k, at: v.at, y: height(...v.at), rot: v.rot, seed: v.seed, ...(v.body ? { body: v.body } : {}) });
   for (const c of EXTRA.carts) items.push({ k: 'pushcart', at: c.at, y: height(...c.at), rot: c.rot, seed: c.seed, top: c.top });
   for (const a of EXTRA.apples) items.push({ k: 'crates', at: a.at, y: height(...a.at), rot: Math.PI / 2, seed: a.seed % 1e6 });
-  const { segs, curbs } = pavements(), tiles = new Map(), slot = (p) => `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`;
-  const tile = (k) => { if (!tiles.has(k)) tiles.set(k, { segs: [], curbs: [], items: [] }); return tiles.get(k); };
-  for (const s of segs) tile(slot([(s[0] + s[2]) / 2, (s[1] + s[3]) / 2])).segs.push(s);
-  for (const c of curbs) tile(slot([(c[0] + c[2]) / 2, (c[1] + c[3]) / 2])).curbs.push(c);
+  const { segs, curbs } = pavements(), tiles = new Map(), flags = new Map(), slot = (p) => `${Math.floor(p[0] / ST_TILE)},${Math.floor(p[1] / ST_TILE)}`, slotF = (p) => `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`;
+  const tile = (k) => { if (!tiles.has(k)) tiles.set(k, { items: [] }); return tiles.get(k); };
+  const flag = (k) => { if (!flags.has(k)) flags.set(k, { segs: [], curbs: [] }); return flags.get(k); };
   for (const it of items) tile(slot(it.at)).items.push(it);
-  return [...tiles].map(([k, t]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-street-${k}`, [{ t: 'pavement', segs: t.segs, curbs: t.curbs }, { t: 'curb', items: t.items }]), center: toCity(i * 150 + 75, j * 150 + 75), near: 320 }; });
+  for (const s of segs) flag(slotF([(s[0] + s[2]) / 2, (s[1] + s[3]) / 2])).segs.push(s);
+  for (const c of curbs) flag(slotF([(c[0] + c[2]) / 2, (c[1] + c[3]) / 2])).curbs.push(c);
+  // the flags and curbs (two materials) stay in tiles of 150 m, shown to 320 m as before; the things standing on them (a mesh for each of their materials) are in tiles of 300 m
+  return [
+    ...[...flags].map(([k, t]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-flags-${k}`, [{ t: 'pavement', segs: t.segs, curbs: t.curbs }]), center: toCity(i * 150 + 75, j * 150 + 75), near: 320 }; }),
+    ...[...tiles].map(([k, t]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-street-${k}`, [{ t: 'curb', items: t.items }]), center: toCity((i + 0.5) * ST_TILE, (j + 0.5) * ST_TILE), near: ST_NEAR }; }),
+  ];
 }
 /**
  * Bryant Park behind the Library (docs §1l): gravel walks round the lawns and across them to a paved plaza at the middle, slatted benches
@@ -346,5 +355,6 @@ export async function buildings() {
   const dl = dinerLife(), c = toCity(...DINER_AT);
   // the walk from the entrance down Fifth Avenue to the Empire State's doors (plan.js walks) kept clear of the landmarks' stroll-about figures: an element with a rect and no items marks it for the life placer and draws nothing
   const route = base('new-york-route', [{ t: 'curb', items: [], rect: [2.2, 172, 5.8, 232] }]);
-  return [...plans, route, ...streetLife(), ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), libraryLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
+  const life = streetLife();
+  return [...plans, route, nightPlan(LAMPS, base), ...life, ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), libraryLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }

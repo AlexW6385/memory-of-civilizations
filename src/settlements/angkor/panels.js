@@ -2,7 +2,12 @@
 // 0.64 m apart fill the 2 m band as they fill the real walls. Each panel is a list of convex outlines in the viewer's frame
 // (u from his left, 0…len; v up from the band's foot, 0…2; .t = the principal figures, carved deeper). The files are rows
 // of a few poses (soldier with spear, soldier with bow, horseman, elephant, puller, apsara) repeated at a fixed step.
-import { ROUND, bar, trap, stander, puller, apsara, fish, elephant, elephantParts, horseman, monkey, fanHeads, proud } from './figures.js';
+import { ROUND, bar, trap, stander as stander0, puller, apsara as apsara0, fish as fish0, elephant, elephantParts as elephantParts0, horseman as horseman0, monkey as monkey0, fanHeads, proud } from './figures.js';
+
+// Every figure drawn from here is noted as a group of outlines (o.groups: [first, end) in o), so that relief.js can carve the figures
+// that repeat (the files of soldiers, the apsaras, the fish) once each and place them as instances.
+const grouped = (fn) => (o, ...a) => { const n0 = o.length; fn(o, ...a); (o.groups ??= []).push([n0, o.length]); };
+const stander = grouped(stander0), apsara = grouped(apsara0), fish = grouped(fish0), elephantParts = grouped(elephantParts0), horseman = grouped(horseman0), monkey = grouped(monkey0);
 
 const REG = [0.03, 0.67, 1.31];
 const row = (x0, x1, step, fn) => { let i = 0; for (let x = x0; x <= x1 + 1e-6; x += step, i++) fn(x, i); };

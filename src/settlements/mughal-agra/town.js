@@ -3,6 +3,7 @@ import { RADIUS, RIVER_Z, STREETS, houses, KATRAS, LODGES, HAVELI_OPEN, WORKSHOP
 import { lifePlan } from './life.js';
 import { frameOf } from '../../styles/mughal/townhouse.js';
 import { ground, LEVEL } from './ground.js';
+import { rows, cells } from './cells.js';
 const base = (id, elements) => ({ id, style: 'mughal', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 245], facing: 'n' } });
 export async function town() {
   const all = houses(), plans = [];
@@ -44,6 +45,14 @@ export async function town() {
   // the inlay workshop, open to the axis street (§12)
   { const [x0, z0, x1, z1] = WORKSHOP.rect;
     plans.push({ ...base('mughal-agra-workshop', [{ t: 'inlay_workshop', ...WORKSHOP, seed: 7 }]), bounds: [x0 - 2, z0 - 2, x1 + 2, z1 + 2], rooms: [{ id: 'inlay workshop', rect: [x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4], y: 0.35, kind: 'hall' }] }); }
+  // the opened cells of the forecourt's bazaar rows (docs/settlements/mughal-agra.md §17.1): the furnished interiors and their keepers within 62 m of the row's
+  // opened stretch (a near plan), one dark board in each doorway beyond it (a far plan)
+  for (const r of rows()) {
+    const cs = cells(r), cx = (cs[0].xc + cs[cs.length - 1].xc) / 2, cz = r.z - r.s * 5.5, ex = { row: r, cell: 3.2, deep: 4, ver: 3 };
+    plans.push({ ...base(`mughal-agra-cells-${r.id}`, [{ t: 'agra_cells', ...ex }]), bounds: [cs[0].xc - 3, cz - 5, cs[cs.length - 1].xc + 3, cz + 5], near: 62, center: [cx, cz],
+      rooms: cs.map((c) => ({ id: 'bazaar cell', rect: [c.xc - 1.3, Math.min(c.zc, c.zb) , c.xc + 1.3, Math.max(c.zc, c.zb)], y: 0.35, kind: 'market' })) });
+    plans.push({ ...base(`mughal-agra-cells-${r.id}-far`, [{ t: 'agra_plates', ...ex }]), far: 62, center: [cx, cz], nocollide: true });
+  }
   // the washermen's bank (§12): flat stones at the water's edge, cloth spread on the sand to dry
   { const els = [];
     for (let k = 0; k < 5; k++) els.push({ t: 'block', rect: [180.2 + k * 9, -254.6, 183.8 + k * 9, -253.8], y0: -0.02, y1: 0.12, mat: 'granite_grey', collide: false });

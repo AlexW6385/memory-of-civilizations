@@ -52,6 +52,8 @@ export const ground = {
     sky: { turbidity: 2.8, rayleigh: 1.1, mie: 0.004, mieG: 0.8, zenith: [0.1, 0.18, 0.36], horizon: [0.62, 0.64, 0.66] },
     fog: { color: [0.78, 0.76, 0.72], density: 0.0004, height: 0.01 },
     exposure: 0.48,
+    waterline: 0.22,     // the canals' still water (the square's, the avenue's: plan.js water_rect y 0.22): a stain line on the curbs and the revetment (src/engine/materials.js)
+    damp: 0.1,           // the dry plateau: no moss and almost no rain streaks; dust, salts at the foot of the mud walls and the canal's stain (docs/settlements/isfahan.md §26.5)
     wind: [0.4, 0.1],
     weather: [
       { id: 'clear', weight: 4, clouds: 0.08, cloudDensity: 0.3, sun: 1.0, fog: 1 },

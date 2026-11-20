@@ -40,5 +40,13 @@ for (const [x, z, k] of [[-120, RIVER_Z + 4, 'egret'], [-20, RIVER_Z + 7, 'egret
 for (const [x, z] of [[-14, -148], [9, -151], [-22, -150], [16, -153]]) perches.push({ kind: 'pigeon', x, z, y: 7.25, rot: 0.5 + (Math.abs(x) % 3), range: [1.6, 1.4] });
 for (const [x, z] of [[-6, -60], [6, -96], [-6.6, -30], [6.6, 46], [-6, 104], [7.4, 128]]) perches.push({ kind: 'pigeon', x, z, y: 0.57, rot: 1.2 + (Math.abs(x + z) % 3), range: [1.8, 1.4] });
 for (const [x, z] of [[-24, -62], [30, -40], [-38, 70], [52, 88], [-70, -96], [90, -60], [-96, 36], [64, 40]]) perches.push({ kind: 'myna', x, z, y: 0.02, rot: 2 + (Math.abs(x) % 4), range: [2.4, 2.0] });
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §17.4) ──
+// pariah dogs of the town lying at the edge of the shop streets (Indian towns' street dogs [inferred]), the open house's fowl in the court's far corner
+// (the hens' yard [inferred]), blue rock pigeons walking and pecking on the forecourt's paving (the dossier's pigeons, §12)
+const critters = [];
+const hashAt = (x, z) => { const k = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return k - Math.floor(k); };
+for (const [x, z] of [[6.4, 258], [-6.4, 322], [-60, 273.6], [118, 276.4], [6.4, 352]]) critters.push({ model: 'dog', at: [x, 0.04, z], rot: hashAt(z, x) * 6.28, range: [5, 1.8] });
+for (const [model, x, z, size] of [['rooster', 24.4, 284.2, 1], ['hen_brown', 23.2, 285.4, 0.96], ['hen_white', 24.8, 286.0, 1], ['hen_brown', 22.4, 284.0, 0.98]]) critters.push({ model, at: [x, 0.04, z], rot: hashAt(x, z) * 6.28, range: [2.2, 1.2], size });
+for (const [x, z] of [[-24, 181], [-33, 187], [22, 180], [32, 188], [-48, 214], [46, 218]]) critters.push({ model: 'pigeon_grey', at: [x, 0.06, z], rot: hashAt(z, x) * 6.28, range: [2.4, 1.6] });
 void FORECOURT;
-export default { fish, flights, perches };
+export default { fish, flights, perches, critters };

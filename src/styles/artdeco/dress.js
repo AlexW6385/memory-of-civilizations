@@ -7,7 +7,8 @@
 // signs costs a few thousand triangles.
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
-import { face } from './blocks.js';
+import { face, LEAN } from './blocks.js';
+export { LEAN };
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** The entrance of the settlement, in the grid's frame (plan.js): the signs within 230 m of it are lettered in full, further out only the boards stand. */
@@ -31,6 +32,8 @@ const GL = {
   '&': ['.##..', '#..#.', '.##.#', '#..#.', '.##.#'], '-': ['.....', '.....', '###..', '.....', '.....'], '.': ['.', '.', '.', '.', '#'], "'": ['#', '#', '.', '.', '.'], ' ': ['..', '..', '..', '..', '..'],
 };
 const gl = (ch) => GL[ch] ?? GL[' '];
+/** Whether the triangle a b c (upright) faces the horizontal direction out = [x, z] (counter-clockwise seen from there). */
+const facing = (a, b, c, out) => ((b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1])) * out[0] + ((b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2])) * out[1] >= 0;
 /** The length of a text, in metres, at a cell size. */
 export const textLen = (text, cell) => [...text].reduce((s, ch) => s + (gl(ch)[0].length + 1) * cell, 0) - cell;
 /** The cell size that fits a text in a width (at most `max`). */
@@ -46,7 +49,8 @@ export function letters(T, text, cell, at, h0 = 0, v0 = 0) {
         if (row[c] !== '#') { c++; continue; }
         let e = c; while (e < row.length && row[e] === '#') e++;
         const v = v0 + (4 - r) * cell, a = at(h + c * cell, v), b = at(h + e * cell, v), c2 = at(h + e * cell, v + cell), d = at(h + c * cell, v + cell);
-        T.push(...a, ...b, ...c2, ...a, ...c2, ...d, ...a, ...c2, ...b, ...a, ...d, ...c2);
+        if (LEAN.on && T.out) { if (facing(a, b, c2, T.out)) T.push(...a, ...b, ...c2, ...a, ...c2, ...d); else T.push(...a, ...c2, ...b, ...a, ...d, ...c2); }
+        else T.push(...a, ...b, ...c2, ...a, ...c2, ...d, ...a, ...c2, ...b, ...a, ...d, ...c2);
         c = e;
       }
     }
@@ -55,10 +59,15 @@ export function letters(T, text, cell, at, h0 = 0, v0 = 0) {
 }
 /** A collection of quads by material, added to the bag at the end. */
 export class Quads {
-  constructor() { this.m = new Map(); }
-  t(mat) { let a = this.m.get(mat); if (!a) this.m.set(mat, a = []); return a; }
-  /** A double-sided quad of four points in order. */
-  quad(mat, a, b, c, d) { this.t(mat).push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c); }
+  /** `out` ([x, z], optional): the way the quads face, a front's street side: they are then drawn single-sided in the lean form (blocks.js LEAN). */
+  constructor(out = null) { this.m = new Map(); this.out = out; }
+  t(mat) { let a = this.m.get(mat); if (!a) { this.m.set(mat, a = []); if (this.out) a.out = this.out; } return a; }
+  /** A double-sided quad of four points in order (one side, toward `out`, in the lean form). */
+  quad(mat, a, b, c, d) {
+    const t = this.t(mat);
+    if (LEAN.on && this.out) { if (facing(a, b, c, this.out)) t.push(...a, ...b, ...c, ...a, ...c, ...d); else t.push(...a, ...c, ...b, ...a, ...d, ...c); return; }
+    t.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c);
+  }
   /** An upward-facing single-sided quad (a floor's tile), whichever way the four points run. */
   up(mat, a, b, c, d) {
     const n = (c[2] - b[2]) * (a[0] - b[0]) - (c[0] - b[0]) * (a[2] - b[2]), t = this.t(mat);   // the y of (c−b)×(a−b)
@@ -123,7 +132,7 @@ function windowGoods(Q, F, g0, g1, y, kind, r) {
  * u0..u1 the shop's width (the fascia's), g0..g1 its plate glass, y the street. `rand` is the shop's own stream.
  */
 export function shopSign(bag, F, u0, u1, y, shop, g0, g1, full, r, glassD = 0.18) {
-  const [bm, lm] = shop.board, Q = new Quads();
+  const [bm, lm] = shop.board, Q = new Quads(F.along ? [0, F.sg] : [F.sg, 0]);
   // the board over the glass: a painted board standing 5 cm proud of the fascia, framed in a narrow moulding
   const yb = y + 3.72, yt = y + 4.26;
   bag.add(bm, F.R(u0 + 0.05, u1 - 0.05, yb, yt, 0.4, 0.45));
@@ -153,7 +162,7 @@ export function bladeText(bag, F, f, u, d0, d1, yb, hh, text, lm) {
   for (const ch of text) {
     if (v < yb + 0.05) break;
     const w = gl(ch)[0].length * cell;
-    for (const sd of [-1, 1]) { const k = -readDir(f) * sd; letters(T, ch, cell, (h, vv) => F.P(u + sd * 0.075, dc + k * (h - w / 2), v + vv), 0, 0); }
+    for (const sd of [-1, 1]) { const k = -readDir(f) * sd; T.out = F.along ? [sd, 0] : [0, sd]; letters(T, ch, cell, (h, vv) => F.P(u + sd * 0.075, dc + k * (h - w / 2), v + vv), 0, 0); }
     v -= 6.4 * cell;
   }
   Q.flush(bag);
