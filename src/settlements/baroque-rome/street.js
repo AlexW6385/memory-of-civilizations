@@ -6,7 +6,7 @@
 
 import { feast } from './feast.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
-import { OVAL, FRONT_X, FLOOR, BORGO, GARDEN, TIBER, rows, frontPt, lots, tiberX, height, CROSSING, openHomes, SISTINA_C, COURT } from './layout.js';
+import { COACH_SITES, OVAL, FRONT_X, FLOOR, BORGO, GARDEN, TIBER, rows, frontPt, lots, tiberX, height, CROSSING, openHomes, SISTINA_C, COURT } from './layout.js';
 
 const plan = (id, style, elements, bounds, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -23,9 +23,9 @@ export function streetPlans() {
     if (o.footmen) for (const s of [-1, 1]) L.push(livery(Math.floor(x * 5 + z + s), { at: at(x, z, rot, s * 0.25, 1.85), rot, y: 1.12, pose: 'stand', cloth: o.livery ?? 'cloth_red' }));
   };
   // a cardinal's coach before the steps, facing the church, its footmen; an ambassador's in the oval; one in the Borgo Nuovo
-  coachAt(FRONT_X + 58, 24, Math.PI / 2, { footmen: true, cloth: 'cloth_red', livery: 'cloth_red' });
-  coachAt(OVAL.c[0] + 30, -52, 0.35, { body: 'wood_painted', cloth: 'cloth_indigo', livery: 'cloth_indigo', footmen: true, horse: 'hide_grey' });
-  coachAt(205, BORGO[0], -Math.PI / 2, { cloth: 'cloth_green', livery: 'cloth_green', horse: 'hide_brown' });
+  coachAt(COACH_SITES[0].x, COACH_SITES[0].z, COACH_SITES[0].rot, { footmen: true, cloth: 'cloth_red', livery: 'cloth_red' });
+  coachAt(COACH_SITES[1].x, COACH_SITES[1].z, COACH_SITES[1].rot, { body: 'wood_painted', cloth: 'cloth_indigo', livery: 'cloth_indigo', footmen: true, horse: 'hide_grey' });
+  coachAt(COACH_SITES[2].x, COACH_SITES[2].z, COACH_SITES[2].rot, { cloth: 'cloth_green', livery: 'cloth_green', horse: 'hide_brown' });
   // a sedan chair set down near the steps, its two bearers standing at the poles
   const sx = FRONT_X + 50, sz = -20, sr = Math.PI / 2;
   C.push({ t: 'sedan_chair', at: [sx, sz], rot: sr, y: 0, cloth: 'cloth_red' });

@@ -39,3 +39,11 @@ export function openShops() {
   }
   return OP;
 }
+
+const rand0 = (n) => ((Math.sin(n * 91.7) * 43758.5453) % 1 + 1) % 1;
+const CAS_H = [3.9, 3.4, 3.2, 2.9];
+/** The `borgo_row` element of one fronted lot (a single casa unit on the lot's own rect and front); town.js builds it, night.js lights it. */
+export function lotRow({ l, trade, open }) {
+  const w = l.rect[2] - l.rect[0], st = l.storeys, r = rand0(l.seed);
+  return { t: 'borgo_row', rect: l.rect, face: l.front, y: 0, units: [{ u0: 0, w, kind: 'casa', storeys: st, H: CAS_H.slice(0, st).reduce((p, q) => p + q, 0), seed: l.seed, trade, madonna: r < 0.4, flip: r > 0.5, awning: rand0(l.seed + 3) < 0.4, birdcage: rand0(l.seed + 5) < 0.2, cat: false, open }] };
+}

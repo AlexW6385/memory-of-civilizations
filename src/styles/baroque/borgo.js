@@ -346,6 +346,12 @@ function chimney(bag, M, o, y, rand) {
 function altanaOn(bag, M, o, y, rand) { altana(bag, M, o.u0, o.w, y, o.roofD ?? o.D, rand); }
 
 // ── casa ─────────────────────────────────────────────────────────────────────
+/** The bay (0-based, along the front) of a casa's street shrine: the end bay on the side of the shop-opening's opposite, or -1 (none: a fountain, or a climbed house whose balcony takes that bay). */
+export function madonnaBay(o) {
+  const nb = o.w < 7.6 ? 2 : 3;
+  if (!o.madonna || o.fountain) return -1;
+  return o.up ? (o.flip ? 0 : nb - 1) : (o.flip ? nb - 1 : 0);
+}
 function casa(bag, col, M, o) {
   const { u0, w, rand, simple } = o, H = o.H, L = new Local(); L.noBack = true;
   const S = CASA_STOREYS.slice(0, o.storeys);
@@ -361,8 +367,8 @@ function casa(bag, col, M, o) {
     L.box(T, doorU - dw / 2 - 0.18, 0, -0.02, doorU - dw / 2, 2.45, 0.14); L.box(T, doorU + dw / 2, 0, -0.02, doorU + dw / 2 + 0.18, 2.45, 0.14); L.box(T, doorU - dw / 2 - 0.25, 2.4, -0.02, doorU + dw / 2 + 0.25, 2.7, 0.2);
     if (!o.climb) { L.box('opening', doorU - dw / 2, 0, -0.02, doorU + dw / 2, 2.4, 0.03); L.box('wood_dark', doorU - dw / 2 + 0.03, 0, 0.03, doorU + dw / 2 - 0.03, 2.35, 0.08); }
     L.box(T, doorU - dw / 2 - 0.2, 0, 0.14, doorU + dw / 2 + 0.2, 0.14, 0.6);
-    const mu = o.flip ? u0 + w - 0.9 : u0 + 0.9, nb0 = w < 7.6 ? 2 : 3, bw0 = (w - 0.8) / nb0;
-    if (o.madonna && !Array.from({ length: nb0 }, (_, k) => u0 + 0.4 + (k + 0.5) * bw0).some((c) => c > mu - 1.6 && c < mu + 2.1)) madonnella(L, mu, ys[1] + 0.75, rand);
+    // the street shrine (a madonnella with its lantern) takes the first-floor bay at the end away from the shop (the climbed houses' balcony bay is at the other end): that window is left out
+    if (o.madonna && madonnaBay(o) >= 0) { const nb0 = o.w < 7.6 ? 2 : 3, bw0 = (o.w - 0.8) / nb0; madonnella(L, u0 + 0.4 + (madonnaBay(o) + 0.5) * bw0, ys[1] + 0.75, rand); }
   }
   // the upper storeys: windows on the same axes, with shutters open or closed, pots, balconettes
   const nb = w < 7.6 ? 2 : 3, bw = (w - 0.8) / nb;
@@ -371,6 +377,7 @@ function casa(bag, col, M, o) {
     L.box(T, u0, y0 - 0.1, -0.02, u0 + w, y0 + 0.09, 0.1);
     for (let k = 0; k < nb; k++) {
       const u = u0 + 0.4 + (k + 0.5) * bw, wh = s === 1 ? 2.0 : 1.7, sh = SHUT[Math.floor(rand() * SHUT.length)];
+      if (s === 1 && o.madonna && k === madonnaBay(o)) continue;
       if (o.climb && s === 1 && k === (o.flip ? nb - 1 : 0)) { window(L, u, y0 + 0.12, 0.9, 2.45, { head: 'cornice', shut: sh, closed: false, rand, frame: T }); balcony(L, u, y0 + 0.12, 1.7, 0.95, 0.95); continue; }
       window(L, u, y0 + 0.75, 0.9, wh, { head: s === 1 ? 'cornice' : 'flat', shut: sh, closed: rand() < 0.4, rand, frame: T });
       if (s === 1 && rand() < 0.55) { balcony(L, u, y0 + 0.75, 1.5, 0.5, 0.9); }
