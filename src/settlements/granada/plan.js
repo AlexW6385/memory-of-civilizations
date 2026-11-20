@@ -2,6 +2,7 @@
 // the Comares Tower, the Alcazaba, the walls and towers round the hill.
 import { HILL, MYRTLES, COMARES, LIONS, ALCAZABA, PARTAL, RAUDA, GEN, height } from './layout.js';
 import { routes } from './walk.js';
+import { palaceLamps } from './lamps.js';
 
 const T = HILL.top, E = [];
 // the Comares palace: the Court of the Myrtles, its porticoes, the Sala de la Barca, the Comares Tower
@@ -16,6 +17,8 @@ for (const [a, b] of [[[a0, b0], [a1, b0]], [[a0, b1], [a1, b1]], [[a0, b0], [a0
 E.push({ t: 'nasrid_tower', rect: [a0 - 6, b0 - 6, a0 + 10, b0 + 10], h: 26, y: T, windows: 2 });
 E.push({ t: 'nasrid_tower', rect: [a1 - 6.06, b0 - 5.23, a1 + 6.06, b0 + 5.23], h: 26, y: T, windows: 2 });
 for (const [x, z] of [[a0, b1], [a1, b1]]) E.push({ t: 'nasrid_tower', rect: [x - 5, z - 5, x + 5, z + 5], h: 16, y: T });
+// the lamps of the palaces at night (lamps.js, nightlight.js)
+E.push({ t: 'gr_night', lamps: palaceLamps() });
 // the Partal and the Rauda
 E.push({ t: 'partal', tower: PARTAL.tower, pool: PARTAL.pool, y: T });
 E.push({ t: 'rauda', rect: RAUDA.rect, garden: RAUDA.garden, y: T });
