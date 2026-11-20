@@ -24,6 +24,8 @@ export function hashAt(x, z, s = 0) {
 export const SHOP_LIT = 0.7;
 /** The share of the lattice windows of the houses with a lamp behind them [inferred: a household's lamp burns in some rooms, not all]. */
 export const WINDOW_LIT = 0.3;
+/** Off: the lit windows put the halo material into the houses' merged plans, one more main draw at the arrival (+3, the budget allows +2). Built and checked; switch on when the budget has room. */
+export const LIT_WINDOWS = false;
 
 const TAU = Math.PI * 2, MAT = 'halo';
 /** Triangles (position and a normal per corner) of the halo material (the normal's y is the brightness, 1 at a disc's middle, 0 at its rim). */
@@ -211,7 +213,7 @@ function wrapElement(style, name, share) {
 /** Register the street life's halo element and the lit windows of the town houses. */
 export function registerNight() {
   if (STYLES.life) STYLES.life.elements.agra_halo = agraHalo;
-  wrapElement('mughal', 'haveli', WINDOW_LIT);
+  if (LIT_WINDOWS) wrapElement('mughal', 'haveli', WINDOW_LIT);
 }
 void STREETS; void RADIUS;
 registerNight();

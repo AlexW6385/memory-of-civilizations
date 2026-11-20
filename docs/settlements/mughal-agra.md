@@ -189,7 +189,7 @@ Built (all lit by the engine's glow materials and the `halo` material, readable 
 - 38 mashal stands (iron, a cage holding the rag torch, lit) either side of the arch on both faces of the forecourt's three gates and the four katra gates, and two on the great gate's south face;
 - a brazier of coals (brass pan on three feet, coals glowing) in each katra court;
 - a pool of hearth-light at the door of 45 % of the open houses;
-- the lattice windows of the town houses (jharokha and window jali): 30 % lit with the sheet of lamp-light behind the lattice, by the hash of the room's place.
+- (SWITCHED OFF, `LIT_WINDOWS = false` in nightlight.js: it costs one more main draw at the arrival, +3 against the allowed +2) the lattice windows of the town houses (jharokha and window jali): 30 % lit with the sheet of lamp-light behind the lattice, by the hash of the room's place.
 Looked at: night views at the east bazaar street and on the cross street (shots at 2 m, low preset). Not looked at: the katra courts' brazier glow close up, the great gate's stands, the cells' inside lamps from within (the cell interiors read dark from the street).
 
 ### 17.3 Sound (`soundmap.js`, `src/engine/voices-agra.js`, `tests/agra-sound.test.mjs`)
