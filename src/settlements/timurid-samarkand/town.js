@@ -35,6 +35,7 @@ export async function town() {
   // the chorsu and the bazaar's streets
   const E = [{ t: 'chorsu', c: CHORSU.c, r: CHORSU.r }];
   for (const { a, b } of BAZAAR) { E.push({ t: 'bazaar', a, b, w: 5, h: 7, bay: 5, shops: 5 }); E.push({ t: 'tim_bazaar_dress', a, b, w: 5, bay: 5, seed: Math.round(a[0] + a[1] * 3) }); }
+  E.push({ t: 'tim_night', part: 'bazaar' });
   plans.push(base('samarkand-bazaar', E, [CHORSU.c[0] - 110, CHORSU.c[1] - 70, CHORSU.c[0] + 110, CHORSU.c[1] + 75]));
   plans.push(aryk());
   return [...plans, lifePlan()];

@@ -112,6 +112,50 @@ Gaps found against Ming Suzhou, and what closed them (`src/styles/baroque/{borgo
 
 Still below Suzhou: the upper storeys of the shops cannot be entered (the stair door is shut: the shop is one vaulted room with 2–6 m of solid mass behind it, too shallow for a stair); the outer ring beyond 115 m is still the shared Roman house with little eye-level detail; no music zone for the Borgo streets (the engine keys zones to the landmark's rooms; a non-open room would also add indoor reverb).
 
+## 6. Matching the reference (round 7): the walk, sound, night, animals, wear and writing
+
+Every line is [stated] with its source or [inferred]. Code: `src/settlements/baroque-rome/{openwalk,soundmap,voices}.js`; the test `tests/baroque-rome-sound.test.mjs`.
+
+### 6a. The walk
+
+- The arrival (110, 0) stands at the oval's mouth, facing west to the steps; the Borgo's two streets lie behind, east. The open bottegas are the casas of the three rows that can be entered (`rows()` units with `open`) and now the fourteen fronted lots nearest the arrival (`BOTTEGHE` in `openwalk.js`, was eight): each a vaulted room six metres deep with its counter, scales, shelves, goods, lantern and a keeper behind the counter [inferred: the Borgo's shops were small street-front rooms under the house; the trades are those of the dossier's §5b].
+- `openShops()` is the one list of the shops that can be entered; town.js, the sound map and the walk-check routes all read it so that they cannot disagree.
+
+### 6b. Sound
+
+The sounds of the place and date, placed where they are made and heard by hour and weather (`soundmap.js`; voices in `voices.js`, all named `brm…`).
+- *Water:* the piazza's two fountains, a steady broad rush heard across the oval at every hour (`brmFountain`); Maderno's fountain throws its water from an upper bowl into a wide basin [stated: vatican.va, §4 above]; the wall fountains of the Borgo's houses (the engine's `fountain`) [inferred: placing]; the floating ship-mills of the Tiber, their paddle-wheels slapping the stream and the hulls creaking, day and night (`brmMill`) [stated: the ship-mills, Wikipedia "Ship mill"; their sound inferred]; washerwomen pouring and wringing cloth on the west bank by day [inferred: §5b]; the lap of the bank's stones.
+- *Voices:* the market's cries at the Borgo's mouth by morning (the engine's wordless `marketCry`), the water-seller's and the pedlars' calls along the streets (`brmCry`: a fall held low, a climb, two notes repeated) [inferred: street cries were part of every Italian town's day, but no contour of 1670 survives, so ours are invented]; pilgrims murmuring a litany at the steps and the obelisk; a confraternity's procession with its leader's phrase and the brothers' answer on one recitation note and a hand-bell (`brmLitany`), passing along the streets by day [inferred from the §5b procession; that confraternities of pilgrims and townsfolk processed in the Holy Years is general knowledge, not checked against a source here].
+- *Guard and watch:* the Swiss at the colonnade's mouths grounding their halberds at the change of guard (`brmHalberd`) [stated: the Swiss Guard has served the pope since 1506; the drill inferred]; the night patrol of the Borgo, two men's steps, a scabbard, a lantern's chain, a low challenge (`brmPatrol`) [inferred: a papal city had watchmen by night].
+- *Traffic:* a gala coach at a walk over the setts, the pair's iron-shod hoofs in four beats, the rumble of the wheels and the creak of the body on its leather braces, the harness (`brmCoach`) [inferred: §5, the coaches]; walkers on the Ponte Sant'Angelo.
+- *Work in the shops, by trade and hour:* the baker's sacks and kitchen before noon; the grocer's sacks and coin; cloth, scissors; the apothecary's mortar; the cobbler's tacks; the wine shop's pouring; the osteria's talk and cups into the evening; the medal-seller's rosary beads (`brmBeads`, the Holy Years' trade) [inferred from the trades; the baker's early hours from the dossier §5b].
+- *Rooms:* the basilica (a hush, footfalls, murmur, a long reverb), the Sistine Chapel, the open shops and the inns by trade.
+- *Bells:* the profile's Angelus at dawn, noon and dusk [stated: Wikipedia "Angelus", cited in `soundscape.js`]. Nothing is made for the Chinese tracks (sedan chant, rattle-drum, clapper).
+- *Season and weather:* cicadas in the gardens and the hill in summer; the rain on tile roofs and the eaves; frogs by the Tiber's reeds in the warm nights [inferred: Latium's summer].
+
+### 6c. Night
+
+What lit Rome at night in 1670, and nothing else (`src/settlements/baroque-rome/nightlight.js`; the lights are geometry of the engine's additive `halo` material, so they show at the low preset; day view unchanged). Rome had no street lighting; the lamps before the madonnelle were the lights of the streets [inferred: the common account of Rome's street lighting before the 18th century; the dossier's earlier pointer is Wikipedia "Edicola sacra"/"Madonnella", not re-read here].
+- *The madonnelle:* each street shrine has its lantern (the shrines are drawn since this round: see 6f), a glow with the wash on the wall and a pool on the paving; 22 of them in the Borgo's fronts [inferred: the lantern on its bracket, built in `borgo.js`].
+- *Windows:* a share of the upper windows shows a candle or an oil lamp behind it, by hash of the window's place — more at the palazzi's piano nobile than in the casas' upper floors (138 windows in the Borgo) [inferred]; some windows of the Apostolic Palace's south and east faces and of the papal apartments in Castel Sant'Angelo [inferred: the palace and the fortress were inhabited at night].
+- *Fires and lamps in the open:* the baker's oven glows at the open front (bakers fired their ovens in the small hours) and the osteria and the inn are lit into the evening, their street fronts washed and the paving pooled [inferred]; two cressets at the Apostolic Palace's gate and one at each Swiss post at the colonnade's mouths [inferred: a watched gate kept a fire]; fires on the four bastions of Castel Sant'Angelo [inferred]; a lantern at each moored ship-mill [inferred: the mills worked on]; the lanterns of the three coaches left standing (two on each) [inferred: coaches carried lanterns].
+- *Inside St Peter's:* the Confessio's ninety-five lamps burning day and night, their glow along the four sides of the rail and the pool over the sunk floor [stated: stpetersbasilica.info, Confessio, cited in §5b].
+- *Not shown:* the illumination of the dome and the colonnade on the great feasts, and fireworks from Castel Sant'Angelo (festival lighting is attested for later centuries and not checked for 1670 here).
+
+### 6d. Animals
+
+`fauna.js` `critters` (the engine's rigs, one draw): sixteen pigeons, grey with a few white and dark, walking and pecking on the paving of the oval, the retta and the foot of the steps (the town's pigeons, as the dossier's earlier sparrows-for-pigeons stand-in); a cock and three hens scratching in the alley of the spina, where the scraps of the baker and the osteria fall; cats asleep at the doorsteps of the open shops and a dog at the baker's and the osteria's fronts (the open shops' own list, `openShops()`); five mallards on the Tiber's slack water above the bridge [inferred: all, the animals of a papal city's streets as in the other settlements' dossiers; geese and a goat's flock not placed]. The horses of the coaches and the donkey of the cart stay as street-life figures; a critter model for a mule or horse (with behaviour) is not yet in the engine. Tests: `tests/baroque-rome-critters.test.mjs`.
+
+### 6e. Writing
+
+Latin capitals from the verified set of Rome's `lettering.js` (read-only; V for U): the four tablets of the obelisk's pedestal in raised bronze letters — CHRISTVS VINCIT, CHRISTVS REGNAT, CHRISTVS IMPERAT, CHRISTVS AB OMNI MALO PLEBEM SVAM DEFENDAT [the acclamation is cut on the obelisk's pedestal: from general knowledge, not re-fetched in this session (the shell cannot reach the site cited in §4), so marked inferred; which phrase stands on which face is ours]; the words on the open shops' hanging signs, in dark raised capitals on both faces of the board: OLIO (grocer), PANE (baker), DRAPPI (cloth), VINO (wine), ERBE (apothecary), OSTERIA, SCARPE (cobbler), CORONE (rosaries and medals) [inferred: ordinary Italian trade words; painted signs in Roman capitals]. Not written: the dedications of Sixtus V and the Augustan dedications on the pedestal (the exact wording is not certain here), street-name plaques (later than 1670), the notices on the walls (plain paper, no text). The façade's inscription to Paul V is as in §4.
+
+### 6f. Wear and gaps closed on the way
+
+- *Worn doorsteps:* the middle of every house's doorstep is dished 1.8 cm (a three-piece slab) [inferred: stone worn by feet; as the sagrato's steps, §5].
+- *The street shrines are now built:* the madonnella's placing rule in `borgo.js` (a window-free span 3.7 m wide) was never satisfied, so no shrine, with its lantern and flame, had been drawn since they were added; each now takes the first-floor bay above the shop (the other end bay in a climbed house) and that bay's window is left out [inferred: the rule was a bug, not a decision; the dossier §5b describes madonnelle].
+- *Open fronts:* the folded counter board with its goods, drawn floating across the opening of the open shops, is now two stubs at the jambs with the goods on them (the room's own counter is inside); the lane through the opening is kept clear of goods, gear and figures (`clearU`, `lanes` in `openwalk.js`); an open lot needs 3.6 m of free street before its front (`clearFront`). Walk-check routes run into all 21 open bottegas.
+
 ## Sources
 
 - [Sistine Chapel — Wikipedia](https://en.wikipedia.org/wiki/Sistine_Chapel) (fetch refused this session; used for the entries under the Sistine Chapel from general knowledge, to be checked)

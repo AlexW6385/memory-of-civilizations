@@ -18,7 +18,9 @@ export const SISTINE = [-207.65, -136.9, -162.35, -119.1];
 export const GARDEN = [-285, 84, -195, 150];                  // the Vatican gardens' parterre, south-west of the church
 export const CASTEL = { c: [172, -60], r: 22 };
 export const TIBER = { x: 268, w: 64, level: -5, bed: -8 };
-export const BORGO = [-14, 14];                              // the Borgo Nuovo and Borgo Vecchio (z)
+export const BORGO = [-14, 14];
+/** The three coaches standing in the piazza and the Borgo (street.js coachAt; night.js hangs their lanterns): { x, z, rot (yaw as street.js's `at`) }. */
+export const COACH_SITES = [{ x: FRONT_X + 58, z: 24, rot: Math.PI / 2 }, { x: OVAL.c[0] + 30, z: -52, rot: 0.35 }, { x: 205, z: BORGO[0], rot: -Math.PI / 2 }];                              // the Borgo Nuovo and Borgo Vecchio (z)
 // The Borgo's fronts (docs/settlements/baroque-rome.md §5): three rows of palazzi and houses east of the oval,
 // the spina's two rows back to back with an alley between them, the Borgo Nuovo (z -26..-12) and Borgo Vecchio
 // (z 10..24) on either side; three lanes cross the spina.
