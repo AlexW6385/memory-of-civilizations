@@ -5,6 +5,8 @@
 // their butter-lamp lanterns. All from layout.js (the lots and the shops), seeded; nothing hard-coded.
 import { lots, shops, SHOL, inRect, STREET } from './layout.js';
 import { ground } from './ground.js';
+import { openWalks } from './upstairs.js';
+import { placeWalks, shopWalks } from './openwalk.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const OUT = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
@@ -12,8 +14,18 @@ const face = (n) => Math.atan2(n[0], n[1]);
 const ROT = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
 
 /** { dung: [...dung_wall], flags: [...flag_line] (tibetan style), life: [...] (life style) } */
+let CACHE = null, ROUTES = null;
+/** Is (x, z) within d of a route a visitor walks into an opened house (upstairs.js)? A prop at the foot of a wall is moved along the wall, or left out, where it would stand in the way. */
+const onRoute = (x, z, d = 1.55) => (ROUTES ||= [...openWalks((px, pz) => ground.height(px, pz)), ...placeWalks(), ...shopWalks()]).some((w) => w.some((a, i) => {
+  if (!i) return false;
+  const b = w[i - 1], dx = a[0] - b[0], dz = a[1] - b[1], t = Math.max(0, Math.min(1, ((x - b[0]) * dx + (z - b[1]) * dz) / (dx * dx + dz * dz || 1)));
+  return Math.hypot(b[0] + t * dx - x, b[1] + t * dz - z) < d;
+}));
+/** The dogs and goats of the lanes within 150 m of the lane's crossing are critters (fauna.js, with behaviour); the rest are still figures of the street life. */
+const AT_LANE = (x, z) => Math.hypot(x, z - 134) < 150;
 export function dressing() {
-  const rand = rng(1696), D = [], F = [], L = [];
+  if (CACHE) return CACHE;
+  const rand = rng(1696), D = [], F = [], L = [], C = [];
   const pick = (a) => a[Math.floor(rand() * a.length)], sd = () => Math.floor(rand() * 1e9);
   const all = lots();
   for (const l of all) {
@@ -28,21 +40,21 @@ export function dressing() {
       if (isDung) { const w = 2.4 + rand() * 1.8, k = 2.5 + rand() * Math.max(0, len - 5 - w) + w / 2; D.push({ t: 'dung_wall', at: cen(Math.min(k, len - 2.2)), n: f, w, h: 0.8 + rand() * 0.6, y, seed: sd() }); }
       // at the house foot (not on the side of the gate: the south) — a stack, a jar, baskets
       const k = 2 + rand() * (len - 4);
-      const r = rand(), at = cen(k), o = [at[0] + n[0] * 0.55, at[1] + n[1] * 0.55];
-      if (r < 0.32) L.push({ t: 'firewood', at: o, y, rot: f === 'n' ? 0 : Math.PI / 2, len: 1.3 + rand(), seed: sd() });
-      else if (r < 0.5) L.push({ t: 'pot', kind: pick(['dark_pot', 'water_pot', 'dark_pot']), at: o, y, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: sd() });
-      else if (r < 0.62) L.push({ t: 'basket', at: o, y, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 2), seed: sd() });
-      else if (r < 0.72) L.push({ t: 'sacks', at: o, y, rot: ROT[f], n: 2 + Math.floor(rand() * 2), seed: sd() });
-      else if (r < 0.78) L.push({ t: 'barrel', at: o, y, rot: 0, n: 1 + Math.floor(rand() * 2), seed: sd() });
+      const r = rand(), at = cen(k), o = [at[0] + n[0] * 0.55, at[1] + n[1] * 0.55], P = (e) => { if (!onRoute(o[0] + n[0] * 0.9, o[1] + n[1] * 0.9)) L.push(e); };
+      if (r < 0.32) P({ t: 'firewood', at: o, y, rot: f === 'n' ? 0 : Math.PI / 2, len: 1.3 + rand(), seed: sd() });
+      else if (r < 0.5) P({ t: 'pot', kind: pick(['dark_pot', 'water_pot', 'dark_pot']), at: o, y, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 3), seed: sd() });
+      else if (r < 0.62) P({ t: 'basket', at: o, y, rot: rand() * 6.28, n: 1 + Math.floor(rand() * 2), seed: sd() });
+      else if (r < 0.72) P({ t: 'sacks', at: o, y, rot: ROT[f], n: 2 + Math.floor(rand() * 2), seed: sd() });
+      else if (r < 0.78) P({ t: 'barrel', at: o, y, rot: 0, n: 1 + Math.floor(rand() * 2), seed: sd() });
       // a second thing further along
-      if (rand() < 0.4) { const k2 = 1.5 + rand() * (len - 3), a2 = cen(k2); L.push({ t: pick(['basket', 'pot', 'firewood']), kind: 'dark_pot', at: [a2[0] + n[0] * 0.5, a2[1] + n[1] * 0.5], y, rot: f === 'n' ? 0 : Math.PI / 2, len: 1.2, seed: sd() }); }
+      if (rand() < 0.4) { const k2 = 1.5 + rand() * (len - 3), a2 = cen(k2); if (!onRoute(a2[0] + n[0] * 1.2, a2[1] + n[1] * 1.2)) L.push({ t: pick(['basket', 'pot', 'firewood']), kind: 'dark_pot', at: [a2[0] + n[0] * 0.5, a2[1] + n[1] * 0.5], y, rot: f === 'n' ? 0 : Math.PI / 2, len: 1.0, seed: sd() }); }
     }
     // an old woman at her stool on a sunny wall (the east and south sides of the lanes), a dog in the lane, a goat or a donkey tied at the wall
     if (inSh) {
       const roll = rand();
       const zc = z0 + 3 + rand() * (z1 - z0 - 6);
-      if (roll < 0.12) L.push({ t: 'animal', kind: 'dog', at: [x1 + 1.1, zc], y, rot: rand() * 6.28, seed: sd() });
-      else if (roll < 0.17) L.push({ t: 'animal', kind: 'goat', at: [x0 - 1.2, zc], y, rot: rand() * 6.28, seed: sd(), graze: false });
+      if (roll < 0.12) { const e = { t: 'animal', kind: 'dog', at: [x1 + 1.1, zc], y, rot: rand() * 6.28, seed: sd() }; (AT_LANE(...e.at) ? C : L).push(e); }
+      else if (roll < 0.17) { const e = { t: 'animal', kind: 'goat', at: [x0 - 1.2, zc], y, rot: rand() * 6.28, seed: sd(), graze: false }; (AT_LANE(...e.at) ? C : L).push(e); }
       else if (roll < 0.2) L.push({ t: 'animal', kind: 'donkey', at: [x1 + 1.3, zc], y, rot: ROT.e + (rand() - 0.5), seed: sd(), graze: false });
       else if (roll < 0.3) {
         const at = [x1 + 0.7, zc];
@@ -76,5 +88,5 @@ export function dressing() {
   }
   // the street's own: a woman with her basket, traders talking at the booths, a dog, pilgrims prostrating are in town.js
   void STREET;
-  return { dung: D, flags: F, life: L };
+  return (CACHE = { dung: D, flags: F, life: L, crit: C });
 }

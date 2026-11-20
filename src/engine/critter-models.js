@@ -574,3 +574,35 @@ export function goat(variant) {
 }
 MODELS.goat_black = () => goat('black');
 MODELS.goat_white = () => goat('white');
+
+/** A Tibetan mastiff (on the dog's rig: parts 1 neck, 2 head, 3 tail, 4–7 legs, 13 the paws' shadow): black with tan points over the eyes, on the muzzle and the legs; a heavy head, a thick ruff round the neck, a bushy tail curled over the back (Lhasa, docs/settlements/lhasa.md §19; placed at about 1.3 of the dog's size). */
+export function mastiff() {
+  const m = new Model(), blk = [0.07, 0.06, 0.055], tan = [0.5, 0.3, 0.12], lite = [0.16, 0.13, 0.1];
+  const fur = ({ p, n }) => lerp(lerp(blk, lite, sm(-0.2, -0.8, n[1]) * 0.5), tan, sm(0.12, 0.0, Math.abs(p[2])) * 0 + hash3(p, 8) * 0.04);
+  const S = [[0.3, 0.34, 0.09, 0.09], [0.22, 0.36, 0.15, 0.13], [0.1, 0.37, 0.165, 0.14], [-0.05, 0.36, 0.155, 0.13], [-0.2, 0.36, 0.145, 0.12], [-0.3, 0.35, 0.1, 0.09], [-0.34, 0.34, 0.03, 0.03]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 9, col: fur });
+  const NP = [0.26, 0.41, 0], HP = [0.4, 0.54, 0];
+  m.as(1, NP, null, () => {
+    m.tube([[0.22, 0.4, 0], [0.31, 0.46, 0], [0.37, 0.5, 0]], [[0.12, 0.12], [0.1, 0.1], [0.085, 0.085]], { sides: 8, ref: [1, 0, 0], col: fur });   // the ruff: a thick neck
+  });
+  m.as(2, HP, NP, () => {
+    m.ball([0.41, 0.545, 0], [0.085, 0.07, 0.07], fur, { nu: 6, nv: 7 });
+    m.tube([[0.44, 0.53, 0], [0.5, 0.515, 0], [0.55, 0.505, 0]], [[0.052, 0.05], [0.044, 0.046], [0.036, 0.04]], { sides: 6, col: ({ t }) => lerp(blk, tan, t * 0.7) });
+    m.ball([0.558, 0.515, 0], [0.014, 0.012, 0.02], [0.03, 0.025, 0.025], { nu: 3, nv: 5 });
+    for (const s of [-1, 1]) m.tube([[0.4, 0.58, s * 0.05], [0.385, 0.6, s * 0.075], [0.4, 0.58, s * 0.085]], [[0.012, 0.03], [0.01, 0.028], [0.002, 0.004]], { sides: 4, col: blk });
+    for (const s of [-1, 1]) m.ball([0.46, 0.585, s * 0.036], [0.012, 0.008, 0.012], tan, { nu: 3, nv: 4 });      // the tan spots over the eyes
+    eyes(m, 0.46, 0.565, 0.04, 0.008, [0.08, 0.05, 0.03]);
+  });
+  m.as(3, [-0.32, 0.34, 0], null, () => m.tube([[-0.32, 0.34, 0], [-0.4, 0.43, 0], [-0.41, 0.52, 0], [-0.34, 0.56, 0]], [0.04, 0.045, 0.04, 0.012], { sides: 6, col: blk }));
+  const legs = [[4, 1, -1, 0.2], [5, 1, 1, 0.2], [6, 0, -1, -0.22], [7, 0, 1, -0.22]];
+  for (const [part, front, z, x] of legs) {
+    const hip = [x, 0.3, z * 0.09];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [x - (front ? 0 : 0.03), 0.17, z * 0.09], [x - (front ? 0 : 0.02), 0.07, z * 0.09], [x + 0.01, 0.015, z * 0.09]], [[0.055, 0.05], [0.03, 0.028], [0.024, 0.023], [0.028, 0.03]], { sides: 5, col: ({ t }) => lerp(blk, tan, sm(0.45, 0.9, t)) });
+      m.ball([x + 0.03, 0.012, z * 0.09], [0.05, 0.016, 0.03], tan, { nu: 4, nv: 5 });
+    });
+  }
+  m.as(13, [0.5, 0.04, 0], null, () => { for (const z of [-1, 1]) m.tube([[0.28, 0.07, z * 0.09], [0.42, 0.04, z * 0.09], [0.5, 0.025, z * 0.09]], [[0.05, 0.04], [0.034, 0.034], [0.03, 0.034]], { sides: 5, col: ({ t }) => lerp(blk, tan, t) }); });
+  return m;
+}
+MODELS.mastiff = mastiff;
