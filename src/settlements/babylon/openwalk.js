@@ -43,3 +43,11 @@ export function routes(count = 15) {
   }
   return out;
 }
+
+/** A lot's door in the settlement's frame: { p (on the wall's outer face), out (unit, away from the house), side (unit, along the front, the way u grows) }. */
+export function doorPoint(l) {
+  let W, u;
+  if (l.shop) { W = frameOf(l.rect, l.door).W; u = SHOP_DOOR; } else { const F = frame({ rect: l.rect, door: l.door }); W = F.W; u = F.t + 0.72; }
+  const p = W(u, 0), o = W(u, -1), s = W(u + 1, 0);
+  return { p, out: [o[0] - p[0], o[1] - p[1]], side: [s[0] - p[0], s[1] - p[1]] };
+}
