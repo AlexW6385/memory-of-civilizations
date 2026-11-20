@@ -136,3 +136,24 @@ Sources of this pass: [Giant Wild Goose Pagoda, ancient-history-sites](https://w
 See §1; further: [Culturechina, what did people wear in the Tang](https://www.culturechina.com/blog/what-did-people-wear-in-the-tang-dynasty.html); [Wikipedia, Women's clothing in China](https://en.wikipedia.org/wiki/Women%27s_clothing_in_China); the tang-wutai dossier of this repo for the Foguang hall's proportions.
 
 - [Daci'en Temple, ancient-history-sites](https://www.ancient-history-sites.com/?p=133050); [Tang Homes, Furnishings and Household Objects](https://www.ancient-history-sites.com/?p=174147).
+
+## 18. The night of the curfew (match pass)
+
+The night follows the curfew, not an open night market. Sources: Lin 2015 (ward gates shut at night by the ward headman, wards and crossroads guarded, temples and officials of rank 3b exempt); encyclopedia.com "City Life in Tang" (drum towers proclaim the time, mounted soldiers patrol); Wikipedia "Chang'an" and ancient-history-sites ?p=174139 / ?p=174145 (markets open at the noon drum and close before dusk at the gong; the curfew lifted three nights at the Lantern Festival; a night market was only attempted to be closed in 841, so none c. 750).
+- [stated] Ward gates are shut at night: night-only leaves with a bar and a guard lamp at each ward gate (`tc_night_gate`, near plans within 215 m of a ward centre); Daci'en's gate stays open (temple).
+- [stated] The two markets are shut at dusk: night-only shutters over the shop fronts and covered lanterns (near plans); no stall or market lamp is lit.
+- [stated] Temples keep their lamps: lit hall lanterns and windows, stone lamps, incense embers, the pagoda's windows lit storey by storey (halo material, readable at the low preset).
+- [inferred] Lamps inside the wards: a hash share (half) of the courtyard houses show a lit window and a lamp at the gate; guard lamps at gates; drummers' lamps in the drum towers. Oil-lamp scale and colour are inferred.
+- [inferred] Shut gates and shutters are visual only (no collider): the visitor is never locked out.
+
+## 19. Sound (match pass)
+
+Map: `src/settlements/tang-changan/soundmap.js`; voices `src/engine/voices-tang.js` (all prefixed `tc`); test `tests/tang-sound.test.mjs`.
+- [stated] Markets sound only from the noon drum to about 16:45 (closing gong, 1¾ h before dusk); streets are silent in the curfew; no hawker cries and no watchman's clapper (those are of later cities), so the engine's street tracks are switched off.
+- [stated] Street drums at dusk and from the fifth watch, the market drum at noon and gong at closing, Daci'en's bell and drum at dawn and dusk (engine `temple-am` / `temple-pm`); beat counts are shortened.
+- [stated] Camel strings (Silk Road trade) by day on the avenue; mounted patrol by night (encyclopedia.com).
+- [inferred] Ward gate bar and hinge at dusk and at the fifth watch; ox-carts; Hu pipa and drum at the wine shop and caravanserai yards (Hu music at the West Market is attested, the tunes are not); wind bells on the pagoda; trade work sounds by shop trade in market hours; kitchens, looms and zithers in houses by hour. All pitches and contours are inferred.
+
+## 20. Animals as critters (match pass)
+
+- [stated] Dogs, camels, donkeys and horses are in the city (existing life figures); [inferred] animated critters: a dog at each ward crossing within 360 m, at Daci'en's kitchen door and in the caravanserai yards; cats on the kitchen and sutra-hall platforms and in a yard; pigeons walking on the main court; a rooster and hens in a ward lane (none in the temple: a Buddhist kitchen). Camels stay static life figures (no camel rig yet).
