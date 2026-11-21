@@ -58,7 +58,7 @@ export function homeRoute(l) {
 }
 
 /** The houses the walk enters, nearest the ends of Jongno first: the lanes' ends east and west of the ministries. */
-export function walkHomes(n = 6) {
+export function walkHomes(n = 7) {
   const c = [JONGNO[0], 330], e = [JONGNO[2], 330];
   return lots().filter(enterable).map((l) => ({ l, d: Math.min(Math.hypot((l.rect[0] + l.rect[2]) / 2 - c[0], (l.rect[1] + l.rect[3]) / 2 - c[1]), Math.hypot((l.rect[0] + l.rect[2]) / 2 - e[0], (l.rect[1] + l.rect[3]) / 2 - e[1])) }))
     .sort((p, q) => p.d - q.d).slice(0, n).map((p) => p.l);
@@ -68,10 +68,11 @@ export function walkHomes(n = 6) {
 export function seoulWalks() {
   const out = [];
   const blocks = blocksOf().sort((p, q) => Math.abs((p.rect[0] + p.rect[2]) / 2) - Math.abs((q.rect[0] + q.rect[2]) / 2));
-  for (const b of blocks.slice(0, 3)) for (const s of shopsOf(b).filter((q) => q.open).slice(0, 2)) { const z = s.z; out.push(Object.assign([[s.xin, z - 4], [s.xin, z - 1.2], [s.xin, z + 0.6], [s.xin, z + 2.6], [s.xin, z + 4.4]], { y0: 0 })); }
+  for (const b of blocks.slice(0, 6)) for (const s of shopsOf(b).filter((q) => q.open).slice(0, 2)) { const z = s.z; out.push(Object.assign([[s.xin, z - 4], [s.xin, z - 1.2], [s.xin, z + 0.6], [s.xin, z + 2.6], [s.xin, z + 4.4]], { y0: 0 })); }
   // the bell pavilion: from Jongno in at its middle bays (the rail is low and open there) — the floor is 0.9 m up on its base
   const [bx0, bz0, bx1, bz1] = BELL;
   void bx0; void bx1; void bz1; void bz0;
+  out.push(Object.assign([[(bx0 + bx1) / 2, bz0 - 5], [(bx0 + bx1) / 2, bz0 - 1.5], [(bx0 + bx1) / 2, bz0 + 1.2], [(bx0 + bx1) / 2, bz0 + 1.3]], { y0: 0 }));
   // the yangban house: in at its gate on the south, across the yard to the anchae's hall
   const [yx0, yz0, yx1, yz1] = YANGBAN, W = yx1 - yx0, xc = yx0 + W * 0.62;
   out.push(Object.assign([[xc, yz1 + 2], [xc, yz1 - 1], [xc, yz0 + 1.6 + 2.9 + 1.0 + 1.7], [xc, yz0 + 1.6 + 2.9 + 1.0 + 0.55], [xc, yz0 + 1.6 + 1.7]], { y0: 0 }));

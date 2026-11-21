@@ -440,15 +440,18 @@ export function sijeon(el, { bag, col }) {
 export function bellPavilion(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = 0.9, H = 3.6, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   bag.add('granite_korea', box(x0 - 0.6, -0.2, z0 - 0.6, x1 + 0.6, y, z1 + 0.6));
-  col.rect([x0 - 0.6, z0 - 0.6, x1 + 0.6, z1 + 0.6], 0, y - 0.3);
-  const xs = Array.from({ length: 6 }, (_, i) => x0 + (x1 - x0) * i / 5), zs = [z0, cz, z1];
+  // the base's collision leaves the stair's lane free: the front strip in two pieces
+  col.rect([x0 - 0.6, z0 - 0.6, cx - 1.0, z0], 0, y - 0.3); col.rect([cx + 1.0, z0 - 0.6, x1 + 0.6, z0], 0, y - 0.3); col.rect([x0 - 0.6, z0, x1 + 0.6, z1 + 0.6], 0, y - 0.3);
+  // five bays, the middle one the widest (2.2 m between the columns' faces at 10 m) so a stair of 1.76 m can climb through it
+  const xs = [0, 0.18, 0.39, 0.61, 0.82, 1].map((f) => x0 + (x1 - x0) * f), zs = [z0, cz, z1];
   for (const x of xs) for (const z of [z0, z1]) { bag.add('granite_korea', box(x - 0.3, y, z - 0.3, x + 0.3, y + 0.12, z + 0.3)); bag.add('lacquer_red', lathe([[0.22, 0], [0.21, H], [0.001, H]], 12, null, x, y + 0.12, z)); col.circle(x, z, 0.24, y, y + H); }
   for (const x of [x0, x1]) { bag.add('granite_korea', box(x - 0.3, y, cz - 0.3, x + 0.3, y + 0.12, cz + 0.3)); bag.add('lacquer_red', lathe([[0.22, 0], [0.21, H], [0.001, H]], 12, null, x, y + 0.12, cz)); }
   // the walls: plaster below, lattice above; the street side open on its three middle bays behind a low rail
-  for (const [a, b, open] of [[[x0, z0], [x1, z0], false], [[x0, z1], [x1, z1], true], [[x0, z0], [x0, z1], false], [[x1, z0], [x1, z1], false]]) {
+  for (const [a, b, open] of [[[x0, z0], [x1, z0], true], [[x0, z1], [x1, z1], false], [[x0, z0], [x0, z1], false], [[x1, z0], [x1, z1], false]]) {
     const along = a[1] === b[1], ps = along ? xs : zs;
     for (let k = 0; k + 1 < ps.length; k++) {
       const pa = along ? [ps[k] + 0.22, a[1]] : [a[0], ps[k] + 0.22], pb = along ? [ps[k + 1] - 0.22, a[1]] : [a[0], ps[k + 1] - 0.22];
+      if (open && k === 2) continue;
       if (open && k > 0 && k < 4) { railing(bag, col, pa, pb, y + 0.12, { step: 1.2 }); continue; }
       slab(bag, 'plaster_white', pa, pb, y + 0.12, y + 1.5, 0.1);
       slab(bag, 'plaster_damp', pa, pb, y + 0.12, y + 0.5, 0.11);
@@ -457,6 +460,11 @@ export function bellPavilion(el, { bag, col }) {
     }
   }
   col.floor([x0, z0, x1, z1], y + 0.12);
+  // the stair on the street side (Jongno lies to the north): two granite steps of 0.3 m up to the base's top, between the middle bay's columns
+  bag.add('granite_korea', box(cx - 1.0, -0.2, z0 - 1.7, cx + 1.0, 0.3, z0 - 1.15));
+  bag.add('granite_korea', box(cx - 1.0, -0.2, z0 - 1.15, cx + 1.0, 0.6, z0 - 0.6));
+  col.ramp([cx - 0.9, z0 - 1.7, cx + 0.9, z0 - 0.6], 0, y, 's');
+  col.floor([cx - 0.9, z0 - 0.6, cx + 0.9, z0], y);
   bag.add('paint_dancheong', box(x0 - 0.25, y + H - 0.45, z0 - 0.25, x1 + 0.25, y + H + 0.1, z1 + 0.25));
   meoricho(bag, el.rect, [xs, [z0, z1]], y + H - 0.4, y + H + 0.04, 0.26);
   // the bell, hung from a beam across the middle
