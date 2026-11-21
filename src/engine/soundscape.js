@@ -94,6 +94,7 @@ import * as HIMEJI from '../settlements/edo-himeji/soundmap.js';
 import * as SEOUL from '../settlements/joseon-seoul/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as MADURAI from '../settlements/madurai/soundmap.js';
+import * as KARAKORUM from '../settlements/mongol-karakorum/soundmap.js';
 import * as MAYATIKAL from '../settlements/maya-tikal/soundmap.js';
 import './voices-tikal.js';
 import * as MUSCOVY from '../settlements/muscovy/soundmap.js';
@@ -203,7 +204,7 @@ export const PROFILES = {
   'qin-xianyang': T(NEAR, { animals: { cattle: 0.5, dog: 0.3, horse: 0.3 }, roof: 'tile' }),
   thebes: T(NEAR, { frogs: 0.3, animals: withLife({ donkey: 0.5, dog: 0.3, cattle: 0.3 }, { market: 0.7, canal: 0.5, map: THEBES }), roof: 'flat' }),
   fez: T(NEAR, { animals: withLife({ donkey: 0.6, rooster: 0.3, cat: 0.3 }, { market: 1, map: FEZ }), roof: 'flat', adhan: 1 }),
-  'mongol-karakorum': T(NEAR, { animals: { horse: 0.8, dog: 0.6, sheep: 0.4 }, roof: 'flat' }),
+  'mongol-karakorum': T(NEAR, { animals: withLife({ horse: 0.8, dog: 0.6, sheep: 0.4, camel: 0.2 }, { market: 0.9, map: KARAKORUM }), roof: 'flat', adhan: 1 }),
   catalhoyuk: T({ sparrow: 0.4, warbler: 0.5, crow: 0.4, dove: 0.2 }, { frogs: 0.6, animals: { dog: 0.4, goat: 0.5, cattle: 0.4 }, roof: 'flat' }),
   shibam: T(NEAR, { animals: withLife({ donkey: 0.4, goat: 0.4, cat: 0.2 }, { market: 0.8, map: SHIBAM }), roof: 'flat', adhan: 1 }),
   mycenae: T(MED, { cicadas: 0.9, animals: withLife({ goat: 0.5, sheepbell: 0.5, donkey: 0.3, dog: 0.3 }, { market: 0.6, map: MYCENAE }), roof: 'flat' }),
