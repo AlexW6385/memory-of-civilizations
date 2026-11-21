@@ -27,6 +27,7 @@ MODEL_KIND.turkey = 'hen'; MODEL_KIND.turkey_ocellated = 'hen';                 
 Object.assign(MODEL_KIND, { goat_black: 'dog', goat_white: 'dog' });                                                      // (Bhaktapur's goats lie down and stand on the dog's rig)
 MODEL_KIND.mastiff = 'dog';                                                                                                           // (Lhasa's chained mastiffs lie down and stand on the dog's rig)
 Object.assign(MODEL_KIND, { llama_brown: 'dog', llama_white: 'dog', llama_pied: 'dog', cuy: 'dog' });                       // (Machu Picchu's llamas and guinea pigs, on the dog's rig)
+Object.assign(MODEL_KIND, { camel_dun: 'dog', camel_dark: 'dog' });   // (Dunhuang's Bactrian camels kneel and stand on the dog's rig)
 MODEL_KIND.gull_silver = 'hen';   // (Sydney's silver gulls walk and peck as the fowl do)
 /** Out at night too (a cat and a dog asleep, a cage hung out, the craft)? */
 const NIGHT = { cat: 1, dog: 1, cagebird: 1, craft: 1 };

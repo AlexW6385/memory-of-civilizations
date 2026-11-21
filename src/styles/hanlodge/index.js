@@ -28,6 +28,9 @@ function horses(el, ctx) {
   horse(bag, x, y + 0.66, z, fx, fz, 1.2);
 }
 
+/** What the last house built recorded of its doors (hall(): the hall's door; house(): the gate): read by DOORS after each build (walkroutes.js asks `houseDoors`). */
+let LAST = {};
+export const DOORS = new Map();
 const WALLS = ['earth_wall', 'lime_plaster', 'mud_plaster', 'earth_wall', 'lime_plaster'];
 
 function perimeter(F, W, D, h, gateU, gateW, wm, noFront = false, rank = 1) {
@@ -73,7 +76,8 @@ function perimeter(F, W, D, h, gateU, gateW, wm, noFront = false, rank = 1) {
  * Returns the door's u.
  */
 function hall(F, u0, u1, v0, v1, H, wm, o, rand) {
-  const w = u1 - u0, t = 0.4, P = 0.3, dw = o.dw ?? 1.7, du = o.du ?? u0 + w * (0.4 + rand() * 0.2);
+  const w = u1 - u0, t = 0.4, P = 0.3, dw = o.dw ?? 1.8, du = o.du ?? u0 + w * (0.4 + rand() * 0.2);
+  LAST.du = du; LAST.dw = dw; LAST.v0 = v0; LAST.v1 = v1; LAST.P = P; LAST.open = !!o.open;
   F.b('brick_paving', u0 - 0.5, 0, v0 - 0.9, u1 + 0.5, P, v1 + 0.2, false);
   F.floor(u0 - 0.5, v0 - 0.9, u1 + 0.5, v1 + 0.2, P);
   F.b('wood_dark', u0 + t, P, v0 + t, u1 - t, P + 0.03, v1 - t, false);
@@ -106,10 +110,24 @@ function hall(F, u0, u1, v0, v1, H, wm, o, rand) {
 
 /** hanl_house: { rect, front, kind ('court' | 'row' | 'shop' | 'lou'), seed } — a house of the service quarters, its hall enterable and lit. */
 function house(el, ctx) {
+  LAST = {};
+  houseBuild(el, ctx);
+  DOORS.set(doorKey(el), { ...LAST, kind: el.kind });
+}
+export const doorKey = (el) => `${el.rect.join(',')}|${el.front}|${el.seed}`;
+const NOOP = new Proxy({}, { get: () => () => {} });
+/** Where the doors of a hanl_house are, in its lot's frame (u along the lane, v into the lot): { gateU, gw, du, dw, v0, v1, P, kind } — built once against a stand-in context (no geometry kept). */
+export function houseDoors(el) {
+  const k = doorKey(el);
+  if (!DOORS.has(k)) { const keep = LAST; try { house(el, { bag: NOOP, col: NOOP, lights: [], style: STYLES.hanlodge }); } finally { LAST = keep; } }
+  return DOORS.get(k);
+}
+function houseBuild(el, ctx) {
   const rank = el.rank ?? 1, rand = rng(el.seed), F = lotFrame(ctx, el.rect, el.front), W = F.W, D = F.D, kind = el.kind, H = 3.3 + rand() * 0.3;
   const wm = rank === 0 ? (el.seed % 2 ? 'mud_plaster' : 'earth_wall') : rank === 2 ? (el.seed % 3 ? 'lime_plaster' : WALLS[el.seed % WALLS.length]) : WALLS[el.seed % WALLS.length];
   const gateU = Math.max(1.8, Math.min(W - 1.8, W * (0.25 + 0.5 * rand()))), room = KINDS[(el.seed >> 3) % KINDS.length];
-  const wh = rank === 0 ? 2.0 : rank === 2 ? 2.7 : 2.5, gw = rank === 2 ? 2.1 : rank === 0 ? 1.6 : 1.8, tile = rank === 0 ? 'tile_dark' : 'tile_grey';
+  const wh = rank === 0 ? 2.0 : rank === 2 ? 2.7 : 2.5, gw = rank === 2 ? 2.4 : rank === 0 ? 2.0 : 2.2, tile = rank === 0 ? 'tile_dark' : 'tile_grey';
+  LAST.gateU = gateU; LAST.gw = gw;
   if (kind === 'court') {
     perimeter(F, W, D, wh, gateU, gw, wm, false, rank);
     frontDress(F, W, D, gateU, gw, wh, el.seed, 'court');
