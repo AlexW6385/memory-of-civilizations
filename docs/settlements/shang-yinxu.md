@@ -104,3 +104,50 @@ Soot and ash about the furnaces and the pit; water troughs; a mound kiln for bak
 - Daily life in Anyang c. 1200 BCE — https://dailylifehistory.pages.dev/ancient/china/anyang/c-1200-bce
 - CSSN, on the clan temples of Yinxu — https://www.cssn.cn/lsx/lsx_kgx/202210/t20221024_5552711.shtml
 - Y. Zhou, "Reexamine Bronze Foundries in Anyang", UC San Diego — https://history.ucsd.edu/_files/undergraduate/honors-theses/Yuwei-Zhou---Reexamine-Bronze-Foundries-in-Anyang.pdf
+
+## 9. The visitor's walk (reference pass, step 1)
+
+All of this is [inferred] from the dossier's own plans (§2, §4, §5, §5d) unless a source is named; no new thing is invented, the walk only fixes what could be entered and where the visitor goes. Code: `src/settlements/shang-yinxu/walk.js` (the lines), `walkroutes.js` (the door routes walk-check follows).
+
+- **The way.** From the arrival in the court (20, -34) up the axis between the covered pits to the stair of the kings' hall and into it; back down the court to the west flanking hall (Jia group) and the east one (Bing group), both entered by the stair in their middle bay on the court side; out of the court's east side across the open ground to the lane of the eastern quarter, past the courtyard houses, the row houses and the diviners' workshop, to the oracle-bone archive's shed and its door; west of the hall to Fu Hao's tomb and its small hall (the stair beside the offering table); south out of the gate, over the moat's causeway to the quarter's lanes, west along them to the bronze foundry and, through the furnace shed, to the casters' pit house. Daily trade at Yinxu is not recorded as shops; the places open to the visitor are therefore the households and the workshops (bone, jade, pottery, the diviners' craft), as in §5a and §5d [inferred].
+- **What can be entered along it.** The ancestral hall, both flanking halls, the tomb's small hall, the archive, the court houses' main houses (door on the lot's axis, up three steps to the 0.5 m foundation), the middle house of each row, the middle pit house of each pit yard, the workshops' sheds, the casters' pit house. Every route is walked from the lane to the front room by `tools/walk-check.mjs`.
+- **Pit houses made enterable (they were not).** An enterable pit house (the middle one of a pit yard, the casters', and by seed the others) stood with its eave at 1.0 m and its door's lintel at 1.45 m: shut to a walker 1.75 m high. It now has daub walls on its banks to an eave 2.1 m over the floor, a header 2.0 m above it and jambs to it; the roof rises 1.6 + 0.1 w. The excavated floors lay 0.6-1.0 m below the ground and this model keeps the floor at ground level with the earth banked round it (§5), so 2.1 m over the floor is about 1.3 m of wall over the ground [inferred]. Unopened pit houses stay low and closed.
+- **Door lanes kept clear.** Firewood, jars, baskets, benches, the lane's people and the dogs of the lots on the walk were shifted off the gate and door lines; the guards and a talker in the yards were moved aside (nothing removed).
+
+## 10. The night (reference pass, step 2)
+
+Code: `src/settlements/shang-yinxu/nightlight.js` (the `halo` pattern: light added over the scene at night only, no light, shadow or collision, so it shows at the low preset; the day view is unchanged). All [inferred]: the sources name no lighting, so only fire is used, and no lamp is invented (the bronze lamp is a later object).
+
+- **Hearths.** Every house had a hearth (hearths were found inside the pit houses: dailylifehistory.pages.dev, Xiaomintun, §5a [stated]); a household is lit or dark by the hash of its place (court houses 62 %, pit yards 50 %, row houses 45 %, workshops 40 %); a lit one shows its hearth's glow and pool, a warm sheet in its open doorway and on its window slits.
+- **The diviners' braziers and the hall.** The braziers of the court (the plastron is heated at a fire, §4), the tripod stands of the axis, the braziers and porch stands of the kings' hall, the tomb's offering lamps and the archive's lamp glow; the court's two stacks of billets for the burnt offering (*liao*, §5a) burn at night (flames present at night only). That the rites were kept up by firelight is our inference.
+- **The foundry.** The four furnaces' mouths glow strongly and the mould kiln's mouth; the casting went on through the night (sound map §11) [inferred]. The pottery workshops' kilns glow too.
+- Not done: the Huan's landings have no light; no torch carried by the guards.
+
+## 11. Sound (reference pass, step 3)
+
+Code: `src/settlements/shang-yinxu/soundmap.js` (the places), `src/engine/voices-shang.js` (17 voices, all `shang…`), `tests/shang-yinxu-sound.test.mjs`. All synthesised and [inferred]: no recording of Shang sound exists; where the instrument is named by the finds it is stated in the voice's comment.
+
+- **The rites** (by day, dawn and toward evening, before the kings' hall): the nao bells, the stone chime (the tiger-patterned stone of Wuguancun, §4 [stated]), the drum with crocodile-skin heads (§4), the ocarina (*xun*, §7), in the pentatonic mode of `music.js`.
+- **The oracle bone's own sound**: the crack of the heated shell (the "bu" of *bu* 卜, divination), at the four braziers of the court, at the shed's fire and in the archive; saws and bronze drills at the shed's benches (§5).
+- **The foundry:** the hide bellows of the four furnaces by day and, less often, through the night; the pour (hiss and the ticks of the cooling cast) at the pouring pit; file strokes at the fettling benches; the engine's smith's hammer; the master's wordless call.
+- **The households:** pestle in the mortar, the saddle quern, the loom, the kitchen, the pigs in their pens, a keeper's call; the workshops by trade (bone, jade, pottery, the diviners' craft). Wells' buckets in the yards near the court.
+- **The river and the court:** cloth beaten on the landings' stones, the lapping of the Huan at its banks, frogs on the banks by night; two chariots trundling in the court (wheels, a pair's trot, bronze fittings); the court's murmur; owls at night, dogs from the quarters (the engine's).
+- **Rooms:** the hall, the flanking halls, the archive, the tomb's hall, the houses by kind, each with its tone and hush.
+- No market sound: Yinxu is not known to have had market streets (§9).
+
+## 12. Animals with behaviour (reference pass, step 4)
+
+Code: `fauna.js` (`critters`), `tests/shang-yinxu-critters.test.mjs`; the engine's rigged models are used as they are. All from the dossier's own animal lists (§5a, §7), placement [inferred].
+
+- **Dogs** (in the bone record, §5a [stated]) lying beside the gates of six lots on the walk; they lift their heads and stand as the visitor comes. **Hens and a rooster** in the yard fronts of every third near lot (fowl in the yards, §5a). **Goats** in the pens of two lots (sheep or goats in the bone record, §5a [stated]; the model is the engine's hill goat).
+- **Swallows** (§7): mud nests under the eave of the kings' hall's front wall (between the door bays) and on the front walls of up to five great houses; the birds fly out and home.
+- **The Huan:** ducks afloat on two rafts (western and eastern reach), a crane on the north bank, a kingfisher on a pile of a landing [inferred: egrets and carp are in §5b; these are the river's own birds]. No cat or pigeon: not certain for the town.
+- Oxen, pigs and horses keep their older life elements (`town.js`); the engine has no critter model for them.
+
+## 13. Wear and writing (reference pass, step 5)
+
+Code: `src/settlements/shang-yinxu/wear.js` (wraps the style's elements and the doorway hook of `houses.js`). All [inferred]: trampling and hearth smoke follow from use, not from a source.
+
+- **Stairs trodden dark down their middle**: the kings' hall's stair, both flanking halls', the tomb's and the archive's, a patch on every tread (the "steps worn at the middle" §5d listed as missing).
+- **Thresholds:** a dark worn patch on the slab of every opened house's door and on the earth step of the opened pit houses; the **soot of the hearth** above the lintel of the opened houses (the pit houses' open gable has no wall to blacken).
+- **Writing: none.** The oracle-bone script would be the only script of the place, and no graph was verified against a source in this pass (no web access), so no inscription, tablet or sign is drawn. Shang Yinxu had no shop signs; the dossier's lintel boards and bronzes carry pattern, not text (§4b, §4c).

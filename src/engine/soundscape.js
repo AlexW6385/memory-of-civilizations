@@ -141,6 +141,7 @@ import * as ROME from '../settlements/rome/soundmap.js';
 import * as HANCHANGAN from '../settlements/han-changan/soundmap.js';
 import * as HANGZHOU from '../settlements/song-hangzhou/soundmap.js';
 import * as KAIFENG from '../settlements/song-kaifeng/soundmap.js';
+import * as SHANGYINXU from '../settlements/shang-yinxu/soundmap.js';
 import * as SHAOLIN from '../settlements/shaolin/soundmap.js';
 import * as SHIBAM from '../settlements/shibam/soundmap.js';
 import * as SYDNEY from '../settlements/sydney/soundmap.js';
@@ -227,7 +228,7 @@ export const PROFILES = {
   'mohenjo-daro': T(NEAR, { cicadas: 0.5, frogs: 0.3, animals: withLife({ zebu: 0.5, goat: 0.4, dog: 0.4, rooster: 0.2 }, { market: 0.8, map: MOHENJO }), roof: 'flat' }),
   ayutthaya: T(TROP, { cicadas: 0.7, frogs: 0.9, animals: withLife({ rooster: 1, dog: 0.5, duck: 0.4 }, { canal: 1, market: 1, eaves: 0.7, map: AYUTTHAYA }), roof: 'thatch' }),
   'lu-qufu': T(EAS, { cicadas: 0.5, frogs: 0.2, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
-  'shang-yinxu': T(EAS, { cicadas: 0.4, frogs: 0.5, animals: { cattle: 0.5, dog: 0.5, rooster: 0.4, horse: 0.2 }, roof: 'thatch' }),
+  'shang-yinxu': T(EAS, { cicadas: 0.4, frogs: 0.5, animals: withLife({ cattle: 0.5, dog: 0.5, rooster: 0.4, horse: 0.2, goat: 0.2 }, { canal: 0.4, map: SHANGYINXU }), roof: 'thatch' }),
   'manueline-lisbon': T({ ...MED, gull: 1, kite: 0.3 }, { animals: withLife({ donkey: 0.3, dog: 0.4, rooster: 0.3 }, { market: 1, eaves: 1, map: LISBON }), roof: 'tile', bells: 'angelus' }),
   'bali-village': T(TROP, { cicadas: 0.6, frogs: 0.9, animals: { rooster: 1, dog: 0.4 }, roof: 'thatch' }),
   bagan: T({ sparrow: 0.8, dove: 0.8, kite: 0.4, crow: 0.6, koel: 0.3 }, { cicadas: 0.5, frogs: 0.4, animals: withLife({ rooster: 0.6, dog: 0.7, cattle: 0.5, goat: 0.4 }, { market: 0.8, canal: 0.6, map: BAGAN }), roof: 'thatch' }),
