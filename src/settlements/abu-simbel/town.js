@@ -46,8 +46,8 @@ function people() {
   const priest = (at, y, rot, o = {}) => fig(at, y, rot, { dress: 'wrap', over: 'sash', ...o });
   const F = 0.04, X0 = TERRACE[0];
   // ── the temple's priests on the terrace: at the door in pairs, before the altar of Ra-Horakhty, along the terrace; the long kilt, the sash, the shaven head
-  for (const z of [-2.4, 2.4]) priest([FX + 12, z], F, -Math.PI / 2);
-  priest([ALTAR.x + 3.6, ALTAR.z], 0.9, Math.PI / 2, { pose: 'kneel' }); priest([ALTAR.x + 4.4, ALTAR.z + 1.4], 0.9, Math.PI / 2);
+  for (const z of [-2.4, 2.4]) priest([FX + 12, z], F, -Math.PI / 2, { nightKeep: 1 });
+  priest([ALTAR.x + 3.6, ALTAR.z], 0.9, Math.PI / 2, { pose: 'kneel', nightKeep: 1 }); priest([ALTAR.x + 4.4, ALTAR.z + 1.4], 0.9, Math.PI / 2);
   priest([FX + 22, -9], F, Math.PI / 2, { pose: 'talk' }); fig([FX + 22.9, -8.6], F, -Math.PI / 2, { pose: 'talk', hair: 'short' });
   priest([-14, 12], F, 0.4, { carry: 'staff', pose: 'staff', len: 1.7 });
   // pilgrims and offerers at the tables before the colossi, kneeling and standing; one with a goose, one with a jar
@@ -64,11 +64,11 @@ function people() {
   for (const zb of [-17, 17]) { priest([X0 + 22 - 1.4, zb], F, Math.PI / 2, { pose: 'squat' }); }
   for (let k = 0; k < 12; k++) { const x = X0 + 6 + rand() * 46, z = (rand() - 0.5) * 36; if (x > BANK_X - 2 || (Math.abs(z) < 3 && x < X0 + 12)) continue; (rand() < 0.5 ? woman : man)([x, z], F, rand() * 6.28, rand() < 0.4 ? { carry: rand() < 0.5 ? 'basket' : 'pot' } : {}); }
   // inside: a priest at the offering stone in the sanctuary, a lector reading before the pillars, an old man resting on a bench
-  priest([FX - 58.6 + 1.3, 0], 1.24, Math.PI / 2, { pose: 'kneel' });
-  priest([FX - 15, 2.2], F, Math.PI / 2);
+  priest([FX - 58.6 + 1.3, 0], 1.24, Math.PI / 2, { pose: 'kneel', nightKeep: 1 });
+  priest([FX - 15, 2.2], F, Math.PI / 2, { nightKeep: 1 });
   man([FX - 14.8, 7.9], F + 0.45, Math.PI, { pose: 'sit', hair: 'shaven' });
   // the Small Temple's priestess at the door and a chanter before the Hathor pillars
-  woman([FXS + 6, ZS - 3.7], F, Math.PI / 2, { dress: 'sheath', over: 'wesekh', hair: 'wig' }); priest([FXS + 12, ZS + 2.0], F, Math.PI / 2, { pose: 'kneel' });
+  woman([FXS + 6, ZS - 3.7], F, Math.PI / 2, { dress: 'sheath', over: 'wesekh', hair: 'wig', nightKeep: 1 }); priest([FXS + 12, ZS + 2.0], F, Math.PI / 2, { pose: 'kneel', nightKeep: 1 });
   // the way north: a donkey-driver is the life pass's; a priest walking with offerings
   woman([-18, -60], F, 0.3, { carry: 'basket' }); man([-17.5, -90], F, 0, { carry: 'pot' });
   // ── the market street: at every shop the vendor behind the counter's window, a customer at it, the craftsman in his room
@@ -120,8 +120,10 @@ function people() {
   for (const l of L) {
     if (l.kind !== 'bakery') continue;
     const [x0, z0, x1, z1] = l.rect, at = [x0 + 1.2 + rand() * (x1 - x0 - 2.4), z1 - 2.3];
-    woman(at, 0, face(at, [at[0], at[1] + 1]), { pose: 'squat' }); man([x1 - 1.0, z0 + 1.3], 0, 0, { carry: 'basket' });
+    woman(at, 0, face(at, [at[0], at[1] + 1]), { pose: 'squat', nightKeep: 1 }); man([x1 - 1.0, z0 + 1.3], 0, 0, { carry: 'basket' });
   }
+  // the watch: a man sitting by each watch-fire all night, facing the flame (docs §23)
+  for (const [x, z, y] of FIRES) { const a = [x + 1.5, z]; man(a, y, face(a, [x, z]), { pose: 'sit_ground', nightKeep: 1, hair: 'short' }); }
   // ── the quay: porters off the boats, the scribe counting, the overseer, women washing at the water's edge
   for (const [x, z] of [[48.5, -2], [49.4, 2.4], [52, 9], [55, 4.5], [57, -3.5]]) man([x, z], QUAY_Y, rand() * 6.28, { carry: rand() < 0.5 ? 'basket' : 'sack' });
   man([53.5, -1.0], QUAY_Y, Math.PI / 2, { pose: 'kneel', dress: 'wrap', over: 'sash', hair: 'wig' }); man([54.6, -1.1], QUAY_Y, -Math.PI / 2, { pose: 'staff', carry: 'staff', len: 1.7, dress: 'wrap', over: 'sash' });
