@@ -8,8 +8,9 @@ import { storeyOf } from './upstairs.js';
 import { summitLife } from './summit.js';
 import { acropolisWorks, acropolisLife } from './works.js';
 import { fronts, crossings, openLife } from './fronts.js';
-import { stallSites, steleSites, houseSpots } from './wayside.js';
+import { stallSites, steleSites, houseSpots, laneFires } from './wayside.js';
 import { fires } from './nightlight.js';
+import { wornSlabs } from './wear.js';
 import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
 const base = (id, elements) => ({ id, style: 'greek', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-300, 70], facing: 'e' } });
 const OPEN_TRADES = ['bronze', 'shoe', 'cloth', 'wine', 'perfume', 'carpenter'];
@@ -61,7 +62,9 @@ export async function town() {
   { const { herms, wells } = crossings();
     // the herms' plan also carries the visitor's walk (§18): the roadside stalls with their keepers, the stelae of decrees, the conical pillar of Apollo Agyieus before each walk-in house's door (one plan: fewer draws)
     plans.push(base('athens-herms', [...herms.map((h) => ({ t: 'herm', ...h })), ...stallSites().map((s) => ({ t: 'athens_stall', ...s })), ...steleSites().map((s) => ({ t: 'athens_stele', ...s })),
-      ...houseSpots(10).map(({ l, door: [x, z] }) => ({ t: 'athens_agyieus', at: [x, z], y: l.y })) ]));
+      ...houseSpots(10).map(({ l, door: [x, z] }) => ({ t: 'athens_agyieus', at: [x, z], y: l.y })),
+      { t: 'athens_wayworn', list: wornSlabs() },
+      ...laneFires().map((f) => ({ t: 'athens_brazier', at: f.at, y: f.y })) ]));   // the braziers at the lanes' edge (docs §24)
     plans.push({ ...lifePlan(), id: 'athens-fronts', elements: [...fronts(), ...wells, ...openLife()] }); }
   plans.push({ ...lifePlan(), id: 'athens-summit-life', elements: [...summitLife(), ...acropolisLife()] });
   plans.push(...acropolisWorks());
