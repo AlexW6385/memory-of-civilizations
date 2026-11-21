@@ -156,3 +156,8 @@ export function gateBraziers() {
   }
   return out;
 }
+/** Braziers of the camp before the Golden Gate (the visitor's own ground, docs §20): the petitioners' fire, the caravan's, the letter-writer's, and two by the water-sellers' stalls. */
+export function campBraziers() {
+  const gx = C[0], gz = C[1] + 36;
+  return [[-8, 34], [8, 34], [-21, 10.5], [12.5, 10], [-6.5, 11.5], [-3.6, 20.5]].map(([dx, dz]) => ({ t: 'bag_halo', kind: 'brazier', at: [gx + dx, gz + dz], y: 0, rot: 0 }));
+}

@@ -11,11 +11,12 @@ import { marketElements } from './market.js';
 import { riverElements } from './river.js';
 import { khanElements } from './khan.js';
 import { mosqueElements } from './mosque.js';
+import { wearElements } from './wear.js';
 
 registerStyle('abbasid', {
   column: () => {},
   trim: () => {},
   opening: () => {},
-  elements: { ...fortifyElements, ...palaceElements, ...libraryElements, ...houseElements, ...marketElements, ...riverElements, ...khanElements, ...mosqueElements },
+  elements: { ...fortifyElements, ...palaceElements, ...libraryElements, ...houseElements, ...marketElements, ...riverElements, ...khanElements, ...mosqueElements, ...wearElements },
   objects: {},
 });
