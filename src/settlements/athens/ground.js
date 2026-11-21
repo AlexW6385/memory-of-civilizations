@@ -25,7 +25,8 @@ function cover(x, z, h, ny) {
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 // the Agora's buildings and booths, which the trees keep clear of: the Painted Stoa, the Stoa of Zeus with its wings,
 // South Stoa I, the booths of the market (src/settlements/athens/plan.js)
-const AGORA_BUILT = [[-252, -237.6, -204, -225], [-292, -197, -273, -150], [-262, -124.89, -219, -110], [-242, -199, -178, -140]];
+import { COUNCIL } from './council.js';
+const AGORA_BUILT = [[-252, -237.6, -204, -225], [-292, -197, -273, -150], [-262, -124.89, -219, -110], [-242, -199, -178, -140], COUNCIL];
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || acroE(x, z) < 1.05 || onWay(x, z, 1) || pathAt(x, z, RAMP)[0] < 8 || lotAt(x, z, 9)) return null;
   // the plane trees Kimon planted in the Agora (Plutarch, Cimon 13.8): rows along its edges, its middle left open

@@ -12,6 +12,7 @@ import './maidens.js';
 import { houseWalks } from './houses.js';
 import './promachos.js';
 import { walkRoutes } from './walk.js';
+import { council } from './council.js';
 import './wayside.js';
 
 const T = ACRO.top, E = [];
@@ -245,6 +246,7 @@ E.push({ t: 'tholos', c: [-280, -133], r: 9.16, h: 5.2, y: 0.1 });
 E.push({ t: 'stair', rect: [-271.9, -134.5, -269.2, -131.5], dir: 'w', y0: 0, y1: 0.4, riser: 0.2, base: -0.3, mat: 'limestone' });
 E.push({ t: 'athens_horos', at: [-267.5, -120.5], y: 0, rot: Math.PI / 2 });                 // the stone with its letters (wayside.js, docs §18e)
 E.push({ t: 'altar12', c: [-240, -208], y: 0 });
+E.push(...council());                                                                 // the Council house, open to the visitor (council.js, docs §24)
 // the Herms at the north-west corner, where the Panathenaic Way comes in
 const wayX = (z) => -260 + (z + 220) / 2;
 for (const z of [-221, -218, -215, -212]) E.push({ t: 'herm', at: [wayX(z) + 7, z], y: height(wayX(z) + 7, z), rot: -Math.PI / 2 });

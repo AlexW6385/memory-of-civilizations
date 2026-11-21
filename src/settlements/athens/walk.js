@@ -41,6 +41,9 @@ export function walkRoutes() {
   out.push(withY([[-276, -178], [-283.5, -172], [-288, -172]]));
   // the market: along an aisle between two rows of booths
   out.push(withY([[-234, -173.3], [-210, -173.3], [-186, -173.3]]));
+  // the Council house (door on its east side) and the Altar of the Twelve Gods (open west and east)
+  out.push(withY([[-249, -176], [-254, -176], [-257.5, -176], [-257.5, -173], [-263, -173]]));
+  out.push(withY([[-248, -208], [-243.5, -208], [-238, -206.8]]));
   void pathAt;
   return out;
 }
