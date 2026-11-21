@@ -143,3 +143,18 @@ The arrival's tower house (`tower_open`) and six more of the rows nearest the ar
 - [inferred] Here the stair is two straight flights with a landing at every storey, divided by a mud wall, as in the arrival's house; the same rooms are furnished by storey use (store and stable, women's floor, family room, bedroom, majlis on the fifth floor, further family rooms in turn, a room under the roof), the terrace has washing, jars and a sleeping mat. Lots turn the house so that its door is on the lot's front (north or south); the wall's taper is kept on free faces only, and the side windows are left out where the side touches a neighbour.
 - Each opened house has two walk routes (street to the majlis, street to the roof) in the landmark plan's `walks`, and so has the arrival's house.
 - Still shut: all other tower houses, the palace's upper floors, and lots narrower than 8.6 m.
+
+## 16. Bringing Shibam up to the reference (Suzhou): the visitor's walk
+
+No source was reachable this round (web fetches are refused here); the pass works from §2, §5, §11, §12 and §15, and every new line is [inferred] unless marked.
+
+- **The walk** (`walk.js`, pure data): from the arrival on the square across to the merchant's tower house and its street door; under the stalls along the palace's front; to the mosque's court door; and south down the main street from the square to the gate [inferred: the sights and the way between them follow §2's plan].
+- **What is open on it.** The seventeen ground-floor shops of §11 (spice and incense, cloth, grain and dates, coffee house, honey, indigo, silver, weaver, smith, carpenter, jars, tailor, barber) along the square's south edge and the main street, the thirteen household rooms of §12 further out, the palace hall, the merchant's house and six more towers to the roof (§15) were already open; this pass adds the routes `walk-check` follows into every opened ground floor (`walkroutes.js`, 16 routes: from the lane, in at the door, along the front room) so that a door that shuts the walker is found.
+- Not added: more opened houses and new stalls: the arrival frame has no draws to spare (315 main draws against the reference's budget).
+
+## 17. Night (`nightlight.js`)
+
+What lit Shibam at night about 1700 [inferred unless marked; no electric light]: the sesame- or castor-oil lamp (a clay saucer with a wick, dear oil: few windows lit), a lamp in a niche beside the street door (already built, §11: its glass now glows and is given a halo), a lamp hung in every shop room and the coffee house's lamps (the shops' `lights`), cressets (iron baskets of burning wood and resinous splinters on posts) at the gate, before the palace's door and the merchant's door, the lamp in the minaret's lantern lit for the night prayers, and a lamp seen through the lattice of the family rooms and the majlis.
+- Built as `halo` geometry (additive, night only, no collision, shows at the low preset): lit windows by the hash of their own place (about one in five of the small lower windows, three in ten of the big ones, over a third of the white-framed top ones), niche lamps, the halo and floor pool of every light a shop or hall puts in, the light of an open shop front or of the palace's hall spilling over the sill into the street, the merchant's door.
+- `shb_cresset` (iron post with braces, ribbed basket, flames, light, glow and pool): at the gate (2), the palace door (2), the mosque door, the merchant's door; `shb_minaretlamp`: the glow in the minaret's lantern.
+- Day view unchanged: the halo is invisible by day. Cost at the arrival: +2 main draws (halo, iron/flame in the house plan), triangles unchanged.

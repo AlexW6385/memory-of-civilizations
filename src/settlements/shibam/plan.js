@@ -12,6 +12,8 @@ const E = [{ t: 'tower_open', rect: LM.rect, storeys: LM.storeys, seed: 7 }];
 E.push({ t: 'block', rect: [X0 - 0.08, Z0 - 0.08, X1, Z0], y0: -0.6, y1: 1.1, mat: 'schist_rubble', collide: false });
 E.push({ t: 'block', rect: [X0 - 0.08, Z0, X0, dz - 0.75], y0: -0.6, y1: 1.1, mat: 'schist_rubble', collide: false });
 E.push({ t: 'block', rect: [X0 - 0.08, dz + 0.75, X0, Z1], y0: -0.6, y1: 1.1, mat: 'schist_rubble', collide: false });
+// a cresset before the door (nightlight.js): in this plan so that its iron, flame and glow merge with the house's own meshes
+E.push({ t: 'shb_cresset', at: [X0 - 1.6, dz - 2.0], y: 0 });
 const room = (id, rect, y, kind, extra = {}) => ({ id, rect, y, kind, ...extra });
 const NAMES = ['the store and stable', 'the women\'s floor', 'the family room', 'the bedroom', 'the majlis', 'the upper room', 'the room under the roof'];
 const rooms = NAMES.map((n, s) => room(n, LMD.room, fl(s), 'hall'));
@@ -67,6 +69,7 @@ M.push({ t: 'wall', a: [wx1, wz0], b: [wx1, wz1], th, y0: -0.6, y1: WH, mat: 'li
 M.push({ t: 'beam', a: [wx1 + 0.3, doorZ - 1.1], b: [wx1 + 0.3, doorZ + 1.1], w: 0.3, y: 2.8, h: 0.25, mat: 'timber', ext: 0 });
 M.push({ t: 'mosque_hall', rect: [wx0 + th / 2, wz0 + th / 2, mx0 + 11, wz1 - th / 2], y: 0.06, roofY: 5.6 });
 M.push({ t: 'mosque_crown', rect: [mx0, mz0, mx1, mz1], y: WH, door: [mx1, doorZ] });
+M.push({ t: 'shb_cresset', at: [-31.4, -14.6], y: 0 }, { t: 'shb_minaretlamp', c: [mx1 - 2.4, mz0 + 2.2], y: 28.2 });
 M.push({ t: 'minaret', c: [mx1 - 2.4, mz0 + 2.2], w: 3.8, h: 31 });
 // the court: benches of mud and lime along its long walls, the water jars of the sabil by the door, a shade of mats over a corner, stone seats round the basin
 for (const zz of [wz0 + 0.45, wz1 - 0.95]) { M.push({ t: 'block', rect: [-46.5, zz, -34.6, zz + 0.5], y0: 0.0, y1: 0.42, mat: 'mud_plaster', collide: false }); M.push({ t: 'block', rect: [-46.55, zz - 0.02, -34.55, zz + 0.52], y0: 0.42, y1: 0.46, mat: 'lime_plaster', collide: false }); }
