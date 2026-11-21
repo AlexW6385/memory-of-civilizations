@@ -11,7 +11,7 @@ import { box, lathe } from '../../core/geom.js';
 import '../../styles/baroque/index.js';
 import { faceFrame, toW } from '../../styles/renaissance/face.js';
 import { rows, lots, CASTEL, PALACE, COURT, CROSSING, FLOOR, OVAL, TIBER, COACH_SITES, RADIUS, tiberX, height } from './layout.js';
-import { frontedLots, lotRow } from './openwalk.js';
+import { frontedLots, lotRow, openShops } from './openwalk.js';
 import { madonnaBay } from '../../styles/baroque/borgo.js';
 
 const TAU = Math.PI * 2;
@@ -118,6 +118,14 @@ export function litShops() {
   }
   return out;
 }
+/** The lamp hung from the vault of every open bottega (borgo.js furnish): { at: [x, z] of the lamp, back: [x, z] on the back wall, inward: the wall-wash's normal }. [inferred: a shop open at night burned its oil lamp] */
+export function shopLamps() {
+  return openShops().map((s) => {
+    const u = s.unit, shopU = u.u0 + u.w / 2;   // (the lantern hangs at the room's middle)
+    const { M } = faceFrame(s.frame[0], s.frame[1], 0), e = M.elements;
+    return { at: toW(M, shopU, -3.3), back: toW(M, shopU, -5.9), inward: [-e[8], -e[10]] };
+  });
+}
 /** The Confessio's lamps (dress.js naveDress: the rail [cx + 5.8, cz − 4.2, cx + 13, cz + 4.2], the lamps 1.4 m over the floor). */
 const CONF = [CROSSING[0] + 5.8, CROSSING[1] - 4.2, CROSSING[0] + 13, CROSSING[1] + 4.2];
 /** The cressets at the Apostolic Palace's gate (the passage at x −110 in the south face, its piers 2 m either side) and at the Swiss posts at the colonnade's two mouths. */
@@ -127,6 +135,18 @@ export function cressets() {
   return out;
 }
 const MILL_Z = [-52, 78, 205];
+/** The feast night's lights in the oval [inferred: a confraternity's procession carried torches and tapers; the stalls of the fair and pilgrims on the road carried lanterns]: the procession's torches in its two files along z -7.4 (feast.js), the lanterns hung at the fair's stalls, and the hand lanterns of pilgrims about the oval's mouth, placed by hash. */
+export function feastLights() {
+  const out = [];
+  for (let x = 52; x <= 94; x += 3.6) for (const s of [-1, 1]) out.push({ at: [x + 0.4 * hashAt(x, s, 61), -7.4 + s * 1.35], y: 2.05, r: 0.8, pool: 2.4, b: 0.75 });
+  for (const [x, z] of [[93, -29], [90, 31], [68, 52], [66, -50], [31, -52]]) out.push({ at: [x, z], y: 2.4, r: 0.8, pool: 3.0, b: 0.8 });
+  for (let i = 0; i < 14; i++) {
+    const a = hashAt(i, 3, 62) * TAU, d = 4 + 11 * hashAt(i, 5, 63), x = 112 + Math.cos(a) * d * 1.4, z = Math.sin(a) * d;
+    if (Math.abs(x - 110) < 1.3 && Math.abs(z) < 1.3) continue;
+    out.push({ at: [x, z], y: 1.35 + 0.2 * hashAt(i, 7, 64), r: 0.55, pool: 2.6, b: 0.7 });
+  }
+  return out;
+}
 
 // ── the halos ───────────────────────────────────────────────────────────────────
 export function halos() {
@@ -144,11 +164,16 @@ export function halos() {
     H.wall(s.at[0], 1.7, s.at[1], s.out, s.hw * 1.15, 1.7, 6, s.baker ? 0.95 : 0.8);
     H.floor(s.pool[0], 0.04, s.pool[1], 2.6, 2.0, 6, 0.9);
   }
+  for (const l of shopLamps()) {            // inside the open bottegas: the lamp's glow under the vault, the pool on the floor, the wash on the back wall
+    H.ball(l.at[0], 3.3, l.at[1], 1.5); H.floor(l.at[0], 0.09, l.at[1], 2.6, 2.6, 6, 0.9);
+    H.wall(l.back[0], 1.9, l.back[1], l.inward, 2.3, 1.7, 6, 0.8);
+  }
   // the Confessio: the lamps' glow along the four sides, the pool over the rail
   const y = FLOOR + 2.4, [x0, z0, x1, z1] = CONF;
   for (const [a, b] of [[x0, z0], [x1, z0], [x1, z1], [x0, z1]]) H.ball(a, y, b, 1.5);
   for (const q of [[(x0 + x1) / 2, z0], [(x0 + x1) / 2, z1], [x0, 0], [x1, 0], [(x0 + x1) / 2, 0]]) H.ball(q[0], y, q[1], q[1] === 0 && q[0] > x0 && q[0] < x1 ? 2.6 : 1.5);
   H.floor((x0 + x1) / 2, FLOOR + 0.12, 0, 5.6, 6.0, 8, 0.9);
+  for (const l of feastLights()) { H.ball(l.at[0], l.y, l.at[1], l.r); H.floor(l.at[0], 0.03, l.at[1], l.pool, l.pool, 6, l.b); }
   // the cressets
   for (const [x, z] of cressets()) { const g = height(x, z); H.ball(x, g + 2.15, z, 1.3); H.floor(x, g + 0.03, z, 3.2); }
   // the gate's face and the Sixtine wing's windows
