@@ -182,12 +182,24 @@ function stallLamps({ pts, y = 0, h = 1.95 }, { bag }) {
   H.flush(bag);
 }
 
+/**
+ * shb_walllamps: { pts: [[x, z, s]], y? } — a clay lamp on an iron bracket from a street wall (s = +1: the wall lies to the east of the point, -1: west), lit at
+ * night; the lamps that light the main street between the gate and the square [inferred].
+ */
+function wallLamps({ pts, y = 2.3 }, { bag }) {
+  const H = new Halo();
+  for (const [x, z, s] of pts) {
+    H.ball(x, y + 0.06, z, 0.55, 0.6); H.floor(x - s * 0.9, 0.05, z, 2.4, 2.4, 10, 0.5);
+  }
+  H.flush(bag);
+}
+
 let done = false;
 /** Wraps the hadhrami style's house builders (once, after the style has registered itself). */
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.hadhrami.elements;
   for (const k of ['tower_house', 'tower_open', 'tower_up']) if (typeof E[k] === 'function') E[k] = wrap(k, E[k]);
-  E.shb_cresset = cresset; E.shb_stalllamps = stallLamps; E.shb_minaretlamp = minaretLamp;
+  E.shb_cresset = cresset; E.shb_stalllamps = stallLamps; E.shb_walllamps = wallLamps; E.shb_minaretlamp = minaretLamp;
 }
 registerNight();

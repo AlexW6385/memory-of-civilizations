@@ -196,6 +196,20 @@ function interiorLife() {
   return T;
 }
 
+/** The main street between the gate and the square: mastabas (benches of mud and lime), jars, sacks and firewood along its walls, and the lamps on brackets (docs/settlements/shibam.md §21). Kept off the walk's line and off the dog's corner. */
+function streetWork() {
+  const E = [], xw = GATE.x - 2.1, xe = GATE.x + 2.1;
+  const zs = [57, 62, 68, 74, 79, 85, 90];
+  zs.forEach((z, i) => {
+    const w = i % 2 === 0, x = w ? xw : xe, rot = Math.PI / 2;
+    if (i % 3 === 0) E.push({ t: 'bench', at: [x, z], y: 0, rot, len: 2.2 });
+    else if (i % 3 === 1) E.push({ t: 'pot', kind: 'water_pot', at: [x, z], y: 0, n: 3, seed: 70 + i }, { t: 'sacks', at: [x, z + 1.4], y: 0, rot, n: 2, seed: 80 + i });
+    else E.push({ t: 'bench', at: [x, z], y: 0, rot, len: 1.6 }, { t: 'pot', kind: 'water_pot', at: [x, z + 1.4], y: 0, n: 2, seed: 100 + i });
+  });
+  E.push({ t: 'shb_walllamps', pts: [54, 66, 78, 90].map((z, i) => [i % 2 ? GATE.x + 2.25 : GATE.x - 2.25, z, i % 2 ? 1 : -1]) });
+  return E;
+}
+
 export async function town() {
   const plans = [], L = lots(), S = shops();
   void S; ups();
@@ -213,6 +227,7 @@ export async function town() {
   for (const [x, z] of [[-26, -24], [-19, -24], [-12, -24.5], [-2, -24], [6, -24.5], [13, -24], [-26, -15], [-14, -3.5], [14, -3.5], [21, -3], [27, -6]]) res.push({ t: 'reserve_wall', rect: [x - 1.6, z - 1.4, x + 1.6, z + 1.5] });
   res.push({ t: 'reserve_wall', rect: [SQUARE[0], SQUARE[1], SQUARE[2], SQUARE[3]] });
   plans.push(base('shibam-reserve', res));
+  plans.push(base('shibam-street', streetWork()));
   const { lines, bridges } = crossings_();
   plans.push(base('shibam-sabat', bridges));
   plans.push({ ...base('shibam-washing', lines, 'life') });
