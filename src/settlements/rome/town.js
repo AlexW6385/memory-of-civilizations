@@ -132,7 +132,7 @@ function nightLife(ways) {
   for (const x of [-21, 21]) add.push({ t: 'rome_halo', kind: 'brazier', at: [x, -54.2], y: 0, rot: 0 });
   const slave = (at, rot, k) => ({ t: 'figure', at, y: 0, rot, seed: 7100 + k, skin: k % 2 ? 'skin_medium' : 'skin_light', dress: 'tunic', legs: 'bare', cloth: ['cloth_brown', 'cloth_ochre', 'cloth_grey'][k % 3], over: 'belt', hair: 'short', beard: 0, hat: 'none', pose: 'stand' });
   const master = (at, rot, k) => ({ t: 'figure', at, y: 0, rot, seed: 7200 + k, skin: 'skin_light', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', hair: 'short', beard: k % 2, hat: 'none', pose: 'stand' });
-  const ESC = [[[9, -104], Math.PI / 2], [[-12, -131], Math.PI], [[-30, -175.4], -Math.PI / 2], [[-7, -175.4], Math.PI / 2], [[30, -175.4], -Math.PI / 2], [[100, -175.4], Math.PI / 2]];
+  const ESC = [[[-12, -131], Math.PI], [[-30, -175.4], -Math.PI / 2], [[-7, -175.4], Math.PI / 2], [[30, -175.4], -Math.PI / 2], [[100, -175.4], Math.PI / 2]];
   ESC.forEach(([[x, z], rot], k) => {
     const f = [-Math.sin(rot), -Math.cos(rot)];
     add.push(master([x, z], rot, k), slave([x - f[0] * 1.1 - f[1] * 0.5, z - f[1] * 1.1 + f[0] * 0.5], rot, k), { t: 'rome_halo', kind: 'torch', at: [x + f[0] * 1.6 + f[1] * 0.5, z + f[1] * 1.6 - f[0] * 0.5], y: 0, rot: 0 });
