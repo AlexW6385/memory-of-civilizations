@@ -13,7 +13,7 @@ import { STYLES } from '../../core/build.js';
 import { frontRule } from '../../styles/mississippian/front.js';
 import { rng } from '../../styles/mississippian/kit.js';
 import { HALLS, LODGES, MOUNDS, FOX, PLAZA, PALISADE, height, lots, smallPlazas } from './layout.js';
-import { openSet, fillerList, PLAZA_FIRES } from './town.js';
+import { openSet, fillerList, PLAZA_FIRES, WAIT_FIRES } from './town.js';
 
 const TAU = Math.PI * 2;
 /** A number in [0, 1) from a position alone. */
@@ -112,6 +112,7 @@ function nightTown(el, { bag }) {
   // the fires of the yards: the summit's, the terrace's, the plaza's rings beside the arbors, those of the empty cells of the house grid
   for (const [x, z] of [[8, -176], [-6, -116], [14, -112]]) { const y = height(x, z); fire(H, x, y + 0.06, z, 0.38, y); }
   for (const [x, z] of PLAZA_FIRES) fire(H, x, 0.06, z, 0.38, 0);
+  for (const [x, z] of WAIT_FIRES) { fire(H, x, 0.06, z, 0.45, 0); H.floor(x, 0.07, z, 5.2, 4.6, 12, 0.6); }
   // the pottery pits (a craft arbor of the potters: its pit 1.8 m beyond the arbor's east side) and the monks plan's own two arbors
   const pit = (x1, z0, z1) => { const x = x1 + 1.8, z = (z0 + z1) / 2, y = height(x, z); fire(H, x, y + 0.06, z, 0.45, y); };
   pit(-48.6, -124, -121.6);
