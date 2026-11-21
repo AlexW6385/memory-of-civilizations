@@ -7,7 +7,7 @@ import { ALL_SUQS, C, PALACE, MOSQUE, LIBRARY, SUQS, RC, RIVER, CANAL, JETTIES, 
 import { MASJIDS, KHAN_RECT, HAMMAM_RECT, WORKSHOPS, CANAL_BRIDGES, moored } from './layout.js';
 import { frontElements, esplanadeElements, esplanadeShopFronts } from './fronts.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
-import { bayLamps, streetHalos, roomSpills, gateBraziers, doorGlows } from './nightlight.js';
+import { bayLamps, streetHalos, roomSpills, gateBraziers, doorGlows, campBraziers } from './nightlight.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));       // a figure faces −z when rot = 0
@@ -163,7 +163,7 @@ export async function lifePlan() {
   porter([-340, CANAL.z - 9.8], 0, 1.0, { pose: 'squat' }); porter([-336, CANAL.z - 10.4], 0, -2.0, { pose: 'stand' });
   void CANAL_BRIDGES;
   // ── the night: the light of the lamps, the lit doors and fronts, the braziers at the gates (nightlight.js; halo material, lit at night only) ──
-  E.push(...streetHalos(E), ...bayLamps(), ...roomSpills(), ...gateBraziers(), ...doorGlows());
+  E.push(...streetHalos(E), ...bayLamps(), ...roomSpills(), ...gateBraziers(), ...doorGlows(), ...campBraziers());
   const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-520, -520, 520, 520], entrance: { at: [C[0], C[1] + 60], facing: 'n' } });
   plans.push(base('abbasid-baghdad-people', 'life', [...P, ...E]));
   void lodTiles; void CANAL;
