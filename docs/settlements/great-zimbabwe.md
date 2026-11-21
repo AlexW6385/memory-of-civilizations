@@ -200,3 +200,10 @@ All voices are synthesised (no recordings); names begin `gz` (`src/engine/voices
 - **Trodden ground.** The earth of each homestead is bare and packed (`silt`, 4.5 cm over the ground) along the way from the gate to the yard's middle and for three metres outside the gate, ragged at its edges [inferred]. The hearth's ash disc and the dark wash at the foot of the houses' walls are the style's own (§14).
 - **Not done.** No worn stone thresholds or hollowed steps (those are the landmark's: §19.6); no weathering over time; no repairs.
 - Geometry in existing materials only: no new draw; no collision. Checked by the surface check.
+
+### 19.6 The landmark's remaining gaps
+
+The gaps §5 and the earlier rounds listed as "not built": the covered stairway with its twist, the cave, the real narrow entrance, the sealed passage. Done here, and said plainly what is not:
+- **The covered stairway with its twist** (`plan.js`, Hill Complex, from (10, -188) north to (12.3, -208)): a flight of granite treads 1.4 m wide between two dry walls 3.1 m high, a landing of treads where the climb jogs 2.3 m to the east (the twist), a second flight, and a roof of dressed slabs on the walls, 2.15 m over the highest ground each slab spans [a covered stairway on the Hill is stated (zimfieldguide, Hill Complex); its place, width, the single twist and the slab roof are inferred]. It can be walked: `plan.walks` has a route up it, checked by walk-check (the landing is laid in treads because a riser under a roof is a wall to the walker).
+- **The cave:** a dark mouth 2.2 m wide between two boulders, under a roof slab, on the Hill's north side at (-24, -207) [a cave on the Hill is stated (zimfieldguide); the place is inferred]. Mouth only: the hollow behind it is a dark panel one metre in, not a room one can enter.
+- **Still not built:** the Great Enclosure's real narrow entrance (the north gap stays open, as the arrival view needs it; its stepped threshold is `entrance_steps`, §Round 2), the inner passage's walkable sealed stretch, the Balcony's walls beyond the one on the great boulder. No worn treads: the steps are clean.
