@@ -2,7 +2,9 @@
 // entered by its door, its trade furnished (bakery, news stand, haberdashery, pharmacy, snack bar, grocery, shoemaker, barber,
 // stationer, butcher, greengrocer, optician), fascia boards with pseudo-lettering, goods out under the arcade.
 import { box, lathe, rod } from '../../core/geom.js';
-import { rngOf, solidBox, shelving, counter, stool, letters } from './kit.js';
+import { rngOf, solidBox, shelving, counter, stool } from './kit.js';
+import { shopOrder } from './trades.js';
+import { sign } from './sign.js';
 
 const WHITE = 'plaster_white', CONC = 'concrete_light';
 const FASCIA = ['cloth_red', 'cloth_blue', 'cloth_green', 'cloth_ochre', 'paint_blue', 'wood_painted', 'cloth_maroon', 'paint_ochre'];
@@ -20,7 +22,6 @@ const GOODS = {
   hortifruti: { frame: 'timber', mats: ['cloth_red', 'cloth_green', 'cloth_ochre', 'glaze_yellow'], rows: 2, h: [0.1, 0.18], counter: { body: 'timber', top: 'timber' } },
   otica: { frame: 'paint_white', mats: ['glaze_white', 'steel_chrome', 'cloth_black'], rows: 3, h: [0.06, 0.12], counter: { body: 'paint_white', top: 'marble', glass: true } },
 };
-const TRADES = Object.keys(GOODS);
 
 /** The inside of one shop unit: x from xa to xb (front to back), z from za to zb, the aisle from the door left clear. */
 function furnish(bag, col, trade, xa, xb, za, zb, rand) {
@@ -95,8 +96,7 @@ export function shopsRow(el, { bag, col, lights }) {
     }
     if (rand() < 0.3) bag.add('cloth_blue', box(fx - 0.02, 6.2, z + 0.8, fx - 0.01, 6.9, z + 2.0));
   }
-  const order = TRADES.slice();
-  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  const order = shopOrder(el.seed ?? 3);
   // the shell: back wall, the end walls, the party walls between the units
   const xa = fx + 0.4, xb = x1 - 0.25, z0u = z0 + 0.4;
   const WALL = 0.2;
@@ -105,7 +105,7 @@ export function shopsRow(el, { bag, col, lights }) {
   solidBox(bag, col, 'plaster_grey', fx + 0.4, 0, z0, xb, 3.6, z0 + 0.3); solidBox(bag, col, 'plaster_grey', fx + 0.4, 0, z1 - 0.3, xb, 3.6, z1);
   const aw = ['cloth_red', 'cloth_blue', 'cloth_green', 'cloth_ochre', 'cloth_white'];
   for (let k = 0; k < n; k++) {
-    const z = z0u + k * W, za = z + 0.15, zb = z + W - 0.15, trade = order[k % order.length], zd0 = z + 1.5, zd1 = z + 2.7;
+    const z = z0u + k * W, za = z + 0.15, zb = z + W - 0.15, trade = order[k % order.length], zd0 = z + 1.25, zd1 = z + 2.85;   // the door 1.6 m clear
     const R = rngOf((el.seed ?? 3) * 977 + k * 31 + 1);
     // the glazed front with the door's gap; a kick plate, the transom, the lintel board with the shop's name
     for (const [a, b] of [[z + 0.1, zd0], [zd1, z + W - 0.1]]) { bag.add('glass_outer', box(fx, 0.35, a + 0.04, fx + 0.04, 3.0, b - 0.04)); bag.add('granite_black', box(fx - 0.04, 0, a, fx + 0.06, 0.35, b)); col.rect([fx - 0.04, a, fx + 0.06, b], 0, 3.0); }
@@ -114,7 +114,13 @@ export function shopsRow(el, { bag, col, lights }) {
     bag.add('wood_painted', box(fx - 0.06, 3.0, z + 0.05, fx + 0.1, 3.55, z + W - 0.05));
     const fc = FASCIA[Math.floor(R() * FASCIA.length)];
     bag.add(fc, box(fx - 0.1, 3.05, z + 0.2, fx - 0.06, 3.5, z + W - 0.2));
-    letters(bag, 'cloth_white', fx - 0.1, 3.12, z + W / 2, 8 + Math.floor(R() * 3), 'x-', R, 0.3, 0.19);
+    // the trade's name in capitals, on a board standing on the awning's outer edge (the fascia behind is hidden from the street by the awning) (docs §16)
+    bag.add(fc, box(x0 - 0.3, 3.1, z + 0.25, x0 - 0.2, 3.58, z + W - 0.45));
+    sign(bag, WHITE, trade, { x: x0 - 0.3, y: 3.22, zc: z + (W - 0.2) / 2, cell: 0.052 });
+    R(); R(); R();                                                                                     // (the three draws the pseudo-lettering made: the rest of the unit keeps its variety)
+    // the sill worn by the feet, and red dust drifted into the corners of the glass
+    bag.add('granite_black', box(fx - 0.28, 0.064, zd0 + 0.02, fx + 0.28, 0.07, zd1 - 0.02));
+    for (const [dz, dw] of [[z + 0.12, 0.5], [z + W - 0.62, 0.5]]) bag.add('laterite', box(fx - 0.45, 0.064, dz, fx - 0.04, 0.074, dz + dw));
     bag.add(aw[Math.floor(R() * 5)], box(x0 - 0.2, 2.9, z + 0.1, fx, 3.1, z + W - 0.3));
     // out under the arcade: the trade's goods at the door
     const gx = x0 + 1.0;

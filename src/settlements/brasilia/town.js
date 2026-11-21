@@ -2,7 +2,9 @@
 // and the Justice palaces at the Congress end, the superquadra's eight blocks on pilotis with the commercial strip, the carriageways'
 // and the avenue's traffic of cars and buses, the lamps and benches, and the people of the lawn, the pavements, the square and the
 // plaza. Everything is placed from layout.js.
-import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, SCHOOL, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
+import { lampPosts } from './lamps.js';
+import { nightPlan } from './nightlight.js';
+import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, SCHOOL, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng, doorLane, carKeepClear } from './layout.js';
 
 const LAWN_PICNICS = [];
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 0], facing: 'e' } });
@@ -43,7 +45,7 @@ export async function town() {
   const lane = (axis, c, from, to, rot, gap0, gap1, n0 = 24, n1 = 60) => {
     for (let v = from + rand() * 20; v < to; v += n0 + rand() * (n1 - n0)) {
       const x = axis === 'x' ? v : c, z = axis === 'x' ? c : v;
-      if (Math.hypot(x, z) > RADIUS - 40 || !clear(x, z, 2) || (gap0 !== undefined && v > gap0 && v < gap1)) continue;
+      if (Math.hypot(x, z) > RADIUS - 40 || !clear(x, z, 2) || carKeepClear(x, z) || (gap0 !== undefined && v > gap0 && v < gap1)) continue;
       if (rand() < 0.14) B.push({ t: 'bus', at: [x, z], rot, mat: pick(['paint_blue', 'paint_blue', 'car_red', 'paint_ochre']) });
       else B.push({ t: 'car60', at: [x, z], rot, kind: pick(KIND), mat: pick(CAR) });
     }
@@ -62,7 +64,7 @@ export async function town() {
   for (const x of [SQ[0] - RING / 2 - 2.5, SQ[0] - RING / 2 + 2.5]) lane('z', x, SQ[1] + 10, SQ[3] - 10, x < SQ[0] - RING / 2 ? 0 : Math.PI, undefined, undefined, 60, 120);
   B.push({ t: 'bus', at: [AVENUE[0] - 4.2, 322], rot: 0, mat: 'paint_blue' }, { t: 'bus', at: [AVENUE[0] - 4.2, 345], rot: 0, mat: 'car_red' });
   // parked: the cars at the ministries' feet and the shops' kerb
-  for (let z = SHOPS[1] + 4; z < SHOPS[3] - 3; z += 6.2 + rand() * 6) if (rand() < 0.75) B.push({ t: 'car60', at: [AVENUE[2] - 1.4, z], rot: 0, kind: pick(KIND), mat: pick(CAR) });
+  for (let z = SHOPS[1] + 4; z < SHOPS[3] - 3; z += 6.2 + rand() * 6) if (rand() < 0.75 && !carKeepClear(AVENUE[2] - 1.4, z)) B.push({ t: 'car60', at: [AVENUE[2] - 1.4, z], rot: 0, kind: pick(KIND), mat: pick(CAR) });
   // the car parks' bays: about two in five taken
   for (const pk of PARKS) {
     const [px0, pz0, px1, pz1] = pk.rect;
@@ -74,14 +76,11 @@ export async function town() {
   }
 
   // ── lamps, benches, flags ──
-  for (let x = -450; x < 80; x += 36) { L.push({ t: 'street_lamp', at: [x, -117], y: 0, h: 6.5 }, { t: 'street_lamp', at: [x, 117], y: 0, h: 6.5 }); }
-  for (let z = AVENUE[1] + 12; z < AVENUE[3] - 20; z += 36) L.push({ t: 'street_lamp', at: [AVENUE[0] - 1.5, z], y: 0, h: 6.5 }, { t: 'street_lamp', at: [AVENUE[2] + 1.5, z], y: 0, h: 6.5 });
-  for (let x = PRACA[0] + 12; x < PRACA[2] - 8; x += 40) for (const z of [-132, 132]) L.push({ t: 'street_lamp', at: [x, z], y: 0, h: 7 });
+  for (const l of lampPosts()) if (l.y === 0) L.push({ t: 'street_lamp', ...l });
   for (let x = -420; x < -120; x += 52) for (const z of [-104, 104]) L.push({ t: 'bench', at: [x, z], y: 0, rot: z < 0 ? Math.PI : 0, len: 1.9, back: true });
   for (let x = SQ[0] + 14; x < SQ[2] - 10; x += 34) for (let z = SQ[1] + 14; z < SQ[3] - 8; z += 38) if (!inBuilding(x, z, 4) && !inBuilding(x, z + 2, 2)) L.push({ t: 'bench', at: [x, z], y: 0, rot: rand() * 6.28, len: 1.9, back: true });
-  for (const z of [-28, -17, 17, 28]) L.push({ t: 'street_lamp', at: [-100.5, z], y: 0, h: 6.5 });
   // the roof deck: lamp posts along the parapets and benches facing the towers
-  for (const x of [0, 22, 60]) for (const z of [-104, 104]) L.push({ t: 'street_lamp', at: [x, z], y: 6.5, h: 6 });
+  for (const l of lampPosts()) if (l.y > 0) L.push({ t: 'street_lamp', ...l });
   for (const z of [-88, -62, 62, 88]) L.push({ t: 'bench', at: [2, z], y: 6.5, rot: Math.PI / 2, len: 1.9, back: true });
   const [cx, cz] = CATH.c;
   for (let a = 0; a < 6.28; a += 0.42) { const x = cx + Math.cos(a) * (CATH.pool + 8), z = cz + Math.sin(a) * (CATH.pool + 8); if (Math.abs(x - cx) < 14 && z < cz) continue; L.push({ t: 'bench', at: [x, z], y: 0, rot: a + Math.PI / 2, len: 1.9, back: true }); }
@@ -93,6 +92,7 @@ export async function town() {
   const person = (x, z, rot, o = {}) => {
     if (!o.camp && ((x + 120) ** 2 + z * z < 81 || (Math.abs(z) < 2.8 && x > -122 && x < -96))) return;     // nobody within 9 m of the arrival or in its line of sight to the ramp
     if (!o.camp && x > -125 && x < -92 && Math.abs(z) < 62 && Math.abs(x - (-110 + 6 * Math.abs(z) / 60)) < 2.2) return;     // the visitors' routes up the apron keep clear
+    { const u = doorLane(x, z); if (u) { z = u.door - 1.3; if (x < u.fx) x = u.strip[0] + 0.4; } }     // a door's lane stays clear: whoever stood in it stands beside it (the walk, docs §13)
     if ((!o.inside && !clear(x, z, 0.8)) || (Math.abs(z) < 3.5 && x > -140 && x < 80) || P.some((q) => Math.hypot(q.at[0] - x, q.at[1] - z) < 1.3)) return;
     const w = o.w ?? woman(), t = rand();
     const o2 = o.kind === 'student' ? { dress: w ? 'robe' : 'trousers', cloth: 'cloth_white', cloth2: 'cloth_blue', hat: 'none', hair: w ? 'bun' : 'short', h: 0.8 }
@@ -168,5 +168,5 @@ export async function town() {
   { const n = Math.floor((SERV[3] - SERV[1] - 0.4) / 4.2); for (let k = 0; k < n; k++) { const z = SERV[1] + 0.4 + k * 4.2; person(SERV[0] + 3.4 + 0.4 + 3.6, z + 3.6, 0, { inside: true, kind: rand() < 0.4 ? 'worker' : undefined, w: rand() < 0.5 }); if (rand() < 0.7) person(SERV[0] + 3.4 + 0.4 + 2.2 + rand() * 2.5, z + 1.9, Math.PI + (rand() - 0.5) * 0.6, { inside: true }); if (rand() < 0.4) person(SERV[0] + 1.5, z + 1.5 + rand() * 2, rand() * 6.28, { inside: true }); } }
   // the vehicles' fronts are not in the way: the people stand clear of the roadways (the carriageways are not walked by the still figures)
   void inRect; void POOLS; void RAMP; void PLATFORM; void TUNNEL; void LAWN;
-  return [base('brasilia-buildings', 'brasilia', B), base('brasilia-life', 'life', [...L, ...P])];
+  return [base('brasilia-buildings', 'brasilia', B), nightPlan(base), base('brasilia-life', 'life', [...L, ...P])];
 }
