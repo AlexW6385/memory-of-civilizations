@@ -148,7 +148,7 @@ export async function town() {
   for (const [x, z, yaw] of SAKAU) {
     const W = frameW([x, z], yaw);
     for (const [u, s] of [[-1.05, 1], [-0.3, 1], [0.6, 1], [-0.7, -1], [0.2, -1], [1.0, -1]]) { const at = W(u, s * 0.9); man(at, 0, face(at, W(u, 0)), { cloth: 'hide_tan', cloth2: 'hide_tan', pose: 'talk' }); }
-    const head = W(2.9, 0); man(head, 0, face(head, W(0, 0)), { pose: 'cross', cloth: 'cloth_white', beard: true, hair: 'bun' });
+    const head = W(2.9, 0); man(head, 0, face(head, W(0, 0)), { pose: 'cross', cloth: 'cloth_white', beard: true, hair: 'bun', nightKeep: 1 });
   }
   // priests in the outer court, at the gate and about the inner court and the tomb's stair
   const standing = [[-15, -13], [-5, -11], [-17, -11], [6, -30], [10, -48], [-27, -56], [-20, -14], [11, -20], [5.5, -12]];
@@ -171,7 +171,7 @@ export async function town() {
   // the earth ovens: a woman kneeling at each, another bringing leaves
   cooks().forEach((k, i) => {
     const F = frameW(k.c, k.yaw), at = F(0.3, -1.3);
-    woman(at, 0, face(at, k.c), { pose: 'kneel' });
+    woman(at, 0, face(at, k.c), { pose: 'kneel', nightKeep: 1 });
     if (i % 2 === 0) { const b = F(-1.2, -1.7); woman(b, 0, face(b, k.c), { carry: 'basket' }); }
     P.push({ t: 'firewood', at: F(-1.3, 1.0), y: 0, rot: k.yaw, len: 1.2, seed: 40 + i });
   });
@@ -194,15 +194,15 @@ export async function town() {
       for (const x of [-k.l / 4, k.l / 4]) { const p0 = at(x, k.w / 2 + 3.4); woman(p0, 0, face(p0, at(x, k.w / 2 + 2.0)), { pose: 'kneel' }); }
     } else if (k.kind === 'cookshed') {
       const n = Math.max(3, Math.floor(k.l / 4));
-      for (let i = 0; i < n; i++) { const x = -k.l / 2 + (i + 0.5) * k.l / n, p0 = at(x + 0.2, 1.35); woman(p0, 0, face(p0, at(x, 0)), { pose: 'kneel' }); if (i % 2) { const q = at(x - 1.6, -1.5); man(q, 0, face(q, at(x, 0)), { carry: 'basket' }); } }
+      for (let i = 0; i < n; i++) { const x = -k.l / 2 + (i + 0.5) * k.l / n, p0 = at(x + 0.2, 1.35); woman(p0, 0, face(p0, at(x, 0)), { pose: 'kneel', nightKeep: 1 }); if (i % 2) { const q = at(x - 1.6, -1.5); man(q, 0, face(q, at(x, 0)), { carry: 'basket' }); } }
       for (let i = 0; i < 2; i++) { const p0 = at(-k.l / 2 + 1.2 + i * 2, -k.w / 2 - 1.5); woman(p0, 0, face(p0, at(-k.l / 2 + 1.2 + i * 2, -k.w / 2 - 1.2 + 0.1)), { pose: 'kneel' }); }
     } else if (k.kind === 'hall') {
-      for (const [u, w2] of [[-k.l / 4, -1.4], [-k.l / 4, 1.4], [0, -1.4], [0, 1.4], [k.l / 4 - 0.5, 0]]) { const p0 = at(u, w2); man(p0, 0.9, face(p0, at(k.l / 2 - 1.5, 0)), { pose: 'cross', cloth: 'cloth_white', beard: true }); }
-      const ch = at(k.l / 2 - 1.1, 0); man(ch, 1.15, face(ch, at(0, 0)), { pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cloak', beard: true, hair: 'bun' });
+      for (const [u, w2] of [[-k.l / 4, -1.4], [-k.l / 4, 1.4], [0, -1.4], [0, 1.4], [k.l / 4 - 0.5, 0]]) { const p0 = at(u, w2); man(p0, 0.9, face(p0, at(k.l / 2 - 1.5, 0)), { pose: 'cross', cloth: 'cloth_white', beard: true, nightKeep: 1 }); }
+      const ch = at(k.l / 2 - 1.1, 0); man(ch, 1.15, face(ch, at(0, 0)), { pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cloak', beard: true, hair: 'bun', nightKeep: 1 });
       for (let i = 0; i < 3; i++) { const p0 = at(-k.l / 2 + 2 + i * 2.5, -k.w / 2 - 2.2); (i % 2 ? woman : man)(p0, 0, hr() * 6.28, { carry: 'basket' }); }
     } else if (k.kind === 'landing') {
       // the store's keeper, seated among the baskets facing the way, and a woman sorting yams beside him [inferred: §14.1]; off the lane the walker takes (u 1.5)
-      { const kp = at(3.3, 0.2); man(kp, 0.37, face(kp, at(3.3, -k.w)), { pose: 'cross', cloth: 'cloth_white', beard: true, hair: 'bun' }); const sp = at(-3.4, 0.0); woman(sp, 0.37, face(sp, at(-3.4, -k.w)), { pose: 'sit_ground' }); }
+      { const kp = at(3.3, 0.2); man(kp, 0.37, face(kp, at(3.3, -k.w)), { pose: 'cross', cloth: 'cloth_white', beard: true, hair: 'bun', nightKeep: 1 }); const sp = at(-3.4, 0.0); woman(sp, 0.37, face(sp, at(-3.4, -k.w)), { pose: 'sit_ground' }); }
       for (let i = 0; i < 5; i++) { const p0 = at(-k.l / 2 + 1.0 + i * (k.l - 2) / 4, k.w / 2 + 1.6 + (i % 2) * 1.2);   /* behind the store, by the water, not across the path in front of it */ (i % 2 ? woman : man)(p0, 0, face(p0, at(p0 && 0, 0)), { carry: i % 2 ? 'basket' : 'pole' }); }
     }
   }
@@ -235,7 +235,13 @@ export async function town() {
   for (const [x, z, k] of [[-13.2, 66, 0], [-6.8, 70, 1], [-6.6, 84, 2], [-13.4, 86, 3], [-12.8, 77, 4], [-7.0, 77, 5]]) { const at = [x, z]; (k % 2 ? man : woman)(at, 0, face(at, [-10, z + (k % 3 - 1) * 3]), { pose: k < 2 ? 'talk' : k < 4 ? 'sit_ground' : 'stand' }); }
   moored().forEach((m, i) => { if (i % 2) return; const at = [m.at[0], m.at[1]]; man(at, m.y + 0.18, m.yaw + Math.PI, { pose: 'cross', hat: 'none' }); });
   // and in each of the lit houses someone sits at the lamp, whatever the draw gave (a stream of its own: the households' stay as they were)
-  { const lr = rng(1771); [...litSet].forEach((h, i) => { const F = frameW(h.c, h.yaw), ph = h.rank ? 0.7 : 0.45, at = F(Math.min(-h.w / 2 + 1.5 + lr() * 0.6, -1.05), 1.9 + lr() * 0.8); (i % 3 === 0 ? man : woman)(at, ph, face(at, F(0, -h.l)), { pose: i % 2 ? 'cross' : 'sit_ground' }); }); }
+  { const lr = rng(1771); [...litSet].forEach((h, i) => { const F = frameW(h.c, h.yaw), ph = h.rank ? 0.7 : 0.45, at = F(Math.min(-h.w / 2 + 1.5 + lr() * 0.6, -1.05), 1.9 + lr() * 0.8); (i % 3 === 0 ? man : woman)(at, ph, face(at, F(0, -h.l)), { pose: i % 2 ? 'cross' : 'sit_ground', nightKeep: 1 }); }); }
+  // by night (docs §15): people at the fires and lamps, added last so that no earlier figure's draw moves [inferred]
+  { const nr = rng(2611), nw = (at, to, o = {}, f = woman) => f(at, 0, face(at, to), { pose: 'sit_ground', nightKeep: 1, ...o });
+    for (const c of FORECOURT.lamps.slice(0, 3)) { const a = [c[0] + (c[0] < -10 ? -1.3 : 1.3), c[1] + 0.6]; nw(a, c, { pose: nr() < 0.5 ? 'cross' : 'sit_ground' }, nr() < 0.5 ? man : woman); }
+    cooks().slice(0, 4).forEach((k, i) => { const F = frameW(k.c, k.yaw), a = F(1.5, 1.3); nw(a, k.c, { pose: 'sit_ground' }, i % 2 ? man : woman); });
+    for (const [lx, lz] of NAN_LAMPS.slice(0, 4)) { const a = [lx + (lx < -10 ? -1.3 : 1.3), lz + 0.9]; nw(a, [lx, lz], { pose: 'cross', cloth: 'cloth_white', beard: true }, man); }
+  }
   void INNER; void OUTER; void OUTER_GATE; void INNER_GATE; void TOMB; void inRect;
   return [plan('nan-madol-islets', 'nanmadol', E), plan('nan-madol-people', 'life', P)];
 }
