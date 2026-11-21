@@ -7,6 +7,7 @@ import './nightlight.js';
 import { box } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { mapper } from '../../styles/mycenaean/furnish.js';
+import { mergeG } from '../../styles/mycenaean/util.js';
 
 let done = false;
 export function registerWear() {
@@ -17,13 +18,11 @@ export function registerWear() {
     const r = base.call(this, el, ctx);
     if (el.simple || !el.rect) return r;
     const y = el.y ?? 0, m = mapper(el.rect, el.face ?? 'n'), { bag } = ctx, du = el.du ?? m.W / 2, dw = el.dw ?? 1.05;
-    const put = (mat, u0, u1, v0, v1, y0, y1) => bag.add(mat, m.B(u0, y0, v0, u1, y1, v1));
-    // the threshold stone (0.45 m out from the wall, its top 0.02 above the floor): a darker patch worn in its middle, a second small one by the jamb
-    put('plaster_damp', du - Math.min(0.6, dw / 2 - 0.1), du + Math.min(0.6, dw / 2 - 0.1), -0.4, -0.04, y + 0.02, y + 0.024);
-    put('plaster_damp', du - dw / 2 + 0.05, du - dw / 2 + 0.3, -0.34, -0.1, y + 0.024, y + 0.027);
+    // (one geometry of both patches: a piece under 0.4 m would be a fine detail mesh of its own per cell and material, a draw each)
+    bag.add('plaster_damp', mergeG([m.B(du - Math.min(0.6, dw / 2 - 0.1), y + 0.02, -0.4, du + Math.min(0.6, dw / 2 - 0.1), y + 0.024, -0.04), m.B(du - dw / 2 + 0.05, y + 0.024, -0.34, du - dw / 2 + 0.3, y + 0.027, -0.1)]));
     // the soot of each light of the room (hearth, forge, lamp) on the roof beams' underside above it
     const SH = el.sh ?? 2.95;
-    if (ctx.lights) for (const l of ctx.lights.slice(n)) if (l.at[1] > y + 0.5 && l.at[1] < y + 2.0) bag.add('lacquer_black', box(l.at[0] - 0.3, y + SH - 0.4 - 0.012, l.at[2] - 0.3, l.at[0] + 0.3, y + SH - 0.4 - 0.004, l.at[2] + 0.3));
+    if (ctx.lights) for (const l of ctx.lights.slice(n)) if (l.at[1] > y + 0.5 && l.at[1] < y + 2.0) bag.add('pottery_dark', box(l.at[0] - 0.3, y + SH - 0.4 - 0.012, l.at[2] - 0.3, l.at[0] + 0.3, y + SH - 0.4 - 0.004, l.at[2] + 0.3));
     return r;
   };
 }
