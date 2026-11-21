@@ -1,8 +1,8 @@
 // The routes walk-check follows into the opened places of the visitor's walk (walk.js): the whole way from the arrival to the south gate, and in at the doorway of
 // the pilgrims' shops of Queli Street and the square (each shop's gap beside its counter), to the account table behind. Pure functions of the layout.
-import { shopRuns } from './layout.js';
+import { shopRuns, lots } from './layout.js';
 import { WALK_REACH, walkDistance } from './walk.js';
-import { lotFrame } from '../../styles/lu/kit.js';
+import { lotFrame, rng } from '../../styles/lu/kit.js';
 
 const NOOP = new Proxy({}, { get: () => () => {} });
 const frame = (rect, front) => lotFrame({ bag: NOOP, col: NOOP }, rect, front);
@@ -36,10 +36,25 @@ export function walkRoutes() {
   return out;
 }
 
+/** In at the gate of the courtyard houses nearest the walk (the lanes off Queli Street): the lane, the gate (the leaves are swung open), round the screen wall, into the court. The gate's place is the style's own rule (styles/lu/house.js). */
+export function houseRoutes() {
+  const out = [];
+  for (const l of lots()) {
+    const [x0, z0, x1, z1] = l.rect, c = [(x0 + x1) / 2, z1];
+    if (l.lod || walkDistance(c) > 70) continue;
+    const luck = rng(l.seed * 7919 + 13)(), tier = l.wealth + (luck - 0.5) * 0.26 > 0.55 ? 2 : l.wealth + (luck - 0.5) * 0.26 > 0.3 ? 1 : 0;
+    const shopOn = l.wealth > 0.3 && l.seed % 3 === 0 && tier > 0, rand = rng(l.seed), gx = x0 + 3.6 + (shopOn ? (rand() < 0.5 ? 0.25 : 0.7) : rand()) * Math.max(0, (x1 - x0) - 7.2);
+    const r = tier ? [[gx, z1 + 1.6], [gx, z1 + 0.2], [gx, z1 - 1.4], [gx, z1 - 5.6], [gx + 2.8, z1 - 6.4], [gx + 2.8, z1 - 9.0]] : [[gx, z1 + 1.6], [gx, z1 + 0.2], [gx, z1 - 1.2], [gx, z1 - 6.0], [gx, z1 - 9.0]];
+    r.y0 = 0; r.kind = 'house'; r.id = `house:${l.seed}`;
+    out.push(r);
+  }
+  return out;
+}
+
 let LINES = null;
 /** Move a point (a figure, a prop) out of the lanes of the routes: it is pushed sideways to `m` metres from the nearest route line. Others are left as they are. */
 export function keepOff(p, m = 1.2) {
-  if (!LINES) { LINES = [mainRoute(), ...walkRoutes()]; }
+  if (!LINES) { LINES = [mainRoute(), ...walkRoutes(), ...houseRoutes()]; }
   let q = p;
   for (let pass = 0; pass < 3; pass++) {
     let moved = false;
