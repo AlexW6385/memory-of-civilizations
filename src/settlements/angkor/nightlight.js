@@ -96,8 +96,8 @@ function haloEl(el, { bag }) {
 function lampstand(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0;
   bag.add('sandstone_khmer', lathe([[0.3, 0], [0.3, 0.12], [0.2, 0.2], [0.14, 0.3], [0.12, 0.9], [0.2, 1.0], [0.001, 1.02]], 10, null, x, y, z));
-  bag.add('bronze', lathe([[0.001, 1.02], [0.12, 1.02], [0.18, 1.08], [0.19, 1.14], [0.001, 1.1]], 10, null, x, y, z));
-  bag.add('flame', lathe([[0.001, 1.1], [0.02, 1.17], [0.001, 1.3]], 4, null, x, y, z));
+  bag.add(el.stone ? 'sandstone_khmer' : 'bronze', lathe([[0.001, 1.02], [0.12, 1.02], [0.18, 1.08], [0.19, 1.14], [0.001, 1.1]], 10, null, x, y, z));
+  if (!el.stone) bag.add('flame', lathe([[0.001, 1.1], [0.02, 1.17], [0.001, 1.3]], 4, null, x, y, z));
   col.circle(x, z, 0.32, y, y + 1.3);
 }
 Object.assign(STYLES.khmer.elements, { ak_lampstand: lampstand, ak_halo: haloEl });
@@ -106,18 +106,18 @@ Object.assign(STYLES.khmer.elements, { ak_lampstand: lampstand, ak_halo: haloEl 
 /** The lamp-stands: either side of the outer causeway before the gate, and flanking the image in the central sanctuary. */
 export function stands() {
   const out = [];
-  for (const x of [-186, -172]) for (const s of [-1, 1]) out.push({ at: [x, s * 2.3], y: 1.0 });
+  for (const x of [-186, -172, -158, -144]) for (const s of [-1, 1]) out.push({ at: [x, s * 2.3], y: 1.0 });
   const fy = T.bakan.y + 0.7;
   for (const s of [-1, 1]) out.push({ at: [CX - 2.0, s * 2.1], y: fy });
   return out;
 }
 /** The glows of the temple, as data, by zone: `causeway` (the stands and the first offering table, all in one cell before the gate: what the arrival sees), `court` (the offering tables of the inner causeway and the terrace, the libraries' fire pits and lamp stands), `sanctuary` (the stands by the image). */
 export function templeItems(zone) {
-  const items = [], lamp = (x, y, z, fy, r = 2.4, k = 0.85) => { items.push({ k: 'ball', x, y, z, r: 0.9, f: 0.62 }, { k: 'floor', x, y: fy + 0.03, z, r, f: k, segs: 10 }); };
+  const items = [], lamp = (x, y, z, fy, r = 2.4, k = 0.85, br = 0.9, bf = 0.62) => { items.push({ k: 'ball', x, y, z, r: br, f: bf }, { k: 'floor', x, y: fy + 0.03, z, r, f: k, segs: 10 }); };
   const fy = T.bakan.y + 0.7;
   if (zone === 'causeway') {
-    for (const s of stands().filter((q) => q.at[0] < 0 && q.y === 1.0)) lamp(s.at[0], s.y + 1.3, s.at[1], s.y);
-    for (const s of [-1, 1]) lamp(-136, 0.9, s * 7.4, 0, 1.3, 0.7);
+    for (const s of stands().filter((q) => q.at[0] < 0 && q.y === 1.0)) lamp(s.at[0], s.y + 1.3, s.at[1], s.y, 3.6, 0.75, 1.3, 0.6);
+    for (const s of [-1, 1]) lamp(-136, 0.9, s * 7.4, 0, 1.8, 0.7, 0.9, 0.6);
   } else if (zone === 'sanctuary') {
     for (const s of stands().filter((q) => q.y === fy)) lamp(s.at[0], s.y + 1.3, s.at[1], s.y);
   } else {
