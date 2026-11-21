@@ -225,3 +225,10 @@ Sound (`soundmap.js`, `voices-ny.js`, tests/new-york-sound.test.mjs), every voic
 Animals (`fauna.js` `critters`, one mesh): pigeons feeding on the pavements of Sixth, Fifth and Madison Avenues in twos to fours, a tabby on the walk-up's step, a dog by a newsstand. [inferred: the city's pigeons and stray cats and dogs; no horse model exists in the critter set, so the milk horse is sound only.]
 
 Not done in this round: new opened shops and routes, street-name and subway lettering, wear. [stated plainly so a later round picks them up.]
+
+## §15 Second pass (2026-11-21)
+
+- Looked: the arrival renders crashed the page three times (machine memory shared by ten agents); renders at radius 30 worked, so one place was seen by day and by night (the barber's front, 21 m from the arrival). Seen: at night each shop with a built room (`l.room`) had an opaque orange halo sheet over its whole glass that hid the room (the other shops' sheets are fine, their rooms are not built). Fixed in `nightlight.js`: for the lot's own front a room is built behind, the sheet is only a lit band (2.7 to 3.1 m) under the fascia; the pool on the pavement is unchanged. The room's interior still reads dark at the low preset (not solved: the room's lamps are engine lights). [inferred: a lit shop in 1931 shows its counter through the glass.]
+- Budget measured, no change needed: arrival main 408 draws / 2.05 M triangles; two poses on Fifth (barber's front, drug store's front) 403 / 2.03 M and 368 / 1.89 M. Geometry 105.3 MB / 2253 meshes.
+- Tried and dropped: building the shops' keepers and customers into the near shop rooms (`STYLES.life.elements.figure` from `shopRoom`, as Venice does): one shop costs +4 main draws at the arrival, all 42 +27 (instanced prototypes and cells), over the +2 limit. The keepers stay life figures (170 m reach).
+- Still short: shop keepers as life figures; row-house parlours, iron-front lots and upper floors beyond the eight shops still shut; no wear on steps; no street-name or subway lettering (no verified source in the repo); Chanin and Lincoln are generic towers; the other five of six renders (arrival, a second walk place) were not seen.
