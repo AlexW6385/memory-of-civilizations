@@ -2,7 +2,7 @@
 // quays, swifts and swallows over the water and the Canopic Way, black kites (the dark birds of the engine) circling over the
 // Museion and the Pharos, sparrows on the paving, a heron and little egrets on the quay and at the lake.
 import { SEA, GROUND, QUAY, PHAROS, MUSEION, AGORA, SEROUTE, wet, lots, isle } from './layout.js';
-import { opened, walkDist } from './walk.js';
+import { opened, walkDist, laneClear } from './walk.js';
 import { hash } from './soundmap.js';
 
 const inWater = (x, z) => wet(x, z);
@@ -51,7 +51,7 @@ for (const [x, z] of [[113.2, -88.4], [188.8, -88.4], [-36.2, -88.4]]) {
   critters.push({ model: 'goose_white', at: [x + 1.6, GROUND + 0.05, z + 0.6], rot: 2.2, range: [3.2, 1.4] }, { model: 'goose_grey', at: [x - 0.6, GROUND + 0.05, z + 1.4], rot: 3.4, range: [3.2, 1.4] }, { model: 'duck_brown', at: [x + 3.0, GROUND + 0.05, z + 1.0], rot: 1.1, range: [3, 1.4] });
 }
 { const I = isle(), [nx, nz] = I.nets[0] || [-190, -255.4]; critters.push({ model: 'kingfisher', at: [nx + 4, GROUND + 0.06, -249.5], rot: Math.PI, water: [nx + 4, -247.8, SEA], cycle: 34 }); }
-{ let k = 0; for (const l of lots()) { if (l.quarter !== 'egyptian' || hash(l.rect[0], l.rect[1]) > 0.06 || k >= 8) continue; k++; const [x0, z0, x1, z1] = l.rect, f = FRn[l.front], x = (x0 + x1) / 2 + 1.5, z = l.front === 'n' ? z0 - 1.5 : z1 + 1.5; critters.push({ model: k % 2 ? 'goat_black' : 'goat_white', at: [x, l.y, z], rot: Math.atan2(f[0], f[1]), range: [8, 3] }); } }
+{ let k = 0; for (const l of lots()) { if (l.quarter !== 'egyptian' || hash(l.rect[0], l.rect[1]) > 0.06 || k >= 8) continue; k++; const [x0, z0, x1, z1] = l.rect, f = FRn[l.front], [x, z] = laneClear([(x0 + x1) / 2 + 1.5, l.front === 'n' ? z0 - 1.5 : z1 + 1.5]); critters.push({ model: k % 2 ? 'goat_black' : 'goat_white', at: [x, l.y, z], rot: Math.atan2(f[0], f[1]), range: [8, 3] }); } }
 for (const [x, z, m] of [[212, -66.8, 'cat_tabby'], [262, -66.8, 'cat_orange']]) critters.push({ model: m, at: [x, GROUND + 0.3, z], rot: 0.5, range: [7, 2.5] });
 void QUAY; void walkDist;
 export default { fish, flights, perches, critters };

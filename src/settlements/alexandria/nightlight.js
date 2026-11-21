@@ -145,7 +145,7 @@ const EXTRA = {
   egyptian_house: (el, H) => {
     if (el.simple) return;
     const r = rng(el.seed || 1), F = frame(el.rect, el.front ?? 's'), { L, D } = F, y = el.y ?? 0, [ox, oz] = F.out;
-    const n = 2 + (r() < 0.4 ? 1 : 0), sh = 2.9, H0 = n * sh, hd = Math.min(D - 4.5, 8.6 + r() * 2); r(); const dw = 1.1, du = 1.2 + r() * (L - 5.2);
+    const n = 2 + (r() < 0.4 ? 1 : 0), sh = 2.9, H0 = n * sh, hd = Math.min(D - 4.5, 8.6 + r() * 2); r(); const dw = 1.7, du = 1.2 + r() * (L - 5.2);
     if (hashAt(el.rect[0], el.rect[1], 5) < 0.55) {
       const [ax, az] = F.P(du + 0.05, 0.2), [bx, bz] = F.P(du + dw - 0.05, 0.2);
       H.quad([ax, y + 0.1, az], [bx, y + 0.1, bz], [bx, y + 2.0, bz], [ax, y + 2.0, az], [ox, oz], 0.4);
