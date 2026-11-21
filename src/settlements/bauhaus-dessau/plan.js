@@ -1,7 +1,7 @@
 // The Bauhaus building, Dessau (docs/settlements/bauhaus-dessau.md §2, §6): one plan, the whole school — workshop wing, bridge, north wing,
 // Aula and canteen, Prellerhaus — with the rooms the visitor can walk into.
 import { B, LV, PL } from './layout.js';
-import { shopWalks } from './walks.js';
+import { shopWalks, nearFlats } from './walks.js';
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
@@ -42,6 +42,6 @@ export const school = {
   bakeTop: 18,
   elements: [{ t: 'bauhaus_school' }],
   rooms,
-  walks: shopWalks(12),
+  walks: [...shopWalks(20), ...nearFlats(6).map((d) => [d.out, d.door, d.in, d.inner])],
 };
 export default school;
