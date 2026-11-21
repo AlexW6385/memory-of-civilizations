@@ -102,3 +102,30 @@ export function pancuranAt() {
   for (let z = 24; z < 126 && PANCURAN.length < 3; z += 1.0) if (!busy(z) && !busy(z - 1.2) && !busy(z + 1.2) && (z - 24) > PANCURAN.length * 34) PANCURAN.push(z);
   return PANCURAN;
 }
+
+/** The compound's frame, as src/styles/balinese/compound.js builds it: P(u, v) → world [x, z] (u along the street from the left as one looks in, v inward), W, D, and M(u) the mirror that puts the sanggah's side at small u. */
+export function compoundFrame(l) {
+  const [x0, z0, x1, z1] = l.rect, f = l.front, alongX = f === 'n' || f === 's', W = alongX ? x1 - x0 : z1 - z0, D = alongX ? z1 - z0 : x1 - x0;
+  const P = (u, v) => (f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x1 - u, z1 - v] : f === 'w' ? [x0 + v, z1 - u] : [x1 - v, z0 + u]);
+  const cL = P(0, D), cR = P(W, D), left = cL[0] - cL[1] >= cR[0] - cR[1];
+  return { P, W, D, M: (u) => (left ? u : W - u) };
+}
+
+function h01(a, b = 0) { let h = Math.imul(Math.floor(a * 131.07) ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(Math.floor(b * 97.31) + 0x7f4a7c15, 0xc2b2ae35); h ^= h >>> 15; h = Math.imul(h, 0x2c1b3c6d); h ^= h >>> 12; return (h >>> 0) / 4294967296; }
+let FIELDS = null;
+/** Spots on the flat treads of the terraces: dry ones for the scarecrows' clapper lines (huts) and the plough, flooded ones for the ducks. */
+export function fieldSpots() {
+  if (FIELDS) return FIELDS;
+  FIELDS = { huts: [], plough: [], ducks: [] };
+  for (let k = 0; k < 900 && (FIELDS.huts.length < 6 || FIELDS.plough.length < 4 || FIELDS.ducks.length < 5); k++) {
+    const a = h01(k, 1) * Math.PI * 2, d = 112 + h01(k, 2) * 60, x = Math.cos(a) * d, z = Math.sin(a) * d * 0.95;
+    if (Math.hypot(x, z) > RADIUS - 14 || inRect(CORE, x, z, 3)) continue;
+    const y = height(x, z);
+    if (![[2, 0], [-2, 0], [0, 2], [0, -2]].every(([dx, dz]) => Math.abs(height(x + dx, z + dz) - y) < 0.02)) continue;
+    const spot = { at: [x, z], y };
+    if (flooded(x, z, y)) { if (FIELDS.ducks.length < 5 && FIELDS.ducks.every((q) => Math.hypot(q.at[0] - x, q.at[1] - z) > 30)) FIELDS.ducks.push(spot); }
+    else if (FIELDS.huts.length < 6 && FIELDS.huts.every((q) => Math.hypot(q.at[0] - x, q.at[1] - z) > 30)) FIELDS.huts.push(spot);
+    else if (FIELDS.plough.length < 4 && FIELDS.plough.every((q) => Math.hypot(q.at[0] - x, q.at[1] - z) > 40)) FIELDS.plough.push(spot);
+  }
+  return FIELDS;
+}

@@ -7,7 +7,7 @@
 // keeps the offices of dawn and dusk (the kulkul sounds the banjar's calls [stated: Wikipedia "Balinese architecture"]; the gamelan is the banjar's, kept in the community's
 // hall [stated: Wikipedia "Gamelan"]).
 import '../../engine/voices-bali.js';
-import { RADIUS, CORE, PURA, WANTILAN, KULKUL, BANYAN, CHANNEL_X, DALEM_C, STREET, LANE, inRect, lots, lotFrame, outward, height, flooded, pancuranAt } from './layout.js';
+import { RADIUS, CORE, PURA, WANTILAN, KULKUL, BANYAN, CHANNEL_X, DALEM_C, STREET, LANE, inRect, lots, lotFrame, outward, height, flooded, pancuranAt, fieldSpots } from './layout.js';
 
 /** Where the audio puts the listener when the engine gives none (the arrival before the pura). */
 export const HOME = [0, -26];
@@ -73,6 +73,7 @@ export function sites() {
 
 /** No wells: the water is the channel's and the pancuran's. */
 export const WELLS = [];
+export { fieldSpots };
 export const FAR = {};
 export const TEMPLE = {};
 
@@ -154,25 +155,6 @@ export const TRACKS = [{
   key: 'cart', voice: 'balCart', speed: 1.0, r50: 16, gap: [60, 150], ok: (hour, rain) => hour >= 6 && hour < 17.5 && rain < 0.5,
   get: (lx, lz, r) => (inRect([-40, -60, 40, 140], lx, lz) ? (r() < 0.5 ? { pts: [[-1.2, 130], [-1.2, 10]] } : { pts: [[1.4, 10], [1.4, 130]] }) : null),
 }];
-
-// ── the terraces' spots ──────────────────────────────────────────────────
-let FIELDS = null;
-/** Spots on the flat treads of the terraces: dry ones for the scarecrows' clapper lines (huts) and the plough, flooded ones for the ducks. */
-export function fieldSpots() {
-  if (FIELDS) return FIELDS;
-  FIELDS = { huts: [], plough: [], ducks: [] };
-  for (let k = 0; k < 900 && (FIELDS.huts.length < 6 || FIELDS.plough.length < 4 || FIELDS.ducks.length < 5); k++) {
-    const a = hash(k, 1) * Math.PI * 2, d = 112 + hash(k, 2) * 60, x = Math.cos(a) * d, z = Math.sin(a) * d * 0.95;
-    if (Math.hypot(x, z) > RADIUS - 14 || inRect(CORE, x, z, 3)) continue;
-    const y = height(x, z);
-    if (![[2, 0], [-2, 0], [0, 2], [0, -2]].every(([dx, dz]) => Math.abs(height(x + dx, z + dz) - y) < 0.02)) continue;
-    const spot = { at: [x, z] };
-    if (flooded(x, z, y)) { if (FIELDS.ducks.length < 5 && FIELDS.ducks.every((q) => Math.hypot(q.at[0] - x, q.at[1] - z) > 30)) FIELDS.ducks.push(spot); }
-    else if (FIELDS.huts.length < 6 && FIELDS.huts.every((q) => Math.hypot(q.at[0] - x, q.at[1] - z) > 30)) FIELDS.huts.push(spot);
-    else if (FIELDS.plough.length < 4 && FIELDS.plough.every((q) => Math.hypot(q.at[0] - x, q.at[1] - z) > 40)) FIELDS.plough.push(spot);
-  }
-  return FIELDS;
-}
 
 // ── the emitters in the open ─────────────────────────────────────────────────
 /** Fixed emitters: { voice, at, r50 (m: the distance at which it is half as loud), gap [min, max] s, hours [from, to] }, with `dry`, `rainMax`, `after`. */
