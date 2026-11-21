@@ -15,6 +15,7 @@ import './writing.js';
 import './ruts.js';
 import { shopKeepers } from './keepers.js';
 import { forecourtLife } from './forecourt.js';
+import { pantheonHalos } from './pantheon-night.js';
 /** lodTiles of src/settlements/lod.js with a wider tile (the geometry budget counts plan x material buckets). */
 function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
   const tiles = new Map();
@@ -132,6 +133,7 @@ function nightLife(ways) {
   add.push({ t: 'rome_halo', kind: 'torch', at: [cx + f[0] * 4.6 + r[0] * 0.5, cz + f[1] * 4.6 + r[1] * 0.5], y: 0, rot: 0 });
   // the temple's braziers at the foot of the Pantheon's steps, and escorts with torches near the visitor's walk (Juvenal, Satire 3: a man out by night has slaves with flambeaux before him)
   for (const x of [-21, 21]) add.push({ t: 'rome_halo', kind: 'brazier', at: [x, -54.2], y: 0, rot: 0 });
+  add.push(...pantheonHalos());
   const slave = (at, rot, k) => ({ t: 'figure', at, y: 0, rot, seed: 7100 + k, skin: k % 2 ? 'skin_medium' : 'skin_light', dress: 'tunic', legs: 'bare', cloth: ['cloth_brown', 'cloth_ochre', 'cloth_grey'][k % 3], over: 'belt', hair: 'short', beard: 0, hat: 'none', pose: 'stand' });
   const master = (at, rot, k) => ({ t: 'figure', at, y: 0, rot, seed: 7200 + k, skin: 'skin_light', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', hair: 'short', beard: k % 2, hat: 'none', pose: 'stand' });
   const ESC = [[[-12, -131], Math.PI], [[-30, -175.4], -Math.PI / 2], [[-7, -175.4], Math.PI / 2], [[30, -175.4], -Math.PI / 2], [[100, -175.4], Math.PI / 2]];
