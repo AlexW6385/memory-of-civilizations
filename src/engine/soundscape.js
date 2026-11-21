@@ -94,6 +94,8 @@ import * as HIMEJI from '../settlements/edo-himeji/soundmap.js';
 import * as SEOUL from '../settlements/joseon-seoul/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
 import * as MADURAI from '../settlements/madurai/soundmap.js';
+import * as MAYATIKAL from '../settlements/maya-tikal/soundmap.js';
+import './voices-tikal.js';
 import * as MUSCOVY from '../settlements/muscovy/soundmap.js';
 import './voices-muscovy.js';
 import * as MYCENAE from '../settlements/mycenae/soundmap.js';
@@ -222,7 +224,7 @@ export const PROFILES = {
   kakadu: T({ tropic: 0.8, warbler: 0.3, crow: 0.4 }, { cicadas: 0.4, frogs: 0.5, animals: { dog: 0.3 }, roof: 'thatch' }),
   'benin-city': T(NEAR, { animals: { goat: 0.4, rooster: 0.5, dog: 0.3 }, cicadas: 0.4, roof: 'flat' }),
   dogon: T({ dove: 1, kite: 0.3 }, { cicadas: 0.4, animals: { goat: 0.5, rooster: 0.4, dog: 0.3, cattle: 0.2 }, roof: 'flat' }),
-  'maya-tikal': T(TROP, { cicadas: 1, frogs: 0.7, animals: { dog: 0.3 }, roof: 'thatch' }),
+  'maya-tikal': T(TROP, { cicadas: 1, frogs: 0.7, animals: withLife({ dog: 0.3 }, { market: 0.9, map: MAYATIKAL }), roof: 'thatch' }),
   vienna: T({ ...EU, sparrow: 1 }, { animals: withLife({ horse: 0.5, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: VIENNA }), roof: 'slate', bells: null }),
   brasilia: T({ tropic: 0.7, dove: 0.5, sparrow: 0.6 }, { cicadas: 0.4, animals: {}, roof: 'flat', bells: 'angelus' }),
   'bauhaus-dessau': T(NEAR, { animals: { dog: 0.3, rooster: 0.1 }, roof: 'flat' }),

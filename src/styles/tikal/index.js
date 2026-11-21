@@ -228,7 +228,7 @@ function eshrine(el, ctx) {
 
 /** A raised causeway of plastered limestone { pts, w, h }: a trapezoid in section, its ends and its sides sloping (walked up anywhere). */
 function causeway(el, { bag }) {
-  const h = el.h ?? 0.9, sl = h * 1.3, hw = el.w / 2;
+  const h = el.h ?? 0.9, sl = h * 2.6, hw = el.w / 2;
   for (let i = 0; i + 1 < el.pts.length; i++) {
     const a = el.pts[i], b = el.pts[i + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uz = (b[1] - a[1]) / len, nx = -uz, nz = ux;
     const corner = (s, o, y, ext) => [a[0] + ux * (s < 0 ? -ext : len + ext) + nx * o, y, a[1] + uz * (s < 0 ? -ext : len + ext) + nz * o];
@@ -260,13 +260,13 @@ function ballcourt(el, { bag, col }) {
 
 /** A pole-and-thatch house { c, w, d (the extents in x and z), door ('n'…), seed, kitchen }: a rubble platform, walls of daub, a hipped roof of palm thatch; furnished. */
 function house(el, ctx) {
-  const { bag, col, lights } = ctx, [cx, cz] = el.c, w = el.w, d = el.d, rand = rng(el.seed || 1), P = 0.42, T = 0.16, type = el.type ?? 'daub', wh = type === 'rich' ? 2.2 : 1.95, side = el.door ?? 's';
+  const { bag, col, lights } = ctx, [cx, cz] = el.c, w = el.w, d = el.d, rand = rng(el.seed || 1), P = 0.42, T = 0.16, type = el.type ?? 'daub', wh = type === 'rich' ? 2.65 : 2.45, side = el.door ?? 's';
   const px = w / 2 + 0.7, pz = d / 2 + 0.7;
   bag.add('rubble', box(cx - px, -0.1, cz - pz, cx + px, P, cz + pz));
   bag.add(LIME, box(cx - px + 0.1, P - 0.04, cz - pz + 0.1, cx + px - 0.1, P, cz + pz - 0.1));
   col.floor([cx - px, cz - pz, cx + px, cz + pz], P);
   // the walls: four of daub, a doorway in the middle of the door's side (1.0 wide, 1.85 high)
-  const dwid = 1.0, dh = 1.85, mat = type === 'rich' ? 'lime_plaster' : type === 'pole' ? 'mud_plaster' : rand() < 0.5 ? 'mud_plaster' : 'lime_plaster';
+  const dwid = 1.6, dh = 2.15, mat = type === 'rich' ? 'lime_plaster' : type === 'pole' ? 'mud_plaster' : rand() < 0.5 ? 'mud_plaster' : 'lime_plaster';
   const wl = (x0, z0, x1, z1, isDoor, alongX) => {
     if (!isDoor) { slab(bag, mat, [x0, z0, x1, z1], P, P + wh, col, P, P + wh); return; }
     const m = alongX ? (x0 + x1) / 2 : (z0 + z1) / 2;
@@ -286,7 +286,7 @@ function house(el, ctx) {
       const len = Math.hypot(x1 - x0, z1 - z0), n = Math.max(2, Math.round(len / 0.5)), m = [(x0 + x1) / 2, (z0 + z1) / 2];
       for (let i = 0; i <= n; i++) {
         const q = i / n, px2 = x0 + (x1 - x0) * q, pz2 = z0 + (z1 - z0) * q;
-        if (isDoor && Math.hypot(px2 - m[0], pz2 - m[1]) < 0.62) continue;
+        if (isDoor && Math.hypot(px2 - m[0], pz2 - m[1]) < 0.92) continue;
         const ox = px2 + nrm[0] * 0.05, oz = pz2 + nrm[1] * 0.05;
         bag.add(TIM, rod([ox, P, oz], [ox, P + wh, oz], 0.04, 4));
       }
@@ -301,7 +301,7 @@ function house(el, ctx) {
     const F3 = frame(side, ...(side === 'n' ? [cx, cz - d / 2] : side === 's' ? [cx, cz + d / 2] : side === 'w' ? [cx - w / 2, cz] : [cx + w / 2, cz]));
     const dado = (u0, u1, v0, v1) => { const r = F3.R(u0, u1, v0, v1); bag.add(L, box(r[0], P, r[1], r[2], P + 0.45, r[3])); };
     const half = (side === 'n' || side === 's' ? w : d) / 2;
-    dado(-0.06, 0, -half, -0.55); dado(-0.06, 0, 0.55, half);                                // a stone dado under the plaster
+    dado(-0.06, 0, -half, -0.85); dado(-0.06, 0, 0.85, half);                                // a stone dado under the plaster
     // the porch: two posts and a lean-to of thatch before the door, the platform carried out under it
     const pf = F3.R(-1.9, -0.7, -1.7, 1.7); bag.add('rubble', box(pf[0], -0.1, pf[1], pf[2], P, pf[3])); bag.add(LIME, box(pf[0] + 0.05, P - 0.04, pf[1] + 0.05, pf[2] - 0.05, P, pf[3] - 0.05)); col.floor(pf, P);
     for (const v of [-1.5, 1.5]) { const q = F3.P(-1.6, v); bag.add(TIM, rod([q[0], P, q[1]], [q[0], P + wh - 0.3, q[1]], 0.07, 6)); col.circle(q[0], q[1], 0.09, P, P + wh); }
@@ -334,8 +334,8 @@ function house(el, ctx) {
   if (hang) { const a = at(e0 + 0.5, -((long ? d : w) / 2 - 0.5)), b2 = at(e0 + 0.5, (long ? d : w) / 2 - 0.5); hammock(bag, [a[0], F + 1.5, a[1]], [b2[0], F + 1.5, b2[1]], 0.45, rand() < 0.5 ? 'cloth_white' : 'cloth_ochre'); }
   // outside: the doorway's poles, strings of maize and chiles under the eave, a log bench, the stains where the rain splashes the daub
   { const F2 = frame(side, ...(side === 'n' ? [cx, cz - d / 2] : side === 's' ? [cx, cz + d / 2] : side === 'w' ? [cx - w / 2, cz] : [cx + w / 2, cz])), dn = [-F2.U[0], 0, -F2.U[1]];
-    for (const v of [-0.58, 0.58]) { const p = F2.P(-0.06, v); bag.add(TIM, rod([p[0], P, p[1]], [p[0], P + dh, p[1]], 0.05, 5)); }
-    for (const [v, m, hh] of el.lite ? [] : [[-0.95, 'wood_ochre', 0.5], [-1.05, 'stucco_red', 0.4], [0.95, 'wood_ochre', 0.45]]) { const p = F2.P(-0.14, v); bag.add('rope_fibre', rod([p[0], P + wh - 0.25, p[1]], [p[0], P + wh - 0.25 - hh, p[1]], 0.012, 4)); bag.add(m, box(p[0] - 0.07, P + wh - 0.25 - hh, p[1] - 0.07, p[0] + 0.07, P + wh - 0.3, p[1] + 0.07)); }
+    for (const v of [-0.86, 0.86]) { const p = F2.P(-0.06, v); bag.add(TIM, rod([p[0], P, p[1]], [p[0], P + dh, p[1]], 0.05, 5)); }
+    for (const [v, m, hh] of el.lite ? [] : [[-1.3, 'wood_ochre', 0.5], [-1.45, 'stucco_red', 0.4], [1.3, 'wood_ochre', 0.45]]) { const p = F2.P(-0.14, v); bag.add('rope_fibre', rod([p[0], P + wh - 0.25, p[1]], [p[0], P + wh - 0.25 - hh, p[1]], 0.012, 4)); bag.add(m, box(p[0] - 0.07, P + wh - 0.25 - hh, p[1] - 0.07, p[0] + 0.07, P + wh - 0.3, p[1] + 0.07)); }
     if (rand() < 0.6) { const q = F2.R(-1.05, -0.65, 0.9, 2.1); bag.add(TIM, box(q[0], P, q[1], q[2], P + 0.28, q[3])); }
     for (let k = 0; k < (el.lite ? 0 : 3); k++) { const v = (rand() - 0.5) * (side === 'n' || side === 's' ? w : d) * 0.8, p = F2.P(-0.01, v); patch(bag, 'plaster_damp', [p[0], P + 0.3, p[1]], dn, 0.6 + rand() * 0.8, 0.4, Math.floor(rand() * 1e6), 0.01); }
     if (el.kitchen) soot(bag, [cx, P + wh + 0.8, cz], [0, -1, 0], 1.2, 1.2, el.seed || 3); }
