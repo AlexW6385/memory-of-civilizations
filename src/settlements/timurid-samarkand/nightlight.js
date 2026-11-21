@@ -181,7 +181,8 @@ function hungLantern(bag, x, y, z) {
 function lampStand(bag, x, z, y0 = 0) {
   for (let i = 0; i < 3; i++) { const a = i / 3 * TAU + 0.4; bag.add('bronze', rod([x + Math.cos(a) * 0.3, y0, z + Math.sin(a) * 0.3], [x, y0 + 0.5, z], 0.014, 4)); }
   bag.add('bronze', rod([x, y0 + 0.45, z], [x, y0 + 1.62, z], 0.018, 5));
-  bag.add('bronze', lathe([[0.001, 1.6], [0.08, 1.62], [0.2, 1.72], [0.22, 1.78], [0.19, 1.76], [0.001, 1.68]], 10, null, x, y0, z));
+  const k = 0.9 + 0.05 * Math.floor(hashAt(x, z, 71) * 4), n = 9 + Math.floor(hashAt(z, x, 72) * 3);   // the dish varies by its place: no twelve alike, none drawn instanced
+  bag.add('bronze', lathe([[0.001, 1.6], [0.08 * k, 1.62], [0.2 * k, 1.72], [0.22 * k, 1.78], [0.19 * k, 1.76], [0.001, 1.68]], n, null, x, y0, z));
 }
 /** A fire basket 0.84 m across on its foot, one bronze piece. */
 function fireBasket(bag, x, z) {
