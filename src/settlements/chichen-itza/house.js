@@ -18,7 +18,7 @@ const reach = (h) => 1.25 * Math.max(h.a, h.b);
  */
 export function variant(el) {
   const r = rng(((el.seed || 1) ^ 0x9e3779b1) >>> 0), u = r();
-  const v = { finish: u < 0.45 ? 'daub' : u < 0.7 ? 'lime' : 'poles', F: 0.35 + r() * 0.25, wall: 2.0 + r() * 0.15, pitch: 0.9 + r() * 0.22, old: r() < 0.4, mat: r() < 0.6, porch: r() < 0.35 ? (r() < 0.5 ? 0 : 1) : -1, lean: r() < 0.3, use: 'home' };
+  const v = { finish: u < 0.45 ? 'daub' : u < 0.7 ? 'lime' : 'poles', F: 0.35 + r() * 0.25, wall: 2.45 + r() * 0.15, pitch: 0.9 + r() * 0.22, old: r() < 0.4, mat: r() < 0.6, porch: r() < 0.35 ? (r() < 0.5 ? 0 : 1) : -1, lean: r() < 0.3, use: 'home' };
   const w = r(); v.use = w < 0.55 ? 'home' : w < 0.75 ? 'weaver' : 'store';
   const alongX = el.dir !== 'z', others = el.others || [], [cx, cz] = el.c;
   const free = (x, z) => others.every((o) => Math.hypot(o.c[0] - x, o.c[1] - z) > o.r + 1.7);
@@ -55,7 +55,8 @@ function czHouse(el, ctx) {
   const base = v.finish === 'daub' ? 'mud_plaster' : v.finish === 'lime' ? 'lime_plaster' : 'log_pine';
   bag.add('rubble', lathe([[a * 1.04, -0.55], [a * 1.04, F - 0.03], [0.001, F - 0.03]], 24, oval, cx, Y0, cz));
   bag.add('mud_plaster', lathe([[a - T, F - 0.03], [a - T, F], [0.001, F]], 24, oval, cx, Y0, cz));            // the beaten earth floor
-  const doors = alongX ? [Math.PI / 2, -Math.PI / 2] : [0, Math.PI], dw = (0.45 + 0.05 * rand()) / Math.min(a, b) * 1.0, dh = F + 1.85, N = 40;
+  // the doorways: 1.7 m or more clear and a lintel 2.1 m over the floor, so that a visitor can walk in (§19): three of the wall's 48 segments either side of the door's middle, so that the door's edges fall on the wall's segments
+  const doors = alongX ? [Math.PI / 2, -Math.PI / 2] : [0, Math.PI], N = 48, step = 2 * Math.PI / N, dw = 3 * step, dh = F + 2.12;
   const t = [], tb = [], tv = [], q = (arr, p1, p2, p3, p4) => arr.push(...p1, ...p2, ...p3, ...p1, ...p3, ...p4);
   const inDoor = (th) => doors.some((d) => Math.abs(Math.atan2(Math.sin(th - d), Math.cos(th - d))) < dw);
   const dado = v.finish === 'poles' ? 0.55 : v.finish === 'lime' ? 0.5 : 0;
@@ -79,10 +80,10 @@ function czHouse(el, ctx) {
   if (tb.length) bag.add('mud_plaster', flipGeo(fromTriangles(tb)));
   if (tv.length) bag.add('rope_fibre', flipGeo(fromTriangles(tv)));
   // the roof of palm thatch, hipped at the rounded ends, its underside seen from within
-  const k = v.pitch, prof = [[a * 1.25, 1.9], [a * 0.95, 1.9 + 0.7 * k], [a * 0.55, 1.9 + 1.9 * k], [a * 0.12, 1.9 + 3.1 * k], [0.001, 1.9 + 3.3 * k]], rm = v.old ? 'thatch' : 'thatch_palm';
+  const k = v.pitch, L0 = 2.35, prof = [[a * 1.25, L0], [a * 0.95, L0 + 0.7 * k], [a * 0.55, L0 + 1.9 * k], [a * 0.12, L0 + 3.1 * k], [0.001, L0 + 3.3 * k]], rm = v.old ? 'thatch' : 'thatch_palm';
   bag.add(rm, lathe(prof, 24, oval, cx, Y0, cz));
   bag.add(rm, flipGeo(lathe(prof.map(([r, y]) => [Math.max(0.001, r - 0.12), y - 0.1]), 24, oval, cx, Y0, cz)));
-  { const e = lathe([[a * 1.25, 1.9], [a * 1.25 - 0.12, 1.8]], 24, oval, cx, Y0, cz); bag.add(rm, e); bag.add(rm, flipGeo(e.clone())); }
+  { const e = lathe([[a * 1.25, L0], [a * 1.25 - 0.12, L0 - 0.1]], 24, oval, cx, Y0, cz); bag.add(rm, e); bag.add(rm, flipGeo(e.clone())); }
   col.floor([cx - (alongX ? a : b) * 0.7, cz - (alongX ? b : a) * 0.7, cx + (alongX ? a : b) * 0.7, cz + (alongX ? b : a) * 0.7], Y0 + F);
   // a step stone before each doorway; a rolled mat above some
   doors.forEach((d, i) => {
@@ -99,9 +100,9 @@ function czHouse(el, ctx) {
       const xs = [cx + n[0] * q0 + tn[0] * u0, cx + n[0] * q1 + tn[0] * u1], zs = [cz + n[1] * q0 + tn[1] * u0, cz + n[1] * q1 + tn[1] * u1];
       return [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)];
     };
-    const sl = wq(-1.5, 1.5, e0, e1); bag.add('thatch_palm', box(sl[0], Y0 + 1.93, sl[1], sl[2], Y0 + 2.1, sl[3])); col.rect(sl, Y0 + 1.93, Y0 + 2.1);
-    for (const u of [-1.35, 1.35]) { const p = wq(u - 0.07, u + 0.07, e1 - 0.15, e1 - 0.01); bag.add('log_pine', box(p[0], Y0 - 0.05, p[1], p[2], Y0 + 1.93, p[3])); col.circle((p[0] + p[2]) / 2, (p[1] + p[3]) / 2, 0.1, Y0, Y0 + 2); }
-    const bm = wq(-1.42, 1.42, e1 - 0.2, e1 - 0.1); bag.add('timber', box(bm[0], Y0 + 1.84, bm[1], bm[2], Y0 + 1.93, bm[3]));
+    const sl = wq(-1.5, 1.5, e0, e1); bag.add('thatch_palm', box(sl[0], Y0 + 2.48, sl[1], sl[2], Y0 + 2.65, sl[3])); col.rect(sl, Y0 + 2.48, Y0 + 2.65);
+    for (const u of [-1.35, 1.35]) { const p = wq(u - 0.07, u + 0.07, e1 - 0.15, e1 - 0.01); bag.add('log_pine', box(p[0], Y0 - 0.05, p[1], p[2], Y0 + 2.48, p[3])); col.circle((p[0] + p[2]) / 2, (p[1] + p[3]) / 2, 0.1, Y0, Y0 + 2.5); }
+    const bm = wq(-1.42, 1.42, e1 - 0.2, e1 - 0.1); bag.add('timber', box(bm[0], Y0 + 2.39, bm[1], bm[2], Y0 + 2.48, bm[3]));
     const bn = wq(0.8, 1.3, b + 0.3, b + 0.7); bag.add('log_pine', box(bn[0], Y0, bn[1], bn[2], Y0 + 0.4, bn[3])); col.rect(bn, Y0, Y0 + 0.4);
     const jp = wq(-1.0, -1.0, b + 0.5, b + 0.5); put(bag, waterJarKit(), jp[0], Y0, jp[1], 0); col.circle(jp[0], jp[1], 0.33, Y0, Y0 + 0.8);
   }
@@ -109,8 +110,8 @@ function czHouse(el, ctx) {
   if (v.lean) {
     const e = alongX ? [-1, 0] : [0, -1], te = [-e[1], e[0]], e0 = 1.25 * a - 0.3, e1 = 1.25 * a + 1.9;
     const wq = (u0, u1, q0, q1) => { const xs = [cx + e[0] * q0 + te[0] * u0, cx + e[0] * q1 + te[0] * u1], zs = [cz + e[1] * q0 + te[1] * u0, cz + e[1] * q1 + te[1] * u1]; return [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)]; };
-    const sl = wq(-1.1, 1.1, e0, e1); bag.add('thatch_palm', box(sl[0], Y0 + 1.7, sl[1], sl[2], Y0 + 1.85, sl[3])); col.rect(sl, Y0 + 1.7, Y0 + 1.85);
-    for (const u of [-1.0, 1.0]) { const p = wq(u - 0.06, u + 0.06, e1 - 0.14, e1 - 0.02); bag.add('log_pine', box(p[0], Y0 - 0.05, p[1], p[2], Y0 + 1.7, p[3])); col.circle((p[0] + p[2]) / 2, (p[1] + p[3]) / 2, 0.09, Y0, Y0 + 1.8); }
+    const sl = wq(-1.1, 1.1, e0, e1); bag.add('thatch_palm', box(sl[0], Y0 + 2.15, sl[1], sl[2], Y0 + 2.3, sl[3])); col.rect(sl, Y0 + 2.15, Y0 + 2.3);
+    for (const u of [-1.0, 1.0]) { const p = wq(u - 0.06, u + 0.06, e1 - 0.14, e1 - 0.02); bag.add('log_pine', box(p[0], Y0 - 0.05, p[1], p[2], Y0 + 2.15, p[3])); col.circle((p[0] + p[2]) / 2, (p[1] + p[3]) / 2, 0.09, Y0, Y0 + 2.2); }
     const m = wq(0, 0, 1.25 * a + 0.9, 1.25 * a + 0.9), L2 = STYLES.life.elements;
     L2.firewood({ at: [m[0], m[1]], y: Y0, rot: alongX ? Math.PI / 2 : 0, seed: el.seed, len: 1.4 }, ctx);
     const j = wq(0.7, 0.7, 1.25 * a + 0.5, 1.25 * a + 0.5); L2.pot({ at: [j[0], j[1]], y: Y0, kind: 'dark_pot', n: 2, seed: el.seed }, ctx);
