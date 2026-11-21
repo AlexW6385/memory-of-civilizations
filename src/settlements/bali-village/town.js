@@ -103,19 +103,19 @@ function people() {
   const temple = (at, y, rot, o = {}) => P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'sash', skin: skin(), hat: 'turban', hatMat: 'cloth_white', hair: 'short', feet: 'bare', beard: false, ...o });
   const wantilanX = (WANTILAN[0] + WANTILAN[2]) / 2, wy = 0.5;
   // the gamelan in the wantilan: players behind the metallophones, a drummer, the gong's player; the same in the temple's gong pavilion
-  for (const [cx, z0, f] of [[wantilanX, WANTILAN[1], wy], [21, -104, PURA.y1 + 0.5]]) {
+  for (const [cx, z0, f, NK] of [[wantilanX, WANTILAN[1], wy, 0.7], [21, -104, PURA.y1 + 0.5, 0.9]]) {   // the evening's gamelan plays on into the night
     const cz = z0 + 3.8;
-    for (let r = 0; r < 3; r++) for (const s of [-1, 1]) man([cx + s * 2.6 - 0.3 + rand() * 0.4, cz - 1.0 + r * 1.1 + 0.6], f, 0, { pose: 'cross' });
-    man([cx - 1.0, cz - 1.2 + 0.7], f, 0, { pose: 'cross' }); man([cx + 1.0, cz - 1.2 + 0.7], f, 0, { pose: 'cross' });
-    man([cx - 0.8, cz + 1.4], f, 0, { pose: 'cross' }); man([cx + 0.6, cz + 1.4], f, 0, { pose: 'cross' });
-    man([cx - 1.05, cz + 1.95], f, 0.4, { pose: 'drum' }); man([cx + 1.05, cz + 1.95], f, -0.4, { pose: 'drum' });
-    man([cx + 1.1, cz - 2.8 + 1.0], f, 0, { pose: 'cross' });
+    for (let r = 0; r < 3; r++) for (const s of [-1, 1]) man([cx + s * 2.6 - 0.3 + rand() * 0.4, cz - 1.0 + r * 1.1 + 0.6], f, 0, { pose: 'cross', nightKeep: NK });
+    man([cx - 1.0, cz - 1.2 + 0.7], f, 0, { pose: 'cross', nightKeep: NK }); man([cx + 1.0, cz - 1.2 + 0.7], f, 0, { pose: 'cross', nightKeep: NK });
+    man([cx - 0.8, cz + 1.4], f, 0, { pose: 'cross', nightKeep: NK }); man([cx + 0.6, cz + 1.4], f, 0, { pose: 'cross', nightKeep: NK });
+    man([cx - 1.05, cz + 1.95], f, 0.4, { pose: 'drum', nightKeep: NK }); man([cx + 1.05, cz + 1.95], f, -0.4, { pose: 'drum', nightKeep: NK });
+    man([cx + 1.1, cz - 2.8 + 1.0], f, 0, { pose: 'cross', nightKeep: NK });
   }
   // the worshippers: kneeling in rows in the inner court facing the merus, in white with the yellow sash; the priest at the front; devotees in the middle court
   const y2 = PURA.y2;
   for (let r = 0; r < 3; r++) for (let k = -5; k <= 5; k++) if (k !== 0 && rand() < 0.7) {   // (the middle of the court is the aisle the visitor walks up: no one kneels in it)
-    const at = [k * 1.5 + (rand() - 0.5) * 0.3, -126 + r * 1.9]; (rand() < 0.5 ? woman : temple)(at, y2, 0, { pose: 'seiza', arms: 'pray', cloth: 'cloth_white', hat: 'none', hair: 'bun' }); }
-  temple([0, -131], y2, 0, { pose: 'seiza', arms: 'pray', hat: 'turban', beard: true });
+    const at = [k * 1.5 + (rand() - 0.5) * 0.3, -126 + r * 1.9]; (rand() < 0.5 ? woman : temple)(at, y2, 0, { pose: 'seiza', arms: 'pray', cloth: 'cloth_white', hat: 'none', hair: 'bun', nightKeep: 0.55 }); }   // (the odalan's prayers go on after dark)
+  temple([0, -131], y2, 0, { pose: 'seiza', arms: 'pray', hat: 'turban', beard: true, nightKeep: 1 });
   // (none stands in the middle lane of the approach, x within 1.5 m of the axis, where the visitor walks up to the inner court)
   const aside = (x) => (Math.abs(x) < 1.5 ? (x < 0 ? -1.5 : 1.5) : x);
   for (let k = 0; k < 7; k++) woman([aside(-20 + rand() * 40), -100 + rand() * 20], PURA.y1, rand() * 6.28, rand() < 0.5 ? { carry: 'basket' } : { pose: 'talk' });
@@ -214,8 +214,8 @@ function people() {
   // the pura dalem: the priest and the women kneeling before the gedong, a man at the gate (the temple turned to face west: local (dx, dz) is world (cx − dz, cz + dx))
   {
     const [cx, cz] = DALEM_C, W2 = (dx, dz) => [cx - dz, cz + dx], fl = 0.4, east = -Math.PI / 2;
-    temple(W2(0, -6.5), fl, east, { pose: 'seiza', arms: 'pray', hat: 'turban', beard: true });
-    for (const dx of [-3, -1.5, 1.5, 3]) woman(W2(dx, -4.5), fl, east, { pose: 'seiza', arms: 'pray', cloth: 'cloth_white', hat: 'none', hair: 'bun' });
+    temple(W2(0, -6.5), fl, east, { pose: 'seiza', arms: 'pray', hat: 'turban', beard: true, nightKeep: 1 });
+    for (const dx of [-3, -1.5, 1.5, 3]) woman(W2(dx, -4.5), fl, east, { pose: 'seiza', arms: 'pray', cloth: 'cloth_white', hat: 'none', hair: 'bun', nightKeep: 0.6 });
     woman(W2(-2, 4.5), fl, rand() * 6, { carry: 'basket' }); man(W2(2.4, 6.0), fl, rand() * 6, { pose: 'talk' });
   }
   // the buffalo pulling the plough in a dry paddy, the plowman behind it, and a boy with the ducks' stick at the water
@@ -241,6 +241,12 @@ function people() {
   E.push({ t: 'cart', kind: 'two', at: [2.1, 58], y: 0, rot: Math.PI, beast: 'ox', load: 'sacks', seed: 77 }); man([0.7, 55.2], 0, 1.2, { pose: 'talk' }); man([-0.4, 56], 0, -1.5, { pose: 'talk' });
   // pilgrims bringing their offerings up the street to the temple: the towers of fruit and flowers on their heads
   [[-2.5, -33], [2.4, -36.5], [-2.6, -40], [2.5, -31.6]].forEach(([x, z], k) => (k % 2 ? woman : man)([x, z], 0, 0, k % 2 ? { carry: 'basket', arms: 'head', cloth: 'cloth_red' } : { carry: 'pole', pose: 'stand' }));
+  // the night's own people, added last so no other figure's seed moves: the watchman by the kulkul tower (a staff), two men sat by the crossing's torches, the priest's helper
+  // kneeling at the padmasana, an old woman by the gong pavilion's lamp
+  man([KULKUL[0] + 2.2, KULKUL[1] + 1.6], 0, 2.2, { pose: 'stand', carry: 'staff', hat: 'turban' });
+  man([2.7, 2.8], 0, -1.9, { pose: 'sit_ground', carry: 'none', nightKeep: 1 }); man([2.8, 4.1], 0, -1.2, { pose: 'sit_ground', carry: 'none', nightKeep: 1 });
+  temple([24.2, -142.6], PURA.y2, 0, { pose: 'seiza', arms: 'pray', nightKeep: 1 });
+  woman([18.2, -100.4], PURA.y1 + 0.5, 0.6, { pose: 'sit_ground', carry: 'none', nightKeep: 1 });
   void TREAD; void KULKUL; void BANYAN;
   return base('bali-people', 'life', [...P, ...E]);
 }
