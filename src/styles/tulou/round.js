@@ -205,6 +205,11 @@ export function tulouRound(el, ctx) {
     bag.add('cloth_red', lbox(c[0], c[1], phi, -hw, GATE_H - 0.5, R + 0.25, hw, GATE_H - 0.2, R + 0.275));
     bag.add('granite_block', lbox(c[0], c[1], phi, -hw - 0.3, 0, R - 0.3, hw + 0.3, 0.14, R + 1.4));
     bag.add('granite_block', lbox(c[0], c[1], phi, -hw - 0.1, 0, R + 1.4, hw + 0.1, 0.07, R + 1.85));
+    // wear where feet went [inferred]: the granite sill dished and polished dark along the way in, a worn patch on each step, the way going slightly off the middle with the hand most used
+    { const o = (rnd(g, 5) - 0.5) * 0.3;
+      bag.add('slate', lbox(c[0], c[1], phi, -0.55 + o, 0.14, R - 0.25, 0.5 + o, 0.146, R + 1.3));
+      bag.add('slate', lbox(c[0], c[1], phi, -0.4 + o, 0.07, R + 1.45, 0.35 + o, 0.076, R + 1.8));
+      bag.add('slate', lbox(c[0], c[1], phi, -1.0 + o * 0.5, 0.14, R + 1.28, 0.9 + o * 0.5, 0.146, R + 1.4)); }
     for (const sg of [-1, 1]) { const q = W(sg * (hw + 0.1), R + 0.9); LF.hang_lantern({ t: 'hang_lantern', at: q, y: hy1 - 0.5, rot: 0, seed: g }, ctx); }
     // the rules of conduct, a board beside the gate [stated: NatGeo], its lines of script
     bag.add('lacquer_black', lbox(c[0], c[1], phi, hw + 0.6, 1.5, R - lean * 0.12, hw + 1.3, 2.4, R + 0.04));
@@ -488,6 +493,7 @@ function ringStair({ bag, col }, g, st, f1) {
     const xa = S.X0 + q * run, ty = (q + 1) * rise;
     J(TIMBER, xa, ty - 0.05, zl, xa + run + 0.03, ty, zh, q * 3);
     J('wood_dark', xa - 0.01, ty - rise, zl, xa + 0.02, ty - 0.05, zh, q * 3 + 1);
+    if (q % 3 !== 2) J('wood_dark', xa + 0.03, ty, zl + 0.3, xa + run - 0.02, ty + 0.006, zh - 0.3, q * 3 + 2);   // the tread worn dark where feet fall
   }
   const r = st.rect(S.X0, zl, S.X1, zh);
   col.ramp(r, 0, f1, s > 0 ? 'e' : 'w');

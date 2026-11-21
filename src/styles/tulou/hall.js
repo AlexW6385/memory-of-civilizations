@@ -20,6 +20,7 @@ export function tulouHall(el, { bag, col, lights }) {
   B('bluestone', -hw - 0.5, PY - 0.01, zb - 0.5, hw + 0.5, PY + 0.01, zf + 0.5);
   B('granite_block', -1.8, 0, zf + 0.5, 1.8, 0.175, zf + 0.95);
   B('granite_block', -1.8, 0, zf + 0.5, 1.8, PY * 0.5, zf + 0.7);
+  B('slate', -0.7, 0.175, zf + 0.58, 0.7, 0.181, zf + 0.9); B('slate', -0.8, PY + 0.011, zf + 0.0, 0.8, PY + 0.016, zf + 0.48);   // the steps and the platform's edge worn dark where feet go up [inferred]
   col.floor([X(-hw - 0.5), Z(zb - 0.5), X(hw + 0.5), Z(zf + 0.5)], PY);
   col.ramp([X(-1.8), Z(zf + 0.5), X(1.8), Z(zf + 0.95)], 0.0, PY, 'n');
   col.rect([X(-hw - 0.5), Z(zf + 0.5), X(-1.85), Z(zf + 0.95)], 0, PY);
