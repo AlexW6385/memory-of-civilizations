@@ -1,7 +1,8 @@
 // Djenné — the animals (src/engine/fauna.js; docs/settlements/djenne.md §14): fish in the channel of the Bani, swallows
 // over the lanes and the water, black kites circling over the market and the town (the scavengers of every Sahel
 // town), egrets and herons standing in the shallows and on the bank, sparrows on the market's ground and the lanes.
-import { RADIUS, ISLAND, LEVEL, MARKET, shore } from './layout.js';
+import { RADIUS, ISLAND, LEVEL, MARKET, SHOPS, shore } from './layout.js';
+import { WELLS, shopAt } from './walk.js';
 
 const ringR = (a) => ISLAND + 14 * Math.sin(a * 3 + 1) + 8 * Math.sin(a * 7 + 2);
 /** Negative in the channel's water (distance from the edge of the water, shore 8–38), positive outside. */
@@ -32,4 +33,16 @@ for (const [x, z] of [[60, -20], [75, 10], [90, -30], [105, 25], [50, 30], [-6.2
 // egrets walking with the zebu herds on the floodplain (town.js plain(): the same three places)
 for (const a0 of [-Math.PI / 2 + 0.2, -Math.PI / 2 - 0.5, Math.PI + 0.3]) { const r = ringR(a0) + 62; for (const d of [-5, 4]) perches.push({ kind: 'egret', x: Math.cos(a0) * r + d, z: Math.sin(a0) * r + d * 0.6, y: -1.2, rot: a0, range: [4, 4], alert: 10 }); }
 void RADIUS; void MARKET;
-export default { fish, flights, perches };
+
+// ── the critters: animals with a rig and behaviour (src/engine/fauna-critters.js; dossier 20.4) ──
+// Dogs lying in the shade at the wells and the market's edge, cats on a shop counter and a facade bench, goats tethered at the wells (they drink and
+// graze: the town's small stock), hens with a rooster in the court house's yard and at the market's south edge, doves on the mosque's platform
+// and before its north door. [inferred: Sahel towns keep exactly these; no source for this town and date]
+const critters = [];
+const [w0, w1, w2] = WELLS;
+critters.push({ model: 'dog', at: [w0[0] + 2.7, 0.02, w0[1] + 1.6], rot: 1.2, range: [9, 3.5] }, { model: 'dog', at: [112.5, 0.02, -8], rot: 0.4, range: [9, 3.5] }, { model: 'dog', at: [w2[0] - 2.4, 0.02, w2[1] - 1.0], rot: 2.2, range: [9, 3.5] });
+critters.push({ model: 'cat_tabby', at: [shopAt(1).c - 1.0, 0.96, SHOPS[3] - 0.5], rot: 3.0, range: [1.0, 0.3] }, { model: 'cat_orange', at: [103.6, 0.5, -45.3], rot: 3.1, range: [1.0, 0.3] });
+critters.push({ model: 'goat_black', at: [w1[0] + 2.2, 0.02, w1[1] + 1.4], rot: 0.6, range: [9, 3.2] }, { model: 'goat_white', at: [w1[0] + 3.0, 0.02, w1[1] + 2.6], rot: 3.0, range: [9, 3.2] }, { model: 'goat_white', at: [w0[0] + 3.4, 0.02, w0[1] - 1.0], rot: 1.8, range: [9, 3.2] });
+for (const [x, z, m] of [[105.5, -55.5, 'hen_brown'], [106.4, -55.0, 'hen_white'], [104.8, -54.6, 'hen_brown'], [106.0, -56.4, 'rooster'], [70, 43.5, 'hen_brown'], [71, 44.2, 'hen_white'], [69.6, 44.4, 'rooster']]) critters.push({ model: m, at: [x, 0.02, z], rot: x * 3, range: [2.2, 1.8] });
+for (const [x, z, m] of [[12, -34, 'pigeon_grey'], [13.1, -34.8, 'pigeon_white'], [10.8, -33.6, 'pigeon_grey'], [18, -33, 'pigeon_white'], [4, 36, 'pigeon_grey'], [5.2, 35, 'pigeon_grey']]) critters.push({ model: m, at: [x, 3.05, z], rot: x * 3, range: [1.4, 1.2] });
+export default { fish, flights, perches, critters };
