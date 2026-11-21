@@ -36,6 +36,24 @@ const rooms = [
 ];
 const walks = [[[0, 170], [0, hz + HILL.ditch + 10], [0, hz + 60], [0, hz + HILL.tihi - 4]]];
 walks[0].y0 = 0;
+// the visitor's walk (docs/settlements/maori.md §4i): from the way in before each of the houses nearest the arrival, through its door to the hearth
+// (the door left of centre in the front wall, the hearth in the middle of the room: the same numbers as `whare` in src/styles/maori/index.js)
+export const DOORS = [];
+{
+  const ARR = [0, 33], hh = v.houses.slice(1).filter((h) => (h.rank || 0) <= 1 && h.w >= 3);
+  hh.sort((p, q) => Math.hypot(p.c[0] - ARR[0], p.c[1] - ARR[1]) - Math.hypot(q.c[0] - ARR[0], q.c[1] - ARR[1]));
+  for (const h of hh.slice(0, 10)) {
+    const ca = Math.cos(h.yaw), sa = Math.sin(h.yaw), W2 = (x, z) => [h.c[0] + x * ca + z * sa, h.c[1] - x * sa + z * ca];
+    const zf = -h.l / 2 + 1.6, dx = -h.w * 0.18 - 0.32 + 0.475, zm = (zf + 0.3 + h.l / 2 - 0.35) / 2;
+    const r = [W2(dx, zf - 3), W2(dx, zf - 0.6), W2(dx, zf + 0.6), W2(dx, zm - 0.9)];
+    r.y0 = h.y ?? height(h.c[0], h.c[1]);
+    DOORS.push({ c: h.c, door: W2(dx, zf) });
+    walks.push(r);
+  }
+  // the chief's carved house: its door, then down the room
+  { const h = H0, ca = Math.cos(h.yaw), sa = Math.sin(h.yaw), W2 = (x, z) => [h.c[0] + x * ca + z * sa, h.c[1] - x * sa + z * ca], zf = -h.l / 2 + 1.6, dx = -h.w * 0.18 - 0.32 + 0.475;
+    const r = [W2(dx, zf - 3), W2(dx, zf - 0.6), W2(dx, zf + 0.6), W2(dx, zf + 2.5)]; r.y0 = HILL.top; DOORS.push({ c: h.c, door: W2(dx, zf) }); walks.push(r); }
+}
 
 export const pa = {
   id: 'maori-pa',
