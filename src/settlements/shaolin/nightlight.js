@@ -150,6 +150,11 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     const [x, z] = el.at, s = el.s ?? 1, y = el.y ?? 0;
     H.ball(x, y + 1.72 * s, z, 0.62 * s); H.floor(x, y + 0.04, z, 1.5 * s, 1.5 * s, 8, 0.6);
   }
+  if (name === 'shaolin_gear' && el.kind === 'wayshrine') {
+    // the little lamp in the shrine's niche, and the sill's offerings lit by it
+    const [x, z] = el.at, s = el.s ?? 1, y = el.y ?? 0, rot = el.rot ?? 0, ox = Math.sin(rot) * 0.6 * s, oz = Math.cos(rot) * 0.6 * s;
+    H.ball(x + ox, y + 0.62 * s, z + oz, 0.5 * s, 0.55); H.floor(x + ox * 1.6, y + 0.04, z + oz * 1.6, 1.3 * s, 1.1 * s, 7, 0.5);
+  }
   H.flush(ctx.bag);
   return r;
 };
