@@ -146,3 +146,13 @@ The map places each sound where it is made, by hour, season and weather; all voi
 - **Out of doors:** the axe at the woodpiles of every second farm; linen washed at the bank where the dossier's washers are; the mooring rope and strakes creaking at the landing; swallows in the yards and over the church, hooded crows about the church and the slope, sparrows in the yards; the owl on the wooded sides in the short dark; frogs in the wet meadows in spring. Walkers go on the trodden tracks from the farms to the church's gate by day, and a packhorse from the landing [inferred: goods came up from the fjord on packhorse, see "The landing" above].
 - **Left silent:** no market, no street hawkers, no night watch, no canal, no well (a third of the yards have one built; none is given a sound) — Borgund is a scatter of farms [stated: §5].
 - **Measured** with tools/sound-render.mjs (offline render; nothing heard): chant — energy mostly 100–1000 Hz, centroid 0.5 kHz; kulning — 0.8–3 kHz, centroid 1.0 kHz; river — broadband, 6% below 300 Hz and 27% above 3 kHz; loom — dull beats, 70% below 300 Hz, four onsets in a minute's phrase.
+
+### R6.4 Animals with behaviour (`fauna.js` `critters`, tests/norse-borgund-critters.test.mjs)
+One mesh, one draw (src/engine/fauna-critters.js). The dossier names horses and cattle first, then sheep, goats and pigs, and dogs often [stated: Landslov exhibition, University of Bergen]; goats and cows were milked at the summer farms [stated: same]. Cats, hens, geese, mallards and swallows' nests are [inferred: the usual animals of a Norwegian valley farm; no source lists Borgund's]. The engine's rigged models have no cattle, horses, sheep or pigs: those stay the life figures'.
+- Dogs lying beside the door of each of the eight dwellings nearest the arrival, on the side away from the cleared lane; they lift their heads and stand when the visitor comes near.
+- Cats, the barns' mousers, on the far side of six barn doorsteps (tabby and orange).
+- A cock and two hens scratching in the yard of each of the six nearest farms.
+- Three geese on the grass of the river's bank at the landing; three mallards on the slack water above the landing (floaters, drifting in a loop that stays on the water).
+- Three goats (white and black) at each of the three summer huts.
+- Swallows' mud nests under the eaves of every second barn near the arrival (four), on the wall away from the door, the birds sallying out over the yard and home again.
+- The existing fauna stays: trout, swallows, crows, sparrows, herons.
