@@ -41,6 +41,11 @@ export async function town() {
     // cross bands (the fields are squares of brick between the bands) and a stone kerb along the edge [inferred: the layout of the fields]
     for (let z = r[1] + 4.5; z < r[3] - 2; z += 9) pave.push({ t: 'floor', rect: [r[0], z - 0.2, r[2], z + 0.2], y: GROUND + 0.04, th: 0.1, mat: 'limestone' });
   }
+  // the ground south of the Campanile and along the west side of the Piazzetta, bare earth before: the same brick, a band of stone every 9 m [inferred: the Piazzetta's paving ran on there]
+  for (const r of [[0, PIAZZA[3], PIAZZETTA[0], PIAZZA[3] + 4], [11, PIAZZA[3] + 4, PIAZZETTA[0], PIAZZETTA[3]]]) {
+    pave.push({ t: 'floor', rect: r, y: GROUND + 0.03, th: 0.1, mat: 'cotto_floor' });
+    for (let z = r[1] + 4.5; z < r[3] - 2; z += 9) pave.push({ t: 'floor', rect: [r[0], z - 0.2, r[2], z + 0.2], y: GROUND + 0.04, th: 0.1, mat: 'limestone' });
+  }
   pave.push({ t: 'floor', rect: [MERCERIA_ST[0], MERCERIA_ST[1], MERCERIA_ST[2], MERCERIA_ST[3]], y: GROUND + 0.03, th: 0.1, mat: 'cotto_floor' });
   pave.push({ t: 'floor', rect: [(MERCERIA_ST[0] + MERCERIA_ST[2]) / 2 - 0.25, MERCERIA_ST[1], (MERCERIA_ST[0] + MERCERIA_ST[2]) / 2 + 0.25, MERCERIA_ST[3]], y: GROUND + 0.035, th: 0.1, mat: 'bluestone' });
   plans.push(base('venice-piazza-paving', pave));

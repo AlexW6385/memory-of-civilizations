@@ -32,6 +32,16 @@ export function rive(el, { bag }) {
     P(-h, sea + 1.55, -0.8, h, top - 0.2, 0, 'brick');
     P(-h, top - 0.2, -0.6, h, top + 0.04, 0.13, 'limestone');             // the coping
     P(-h, top - 0.6, -2.3, h, top + 0.02, -0.6, 'bluestone');             // the walk's trachyte paving back over the bank to the ground
+    // rope grooves in the coping of the Molo where the boats were made fast: a dark scar over the edge, a few to each piece, at places of its own [inferred]
+    const wr = el.worn;
+    if (wr && x > wr[0] && x < wr[2] && z > wr[1] && z < wr[3] && wz > 0.9) {
+      const hh = (k) => { const q = Math.sin((x * 12.9898 + z * 78.233 + k * 37.719)) * 43758.5453; return q - Math.floor(q); };
+      for (let k = 0; k < 2; k++) {
+        const u = -h + 0.45 + hh(k) * (2 * h - 0.9), wd = 0.05 + 0.03 * hh(k + 5);
+        P(u, top + 0.04, -0.3, u + wd, top + 0.046, 0.13, 'bluestone');              // across the coping's top, to the arris
+        P(u, top - 0.13, 0.13, u + wd, top + 0.046, 0.136, 'bluestone');             // down the face a hand's breadth, where the rope bit
+      }
+    }
   }
 }
 
