@@ -654,7 +654,7 @@
  },
  "baroque-rome-stpeter": {
   "site": "baroque-rome",
-  "hash": "1000584d2f67ee06",
+  "hash": "2c5bb3ebe8d39e6f",
   "rays": 128,
   "probes": 73584,
   "boxes": [
@@ -675,9 +675,9 @@
     ]
    }
   ],
-  "bytes": 1143347,
-  "seconds": 1001,
-  "baked": "2026-11-20"
+  "bytes": 1143399,
+  "seconds": 334,
+  "baked": "2026-11-21"
  },
  "bauhaus-school": {
   "site": "bauhaus-dessau",
@@ -1388,7 +1388,7 @@
  },
  "edo-himeji-castle": {
   "site": "edo-himeji",
-  "hash": "427d0fdff4c89fa4",
+  "hash": "169b02fb4732be0e",
   "rays": 128,
   "probes": 77299,
   "boxes": [
@@ -1467,9 +1467,9 @@
     ]
    }
   ],
-  "bytes": 1245764,
-  "seconds": 232,
-  "baked": "2026-11-20"
+  "bytes": 1245800,
+  "seconds": 1072,
+  "baked": "2026-11-21"
  },
  "fez-bou-inania": {
   "site": "fez",
@@ -1751,7 +1751,7 @@
    }
   ],
   "bytes": 489852,
-  "seconds": 376,
+  "seconds": 522,
   "baked": "2026-11-21"
  },
  "granada-alhambra": {
@@ -2486,7 +2486,7 @@
    }
   ],
   "bytes": 16015,
-  "seconds": 12,
+  "seconds": 10,
   "baked": "2026-11-21"
  },
  "karakorum-palace": {
@@ -2529,7 +2529,7 @@
    }
   ],
   "bytes": 209550,
-  "seconds": 178,
+  "seconds": 112,
   "baked": "2026-11-21"
  },
  "khajuraho-temples": {
@@ -3379,7 +3379,7 @@
  },
  "mughal-agra-taj": {
   "site": "mughal-agra",
-  "hash": "e0866afe093e193e",
+  "hash": "50c8b427ac19755b",
   "rays": 128,
   "probes": 77348,
   "boxes": [
@@ -3481,9 +3481,9 @@
     ]
    }
   ],
-  "bytes": 1289053,
-  "seconds": 163,
-  "baked": "2026-11-20"
+  "bytes": 1289019,
+  "seconds": 791,
+  "baked": "2026-11-21"
  },
  "muromachi-ginkaku": {
   "site": "muromachi-kyoto",
