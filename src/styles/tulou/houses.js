@@ -124,7 +124,7 @@ export function hakkaHouse(el, ctx) {
     B('wood_dark', hx - 0.3, 1.9, hz + 1.17, hx - 0.15, 4.2, hz + 1.2); B('lacquer_black', hx - 1.0, 3.0, hz + 1.21, hx - 0.35, 4.15, hz + 1.25); B('gilt_bronze', hx - 0.85, 3.2, hz + 1.25, hx - 0.75, 4.0, hz + 1.265);
   }
   right[(sd >> 2) % 3]();
-  if (kind === 1) shopFit(ctx, { cx, cz, phi, hx, hz, sd, trade: el.trade ?? ['tobacco', 'tea', 'wine', 'pickles'][Math.floor(sd / 4) % 4], W });
+  if (kind === 1) shopFit(ctx, { cx, cz, phi, hx, hz, sd, nokeeper: true, trade: el.trade ?? ['tobacco', 'tea', 'wine', 'pickles'][Math.floor(sd / 4) % 4], W });
   if (kind === 2) {
     const P = (x0, x1, y0, y1) => B('lime_plaster_rough', x0, y0, hz + 0.03, x1, y1, hz + 0.045);
     P(-hx + 0.02, -2.8, 0.7, topF); P(2.8, hx - 0.02, 0.7, topF); P(-1.9, -dw - 0.1, 0.7, topF); P(dw + 0.1, 1.9, 0.7, topF);

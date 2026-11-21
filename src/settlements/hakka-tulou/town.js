@@ -86,6 +86,11 @@ export async function town() {
     if (hill(x, z) < 6 || inFoot(x, z, 2)) continue;
     woman([x, z], y, rand() * 6.28, { hat: 'straw', carry: 'basket', cloth: 'cloth_indigo' });
   }
+  // the shop-houses' keepers behind their counters (a woman at the tea and the greens, a man at the wine and the tobacco), facing the road
+  for (const h of HOUSES) if (isShop(h)) {
+    const t = tradeOf(h), W = (x, z) => { const c = Math.cos(h.yaw), sn = Math.sin(h.yaw); return [h.c[0] + x * c + z * sn, h.c[1] - x * sn + z * c]; };
+    (t === 'tea' || t === 'pickles' ? woman : man)(W(-2.3, h.d / 2 + 0.2), 0, h.yaw + Math.PI, { pose: 'stand', carry: 'none', hat: t === 'tea' || t === 'pickles' ? 'none' : 'cap', cloth: t === 'tea' || t === 'pickles' ? 'cloth_indigo' : 'cloth_black' });
+  }
   // the hamlet's people: an elder or a woman on the porch bench, a child at the door, the offering at the shrine, washers on the steps
   const fo = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
   HOUSES.forEach((h, k) => {

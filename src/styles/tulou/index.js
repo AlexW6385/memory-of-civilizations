@@ -12,3 +12,5 @@ registerStyle('tulou', {
   elements: { ...STYLES.life.elements, ...STYLES.qing.elements, tulou_ring: tulouRound, tulou_hall: tulouHall, tulou_enclosure: tulouSquare, farmhouse, slab_bridge: slabBridge, track, hakka_house: hakkaHouse, earth_shrine: earthShrine, noria, wash_steps: washSteps, veg_plot: vegPlot },
   objects: {},
 });
+import { registerNight } from './nightlight.js';
+registerNight();
