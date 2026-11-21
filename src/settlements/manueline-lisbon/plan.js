@@ -17,6 +17,19 @@ function orangeGrove() {
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) for (const [u, v] of [[8, 8], [15, 8], [8, 15], [15, 15], [12, 11.5]]) out.push({ t: 'orange_tree', at: [cx + sx * u, cz + sz * v], y: g, seed: 100 + out.length, h: 3.4 + (out.length % 4) * 0.35 });
   return out;
 }
+/** The worn flags before the portal: single slabs (1.2 x 0.8 m) of the palette's paler `plaster_damp`, thinning out with the distance, each a hair higher than its neighbour (no two share a plane). */
+function wornFlags() {
+  const out = [], hs = (a, b) => { let k = Math.imul(Math.round(a * 4) * 73856093 ^ Math.round(b * 4) * 19349663, 1274126177); k ^= k >>> 15; return (k >>> 0) / 4294967296; };
+  for (let z = 44.8; z < 64; z += 0.8) {
+    const hw = Math.max(0.6, 2.8 - (z - 44.8) * 0.12), keep = 1 - (z - 44.8) / 26;
+    for (let x = PORTAL_X - hw; x < PORTAL_X + hw - 0.5; x += 1.2) {
+      if (hs(x, z) > keep) continue;
+      const w = 1.0 + hs(x, z + 1) * 0.15;
+      out.push({ t: 'floor', rect: [x + 0.05, z + 0.03, x + w, z + 0.72], y: g + 0.012 + hs(z, x) * 0.012, th: 0.03, mat: 'plaster_damp', walk: false });
+    }
+  }
+  return out;
+}
 const CF = churchFrame(CHURCH), KF = cloisterFrame(CLOISTER);
 const [X0, Z0, X1, Z1] = CLOISTER;
 const rings = [[X0, Z0, X1, Z0 + 7], [X0, Z1 - 7, X1, Z1], [X0, Z0 + 7, X0 + 7, Z1 - 7], [X1 - 7, Z0 + 7, X1, Z1 - 7]];
@@ -70,6 +83,8 @@ export const jeronimos = {
   elements: [
     { t: 'floor', rect: PLAZA, y: g, th: 0.3, mat: 'flagstone' },
     { t: 'jeron_church', rect: CHURCH, y: g, portalX: PORTAL_X },
+    // the way the pilgrims' feet have worn to the portal: slightly paler, polished slabs, narrowing from the porch out across the plaza (docs §14.4)
+    ...wornFlags(),
     { t: 'cloister', rect: CLOISTER, y: g },
     ...orangeGrove(),
     { t: 'range', rect: [MONASTERY[0], MONASTERY[1], MONASTERY[2] - 0, CLOISTER[1] - 0.0], y: g, h: 12 },
