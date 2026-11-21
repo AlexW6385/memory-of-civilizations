@@ -8,7 +8,7 @@
 // no Math.random). The method is that of the Suzhou reference; nothing of Suzhou's is imported.
 import '../../styles/dunhuang/index.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { lathe } from '../../core/geom.js';
+import { lathe, box } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { frame } from '../../styles/dunhuang/town.js';
 import { doorU } from '../../styles/dunhuang/homes.js';
@@ -114,6 +114,26 @@ function caveGlows(H) {
   }
 }
 
+/** Stone lamp-posts along the apron (a lamp of oil in a pierced stone lantern; the monks lit the way along the cliff foot [inferred]): one every 14 m, off the walk's lines and the cave doors. */
+const KEEP = [0, -30, -52, 45, -26.5, 26, -90, 72, 96];
+function apronLamps(H, bag) {
+  const x = XF + 5.2, y = FLOOR[0];
+  for (let z = -126; z <= 126; z += 14) {
+    const zz = z + Math.round((hashAt(x, z, 9) - 0.5) * 4);
+    if (KEEP.some((k) => Math.abs(k - zz) < 4.5) || (zz < -100 && zz > -140)) continue;
+    bag.add('limestone', box(x - 0.2, y, zz - 0.2, x + 0.2, y + 0.35, zz + 0.2));
+    bag.add('limestone', box(x - 0.09, y + 0.35, zz - 0.09, x + 0.09, y + 1.15, zz + 0.09));
+    bag.add('limestone', box(x - 0.2, y + 1.15, zz - 0.2, x + 0.2, y + 1.22, zz + 0.2));
+    bag.add('limestone', box(x - 0.2, y + 1.22, zz - 0.2, x - 0.15, y + 1.55, zz + 0.2));
+    bag.add('limestone', box(x + 0.15, y + 1.22, zz - 0.2, x + 0.2, y + 1.55, zz + 0.2));
+    bag.add('limestone', box(x - 0.15, y + 1.22, zz - 0.2, x + 0.15, y + 1.55, zz - 0.15));
+    bag.add('limestone', box(x - 0.15, y + 1.22, zz + 0.15, x + 0.15, y + 1.55, zz + 0.2));
+    bag.add('limestone', box(x - 0.27, y + 1.55, zz - 0.27, x + 0.27, y + 1.63, zz + 0.27));
+    bag.add('flame', lathe([[0.001, 0], [0.03, 0.04], [0.001, 0.16]], 5, null, x, y + 1.24, zz));
+    H.ball(x, y + 1.38, zz, 0.75, 0.7); H.floor(x, y + 0.03, zz, 3.6, 3.6, 10, 0.6);
+  }
+}
+
 let depth = 0;
 const FLOORS = FLOOR;
 /** Wrap one element builder: the halo of every light it adds, the lit windows, the spill of a door, and the lights of the places the style does not light by itself. */
@@ -133,7 +153,7 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     const f = frame(el.rect, el.front), W = f.W, du = doorU(W, !!el.trade, rng((el.seed || 1) * 7 + 3)()), [px, pz] = f.P(du, -1.1);
     if (hashAt(px, pz, 5) < (el.trade ? 0.55 : 0.3)) H.floor(px, 0.06, pz, 2.2, 1.6, 8, 0.6);
   }
-  if (cliff) caveGlows(H);
+  if (cliff) { caveGlows(H); apronLamps(H, ctx.bag); }
   if (name === 'dh_gate') { const [cx, cz] = el.at ?? [GATE.x, GATE.z]; H.ball(cx - 3.2, 3.5, cz, 0.6, 0.6); H.floor(cx - 3.2, 0.075, cz, 3.2, 2.6, 10, 0.5); }
   if (name === 'dh_serai') { const gx = (el.x0 + el.x1) / 2; H.ball(gx, 3.3, el.z0 + 1.7, 0.6, 0.6); H.floor(gx, 0.075, el.z0 + 1.7, 3.0, 2.4, 10, 0.5); H.ball(gx, 1.1, (el.z0 + el.z1) / 2 + 2.5, 0.5, 0.5); }
   H.flush(ctx.bag);

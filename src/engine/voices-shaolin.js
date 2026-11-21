@@ -21,9 +21,9 @@ export const SL_VOICES = {
       for (let k = 0, n = 5 + Math.floor(R() * 4); k < n; k++) {
         const x = w + k * 0.52;
         this.cue(x, (y) => {
-          this.burst(y, 0.14, 1700 + R() * 600, 0.8, 0.012 * lv, bus, 0.06);
-          this.knock(y + 0.13, 1250 + R() * 250, 0.03 * lv, bus, 0.06);
-          this.tone(y + 0.13, [[0, 100], [0.08, 52]], 0.12, 0.03 * lv, bus, 'sine');
+          this.burst(y, 0.14, 1700 + R() * 600, 0.8, 0.026 * lv, bus, 0.06);
+          this.knock(y + 0.13, 1250 + R() * 250, 0.045 * lv, bus, 0.06);
+          this.tone(y + 0.13, [[0, 120], [0.08, 64]], 0.12, 0.014 * lv, bus, 'sine');
         });
       }
       this.cue(w + 0.1, (y) => this.tone(y, [[0, 210], [0.14, 160]], 0.2, 0.022 * lv, bus, 'sawtooth', ['bandpass', 900, 1.5]));
@@ -36,7 +36,7 @@ export const SL_VOICES = {
     let w = t;
     for (let k = 0, n = 10 + Math.floor(R() * 8); k < n; k++) {
       const x = w;
-      this.cue(x, (y) => { this.tone(y, [[0, 120], [0.1, 44]], 0.28, 0.05 * lv, bus, 'sine'); this.burst(y, 0.05, 420, 0.9, 0.02 * lv, bus); });
+      this.cue(x, (y) => { this.tone(y, [[0, 150], [0.1, 58]], 0.28, 0.04 * lv, bus, 'sine'); this.burst(y, 0.07, 520, 0.9, 0.05 * lv, bus); });
       w += k % 4 === 3 ? 1.5 : 0.78;
     }
     return w - t + 1;
@@ -46,7 +46,7 @@ export const SL_VOICES = {
     let w = t;
     for (let k = 0, n = 2 + Math.floor(R() * 4); k < n; k++) {
       const f = 1700 + R() * 900, x = w;
-      this.cue(x, (y) => this.struck(y, f, 0.012 * lv, bus, [[1, 1, 1.7], [2.76, 0.35, 0.8], [5.4, 0.12, 0.35]]));
+      this.cue(x, (y) => this.struck(y, f, 0.02 * lv, bus, [[1, 1, 1.7], [2.76, 0.35, 0.8], [5.4, 0.12, 0.35]]));
       w += 0.35 + R() * 1.3;
     }
     return w - t + 1.8;

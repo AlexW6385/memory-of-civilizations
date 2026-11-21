@@ -8,7 +8,7 @@ STYLES.life.elements.sl_fronttrim = slFronttrim;
 STYLES.life.elements.sl_shop = slShop;
 import { PAL_HOUSE } from '../../styles/shaolin/index.js';
 import { HOUSES, YARDS, GAP, AXIS, PLAT, HGT, RANGES, CELL, RADIUS, rng } from './layout.js';
-import { walkRoutes } from './walk.js';
+import { walkRoutes, openedHouses } from './walk.js';
 import { streetHalo } from './nightlight.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 165], facing: 'n' } });
@@ -103,6 +103,10 @@ function village() {
     const z0 = north ? q[1] : q[3], z1 = back;
     wallOnce([q[0], z0], [q[0], z1]); wallOnce([q[2], z0], [q[2], z1]);
   }
+  // worn doorsteps at the houses of the walk (dossier 12.3); the village's earth-god shrine at the crossing, a mill at the south end of the approach
+  openedHouses().forEach(({ h }) => { const F = frontOf(h), p = F.P(0.5, 0.25); E.push({ t: 'shaolin_gear', kind: 'doorstep', at: p, y: 0.02, rot: F.rot, w: 1.5, seed: h.seed }); });
+  E.push({ t: 'shaolin_gear', kind: 'wayshrine', at: [8.5, 151.2], y: 0.02, rot: 0, s: 1.25, seed: 4 }, { t: 'shaolin_gear', kind: 'offering', at: [8.5, 152.5], y: 0.02, rot: 0, s: 0.8 });
+  E.push({ t: 'shaolin_gear', kind: 'millstone', at: [8.8, 187], y: 0.0, rot: 0, s: 1 });
   // the street: a strip of worn bluestone down the middle of the village street, the approach's shoulders and the processional way across the plaza
   E.push({ t: 'paving', rect: [-88, 153.4, 88, 156.6], y: 0.02, th: 0.3, mat: 'bluestone' });
   E.push({ t: 'paving', rect: [-5.2, 152, -4, 190], y: 0.02, th: 0.3, mat: 'bluestone' });
@@ -159,7 +163,9 @@ function frontLife() {
   for (const sx of [-1, 1]) { L.push({ t: 'bench', at: [sx * 7.6, 149.5], y: 0.02, rot: Math.PI / 2, seed: sd() }); L.push({ t: 'handcart', at: [sx * 9, 139], y: 0.02, rot: sx * 0.4, load: pick(['baskets', 'crates', 'sacks']), seed: sd() }); }
   // the leading line to the gate: paper lamps on posts down both sides of the processional way, a hitching place for the pilgrims' mounts at the plaza's
   // south corners (a trough, the donkeys tied, their drivers squatting by them: the people are in town())
-  for (const sx of [-1, 1]) for (const z of [135, 141.5, 148]) L.push({ t: 'lantern', at: [sx * 4.4, z], y: 0.02, kind: 'paper', h: 2.6 });
+  for (const sx of [-1, 1]) for (const z of [135, 141.5, 148, 153.5, 158.5]) L.push({ t: 'lantern', at: [sx * 4.4, z], y: 0.02, kind: 'paper', h: 2.6 });
+  // night near the visitor (dossier 12.1): a paper lantern on a post at the open end of each plaza stall, so the stalls' goods and keepers are lit
+  for (const sx of [-1, 1]) for (const z of [133.5, 138, 142.5, 147]) L.push({ t: 'lantern', at: [sx * 12.9, z + 1.7], y: 0.02, kind: 'paper', h: 2.6 });
   for (const sx of [-1, 1]) { L.push({ t: 'trough', at: [sx * 11.6, 150.2], y: 0.02, rot: Math.PI / 2, seed: sd() }); L.push({ t: 'animal', kind: 'donkey', at: [sx * 12.6, 149.0], y: 0.02, rot: sx * 1.2, gear: true, graze: false, seed: sd() }); L.push({ t: 'animal', kind: 'donkey', at: [sx * 10.6, 149.6], y: 0.02, rot: -sx * 1.5, gear: false, graze: false, seed: sd() }); }
   // beasts: donkeys in carts and with packs on the approach and the street, dogs, an ox cart, goats
   L.push({ t: 'cart', kind: 'two', beast: 'donkey', load: 'sacks', at: [-9, 170], y: 0, rot: 0.15, seed: 5 });
@@ -245,6 +251,11 @@ export async function town() {
   for (const [x, z] of [[-0.2, 140.2], [1.0, 139.4], [-2.1, 139.6]]) mk(rand() < 0.5 ? man : woman, [x, z], 0.02, 0.3 + rand() * 0.4, { pose: 'talk' });
   mk(man, [-12.0, 145.8], 0.02, Math.PI / 2, { pose: 'sit_ground', cloth: 'cloth_brown', hat: 'none' });
   mk(man, [11.4, 146.4], 0.02, -Math.PI / 2, { pose: 'sit', cloth: 'cloth_grey' }); fl.add({ t: 'tea_table', at: [12.4, 146.4], c: [12.4, 146.4], r: 0.7, y: 0.02, rot: Math.PI / 2, seed: 17 });
+  // a roadside tea stall at the crossing (teaware on the table, a kettle man, a table and stools by the street's edge); a porter resting at it
+  fl.add({ t: 'stall', at: [-7.8, 149.6], y: 0.02, rot: 0, w: 2.6, d: 1.1, awning: 'cloth_indigo', goods: ['pottery'], seed: 29 });
+  fl.add({ t: 'tea_table', at: [-8.0, 152.5], c: [-8.0, 152.5], r: 0.7, y: 0.02, rot: 0, seed: 31 });
+  fl.add({ t: 'lantern', at: [-9.5, 151.5], y: 0.02, kind: 'paper', h: 2.6 });
+  mk(man, [-7.8, 148.1], 0.02, Math.PI, { pose: 'stand', arms: 'hang' }); mk(man, [-8.0, 153.55], 0.02, 0, { pose: 'sit', cloth: 'cloth_brown', hat: 'straw' });
   for (const sx of [-1, 1]) { mk(man, [sx * 14.2, 150.4], 0.02, sx * 2.0, { pose: 'squat', cloth: 'cloth_brown', hat: 'straw', dress: 'trousers' }); }
   // each shop keeper stands or sits at his door (a third of the shops), a woman sweeps before every fifth house
   HOUSES.forEach((h, i) => {
