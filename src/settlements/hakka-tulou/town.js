@@ -3,6 +3,7 @@
 // its people — farmers, women with the broad straw hat, children, elders at the hall — and animals.
 import { RADIUS, NEIGHBOURS, FARMS, YARD, STREAM, streamZ, inStream, T, rng, polar, inFoot, hill, HOUSES, SHRINES, NORIA, WASH_STEPS, PLOTS, furnishRing } from './layout.js';
 import { ground } from './ground.js';
+import { isShop, tradeOf } from './walk.js';
 import './../../styles/tulou/index.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 40], facing: 'n' } });
@@ -45,7 +46,7 @@ export async function town() {
 
   // the hamlet: the rows of houses round the yard and along the road, the shrines, the noria, the washing steps, the gardens
   const rectOf = (h) => { const q = Math.abs(Math.sin(h.yaw)) > 0.5, a = (q ? h.d : h.w) / 2 + 1.5, b = (q ? h.w : h.d) / 2 + 1.5; return [h.c[0] - a, h.c[1] - b, h.c[0] + a, h.c[1] + b]; };
-  for (const h of HOUSES) V.push({ t: 'hakka_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, seed: h.seed, rect: rectOf(h) });
+  for (const h of HOUSES) V.push({ t: 'hakka_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, seed: h.seed, trade: isShop(h) ? tradeOf(h) : undefined, rect: rectOf(h) });
   for (const [x, z, r] of SHRINES) V.push({ t: 'earth_shrine', at: [x, z], rot: r, y: ground.height(x, z), rect: [x - 2, z - 2, x + 2, z + 2] });
   { const zc = streamZ(NORIA.x); V.push({ t: 'noria', x: NORIA.x, zc, r: NORIA.r, axle: NORIA.axle, rect: [NORIA.x - 4, zc - 8, NORIA.x + 4, zc + 5] }); }
   for (const [x] of WASH_STEPS) { const z = streamZ(x); V.push({ t: 'wash_steps', x, z, rect: [x - 2, z - 5, x + 3, z - 2] }); }
@@ -85,6 +86,11 @@ export async function town() {
     if (hill(x, z) < 6 || inFoot(x, z, 2)) continue;
     woman([x, z], y, rand() * 6.28, { hat: 'straw', carry: 'basket', cloth: 'cloth_indigo' });
   }
+  // the shop-houses' keepers behind their counters (a woman at the tea and the greens, a man at the wine and the tobacco), facing the road
+  for (const h of HOUSES) if (isShop(h)) {
+    const t = tradeOf(h), W = (x, z) => { const c = Math.cos(h.yaw), sn = Math.sin(h.yaw); return [h.c[0] + x * c + z * sn, h.c[1] - x * sn + z * c]; };
+    (t === 'tea' || t === 'pickles' ? woman : man)(W(-2.3, h.d / 2 + 0.2), 0, h.yaw + Math.PI, { pose: 'stand', carry: 'none', hat: t === 'tea' || t === 'pickles' ? 'none' : 'cap', cloth: t === 'tea' || t === 'pickles' ? 'cloth_indigo' : 'cloth_black' });
+  }
   // the hamlet's people: an elder or a woman on the porch bench, a child at the door, the offering at the shrine, washers on the steps
   const fo = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
   HOUSES.forEach((h, k) => {
@@ -102,8 +108,7 @@ export async function town() {
   for (const [x, z, r] of SHRINES) { const at = [x + 1.5 * Math.sin(r), z + 1.5 * Math.cos(r)]; woman(at, ground.height(at[0], at[1]), fo(at, [x, z]), { pose: 'kneel', carry: 'none' }); }
   WASH_STEPS.forEach(([x], k) => { const sz = streamZ(x); for (let q = 0; q < 2; q++) woman([x - 0.35 + q * 0.7, sz - 3.2 + 0.15], -0.58, 0, { pose: 'squat', hat: q ? 'straw' : 'none', carry: 'none' }); P.push({ t: 'basket', at: [x + 1.3, sz - 3.7], y: -0.3, n: 2, seed: k + 20 }); });
   for (const x of [-44, 52]) { const z = streamZ(x) - 3.2; man([x, z], ground.height(x, z), Math.PI, { hat: 'straw', carry: 'rope', pose: 'stand' }); }
-  // ducks on the stream, a farmer with the buffalo by the road, a pedlar with his pole and baskets, children at the bridge
-  for (const x of [-52, -24, 20, 36, 62]) F.push({ t: 'chickens', kind: 'duck', n: 4 + Math.floor(rand() * 3), at: [x, streamZ(x) + (rand() - 0.5) * 2], y: STREAM.water - 0.02, rot: rand() * 6.28, seed: Math.round(x) + 90 });
+  // (the ducks on the stream are the critters' floaters, fauna.js; a farmer with the buffalo by the road, a pedlar with his pole and baskets, children at the bridge)
   man([2.4, 66], 0, Math.PI, { hat: 'straw', carry: 'pole', cloth: 'cloth_indigo' }); woman([-2.2, 74.6], 0, 0.4, { carry: 'basket' });
   for (let k = 0; k < 3; k++) L.push({ t: 'figure', at: [3.2 + k * 0.7, 76.5 + (k % 2)], y: 0, rot: 3.3 + k, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: ['cloth_red', 'cloth_blue', 'cloth_white'][k], cloth2: 'cloth_indigo', over: 'none', skin: 'skin_medium', hat: 'none', hair: 'short', h: 0.62 + k * 0.04, feet: 'shod' });
   // the courts of the neighbouring tulou: trays, washing, hens, a well, the people of the house

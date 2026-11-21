@@ -424,6 +424,8 @@ function ring2(el, ctx) {
       bag.add(TIMBER, plank(f0, at(d0), 0, f1, 0.08)); bag.add(TIMBER, plank(at(d1), f1p, 0, f1, 0.08)); bag.add(TIMBER, plank(at(d0), at(d1), 2.1, f1, 0.08));
       col.segment(f0, at(d0), 0.08, 0, f1); col.segment(at(d1), f1p, 0.08, 0, f1);
       for (const q of [at(d0), at(d1)]) bag.add('wood_dark', box(q[0] - 0.045, 0, q[1] - 0.045, q[0] + 0.045, 2.1, q[1] + 0.045));
+      // the ground room, furnished (docs §4.8, §11: the inner ring's school and guest rooms): guest bedrooms, sitting rooms with the tea table, tool rooms
+      if (up) { const rc0 = P(c, ri - 2.0, ac), hk = hash(i, 71); fillRoom(ctx, { ox: rc0[0], oz: rc0[1], phi: Math.PI / 2 - ac, y: 0 }, hk < 0.4 ? 'bedroom' : hk < 0.75 ? 'tea' : 'tools', { light: true, mirror: ((i * 5 + 1) % 4) < 2, seed: i * 17 + 7 }); }
       if (!up) {
         const sub = (s0, s1) => [P(c, g.r0, a0 + (a1 - a0) * s0), P(c, g.r0, a0 + (a1 - a0) * s1)];
         bag.add(TIMBER, plank(...sub(0, 1), f1, f1 + 0.9, 0.1));

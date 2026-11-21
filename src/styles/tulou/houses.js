@@ -10,6 +10,7 @@ import { Matrix4 } from '../../core/three.js';
 import { lbox, frameOf } from './geo.js';
 import { zslab } from './hall.js';
 import { fillRoom } from './rooms.js';
+import { shopFit, signOf, wearFront } from './shopwork.js';
 
 const EARTH = 'mud_plaster', TIMBER = 'timber', TILE = 'tile_grey';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -120,9 +121,11 @@ export function hakkaHouse(el, ctx) {
     S('timber_red', -3.45, 0, hz + 0.5, -1.15, 1.0, hz + 0.95); B('wood_dark', -3.5, 1.0, hz + 0.45, -1.1, 1.05, hz + 1.0);
     for (let q = 0; q < 6; q++) { const x = -3.2 + q * 0.38; bag.add(q % 2 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.1, 0.01], [0.15, 0.12], [0.12, 0.24], [0.07, 0.3], [0.001, 0.3]], 9, null, W(x, hz + 0.72)[0], 1.05, W(x, hz + 0.72)[1])); }
     for (const x of [-2.9, -1.7]) bag.add('wicker', lathe([[0.001, 0], [0.2, 0.01], [0.26, 0.2], [0.001, 0.22]], 9, null, W(x, hz + 0.72)[0], 0.0, W(x, hz + 0.72)[1] + 0.0));
-    B('wood_dark', hx - 0.3, 1.9, hz + 1.17, hx - 0.15, 4.2, hz + 1.2); B('lacquer_black', hx - 1.0, 3.0, hz + 1.21, hx - 0.35, 4.15, hz + 1.25); B('gilt_bronze', hx - 0.85, 3.2, hz + 1.25, hx - 0.75, 4.0, hz + 1.265);
+    B('wood_dark', hx - 0.3, 1.9, hz + 1.17, hx - 0.15, 4.2, hz + 1.2); B('lacquer_black', hx - 1.0, 3.0, hz + 1.21, hx - 0.35, 4.15, hz + 1.25);
+    if (!signOf(el.trade ?? ['tobacco', 'tea', 'wine', 'pickles'][Math.floor(sd / 4) % 4])) B('gilt_bronze', hx - 0.85, 3.2, hz + 1.25, hx - 0.75, 4.0, hz + 1.265);
   }
   right[(sd >> 2) % 3]();
+  if (kind === 1) shopFit(ctx, { cx, cz, phi, hx, hz, sd, nokeeper: true, trade: el.trade ?? ['tobacco', 'tea', 'wine', 'pickles'][Math.floor(sd / 4) % 4], W });
   if (kind === 2) {
     const P = (x0, x1, y0, y1) => B('lime_plaster_rough', x0, y0, hz + 0.03, x1, y1, hz + 0.045);
     P(-hx + 0.02, -2.8, 0.7, topF); P(2.8, hx - 0.02, 0.7, topF); P(-1.9, -dw - 0.1, 0.7, topF); P(dw + 0.1, 1.9, 0.7, topF);
@@ -141,6 +144,7 @@ export function hakkaHouse(el, ctx) {
   LF.laundry_pole({ t: 'laundry_pole', at: W(0.0, hz + 0.02), y: 4.3, rot: phi, len: 1.5, seed: sd * 3 }, ctx);
   if (sd % 3 !== 1) LF.chickens({ t: 'chickens', n: 3 + (sd % 3), kind: 'hen', at: W(1.0 - (sd % 3), hz + 2.3), y: 0, seed: sd }, ctx);
 
+  wearFront(ctx, { cx, cz, phi, hx, hz, dw, sd, W });
   // weathering: the splashed foot, lichen, the rain tails below the roof and the shutter, a mended patch
   const wz = (x0, x1, y0, y1, m) => B(m, x0, y0, hz, x1, y1, hz + 0.02);
   wz(-hx, -dw - 0.1, 0.7, 1.15 + rand() * 0.4, 'banco_rough'); wz(dw + 0.1, hx, 0.7, 1.15 + rand() * 0.4, 'banco_rough');
