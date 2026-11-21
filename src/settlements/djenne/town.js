@@ -5,6 +5,7 @@ import { RADIUS, MARKET, LEVEL, ISLAND, MOSQUE, SHOPS, COURT, houses, shore, inH
 import { ground } from './ground.js';
 import { boatFloat } from '../../objects/index.js';
 import { lodTiles } from '../lod.js';
+import { WELLS, shopAt, courtAt } from './walk.js';
 /** How far from the visitor the houses are built in full (m); the arrival (the market, 95 m from the mosque) sees the simple form only of what lies beyond. */
 const NEAR = 135;
 
@@ -306,6 +307,36 @@ function plain() {
 }
 const pick = (a, r) => a[Math.floor(r() * a.length)];
 
+/**
+ * The people of the walk (docs/settlements/djenne.md §20.1): the keeper behind each shop's counter, the weaver at her loom and the teacher with
+ * his pupils in the court house, a woman drawing water at each well.
+ */
+function walkLife() {
+  const rand = rng(2020), P = [], W = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red'];
+  const pk = (a) => a[Math.floor(rand() * a.length)];
+  const fig = (at, y, rot, o) => P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_dark', cloth: pk(W), cloth2: pk(W), hatMat: pk(W), ...o });
+  // the keepers: behind the counter (its west part; the entry is on the east), facing the market
+  for (let i = 0; i < 8; i++) {
+    const S = shopAt(i), at = [S.c - 0.85, S.zFront - 1.55], woman = i % 3 === 1, trade = i % 8;
+    fig(at, 0, Math.PI, woman ? { dress: 'wrap', hat: 'turban', feet: 'bare', pose: 'stand' } : { dress: 'robe', cloth: pk(['cloth_white', 'cloth_indigo']), hat: pk(['cap', 'turban']), hatMat: 'cloth_white', feet: 'shod', pose: i % 2 ? 'talk' : 'stand', beard: rand() < 0.5 });
+    void trade;
+  }
+  const C = courtAt();
+  // the weaver at the loom of strips in the workshop west of the vestibule, on a low stool
+  { const wx = (C.x0 + 0.5 + C.xm - 3.25) / 2, wz = (C.zp + C.zf) / 2, at = [wx, wz + 1.2];
+    P.push({ t: 'stool', at, y: 0, rot: 0, seed: 21 });
+    fig(at, 0, 0, { dress: 'robe', cloth: 'cloth_indigo', hat: 'cap', hatMat: 'cloth_white', feet: 'bare', pose: 'sit_low', beard: false }); }
+  // the teacher on the vestibule's bench with two pupils on the mat opposite (the Qur'anic school of the skifa)
+  fig([C.xm + 2.5, (C.zp + C.zf) / 2], 0.45, Math.PI / 2, { dress: 'robe', cloth: 'cloth_white', hat: 'turban', hatMat: 'cloth_white', feet: 'shod', pose: 'sit', beard: true });
+  for (const dz of [-1.0, 0.4]) fig([C.xm - 2.55, (C.zp + C.zf) / 2 + dz], 0.45, -Math.PI / 2, { dress: 'tunic', legs: 'bare', hat: 'cap', hatMat: 'cloth_white', feet: 'bare', pose: 'sit', h: 1.1 });
+  // a woman at each well with her pot on the head or at the curb, a boy waiting
+  WELLS.forEach(([x, z], i) => {
+    fig([x - 1.9, z - 1.2], 0, Math.PI / 2 + 0.5, { dress: 'wrap', hat: 'turban', feet: 'bare', carry: i % 2 ? 'none' : 'pot', pose: 'stand' });
+    fig([x + 0.3, z + 1.7], 0, Math.PI + 0.6, { dress: 'tunic', legs: 'bare', hat: 'none', feet: 'bare', pose: 'stand', h: 1.05, carry: 'pot' });
+  });
+  return P;
+}
+
 export async function town() {
   const { E, P } = market(), lnd = landing(), cr = crepissage();
   // (the channel's water is the planet's sea: ground.js, sea)
@@ -315,7 +346,8 @@ export async function town() {
     plans.push(base('djenne-yards', Y)); const rr = rng(77); const Pm = [];
     for (const y of Y) { Pm.push({ t: 'figure', at: [y.c[0] + 1, y.c[1] - 2], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), dress: 'tunic', legs: 'bare', top: 'bare', skin: 'skin_dark', hat: 'none', feet: 'bare', carry: 'hoe' }); Pm.push({ t: 'animal', kind: 'donkey', at: [y.c[0] + 4, y.c[1] + 3], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), gear: true }); }
     plans.push({ ...base('djenne-yards-life', Pm), style: 'life' }); }
-  plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }]));
+  plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }, ...WELLS.map((at, i) => ({ t: 'dj_well', at, rot: i * 1.7 + 0.4 }))]));
+  plans.push({ ...base('djenne-shops-life', walkLife()), style: 'life' });
   const all = houses(), homes = enterable(all);
   // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full (interiors, fittings, door work) within NEAR of the visitor, simple (the solid form, the
   // facade's masses, the door) beyond; the arrival at the market sees the far form only of what is far

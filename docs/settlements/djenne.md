@@ -151,6 +151,15 @@ Sources added: [Wikiwand](https://www.wikiwand.com/en/articles/Great_Mosque_of_D
 - **Walk routes** (`walks` of the mosque plan, `src/settlements/djenne/plan.js`): for each of the 24 houses a route from the street through door, vestibule and court up the stair into the room and on up the roof stair to the terrace; a second to the loggia in the houses that have one; 41 routes in all, walked by `walk-check --sites djenne`.
 - **Still shut:** the houses beyond the 24 keep the one furnished room (§16); no stair to the roof from one-storey houses' upper floor (they have none); the back block's roof is not reached from the upper floor; no lamps upstairs.
 
+## 20. Bringing the town up to the reference (2026-11-20)
+
+### 20.1 The visitor's walk
+- **The walk** (`src/settlements/djenne/walk.js`): from the arrival in the market west across it toward the qibla front, north up the aisle at x 55 to the shop row on the market's north edge, east along the shop fronts to the court house, and west again along the platform's foot to the north stair. [inferred from the plan; the market on Monday after Caillie, section 11]
+- **Shops** (`sahel_shops`): the eight open fronts of section 15 now have an entry 1.65 m clear beside the counter (the counter was shortened), a keeper behind each counter (men and women, standing or talking), and a walked route into each. [inferred: keepers; goods as section 15]
+- **Court house**: door and inner doors widened to 1.7 m, the hearth and the water-jar stand moved clear of the workshop door; the weaver on her stool at the loom of strips, the teacher on the vestibule bench with two pupils on the mat opposite (the vestibule as Qur'anic school: Springer 2021, section 15 [stated]; the people [inferred]). Routes: through the vestibule to the court, into the workshop, and up the court stair to the east roof.
+- **Wells** (`dj_well`, three on the walk): a hand-dug well with a banco curb, forked posts and a pole across with rope and leather bucket, a clay trough and jars; a woman and a boy at each. Wells in the open of Sahel towns are common; their form here [inferred].
+- Houses of the walk were already open (sections 16-19: 513 enterable, 24 with upper floors, routes in 41).
+
 ## Sources
 
 - [Great Mosque of Djenne — Designing Buildings Wiki](https://designingbuildings.co.uk/wiki/Great_Mosque_of_Djenne)
