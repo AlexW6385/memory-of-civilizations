@@ -64,9 +64,8 @@ export function people() {
   {
     const arr = [46, 60], open = huts().filter((h) => h.open && Math.hypot(h.c[0] - arr[0], h.c[1] - arr[1]) < 110).sort((p, q) => Math.hypot(p.c[0] - arr[0], p.c[1] - arr[1]) - Math.hypot(q.c[0] - arr[0], q.c[1] - arr[1]));
     open.forEach((h, i) => {
-      if (i % 2) return;
       const a = (h.seed % 628) / 100, Q = (rr, t) => [h.c[0] + Math.cos(a + t) * rr, h.c[1] + Math.sin(a + t) * rr], p = Q(0.95, 2.3), hearth = Q(0.25, 0);
-      woman(p, h.y + 0.24, face(p, hearth), { pose: i % 4 === 0 ? 'kneel' : 'sit_ground', nightKeep: 1 });
+      woman(p, h.y + 0.24, face(p, hearth), { pose: i % 3 === 0 ? 'kneel' : 'sit_ground', nightKeep: 1 });
     });
     daras().forEach((d, i) => {
       for (const k of i % 2 ? [0, 2] : [1]) {
