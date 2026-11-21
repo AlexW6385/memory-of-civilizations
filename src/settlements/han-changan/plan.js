@@ -7,6 +7,7 @@ import '../../styles/hanlodge/index.js';
 import './nightlight.js';
 import { walkRoutes, mainRoute, wardRoute, westRoute } from './walkroutes.js';
 import { crownNight } from './nightplace.js';
+import './landmarkwear.js';
 import { AX, TIERS, CROWN, RAMP, HALL, SIDE_HALLS, EAST_GATE, PALACE, CHANGLE_HALL, PALACE_WALL } from './layout.js';
 
 const E = [];
@@ -25,6 +26,8 @@ for (const [dz, s] of [[-14, 1], [14, -1]]) E.push({ t: 'hanl_que', at: [wx + PA
 
 for (const sd of [-1, 1]) E.push({ t: 'hanl_horses', at: [AX + sd * 11.7, -154.5], y: CROWN + 0.03, face: [0, 1] });
 E.push(...crownNight());
+E.push({ t: 'hanl_hangings', cx: AX, z1: HALL.z1, floor: HALL.floor, h: HALL.h, bayW: HALL.bayW, bays: HALL.bays, first: 3, last: 5 });
+E.push({ t: 'hanl_wear', ax: AX, ramp: RAMP, top: CROWN, hallZ: HALL.z1 });
 E.push({ t: 'han_crown', ax: AX, top: CROWN, z0: TIERS[TIERS.length - 1].r[3], z1: HALL.z1, seed: 5 });
 E.push({ t: 'han_court', ax: AX, z0: RAMP.z1, z1: PALACE[3] - 2, seed: 5 });
 
