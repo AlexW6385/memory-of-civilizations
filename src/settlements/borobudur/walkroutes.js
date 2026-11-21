@@ -21,6 +21,10 @@ export function walkRoutes() {
   const R = [];
   for (const h of houses()) if (h.hamlet === -1) R.push(houseRoute(h));
   for (const s of wayStalls()) if (s.kind === 'rest') { const [x, z] = s.at; R.push(hallRoute([x - s.w / 2, z - 2.2, x + s.w / 2, z + 2.2], s.side < 0 ? 's' : 'n')); }
+  // the open stalls by the first stretch of the way: from the way's middle to where a buyer stands at the counter (the front room of a stall)
+  for (const s of wayStalls()) if (s.kind !== 'rest' && s.at[0] > 95 && s.at[0] < 180) { const [x, z] = s.at; R.push([[x, 0], [x, z - s.side * 1.9]]); }
+  // up the east stair onto the first gallery and along it to the south side, past its lamps
+  R.push([[70, 0], [63, 0], [60, 0], [60, 5], [55, 6], [55, 22], [55, 40], [52.5, 50]]);
   HAMLETS.forEach(([hx, hz], hi) => { if (coreOf(hi) === 'balai') R.push(hallRoute([hx - 4.5, hz - 3.5, hx + 4.5, hz + 3.5], 'e')); });
   R.push(hallRoute([-182, -150, -158, -132], 'e'));
   void CELLS; void cellRoom;
