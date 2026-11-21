@@ -19,6 +19,10 @@ export function lights() {
   // [inferred: fire was kept in the temples all night, §21; this temple is 20 m from the arrival]
   for (const z of [-14.8, -5.2]) L.push({ k: 'brazier', x: 15.6, y: 0.95, z, gy: 0.03 });
   L.push({ k: 'door', x: 1.2, z: -10, n: [1, 0], gy: 8, w: 1.6, h: 2.2, f: 0.5, s: 1.2 });
+  // the palace (PALACE [160, 100, 211, 191], floor 1.0 m; first court's doorways at u = 175.9 + 3.025 i): the kitchen of the north range with its hearth and the hall of the
+  // south block with its braziers, their doors open on the court [inferred: Díaz says the lords' fires and the stewards' kitchens served the palace all night, as §21]
+  L.push({ k: 'door', x: 175.9, z: 112.1, n: [0, 1], gy: 1.0, w: 1.5, h: 2.5, f: 0.5, s: 1.2 });
+  L.push({ k: 'door', x: 175.9, z: 140.4, n: [0, -1], gy: 1.0, w: 1.5, h: 2.5, f: 0.5, s: 1.2 });
   // the stairheads' cauldrons, and the fire at each shrine's door (the huehuetl is beaten beside Huitzilopochtli's)
   const sxw = cx - w1 * 0.55;
   for (const s of [-1, 1]) {
