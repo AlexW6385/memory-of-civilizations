@@ -3,6 +3,7 @@
 import '../../styles/siamese/index.js';
 import './walkwork.js';
 import './nightlight.js';
+import './wear.js';
 import wat from './plan.js';
 import music from './music.js';
 export { town } from './town.js';

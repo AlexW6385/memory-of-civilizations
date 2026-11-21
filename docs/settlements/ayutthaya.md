@@ -168,6 +168,16 @@ All [inferred] (`fauna.js`, `critters` of `src/engine/fauna-critters.js`, each a
 - Doves on the court's brick way and the platform's foot (the spotted dove of the wats); a kingfisher on the canal's bank at the bridge, which dives for fish; songbirds in cages at the front posts of three houses of the walk (the Thai keep caged doves and bulbuls [inferred]).
 - Not shown, and why: the king's elephants (already the people plan's two figures at the palace gate); water buffalo (no model); the water monitor of the canals (no model); swallows' nests (the swallows of the dossier are in flight lists only); no goat, cormorant or turkey (the Chinese fishing cormorant was not a Siamese practice [inferred]).
 
+### 13.5 Wear and writing
+
+All built by `src/settlements/ayutthaya/wear.js`, from the element's own numbers (no randomness beyond the position hash).
+
+- Worn treads on the entered stilt houses' stairs and a worn sill before their doors, in `tile_dark`: the middle of each tread dark from feet. [inferred: from the house's use; no source describes wear]
+- A polished threshold at the gap of each walk shop, and black mildew streaks down the shophouse piers from under the lintel, three to a pier. [inferred from §10: black mildew on plaster in the monsoon]
+- Chinese shop signs: one character in relief on both faces of the plaque, 香 incense and candles, 米 rice, 布 cloth, 茶 tea, on the shops with a Chinese trade. [stated: the Chinese merchants' quarter, §11.1; the choice of character per trade is inferred]
+- The Siamese sellers' shops and every temple carry no writing, and no Thai script is modelled anywhere: the letterforms cannot be checked here. [stated as a limit]
+- Not done: mildew under the chedi cornices; it cost one arrival draw over the budget.
+
 ## Sources
 - Wikipedia, "Wat Phra Si Sanphet": https://en.wikipedia.org/wiki/Wat_Phra_Si_Sanphet
 - Ayutthaya Historical Research, "The architecture of Wat Phra Sri Sanphet": https://ayutthaya-history.com/Temples_Ruins_PhraSisanphet_Architecture.html

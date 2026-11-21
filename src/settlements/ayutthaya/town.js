@@ -180,7 +180,7 @@ function people() {
 }
 export async function town() {
   const plans = [water(), garden(), people(), voc()];
-  const els = lots().map((l) => ({ t: 'thai_house', rect: l.rect, front: l.front, seed: l.seed, kind: l.kind, row: l.row, kitchen: kitchenOf(l), ...(l.trade ? { trade: l.trade } : {}) }));
+  const els = lots().map((l) => ({ t: 'thai_house', rect: l.rect, front: l.front, seed: l.seed, kind: l.kind, row: l.row, kitchen: kitchenOf(l), ...(l.trade ? { trade: l.trade } : {}), ...(l.walk ? { walk: true } : {}) }));
   els.push(...gearElements());
   plans.push(...lodTiles('ayutthaya-houses', 'siamese', els, { R: RADIUS, near: 150 }));
   void UBOSOT;
