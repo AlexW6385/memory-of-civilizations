@@ -84,6 +84,13 @@ function way() {
     E.push({ t: 'umbul', at: [x, side * 2.8], y: 0, h: 4.6 + rand() * 1.4, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
   }
   E.push({ t: 'umbul', at: [WAY.gate - 4, 2.8], y: 0, h: 5.6, seed: 91 }, { t: 'umbul', at: [WAY.gate - 4, -2.8], y: 0, h: 5.6, seed: 92 });
+  // resin torches on bamboo poles along the way (§20.2): a pair before the gate's pylons, then one every 14 m, alternating sides, none in the visitor's view at the arrival
+  for (const sd of [-1, 1]) E.push({ t: 'bb_torch', at: [WAY.gate - 3.0, sd * 3.6], y: 0, seed: sd });
+  for (let x = 70, k = 0; x < WAY.x1 - 30; x += 14, k++) {
+    const side = k % 2 ? 1 : -1;
+    if (nearArrival(x, side * 3.3, 1.8) || Math.abs(x - WAY.gate) < 8) continue;
+    E.push({ t: 'bb_torch', at: [x + 1.5, side * 3.4], y: 0, seed: k });
+  }
   // what each stall has about it: firewood at the food stalls' hearths, rice in sacks, fruit in heaps, trays drying, a child at the counter
   for (const s of stalls) {
     if (s.kind === 'rest') continue;
@@ -246,7 +253,7 @@ function fields() {
 /** The monastery's gate, its shrines, the paved ways between the gate, the hall and the monks' houses, the water jars before the cells. */
 function monasteryExtras() {
   const E = [], L = [], rand = rng(912), [mx0, mz0, mx1, mz1] = MONASTERY, gz = (mz0 + mz1) / 2;
-  E.push({ t: 'gapura', at: [mx1, gz], half: 3.0, h: 4.8 });
+  E.push({ t: 'gapura', at: [mx1, gz], half: 3.0, h: 4.8 }, { t: 'bb_torch', at: [mx1 + 2.2, gz - 4.6], y: 0 }, { t: 'bb_torch', at: [mx1 + 2.2, gz + 4.6], y: 0 });
   for (const [x, z] of [[-190, -142], [-150, -145], [-172, -124]]) E.push({ t: 'cetiya', at: [x, z], y: 0, r: 0.9 });
   E.push({ t: 'lane', rect: [-181.5, gz - 1.6, mx1 - 0.5, gz + 1.6], y: 0.03, mat: 'andesite' });
   E.push({ t: 'lane', rect: [-170, mz0 + 8, -166, gz - 1.6], y: 0.03, mat: 'andesite' });
