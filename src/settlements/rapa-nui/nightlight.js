@@ -116,6 +116,10 @@ const wrapApproach = (fn) => function lit(el, ctx) {
   if (!ctx?.lights) return r;
   const H = new Halo(), y = el.ground(8, 60);
   H.ball(8, y + 0.4, 60, 0.9, 0.7); H.floor(8, y + 0.08, 60, 2.4, 2.1, 10, 0.85);
+  // the bark-cloth yard's banked fire on the left of the way and the sweet-potato mat's small fire on the right, so that both sides of the way near the visitor are lit [inferred]
+  const yl = el.ground(-12.5, 54.6), yr = el.ground(11.5, 53.6);
+  H.ball(-12.5, yl + 0.3, 54.6, 0.8, 0.6); H.floor(-12.5, yl + 0.08, 54.6, 2.2, 1.9, 10, 0.75);
+  H.ball(11.5, yr + 0.3, 53.6, 0.7, 0.5); H.floor(11.5, yr + 0.08, 53.6, 1.9, 1.7, 10, 0.65);
   H.flush(ctx.bag);
   return r;
 };
