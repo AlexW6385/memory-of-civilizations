@@ -169,3 +169,18 @@ The rigged animals of the engine (`critters`, `src/settlements/benin-city/fauna.
 - **The king's square and the court [inferred]:** doves on the earth before the gate and on the paving of the court of audience (the dove's cry, §7); hens at the waiting sheds, a goat tethered by each.
 - **The Oba market and the guild lane [stated: goats and fowls were sold, §5]:** six fowl round the mats of the open floor, three goats at its edge, two dogs; hens at the fronts of four casting yards.
 - **Behaviour:** the engine's own (hens walk and peck; the goat, dog and cat lie, stand and lift the head as the visitor comes near; the doves keep to a patch). Test: `tests/benin-critters.test.mjs`.
+
+### 15.5 Wear and writing (item 5)
+
+`src/settlements/benin-city/wear.js` (wraps the style from the folder; thin relief in materials the tiles already hold, near only).
+
+- **Door-steps and thresholds [inferred: red earth polished by bare feet; the climate's own splash and damp are already on the walls, §10]:** at every compound's street door the step has a polished hollow (a darker patch of `scoria_red`, a second smaller one in its middle) and inside the threshold a worn patch where the feet carry the street's dust in; at a trading front the hollow is at the gap of the counter (the way in).
+- **The yards [inferred]:** soot and ash in a ring round each casting furnace's mouth, the trodden path to it from the lane, and the dark earth of the yard's gap on the lane.
+- **The lane water jars [inferred]:** the ground round each jar dark with splashed water (a thin ring of damp plaster).
+- **Moss, lichen, mended clay, rain streaks, splash bands:** already on every wall (§10).
+- **Writing: none, stated plainly.** The Edo had no script [stated by omission in every source cited here: no inscription, tablet or sign is recorded for the city; the plaques are pictures]. No shop board or tablet carries letters: Latin (the Portuguese traders' own) is not guessed. Nothing is written in this settlement.
+
+### 15.6 Landmark gaps found on the way (item 6)
+
+- **Palace by night [inferred]:** the three inner courts have a bronze stand at each south corner of their open floors (six), beside the six of the court of audience (§15.2); the great gallery, the galleries and the turrets stay unlit.
+- **Still short of the reference [inferred, from this pass]:** the great gallery's floor, the dais steps and the audience way carry no wear; the galleries have no lamps (the type of the palace's lighting is not recorded); no hornbill, weaverbird or agama model (§15.4); the market's stalls have goods but no keepers built into their near plans (the keepers are life figures); no source was fetched in this pass, every new line above is [inferred] from §1–§14.

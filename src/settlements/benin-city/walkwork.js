@@ -39,6 +39,7 @@ function shrine({ at, y = 0, simple }, { bag, col }) {
  */
 function waypot({ at, y = 0, simple }, { bag, col }) {
   const [x, z] = at, q = hashAt(x, z, 5), s = 0.92 + 0.16 * q;
+  bag.add('plaster_damp', lathe([[0.5, 0.012], [1.0 * s, 0.012], [1.0 * s, 0.016], [0.5, 0.016]], 12, null, x, y, z));      // the ground dark with splashed water
   bag.add('terracotta', lathe([[0.001, 0.12], [0.2 * s, 0.14], [0.36 * s, 0.4], [0.4 * s, 0.62], [0.3 * s, 0.9], [0.2 * s, 0.98], [0.24 * s, 1.04], [0.21 * s, 1.06], [0.15 * s, 1.0]], 10, null, x, y, z));
   bag.add('tuff_red', lathe([[0.001, 0], [0.5, 0], [0.46, 0.14], [0.3, 0.16], [0.001, 0.16]], 10, null, x, y, z));
   col.circle(x, z, 0.52, y, y + 1.1);
