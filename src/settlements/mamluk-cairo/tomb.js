@@ -211,4 +211,19 @@ function hasanDoor(el, { bag }) {
   void x0; void x1;
 }
 
+/** hasan_wear: { m, z0, z1, y } — the way to the portal, paved in dark marble slabs, its middle worn smooth and pale where feet went (docs §19.4); 3 cm proud, no collision. */
+function hasanWear(el, { bag }) {
+  const { m, z0, z1 } = el, y = el.y ?? 0, n = Math.round((z1 - z0) / 1.6), dz = (z1 - z0) / n;
+  for (let k = 0; k < n; k++) {
+    const a = z0 + k * dz, hk = (Math.imul(k + 7, 2654435761) >>> 0) / 4294967296, w = 1.5 + 0.25 * hk;
+    bag.add('marble_dark', box(m - 1.9, y, a + 0.03, m + 1.9, y + 0.02, a + dz - 0.03));
+    // the worn track: wider and paler the nearer the door, a little off the middle by slab
+    const t = (k + 1) / n, ww = 0.5 + 0.9 * t, off = (hk - 0.5) * 0.4;
+    bag.add('marble_smooth', box(m + off - ww / 2, y + 0.02, a + 0.08, m + off + ww / 2, y + 0.032, a + dz - 0.08));
+    void w;
+  }
+  // the threshold: a long pale dish of a step where the leaves meet the ground
+  bag.add('marble_smooth', box(m - 1.5, y, z1 - 0.02, m + 1.5, y + 0.035, z1 + 0.5));
+}
+ELEM.hasan_wear = hasanWear;
 ELEM.hasan_tomb = tomb; ELEM.hasan_dome = dome; ELEM.hasan_door = hasanDoor;

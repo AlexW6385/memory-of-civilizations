@@ -8,6 +8,7 @@ import { AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, MESE, MILION, FORUM,
 import sophiaPlan from '../../buildings/hagia-sophia/plan.js';
 import { MESE_STOAS } from './stoas.js';
 import { porticoLamps, fires } from './nightlight.js';
+import './wear.js';
 
 export const JUSTINIAN = [AUGUSTAION[0] + 24, AUGUSTAION[1] + 32];
 const E = [];
@@ -61,6 +62,10 @@ export { MESE_STOAS };
 for (const s of MESE_STOAS) E.push({ t: 'stoa', y: height(...s.a), depth: 5, h: 6, d: 0.62, spacing: 3.8, ...s });
 // the night (nightlight.js): the lamps hung in the porticoes, the light of the church's south door
 E.push({ t: 'cn_lamps', list: porticoLamps() }, ...fires());
+// the wear of feet from the court to the south door (wear.js)
+E.push({ t: 'cn_wear', at: [-10, 36], y: height(-10, 36), w: 3.2, len: 22 });
+// two street shrines at the ends of the forecourt's porticoes, fronts to the court, each with its lamp (docs §17.3)
+for (const [x, z, rot] of [[-51, 98, -Math.PI / 2], [41, 98, Math.PI / 2]]) E.push({ t: 'byz_shrine', at: [x, z], y: height(x, z), rot }, { t: 'cn_flame', at: [x + Math.sign(-x) * 0.55, height(x, z) + 1.15, z], intensity: 1.6, distance: 6, floor: height(x, z), r: 0.6 });
 
 export const city = {
   id: 'constantinople-city',
@@ -73,5 +78,7 @@ export const city = {
   elements: E,
   rooms: [],
 };
-export const sophia = { ...sophiaPlan, origin: [0, 0], base: 0, district: undefined, view: [-50, -51, 42, 38] };
+// the south door's stone frame with its gold lunette (the church's `portal`, as the narthex doors have; the door was a bare hole in the wall) (docs §17.4)
+const southPortal = { t: 'obj', kind: 'portal', at: [-10, 36], y: 0, n: [0, 1], w: 3.2, h: 5.0 };
+export const sophia = { ...sophiaPlan, elements: [...sophiaPlan.elements, southPortal], origin: [0, 0], base: 0, district: undefined, view: [-50, -51, 42, 38] };
 export default sophia;

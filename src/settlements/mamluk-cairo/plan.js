@@ -21,6 +21,7 @@ E.push({ t: 'madrasa_block', rect: HASAN.tomb, h: 30, portal: 's', ph: 28.5, cou
 E.push({ t: 'hasan_tomb', c: TC, a: 10.5 });
 E.push({ t: 'hasan_dome', c: TC, r: 10.5, y: 30, a: 10.5 });
 E.push({ t: 'hasan_door', rect: HASAN.rect, face: 'n', m: -37.5 });
+E.push({ t: 'hasan_wear', m: -37.5, z0: -9, z1: 6, y: 0 });
 E.push({ t: 'hasan_door', rect: HASAN.tomb, face: 's', m: TM });
 for (const s of [-1, 1]) E.push({ t: 'mamluk_minaret', c: [s * 22, 92], h: 81, r: 3.2 });
 // the Citadel: its curtain on the spur with round towers, the gate at the road's head (the north-west, Bab
