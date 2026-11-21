@@ -8,7 +8,7 @@ import { openSet } from './town.js';
 import { lots as allLots } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
 import { upperWalks } from './court-houses.js';
-import { shopWalks, shopRoute, nearLane } from './shoproutes.js';
+import { shopWalks, ajarWalks, shopRoute, nearLane } from './shoproutes.js';
 import './wear.js';
 
 const g = RIVER.ground;
@@ -160,6 +160,6 @@ export const river = {
 };
 void ISLAND;
 // the ways up in the court's houses (docs/settlements/paris.md §5e) are walked as routes of the chapel's plan, in its local frame (yaw 0)
-const houseWalks = [...upperWalks(), ...shopWalks(10)].map((r) => { const w = r.map(([x, z]) => [x - CHAPEL.origin[0], z - CHAPEL.origin[1]]); w.y0 = 0; return w; });
+const houseWalks = [...upperWalks(), ...shopWalks(10), ...ajarWalks()].map((r) => { const w = r.map(([x, z]) => [x - CHAPEL.origin[0], z - CHAPEL.origin[1]]); w.y0 = 0; return w; });
 export const chapel = { ...chapelPlan, walks: [...(chapelPlan.walks || []), ...houseWalks], origin: CHAPEL.origin, base: g, district: undefined, view: [CHAPEL.origin[0] - 20, CHAPEL.origin[1] - 12, CHAPEL.origin[0] + 38, CHAPEL.origin[1] + 12] };
 export default chapel;

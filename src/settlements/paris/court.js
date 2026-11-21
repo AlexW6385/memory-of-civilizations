@@ -100,7 +100,7 @@ export function courtLife() {
   fig([-283.6, 26.6], face([-283.6, 26.6], [-283.6, 24.4]), { child: true, h: 1.05, dress: 'tunic', hat: 'none', hair: 'short', cloth: 'cloth_red' });
   L.push({ t: 'animal', kind: 'dog', at: [-281.6, 26.4], y: y0, rot: 2.6, seed: 67, pose: 'lie' });
   for (const z of [-34.6, -29.6]) L.push({ t: 'barrel', at: [-273.4, z], y: y0, rot: 0, n: 1, seed: z | 0 });
-  L.push({ t: 'lantern', kind: 'iron', at: [-221.4, -21.0], y: y0, rot: 0, h: 2.9 });
+  // (no lantern in the court: none is attested for 1248)
   return { id: 'paris-court-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-250, -10], facing: 'e' }, bounds: [PALACE[0], PALACE[1], PALACE[2] + 4, PALACE[3]], rooms: [], elements: L };
 }
 void inRect;

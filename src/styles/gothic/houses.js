@@ -36,7 +36,7 @@ const TRADES = [
  * the wide lots). Open houses are always shops. Drawn from the seed, not from the house's own random stream.
  */
 export function frontKind(el) {
-  if (el.open) return 'shop';
+  if (el.open && !el.ajar) return 'shop';           // (an ajar house is opened as a burgher's: its front stays the burgher's)
   const f = el.front || 's', along = f === 's' || f === 'n', L = along ? el.rect[2] - el.rect[0] : el.rect[3] - el.rect[1];
   const k = (Math.imul((el.seed >>> 7) + 7, 2654435761) >>> 0) % 9;
   if (k < 2) return 'burgher';
@@ -116,7 +116,7 @@ function paris_house(el, { bag, col, lights }) {
   const lintel = 2.75;
   const kind = frontKind(el);
   const UPV = UP ? planUpper({ el, L, D, n, doorL, ST0, ST, FL: 0.1, chim, jet, kind: el.upper, trade: trade.id }) : null;
-  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: trade.id, seed: el.seed, lights, lit: !!el.lit, up: UPV });
+  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: el.ajar ? 'hall' : trade.id, seed: el.seed, lights, lit: !!el.lit, up: UPV, ajar: !!el.ajar });
   if (kind === 'shop') {
     if (!OPEN) B('opening', su, su + ws, 0.12, lintel, -0.03, 0.05);
     for (const u of [su - 0.2, su + ws]) B('timber', u, u + 0.2, 0, lintel + 0.3, -0.14, 0.06);                 // the posts
@@ -150,7 +150,7 @@ function paris_house(el, { bag, col, lights }) {
     // the burgher's front: two small windows with iron bars and wooden shutters, a stone bench, a niche over the door with a saint
     const wu = doorL ? [su + 0.3, su + ws * 0.5 + 0.3] : [su + 0.1, su + ws * 0.5 + 0.1], ww = Math.min(0.62, ws * 0.38);
     for (const u0 of wu) {
-      B('opening', u0, u0 + ww, 1.3, 2.1, -0.03, 0.05);
+      if (OPEN) B('opening', u0, u0 + ww, 1.3, 2.1, -0.125, -0.1); else B('opening', u0, u0 + ww, 1.3, 2.1, -0.03, 0.05);
       B('limestone', u0 - 0.1, u0 + ww + 0.1, 1.2, 1.3, -0.12, 0.06); B('limestone', u0 - 0.1, u0 + ww + 0.1, 2.1, 2.2, -0.1, 0.06);
       for (const u of [u0 - 0.1, u0 + ww]) B('limestone', u, u + 0.1, 1.3, 2.1, -0.1, 0.06);
       for (let k = 1; k < 4; k++) R('iron', [u0 + ww * k / 4, 1.3, -0.07], [u0 + ww * k / 4, 2.1, -0.07], 0.012, 4);
