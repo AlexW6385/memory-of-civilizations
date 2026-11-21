@@ -211,3 +211,11 @@ Code: `fauna.js` (`critters`), the `turkey` model of `src/engine/critter-models.
 ## 23. Numbers of this pass
 
 Arrival: main draws 260 → 257, main triangles 1.43 M → 1.42 M. On the walk: market's east gate (−72, 259) 273 draws, 2.28 M; barrio lane (81, 118) 349 draws, 2.16 M; before the kitchen of the first compound (−100, 40) 344 draws, 2.45 M. geo-one 52.0 MB / 1387 meshes → 51.7 MB / 1375 meshes.
+
+## 24. Second pass, narrow form
+
+- **Night near the visitor.** Rendered the arrival at night (low preset): the plaza floor reads, braziers' halos are visible at 17 m and beyond, but nothing burned within 15 m of the spawn. Added two incense braziers on the arrival plaza, 8.6 m either side of the way up the middle (`dress.js`; they feed `nightlight.js` automatically) [inferred: braziers as on the rest of the avenue, §15]. They stand behind the default view, so the second render showed no change in frame; not seen in a frame.
+- **Budget.** Arrival main 257 draws / 1.43 M (unchanged). Walk poses: (0,150) 331 / 1.68 M and 322 / 2.30 M; before the first compound (-100,40) 394 / 2.65 M and 420 / 3.33 M; barrio lane (81,118) 266 / 1.37 M and 349 / 2.16 M (two opposite yaws each). Nothing over 450 / 4.5 M, no split needed.
+- **Walk's gaps.** `walk.js ciudadelaRoutes()`: up the Ciudadela's broad stair (z 252) onto the west bank and into the chambers of its four west temples (z 210, 238, 282, 310), and down into the court and up the Adosada's stair onto its roof; walk-check 18 to 23 routes. Door-probe confirmed 210 and 238 and the Adosada. Moon Plaza temples not probed through (props in the avenue's lanes stopped the strict probe; the existing route to the plaza is unchanged). Still closed: the other ~200 compounds, the palace and Jaguars' patio interiors, keepers of the market as life figures.
+- **Landmark wear.** The Sun's landings: trodden grey patches (plaster_grey, no new material) across each landing from one flight's head to the next flight's foot, and on the summit from the stair's head to the temple door (`styles/teotihuacano/index.js`) [inferred]. surface-check ok; in the one render (landing, low) the patches could not be told from the plaster, so they are subtle at best.
+- **Checks.** surface-check, plan-check, walk-check, view-check, disc-check, worker test pass; geo-one 51.7 MB / 1375 meshes.
