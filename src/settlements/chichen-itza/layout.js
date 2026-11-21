@@ -54,7 +54,7 @@ export function lots() {
       const x0 = -66 + i * 30.5, r = [x0 + 1, 126, x0 + 29.5, 143], zc = 134.4, houses = [];
       let range = null;
       if (i % 2 === 0) {
-        range = { c: [x0 + 9.5, zc - 0.6], a: 6.2, b: 2.4, rot: 0, seed: Math.floor(r2() * 1e6) };
+        range = { c: [x0 + 9.5, zc + 0.6], a: 6.2, b: 2.4, rot: Math.PI, seed: Math.floor(r2() * 1e6) };      // its front toward the street (north), where the gate is
         houses.push({ c: [x0 + 22, zc], a: 3.7 + r2() * 0.8, b: 2.3 + r2() * 0.4, dir: 'x', seed: Math.floor(r2() * 1e6) });
       } else {
         houses.push({ c: [x0 + 8.5, zc], a: 3.8 + r2() * 0.8, b: 2.3 + r2() * 0.4, dir: i % 4 === 1 ? 'x' : 'z', seed: Math.floor(r2() * 1e6) });

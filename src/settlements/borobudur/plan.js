@@ -3,6 +3,7 @@
 // the four sides, three circular terraces of 72 latticed stupas, the crowning stupa 35 m above the
 // ground; the monastery to the north-west.
 
+import { walkRoutes } from './walkroutes.js';
 import { MONUMENT, SQUARES, CIRCLES, MONASTERY, CELLS, cellRect, cellRoom, houses, floorOf } from './layout.js';
 
 const E = [];
@@ -29,6 +30,7 @@ E.push({ t: 'lane', rect: [64, -2, 300, 2], y: 0.03, mat: 'andesite' });
     const gy = nx > 0 ? 0.03 : 0.002;                  // on the paved way from the east, else on the ground
     E.push({ t: 'rite', kind: 'lamps', at: at(d + 0.2, -1.2), to: at(d + 0.2, 1.2), y: gy, count: 5 });
     for (const k of [-1, 1]) E.push({ t: 'rite', kind: 'plate', at: at(d + 0.5, k * 1.45), y: gy, mats: fl[i % 2] });
+    for (const k of [-1, 1]) E.push({ t: 'bb_torch', at: at(d + 2.2, k * 4.2), y: gy, seed: i * 2 + k });   // torches either side of the foot of the flight (§20.2)
     E.push({ t: 'rite', kind: 'offering', at: at(nz > 0 ? 7.1 : 6.7, 0), y: top, n: [nx, nz], seed: i, mats: fl[(i + 1) % 2] });
   }
 }
@@ -60,6 +62,7 @@ const rooms = [
 ];
 const walks = [[[150, 0], [66, 0], [40, 0], [8, 0]]];
 walks[0].y0 = 0;
+for (const r of walkRoutes()) { r.y0 = 0; walks.push(r); }
 
 export const monument = {
   id: 'borobudur-temple',
