@@ -157,6 +157,7 @@ import * as SYDNEY from '../settlements/sydney/soundmap.js';
 import './voices-sydney.js';
 import * as TANGCA from '../settlements/tang-changan/soundmap.js';
 import './voices-tang.js';
+import * as TANGWUTAI from '../settlements/tang-wutai/soundmap.js';
 import * as TAOS from '../settlements/taos/soundmap.js';
 import * as TEOTIHUACAN from '../settlements/teotihuacan/soundmap.js';
 import './voices-teotihuacan.js';
@@ -288,7 +289,7 @@ export const PROFILES = {
   'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, roof: 'tile', bells: null, animals: withLife({ donkey: 0.4, rooster: 0.3, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: KAIFENG }) }),
   stonehenge: T({ warbler: 1, crow: 0.6 }, { animals: { cattle: 0.4, dog: 0.3 }, roof: 'thatch' }),
   sydney: T({ gull: 0.6, koel: 0.25, sparrow: 0.5, dove: 0.3, crow: 0.2 }, { cicadas: 0.4, animals: withLife({ dog: 0.2 }, { market: 0.9, map: SYDNEY }), roof: 'flat' }),
-  'tang-wutai': T({ warbler: 0.7, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.3, cattle: 0.3 }, roof: 'tile', bells: 'monastery' }),
+  'tang-wutai': T({ warbler: 0.7, crow: 0.6 }, { cicadas: 0.4, animals: withLife({ dog: 0.3, cattle: 0.3, donkey: 0.3, rooster: 0.3, sheepbell: 0.3 }, { market: 0.5, map: TANGWUTAI }), roof: 'tile', bells: 'tang-wutai' }),
   taos: T({ warbler: 0.6, crow: 0.6, dove: 0.3 }, { cicadas: 0.3, frogs: 0.2, animals: withLife({ dog: 0.6 }, { market: 0.5, map: TAOS }), roof: 'flat' }),
   tenochtitlan: T({ warbler: 0.8, tropic: 0.5 }, { frogs: 0.7, animals: withLife({ dog: 0.3 }, { canal: 0.6, market: 1, map: TENOCHTITLAN }), roof: 'flat' }),
   teotihuacan: T({ warbler: 0.8, dove: 0.5 }, { cicadas: 0.4, animals: withLife({ dog: 0.3 }, { market: 1, map: TEOTIHUACAN }), roof: 'flat' }),
@@ -330,6 +331,8 @@ const HOURS = {
   // Shaolin: the bell then the drum and the recitation before dawn, the drum then the bell and the evening service at dusk (placed in the towers and the hall: soundmap TEMPLE)
   shaolin: [[4.2, 'temple-am'], [18.4, 'temple-pm']],
   // Tang Chang'an: Daci'en's bell and drum at dawn and dusk (the street drums sound from the map), the city's drum far off (docs/settlements/tang-changan.md §19)
+  // Wutai: the bell then the drum and the chant in the Great East Hall before dawn, the drum then the bell at dusk (soundmap TEMPLE)
+  'tang-wutai': [[4.4, 'temple-am'], [18.4, 'temple-pm']],
   'tang-changan': [[4.6, 'temple-am'], [5.1, 'tower:am'], [18.4, 'temple-pm'], [18.7, 'tower:pm']],
   bonsho: [[5.5, 'bonsho'], [18.2, 'bonsho']],
   zvon: [[6.5, 'zvon'], [17, 'zvon']],

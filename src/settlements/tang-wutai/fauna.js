@@ -1,7 +1,8 @@
 // Mount Wutai in 857 — the animals (src/engine/fauna.js draws them; docs/settlements/tang-wutai.md §12): house swallows over the
 // village, the courtyard and the terraces, crows over the pines of the hill, tree sparrows hopping on the paving and the lanes.
 // No water, so no fish.
-import { height, LANES } from './layout.js';
+import { height, LANES, HALL } from './layout.js';
+import { visitorWalks } from './walk.js';
 import { village } from './village.js';
 
 const fish = [];
@@ -26,4 +27,23 @@ for (const [x0, z0, x1, z1] of LANES.slice(1)) {
 sparrow(-89, -2.5); sparrow(-86, 3);
 // more flights: swallows low over the terraced fields on both flanks, a wheel of crows over the hill path's pines
 flights.push({ kind: 'swallow', n: 3, loop: { c: [-130, -135], a: [50, 14], rot: 0.1 }, y: [1.5, 6], speed: 9 }, { kind: 'swallow', n: 3, loop: { c: [-130, 135], a: [50, 14], rot: -0.1 }, y: [1.5, 6], speed: 9 }, { kind: 'crow', n: 4, loop: { c: [150, 50], a: [30, 20], rot: 0.3 }, y: [38, 54], speed: 9 });
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; docs/settlements/tang-wutai.md §22) ──
+// [inferred: the animals of a Tang monastery and a north Shanxi village; no source for 857] A dog asleep at the inn's door and one at the smithy's, off the doors'
+// lanes; a cat on the monks' kitchen platform; a rooster and hens in the yards of the first two open houses, beside the way to the door; two goats of the
+// village's flocks by the green; temple doves on the paving of the three levels (pigeons, birds of the monastery's courts).
+const critters = [];
+{
+  const at = (x, z, dy = 0.03) => [x, height(x, z) + dy, z];
+  critters.push({ model: 'dog', at: at(-103.7, -1.9), rot: 1.2, range: [9, 3.5] }, { model: 'dog', at: at(-110.1, 1.9), rot: 4.1, range: [9, 3.5] });
+  critters.push({ model: 'cat_orange', at: [-19.6, 0.48, 35.2], rot: 3.0, range: [4, 1.5] });
+  const gx = -77;
+  critters.push({ model: 'goat_black', at: at(-86.4, -6.5), rot: 0.6, range: [8, 3] }, { model: 'goat_white', at: at(-85.2, -6.0), rot: 3.0, range: [8, 3] });
+  for (const [x, z, y, m] of [[-36.5, 3.0, 0.02, 'pigeon_grey'], [-35.4, 4.1, 0.02, 'pigeon_white'], [-41.2, -3.2, 0.02, 'pigeon_grey'], [9.2, 3.4, 6.52, 'pigeon_white'], [10.3, 4.2, 6.52, 'pigeon_grey'], [38.2, 7.6, 13.02, 'pigeon_grey'], [39.3, 8.5, 13.02, 'pigeon_white'], [gx + 5, 0.6, height(gx + 5, 0.6) + 0.04, 'pigeon_grey']]) critters.push({ model: m, at: [x, y, z], rot: x * 3, range: [1.4, 1.2] });
+  // hens in the yards of the first two open houses, beside the yard's front (the way from the gate to the door is kept clear of them)
+  visitorWalks().routes.slice(5, 7).forEach((r, i) => {
+    const [dx, dz] = [r[r.length - 2][0] + HALL.origin[0], r[r.length - 2][1]], sx = r[1][0] + HALL.origin[0] < dx ? 1 : -1;
+    for (const [model, a, d, sz] of [['rooster', 2.4, 0.2, 1], ['hen_brown', 3.0, 0.9, 1], ['hen_white', 2.0, 1.0, 0.96]]) { const x = dx + sx * a, z = dz + (r[r.length - 1][1] > dz ? -1 : 1) * d; critters.push({ model, at: at(x, z), rot: 0.5 + a + i, range: [3.4, 1.4], size: sz }); }
+  });
+}
+export default { fish, flights, perches, critters };

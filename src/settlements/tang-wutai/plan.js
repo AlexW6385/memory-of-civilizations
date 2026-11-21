@@ -9,6 +9,7 @@ import { courtElements } from './courts.js';
 import { gateElements } from './gate.js';
 import { cellElements, cellPeople } from './cells.js';
 import hallPlan from '../../buildings/foguang-east-hall/plan.js';
+import { visitorWalks } from './walk.js';
 
 const T = 13;                                   // the upper terrace (hall plan, y above the courtyard)
 const at = (x, z) => [HALL.origin[0] + x, HALL.origin[1] + z];   // a point of the hall plan in the settlement
@@ -143,7 +144,7 @@ export const people = monks();
 // the upper terrace's open room split either side of the axis, so that the street life's people stand beside the way
 // up to the hall and not on it (the arrival is on the axis)
 const rooms = hallPlan.rooms.flatMap((r) => (r.id === 'upper-terrace' ? [{ ...r, id: 'upper-terrace-north', rect: [r.rect[0], r.rect[1], r.rect[2], -3] }, { ...r, id: 'upper-terrace-south', rect: [r.rect[0], 3, r.rect[2], r.rect[3]] }] : [r]));
-export const hall = { ...hallPlan, rooms, elements: hallPlan.elements.filter((e) => !(e.t === 'obj' && (e.kind === 'pagoda' || e.kind === 'dharani_pillar'))), origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 14, -20, HALL.origin[0] + 11, 20], viewY: 13 };
+export const hall = { ...hallPlan, rooms, elements: hallPlan.elements.filter((e) => !(e.t === 'obj' && (e.kind === 'pagoda' || e.kind === 'dharani_pillar'))), origin: HALL.origin, base: 0, district: undefined, walks: [...hallPlan.walks, ...visitorWalks().routes], view: [HALL.origin[0] - 14, -20, HALL.origin[0] + 11, 20], viewY: 13 };
 export default hall;
 
 /** The Hall of Manjusri, the bell pavilion, the incense burners and the side stairs (monastery.js). */
