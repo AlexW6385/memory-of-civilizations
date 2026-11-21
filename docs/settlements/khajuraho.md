@@ -132,6 +132,13 @@ Still crude: the faces are modelled alike within a kind (a minute's difference o
 Sources added:
 - [Who are the 16 Surasundaris on Indian Temples? — Sahapedia](https://www.sahapedia.org/who-are-16-surasundaris-indian-temples)
 
+## 18. The visitor's walk (2026-11 match-the-reference pass, item 1)
+
+The village already stood open from the earlier passes (§5, §15: shops 85 %, homes 60 %, merchants' houses 55 %, mud houses, huts and sheds out to the village's edge, interiors only in the near plans; the keepers, the goods by trade, the lamp niche, the fronts by rule, the wayside shrines, kilns and carts). This pass fixes the visitor's walk and proves it:
+- **The walk** (`walk.js`, data): from the arrival in the pilgrims' approach (x -14, z -60, facing the stair) west to the forecourt of Kandariya's stair; east along the approach to the road's bend; the bazaar road from the temples' end east to the lane up to Lakshmana's platform and the Varaha; the tank way to the ghat; the road on into the village [inferred: the order after the arrival and §8's paths].
+- **Routes** (`plan.js` `walks`): fourteen routes from the lane over the verandah's platform into opened places, ten shops and sheds of the approach and the bazaar and four houses (homes, a mud house, a merchant's house) at the door the style cut (`doors.js` repeats the style's own draw, so a door is found without building it); walk-check follows all of them. Shop routes go in 0.9 m from the front's end: the middle of a shop's front is taken by the verandah's posts, the flower-sellers' plates, the bell and the dressing, which stand at random places [measured: a probe along twelve shops found the end open in all twelve].
+- Not built here: no new stall or water-shed on the lane (the arrival's draw budget is spent: §16).
+
 ## Sources
 
 - [Kandariya Mahadeva Temple — Wikipedia](https://en.wikipedia.org/wiki/Kandariya_Mahadeva_Temple)
