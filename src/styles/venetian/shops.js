@@ -167,12 +167,12 @@ export function shopFit(el, ctx) {
       if (h(k + 2 + j * 3) < 0.8) Lc.box('plaster_damp', x, 0, -P, x + w, top, -P + 0.006);
       x += w;
     }
-    for (let q = 0; q < 3; q++) Lc.box('plaster_streak', uw - 0.62 + q * 0.5 + 0.1 * h(20 + q), 0.7, -P, uw - 0.62 + q * 0.5 + 0.1 * h(20 + q) + 0.06, 0.93 - 0.06 * h(23 + q), -P + 0.006);
+    for (let q = 0; q < 3; q++) Lc.box('plaster_damp', uw - 0.62 + q * 0.5 + 0.1 * h(20 + q), 0.7, -P, uw - 0.62 + q * 0.5 + 0.1 * h(20 + q) + 0.06, 0.93 - 0.06 * h(23 + q), -P + 0.006);
     // the portico's own lamp: an iron lantern on a chain from the vault before the door, lit through the night [inferred: lamps hung in the arcades; the decree of 1450 and the capitelli's lamps are the stated lights]
     const pu = uc, pd = -P * 0.5;
     rodAt(bag, 'iron', P3, [pu, 4.15, pd], [pu, 3.05, pd], 0.006);
     Lc.add('iron', lathe([[0.001, 0], [0.07, 0.01], [0.075, 0.03], [0.001, 0.03]], 6, null, pu, 2.82, pd));
-    Lc.add('lamp_glass', lathe([[0.075, 0.03], [0.085, 0.1], [0.085, 0.2], [0.001, 0.2]], 6, null, pu, 2.82, pd));
+    for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) Lc.box('iron', pu + a * 0.07 - 0.005, 2.85, pd + b * 0.07 - 0.005, pu + a * 0.07 + 0.005, 3.02, pd + b * 0.07 + 0.005);
     Lc.add('iron', lathe([[0.09, 0.2], [0.001, 0.27]], 6, null, pu, 2.82, pd));
     Lc.add('flame', lathe([[0.001, 0.06], [0.02, 0.09], [0.001, 0.17]], 6, null, pu, 2.82, pd));
     const pl = P3(pu, 3.0, pd), pp = P3(pu, 0, pd);
