@@ -194,8 +194,8 @@ export function streetItems() {
   // the wells at some crossings of the north–south streets and the lanes
   const zs = laneZs();
   LANES_X.forEach((x, xi) => zs.forEach((z, zi) => { if ((xi + zi) % 3 === 0 && Math.hypot(x, z) < RADIUS - 50) { const hw = (STREET_W[x] ?? 8) / 2; out.wells.push({ at: [x + hw - 1.5, z + 1.6] }); } }));
-  // the earth-god's shrines: at every second well, on the lane's edge a little south of it facing the lane, and at the square's south corners facing north
-  out.wells.forEach((w, i) => { if (i % 2 === 0) out.tudis.push({ at: [w.at[0] + 0.7, w.at[1] + 4.6], rot: -Math.PI / 2, seed: 7 + i }); });
+  // the earth-god's shrines: at every second well south of the temple's first gate (the draw budget at the arrival), on the lane's edge a little south of it facing the lane, and at the square's south corners facing north
+  out.wells.forEach((w, i) => { if (i % 2 === 0 && w.at[1] > 60) out.tudis.push({ at: [w.at[0] + 0.7, w.at[1] + 4.6], rot: -Math.PI / 2, seed: 7 + i }); });
   for (const s of [-1, 1]) out.tudis.push({ at: [s * 36.5, 168.6], rot: Math.PI, seed: 90 + s });
   for (let i = 0; i < zs.length; i += 2) for (const x of LANES_X) if (Math.hypot(x, zs[i]) < RADIUS - 60 && r() < 0.5) out.carts.push({ at: [x - ((STREET_W[x] ?? 8) / 2 - 1.2), zs[i] + 12 + r() * 6], rot: 0, seed: Math.floor(r() * 1e6) });
   return out;
