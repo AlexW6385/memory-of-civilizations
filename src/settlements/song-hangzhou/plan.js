@@ -107,7 +107,7 @@ for (const l of upLots()) walks.push(storeyWalk({ ...l, y: LEVEL.street }));
 // (those opened upstairs have their own route above), two metres into the front room [inferred: the front's centre is the way in]
 {
   // (where a counter or a post stands in the middle of the front, the route enters beside it or stops short: by lot seed)
-  const TWAY = { 411839: 0.38, deep: { 955396: -1.2 } };
+  const TWAY = { 411839: 0.38,  deep: { 955396: -1.2 } };
   walkLots().forEach((l) => {
     const F = frontOf(l);
     const t = TWAY[l.seed] ?? 0.5;
