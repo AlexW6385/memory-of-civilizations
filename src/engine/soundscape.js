@@ -95,6 +95,7 @@ import * as MADURAI from '../settlements/madurai/soundmap.js';
 import * as MUSCOVY from '../settlements/muscovy/soundmap.js';
 import './voices-muscovy.js';
 import * as MYCENAE from '../settlements/mycenae/soundmap.js';
+import * as NALANDA from '../settlements/nalanda/soundmap.js';
 import * as NARA from '../settlements/nara/soundmap.js';
 import * as FEZ from '../settlements/fez/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
@@ -203,7 +204,7 @@ export const PROFILES = {
   'tang-changan': T(EAS, { cicadas: 0.4, animals: withLife({ rooster: 0.3, dog: 0.3, horse: 0.3, camel: 0.2 }, { market: 1, eaves: 1, map: TANGCA }), roof: 'tile', bells: 'tang-changan' }),
   'wei-ye': T(EAS, { cicadas: 0.5, frogs: 0.3, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
   bhaktapur: T(IND, { cicadas: 0.2, animals: withLife({ dog: 0.4, rooster: 0.4, cattle: 0.3, goat: 0.2 }, { market: 1, eaves: 1, map: BHAKTAPUR }), roof: 'tile', bells: null }),
-  nalanda: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.5, goat: 0.3, rooster: 0.3, dog: 0.2 }, roof: 'flat', bells: 'puja' }),
+  nalanda: T(IND, { cicadas: 0.6, frogs: 0.6, animals: withLife({ cattle: 0.5, goat: 0.3, rooster: 0.3, dog: 0.2 }, { market: 0.6, map: NALANDA }), roof: 'flat', bells: 'puja' }),
   'hakka-tulou': T(EAS, { cicadas: 0.7, frogs: 0.9, animals: { rooster: 0.7, dog: 0.4, cattle: 0.3 }, roof: 'tile' }),
   ajanta: T(IND, { cicadas: 0.4, frogs: 0.3, animals: { goat: 0.4, cattle: 0.3, dog: 0.3 }, roof: 'thatch', bells: 'monastery' }),
   'mohenjo-daro': T(NEAR, { cicadas: 0.5, frogs: 0.3, animals: { zebu: 0.5, goat: 0.4, dog: 0.4, rooster: 0.2 }, roof: 'flat' }),
