@@ -4,6 +4,7 @@
 import { RADIUS, RIVER, EAST, XF, ZW, FLOOR, VILLAGE, WELL, PEN, THRESH, VSHRINE, GRANARIES, GHATS, C1, C19, C12, PATHS, rng, inRect, riverX } from './layout.js';
 import '../../styles/ajanta/index.js';
 import { lots } from './layout.js';
+import { hashAt } from './nightlight.js';
 
 const base = (id, style, elements, b = 0) => ({ id, style, origin: [0, 0], base: b, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 14], facing: 'w' } });
 
@@ -163,8 +164,9 @@ export async function town() {
     const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, d = rng(l.seed ?? 1), uc = W * (0.38 + d() * 0.24), left = uc > W / 2, tt = 0.35, south = l.front === 's';
     const xz = (u, v) => (south ? [x0 + u, z1 - v] : [x1 - u, z0 + v]), rot = south ? 0 : Math.PI;           // v runs into the house; the person at the hearth faces the back wall
     if (Math.hypot((x0 + x1) / 2 + 21.5, (z0 + z1) / 2 + 4) > 125) continue;
-    if (l.seed % 2 === 0) woman(xz((left ? tt + 0.15 : W - tt - 0.85) + 0.35, D - tt - 1.25), 0.02, rot, { pose: 'squat' });
-    else if (l.seed % 3 === 0) { const cu = left ? W - tt - 1.8 : tt + 0.1; (rand() < 0.5 ? worker : lay)(xz(cu + 0.9, D - tt - 0.6), 0.5, rot + Math.PI, { pose: 'sit' }); }
+    const lit = l.open || hashAt(xz(uc, 0)[0], xz(uc, 0)[1], 5) <= 0.62;                     // a hut with its hearth lit at night (nightlight.js hutLight): the one at it stays
+    if (l.seed % 2 === 0) woman(xz((left ? tt + 0.15 : W - tt - 0.85) + 0.35, D - tt - 1.25), 0.02, rot, { pose: 'squat', nightKeep: lit ? 1 : 0 });
+    else if (l.seed % 3 === 0) { const cu = left ? W - tt - 1.8 : tt + 0.1; (rand() < 0.5 ? worker : lay)(xz(cu + 0.9, D - tt - 0.6), 0.5, rot + Math.PI, { pose: 'sit', nightKeep: lit ? 1 : 0 }); }
   }
   // the trades at work: the smith at his anvil, the potter at his wheel, the ox that drives the oil press, the weaver at his loom
   for (const l of LOTS) if (l.craft) {

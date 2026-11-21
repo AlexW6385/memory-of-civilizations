@@ -102,8 +102,8 @@ export function lots() {
   });
   // four of the lots are the trades' sheds (docs/settlements/ajanta.md §14): the potter near the ford's road, the oil-presser, the smith and the weaver at the village's far edge
   for (const [i, craft] of [[3, 'potter'], [8, 'oilpress'], [10, 'smithy'], [15, 'weaver']]) if (out[i]) { out[i].craft = craft; out[i].variant = 0; }
-  // the six houses nearest the road from the ford stand open to the visitor: a door of 1.64 m, the front room walkable (walk.js)
-  out.filter((l) => !l.craft).sort((a, b) => Math.hypot(a.rect[0] - 40, a.rect[1] - 30) - Math.hypot(b.rect[0] - 40, b.rect[1] - 30)).slice(0, 6).forEach((l) => { l.open = true; });
+  // the ten houses nearest the road from the ford stand open to the visitor: a door of 1.64 m, the front room walkable (walk.js)
+  out.filter((l) => !l.craft).sort((a, b) => Math.hypot(a.rect[0] - 40, a.rect[1] - 30) - Math.hypot(b.rect[0] - 40, b.rect[1] - 30)).slice(0, 10).forEach((l) => { l.open = true; });
   return out;
 }
 

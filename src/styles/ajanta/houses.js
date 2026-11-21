@@ -101,7 +101,7 @@ export function house(el, { bag, col, lights }) {
   if (V === 1) {
     B(F, bag, 'banco', -0.1, 0, -1.55, W + 0.1, 0.18, 0); C(F, col, -0.1, -1.55, uc - dw, 0, 0, 0.18);
     col.floor(F.rect4(-0.1, -1.55, W + 0.1, 0), 0.18);
-    for (const u of [0.1, W / 2 - 0.2, W - 0.1]) { const [px, pz] = F.xz(u, -1.5); bag.add('timber', rod([px, 0.18, pz], [px, H + 0.1, pz], 0.07, 6)); col.circle(px, pz, 0.09, 0, H); }
+    for (const u of open ? [0.1, W - 0.1] : [0.1, W / 2 - 0.2, W - 0.1]) { const [px, pz] = F.xz(u, -1.5); bag.add('timber', rod([px, 0.18, pz], [px, H + 0.1, pz], 0.07, 6)); col.circle(px, pz, 0.09, 0, H); }
     { const a = F.rect4(-0.15, -1.62, W + 0.15, -1.45); bag.add('timber', box(a[0], H - 0.12, a[1], a[2], H + 0.08, a[3])); }
     B(F, bag, 'banco', 0.25, 0.18, -0.55, 1.35, 0.5, -0.05); C(F, col, 0.25, -0.55, 1.35, -0.05, 0.18, 0.5);
   }
