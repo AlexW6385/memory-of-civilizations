@@ -17,7 +17,7 @@ export const HALL = { cx: AX, bays: 9, bayW: 6.6, depth: 4, depthW: 6, z1: -166,
 HALL.w = HALL.bays * HALL.bayW; HALL.d = HALL.depth * HALL.depthW; HALL.z0 = HALL.z1 - HALL.d; HALL.floor = CROWN + HALL.base;
 export const SIDE_HALLS = [[AX - 48, -176, 18, 14], [AX + 48, -176, 18, 14]];          // the east and west chambers on the crown: cx, cz, w, d
 export const JIAOFANG = { cx: AX, cz: -232, w: 36, d: 12 };                                // the empress's hall behind the terrace (inside the north wall)
-export const GARDEN_POND = [-235, -90, -165, -30];                                         // the imperial pond south-west of the Front Hall (a shallow basin)
+export const GARDEN_POND = [-243, -90, -191, -30];                                         // the imperial pond south-west of the Front Hall (a shallow basin)
 export const POND_Y = -0.6;
 
 // the city
