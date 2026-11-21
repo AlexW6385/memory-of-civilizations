@@ -681,7 +681,7 @@
  },
  "bauhaus-school": {
   "site": "bauhaus-dessau",
-  "hash": "c77fb4668001cff8",
+  "hash": "c7df764779e4f5fc",
   "rays": 128,
   "probes": 69479,
   "boxes": [
@@ -722,9 +722,9 @@
     ]
    }
   ],
-  "bytes": 1107635,
-  "seconds": 89,
-  "baked": "2026-11-18"
+  "bytes": 1107646,
+  "seconds": 100,
+  "baked": "2026-11-21"
  },
  "benin-palace": {
   "site": "benin-city",
@@ -885,8 +885,8 @@
    }
   ],
   "bytes": 1221650,
-  "seconds": 129,
-  "baked": "2026-11-18"
+  "seconds": 147,
+  "baked": "2026-11-21"
  },
  "brasilia-congress": {
   "site": "brasilia",
@@ -930,8 +930,8 @@
    }
   ],
   "bytes": 1182397,
-  "seconds": 107,
-  "baked": "2026-11-18"
+  "seconds": 121,
+  "baked": "2026-11-21"
  },
  "byodo-in-phoenix-hall": {
   "site": "heian-uji",
@@ -962,7 +962,7 @@
  },
  "cahokia-monks": {
   "site": "cahokia",
-  "hash": "cb5014c315befda3",
+  "hash": "10a665829eb98d3f",
   "rays": 128,
   "probes": 37224,
   "boxes": [
@@ -1015,9 +1015,9 @@
     ]
    }
   ],
-  "bytes": 589739,
-  "seconds": 77,
-  "baked": "2026-11-18"
+  "bytes": 589940,
+  "seconds": 80,
+  "baked": "2026-11-21"
  },
  "catalhoyuk-town": {
   "site": "catalhoyuk",
@@ -2460,7 +2460,7 @@
   ],
   "bytes": 188933,
   "seconds": 16,
-  "baked": "2026-11-18"
+  "baked": "2026-11-21"
  },
  "karakorum-ger-camp": {
   "site": "mongol-karakorum",
@@ -3113,8 +3113,8 @@
    }
   ],
   "bytes": 15602,
-  "seconds": 13,
-  "baked": "2026-11-17"
+  "seconds": 14,
+  "baked": "2026-11-21"
  },
  "maya-tikal-plaza": {
   "site": "maya-tikal",
@@ -3374,7 +3374,7 @@
    }
   ],
   "bytes": 313305,
-  "seconds": 173,
+  "seconds": 31,
   "baked": "2026-11-21"
  },
  "mughal-agra-taj": {
@@ -3782,12 +3782,12 @@
    }
   ],
   "bytes": 170129,
-  "seconds": 77,
+  "seconds": 13,
   "baked": "2026-11-21"
  },
  "nandauwas": {
   "site": "nan-madol",
-  "hash": "b29b7924587ce2c6",
+  "hash": "2c1d0f11d15bf7cd",
   "rays": 128,
   "probes": 4760,
   "boxes": [
@@ -3810,8 +3810,8 @@
    }
   ],
   "bytes": 86567,
-  "seconds": 8,
-  "baked": "2026-11-17"
+  "seconds": 9,
+  "baked": "2026-11-21"
  },
  "nara-todaiji": {
   "site": "nara",
@@ -4361,7 +4361,7 @@
    }
   ],
   "bytes": 1128874,
-  "seconds": 448,
+  "seconds": 121,
   "baked": "2026-11-21"
  },
  "samarkand-registan": {
@@ -4429,7 +4429,7 @@
  },
  "sgang-gwaay-house": {
   "site": "sgang-gwaay",
-  "hash": "f9b8e6c2cd23a3e3",
+  "hash": "19565dbfbc15abe1",
   "rays": 128,
   "probes": 3240,
   "boxes": [
@@ -4450,9 +4450,9 @@
     ]
    }
   ],
-  "bytes": 55481,
-  "seconds": 6,
-  "baked": "2026-11-18"
+  "bytes": 55491,
+  "seconds": 7,
+  "baked": "2026-11-21"
  },
  "shaolin-monastery": {
   "site": "shaolin",
