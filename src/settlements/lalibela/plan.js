@@ -223,6 +223,8 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
 // ---- braziers at the church doors, where the pilgrims keep the night's vigil (docs §19)
 for (const [id, x, z] of [['giyorgis', gc[0] - 16.2, gc[1] - 4.2], ['giyorgis', gc[0] - 16.2, gc[1] + 4.2], ['medhane', mc[0] - 20.0, mc[1] - 4.4], ['medhane', mc[0] - 20.0, mc[1] + 4.4],
   ...['golgotha', 'amanuel', 'gabriel'].flatMap((k) => { const r = AKS[k].rect, zc = (r[1] + r[3]) / 2; return [[k, r[0] - 2.6, zc - 3.6], [k, r[0] - 2.6, zc + 3.6]]; })]) E.push({ t: 'lal_brazier', at: [x, z], y: -PITS[id].depth + 0.15 });
+// ---- wayside fires of the pilgrims on the knoll and along the way down (docs §23): a visitor at night has light within a few metres
+for (const [x, z] of [[-235.1, 169.1], [-246.2, 160.8], [-251.5, 141.0], [-253.5, 134.5], [-244.0, 112.0], [-255.0, 60.0]]) E.push({ t: 'lal_brazier', at: [x, z], y: slope(x, z) });
 E.push({ t: 'lal_glow', houses: houses().map((h) => ({ c: h.c, door: h.door, r: h.r, seed: h.seed, y: slope(h.c[0], h.c[1]), enter: !!h.enter })).concat([{ c: HUT.c, door: HUT.door, r: HUT.r, seed: 1220, y: 0, enter: true }]) });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // (the halls first: a position is given to the first room that holds it, and the pits' open rooms hold the halls)
