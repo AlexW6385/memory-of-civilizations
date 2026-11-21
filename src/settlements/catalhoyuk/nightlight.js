@@ -121,6 +121,7 @@ function quarterExtra(H, el) {
 function houseExtra(H, el) {
   const [x0, z0] = el.rect, T = 0.45, top = el.top ?? 2.5;
   hatchGlow(H, x0 + T + 1.6, top + 0.09, z0 + T + 4.4, 0.6);
+  H.ball(x0 + 2.3, top + 0.39, z0 + 1.7, 0.65, 0.62); H.floor(x0 + 2.3, top + 0.13, z0 + 1.7, 1.9, 1.9, 10, 0.8);   // the roof's fire ring
 }
 let done = false;
 export function registerNight() {

@@ -4,7 +4,8 @@
 // were), in materials the plan already holds (no new draw), pure functions of each house's own numbers. Nothing is written anywhere: there is no script (§14).
 import '../../styles/catal/index.js';
 import './nightlight.js';
-import { box, lathe } from '../../core/geom.js';
+import { box, lathe, rod } from '../../core/geom.js';
+import { jar } from '../../styles/catal/kit.js';
 import { cellGeom } from '../../styles/catal/cell.js';
 import { hashAt } from './nightlight.js';
 import { STYLES } from '../../core/build.js';
@@ -79,6 +80,16 @@ export function registerWear() {
     wornWay(bag, y, hx, hz + 1.2, lxo, hz + 1.2, 0.8);
     bag.add(DUST, box(hx - 0.4, ST + 0.27, hz + 0.5 + 0.3, hx + 0.4, ST + 0.274, hz + 0.5 + 0.5));
     sootRoof(bag, hx, y + 0.18, hz, 0.8 + 0.2, 0.5 + 0.2);
+    // the way trodden over the yard from the arrival to the ladder's foot (two rows of foot-wide worn bands, ruts of the daily path)
+    for (let q = 0; q < 6; q++) { const zz = z1 + 1.3 + q * 0.85, jx = (hashAt(lxo, zz, 7) - 0.5) * 0.3; bag.add(DARK, box(lxo + jx - 0.45, 0.004, zz - 0.28, lxo + jx + 0.45, 0.008, zz + 0.28)); }
+    // the roof's work place, clear of the way over it: a fire ring of stones with its ash, a saddle quern with its rubber, jars, reed bundles leaning on the north parapet [inferred: the roofs were work yards, dossier §2]
+    { const fx = x0 + 2.3, fz = z0 + 1.7, qx = x0 + 5.6, qz = z0 + 1.5;
+      for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2 + hashAt(fx, fz, 2); bag.add('granite_rough', lathe([[0.001, 0], [0.09, 0.01], [0.08, 0.09], [0.001, 0.1]], 6, null, fx + Math.cos(a) * 0.34, y, fz + Math.sin(a) * 0.34)); }
+      bag.add(SOOT, lathe([[0.3, 0.004], [0.001, 0.006]], 10, null, fx, y, fz));
+      for (let k = 0; k < 3; k++) { const a = k * 2.1 + 0.3; bag.add('bark_dark', rod([fx + Math.cos(a) * 0.22, y + 0.02, fz + Math.sin(a) * 0.22], [fx + Math.cos(a) * 0.03, y + 0.05, fz + Math.sin(a) * 0.03], 0.02, 5)); }
+      bag.add('granite_rough', box(qx, y, qz, qx + 0.6, y + 0.12, qz + 0.4)); bag.add('granite_rough', box(qx + 0.12, y + 0.12, qz + 0.12, qx + 0.45, y + 0.16, qz + 0.28));
+      jar(bag, qx + 1.0, y, qz + 0.1, 0.9, 'terracotta'); jar(bag, qx + 1.4, y, qz + 0.25, 0.7, 'pottery_dark');
+      for (let k = 0; k < 4; k++) { const rx = x0 + 3.4 + k * 0.16; bag.add('reed_mat', rod([rx, y, z0 + 0.7], [rx + 0.1, y + 0.9, z0 + 0.52], 0.045, 5)); } }
     // inside: the plaster floor greyed under the hatch, blackened round the hearth, the west platform's edge rubbed where people sit
     bag.add(GREY, box(ix0 + 1.2, 0.052, iz0 + 4.0, ix0 + 2.7, 0.054, iz0 + 5.0));
     bag.add(SOOT, lathe([[0.42, 0.052], [0.95, 0.052]], 12, null, ix0 + 1.1, 0, iz0 + 4.4));

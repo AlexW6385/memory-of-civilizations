@@ -135,3 +135,12 @@ All [inferred] from §8 and the site's fauna as generally published (sheep and g
 
 - No inscription, sign or tablet: there is no script at Çatalhöyük [stated: §14 header]. Wear only. Code: `wear.js`.
 - The roof worn by the feet from the ladder's head over the landmark roof to the hatch, and from the middle of each opened house's roof to its hatch's rim, where the rim's top is rubbed pale; soot in tongues on the roofs round every hatch (`pottery_dark`) [inferred: smoke leaves by the hatch, §4; the hatch's inner soot is already stated]. The earth trodden dark at the foot of the landmark's ground ladder, the wall rubbed at hand and shoulder height beside it [inferred: the ladder is climbed daily]. Inside: the plaster floor greyed under each hatch and black round the landmark's hearth [inferred].
+
+## 15. Second pass, narrow form (night, budget, gaps, landmark)
+
+All [inferred] from §2, §4, §11, §12 (no new source read; no writing anywhere).
+
+- **Job 1, night:** rooftop cooking fires on about one house roof in five (halo glow only, in the quarter's existing halo mesh: no draw), and one fire ring on the landmark's roof; figures at fires keep the night (`nightKeep: 1`: the landmark's three, the woman at each opened hearth, the baker at the court oven). Seen: arrival and a roof pose at night (`shots/n1b-arrival.png`, `shots/n4-roof-night.png`) show hatch glow, ring and glow clearly within 15 m; the landmark's interior at night (hearth pool, kept figure) also seen. Not seen: the second walk pose at night.
+- **Job 2, budget (MAIN pass):** arrival main 101 draws / 0.22 M tris; six poses on the walk (three places, two yaws) 91-101 draws / 0.21-0.22 M. Far under 440/450, nothing to split.
+- **Job 3, gaps:** the dossier's still-missing list (§12): wall niches and shelves, burial goods. Built in every opened house: a plaster shelf-niche on the south wall beside the ladder with jar, bowl, obsidian blades and a bone point; grave goods (bead string, blade, bone point) on the platform's fresh patch. Seen in a render (`shots/n3-shelf2.png`); the bead string is small and only faintly visible. 15 routes / 44 legs still walk. Still short: second storeys and ladders between levels (§13), moulded plaster figures of the Mellaart shrines, interior sound.
+- **Job 4, landmark:** trodden yard way from the arrival to the ladder's foot; on the roof a fire ring of stones with ash, a saddle quern, two jars, leaning reed bundles (clear of the worn way). Seen at night.
