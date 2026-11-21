@@ -112,3 +112,11 @@ Source added: Ashoka's Pillar Edict VII (wells, rest-houses and watering places 
 - **Wayside stupa.** A small votive stupa on a platform with a lamp and flowers where the path meets the ford [inferred: votive stupas are common at Buddhist sites; §12 has them on the ledge].
 - **Shelter.** The pilgrims' shelter at the stair's foot now holds sleeping mats, cloth bundles, a staff, a water jar on a rack and a lamp on a post [inferred].
 - **Open houses.** The six village houses nearest the road from the ford have a door 1.64 m wide with its head 2.08 m up (the plain hut's is 1.04 m by 1.75 m), so that the front room can be walked; the yard house's gate is wider. The four trades' sheds are open-fronted and walked too. Far houses keep their narrow doors.
+
+## 17. Matching the reference, 2: night
+All [inferred] from what such a place burned: no source describes Ajanta's nights. The lamp is the small clay or bronze dish of sesame oil or ghee with a cotton wick; there is no glass, no candle (wax candles are not Indian of this date) and no electric light.
+- **Caves.** Bronze lamp stands before the Buddha of the shrine, in the hall's corners, by the stupa and in the cell hall (the style's `lamp`, already placed in §3, §14); clay lamps in the shrine niches; the lamps with their flames now throw a halo and a pool on the floor (`halo` material, nightlight.js), visible at the low preset.
+- **Ledge.** The stone lamp stands of §12 and the offerings' lamps burn at the cave mouths.
+- **Gorge floor.** The lamp-seller's booth burns a few of its own lamps and one hung from its beam; the wayside stupa and the shelter have a lamp each; the water-shed none.
+- **Village.** Of the huts, the open ones and about three in eight of the rest are awake: the hearth's red glow shows through the door, the clay lamp stands on the door-post shelf, and in some the front window glows; the others are dark (oil is dear). The smith's forge glows red; the potter's kiln burns at its fire-mouth.
+- **Day.** Unchanged: the halo is added light and shows only at night.
