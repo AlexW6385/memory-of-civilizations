@@ -8,7 +8,9 @@ import { RADIUS, AX, PALACE, PALACE_WALL, HALL, CROWN, EAST_GATE, SOUTH_GATE, CH
 const AVENUE_BAND = { mid: [AVENUE[0] + 11, AVENUE[1], AVENUE[2] - 11, WALL_S - 6], kerbW: [AVENUE[0], AVENUE[1], AVENUE[0] + 0.6, WALL_S - 6], kerbE: [AVENUE[2] - 0.6, AVENUE[1], AVENUE[2], WALL_S - 6] };
 
 import { lifePlans } from './life.js';
+import { palaceNight, changleNight, cityNight, wardNight, marketNight } from './nightplace.js';
 import '../../styles/hanlodge/index.js';
+import './nightlight.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'han', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [AX, 60], facing: 'n' }, ...o });
 const pick = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
@@ -98,6 +100,7 @@ export async function town() {
     E.push({ t: 'han_pond', rect: GARDEN_POND, y: POND_Y }, { t: 'han_island', at: [(GARDEN_POND[0] + GARDEN_POND[2]) / 2 - 6, GARDEN_POND[1] + 17], r: 7, y: POND_Y, pond: GARDEN_POND, seed: 4 });
     // the paved axial way from the south gate to the ramp, and the paved court at its foot
     E.push({ t: 'floor', rect: [AX - 6, RAMP.z1 - 0.5, AX + 6, PALACE[3] - 2], y: 0.03, mat: 'bluestone', th: 0.3 }, { t: 'floor', rect: [AX - 26, RAMP.z1 - 0.5, AX + 26, RAMP.z1 + 24], y: 0.02, mat: 'brick_paving', th: 0.3 });
+    E.push(...palaceNight());
     plans.push(base('han-palace', E, { style: 'hanlodge' }));
   }
   // ── the Changle palace ──
@@ -105,6 +108,7 @@ export async function town() {
     const E = walledRect(CHANGLE, PALACE_WALL.th, PALACE_WALL.h, 'lime_plaster', [{ side: 'w', c: EAST_GATE.z, w: 14 }, { side: 's', c: CHANGLE_HALL.cx, w: 14 }]);
     for (const cz of [-150, -20]) E.push({ t: 'hanl_hall', cx: CHANGLE_HALL.cx, z1: cz, bays: 5, bayW: 6, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 5.2, roof: 'hip', rise: 4.2, overhang: 2.6, ap: 1.6, furnish: 'court', open: [2, 2], seed: 51 + cz });
     E.push({ t: 'han_corridor', a: [CHANGLE[0] + 10, -100], b: [CHANGLE[0] + 40, -100], w: 3.4, wall: 1 });
+    E.push(...changleNight());
     plans.push(base('han-changle', E, { style: 'hanlodge' }));
   }
   // ── the great avenue's offices ──
@@ -120,6 +124,7 @@ export async function town() {
       const z0 = w[1], lc = [z0 + WARD_WALL + 24.55, z0 + WARD_WALL + 72.85];
       E.push({ t: 'han_ward', rect: w, gates: [{ side: 'w', c: lc[0], w: 4.5 }, { side: 'e', c: lc[0], w: 4.5 }, { side: 'w', c: lc[1], w: 3.5 }, { side: 'e', c: lc[1], w: 3.5 }] });
     }
+    E.push(...wardNight());
     plans.push(base('han-wards', E));
     const H = lots().filter((l) => l.kind !== 'office' && !inService(l) && !enterable(l)), K = { court: 'han_house', row: 'han_house', tower: 'han_house' };
     for (let i = 0; i < H.length; i += 40) plans.push(base(`han-houses-${i / 40}`, H.slice(i, i + 40).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: false }))));
@@ -132,7 +137,7 @@ export async function town() {
   // ── the markets ──
   for (const [id, rect, sd] of [['west', WEST_MARKET, 600], ['east', EAST_MARKET, 700]]) {
     const cx = (rect[0] + rect[2]) / 2, cz = (rect[1] + rect[3]) / 2;
-    plans.push(base(`han-market-${id}`, [{ t: 'han_market', rect, gates: { n: cx, s: cx, e: cz, w: cz }, th: MARKET_WALL.th, h: MARKET_WALL.h }, ...marketRows(rect, sd)]));
+    plans.push(base(`han-market-${id}`, [{ t: 'han_market', rect, gates: { n: cx, s: cx, e: cz, w: cz }, th: MARKET_WALL.th, h: MARKET_WALL.h }, ...marketRows(rect, sd), ...marketNight(rect)]));
   }
   // ── the city wall and its gates; the Kunming Lake and the tower-ship; the academy ──
   {
@@ -154,6 +159,7 @@ export async function town() {
     E.push({ t: 'han_gate', c: [GATE_S.x, WALL_S], axis: 'x', th, h, n: 3, pw: 6, pier: 2.4, ph: 5.4 });
     void wn;
     for (const b of BRIDGES) E.push({ t: 'han_bridge', ...b, y: MOAT_Y });
+    E.push(...cityNight());
     plans.push(base('han-citywall', E));
     const A = ACADEMY, cx = (A[0] + A[2]) / 2, L = walledRect(A, 1.6, 3.4, 'earth_wall', [{ side: 'n', c: cx, w: 6 }]);
     for (const e of L) if (e.t === 'han_gate') { e.h = 3.4; e.th = 1.6; e.ph = 2.6; e.pw = 3; }
