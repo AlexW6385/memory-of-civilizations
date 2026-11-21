@@ -106,7 +106,9 @@ function arcade(bag, col, a, b, y0, { bay = 0.85, parapet = 0.8, colH = 0.62, pl
     for (let i = 0; i <= n; i++) {
       const [px, pz] = at(r0 + i * bw);
       if (i === 0 || i === n) { bag.add(W, box(px - 0.09, y0, pz - 0.09, px + 0.09, sp + H, pz + 0.09)); continue; }
-      bag.add(W, lathe([[0.075, 0], [0.05, 0.05], [0.045, colH * 0.5], [0.05, colH - 0.07], [0.085, colH - 0.02], [0.085, colH], [0.001, colH]], 8, null, px, ys, pz));
+      // the little column: a bead and a spreading foot, a shaft with a ring, a necking bead and a flared cushion capital under a square abacus (the arcade's carving, [inferred] from the Romanesque forms of the portals)
+      bag.add(W, lathe([[0.085, 0], [0.085, 0.03], [0.06, 0.05], [0.045, 0.09], [0.043, colH * 0.5 - 0.02], [0.055, colH * 0.5], [0.043, colH * 0.5 + 0.03], [0.043, colH - 0.2], [0.06, colH - 0.17], [0.06, colH - 0.14], [0.042, colH - 0.12], [0.07, colH - 0.08], [0.1, colH - 0.04], [0.1, colH - 0.03], [0.001, colH - 0.03]], 10, null, px, ys, pz));
+      bag.add(W, box(px - 0.115, ys + colH - 0.03, pz - 0.115, px + 0.115, ys + colH, pz + 0.115));
     }
     const sh = new Shape(), rr = bw / 2 - 0.06;
     sh.moveTo(0, 0);
