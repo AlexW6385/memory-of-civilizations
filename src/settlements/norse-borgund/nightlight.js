@@ -13,7 +13,11 @@
 import '../../styles/norse/index.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { STYLES } from '../../core/build.js';
-import { doorOf } from './layout.js';
+import { box } from '../../core/geom.js';
+import { doorOf, YARD, height } from './layout.js';
+
+/** The outdoor fires of the night [inferred]: a pine-splinter cresset on a post at each side of the churchyard's gate (where the parish's horses stand), and the herder's fire at the west meadow's sheep. */
+export const FIRES = [[-2.6, YARD[3] + 0.9, 1.9], [2.6, YARD[3] + 0.9, 1.9], [-44, -37, 0.55]];
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -131,6 +135,10 @@ const wrapChurch = (fn) => function haloedChurch(el, ctx) {
   // reaches them from within and they show as faint warm discs from outside [inferred: a lit room's small openings glow in the dark]
   const s = el.s ?? 1, [cx, cz] = el.c, ry = (el.y ?? 0) + 8.75 * s;
   for (const [sd, zz] of [[-1, cz - 3.4 * s - 0.02], [1, cz + 3.4 * s + 0.02]]) for (const u of [-2.85, -0.95, 0.95, 2.85]) H.disc([cx + u * s, ry, zz], [1, 0, 0], [0, 1, 0], 0.15, 0.15, [0, sd], 10, [0.5, 0.45, 0.25]);
+  for (const [fx, fz, fh] of FIRES) {
+    const g = height(fx, fz);
+    if (fh > 1) { ctx.bag.add('tar_wood', box(fx - 0.06, g, fz - 0.06, fx + 0.06, g + fh - 0.12, fz + 0.06)); ctx.bag.add('iron', box(fx - 0.2, g + fh - 0.14, fz - 0.2, fx + 0.2, g + fh - 0.1, fz + 0.2)); ctx.bag.add('iron', box(fx - 0.2, g + fh - 0.1, fz - 0.2, fx - 0.17, g + fh + 0.1, fz + 0.2)); ctx.bag.add('iron', box(fx + 0.17, g + fh - 0.1, fz - 0.2, fx + 0.2, g + fh + 0.1, fz + 0.2)); ctx.bag.add('iron', box(fx - 0.17, g + fh - 0.1, fz - 0.2, fx + 0.17, g + fh + 0.1, fz - 0.17)); ctx.bag.add('iron', box(fx - 0.17, g + fh - 0.1, fz + 0.17, fx + 0.17, g + fh + 0.1, fz + 0.2)); }
+    else { for (let k = 0; k < 3; k++) { const a = k * 2.1, c = Math.cos(a) * 0.3, d = Math.sin(a) * 0.3; ctx.bag.add('log_pine', box(fx + c - 0.45, g, fz + d - 0.06, fx + c + 0.45, g + 0.12, fz + d + 0.06)); } } H.ball(fx, g + fh, fz, fh > 1 ? 0.8 : 0.95, 0.8); H.floor(fx, g + 0.05, fz, fh > 1 ? 2.6 : 3.2, fh > 1 ? 2.6 : 3.2, 10, 0.62); }
   H.flush(ctx.bag);
   return r;
 };
