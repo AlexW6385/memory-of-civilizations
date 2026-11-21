@@ -212,6 +212,32 @@ The visitor arrives at x 110 on the paved way, facing west to the monument (src/
 
 Not done: a near/far split of the houses' interiors. Master draws 436 at the arrival and the walk's poses 389 and 394; splitting the houses into near and far plans (per 100 m tile, or per hamlet) raised the arrival to 450–477 (each near or far plan in view costs a draw per material, where the ordinary plans are merged per material), over the assignment's +2. The interiors stay in their plans, drawn as before.
 
+### 20.2 Night (`nightlight.js`)
+
+| Feature | What is built | Basis |
+|---|---|---|
+| Lamp glows | Every flame an element adds (the clay lamps of the offerings, stall counters and shrines, the stone-step lamp rows at the stairs' feet) gets a glow (three crossed discs) and, where the lamp is low, a pool of light; the lamps of one row are clustered | clay oil lamps (dipa) offered at shrines (§13) [inferred] |
+| Torches | 24 resin torches (damar) on bamboo poles: a pair before the gate's pylons, one every 14 m alternating sides along the way (none in the arrival's view), two beside the foot of each ground flight of the monument, two at the monastery's gate; the flame is a glow only | torches as the street light of a village before the lamp-post [inferred] |
+| Houses | Lit windows (by the hash of their place: 85% of the furnished houses' shutters, 30% of the others), the door ajar on a lit room (a sheet in the doorway, its pool over the veranda and at the stair's foot), the hearth fire in the back corner of the hearth, loom and kitchen houses; the forge's and shrine's own flames | the hearth the house's centre, the shutters [inferred] |
+| Stalls, halls | A hearth glow and a bamboo lantern hung over the counter at seven in ten of the food stalls; one lamp on a bamboo stand at the back corner of each rest hall and village hall; a flame on each bronze lamp stand of the great hall | [inferred] |
+
+All of it is geometry in the engine's additive `halo` material (cut away by day, so the day view is unchanged; readable at the low preset: rendered at the arrival, low preset, 22 h: the stalls' glow, the lit shutters and the lamp rows show). One draw is added to the arrival's frame. Seen: one night render at the arrival; not seen: a second pose, the monastery, the monument's stairs at night.
+
+### 20.3 Sound (`soundmap.js`, `src/engine/voices-borobudur.js`, `tests/borobudur-sound.test.mjs`)
+
+Voices (all synthesised, prefix `bor`): bronze metallophone pair with a hung gong (interlocking on a five-note mode), hung gong, bamboo flute, hand drum, monks' chant (wordless), hand bell, conch, rice mortar (lesung), bird-scarer clapper, buffalo's wooden bell, tokay gecko, koel, sellers' cries, trickle over a bund, buffalo cart on the way. The reliefs show drums, bells, gongs, strings, flutes, xylophones and cymbals, which the Sound of Borobudur project rebuilds [stated in outline: injourneydestination.id]; the instruments' playing, the pitches, the ensemble's interlocking and everything else is [inferred].
+
+| Where | What, when |
+|---|---|
+| Monument | conch at the east stair's foot, bell and chant at the summit: dawn (4.8–6.6 h) and dusk (17–19 h) |
+| Monastery | great hall: chant at the offices and at 10–11.5, gong, drum; the gate's bell at dawn |
+| Hamlets 0–2 (village halls) | ensemble, flute, drum from 16 to 21.5 h, not in rain; hamlets 3–5 (stupa shrines): a hand bell at dawn and dusk |
+| Way | sellers' cries at five stalls by day; a buffalo cart passing (a track) |
+| Houses (77 sites) | by variant: hearth (kitchen, rice mortar at dawn), loom, shrine (bell), kitchen (pour), smith (hammer); geckos in the thatch at night; each a room with its own hush |
+| Fields | clappers at the 14 huts, trickles over the bunds, buffalo bells at the 9 ploughs, koels in the groves by day, owls at night, frogs in the paddies |
+
+Measured with tools/sound-render.mjs (spectra and envelopes plausible: the chant's energy under 1 kHz, the lesung's strokes under 300 Hz, the gamelan with strikes at 0.4 s spacing); not heard.
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)
