@@ -131,7 +131,7 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     flameHalos(H, flames, fl);
     if (hashAt(cx, cz, 11) < (el.interior ? 0.95 : 0.4)) {
       // the door ajar on a lit room: a sheet of light in the doorway, its pool over the veranda and, fainter, at the stair's foot
-      const k = el.interior ? 0.55 : 0.35, a = P(u0 - 0.8, vw - 0.05), b = P(u0 + 0.8, vw - 0.05);
+      const k = el.interior ? 0.42 : 0.3, a = P(u0 - 0.8, vw - 0.05), b = P(u0 + 0.8, vw - 0.05);
       H.quad([a[0], fl + 0.05, a[1]], [b[0], fl + 0.05, b[1]], [b[0], fl + 2.0, b[1]], [a[0], fl + 2.0, a[1]], o, k);
       const v = P(u0, vw + 0.7); H.floor(v[0], fl + 0.04, v[1], 1.5, 1.1, 8, k + 0.15);
       const g = P(su, D / 2 + run + 0.7); H.floor(g[0], 0.04, g[1], 1.9, 1.9, 8, k * 0.75);
