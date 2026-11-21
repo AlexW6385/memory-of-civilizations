@@ -159,3 +159,6 @@ export function shelterSpots() {
   out.push(['ladder', M.x0 + 26, M.zb + 0.05, 0], ['ladder', S.x0 + 9.5, S.zb + 0.05, 0]);
   return out;
 }
+
+/** Half-width and half-depth of each walk-in shelter's footprint (the style's HOUSE, copied here so that the sound map needs no three.js). */
+export const HOUSE_SIZE = { bark: { hw: 1.9, hd: 2.3 }, dome: { hw: 2.0, hd: 2.0 }, shade: { hw: 2.3, hd: 1.9 } };
