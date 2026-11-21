@@ -166,6 +166,7 @@ export async function town() {
       E.push({ t: 'wei_prop', kind: 'lamp', at: [sg * 12, -118] }, { t: 'wei_prop', kind: 'ding', at: [sg * 26, -123], s: 1.0 });
       E.push({ t: 'wei_prop', kind: 'brazier', at: [sg * 52, -97] });
     }
+    for (const sg of [-1, 1]) E.push({ t: 'wei_cresset', at: [sg * 9, -3.2] }, { t: 'wei_cresset', at: [sg * 9, PALACE[1] + 6.5] });
     plans.push(base('wei-palace', E));
   }
   // ── the garden: the Xuanwu pond, the pavilions of the Tongque Garden ──
@@ -243,7 +244,17 @@ export async function town() {
       E.push({ t: 'han_wall', a, b, th, h, mat: 'earth_wall', walk: true, layers: true, gaps });
     }
     for (const g of gates) { const r = Math.hypot(...g.c); if (r < RADIUS - 30) E.push({ t: 'han_gate', c: g.c, axis: g.axis, th, h, n: 3, pw: 6, pier: 2.4, ph: 5.4 }); }
-    plans.push(base('wei-citywall', [...E, ...wallElements()]));
+    // the watch fires of the gates (kept all night): an iron basket on each side of the middle passage, inside the wall and outside it
+    const fires = [];
+    for (const g of gates) {
+      if (Math.hypot(...g.c) >= RADIUS - 30) continue;
+      const alongX = g.axis === 'x', sd = alongX ? (g.c[1] > 0 ? 1 : -1) : (g.c[0] > 0 ? 1 : -1);
+      for (const side of [-1, 1]) for (const out of [-1, 1]) {
+        const o = th / 2 + 2.2, p = alongX ? [g.c[0] + side * 4.6, g.c[1] + sd * out * o] : [g.c[0] + sd * out * o, g.c[1] + side * 4.6];
+        fires.push({ t: 'wei_cresset', at: p });
+      }
+    }
+    plans.push(base('wei-citywall', [...E, ...wallElements(), ...fires]));
     plans.push(base('wei-river', [{ t: 'wei_river', x0: -218, x1: 218, zc: riverZ, w: RIVER.w, y: RIVER.y }, ...riverElements()]));
     plans.push(base('wei-streets', streetElements()));
     plans.push(base('wei-compound', compoundElements()));
