@@ -6,6 +6,7 @@
 // are is read off the builders' own measures (front.js's bays, court.js's bays, townhouse.js's storeys and dice), so a glow is on a window that is there.
 // The halos stand in near plans (a tile each), so that they are one batch, one draw. Pure functions of places.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
+import { lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import '../../styles/classical_fr/index.js';
 import { faceFrame } from '../../styles/dutch/facade.js';
@@ -157,10 +158,13 @@ export function cordLamps() {
 }
 /** The cressets (iron fire-baskets on posts) at the gates of the Royal Court and the forecourt, and the sentry boxes' lanterns. */
 export const CRESSETS = [[150, -7.5], [150, 7.5], [92, -6.8], [92, 6.8]];
+/** Iron torchères on the terrace by the water parterre, where the court walked in the evening (the garden front's lit windows are 60 m off the arrival) [inferred: flambeaux and braziers lit the evening promenades]. */
+export const TORCHERES = [[-45, -7], [-45, 7], [-38, -17], [-38, 17], [-62, -15], [-62, 15]];
 export const SENTRIES = [[154.5, -9.5], [154.5, 9.5], [156, PLACE[1] + 4], [156, PLACE[3] - 4], [PLACE[2] - 14, PLACE[1] + 3], [PLACE[2] - 14, PLACE[3] - 3]];
 function lamps() {
   for (const [x, z] of cordLamps()) { const H = tileHalo(x, z); H.ball(x, RISE + 5.6, z, 1.3); H.floor(x, RISE + 0.06, z, 5.0, 4.4, 0, 8, [0.8, 0.3, 0]); }
   for (const [x, z] of CRESSETS) { const H = tileHalo(x, z); H.ball(x, RISE + 3.3, z, 1.7); H.floor(x, RISE + 0.07, z, 5.5, 5.0, 0, 8); }
+  for (const [x, z] of TORCHERES) { const H = tileHalo(x, z); H.ball(x, RISE + 2.15, z, 1.1); H.floor(x, RISE + 0.07, z, 4.2, 3.8, 0, 8, [0.8, 0.3, 0]); }
   for (const [x, z] of SENTRIES) { const H = tileHalo(x, z); H.ball(x, RISE + 2.4, z, 0.9); H.floor(x, RISE + 0.07, z, 2.6, 2.2, 0, 6); }
   // the Orangerie: the stoves' embers glimpsed through the glazed bays of the gallery, south front (§1i; [inferred] — the gallery was heated against the frost)
   { const g = ORANGERIE.gallery, bw = (g[2] - g[0]) / 7, H = tileHalo((g[0] + g[2]) / 2, g[3]);
@@ -177,7 +181,12 @@ export function halos() {
 }
 
 /** { t: 'vs_night', tile: 'i,j' }: that tile's halos, in one geometry of one material. */
-function vsNight(el, ctx) { const t = halos().get(el.tile); if (t) t.flush(ctx.bag); }
+function vsNight(el, ctx) {
+  const t = halos().get(el.tile); if (t) t.flush(ctx.bag);
+  for (const [x, z] of TORCHERES) if (tileOf(x, z) === el.tile) {   // the iron post and its cup (a day fixture too, thin and out of the lanes)
+    ctx.bag.add('iron', lathe([[0.07, 0], [0.04, 0.12], [0.032, 1.75], [0.1, 1.82], [0.22, 2.02], [0.2, 2.06], [0.05, 2.0]], 10, null, x, RISE, z));
+  }
+}
 Object.assign(STYLES.classical_fr.elements, { vs_night: vsNight });
 
 /** The night plans: a near plan to a tile (one batch for them all, one draw). */
