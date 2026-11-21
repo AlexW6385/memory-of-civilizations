@@ -142,3 +142,8 @@ Hammers on clay, the beat of rammers (the labourers' chant), kiln roar, carts' a
 
 - Wear, as single-quad decals (no thickness, never in the walker's way): the earth before each house door trodden dark with a smaller patch beside it, the way from the door worn into the floor of an open row house, the customers' way across a shop's entrance and the counters' ends polished by hands. [inferred]
 - Writing: none is written. The Qin small-seal script (xiaozhuan) is attested [stated] (the standard weights carry the edict of the 26th year of the First Emperor, the tiles and the bricks have stamps), but a glyph form cannot be checked here, so the signboards, the standards' edict and the tablets stay plain rather than carry invented marks.
+
+## 15. Remaining landmark gaps (match pass)
+
+- Closed from §5: the round ban liang coin with a square hole, a coil of cash on a cord lying on the left counter of every market shop. [stated in §5: the ban liang; the coil's place is inferred]
+- Still open: the script (see §14), the wheel gauge of the town's carts (the yard's ruts are at 1.39 m, the generic carts' axles are not checked against it), hollow-brick patterns (the stair's cheeks are plain), a she (earth altar) at the market, fired-clay stamps on tiles and bricks. [not built]

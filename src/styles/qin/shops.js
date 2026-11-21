@@ -26,6 +26,10 @@ export function qinShop(el, ctx) {
   // the wear of the trade: the customers' way worn dark across the entrance, the counters' ends polished by hands
   decal(F, 'plaster_damp', W / 2 - 1.0, 0.1, W / 2 + 1.0, 2.6, 0.052);
   for (const [a, b] of [[th + 0.3, W / 2 - 1.1], [W / 2 + 1.1, W - th - 0.3]]) decal(F, 'lacquer_black', a === th + 0.3 ? b - 0.9 : a, 0.18, a === th + 0.3 ? b - 0.1 : a + 0.9, 0.62, 0.953);
+  // a coil of ban liang cash on its cord (the round coin with the square hole, the one coin of the whole empire) on the left counter, two turns of the coil
+  const cu = (th + 0.3 + W / 2 - 1.1) / 2;
+  F.lathe('bronze', [[0.07, 0], [0.095, 0.022], [0.125, 0.026], [0.15, 0.012], [0.135, 0], [0.1, 0]], cu, 0.96, 0.46, 10);
+  F.lathe('bronze', [[0.06, 0.02], [0.09, 0.045], [0.12, 0.05], [0.13, 0.03], [0.1, 0.02]], cu, 0.96, 0.46, 10);
   const un = W / 2 + 1.5, vn = 0.4;
   F.b('timber', un - 0.03, 0.95, vn - 0.03, un + 0.03, 1.4, vn + 0.03, false); F.b('bronze', un - 0.3, 1.38, vn - 0.01, un + 0.3, 1.41, vn + 0.01, false);
   for (const s of [-1, 1]) F.b('bronze', un + s * 0.3 - 0.08, 1.1, vn - 0.08, un + s * 0.3 + 0.08, 1.14, vn + 0.08, false);
