@@ -10,7 +10,7 @@ import './house.js';
 // level, and fewer, larger tiles leave room in the mesh budget for the landmarks (DESIGN §8). The
 // near distance grows with the tile so that the full houses still reach as far round the walker as
 // before (220 m less the half-diagonal of a 100 m tile).
-const TILE = 150, NEAR = 220 - 50 * Math.SQRT2 + (TILE / 2) * Math.SQRT2;
+const TILE = 115, NEAR = 220 - 50 * Math.SQRT2 + (TILE / 2) * Math.SQRT2;
 function tiles(id, style, elements) {
   const by = new Map();
   for (const e of elements) {
