@@ -337,7 +337,7 @@ function house(el, ctx) {
     for (const v of [-0.86, 0.86]) { const p = F2.P(-0.06, v); bag.add(TIM, rod([p[0], P, p[1]], [p[0], P + dh, p[1]], 0.05, 5)); }
     for (const [v, m, hh] of el.lite ? [] : [[-1.3, 'wood_ochre', 0.5], [-1.45, 'stucco_red', 0.4], [1.3, 'wood_ochre', 0.45]]) { const p = F2.P(-0.14, v); bag.add('rope_fibre', rod([p[0], P + wh - 0.25, p[1]], [p[0], P + wh - 0.25 - hh, p[1]], 0.012, 4)); bag.add(m, box(p[0] - 0.07, P + wh - 0.25 - hh, p[1] - 0.07, p[0] + 0.07, P + wh - 0.3, p[1] + 0.07)); }
     if (rand() < 0.6) { const q = F2.R(-1.05, -0.65, 0.9, 2.1); bag.add(TIM, box(q[0], P, q[1], q[2], P + 0.28, q[3])); }
-    for (let k = 0; k < (el.lite ? 0 : 3); k++) { const v = (rand() - 0.5) * (side === 'n' || side === 's' ? w : d) * 0.8, p = F2.P(-0.01, v); patch(bag, 'plaster_damp', [p[0], P + 0.3, p[1]], dn, 0.6 + rand() * 0.8, 0.4, Math.floor(rand() * 1e6), 0.01); }
+    for (let k = 0; k < (el.lite ? 0 : 3); k++) { const v = (rand() - 0.5) * (side === 'n' || side === 's' ? w : d) * 0.8, p = F2.P(-0.01, v), pw = 0.6 + rand() * 0.8, ps = Math.floor(rand() * 1e6); if (Math.abs(v) > 0.8 + pw / 2) patch(bag, 'plaster_damp', [p[0], P + 0.3, p[1]], dn, pw, 0.4, ps, 0.01); }   // a damp patch is a thin sheet at counter height: never across the doorway
     if (el.kitchen) soot(bag, [cx, P + wh + 0.8, cz], [0, -1, 0], 1.2, 1.2, el.seed || 3); }
   if (lights && !el.lite) { const pl = at(0, 0); lights.push({ at: [pl[0], F + 1.2, pl[1]], color: '#ff9a55', intensity: 3, distance: 5 }); }
   const j = at(e1 - 0.3, (long ? d : w) / 2 - 0.6); put(bag, waterJarKit(), j[0], F, j[1], 0); col.circle(j[0], j[1], 0.33, F, F + 0.8);
