@@ -143,3 +143,40 @@ The arrival's tower house (`tower_open`) and six more of the rows nearest the ar
 - [inferred] Here the stair is two straight flights with a landing at every storey, divided by a mud wall, as in the arrival's house; the same rooms are furnished by storey use (store and stable, women's floor, family room, bedroom, majlis on the fifth floor, further family rooms in turn, a room under the roof), the terrace has washing, jars and a sleeping mat. Lots turn the house so that its door is on the lot's front (north or south); the wall's taper is kept on free faces only, and the side windows are left out where the side touches a neighbour.
 - Each opened house has two walk routes (street to the majlis, street to the roof) in the landmark plan's `walks`, and so has the arrival's house.
 - Still shut: all other tower houses, the palace's upper floors, and lots narrower than 8.6 m.
+
+## 16. Bringing Shibam up to the reference (Suzhou): the visitor's walk
+
+No source was reachable this round (web fetches are refused here); the pass works from §2, §5, §11, §12 and §15, and every new line is [inferred] unless marked.
+
+- **The walk** (`walk.js`, pure data): from the arrival on the square across to the merchant's tower house and its street door; under the stalls along the palace's front; to the mosque's court door; and south down the main street from the square to the gate [inferred: the sights and the way between them follow §2's plan].
+- **What is open on it.** The seventeen ground-floor shops of §11 (spice and incense, cloth, grain and dates, coffee house, honey, indigo, silver, weaver, smith, carpenter, jars, tailor, barber) along the square's south edge and the main street, the thirteen household rooms of §12 further out, the palace hall, the merchant's house and six more towers to the roof (§15) were already open; this pass adds the routes `walk-check` follows into every opened ground floor (`walkroutes.js`, 16 routes: from the lane, in at the door, along the front room) so that a door that shuts the walker is found.
+- Not added: more opened houses and new stalls: the arrival frame has no draws to spare (315 main draws against the reference's budget).
+
+## 17. Night (`nightlight.js`)
+
+What lit Shibam at night about 1700 [inferred unless marked; no electric light]: the sesame- or castor-oil lamp (a clay saucer with a wick, dear oil: few windows lit), a lamp in a niche beside the street door (already built, §11: its glass now glows and is given a halo), a lamp hung in every shop room and the coffee house's lamps (the shops' `lights`), cressets (iron baskets of burning wood and resinous splinters on posts) at the gate, before the palace's door and the merchant's door, the lamp in the minaret's lantern lit for the night prayers, and a lamp seen through the lattice of the family rooms and the majlis.
+- Built as `halo` geometry (additive, night only, no collision, shows at the low preset): lit windows by the hash of their own place (about one in five of the small lower windows, three in ten of the big ones, over a third of the white-framed top ones), niche lamps, the halo and floor pool of every light a shop or hall puts in, the light of an open shop front or of the palace's hall spilling over the sill into the street, the merchant's door.
+- `shb_cresset` (iron post with braces, ribbed basket, flames, light, glow and pool): at the gate (2), the palace door (2), the mosque door, the merchant's door; `shb_minaretlamp`: the glow in the minaret's lantern.
+- Day view unchanged: the halo is invisible by day. Cost at the arrival: +2 main draws (halo, iron/flame in the house plan), triangles unchanged.
+
+## 18. Sound (`soundmap.js`, `src/engine/voices-shibam.js`)
+
+Nothing was heard or recorded: everything below is [inferred] from the dossier's places and trades (§5, §9, §11, §12); the sounds are synthesised and their levels were set by measuring renders with `tools/sound-render.mjs` (RMS of one event at level 1: oud 8.5e-3, drum 5.1e-3, brick-maker 2.9e-3 before a gain of 1.8, cry 9.4e-4; the engine's hammer 8.1e-3), not by ear.
+- **Place and hour.** The well and bucket of the square (dawn to dusk); donkeys at the square's west posts, at the foot of the merchant's house and by the gate; wordless cries (a driver, a water or date seller, a woman from a high window) in the square and along the main street by day; the brickyard's slaps, strikings-off and mould taps (§12); the Qur'an recited in the mosque's hall (only from inside it); the call to prayer is the engine's (`adhan: 1`, the five times from the sun); in the evening a hand drum with claps in the square and a lone oud from the merchant's majlis (§9); pulley wells and donkeys at five palm gardens; cats, far dogs and an owl at night.
+- **Rooms.** Each opened shop's room sounds by trade (mortar and lids for spice, scissors for cloth and tailor, the loom, the hammer, the plane, cups and the coffee mortar in the coffee house from before dawn to night, a stable's beast), the palace hall, the mosque hall and the climbable towers are rooms with thick-walled hush and a dull flat roof in rain.
+- **Voices** (`shb…`): `shbOud` (plucked phrase in a pentatonic-leaning mode, tonic doubled at the close), `shbDan` (eight-beat hand-drum cycle with claps), `shbBrick`, `shbCall` (three wordless cries). The mode and rhythms are gestures, not transcriptions.
+- Test: `tests/shibam-sound.test.mjs` (profile, voices, map against the settlement, brickyard, drum, smith by hour).
+- Not done: a muezzin's own voice from the minaret placed in space (the engine's call is not positioned), swifts at dusk, camel bells, wind in the palms' fronds (the engine's leaf layer follows `leafNear`).
+
+## 19. Animals (`fauna.js`, `critters`)
+
+[inferred] unless marked: the town's livestock are stated (livestock kept on ground floors and at the foot of the houses, Aramco World; Earth Architecture), the rest is the ordinary domestic fauna of a southern Arabian oasis town.
+- **Critters** (rigged, with behaviour; `src/engine/fauna-critters.js`, models of `critter-models.js`, none added): three cats (orange and tabby) on the doorsteps of the shops along the square's south edge, off the door's lane; two dogs lying in the shade, one outside the gate beside its tower and one in the main street; goats (black and white) tethered at the foot of the houses along the main street from the gate and hens with a cock scratching beside the fronts of the ordinary houses there, never before a door; two pigeons on the merchant's roof terrace by the parapet.
+- Already there: swallows and crows in loops over the town and the wadi, sparrows on the mastabas and the parapets, pigeons in the square, the donkeys, camels, goats and sheep of §11 as animal elements.
+- Not built: a donkey and a camel as rigged critters (no model; would need an addition to `critter-models.js`), swifts at the minaret, kites over the wadi.
+
+## 20. Wear and writing (`wear.js`)
+
+[inferred] throughout. Built: the rubble step of every opened ground floor (shops, hall) gets a darker patch trodden in its middle and wider where the feet and sacks cross (`plaster_damp`, a 4 mm layer on the step); a worn flagstone with a trodden middle before the merchant's street door and one in the mosque's doorway (plan.js), none colliding. Rising damp at the foot, patches of fallen plaster and rain streaks were built in §11–§12.
+- **Writing: none.** The shop signs, the lintels and the mihrab of a Hadhrami town would carry Arabic; no glyph of it could be checked in this session (no source reachable, no verified Arabic glyph table in the repo for this style), so every board and band stays plain, as the rule asks.
+- Not built: dust drifts at the foot of the north faces, mud-plaster repairs after the harvest (§1) beyond the existing patches, soot on shop ceilings (no soot material in `palette.js`).

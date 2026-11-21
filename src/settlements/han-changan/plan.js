@@ -4,6 +4,9 @@
 // Authored in world coordinates (origin 0, yaw 0). The hall faces south.
 
 import '../../styles/hanlodge/index.js';
+import './nightlight.js';
+import { walkRoutes, mainRoute } from './walkroutes.js';
+import { crownNight } from './nightplace.js';
 import { AX, TIERS, CROWN, RAMP, HALL, SIDE_HALLS, EAST_GATE, PALACE, CHANGLE_HALL, PALACE_WALL } from './layout.js';
 
 const E = [];
@@ -21,6 +24,7 @@ const wx = PALACE[2], gz = EAST_GATE.z;
 for (const [dz, s] of [[-14, 1], [14, -1]]) E.push({ t: 'hanl_que', at: [wx + PALACE_WALL.th / 2 + 6, gz + dz], sub: [0, s], h: 11, face: [1, 0] });
 
 for (const sd of [-1, 1]) E.push({ t: 'hanl_horses', at: [AX + sd * 11.7, -154.5], y: CROWN + 0.03, face: [0, 1] });
+E.push(...crownNight());
 E.push({ t: 'han_crown', ax: AX, top: CROWN, z0: TIERS[TIERS.length - 1].r[3], z1: HALL.z1, seed: 5 });
 E.push({ t: 'han_court', ax: AX, z0: RAMP.z1, z1: PALACE[3] - 2, seed: 5 });
 
@@ -38,6 +42,8 @@ const rooms = [
 // the way in: the forecourt, up the ramp-stair to the crown, across the apron and the steps, into the hall, up the aisle to the dais
 const walks = [[[AX, 60], [AX, -60], [AX, -90], [AX, -110], [AX, -127], [AX, -140], [AX, -160], [AX, -166], [AX, -172], [AX, -184]]];
 walks[0].y0 = 0;
+// the visitor's walk (walk.js): the whole way from the arrival to the East Market's tower, and in at the door of each opened place on it
+walks.push(mainRoute(), ...walkRoutes());
 
 export const weiyang = {
   id: 'han-changan-weiyang',

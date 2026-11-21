@@ -8,6 +8,8 @@ STYLES.life.elements.sl_fronttrim = slFronttrim;
 STYLES.life.elements.sl_shop = slShop;
 import { PAL_HOUSE } from '../../styles/shaolin/index.js';
 import { HOUSES, YARDS, GAP, AXIS, PLAT, HGT, RANGES, CELL, RADIUS, rng } from './layout.js';
+import { walkRoutes } from './walk.js';
+import { streetHalo } from './nightlight.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 165], facing: 'n' } });
 
@@ -20,6 +22,22 @@ function keepClear(e) {
   if (d < (live ? 6.5 : 3.5)) return false;
   if (live && dz > 0 && d < 12 && Math.atan2(Math.abs(dx), dz) > 0.5) return false;
   return true;
+}
+/** The lanes of the opened houses (walk.js): the street leg and the doorway of each route. Whatever stands or lives within 1.2 m of one is moved along the front, off the door's lane. */
+const LANES = walkRoutes().map((r) => [r[0], r[2]]);
+const LANE_KINDS = new Set(['figure', 'animal', 'chickens', 'cart', 'handcart', 'bench', 'stool', 'basket', 'pot', 'firewood', 'rain_tub', 'drying_tray', 'ladder', 'tea_table']);
+function offLane(e) {
+  if (!LANE_KINDS.has(e.t)) return e;
+  for (const [a, b] of LANES) {
+    const vx = b[0] - a[0], vz = b[1] - a[1], l2 = vx * vx + vz * vz, t = Math.max(0, Math.min(1, ((e.at[0] - a[0]) * vx + (e.at[1] - a[1]) * vz) / l2));
+    const px = a[0] + vx * t, pz = a[1] + vz * t, d = Math.hypot(e.at[0] - px, e.at[1] - pz);
+    if (d >= 1.25) continue;
+    // sideways to the lane (the lane's normal), to the side the thing is already on
+    const l = Math.sqrt(l2), nx = -vz / l, nz = vx / l, s = (e.at[0] - px) * nx + (e.at[1] - pz) * nz >= 0 ? 1 : -1;
+    e.at = [e.at[0] + nx * s * (1.4 - d + 0.1), e.at[1] + nz * s * (1.4 - d + 0.1)];
+    return e;
+  }
+  return e;
 }
 const OUT = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 /** The frame of a house front: P(t, d) = the point at fraction t along the front and d out from the posts; rot turns local +z out into the street; L the front's width. */
@@ -46,7 +64,7 @@ function village() {
     const rr = h.rect, along = h.front === 'n' || h.front === 's';
     const walls = { n: 'plaster', s: 'plaster', e: 'plaster', w: 'plaster' }; delete walls[h.front];
     const pal = DESIGN_PAL[h.vt] ?? PAL_HOUSE, loft = h.vt === 'loft';
-    E.push({ t: 'ming_hall', rect: rr, y: FRONT_Y, H: h.H, front: h.front, four: false, roof: loft ? 'none' : h.roof, plat: 0.25, platMargin: 0.25, eave: h.vt === 'thatch' ? 0.55 : h.vt === 'white' ? 0.5 : 0.35, pal, lat: 'lattice', walls, winWall: true, bays: [3, 1] });
+    E.push({ t: 'ming_hall', vk: h.kind, rect: rr, y: FRONT_Y, H: h.H, front: h.front, four: false, roof: loft ? 'none' : h.roof, plat: 0.25, platMargin: 0.25, eave: h.vt === 'thatch' ? 0.55 : h.vt === 'white' ? 0.5 : 0.35, pal, lat: 'lattice', walls, winWall: true, bays: [3, 1] });
     if (loft) {
       // the loft: a second, lower hall on the first's ceiling, its front a lattice screen (the doorway the hall cuts in the middle bay is filled), a roof of its own
       const yU = FRONT_Y + h.H - 0.1, nb = 3, fr = frontOf(h), [x0, z0, x1, z1] = rr, o = fr.o, k = 1;
@@ -169,7 +187,7 @@ function frontLife() {
   const people = [];
   const stand = (p) => people.push(p);
   // gather by tile
-  const tiles = new Map(), add = (e) => { if (!keepClear(e)) return; const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); };
+  const tiles = new Map(), add = (e) => { offLane(e); if (!keepClear(e)) return; const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); const hl = streetHalo(e); if (hl) tiles.get(k).push(hl); };
   L.forEach(add); void stand; void plaza;
   return { tiles, plaza, add };
 }

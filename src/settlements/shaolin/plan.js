@@ -5,6 +5,7 @@ import '../../styles/shaolin/index.js';
 import { PAL, PAL_HOUSE } from '../../styles/shaolin/index.js';
 import { WALL, AXIS, PLAT, HGT, BELL, DRUM, CROSS, RANGES, STUPAS, FOREST, FOREST_PATH, MOUNT_PATH, CELL, GEAR, gateX, hw, inRect, rng } from './layout.js';
 import { ground } from './ground.js';
+import { walkRoutes } from './walk.js';
 
 const E = [];
 const H = (x, z) => ground.height(x, z);
@@ -236,6 +237,7 @@ void inRect; void gm;
 const walks = [[[0, 170], [0, 140], [0, 133], [0, 126], [0, 118], [0, 99], [0, 97], [0, 95.3], [2.5, 94.4], [2.5, 89], [1, 88.3], [0, 84], [0, 47], [0, 44], [0, 42.2], [4.4, 41.6], [4.4, 39.8], [0, 42.2], [0, 46],
   [-gm, 46], [-gm, 38.7], [-gm, 30], [-6, 20], [-6, 8], [0, 7], [0, 2], [0, 7], [-gf, 8], [-gf, 1.7], [-gf, -8], [-6, -20], [0, -24], [0, -28], [0, -33], [0, -50], [-ga, -50], [-ga, -29], [0, -48], [-gl, -48], [-gl, -55], [-gl, -62], [0, -72], [0, -79], [0, -84]]];
 walks[0].y0 = 0;
+for (const r of walkRoutes()) walks.push(r);                // the opened houses of the visitor's walk (walk.js)
 
 export const monastery = {
   id: 'shaolin-monastery',

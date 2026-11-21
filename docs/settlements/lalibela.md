@@ -113,6 +113,43 @@ Chant in the ge'ez mode with the kebero drum and sistrum, the begena's buzzing s
 - **Fronts by rule.** Every enterable house now takes its front from its trade and seed: stone as quarried, or plastered with mud and limewashed at the foot (every third); the eave's reach (0.5, 0.7 or 0.9 m); one of three finials (clay pot with a stick, a knot of thatch with a stick, a clay knob on a stalk); the eave carried on four posts over a sheltered doorstep for the weaver, potter, mason and school (and one house in seven), a stone seat by the door for households, brewers, scribes, smiths and stores [inferred].
 - **Mats.** The scribe's rush mat lay below the floor's top; lifted.
 
+## 18. The reference pass: the visitor's walk (item 1)
+
+Written against the Suzhou reference (docs/suzhou-method.md). The shell could not reach web pages in this pass: everything below is [inferred] from the sources already in this dossier and from what is generally known of the Ethiopian highland pilgrimage; no new source was read.
+
+- **The walk.** From the arrival on the knoll (§ fix pass) down to the head of the trench from the west, down its cut steps and through the tunnel into Giyorgis' court; then the footpath north (the link of the compounds), east along the Jordan's road, and the way to the heads of the trenches to Golgotha and Medhane Alem (`walk.js`). [inferred: the route is ours; the sources give only "a descending trench and a tunnel", §10]
+- **Pilgrims' stalls.** Six lean-tos beside the way (`src/styles/zagwe/stall.js`, `pilgrim_stall`; places in `walkwork.js`): posts, wattle and a stepped thatch over a mud counter, the keeper seated behind. Three kinds: water (clay jars of every size, gourd dippers, a cloth over a mouth), candles and incense (bundles of wax tapers tied at the waist, a basket of incense resin, a clay brazier with embers, wood and brass crosses hung on cords, a lamp), and mats, prayer staffs, sandals and white cloth. [inferred: that such stalls stood at Lalibela about 1220 is not shown by any source here; the pilgrimage to the churches is (myjoyonline, §10), and the goods are those a pilgrim on foot, barefoot and in white, to the church, would need; honey and beeswax are old highland products; frankincense is the incense of the church's liturgy. Taken as the least that the place would have had.]
+- **Keepers.** A seated figure behind each counter (women with the veil at the water and cloth stalls, a turbaned man at the candles).
+- **Opened houses.** The doorway of every enterable round house was 1.0 m wide: now 1.7 m clear (two wall segments cut back, the lintel stone carried over), the door leaf folded back against the inside of the wall rather than across the opening. In every yard whose main house is opened, the way from the gate to the door is kept clear: the grindstone stands to the side, no beehives or haystack on the way, the pen to the far side; the woman who squats at her work by the door moved to the side [inferred: technical].
+- **Routes.** The walk-check follows twenty routes: the original through the trench, the house beside the arrival, the front of each of the six stalls, and in at the door and across the room of the twelve opened houses within 60 m of the walk.
+
+## 19. The reference pass: night (item 2)
+
+All [inferred] (no page could be read in this pass); the hanging lamps of the great churches (§16) and the niches the masons left for lamps (§14 trench walls) are the dossier's own.
+
+- **What lit the place.** Clay lamps with a fibre wick in butter or oil (the highland household's), the embers of the hearth, and at the church doors the braziers of the pilgrims who keep the night's vigil [inferred: the all-night vigil of the Ethiopian church is well known; its being kept at the doors of the rock churches about 1220 is our reading].
+- **Built** (`nightlight.js`; one `halo` mesh per plan, light added at night only, readable at the low preset): halos on every hanging lamp of the churches and on the three lamps of each Aksumite-manner church; a lit niche in each trench wall beside the way down; braziers (`lal_brazier`, an iron bowl on a tripod) flanking the west doors of Giyorgis, Medhane Alem, Golgotha, Amanuel and Gabriel-Rufael; the stalls' lamps; the embers glowing through the low door of each of the opened houses and their spill on the threshold; in about two closed houses in five a glimmer of the hearth at the door, by the hash of the house's place. The whole village's glow is one element of the churches' plan, so it is one mesh.
+
+## 20. The reference pass: sound (item 3)
+
+All [inferred]: no recording of the twelfth century exists and no page could be read in this pass. Instruments are those §11 and §9 name (the kebero, the tsenatsel sistrum, the begena, from Wikipedia and The Met); the rest is the highland household's work and the church's hours as generally known.
+
+- **Placed sounds** (`soundmap.js`, `src/engine/voices-lalibela.js`, voices prefixed `la`): at each of the six great churches' west doors the stone slab (dawal) struck to call the dawn office, the deacons' wordless chant at dawn and at the evening office, the kebero's pattern, the sistrum's runs; the begena in a priest's cell in the evening; at the Jordan's pool the washerwomen's cloth and poured water; wind in juniper and thatch on the slopes; herd boys calling; owls at night.
+- **The opened houses** make the sound of their trade by day: the household's pestle and mortar at the morning meal and the griddle's hiss, the loom, the smith's hammer, the mason's chisel in the rock, the potter's clay, the school's chanting of letters, the scribe's chant, the store's jars.
+- **Rooms.** Inside the churches (below the ground only: the roofs are the open) a hush with the begena or the chant now and then; each opened house its own tone.
+- **Checks.** `tests/lalibela-sound.test.mjs` (voices made against a stand-in context, the map's agreement with the layout, chant at dawn and not at midnight, the loom by day and not at night). `tools/sound-render.mjs` measured: kebero centroid 121 Hz with 9 onsets in 8 s; chant 555 Hz, pitched; sistrum 5.1 kHz; stone gong 749 Hz ringing. I could not listen: how any of it sounds is unjudged.
+
+## 21. The reference pass: animals (item 4)
+
+All [inferred] (no page read in this pass). Rigged critters (`fauna.js`, `critters`, engine models as they are; none added): dogs lying in the yards of the opened houses nearest the arrival, cats at their doorsteps, hens and a rooster scratching in others' yards, goats tethered at a yard's side (`goat_black`, `goat_white`), rock doves on the floors of the courts of Bete Giyorgis, Medhane Alem and Maryam. Each stands beside the way from gate to door, on whichever side has nothing else within the animal's range (the yard keeps the way itself clear, §18). The highland's own wild-in-town animals are not in the engine's models and none was added: the rock hyrax of the escarpments, the gelada and the hyena at night (the owls of §20 stand for the night). Mules and zebu in the yards remain the older still life (§15).
+
+## 22. The reference pass: wear, writing, found faults (items 5 and 6)
+
+- **Wear** [inferred]: in every opened round house the threshold stone's middle worn smooth and pale by the feet that cross it, and the floor just inside it trodden darker (`hut.js`); the ground before each stall trodden bare (`stall.js`). Soot on the thatch lining was tried and left out (a disc floating under a 5 m ceiling is worse than none).
+- **Writing: none added.** The only script of the place is Ge'ez; no glyph table was available or verifiable in this pass, so no inscription, sign or tablet was cut. The school's sheet of letters (§17) stays as it was.
+- **Faults found by walking in, and mended** (technical): the north trench to Bete Medhane Alem ended in a ridge of ground 0.3 m wide and 1.9 m high across the mouth of the pit (the pit's edge drop starts 0.35 m inside it): every trench now runs 0.8 m past its ends in `cutDepth` (layout.js), which also clears the mouths to Golgotha, Amanuel and Gabriel-Rufael; a pillar stood in the lane of Medhane Alem's west door (the ring's middle west pillar, now left out: the ring is 33, the source's 34 [stated, §17] less the one before the door); the court's dressing on Medhane Alem's west side is left off the way round to that door. Walk routes now enter Bete Giyorgis (to the crossing) and Bete Medhane Alem (to the middle nave).
+- **Candle stall lamps** have no engine light (a light makes a flame mesh of its plan, a draw): only their halo.
+
 ## Sources (ninth pass)
 
 - [House of the Saviour of the World — dragontravelmag](https://dragontravelmag.blogspot.com/2010/10/house-of-saviour-of-world.html)

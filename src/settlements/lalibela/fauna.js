@@ -1,7 +1,7 @@
 // Lalibela — the animals (src/engine/fauna.js; docs/settlements/lalibela.md §14): swallows hawking over the
 // pits and the village (they nest in the hewn rock), thick-billed ravens high over the plateau, house
 // sparrows on the rims of the pits and the roofs of the churches. All places come from layout.js.
-import { PITS, PRECINCT, compounds, slope } from './layout.js';
+import { PITS, PRECINCT, compounds, slope, enterable, houses } from './layout.js';
 
 const c = (p) => [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2];
 const fish = [];
@@ -28,4 +28,23 @@ compounds().forEach((q, i) => {
   if (q.granary && i % 8 === 0) perches.push({ kind: 'sparrow', x: q.granary[0], z: q.granary[1], y: slope(q.granary[0], q.granary[1]) + 2.5, rot: a, range: [0.5, 0.4] });
 });
 flights.push({ kind: 'swallow', n: 4, loop: { c: [-120, -60], a: [70, 50], rot: 0.7 }, y: [3, 14], speed: 9 }, { kind: 'swallow', n: 4, loop: { c: [120, 90], a: [70, 50], rot: 0.2 }, y: [3, 14], speed: 9 }, { kind: 'crow', n: 3, loop: { c: [-210, 30], a: [60, 50], rot: 0.4 }, y: [20, 40], speed: 7 });
-export default { fish, flights, perches };
+
+// ── the critters: animals with a rig of their own (src/engine/fauna-critters.js; dossier §21) ──
+// Dogs lying in the yards of the opened houses nearest the arrival, cats on their doorsteps, hens and a rooster scratching in others' yards, goats tethered by the pens,
+// rock doves on the floors of the churches' courts. All beside the way from the gate to a door, never on it (the yard keeps that lane clear). [inferred]
+const critters = [];
+{
+  const E = enterable().slice(0, 12), at = (h, d, sd) => { const u = [Math.cos(h.door), Math.sin(h.door)], t = [-u[1], u[0]], x = h.c[0] + u[0] * d + t[0] * sd, z = h.c[1] + u[1] * d + t[1] * sd; return [x, slope(x, z) + 0.02, z]; };
+  const all = houses(), room = (p, m) => !all.some((o) => Math.hypot(o.c[0] - p[0], o.c[1] - p[2]) < o.r + m);
+  // (a place is taken on the side of the door where nothing else stands within the animal's range)
+  const put = (h, i, d, sd, m) => { const a = at(h, d, sd), b = at(h, d, -sd); return room(a, m) ? a : room(b, m) ? b : null; };
+  E.forEach((h, i) => {
+    if (i % 4 === 0) { const p = put(h, i, h.r + 1.7, 3.3, 1.2); if (p) critters.push({ model: 'dog', at: p, rot: i, range: [9, 3.5] }); }
+    else if (i % 4 === 1) { const p = put(h, i, h.r + 2.4, 3.0, 1.2); if (p) critters.push({ model: 'cat_tabby', at: p, rot: i * 2, range: [7, 2.5] }); }
+    else if (i % 4 === 2) { const p = put(h, i, h.r + 3.2, 4.2, 3.0); if (p) critters.push({ model: 'hen_brown', at: p, rot: i, range: [2.0, 1.4] }, { model: 'hen_white', at: [p[0] + 0.5, p[1], p[2] + 0.4], rot: i + 2, range: [2.0, 1.4] }, { model: 'rooster', at: [p[0] - 0.4, p[1], p[2] + 0.7], rot: i + 4, range: [2.0, 1.4] }); }
+    else { const p = put(h, i, h.r + 4.5, 4.6, 1.5); if (p) critters.push({ model: i % 8 === 3 ? 'goat_black' : 'goat_white', at: p, rot: i * 3, range: [9, 3.2] }); }
+  });
+  const dove = (id, dx, dz, m) => { const p = PITS[id], c = [(p.rect[0] + p.rect[2]) / 2 + dx, (p.rect[1] + p.rect[3]) / 2 + dz]; critters.push({ model: m, at: [c[0], -p.depth + 0.2, c[1]], rot: dx, range: [1.4, 1.2] }); };
+  dove('giyorgis', -15.5, 9.5, 'pigeon_grey'); dove('giyorgis', -15.0, 10.4, 'pigeon_white'); dove('medhane', -20.6, 8.2, 'pigeon_grey'); dove('medhane', -20.0, 9.0, 'pigeon_grey'); dove('maryam', -10.5, 6.4, 'pigeon_white'); dove('maryam', -10.0, 7.2, 'pigeon_grey');
+}
+export default { fish, flights, perches, critters };
