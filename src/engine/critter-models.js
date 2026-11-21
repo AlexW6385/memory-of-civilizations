@@ -688,3 +688,38 @@ export function cuy() {
   return m;
 }
 MODELS.cuy = cuy;
+
+// ═════════════ the Bactrian camel (Dunhuang's caravanserai and street) ═════════════
+/** A Bactrian camel standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs; the shader kneels it down and stands it up as the visitor comes): two humps, a long curved neck, a shaggy mane and beard, a small head with split lip, long legs with broad pads; dun or dark brown. Back at 1.75 m, the humps at 2.15 m, the head at 2.2 m. */
+export function camel(variant) {
+  const m = new Model(), dark = variant === 'dark', base = dark ? [0.28, 0.2, 0.14] : [0.62, 0.48, 0.32], shag = dark ? [0.2, 0.14, 0.09] : [0.45, 0.33, 0.21], pale = dark ? [0.4, 0.3, 0.22] : [0.74, 0.62, 0.45];
+  const coat = ({ p, n }) => lerp(base, shade(base, 0.8), sm(0.0, -0.8, n[1]) * 0.5 + hash3(p, 5) * 0.06);
+  const S = [[0.85, 1.6, 0.15, 0.14], [0.6, 1.66, 0.26, 0.22], [0.2, 1.68, 0.34, 0.27], [-0.2, 1.68, 0.35, 0.28], [-0.6, 1.66, 0.3, 0.25], [-0.9, 1.6, 0.17, 0.15], [-0.95, 1.58, 0.03, 0.03]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 10, col: coat });
+  for (const hx of [0.32, -0.42]) m.ball([hx, 2.02, 0], [0.22, 0.3, 0.2], ({ p, n }) => lerp(shag, base, sm(1.9, 2.3, p[1]) * 0.4 + sm(0, 1, n[1]) * 0.2), { nu: 6, nv: 7 });   // the humps
+  const NP = [0.86, 1.62, 0], HP = [1.28, 2.22, 0];
+  m.as(1, NP, null, () => {
+    m.tube([[0.8, 1.58, 0], [0.98, 1.7, 0], [1.1, 1.92, 0], [1.2, 2.12, 0], [1.26, 2.2, 0]], [[0.17, 0.15], [0.12, 0.11], [0.1, 0.095], [0.085, 0.08], [0.08, 0.075]], { sides: 8, ref: [1, 0, 0], col: coat });
+    m.tube([[0.9, 1.74, 0], [1.02, 1.82, 0], [1.1, 1.96, 0]], [[0.1, 0.17], [0.09, 0.15], [0.07, 0.12]], { sides: 6, ref: [1, 0, 0], col: shag });   // the mane under the neck
+  });
+  m.as(2, HP, NP, () => {
+    m.ball([1.3, 2.24, 0], [0.12, 0.09, 0.075], coat, { nu: 6, nv: 7 });
+    m.tube([[1.36, 2.2, 0], [1.46, 2.15, 0], [1.54, 2.11, 0]], [[0.06, 0.055], [0.055, 0.052], [0.05, 0.05]], { sides: 7, col: ({ t }) => lerp(coat({ p: [1.4, 2.2, 0], n: [0, 1, 0] }), pale, t * 0.5) });
+    m.ball([1.56, 2.1, 0], [0.025, 0.02, 0.03], [0.12, 0.08, 0.07], { nu: 3, nv: 5 });
+    for (const s of [-1, 1]) m.ball([1.22, 2.33, s * 0.07], [0.02, 0.03, 0.015], shag, { nu: 3, nv: 4 });             // the small ears
+    m.tube([[1.4, 2.14, 0], [1.4, 2.0, 0], [1.38, 1.9, 0]], [[0.01, 0.02], [0.012, 0.03], [0.004, 0.01]], { sides: 4, col: shag });   // the beard
+    eyes(m, 1.38, 2.27, 0.07, 0.014, [0.1, 0.06, 0.04]);
+  });
+  m.as(3, [-0.92, 1.58, 0], null, () => m.tube([[-0.92, 1.58, 0], [-0.98, 1.4, 0], [-0.98, 1.1, 0]], [0.05, 0.04, 0.025], { sides: 5, col: shag }));
+  const legs = [[4, 1, -1, 0.62], [5, 1, 1, 0.62], [6, 0, -1, -0.62], [7, 0, 1, -0.62]];
+  for (const [part, front, z, x] of legs) {
+    const hip = [x, 1.3, z * 0.2];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [x - (front ? 0 : 0.1), 0.85, z * 0.2], [x - (front ? 0 : 0.06), 0.4, z * 0.2], [x + 0.02, 0.06, z * 0.2]], [[0.12, 0.1], [0.07, 0.065], [0.05, 0.05], [0.06, 0.06]], { sides: 6, col: ({ t }) => lerp(coat({ p: [x, 1.2, z], n: [0, 1, 0] }), shag, sm(0.0, 0.5, t) * 0.4) });
+      m.ball([x + 0.03, 0.03, z * 0.2], [0.1, 0.03, 0.07], [0.3, 0.22, 0.16], { nu: 4, nv: 5 });
+    });
+  }
+  return m;
+}
+MODELS.camel_dun = () => camel('dun');
+MODELS.camel_dark = () => camel('dark');

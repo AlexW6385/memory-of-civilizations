@@ -147,3 +147,9 @@ All in the engine's additive `halo` material (visible at the low preset, night o
 - **Water**: the Daquan's bed in four reaches (`dhStream`), the sweep wells of the fields (`dhShaduf`), the women washing, wells at the lane mouths.
 - **Night**: the little owl on the cliff and at the beacon; the dogs beyond the roofs are the engine's.
 - Measured with tools/sound-render.mjs (not heard): the bells' centroid 4.0 kHz; the pipa 0.6 kHz with 7 onsets; the flute 0.6 kHz in long notes; the murmur 0.6 kHz (formants over a 110 Hz note); the stream 3 kHz broadband.
+
+### 15.4 Animals (src/settlements/dunhuang/fauna.js `critters`, src/engine/critter-models.js `camel`)
+
+[inferred throughout: no source describes the pets and flocks of Shazhou.] 26 rigged animals (one mesh, drawn by src/engine/fauna-critters.js; not counted by tools/draw-count.mjs):
+- **Bactrian camels** (new models `camel_dun`, `camel_dark`: two humps, shaggy mane and beard, on the dog's rig, so they kneel and stand as the visitor comes): the four in the caravanserai's stalls (they replace the life element's one-humped stand-ins there; the dossier §6 asked for the two-humped beast) and one on the apron's south.
+- **Dogs** at two shop doors of the walk, **cats** on two home steps, **goats** tethered at the first and third lane mouths, **doves** (the Buddhist bird of the shrines [inferred]) on the apron before the Great Buddha's hall and at the wayside shrine, **swallows' nests** under the front eaves of six lots of the walk (the birds fly out and come home). No fowl are added (the town already has `chickens`).

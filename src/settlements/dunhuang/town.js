@@ -91,7 +91,7 @@ export async function town() {
   }
   sogdian([cx - 7.4, 9.8], 0, -Math.PI / 2, { carry: 'staff' }); sogdian([cx + 1, 9.9], 0, 0.2, { pose: 'talk' }); sogdian([cx + 2.0, 10.4], 0, -2.9, { pose: 'talk' });
   // the yard: camels kneeling (standing) in the stalls, bales and sacks, a woman at the well
-  for (let k = 0; k < 4; k++) L.push({ t: 'animal', kind: 'camel', at: [SERAI.x1 - 3.4, SERAI.z0 + 5 + k * 4.5], y: 0, rot: Math.PI, seed: 60 + k, gear: false, graze: k % 2 === 0 });
+  // (the four camels in the stalls are `critters` of fauna.js now: Bactrian, kneeling and standing as the visitor comes)
   for (const [x, z] of [[cx - 7, 21], [cx + 4, 33], [cx - 4, 35], [cx + 8, 20]]) L.push({ t: 'sacks', at: [x, z], y: 0, rot: x, n: 5, seed: Math.round(x) });
   for (const [x, z] of [[cx - 9, 36], [cx + 6, 24]]) L.push({ t: 'crates', at: [x, z], y: 0, rot: 0.3, n: 4, seed: Math.round(z) });
   sogdian([cx + 2.2, 30], 0, 3.0, { carry: 'pot' });
