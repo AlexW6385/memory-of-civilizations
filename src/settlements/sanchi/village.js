@@ -52,6 +52,8 @@ export function extras() {
   }
   // a stone lamp-pillar at the foot of each cheek wall
   for (const sd of [-1, 1]) E.push({ t: 'block', rect: [sd * (STAIR.w + 0.9) - 0.25, STAIR.z1 - 0.1, sd * (STAIR.w + 0.9) + 0.25, STAIR.z1 + 0.4], y0: 0, y1: 1.6, mat: 'sandstone_dressed' });
+  // a clay lamp lit in the dish on top of each (docs/settlements/sanchi.md §21)
+  for (const sd of [-1, 1]) E.push({ t: 'rite', kind: 'lamp', at: [sd * (STAIR.w + 0.9), STAIR.z1 + 0.15], y: 1.6, s: 2.2, pool: 0 });
   for (const [cx, cz, front, trade] of STALLS) {
     const f = front === 'e' || front === 'w';
     E.push({ t: 'stall', rect: f ? [cx - 1.3, cz - 1.8, cx + 1.3, cz + 1.8] : [cx - 1.8, cz - 1.3, cx + 1.8, cz + 1.3], front, y: 0, seed: Math.floor(cx * 31 + cz * 17), trade });
