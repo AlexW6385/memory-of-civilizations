@@ -28,12 +28,18 @@ export function outdoorLights() {
   // the Plò, the spring before the church's doors: a lamp in a niche over the tank, for those who drew water at night
   const plo = FOUNTAINS.find((f) => f.id === 'plo');
   if (plo) out.push({ at: [(plo.rect[0] + plo.rect[2]) / 2 + 0.2, 2.1, (plo.rect[1] + plo.rect[3]) / 2], r: 0.5, floor: 0, pool: 1.8 });
+  // the visitor's arrival, the parvis before the west door: the vigil kept at the saint's shrine drew pilgrims after the last bell [inferred], so the door
+  // stood ajar on the nave's lamps, an iron lamp hung on a bracket by each buttress, and a fire of brushwood in an iron basket on the terrace for those waiting
+  const ox = ABBEY.origin[0];
+  out.push({ at: [ox - 0.55, 1.55, 0], r: 1.25, k: 0.5, floor: 0, pool: 3.2 });
+  for (const dz of [-3.1, 3.1]) out.push({ at: [ox - 0.5, 2.5, dz], r: 0.55, floor: 0, pool: 2.3 });
+  out.push({ at: [ox - 9.5, 0.75, 5.2], r: 0.75, k: 0.8, floor: 0, pool: 3.6, pk: 0.85 });
   return out;
 }
 
 /** The plan of these lights (style romanesque, whose elements the glow is registered on). */
 export function nightPlan() {
-  const elements = outdoorLights().map((l) => ({ t: 'conques_halo', at: l.at, r: l.r, floor: l.floor, pool: l.pool }));
+  const elements = outdoorLights().map((l) => ({ t: 'conques_halo', at: l.at, r: l.r, k: l.k, pk: l.pk, floor: l.floor, pool: l.pool }));
   return { id: 'conques-night', style: 'romanesque', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, 0], facing: 'e' } };
 }
 
@@ -52,5 +58,9 @@ export function churchGlow(elements) {
   for (const dz of [-0.6, 0.6]) out.push({ t: 'conques_halo', at: [cx, ty + 0.46 + 0.23 + 0.03, dz], r: 0.32, k: 0.7 });
   const sx = 40.6 + 1.25;
   for (const [sz, dz] of [[-1.35, 0.24], [1.35, -0.24]]) out.push({ t: 'conques_halo', at: [sx - 0.3, 0.96 + 0.3 + 0.26, sz + dz], r: 0.28, k: 0.7 });
+  // the west front's two windows, lit from the nave's lamps (the vigil), seen from the parvis [inferred]
+  for (const dz of [-1.1, 1.1]) out.push({ t: 'conques_pane', x: -0.03, z: dz, y0: 12.26, y1: 14.3, w: 0.95, k: 0.5 });
+  // where feet went: the way from the terrace to the door, a darkened polish on the paving that narrows toward the threshold (each slab a hair higher than the last)
+  [[-14, -10, 2.6], [-10, -6, 2.1], [-6, -2.6, 1.7], [-2.6, -0.02, 1.45]].forEach(([a, b, hw], i) => out.push({ t: 'block', rect: [a, -hw, b, hw], y0: 0, y1: 0.006 + i * 0.002, mat: 'plaster_damp', collide: false }));
   return out;
 }

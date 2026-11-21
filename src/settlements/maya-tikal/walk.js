@@ -59,21 +59,24 @@ const EAST = [[-18, 28], [-14, 31], [16, 31], [16, 16], [16, -24], [22, -30], [3
 export function routes(planEls) {
   const R = [], find = (c) => planEls.find((e) => e.t === 'k_range' && e.c[0] === c[0] && e.c[1] === c[1]);
   // 1. the craftsmen's quarter: down the Tozzer causeway, off its south side, to the third group's east gate, round the shrine, to the court
-  const Q = quarter(), g3 = Q.find((g) => g.rect[1] > 40), g1 = Q.find((g) => g.rect[1] < -20);
+  const Q = quarter(), g3 = Q.find((g) => g.rect[1] > 40), g1 = Q.find((g) => g.rect[1] < -20), g2 = Q.find((g) => g !== g3 && g !== g1);
   const into = (g, hk, via) => {
     const h = g.houses[hk], { F, depth } = houseFrame(h), cz = (g.rect[1] + g.rect[3]) / 2;
-    return { name: `craft house ${g.rect[1]}:${hk} (${h.craft})`, y0: 0, pts: [[-18, 28], [-18, 33], [-76, 33], ...via(g, cz), F.P(-1.6, 0), F.P(-0.3, 0), F.P(0.7, 0), F.P(Math.min(depth - 1.4, 1.0), 0)] };
+    // the first house of the north row lies beyond the porches' posts and the court's cistern: pass south of them, along the court's middle strip
+    const det = via === north && hk === 1 ? [[g.rect[2] - 9, g.rect[1] + 9.5], [F.P(-1.6, 0)[0], g.rect[1] + 9.5]] : [];
+    return { name: `craft house ${g.rect[1]}:${hk} (${h.craft})`, y0: 0, pts: [[-18, 28], [-18, 33], [-76, 33], ...via(g, cz), ...det, F.P(-1.6, 0), F.P(-0.3, 0), F.P(0.7, 0), F.P(Math.min(depth - 1.4, 1.0), 0)] };
   };
   // the way from the causeway to a group's court: down to the ground east of the group, through the east gate, north of the shrine
   const north = (g, cz) => [[g.rect[2] + 3, 36], [g.rect[2] + 3, cz], [g.rect[2] - 1, cz], [g.rect[2] - 1.6, g.rect[1] + 6.7], [g.rect[2] - 9, g.rect[1] + 6.7]];
-  if (g3) for (const k of [2, 3, 4]) R.push(into(g3, k, north));
-  if (g1) for (const k of [3, 4]) R.push(into(g1, k, (g, cz) => [[g.rect[2] + 3, 36], [g.rect[2] + 3, cz], [g.rect[2] - 1, cz], [g.rect[2] - 1.6, g.rect[3] - 6.7], [g.rect[2] - 9, g.rect[3] - 6.7]]));
+  if (g3) for (const k of [0, 1, 2, 3, 4]) R.push(into(g3, k, north));
+  if (g2) for (const k of [0, 1, 2, 3, 4]) R.push(into(g2, k, (g, cz) => [[g.rect[2] + 3, 36], [g.rect[2] + 3, cz], [g.rect[2] - 1, cz], [g.rect[2] - 1.6, g.rect[3] - 6.7], [g.rect[2] - 9, g.rect[3] - 6.7]]));
+  if (g1) for (const k of [0, 1, 2, 3, 4]) R.push(into(g1, k, (g, cz) => [[g.rect[2] + 3, 36], [g.rect[2] + 3, cz], [g.rect[2] - 1, cz], [g.rect[2] - 1.6, g.rect[3] - 6.7], [g.rect[2] - 9, g.rect[3] - 6.7]]));
   // 2. the vaulted rooms of the acropolises: up the great stairs, along the terraces
   const nr1 = find([-24, -76]), nr2 = find([24, -76]), cb1 = find([-34, 123]), mh = find([141, 43]);
   if (nr1) R.push({ name: 'north terrace, west range', y0: 0, pts: [[-18, 28], [-12, -36], [0, -41], [0, -56], [-20, -57], [-21, -66], ...roomRoute(nr1, 1)] });
   if (nr2) R.push({ name: 'north terrace, east range', y0: 0, pts: [[-18, 28], [-12, -36], [0, -41], [0, -56], [20, -57], [21, -66], ...roomRoute(nr2, 1)] });
   // 3. the market hall: east by the Maler causeway, down the market's street, across the East Plaza
-  if (mh) for (const k of [2, 5]) R.push({ name: `market hall room ${k}`, y0: 0, pts: [...EAST, [135.3, rangeRooms(mh)[k].door[1]], ...roomRoute(mh, k)] });
+  if (mh) for (const k of [0, 1, 2, 3, 4, 5, 6, 7]) R.push({ name: `market hall room ${k}`, y0: 0, pts: [...EAST, [135.3, rangeRooms(mh)[k].door[1]], ...roomRoute(mh, k)] });
   void T1; void T2; void NAH; void CAH; void cb1;
   return R;
 }

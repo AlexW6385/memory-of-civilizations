@@ -3,7 +3,7 @@
 // houses of poles, daub and palm thatch on low rubble platforms round it — with their people; the rites on the temples, a game in
 // the ball court, the palace rooms occupied.
 
-import { RADIUS, PLAZA, groups, CAUSEWAYS, CW_H, RESERVOIRS, resDist, T1, T2, T4, BALL, CA, NA } from './layout.js';
+import { RADIUS, PLAZA, NA_TEMPLE, groups, CAUSEWAYS, CW_H, RESERVOIRS, resDist, T1, T2, T4, BALL, CA, NA } from './layout.js';
 import { ground } from './ground.js';
 import { SOUTH_RANGE, STEP_PALACE } from './plan.js';
 import plazaPlan from './plan.js';
@@ -11,6 +11,7 @@ import { frame } from '../../styles/tikal/kit.js';
 import { boatFloat } from '../../objects/index.js';
 import { hashAt } from './walk.js';
 import './stock.js';
+import './offerings.js';
 import './nightlight.js';
 import './wear.js';
 
@@ -32,6 +33,7 @@ function groupElements(g) {
   E.push({ t: 'k_eshrine', at: [sx, sz], seed: g.seed });
   // the court's furnishing: the kitchen shed in the north-east corner, the granary in the south-east, a cistern in the middle, the damp
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  if (!g.ward) E.push({ t: 'k_brazier', at: [cx + 3.0, cz + 2.6], y: 0.1, rot: g.seed });          // the court's fire at night (docs §21)
   E.push({ t: 'k_shed', c: [x1 - 4.4, z0 + 3.4], w: 3.4, d: 2.8, seed: g.seed });
   E.push({ t: 'k_granary', c: [x1 - 3.6, z1 - 3.4], seed: g.seed + 1 });
   if (!lite) { E.push({ t: 'k_chultun', at: [cx + 2, cz - 3.2], y: 0.1, seed: g.seed + 2 }); E.push({ t: 'k_stains', rect: [x0 + 7, z0 + 6, x1 - 7, z1 - 6], y: 0.11, n: 3, seed: g.seed + 3 }); }
@@ -50,7 +52,8 @@ function groupLife(g, rand, L, P) {
   for (const h of g.houses) {
     // goods on the platform by the door
     const s = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[h.door], hw = h.w / 2 + 0.4, hd = h.d / 2 + 0.4;
-    const px = h.c[0] + s[0] * (s[0] ? hw : 0) + (s[0] ? 0 : (rand() - 0.5) * 2.4), pz = h.c[1] + s[1] * (s[1] ? hd : 0) + (s[1] ? 0 : (rand() - 0.5) * 2.4);
+    const lat = (o) => (o < 0 ? -1 : 1) * (0.95 + Math.abs(o) * 0.5);   // along the wall, never in the door's lane (the door is 1.6 m wide)
+    const px = h.c[0] + s[0] * (s[0] ? hw : 0) + (s[0] ? 0 : lat((rand() - 0.5) * 2.4)), pz = h.c[1] + s[1] * (s[1] ? hd : 0) + (s[1] ? 0 : lat((rand() - 0.5) * 2.4));
     const r = rand();
     if (r < 0.3) L.push({ t: 'pot', kind: rand() < 0.5 ? 'water_pot' : 'dark_pot', n: 1 + Math.floor(rand() * 2), at: [px, pz], y: 0.42, seed: h.seed });
     else if (r < 0.55) L.push({ t: 'basket', n: 1, at: [px, pz], y: 0.42, seed: h.seed, goods: 'cloth_ochre' });
@@ -95,6 +98,8 @@ function market() {
     }
   }
   for (let k = 0; k < 30; k++) L.push(person(rand, 86 + rand() * 52, 30.5 + Math.floor(rand() * 4) * 9 + (rand() - 0.5) * 2, Y, rand() * 6.28, { carry: pick(['basket', 'pot', 'none', 'none']), pose: rand() < 0.3 ? 'talk' : 'stand' }));
+  // fires among the stalls for the evening market (docs §21): one brazier in the lane beside every second stall of each row
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c += 2) M.push({ t: 'k_brazier', at: [X0 + c * 8.6 + 4.3, Z0 + r * 9 + 4.4], y: Y, rot: c + r });
   return [{ ...base('maya-tikal-market', L), style: 'life' }, base('maya-tikal-market-mats', M)];
 }
 
@@ -201,7 +206,7 @@ function quarterLife() {
       const [dx, dz] = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[h.door], hw = h.w / 2 + 0.4, hd = h.d / 2 + 0.4;
       const dp = [h.c[0] + dx * (dx ? hw + 0.3 : 0), h.c[1] + dz * (dz ? hd + 0.3 : 0)], sd = [-dz, dx];   // the doorstep, and the way along the platform
       // a: out from the platform's edge (the goods lie on the platform's strip, 0.7 m wide, so a is moved in by 0.8), b: along the wall, moved out of the door's lane (the door is 1.6 m wide)
-      const at = (a, b) => { const bb = b < 0.3 ? b - 1.4 : b + 0.6; return [dp[0] + dx * (a - 0.8) + sd[0] * bb, dp[1] + dz * (a - 0.8) + sd[1] * bb]; };
+      const at = (a, b) => { const bb = b < 0.35 ? b - 1.4 : b + 0.6; return [dp[0] + dx * (a - 0.8) + sd[0] * bb, dp[1] + dz * (a - 0.8) + sd[1] * bb]; };
       // the trade's goods on the platform before the door, the craftsman working beside them
       if (h.craft === 'obsidian') { for (let i = 0; i < 3; i++) L.push({ t: 'basket', n: 1, at: at(0.4, -0.9 + i * 0.5), y: P, seed: h.seed + i, goods: 'obsidian' }); L.push(person(rand, ...at(0.9, 0.9), P, face(-dx, -dz), { woman: false, pose: 'kneel' })); }
       else if (h.craft === 'potter') { L.push({ t: 'pot', kind: 'dark_pot', n: 3, at: at(0.5, -0.9), y: P, seed: h.seed }, { t: 'pot', kind: 'water_pot', n: 2, at: at(0.5, 0.2), y: P, seed: h.seed + 1 }); L.push(person(rand, ...at(1.0, 1.0), P, face(-dx, -dz), { woman: true, pose: 'kneel', over: 'none' })); }
@@ -254,6 +259,16 @@ function openedPlaces() {
   return [{ ...base('maya-tikal-stock', E), center: [-95, 18], near: 90 }, { ...base('maya-tikal-hall-stock', HE), center: [142, 43], near: 60 }, { ...base('maya-tikal-hall-life', L), style: 'life' }];
 }
 
+/**
+ * The offerings on the bench of each great temple's innermost chamber (offerings.js, docs §21): one near plan per shrine, drawn only within 40 m of it, so that the arrival
+ * (80 m from Temple I) pays no draw for them.
+ */
+function offeringPlans() {
+  const shrine = (P, y0, chambers, len) => { const dir = { w: [1, 0], e: [-1, 0], n: [0, 1], s: [0, -1] }[P.face], c = dir[0] ? [P.c[0] - dir[0] * (P.top[0] - 1.8), P.c[1]] : [P.c[0], P.c[1] - dir[1] * (P.top[1] - 1.8)]; return { t: 'mt_offerings', c, face: P.face, y: y0 + P.H, chambers, len }; };
+  const els = [['t1', shrine(T1, 0, 3, 7)], ['t2', shrine(T2, 0, 3, 8)], ['na', shrine(NA_TEMPLE, NA.H, 3, 6)]];
+  return els.map(([id, e]) => ({ ...base(`maya-tikal-offerings-${id}`, [e]), center: e.c, near: 40 }));
+}
+
 /** The life at the reservoirs: women with jars and washing at the rim, a fisher in a dugout canoe, ducks. */
 function reservoirLife() {
   const rand = rng(2210), L = [], out = [];
@@ -292,6 +307,9 @@ export async function town() {
   plans.push(base('maya-tikal-causeways', [...CAUSEWAYS.map((c) => ({ t: 'k_causeway', pts: c.pts, w: c.w, h: CW_H })),
     { t: 'k_pyramid', ...T4, masks: true, shrine: { chambers: 3, len: 8, comb: 20 } }]));
   plans.push(base('maya-tikal-causeway-wear', [
+    // pitch-pine torches along the Tozzer causeway beside the craftsmen's quarter and the Maler causeway's first stretch (docs §21)
+    ...[-50, -70, -90, -110, -130].map((x, i) => ({ t: 'mt_torch', at: [x, i % 2 ? 37.4 : 28.6], y: CW_H })),
+    ...[-30, -50, -70, -90].map((z, i) => ({ t: 'mt_torch', at: [i % 2 ? 103 : 97, z], y: CW_H })),
     { t: 'k_stains', rect: [-222, 27, -38, 39], y: CW_H + 0.02, n: 34, seed: 11 },
     { t: 'k_stains', rect: [96.5, -298, 103.5, -32], y: CW_H + 0.02, n: 30, seed: 12 },
   ]));
@@ -300,7 +318,7 @@ export async function town() {
     const [cx, cz] = R.c, r = Math.max(R.a, R.b) + 2;
     plans.push({ ...base(`maya-tikal-water-${R.id}`, [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: R.water, cell: 1, inside: (x, z) => resDist(R, x, z) < -0.3 && ground.height(x, z) < R.water + 0.3 }]), style: 'ming' });
   }
-  plans.push(...market(), ...people(), ...plazaLife(), ...quarterLife(), ...openedPlaces(), ...reservoirLife());
+  plans.push(...market(), ...people(), ...plazaLife(), ...quarterLife(), ...openedPlaces(), ...offeringPlans(), ...reservoirLife());
   void PLAZA;
   return plans;
 }

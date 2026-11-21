@@ -5,6 +5,7 @@
 import '../../styles/tikal/index.js';
 import './nightlight.js';
 import { STYLES } from '../../core/build.js';
+import { fromTriangles } from '../../core/geom.js';
 import { patch, soot } from '../../styles/maya/household.js';
 import { houseFrame, rangeRooms, PLATFORM, hashAt } from './walk.js';
 
@@ -38,4 +39,33 @@ export function registerWear() {
     return r;
   };
 }
+
+// ── the worn middle of the great stairs (docs §21): the feet of two centuries of processions darken and polish the treads along the stair's middle ──
+const DIRS = { w: [1, 0], e: [-1, 0], n: [0, 1], s: [0, -1] };
+/** The flight a k_pyramid builds (styles/tikal/index.js pyramid): { foot, dir, w, H, Lr, steps, y0 }. */
+export function pyramidStair(P) {
+  const dir = DIRS[P.face], [cx, cz] = P.c, head = dir[0] ? cx - dir[0] * P.top[0] : cz - dir[1] * P.top[1];
+  const Lr = P.foot !== undefined ? Math.abs(head - P.foot) : P.H / 1.72, foot = dir[0] ? [head - dir[0] * Lr, cz] : [cx, head - dir[1] * Lr];
+  return { foot, dir, w: P.stairW, H: P.H, Lr, steps: Math.round(P.H / 0.3), y0: P.y0 ?? 0 };
+}
+/** The flight a k_platform builds for one of its `stairs` entries. */
+export function platformStair(rect, H, s, y0 = 0, batter = 0.8) {
+  const [x0, z0, x1, z1] = rect, dir = DIRS[s.face], Lr = s.run ?? H * 1.6, edge = dir[0] > 0 ? x0 : dir[0] < 0 ? x1 : dir[1] > 0 ? z0 : z1;
+  return { foot: dir[0] ? [edge - dir[0] * (Lr - batter), s.at] : [s.at, edge - dir[1] * (Lr - batter)], dir, w: s.w, H, Lr, steps: Math.max(2, Math.round(H / 0.3)), y0 };
+}
+/** mt_stairwear: a stair's flight { foot, dir, w, H, Lr, steps, y0, spread }: a band of worn tread down its middle, wavering a little (the line the feet take), widest where they gather. */
+function stairWear(el, { bag }) {
+  const { foot, dir: [dx, dz], H, Lr, steps, y0 = 0, w } = el, nx = -dz, nz = dx, sp = el.spread ?? 1, q = hashAt(foot[0], foot[1], 21) * 6.28, t = [];
+  const P = (d, off, y) => [foot[0] + dx * d + nx * off, y0 + y, foot[1] + dz * d + nz * off];
+  for (let i = 0; i < steps; i++) {
+    const d0 = Lr * i / steps, d1 = Lr * (i + 1) / steps, y = H * (i + 1) / steps + 0.008, f = i / steps;
+    const c = 0.28 * sp * Math.sin(i * 0.19 + q), hw = Math.min(w / 2 - 0.3, sp * (0.55 + 0.35 * (1 - f) + 0.2 * Math.sin(i * 0.43 + q * 2) + 0.12 * Math.sin(i * 1.3)));
+    const a = P(d0, c - hw, y), b = P(d0, c + hw, y), e = P(d1, c + hw, y), g = P(d1, c - hw, y);
+    // up-facing: wind so that the normal has y > 0 whichever way the stair runs
+    const cross = (b[2] - a[2]) * (e[0] - a[0]) - (b[0] - a[0]) * (e[2] - a[2]);
+    if (cross > 0) t.push(...a, ...b, ...e, ...a, ...e, ...g); else t.push(...a, ...e, ...b, ...a, ...g, ...e);
+  }
+  bag.add('plaster_damp', fromTriangles(t));
+}
+STYLES.tikal.elements.mt_stairwear = stairWear;
 registerWear();

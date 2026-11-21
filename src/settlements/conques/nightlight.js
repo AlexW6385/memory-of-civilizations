@@ -142,12 +142,19 @@ function haloElement(el, { bag }) {
   H.flush(bag);
 }
 
+/** conques_pane: { x, z, y0, y1, w, k? } — a lit window of the church seen from outside: a pane of halo on the wall's west face (the nave's lamps behind the glass). */
+function paneElement(el, { bag }) {
+  const H = new Halo(), h = el.w / 2, x = el.x, f = el.k ?? 0.55;
+  H.quad([x, el.y0, el.z - h], [x, el.y0, el.z + h], [x, el.y1, el.z + h], [x, el.y1, el.z - h], [-1, 0], f);
+  H.flush(bag);
+}
+
 let done = false;
 /** Wraps the style's houses and registers the glow element (once, after every file of the style has registered its own). */
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.romanesque.elements;
   if (typeof E.maison === 'function') E.maison = wrapMaison(E.maison);
-  for (const s of ['romanesque', 'romanesque-foy']) if (STYLES[s]) (STYLES[s].elements ??= {}).conques_halo = haloElement;
+  for (const s of ['romanesque', 'romanesque-foy']) if (STYLES[s]) { (STYLES[s].elements ??= {}).conques_halo = haloElement; STYLES[s].elements.conques_pane = paneElement; }
 }
 registerNight();

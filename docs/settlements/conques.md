@@ -215,3 +215,12 @@ Nothing in this section is sourced to a Conques text on its night, its sounds or
 
 ### 20.6 What still falls short of the reference
 - Shop goods are boxes and pots, not modelled singly; no shop boards or signs in script; the church windows do not glow; no moss on the lauze beyond the renderer's damp; the south tribune and the transept arms stay shut; the rampart is not built.
+
+## 21. Second pass, narrow form (2026-11)
+
+All [inferred] (no Conques source speaks of its night, its counters or its paving).
+- **Night near the visitor:** the arrival's frame was dark within 15 m (only the candle-seller's trestle showed). Added in `night.js` (existing night plan, no new draw): the west door ajar on the nave's lamps (a glow in the doorway and its pool on the parvis), an iron lamp on a bracket by each buttress, a brushwood fire in an iron basket on the terrace for the pilgrims keeping the vigil, and the two lit west windows (`conques_pane`, halo pane on the front's face). Rendered at night at the arrival and at (-40, 6): halos and the pilgrims' silhouettes read at the low preset.
+- **Budget (MAIN pass):** arrival main 325 draws / 1.56 M tris (limit 440 / 4.3 M); poses (-80,20), (-100,10), (-60,10) at yaw 0 and 3.14: main 212-270 draws, 0.78-1.03 M tris. Nothing over. After the counters: shop pose main 230 draws.
+- **Walk's gaps (`counters.js`, near plans per 100 m cell, 110 m reach):** a keeper stands in each of the 14 open shops, behind the counter-board beside the door-lane side's far end, facing the lane (built into the near plan, not a life figure); the goods of the trade lie on the board's inner half, each modelled singly: loaves, scallop shells, jugs, tankards, staffs with a scrip, bolts of cloth, nails or bars. A first position in the middle of the room stopped four routes in `walk-check`; the keeper now stands to the side away from the door. walk-check: 37 routes ok.
+- **Landmark:** lit west windows (above) and where feet went: four slabs of darkened polish on the parvis narrowing from 5.2 m to 2.9 m toward the threshold (`plaster_damp`, each a hair higher than the last), joining the worn sill already in the doorway.
+- **Still short:** the church's side and chevet windows do not glow; goods on the shelves behind and the smith's/baker's stock are still the first-round boxes and pots; no shop boards in script (none attempted); the south tribune and transept arms stay shut; no torches on the lanes; the rampart is not built; the walk's lanes were not re-rendered at night (only the parvis).

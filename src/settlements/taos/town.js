@@ -105,6 +105,16 @@ export async function town() {
     if (k < 4) woman([tx + 1.7, S ? tz + 3.15 : tz + CELL - 3.15], y, S ? 0 : Math.PI, { pose: k % 2 ? 'sit_ground' : 'kneel', over: 'none' });
     if (k === 1 || k === 4) man([tx + 4.4, S ? tz + 1.7 : tz + CELL - 1.7], y, S ? 0.6 : Math.PI + 0.6, { pose: 'sit_ground' });
   }
+  // the terraced rooms above (§4.6, docs §11.2): the same keeper at the same place in each, raised to its floor
+  for (const r of UPPER) {
+    const B = r.b === 'N' ? NORTH : SOUTH, y = (r.storey - 1) * ST + 0.06, x0 = B.x0 + r.j * CELL + 0.5, z0 = B.z0 + r.i * CELL + 0.5, x1 = x0 + 4, z1 = z0 + 4, mx = x0 + 2, mz = z0 + 2, south = r.door === 's', sg = south ? -1 : 1;
+    const Z = (d) => (south ? z0 + 0.025 + d : z1 - 0.025 - d), D = (d) => (south ? z1 - 0.025 - d : z0 + 0.025 + d);
+    if (r.kind === 'weave') woman([x1 - 0.025 - 0.85, mz + sg * 0.7], y, face([x1, 0], [x1 + 1, 0]) + Math.PI, { pose: 'sit_ground', over: 'none' });
+    else if (r.kind === 'pottery') woman([x0 + 1.15, Z(1.95)], y, south ? 0 : Math.PI, { pose: 'kneel', over: 'none' });
+    else if (r.kind === 'work') man([x0 + 1.4, D(1.65)], y, south ? 0 : Math.PI, { pose: 'sit_ground' });
+    else if (r.kind === 'sleep') woman([mx - 0.2, mz + 0.95 * (south ? 1 : -1)], y, face([mx - 0.2, 0], [mx + 0.3, 0]) + Math.PI, { pose: 'sit_ground', over: 'none' });
+    else if (r.kind === 'home') woman([mx - 0.1 - 0.62, Z(0.48 + 0.78 + 0.03)], y, south ? 0 : Math.PI, { pose: 'kneel', over: 'none' });
+  }
   void creekZ;
   return [plan('taos-people', 'life', [...P, ...E0, ...E]), plan('taos-turkeys', 'pueblo', T)];
 }

@@ -42,6 +42,8 @@ const walks = [[[70, -4], [70, -18], [70, -38], [70, -43], [75.5, -46], [76, -60
 walks[0].y0 = 0; walks[1].y0 = 0;
 // out through the gate hall to the main street, then in at the way in of sixteen open shops along it (walkroutes.js)
 walks.push(Object.assign([[70, 5], [70, 0], [70, -4]], { y0: 0 }));
+// up the Great Hall's stair to its upper storey (styles/mongol/hall.js stairUp): in at the south door, west along the aisle to the foot of the flight, up it to the landing, on to the floor round the opening
+walks.push(Object.assign([[72, 80], [72, 72], [72, 66.5], [72, 62.6], [65.4, 62.5], [65.4, 61.3], [70, 61.3], [76, 61.3], [80.5, 61.3], [80.5, 56]], { y0: 0 }));
 for (const b of walkRoutes()) walks.push(Object.assign(b.route, { y0: 0 }));
 
 export const palace = {

@@ -157,6 +157,26 @@ const AFTER = {
     // a kiln is fired for days together: the glow at its stoke-hole and over its vent, the pool on the ground before it
     const [x, z] = el.at, y = el.y ?? 0, rr = el.r ?? 2.1, yaw = el.yaw ?? 0, s = Math.sin(yaw), c = Math.cos(yaw), sx = x + s * (rr + 0.5), sz = z + c * (rr + 0.5);
     H.ball(sx, y + 0.45, sz, 0.9, 0.7); H.floor(sx, y + 0.03, sz, 2.6, 2.2, 10, 0.8); H.ball(x, y + 3.15, z, 0.9, 0.45);
+    // the chimney (styles/mongol/craft.js: 4.4 m, beside the dome on the stoke-hole's side) throws up a column of smoke lit from below by the fire: a mouth of embers, then
+    // four glows rising and widening, fainter as they go [inferred: a kiln fired for days smokes day and night]
+    const cx = x - s * (rr + 0.7), cz = z + c * (rr + 0.7), q = hashAt(x, z, 8);
+    H.ball(cx, y + 4.5, cz, 0.55, 0.85);
+    [[5.5, 0.9, 0.55], [6.8, 1.25, 0.4], [8.3, 1.65, 0.27], [10.0, 2.1, 0.16]].forEach(([h, r, k], i) => H.ball(cx + (0.5 + i * 0.35) * (q - 0.5) * 2, y + h, cz + (0.4 + i * 0.3) * (hashAt(x, z, 9) - 0.5) * 2, r, k));
+    H.floor(cx, y + 0.03, cz, 1.6, 1.6, 8, 0.3);
+  },
+  great_hall: (H, el) => {
+    // the four paper lanterns of the upper storey (styles/mongol/hall.js upperStorey) and the lamp light on its hangings; the clerestory windows glow through litWindows
+    const [cx, cz] = el.c, Y = (el.y ?? 1.5) + 6.2 + 0.16, top = Y - 0.16 + 5.0, ly = top - 1.5;
+    // butter lamps in rows before the four Buddhas on their plinths (the same four the hall's builder seats at 6.4 m from the stupa) and a pool of their light on the floor [inferred]
+    const F = (el.y ?? 1.5) + 0.04;
+    for (const [dx, dz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const bx = cx + dx * 6.4, bz = cz + dz * 6.4, px = -dz, pz = dx;
+      for (const o of [-1.8, -0.9, 0.9, 1.8]) H.ball(bx + dx * 1.9 + px * o, F + 0.75, bz + dz * 1.9 + pz * o, 0.42, 0.7);
+      H.floor(bx + dx * 2.4, F + 0.05, bz + dz * 2.4, 3.6, 3.0, 10, 0.55);
+      H.ball(bx, F + 2.4, bz, 1.6, 0.35);
+    }
+    H.ball(cx, F + 4.2, cz, 3.4, 0.3); H.floor(cx, F + 0.05, cz, 7.5, 7.5, 12, 0.35);
+    for (const dx of [-1, 1]) for (const dz of [-1, 1]) { H.ball(cx + dx * 7.8, ly + 0.25, cz + dz * 7.8, 1.0, 0.7); H.floor(cx + dx * 7.8, Y + 0.03, cz + dz * 7.8, 3.0, 3.0, 10, 0.4); }
   },
   church: (H, el) => {
     const [x0, z0, x1, z1] = el.rect, cz = (z0 + z1) / 2;
