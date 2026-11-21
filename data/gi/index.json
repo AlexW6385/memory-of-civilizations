@@ -1183,7 +1183,7 @@
  },
  "djenne-great-mosque": {
   "site": "djenne",
-  "hash": "dea0690c5a474f8c",
+  "hash": "3d7e09ad9bc8a91e",
   "rays": 128,
   "probes": 30784,
   "boxes": [
@@ -1204,8 +1204,8 @@
     ]
    }
   ],
-  "bytes": 543980,
-  "seconds": 235,
+  "bytes": 544358,
+  "seconds": 95,
   "baked": "2026-11-21"
  },
  "dogon-village": {
@@ -1351,7 +1351,7 @@
  },
  "dunhuang-mogao": {
   "site": "dunhuang",
-  "hash": "663d4424708832ff",
+  "hash": "572bcc7140fc1ce1",
   "rays": 128,
   "probes": 74340,
   "boxes": [
@@ -1382,8 +1382,8 @@
     ]
    }
   ],
-  "bytes": 1251296,
-  "seconds": 1219,
+  "bytes": 1251396,
+  "seconds": 1335,
   "baked": "2026-11-21"
  },
  "edo-himeji-castle": {
@@ -2273,7 +2273,7 @@
  },
  "han-changan-weiyang": {
   "site": "han-changan",
-  "hash": "c58a24fd390186c2",
+  "hash": "b39433ab8a45c93b",
   "rays": 128,
   "probes": 78430,
   "boxes": [
@@ -2312,8 +2312,8 @@
     ]
    }
   ],
-  "bytes": 1179141,
-  "seconds": 523,
+  "bytes": 1183534,
+  "seconds": 383,
   "baked": "2026-11-21"
  },
  "isfahan-maidan": {
@@ -4456,7 +4456,7 @@
  },
  "shaolin-monastery": {
   "site": "shaolin",
-  "hash": "4b108acd8bf002ba",
+  "hash": "9513d510004f5d70",
   "rays": 128,
   "probes": 74099,
   "boxes": [
@@ -4616,8 +4616,8 @@
     ]
    }
   ],
-  "bytes": 1191672,
-  "seconds": 683,
+  "bytes": 1191693,
+  "seconds": 801,
   "baked": "2026-11-21"
  },
  "shibam-friday-mosque": {
@@ -4644,7 +4644,7 @@
    }
   ],
   "bytes": 57346,
-  "seconds": 62,
+  "seconds": 28,
   "baked": "2026-11-21"
  },
  "shibam-tower-house": {
@@ -4787,7 +4787,7 @@
    }
   ],
   "bytes": 711888,
-  "seconds": 460,
+  "seconds": 350,
   "baked": "2026-11-21"
  },
  "song-hangzhou-liuhe": {

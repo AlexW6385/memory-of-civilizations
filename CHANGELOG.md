@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.68 — second pass: Tikal, Karakorum, Mohenjo-daro, Ur, Conques and five more (2026-11-21)
+
+Tikal: braziers at the arrival, torches along two causeways, the offerings back on the shrine benches, ways into all fifteen craft houses and eight market rooms. Karakorum: the kilns' smoke is lit at night, the Great Hall has butter lamps before its Buddhas and an upper storey one can climb to. Mohenjo-daro: the platform lane, the one view over budget, is a quarter lighter; lamps on the Bath court; workshop masters stand in their shops. Ur: lamps in the Court of Nanna and over each open door, brick cheeks on the terrace stair, eight more upper floors. Conques: light from the west door on the parvis, keepers and goods in fourteen shops. Taos: fires near the arrival, people in the eighteen upper rooms, roof spouts. Ajanta, Benin City, Ye: night fires and lamps near the visitor, more houses opened, worn ways on the landmarks.
+
 ## v12.67 — streets empty at night; Lalibela, Nalanda, Kilwa; sixty-two more characters (2026-11-21)
 
 Still figures now go home: three in four leave one by one over dusk and come back over dawn (watchmen with staffs and Baghdad's guards stay), at no cost in draws. Nalanda: lamps in the great temple's lower niches, worn stair treads, booths moved off the doors, forty-four walk routes. Kilwa: watch fires and lamp stands along the dark spine, door leaves, moss and salt bloom on the Great Mosque, a lighter arrival. Lalibela: worn steps and trodden courts. Sixty-two more Chinese characters are drawn and checked (numerals, directions, trade words, 祈 乾 承 廟 萬 長 and others); none is placed on a building yet.
