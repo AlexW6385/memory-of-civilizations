@@ -9,10 +9,10 @@ import { STYLES } from '../../core/build.js';
 import { hashAt } from './nightlight.js';
 
 const frame = (c, yaw) => { const ca = Math.cos(yaw), sa = Math.sin(yaw); return (u, v) => [c[0] + u * ca + v * sa, c[1] - u * sa + v * ca]; };
-/** Ash and charcoal thrown out round an oven or hearth at (x, y, z): a ragged annulus of grey from the ring's stones out, a few dark flecks of charcoal. */
+/** Ash and charcoal thrown out round an oven or hearth at (x, y, z): a ragged annulus of dark ash-and-charcoal earth from the ring's stones out. */
 function ash(bag, x, y, z, r0, r1) {
   const j = hashAt(x, z, 21) * 6;
-  bag.add('hide_grey', lathe([[r1 * 1.07, 0.036], [r1, 0.05], [r0, 0.05]], 14, (t, i) => 0.78 + 0.3 * Math.abs(Math.sin(t * 3 + j + i * 0.2)) + 0.12 * Math.sin(t * 7 + j), x, y, z));
+  bag.add('bark_dark', lathe([[r1 * 1.07, 0.036], [r1, 0.05], [r0, 0.05]], 14, (t, i) => 0.78 + 0.3 * Math.abs(Math.sin(t * 3 + j + i * 0.2)) + 0.12 * Math.sin(t * 7 + j), x, y, z));
   bag.add('bark_dark', lathe([[r0 * 1.56, 0.05], [r0 * 1.5, 0.057], [r0 * 1.02, 0.057]], 12, (t, i) => 0.7 + 0.45 * Math.abs(Math.sin(t * 2 + j * 1.3 + i * 0.3)), x, y, z));
 }
 /** A trodden way along a line: a run of ragged patches of darker earth of different sizes, strewn a little either side of the line, not a stripe. */
