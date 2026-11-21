@@ -7,6 +7,8 @@ import { ground } from './ground.js';
 import { teaSeats } from '../../styles/tibetan/index.js';
 import { dressing } from './dress.js';
 import { openFlags } from './upstairs.js';
+import { bands } from './interiors.js';
+import { nightElements } from './nightlight.js';
 const base = (id, elements, style = 'tibetan') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-4, 60], facing: 'n' } });
 /** The street's incense burner and the tethered yaks (x, z, rot), by the booths and in the lane. */
 export const SANG = [-3.4, 166];
@@ -67,12 +69,15 @@ function people() {
     L.push({ t: 'figure', at: p, y: yf, rot: face(p, [bx, bz]), h: 1.6 + rand() * 0.1, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.5 ? 'cloth_maroon' : pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_maroon', over: 'sash', skin: 'skin_medium', hat: 'none', hair: rand() < 0.5 ? 'shaven' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'cross' });
   }
   monk([PRINTERY[0] + 22.5, PRINTERY[1] + 3.6], yf, face([0, 0], [1, 0]));
-  return [base('lhasa-people', L, 'life'), base('lhasa-wheels', W)];
+  return [base('lhasa-people', [...L, ...nightElements()], 'life'), base('lhasa-wheels', W)];
 }
 
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 130) plans.push(base(`lhasa-houses-${i / 130}`, all.slice(i, i + 130).map((l) => ({ t: 'tibetan_house', ...l, ...openFlags(l), y: l.farm ? ground.height((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) : 0 }))));
+  const house = (l, part) => ({ t: part === 'rooms' ? 'lh_floor_rooms' : 'tibetan_house', ...l, ...openFlags(l), part, y: l.farm ? ground.height((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) : 0 });
+  for (let i = 0; i < all.length; i += 130) plans.push(base(`lhasa-houses-${i / 130}`, all.slice(i, i + 130).map((l) => house(l, openFlags(l).open ? undefined : 'shell'))));
+  // what furnishes the rooms, in plans shown only near (interiors.js); the twelve houses the visitor enters keep their rooms in the shell's plan (their stairs and floors are walked in one world)
+  for (const b of bands(all)) plans.push({ ...base(`lhasa-rooms-${b.id}`, b.lots.filter((l) => !openFlags(l).open).map((l) => house(l, 'rooms'))), center: b.center, near: b.near });
   // yaks treading out the barley on the farmsteads' threshing floors (the post and floor are the house's: styles/tibetan house(), the same seed's draw)
   { const yk = [];
     for (const l of all) {
@@ -98,6 +103,8 @@ export async function town() {
   for (const s of sh) E.push(s.kind === 'stall' ? { t: 'stall', at: s.at, rot: s.rot, w: s.w, y: 0, seed: s.seed, goods: s.goods } : { t: 'tibetan_shop', rect: s.rect, door: s.door, kind: s.kind, y: 0, seed: s.seed });
   for (const z of [78, 88, 98, 108, 118, 156, 167, 178, 190, 199]) E.push({ t: 'flag_line', a: [STREET[0] - 0.4, z], b: [STREET[2] + 0.4, z + 1.5], y0: 8.2, y1: 8.4, sag: 0.8, poles: ![78, 88, 98, 108, 118, 178, 190].includes(z) });
   E.push({ t: 'sangkhang', at: SANG, rot: 0 });
+  // two mani walls of the pilgrims' stones: on the open ground below the palace (west of the stairs' foot) and along the circuit's south leg outside the gate (docs §19)
+  E.push({ t: 'mani_wall', a: [34, 216], b: [58, 216], y: 0, seed: 11 });
   plans.push(base('lhasa-shops', E));
   // sangkhang in the street, its smoke (smoke.js)
   plans.push(base('lhasa-street-life', [

@@ -14,6 +14,7 @@ import '../qing/index.js';
 import '../chinese/index.js';
 import { makeShops } from './shops.js';
 import { makeRooms } from './rooms.js';
+import { withVariety } from './vary.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -76,7 +77,11 @@ function win(bag, [px, pz], [ux, uz], [nx, nz], y, s = 1, rand = Math.random, o 
     face(bag, cb, n, P(u0, v2, d0), P(u1, v2, d1), P(u1, v1, d1), P(u0, v1, d0));
     face(bag, ca, n, P(u0, v3, d0), P(u1, v3, d1), P(u1, v2, d1), P(u0, v2, d0));
   }
+  // the night's light behind the lattice (settlements/lhasa/nightlight.js listens here): the pane of lamp-light, the lattice's own plane a hair in front
+  if (litSink.fn) litSink.fn({ q: [P(-ow, 0.12, 0.085), P(ow, 0.12, 0.085), P(ow, h - 0.1, 0.085), P(-ow, h - 0.1, 0.085)], n: [nx, nz], y, s, c: [px, pz], open: !!o.open });
 }
+/** A listener for the windows being built (lit panes at night); null when nobody listens. */
+export const litSink = { fn: null };
 /** The four faces of a rect, each as [start x, start z, end x, end z, nx, nz] with u to the right seen from outside. */
 const FACES = (x0, z0, x1, z1) => ({ s: [x0, z1, x1, z1, 0, 1], n: [x1, z0, x0, z0, 0, -1], e: [x1, z1, x1, z0, 1, 0], w: [x0, z0, x0, z1, -1, 0] });
 /**
@@ -560,6 +565,13 @@ function sangkhun(bag, x, y, z, dir = [0, 1]) {
  * The parts of a house that its plan, its walks and its upper floor need to agree on (the same draws of the house's rng, in the same order as
  * house() has always made them): { rand (the stream, after these), third, dn, dr, C, rooms, voids, gx, farm, merchant, ladder: the courtyard's way up }.
  */
+/** The windows a lot's house builds, as win() reports them (a replay of the shell with a bag that keeps nothing): [{ q, n, y, s, c, open }]. */
+export function houseWindows(el) {
+  const out = [], spy = new Proxy({}, { get: () => () => {} }), prev = litSink.fn;
+  litSink.fn = (w) => out.push(w);
+  try { house({ ...el, part: 'shell' }, { bag: spy, col: spy, lights: [] }); } catch { /* a house that does not replay has no lit windows */ } finally { litSink.fn = prev; }
+  return out;
+}
 export function houseKeys(el) {
   const rand = rng(el.seed || 1), y = el.y ?? 0, [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, H = 6;
   const third = W > 11 && rand() < 0.35, dn = third ? 5.3 : 4.6, dr = W > 12 ? 3.2 : 2.9, dw = 0.8;
@@ -625,16 +637,24 @@ function house(el, ctx) {
   const { bag, col } = ctx, y = el.y ?? 0, [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0;
   const H = 6, b = 0.3, pe = 0.45, cap = 0.3, yw = y + H - pe - cap, k = b / (yw - y + 0.5);
   const K = houseKeys(el), { rand, third, dn, dr, dw, C, rooms, voids, farm, merchant, owins, wr, rs, loft } = K;
+  // el.part: 'shell' (the closed house, built wherever it stands), 'rooms' (what furnishes its rooms: built only near the visitor, in a plan of its own; docs/settlements/lhasa.md §19), or both
+  if (el.part === 'rooms') {
+    for (const r of rooms) furnishRoom(ctx, r);
+    if (wr) work(ctx, { rect: wr.rect, y: wr.y, h: wr.h, side: wr.side, seed: wr.seed });
+    if (loft) furnishRoom(ctx, loft.room);
+    return;
+  }
+  const furnish = el.part !== 'shell';
   // the house: one battered body hollowed by the courtyard (open to the sky and to the street side) and by its rooms
   dzong({ rect: el.rect, y0: y - 0.5, y1: y + H, batter: b, mat: 'limewash_white', windows: '', pembe: pe, cap, seed: el.seed, voids }, ctx);
   for (const r of rooms) {
-    furnishRoom(ctx, r);
+    if (furnish) furnishRoom(ctx, r);
     const up = r.y > y + 1;
     doorway({ at: [r.door, C[1]], n: 's', y: up ? r.y : r.y + 0.05, w: 1.1, h: up ? 1.95 : 2.1, k: 0 }, ctx);
   }
   const upDoors = rooms.filter((r) => r.y > y + 1).map((r) => r.door);
   if (wr) {
-    work(ctx, { rect: wr.rect, y: wr.y, h: wr.h, side: wr.side, seed: wr.seed });
+    if (furnish) work(ctx, { rect: wr.rect, y: wr.y, h: wr.h, side: wr.side, seed: wr.seed });
     doorway({ at: [wr.side === 'w' ? C[0] : C[2], wr.doorZ], n: wr.side === 'w' ? 'e' : 'w', y: wr.y, w: 0.9, h: 1.95, k: 0 }, ctx);
   }
   if (rs) {
@@ -649,6 +669,23 @@ function house(el, ctx) {
   dzong({ rect: [C[0] - 0.3, z1 - dw, C[2] + 0.3, z1 - 0.2], y0: y - 0.5, y1: y + wh, batter: 0.08, pembe: 0.35, cap: 0.25, windows: '', seed: 3,
     voids: [{ r: [gx - gw / 2, z1 - dw - 1, gx + gw / 2, z1 + 1], y0: y - 0.5, y1: y + 2.25, floor: false }] }, ctx);
   doorway({ at: [gx, z1 - 0.2], n: 's', y, w: gw, h: 2.25, k: 0.08 / (wh - 0.1) }, ctx);
+  // wear (docs/settlements/lhasa.md §19): the mud thrown up at the feet of the outer walls by rain, animals and feet
+  // (an irregular band of banco, higher where the ground is trodden: its own random stream, so the house's other choices stay as they were)
+  { const tz = z1 - 0.02, ge = [gx - gw / 2 - 0.1, gx + gw / 2 + 0.1]; void tz; void ge;
+    // (no threshold slabs: alike they were one more instanced draw; the worn sill of the shop fronts and the mud at the walls' feet carry the wear)
+    const mr = rng((el.seed || 1) * 31 + 7), kk = b / (yw - y + 0.5), k2 = 0.08 / (wh - 0.6 + 0.5);
+    const band = (a, c, ux, uz, nx, nz, u0, u1, kq) => {
+      for (let u = u0; u < u1 - 0.3;) {
+        const du = Math.min(u1 - u, 0.9 + mr() * 1.1), t0 = 0.12 + mr() * 0.28, t1 = 0.12 + mr() * 0.28, i0 = kq * 0.5, i1 = kq * (t1 + 0.5);
+        const P = (uu, hh, ii) => [a + ux * uu - nx * (ii - 0.014), y + hh, c + uz * uu - nz * (ii - 0.014)], i2 = kq * (t0 + 0.5);
+        face(bag, 'banco_rough', [nx, nz], P(u, 0, i0), P(u + du, 0, i0), P(u + du, t1, i1), P(u, t0, i2));
+        u += du;
+      }
+    };
+    for (const f of 'new') { const [ax, az, bx, bz, nx, nz] = FACES(x0, z0, x1, z1)[f], L = Math.hypot(bx - ax, bz - az); band(ax, az, (bx - ax) / L, (bz - az) / L, nx, nz, 0.3, L - 0.3, kk); }
+    { const [ax, az, , , nx, nz] = FACES(C[0] - 0.3, z1 - dw, C[2] + 0.3, z1 - 0.2).s, ux = 1, uz = 0, ga = gx - gw / 2 - 0.5 - ax, gb = gx + gw / 2 + 0.5 - ax;
+      band(ax, az, ux, uz, nx, nz, 0.2, ga, k2); band(ax, az, ux, uz, nx, nz, gb, C[2] + 0.3 - (C[0] - 0.3) - 0.2, k2); }
+  }
   // the gate's two leaves standing open against the wall's inner face
   for (const sg of [-1, 1]) { const xe = gx + sg * gw / 2; bag.add('wood_painted', box(Math.min(xe, xe - sg * 0.06), y + 0.12, z1 - dw - 0.75, Math.max(xe, xe - sg * 0.06), y + 2.2, z1 - dw - 0.04)); }
   if (merchant) {
@@ -756,7 +793,7 @@ function house(el, ctx) {
       win(bag, [wx, r3[3] - 0.03], [1, 0], [0, 1], y + H + 0.6, 0.9, rand, { k: 0.12 / 2.6, lights: i === Math.floor(nw / 2) && L > 5 ? 2 : 1 });
     }
     if (loft) {                                                                         // the roof room: a door onto the gallery's roof, a window on the west wall, the sleeping loft furnished
-      furnishRoom(ctx, loft.room);
+      if (furnish) furnishRoom(ctx, loft.room);
       doorway({ at: [loft.room.door, r3[3]], n: 's', y: y + H, w: 0.9, h: 1.95, k: 0.12 / 2.6 }, ctx);
       win(bag, [r3[0] + 0.01, loft.wz], [0, 1], [-1, 0], y + H + 0.8, 0.85, rand, { k: 0.12 / 2.6, lights: 1, open: true });
     }
@@ -1404,6 +1441,44 @@ function lhakhang(el, { bag, col, lights }) {
  * back wall under a pembe band and a narrow roof of slates on beams; on a ledge before it the wheels,
  * a hand's breadth apart, each a red drum banded in gilt on its spindle between the ledge and a rail.
  */
+/**
+ * mani_wall: { a, b (along x: a[0] < b[0], one z), y, seed } — a long low wall of whitewashed stone with the mani stones of the pilgrims laid on its coping and set into
+ * both faces: slabs of mud-plastered stone carrying rows of raised, painted bars in red and black. NO TIBETAN LETTERS: no licensed font is on the machine and no glyph is
+ * drawn that cannot be checked; the rows of bars stand for the lines of the carved mantra as relief pattern (docs/settlements/lhasa.md §19). A taller stone with a red disc
+ * (the cartouche of the seed syllable) stands at the middle of each face.
+ */
+function maniWall(el, { bag, col }) {
+  const [ax, az] = el.a, [bx] = el.b, y = el.y ?? 0, rr = rng(el.seed || 5);
+  bag.add('limewash_white', box(ax, y - 0.1, az - 0.45, bx, y + 1.05, az + 0.45)); bag.add('mud_plaster', box(ax - 0.05, y + 1.05, az - 0.5, bx + 0.05, y + 1.12, az + 0.5));
+  col.rect([ax - 0.05, az - 0.5, bx + 0.05, az + 0.5], y, y + 1.12);
+  // the tablets on the coping, lying flat (a stone 0.5 × 0.34), their bars in rows along the wall
+  for (let x = ax + 0.15; x + 0.5 < bx - 0.1; x += 0.58) {
+    const dz = (rr() - 0.5) * 0.18;
+    bag.add('mud_plaster', box(x, y + 1.12, az - 0.17 + dz, x + 0.46 + 0.07 * rr(), y + 1.165 + 0.012 * rr(), az + 0.16 + 0.03 * rr() + dz));
+    for (let r = 0; r < 3; r++) {
+      const mat = (r + Math.floor(rr() * 2)) % 3 ? 'lacquer_red' : 'lacquer_black', zz = az - 0.1 + dz + r * 0.11;
+      for (let u = 0.04; u < 0.45;) { const d = 0.04 + rr() * 0.12, ee = Math.min(d, 0.46 - u); bag.add(mat, box(x + u, y + 1.17, zz - 0.014, x + u + ee, y + 1.19, zz + 0.014)); u += ee + 0.035 + rr() * 0.05; }
+    }
+  }
+  // the tablets set into the two faces, in two courses (a slab 0.5 × 0.34 standing 0.04 out of the wall), bars in lines along it
+  for (const [sg, zf] of [[1, az + 0.45], [-1, az - 0.45]]) {
+    for (const [yb, off] of [[y + 0.15, 0], [y + 0.58, 0.28]]) {
+      for (let x = ax + 0.2 + off; x + 0.5 < bx - 0.1; x += 0.6) {
+        if (Math.abs(x + 0.25 - (ax + bx) / 2) < 0.5) continue;
+        const dy = (rr() - 0.5) * 0.04;
+        bag.add('mud_plaster', box(x, yb + dy, sg > 0 ? zf : zf - 0.045, x + 0.46 + 0.07 * rr(), yb + dy + 0.32 + 0.04 * rr(), sg > 0 ? zf + 0.045 : zf));
+        for (let r = 0; r < 3; r++) {
+          const mat = (r + Math.floor(rr() * 2)) % 3 ? 'lacquer_red' : 'lacquer_black', yy = yb + dy + 0.06 + r * 0.1, z0 = sg > 0 ? zf + 0.045 : zf - 0.045 - 0.02;
+          for (let u = 0.04; u < 0.45;) { const d = 0.04 + rr() * 0.12, ee = Math.min(d, 0.46 - u); bag.add(mat, box(x + u, yy, z0, x + u + ee, yy + 0.026, z0 + 0.02)); u += ee + 0.035 + rr() * 0.05; }
+        }
+      }
+    }
+    // the great stone at the middle of the face: taller, a red disc (the seed syllable's cartouche) on it, the rows of bars below
+    const cx = (ax + bx) / 2;
+    bag.add('mud_plaster', box(cx - 0.4, y + 0.1, sg > 0 ? zf : zf - 0.06, cx + 0.4, y + 0.98, sg > 0 ? zf + 0.06 : zf));
+    bag.add('lacquer_red', rod([cx, y + 0.72, zf + sg * 0.06], [cx, y + 0.72, zf + sg * 0.085], 0.2, 14));
+  }
+}
 function maniGallery(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], sd = el.side ?? 1, n = [-u[1] * sd, u[0] * sd];
   const gy = typeof el.y === 'function' ? el.y : () => el.y ?? 0, step = 6, ns = Math.max(1, Math.round(L / step)), sl = L / ns;
@@ -1435,8 +1510,12 @@ const { furnish: furnishRoom, work } = makeRooms({ face, thangka });
 const { teaSeats: _ts, ...SHOPS } = makeShops({ face, doorway, win, thangka, sangkhun, twigs, bannerPole, flagString });
 /** Where patrons sit in a tea house (shops.js). */
 export const teaSeats = _ts;
+const FINE_VARIED = new Set(['tibetan_house', 'lh_floor_rooms', 'mani_wall', ...Object.keys(SHOPS)]);
+// (the rooms' furnishing is a plan element of its own, named with 'floor' so that src/objects/life.js, which places the street's life round the footprints of a plan's elements, passes it by)
+const OWN = { mani_wall: maniWall, lh_floor_rooms: (el, ctx) => house({ ...el, part: 'rooms' }, ctx), dzong, chorten, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS  };
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dzong, chorten, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS },
+  // (the houses and the street's shops build with their fine pieces marked: vary.js)
+  elements: { ...STYLES.qing.elements, ...Object.fromEntries(Object.entries(OWN).map(([k, f]) => [k, FINE_VARIED.has(k) ? withVariety(f) : f])) },
   objects: {},
 });

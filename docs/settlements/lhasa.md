@@ -191,6 +191,21 @@ Gap found: the courtyard houses had upper rooms, but the steep ladder to the gal
 - **Proof**: `walks` in plan.js (36 routes): lane, gate, court, ladder, gallery, main room; the weaving room; the roof stair, the roof and the roof room.
 - Still shut: the shops and tea houses (single storey, §14), the other ~175 houses' side ranges and roofs, the printing house's roof.
 
+## 19. Visitor's walk, night, sound, animals, wear (2026-11, match to the Suzhou standard)
+
+Marks: [stated] with its source, [inferred] where the place and date make it likely but no source is at hand. The shell cannot reach most sites; only the two Wikipedia pages named here were read.
+
+- **Near-only rooms** (earlier pass, `interiors.js`): a house is a shell element (always built, closed) and a rooms element `lh_floor_rooms` built in plans shown only near the visitor (one plan per band of Shöl, per sector of farmsteads). A house the visitor enters keeps its rooms in the shell plan. [inferred: engineering, no source needed]
+- **Script**: no licensed Tibetan font is on the machine and no glyph can be checked, so NO Tibetan letters are drawn anywhere. Mani stones and prayer flags stay relief pattern (rows of raised bars, a disc for the seed syllable); shop signs are plain cloth. [stated: Mani stone, Wikipedia: stones are carved in sunk relief, the mantra painted syllable by syllable, laid along roads and in mounds and long walls and passed clockwise; ours are bars only]
+- **Walk** (`openwalk.js`, 12 new routes in plan.js): the three tea houses and the seven trading houses nearest the middle of the street, each from the street's axis through the door into the room; the printing house (round its walls, in at the south gate, up the court to the block store); the chapel of the great prayer wheel from the circuit's west leg. 48 routes in all. [inferred: shop fronts as built in §14; the printing house and the chapel are §12 and §13]
+- **Night** (`nightlight.js`, halo material): lit panes in the palace's quarters, the print house, the halls and the houses (butter lamp or hearth glow behind a window), butter lamps on the tomb hall's and the chapel's tables, door lanterns of the shops, tea-house hearths, embers, hanging lanterns. 580 pane elements, 30 hanging lanterns. [inferred: butter lamps are §13; the rest follows from a town with no electricity at 1694]
+- **Sound** (`soundmap.js`, `voices.js`, voices prefixed `lhs`): the dungchen horns [stated: Tibetan horn, Wikipedia: long, deep, whirring wail, often played in pairs or multiples, the most widely used instrument in Tibetan Buddhist culture] at dawn and dusk from the palace roof; gyaling in the Deyang Shar, chant in the halls and by night, hand wheels and the wheel rows, mani murmur, prostrators' boards, flags in the wind, juniper smoke offering, stalls (tea churn, bowls, scales), the printing house, yaks and caravans, mastiffs by night, dogs, wind. [inferred: all but the horn's character]
+- **Animals** (`fauna.js` critters; mastiff model in `critter-models.js`, rig of the dog): five Tibetan mastiffs (four on the row north of the wide lane, one at the south gate), 25 village dogs and about 5 goats within 150 m of the lane crossing, 7 flocks of four rock pigeons, cats on shop doorsteps. [inferred: mastiffs as house guards and herd dogs are common knowledge; the Tibetan Mastiff page could not be read]
+- **Wear**: the shop fronts' timber sill dished in the middle (under 4 cm: the walker counts a taller face as a wall), a band of mud thrown up at the feet of house walls, one mani wall along the circuit's south leg outside the gate (relief tablets, 20 m). [inferred]
+- **Not built**: wells; shop signs in script; the Red Palace's chapels beyond the tomb hall; threshold slabs of slate (they cost an instanced draw at the arrival); a second mani wall (the same).
+
+Still short of the reference: no keepers or goods inside most houses' shops beyond those opened; the lit windows of the far town; sounds for rain and snow; tablets and signs in script; the palace's upper floors; critters indoors; wear on the palace stairs; only one mani wall.
+
 ## Sources
 
 - [Deyangshar — Wikipedia](https://en.wikipedia.org/wiki/Deyangshar)

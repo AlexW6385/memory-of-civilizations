@@ -87,8 +87,8 @@ export function people() {
   // the chaski's post on the road south of the fields (§5.3): a runner seated on the bench by its hut, his pututu and
   // quipu beside him, another standing at the road's edge looking south for the next to come; travellers on the road
   // with their loads in a cloth on the back (q'ipi), a woman with her child, a porter, a string of two llamas
-  gear.push({ t: 'chaski_bench', at: [5.75, 121.9], y: ground.height(5.75, 121.9), rot: 0 });
-  figures.push(man({ at: [5.55, 121.7], y: ground.height(5.55, 121.7), rot: W, pose: 'sit', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'belt', h: 1.62 }));
+  gear.push({ t: 'chaski_bench', at: [5.75, 122.6], y: ground.height(5.75, 121.9), rot: 0 });
+  figures.push(man({ at: [5.55, 122.4], y: ground.height(5.55, 122.4), rot: W, pose: 'sit', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'belt', h: 1.62 }));
   figures.push(man({ at: [3.5, 123.6], y: ground.height(3.5, 123.6), rot: S, cloth: 'cloth_white', cloth2: 'cloth_red', over: 'belt', pose: 'stand', h: 1.64 }));
   for (const [x, z, rot, o] of [[5.6, 131, N, { carry: 'bundle' }], [6.6, 134, N, { carry: 'bundle', over: 'cape' }], [2.2, 112.5, S, {}], [5.8, 146, N, { carry: 'bundle' }]]) figures.push(man({ at: [x, z], y: ground.height(x, z), rot, ...o }));
   figures.push(woman({ at: [6.9, 140.5], y: ground.height(6.9, 140.5), rot: N, carry: 'child', h: 1.5 }));
@@ -114,9 +114,9 @@ export function people() {
     { const [x, z, y] = kt(1, -1.45); figures.push(man({ at: [x, z], y, rot: S + 0.6, h: 1.1, pose: 'staff', staffMat: 'wood_dark', len: 1.0, over: 'belt' })); }
     // on the knoll's stair below the arrival: a porter coming down with his load, a woman with a pot going up, a girl behind her
     { const top = 2.2 * KNOLL.n, zl = KNOLL.c[1] - KNOLL.r - 10, zh = KNOLL.c[1] - hillRing(KNOLL, KNOLL.n - 1) + 0.6, ns = Math.round(top / 0.16), yAt = (z) => top * Math.ceil((z - zl) / (zh - zl) * ns) / ns;
-      figures.push(man({ at: [KNOLL.c[0] + 0.55, 121.5], y: yAt(121.5), rot: N + 0.05, carry: 'bundle', h: 1.62 }));
-      figures.push(woman({ at: [KNOLL.c[0] - 0.55, 115.5], y: yAt(115.5), rot: S, carry: 'pot', h: 1.5 }));
-      figures.push(woman({ at: [KNOLL.c[0] + 0.3, 113.2], y: yAt(113.2), rot: S - 0.1, h: 1.2, over: 'shawl' })); }
+      figures.push(man({ at: [KNOLL.c[0] + 0.85, 121.5], y: yAt(121.5), rot: N + 0.05, carry: 'bundle', h: 1.62 }));
+      figures.push(woman({ at: [KNOLL.c[0] - 0.85, 115.5], y: yAt(115.5), rot: S, carry: 'pot', h: 1.5 }));
+      figures.push(woman({ at: [KNOLL.c[0] + 0.85, 112.4], y: yAt(112.4), rot: S - 0.1, h: 1.2, over: 'shawl' })); }
     // the spearmen of the gate, inside the wall to either side of the road
     for (const [x, z, r] of [[-0.5, 81.2, S + 0.15], [4.5, 81.2, S - 0.15]]) figures.push(man({ at: [x, z], y: 0, rot: r, pose: 'staff', staffMat: 'wood_dark', len: 1.85, cloth: 'cloth_red', cloth2: 'cloth_black', over: 'cape', h: 1.7 }));
   }
