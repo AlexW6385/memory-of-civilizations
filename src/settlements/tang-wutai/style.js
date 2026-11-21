@@ -6,6 +6,7 @@ import '../../styles/chinese/index.js';
 import { box, lathe } from '../../core/geom.js';
 import { tube, blob } from '../../styles/chinese/statues.js';
 import { height } from './layout.js';
+import { frame } from '../../styles/chinese/village.js';
 import { wutaiDwelling } from './dwelling.js';
 import { wutaiTeashed } from './teashed.js';
 
@@ -79,4 +80,27 @@ function wutaiCairn({ at: [x, z], y, seed = 1, h = 1.1 }, { bag, col }) {
 }
 
 const base = STYLES.chinese;
-registerStyle('wutai-site', { ...base, elements: { ...base.elements, wutai_tree: wutaiTree, wutai_rows: wutaiRows, wutai_lamp: wutaiLamp, wutai_scarecrow: wutaiScarecrow, wutai_cairn: wutaiCairn, wutai_dwelling: wutaiDwelling, wutai_teashed: wutaiTeashed } });
+
+/**
+ * An open flat house with a dado is a solid block inside: the shared house builder lays a rubble slab over the whole footprint (0.9 m high, and
+ * its collider) before it makes the hollow room, so such a house cannot be entered and its kang lies buried. A house built of rubble stone has no
+ * dado, so the open houses take the nearest seed whose first draw (the builder's wall choice, `< 0.38` = stone) makes them stone-walled.
+ */
+const baseHouse = base.elements.wutai_house;
+function wutaiOpenHouse(el, ctx) {
+  if (el.open && (el.kind || 'flat') === 'flat' && !el.wallMat) {
+    let seed = el.seed || 1;
+    for (let k = 0; k < 400 && rng(seed + 13)() >= 0.38; k++) seed += 104729;   // (the generator's first draws of nearby seeds are nearly equal: a long step)
+    el = { ...el, seed };
+    // on a plot that falls toward its lane the floor (highest ground + 0.4) can stand over half a metre above the door's ground, more than the
+    // two steps the builder gives the door; the floor is lowered to 0.42 above the ground before the door (the rear sits in the slope)
+    el = lowered(el);
+  }
+  return baseHouse(el, ctx);
+}
+function lowered(el) {
+  const fr = frame(el.rect, el.front), [dx, dz] = fr.P(fr.L / 2, -1.0), y = Math.min(el.y, height(dx, dz) + 0.04);
+  return { ...el, y, foot: Math.min(el.foot ?? y, y) };
+}
+const wutaiOpenDwelling = (el, ctx) => wutaiDwelling(lowered(el), ctx);
+registerStyle('wutai-site', { ...base, elements: { ...base.elements, wutai_house: wutaiOpenHouse, wutai_tree: wutaiTree, wutai_rows: wutaiRows, wutai_lamp: wutaiLamp, wutai_scarecrow: wutaiScarecrow, wutai_cairn: wutaiCairn, wutai_dwelling: wutaiOpenDwelling, wutai_teashed: wutaiTeashed } });

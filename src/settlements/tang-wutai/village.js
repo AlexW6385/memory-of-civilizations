@@ -102,16 +102,23 @@ export function village() {
     put({ t: 'pot', kind: 'vat', n: 1, seed: l.seed }, doorU + 1.2, vf - 0.9);
     put({ t: 'firewood', seed: l.seed + 3, rot: yaw[l.front] + Math.PI / 2 }, u0 + Wh + 0.7, v0 + 1.0);
     if (rand() < 0.6) put({ t: 'chickens', n: 3 + Math.floor(rand() * 3), kind: 'hen', seed: l.seed + 5 }, Math.min(L - 2, u0 + Wh * 0.5), vf - 2.6);
-    if (rand() < 0.35) put({ t: 'haystack', seed: l.seed + 9 }, Math.max(1.8, u0 - 1.6), 2.2);
+    // (the haystack stood where the gate's way in met the yard in one yard in twenty: it keeps 2.6 m off the gate's line; in an open house's yard it goes
+    // back to v 5.6, clear of the way from the gate across the front to the door)
+    let hayU = Math.max(1.8, u0 - 1.6), hayV = 2.2;
+    if (open || dwell) hayV = 5.6;
+    else if (Math.abs(hayU - gu) < 2.6) { const away = doorU > gu ? -2.8 : 2.8; hayU = gu + away; if (hayU < 1.8 || hayU > L - 1.8) hayU = gu - away; hayU = Math.min(L - 1.8, Math.max(1.8, hayU)); }
+    if (rand() < 0.35) put({ t: 'haystack', seed: l.seed + 9 }, hayU, hayV);
     if (rand() < 0.22) put({ t: 'animal', kind: ['goat', 'sheep', 'donkey', 'ox'][Math.floor(rand() * 4)], seed: l.seed + 13, rot: rand() * 6.28 }, L * (0.3 + rand() * 0.4), vf - 4.2);
     if (kind === 'flat' && !open && rand() < 0.5) put({ t: 'ladder', seed: l.seed + 15, rot: yaw[l.front] }, u0 + Wh - 1.0, v0 - 0.1);
     if (rand() < 0.45) { const [x, z] = at(L * 0.55, vf - 1.4); C.push({ t: 'wutai_rack', at: [x, z], y: gh(x, z), rot: l.front === 'n' || l.front === 's' ? 0 : Math.PI / 2, len: 3 }); }
     // the front yard's work (second pass): corn and peppers drying, a stone roller or a millstone, a cart or a barrow
     // against the side wall, a trough, a washing line, stools and a basket for the work of the hands, a rain tub,
     // sacks of grain; each in its own free place (the gate's way to the door and the things above are kept clear)
-    const used = [[gu, 1.0, 1.9], [doorU + 1.2, vf - 0.9, 0.9], [u0 + Wh + 0.7, v0 + 1.0, 1.4], [Math.max(1.8, u0 - 1.6), 2.2, 1.8], [Math.min(L - 2, u0 + Wh * 0.5), vf - 2.6, 1.4], [L * 0.55, vf - 1.4, 2.0], [L * 0.5, vf - 4.2, 1.6]];
+    const used = [[gu, 1.0, 1.9], [doorU + 1.2, vf - 0.9, 0.9], [u0 + Wh + 0.7, v0 + 1.0, 1.4], [hayU, hayV, 1.8], [Math.min(L - 2, u0 + Wh * 0.5), vf - 2.6, 1.4], [L * 0.55, vf - 1.4, 2.0], [L * 0.5, vf - 4.2, 1.6]];
     for (let v = 1.0; v < vf - 0.5; v += 1.0) used.push([doorU, v, 1.3]);                  // the way from the gate's line to the door
     for (let v = 1.0; v < 3.0; v += 1.0) used.push([gu, v, 1.7]);
+    // an open house or dwelling: the visitor's way from the gate's line across the yard's front to the door's line stays clear (walk.js)
+    if (open || dwell) for (let u = Math.min(gu, doorU); u <= Math.max(gu, doorU); u += 1.0) used.push([u, 2.6, 1.3]);
     const free = (u, v, r) => u > r + 0.4 && u < L - r - 0.4 && v > r * 0.6 + 0.4 && v < vf - 0.4 - r * 0.6 && used.every(([a, b, c]) => Math.hypot(a - u, b - v) > r + c);
     const drop = (el, r, tries = 14, extra = {}) => {
       for (let i = 0; i < tries; i++) { const u = r + 0.5 + rand() * (L - 2 * r - 1), v = 0.8 + rand() * (vf - 1.6); if (free(u, v, r)) { used.push([u, v, r]); put(el, u, v, { rot: rand() * 6.28, ...extra }); return true; } }
