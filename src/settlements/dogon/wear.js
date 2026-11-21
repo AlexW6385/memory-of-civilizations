@@ -9,6 +9,7 @@ import { box } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { houseOf } from '../../styles/dogon/compound.js';
 import { hv } from './furniture.js';
+import { height } from './layout.js';
 
 let done = false;
 export function registerWear() {
@@ -21,6 +22,15 @@ export function registerWear() {
       const dx = h.rect[0] + 0.45 + u, w = 0.62 + 0.12 * hv(dx, zf, 2), d = 0.9 + 0.25 * hv(dx, zf, 3);
       ctx.bag.add('mud_plaster', box(dx - w, y + 0.014, zf + 0.12, dx + w, y + 0.02, zf + 0.12 + d));           // trodden bare before the door
       ctx.bag.add('mud_plaster', box(dx - w * 0.55, y + 0.02, zf + 0.16, dx + w * 0.55, y + 0.026, zf + 0.16 + d * 0.5));   // and darker where the feet fall
+    }
+    // the way to the door: three narrowing patches of bare earth running out toward the lane where feet went, each on the ground under it (a stride apart)
+    for (const u of [1.5, 4.9]) {
+      const dx = h.rect[0] + 0.45 + u;
+      for (let k = 0; k < 3; k++) {
+        const z0 = zf + 1.15 + k * 0.62, cx = dx + (hv(dx, z0, 4) - 0.5) * 0.3, w = 0.48 - 0.08 * k, gy = height(cx, z0 + 0.3);
+        if (Math.abs(gy - y) > 0.25) break;                                                   // not down a step in the ground
+        ctx.bag.add('mud_plaster', box(cx - w, gy + 0.012, z0, cx + w, gy + 0.018, z0 + 0.5 + 0.12 * hv(cx, z0, 5)));
+      }
     }
     return r;
   };
