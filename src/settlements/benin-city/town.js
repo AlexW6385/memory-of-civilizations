@@ -3,6 +3,7 @@
 // in rows along the streets.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
+import { walkExcess } from './walk.js';
 import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, BRAZIERS, AUD, crest, height, lots, depth, inRect, onStreet, WAYPOTS } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'benin', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE_X, 12], facing: 'n' }, ...extra });
@@ -284,6 +285,17 @@ export async function town() {
     st.push({ t: 'benin_stall', rect: [x, z0, x + 3, z0 + 2.4], front, seed: Math.floor(rand() * 1e6) });
   }
   plans.push(...lodTiles('benin-market', 'benin', st, { R: RADIUS }));
+  // the sellers behind their tables, built into near plans (women: the sellers of the market are women, dossier §10), the stalls within 130 m of the walk; they leave at dusk like the other figures
+  {
+    const kr = rng(2600), kel = [];
+    for (const s of st) {
+      const F2 = frame(s.rect, s.front), c = F2.P(F2.L / 2, F2.D / 2);
+      if (walkExcess(c) > 130 || kr() < 0.3) continue;
+      const a = F2.P(F2.L / 2 - 0.75, 1.5), to = F2.P(F2.L / 2 - 0.75, 0);
+      kel.push({ t: 'bn_keepers', at: a, list: [{ t: 'figure', at: a, y: 0, rot: face(a, to), seed: Math.floor(kr() * 1e9), skin: 'skin_dark', hair: 'bun', hairMat: 'hair_dark', feet: 'bare', dress: 'wrap', cloth: F.pick(CL), cloth2: F.pick(CL), hat: 'none', over: 'shawl', pose: 'stand', carry: 'none' }] });
+    }
+    plans.push(...lodTiles('benin-keepers', 'benin', kel, { R: RADIUS, near: 130 }));
+  }
 
   // the street furniture: lamps along the great and the cross streets, the king's square, the firewood and pots at the lane mouths
   {
