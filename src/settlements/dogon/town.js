@@ -109,7 +109,6 @@ export async function town() {
     woman([wx - 1.7, wz + 0.9], wy, -1.2, { carry: 'pot', cloth: 'cloth_white' });
     P.push({ t: 'figure', at: [wx + 2.1, wz + 1.0], y: wy, rot: 3.2, seed: 7700 + i, dress: 'tunic', legs: 'bare', cloth: 'cloth_white', over: 'none', hat: 'none', feet: 'bare', hair: 'short', beard: false, child: true, h: 1.05, ...SK() });
     L.push({ t: 'pot', kind: 'water_pot', n: 3, at: [wx - 1.1, wz + 1.3], y: wy, rot: 0.5 * i, seed: 8100 + i });
-    A.push({ t: 'animal', kind: 'goat', at: [wx + 2.6, wz + 1.5], y: wy, rot: 1.4, seed: 8200 + i }, { t: 'animal', kind: 'goat', at: [wx + 1.7, wz + 1.6], y: wy, rot: 4.6, seed: 8300 + i });
   }
   // inside the opened ginnas (compound.js house(): lx/lz from the room's west and north wall): the household at its day — a woman at the hearth of
   // the central room with a child on the mat, the old man on the entrance hall's bench, the cook at the kitchen's fire

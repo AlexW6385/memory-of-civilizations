@@ -32,18 +32,18 @@ function well(el, { bag, col }) {
   }
   bag.add('wood_dark', rod([px[0] - 0.12, y + 1.78, z], [px[1] + 0.12, y + 1.79, z], 0.05, 6));
   // the cord over the pole: two runs down, one to a leather bucket at the curb's lip, the other to a hand's end
-  bag.add('rope_fibre', rod([x - 0.08, y + 1.76, z], [x - 0.12, y + 0.95, z], 0.012, 4));
-  bag.add('rope_fibre', rod([x + 0.08, y + 1.76, z], [x + 0.35, y + 1.0, z - 0.05], 0.012, 4));
+  bag.add('wood_dark', rod([x - 0.08, y + 1.76, z], [x - 0.12, y + 0.95, z], 0.012, 4));
+  bag.add('wood_dark', rod([x + 0.08, y + 1.76, z], [x + 0.35, y + 1.0, z - 0.05], 0.012, 4));
   const bx = x + 0.55, bz = z + 0.9;
-  bag.add('hide_brown', lathe([[0.001, 0], [0.16, 0.02], [0.19, 0.2], [0.2, 0.3], [0.17, 0.3]], 8, null, bx, y, bz));        // the bucket of hide, set down
-  bag.add('rope_fibre', rod([bx - 0.19, y + 0.3, bz], [bx + 0.19, y + 0.3, bz], 0.012, 4));
-  bag.add('wood_ochre', lathe([[0.001, 0], [0.09, 0.03], [0.12, 0.1], [0.08, 0.2], [0.04, 0.26], [0.03, 0.32]], 8, null, x - 0.6, y + H, z + 0.55));   // the calabash dipper on the curb
+  bag.add('wood_dark', lathe([[0.001, 0], [0.16, 0.02], [0.19, 0.2], [0.2, 0.3], [0.17, 0.3]], 8, null, bx, y, bz));        // the bucket of hide, set down
+  bag.add('wood_dark', rod([bx - 0.19, y + 0.3, bz], [bx + 0.19, y + 0.3, bz], 0.012, 4));
+  bag.add('reed_mat', lathe([[0.001, 0], [0.09, 0.03], [0.12, 0.1], [0.08, 0.2], [0.04, 0.26], [0.03, 0.32]], 8, null, x - 0.6, y + H, z + 0.55));   // the calabash dipper on the curb
   // the trough: a hollowed log on two stones, east of the well, and the wet earth round it
   const tx = x + 2.1, tz = z + 0.3;
   bag.add('wood_dark', box(tx - 0.85, y + 0.16, tz - 0.22, tx + 0.85, y + 0.4, tz + 0.22));
-  bag.add('water', box(tx - 0.75, y + 0.37, tz - 0.14, tx + 0.75, y + 0.385, tz + 0.14));
+  bag.add('opening', box(tx - 0.75, y + 0.37, tz - 0.14, tx + 0.75, y + 0.385, tz + 0.14));
   for (const d of [-0.6, 0.6]) bag.add('schist_rubble', lathe([[0.22, 0], [0.18, 0.1], [0.001, 0.16]], 6, null, tx + d, y, tz));
-  bag.add('pottery_dark', lathe([[0.001, 0], [2.6 + 0.2 * hv(x, z, 40), 0]], 14, null, x + 0.9, y + 0.006, z + 0.5));    // wet, trodden dark
+  bag.add('wood_dark', lathe([[0.001, 0], [2.6 + 0.2 * hv(x, z, 40), 0]], 14, null, x + 0.9, y + 0.006, z + 0.5));    // wet, trodden dark
   for (let k = 0; k < 4; k++) bag.add('granite_rough', lathe([[0.3, 0], [0.26, 0.04], [0.001, 0.05]], 6, null, x - 0.9 + k * 0.75, y + 0.006, z + 1.6 + 0.3 * hv(x + k, z, 50)));
   col.circle(x, z, R + 0.3, y - 0.1, y + H);
   void s;
@@ -54,8 +54,8 @@ function scare(el, { bag }) {
   const [x, z] = el.at, y = el.y ?? 0;
   bag.add('wood_dark', rod([x, y, z], [x + 0.05, y + 2.4, z], 0.04, 5));
   bag.add('wood_dark', rod([x + 2.4, y, z + 0.6], [x + 2.35, y + 2.2, z + 0.6], 0.04, 5));
-  bag.add('rope_fibre', rod([x + 0.05, y + 2.35, z], [x + 2.35, y + 2.15, z + 0.6], 0.008, 4));
-  for (let k = 1; k < 6; k++) { const t = k / 6, gx = x + 0.05 + 2.3 * t, gy = y + 2.35 - 0.2 * t - 0.25 - 0.08 * hv(gx, z, k), gz = z + 0.6 * t; bag.add('wood_ochre', lathe([[0.001, 0], [0.06, 0.03], [0.08, 0.09], [0.05, 0.17], [0.03, 0.2]], 6, null, gx, gy, gz)); bag.add('rope_fibre', rod([gx, gy + 0.2, gz], [gx, y + 2.35 - 0.2 * t, gz], 0.006, 3)); }
+  bag.add('wood_dark', rod([x + 0.05, y + 2.35, z], [x + 2.35, y + 2.15, z + 0.6], 0.008, 4));
+  for (let k = 1; k < 6; k++) { const t = k / 6, gx = x + 0.05 + 2.3 * t, gy = y + 2.35 - 0.2 * t - 0.25 - 0.08 * hv(gx, z, k), gz = z + 0.6 * t; bag.add('reed_mat', lathe([[0.001, 0], [0.06, 0.03], [0.08, 0.09], [0.05, 0.17], [0.03, 0.2]], 6, null, gx, gy, gz)); bag.add('wood_dark', rod([gx, gy + 0.2, gz], [gx, y + 2.35 - 0.2 * t, gz], 0.006, 3)); }
 }
 let done = false;
 export function registerFurniture() {
