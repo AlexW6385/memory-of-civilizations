@@ -29,13 +29,11 @@ export function earthWall(el, { bag, col }) {
     if (alongX) for (const s of [-1, 1]) bag.add('mud_plaster', box(x0 + 0.01, yy, z0 + s * (th / 2 - inN) - (s > 0 ? 0.03 : -0.0), x1 - 0.01, yy + 0.05, z0 + s * (th / 2 - inN) + (s > 0 ? 0.0 : 0.03)));
     else for (const s of [-1, 1]) bag.add('mud_plaster', box(x0 + s * (th / 2 - inN) - (s > 0 ? 0.03 : 0), yy, z0 + 0.01, x0 + s * (th / 2 - inN) + (s > 0 ? 0 : 0.03), yy + 0.05, z1 - 0.01));
   }
-  // the outer parapet: merlons along the outer edge of the walk (out = +1: the +z / +x side)
-  const n = Math.max(1, Math.floor(L / 1.9));
-  for (let i = 0; i < n; i++) {
-    const u = (i + 0.5) * L / n, m0 = u - 0.5, m1 = u + 0.5;
-    if (alongX) { const zz = z0 + out * (th / 2 - inset) - (out > 0 ? 0.55 : 0); bag.add('mud_plaster', box(x0 + m0, h, zz, x0 + m1, h + 1.15, zz + 0.55)); }
-    else { const xx = x0 + out * (th / 2 - inset) - (out > 0 ? 0.55 : 0); bag.add('mud_plaster', box(xx, h, z0 + m0, xx + 0.55, h + 1.15, z0 + m1)); }
-  }
+  // the outer parapet: one plain continuous breast-wall of rammed earth along the outer edge of the walk, with a pale coping on top
+  // (out = +1: the +z / +x side); it stands flush on the top edge of the battered face, so the wall reads as one piece
+  { const e = th / 2 - inset, p0 = e - 0.55, pa = out > 0 ? p0 : -e, pb = out > 0 ? e : -p0;
+    if (alongX) { bag.add(EARTH, box(x0, h, z0 + pa, x1, h + 1.0, z0 + pb)); bag.add('mud_plaster', box(x0, h + 1.0, z0 + pa - 0.06, x1, h + 1.1, z0 + pb + 0.06)); }
+    else { bag.add(EARTH, box(x0 + pa, h, z0, x0 + pb, h + 1.0, z1)); bag.add('mud_plaster', box(x0 + pa - 0.06, h + 1.0, z0, x0 + pb + 0.06, h + 1.1, z1)); } }
   if (alongX) { const zz = z0 + out * (th / 2 - inset) - (out > 0 ? 0.3 : -0.3); col.segment([x0, zz], [x1, zz], 0.6, h, h + 1.15); }
   else { const xx = x0 + out * (th / 2 - inset) - (out > 0 ? 0.3 : -0.3); col.segment([xx, z0], [xx, z1], 0.6, h, h + 1.15); }
   // weathering: rubble slumped at the foot, rain gullies down the battered face, a buttress of rammed earth every 16 m inside, a few missing merlons
@@ -44,11 +42,6 @@ export function earthWall(el, { bag, col }) {
       const s = rr() < 0.5 ? -1 : 1, off = th / 2 + 0.5 + rr() * 0.4, rad = 0.7 + rr() * 0.9;
       const cx = alongX ? x0 + u : z0 + s * off, cz = alongX ? z0 + s * off : z0 + u, px = alongX ? cx : x0 + s * off, pz = alongX ? z0 + s * off : cz;
       bag.add(EARTH, lathe([[rad, 0], [rad * 0.7, 0.3], [rad * 0.35, 0.55], [0.001, 0.62]], 7, null, px, 0, pz));
-    }
-    for (let u = 2; u < L - 1; u += 2.5 + rr() * 4) {
-      const s = rr() < 0.5 ? -1 : 1, yy = 1.0 + rr() * 2.4, hh = 1.4 + rr() * 2.0, inN = inset * (yy + hh / 2) / h;
-      if (alongX) { const zz = z0 + s * (th / 2 - inN); bag.add('mudbrick', box(x0 + u, yy, Math.min(zz, zz + s * 0.04), x0 + u + 0.22, yy + hh, Math.max(zz, zz + s * 0.04))); }
-      else { const xx = x0 + s * (th / 2 - inN); bag.add('mudbrick', box(Math.min(xx, xx + s * 0.04), yy, z0 + u, Math.max(xx, xx + s * 0.04), yy + hh, z0 + u + 0.22)); }
     }
     for (let u = 8; u < L - 8; u += 16) {
       if (Math.abs((alongX ? x0 : z0) + u) < 34) continue;
@@ -65,7 +58,7 @@ export function townGate(el, { bag, col }) {
   // the piers either side of the passage (full height), the earth over the passage on a timber lintel
   for (const s of [-1, 1]) {
     const u0 = s > 0 ? w / 2 : -U, u1 = s > 0 ? U : -w / 2;
-    bag.add(EARTH, along === 'x' ? frustum(rectUV(u0, -V, u1, V), 0, h, s > 0 ? 0 : bt, s > 0 ? bt : 0, bt, bt, { noBottom: true }) : frustum(rectUV(u0, -V, u1, V), 0, h, bt, bt, s > 0 ? 0 : bt, s > 0 ? bt : 0, { noBottom: true }));
+    bag.add(EARTH, along === 'x' ? frustum(rectUV(u0, -V, u1, V), 0, h, 0, 0, bt, bt, { noBottom: true }) : frustum(rectUV(u0, -V, u1, V), 0, h, bt, bt, 0, 0, { noBottom: true }));
     col.rect(rectUV(u0, -V, u1, V), 0, h);
   }
   { const r = rectUV(-w / 2 - 0.01, -V + 0.3, w / 2 + 0.01, V - 0.3); bag.add(EARTH, box(r[0], 4.4, r[1], r[2], h, r[3])); col.rect(r, 4.4, h); }
