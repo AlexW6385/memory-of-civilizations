@@ -19,6 +19,23 @@ function gable(P, ua, ub, D, o, ye, yr) {
   return orientOutward([...A, ...B, ...C, ...A2, ...C2, ...B2, ...A, ...C, ...C2, ...A, ...C2, ...A2, ...B, ...B2, ...C2, ...B, ...C2, ...C, ...A, ...A2, ...B2, ...A, ...B2, ...B]);
 }
 
+/**
+ * The doorway of a village house in the world (the rule of `building` below, kept in one place for the walk and the night): the lot's front-frame
+ * Pf(u, v) (v inward from the front face), the door's place `du`, the platform's depth `oD`, the forecourt's depth `vo`, the gateway's span `gate` of a court house.
+ */
+export function houseDoor(el) {
+  const [x0, z0, x1, z1] = el.rect, f = el.front, kind = el.kind || 'home', along = f === 's' || f === 'n';
+  const L = along ? x1 - x0 : z1 - z0, Dfull = along ? z1 - z0 : x1 - x0, rand = rng((el.seed || 1) + 5);
+  pick(rand, WALLS);
+  const doorU = Math.min(L - 1.1, Math.max(1.1, Math.floor(L / 2 / 1.0) * 1.0 + (rand() < 0.5 ? -0.8 : 0.8)));
+  let fr = kind === 'hut' ? 'none' : (el.fr || 'veranda');
+  if (fr === 'court' && Dfull < 7) fr = 'hood';
+  const vo = fr === 'court' ? 1.6 : 0, D = Dfull - vo, oD = fr === 'hood' ? 0.7 : 1.2, open0 = kind === 'shop' || kind === 'shed';
+  const du = open0 ? L / 2 : doorU, g0 = Math.min(L - 1.6, Math.max(0.6, L / 2 - 0.8));
+  const Pf = (u, v) => (f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
+  return { L, D, Dfull, vo, oD, du, fr, open0, kind, Pf, P: (u, v) => Pf(u, v + vo), gate: [g0, g0 + 1.6], stairLeft: du > L / 2, T: 0.3 };
+}
+
 function building(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, f = el.front, y = el.y ?? 0, simple = !!el.simple, kind = el.kind || 'home';
   const rand = rng((el.seed || 1) + 5), along = f === 's' || f === 'n', L = along ? x1 - x0 : z1 - z0, Dfull = along ? z1 - z0 : x1 - x0;
@@ -43,14 +60,14 @@ function building(el, ctx) {
   bag.add('mudbrick', box(...(() => { const r = R(-0.1, -0.1, L + 0.1, D + 0.1); return [r[0], y - 0.6, r[1], r[2], fy, r[3]]; })()));
   const open0 = kind === 'shop' || kind === 'shed';
   const oD = fr === 'hood' ? 0.7 : 1.2;
-  const doorU = Math.floor(L / 2 / 1.0) * 1.0 + (rand() < 0.5 ? -0.8 : 0.8);
+  const doorU = Math.min(L - 1.1, Math.max(1.1, Math.floor(L / 2 / 1.0) * 1.0 + (rand() < 0.5 ? -0.8 : 0.8)));
   if (fr === 'court') {
     // the forecourt: paved earth level with the house's floor, on a plinth, walled along the lane (a gateway of two stone posts under a tiled cap), the platform before it
     const g0 = Math.min(L - 1.6, Math.max(0.6, L / 2 - 0.8)), g1 = g0 + 1.6;
     bag.add('mudbrick', box(...(() => { const r = Rf(-0.1, -0.1, L + 0.1, vo + 0.1); return [r[0], y - 0.6, r[1], r[2], fy - 0.02, r[3]]; })()));
     Bf('earth_wall', 0, 0, L, vo, fy - 0.03, fy - 0.01); col.floor(Rf(0, 0, L, vo), fy - 0.02);
     for (const [a, b] of [[0, g0], [g1, L]]) { Bf('mudbrick', a, 0, b, 0.3, fy, fy + 1.45, true); Bf('earth_wall', a - 0.04, -0.04, b + 0.04, 0.34, fy + 1.45, fy + 1.57); }
-    for (const g of [g0 - 0.1, g1 + 0.1]) { Bf('sandstone_dressed', g - 0.2, -0.05, g + 0.2, 0.35, fy, fy + 2.0, true); Bf('sandstone', g - 0.26, -0.1, g + 0.26, 0.4, fy + 2.0, fy + 2.1); }
+    for (const g of [g0 - 0.3, g1 + 0.3]) { Bf('sandstone_dressed', g - 0.2, -0.05, g + 0.2, 0.35, fy, fy + 2.0, true); Bf('sandstone', g - 0.26, -0.1, g + 0.26, 0.4, fy + 2.0, fy + 2.1); }
     Bf('wood_dark', g0 - 0.3, 0.0, g1 + 0.3, 0.3, fy + 2.1, fy + 2.3);
     { const m0 = fy + 2.3; bag.add('roof_tile', fromTriangles(gable(Pf, g0 - 0.5, g1 + 0.5, 0.3, 0.45, m0, m0 + 0.5))); }
     // in the court: the tulsi's pedestal, a water pot on a stand, the quern's stone, a hen
@@ -67,7 +84,7 @@ function building(el, ctx) {
     if (open0) { B(wall, 0, 0.6, L, D, fy, top, true); B(wall, 0, 0, 0.5, 0.6, fy, top, true); B(wall, L - 0.5, 0, L, 0.6, fy, top, true); B('opening', 0.5, 0.58, L - 0.5, 0.6 + 0.01, fy + 0.1, fy + 2.3); B('timber', 0.5, 0.0, L - 0.5, 0.6, fy + 2.3, fy + 2.5, false); }
     else B(wall, 0, 0, L, D, fy, top, true);
   } else {
-    const dw = open0 ? shopW : 1.1, du = open0 ? L / 2 : Math.min(L - 1, Math.max(1, doorU));
+    const dw = open0 ? shopW : 1.6, du = open0 ? L / 2 : doorU;   // 1.6 m: the walker's door (assign-match, fifth batch)
     const two = storeys === 2, fl2 = fy + 3.0, uf = fl2 + 0.14;
     // the front wall with its openings cut: the door, and on a merchant's house the doors to the balconies
     const nbal = Math.max(1, Math.floor(L / 3.4)), balU = (k) => (k + 0.5) * L / nbal;
@@ -248,6 +265,8 @@ function building(el, ctx) {
   // the front: posts and a tiled lean-to over the platform, the eave board; openings, frames, stains
   const nb = Math.max(2, Math.round(L / 2.1));
   const vz = fr === 'veranda' || fr === 'portico';
+  /** A post of the front stands clear of the doorway's lane (a house's door is 1.6 m wide; the walker needs a metre and a half). */
+  const lanePost = (u) => (open0 || kind === 'hut' || Math.abs(u - doorU) >= 1.05 ? u : (u < doorU ? doorU - 1.1 : doorU + 1.1));
   const slab = (q, yt) => {
     const pts = q.map((p, i) => [p[0], yt[i], p[1]]), bot = pts.map((p) => [p[0], p[1] - 0.12, p[2]]);
     bag.add(roofM, fromTriangles(orientOutward([...pts[0], ...pts[1], ...pts[2], ...pts[0], ...pts[2], ...pts[3], ...bot[0], ...bot[2], ...bot[1], ...bot[0], ...bot[3], ...bot[2], ...pts[1], ...pts[0], ...bot[0], ...pts[1], ...bot[0], ...bot[1], ...pts[2], ...pts[1], ...bot[1], ...pts[2], ...bot[1], ...bot[2], ...pts[3], ...pts[2], ...bot[2], ...pts[3], ...bot[2], ...bot[3], ...pts[0], ...pts[3], ...bot[3], ...pts[0], ...bot[3], ...bot[0]])));
@@ -263,7 +282,8 @@ function building(el, ctx) {
     // a colonnade of stone pillars: a square base, an octagonal shaft, a lotus-bell capital under a block, a dressed stone beam
     const ve = fy + 2.45;
     for (let k = 0; k <= nb; k++) {
-      const u = Math.max(0.28, Math.min(L - 0.28, k * L / nb)), c = P(u, -oD + 0.17);
+      if (open0 && nb === 2 && k === 1) continue;                       // an open shop's front: no pillar in the middle of its doorway
+      const u = Math.max(0.28, Math.min(L - 0.28, lanePost(k * L / nb))), c = P(u, -oD + 0.17);
       B('sandstone', u - 0.26, -oD - 0.09, u + 0.26, -oD + 0.43, fy - 0.03, fy + 0.2);
       bag.add('sandstone_dressed', lathe([[0.2, 0], [0.18, ve - 0.55 - fy - 0.2]], 8, null, c[0], fy + 0.2, c[1]));
       bag.add('sandstone_dressed', lathe([[0.18, 0], [0.24, 0.1], [0.3, 0.25], [0.3, 0.3]], 12, null, c[0], ve - 0.55, c[1]));
@@ -274,7 +294,7 @@ function building(el, ctx) {
   }
   if (fr === 'portico' || fr === 'veranda') {
     const ya = y + (storeys === 2 ? 3.0 : 0) + 2.55, ve = fy + 2.45;
-    if (fr === 'veranda') for (let k = 0; k <= nb; k++) { const u = k * L / nb; B('timber', Math.max(0, u - 0.07), -oD + 0.1, Math.min(L, u + 0.07), -oD + 0.24, fy - 0.03, ve); col.rect(R(Math.max(0, u - 0.07), -oD + 0.1, Math.min(L, u + 0.07), -oD + 0.24), fy, ve); }
+    if (fr === 'veranda') for (let k = 0; k <= nb; k++) { if (open0 && nb === 2 && k === 1) continue; const u = lanePost(k * L / nb); B('timber', Math.max(0, u - 0.07), -oD + 0.1, Math.min(L, u + 0.07), -oD + 0.24, fy - 0.03, ve); col.rect(R(Math.max(0, u - 0.07), -oD + 0.1, Math.min(L, u + 0.07), -oD + 0.24), fy, ve); }
     if (fr === 'veranda') B('wood_dark', -0.1, -oD + 0.05, L + 0.1, -oD + 0.28, ve, ve + 0.2);
     // lean-to: slab sloping from the wall at (fy + 3.0) down to the beam
     const q = [P(-0.3, 0.05), P(L + 0.3, 0.05), P(L + 0.3, -oD - 0.3), P(-0.3, -oD - 0.3)], yt = [fy + 2.95, fy + 2.95, ve + 0.25, ve + 0.25];
@@ -288,7 +308,7 @@ function building(el, ctx) {
     for (let k = 0; k < nb; k++) {
       const u = (k + 0.5) * L / nb;
       if (Math.abs(u - doorU) < 0.9 && !open) { B('timber', doorU - 0.5, -0.04, doorU + 0.5, 0.03, fy, fy + 2.0); B('wood_dark', doorU - 0.6, -0.06, doorU + 0.6, 0.05, fy + 2.0, fy + 2.15); for (let j = 1; j < 5; j++) B('wood_dark', doorU - 0.5 + j * 0.2, -0.05, doorU - 0.49 + j * 0.2, 0.04, fy + 0.05, fy + 1.95); }
-      else if (!(open && Math.abs(u - doorU) < 0.9)) win(u, 0.75, 0.8, 1.15);
+      else if (!(open && Math.abs(u - doorU) < 1.3)) win(u, 0.75, 0.8, 1.15);
       if (storeys === 2 && !open) win(u, 0.8, 1.0, 3.2);
     }
   }
@@ -308,7 +328,7 @@ function building(el, ctx) {
       if (!open0 && kind !== 'shed') {
         for (let k = 0; k < nb; k++) {
           const u = (k + 0.5) * L / nb;
-          if (Math.abs(u - doorU) < 0.9) continue;
+          if (Math.abs(u - doorU) < (open ? 1.5 : 0.9)) continue;
           for (const sd of [-1, 1]) B('timber', u + sd * 0.55 - 0.15, -0.05, u + sd * 0.55 + 0.15, 0.0, fy + 1.15, fy + 2.0);
         }
         const nu = Math.max(0.35, Math.min(L - 0.35, doorU + (doorU > L / 2 ? -1.15 : 1.15)));
@@ -455,4 +475,4 @@ function greatBowl(el, { bag, col }) {
   for (let k = 0; k < 4; k++) { const a = k * 1.7 + 0.4; bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.17, 0.12], [0.15, 0.22], [0.09, 0.26], [0.001, 0.26]], 8, null, cx + Math.cos(a) * (r + 0.7), y, cz + Math.sin(a) * (r + 0.7))); }
 }
 
-export const villageElements = { village_house: building, yard_wall: yardWall, pilgrim_hall: pilgrimHall, stall, tree_shrine: treeShrine, great_bowl: greatBowl };
+export const villageElements = { door_clear: () => {}, village_house: building, yard_wall: yardWall, pilgrim_hall: pilgrimHall, stall, tree_shrine: treeShrine, great_bowl: greatBowl };

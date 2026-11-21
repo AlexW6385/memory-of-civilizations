@@ -2,6 +2,7 @@
 // with their walls, the pilgrims' rest house and the tree shrine at the stair's foot, the plaza with its stalls, the stair
 // itself, the tank's ghat; and every front dressed at eye level (a plan of its own, style life).
 import { lodTiles } from '../lod.js';
+import { houseDoor } from '../../styles/indian/village.js';
 import { RADIUS, TOP, STAIR, TANK, HALL, SHRINE, PLAZA, NORTH, STUPA2, STREETS, lots, yards, height, tankD } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -15,8 +16,16 @@ const faceDir = ([dx, dz]) => Math.atan2(-dx, -dz), awayDir = ([dx, dz]) => Math
 /** The stair's ground line: the height of the cut slope at z. */
 export const stairY = (z) => TOP * Math.max(0, Math.min(1, (STAIR.z1 - z) / (STAIR.z1 - STAIR.z0)));
 
+/** The lane before an opened house's door (the gateway of a forecourt house): a rectangle the street-life pass reads as a footprint, so that none of its people, animals or things stands in it. */
+function laneRect(l) {
+  const F = houseDoor({ rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, fr: l.fr }), u = F.fr === 'court' ? (F.gate[0] + F.gate[1]) / 2 : F.du;
+  const c = [[u - 1.0, 0.3], [u + 1.0, 0.3], [u - 1.0, -(F.oD + 2.4)], [u + 1.0, -(F.oD + 2.4)]].map(([a, v]) => F.Pf(a, v));
+  return [Math.min(...c.map((q) => q[0])), Math.min(...c.map((q) => q[1])), Math.max(...c.map((q) => q[0])), Math.max(...c.map((q) => q[1]))];
+}
 export function village() {
-  return lodTiles('sanchi-houses', 'indian', lots().map((l) => ({ t: 'village_house', rect: l.rect, front: l.front, y: 0, foot: -0.2, seed: l.seed, kind: l.kind, open: l.open, fr: l.fr, rg: l.rg, trade: l.trade })), { near: 125, R: RADIUS, entrance: { at: [0, -180], facing: 's' } });
+  const els = lots().map((l) => ({ t: 'village_house', rect: l.rect, front: l.front, y: 0, foot: -0.2, seed: l.seed, kind: l.kind, open: l.open, fr: l.fr, rg: l.rg, trade: l.trade }));
+  for (const l of lots()) if (l.open && !l.farm) els.push({ t: 'door_clear', rect: laneRect(l) });
+  return lodTiles('sanchi-houses', 'indian', els, { near: 125, R: RADIUS, entrance: { at: [0, -180], facing: 's' } });
 }
 
 /** The stalls round the plaza at the stair's foot: [centre x, z, front, trade]. */
@@ -43,6 +52,8 @@ export function extras() {
   }
   // a stone lamp-pillar at the foot of each cheek wall
   for (const sd of [-1, 1]) E.push({ t: 'block', rect: [sd * (STAIR.w + 0.9) - 0.25, STAIR.z1 - 0.1, sd * (STAIR.w + 0.9) + 0.25, STAIR.z1 + 0.4], y0: 0, y1: 1.6, mat: 'sandstone_dressed' });
+  // a clay lamp lit in the dish on top of each (docs/settlements/sanchi.md §21)
+  for (const sd of [-1, 1]) E.push({ t: 'rite', kind: 'lamp', at: [sd * (STAIR.w + 0.9), STAIR.z1 + 0.15], y: 1.6, s: 2.2, pool: 0 });
   for (const [cx, cz, front, trade] of STALLS) {
     const f = front === 'e' || front === 'w';
     E.push({ t: 'stall', rect: f ? [cx - 1.3, cz - 1.8, cx + 1.3, cz + 1.8] : [cx - 1.8, cz - 1.3, cx + 1.8, cz + 1.3], front, y: 0, seed: Math.floor(cx * 31 + cz * 17), trade });
@@ -111,7 +122,14 @@ export function dressing() {
     if (l.farm) continue;
     const out = OUT[l.front], Lw = (l.front === 's' || l.front === 'n') ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
     const P = (u, v) => frontPoint(l, u, v), yPl = 0.4, rotOut = awayDir(out);
-    const at = (u, v) => P(Math.max(0.4, Math.min(Lw - 0.4, u)), l.fr === 'hood' && v < 0 && v > -1.2 ? v * 0.55 : v);
+    // the door's lane stays clear (docs/settlements/sanchi.md §20): nothing stands in the metre either side of an opened house's door, out to the lane and in to the room's depth
+    const dr = l.open ? houseDoor({ rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, fr: l.fr }) : null;
+    const lane = (u, v, m = 1.1) => {
+      if (!dr || v > 0.05 || v < -3.6 || Math.abs(u - dr.du) >= m) return u;
+      const sd = u >= dr.du ? 1 : -1, w = dr.du + sd * (m + 0.1);
+      return w > Lw - 0.4 || w < 0.4 ? dr.du - sd * (m + 0.1) : w;
+    };
+    const at = (u, v) => P(Math.max(0.4, Math.min(Lw - 0.4, lane(u, v))), l.fr === 'hood' && v < 0 && v > -1.2 ? v * 0.55 : v);
     const u1 = Lw * (0.2 + rand() * 0.2), u2 = Lw * (0.6 + rand() * 0.2);
     const kind = l.kind;
     if (kind === 'shop') {
@@ -144,7 +162,7 @@ export function dressing() {
       if (rand() < 0.5) L.push({ t: 'firewood', at: P(Lw - 0.2, -0.1), y: yPl, rot: rotOut + 1.57, seed: seed++, len: 0.9 });
       if (rand() < 0.35) L.push({ t: 'drying_tray', at: at(u2, -1.9), y: 0, rot: rotOut, seed: seed++ });
       if (rand() < 0.4) L.push({ t: 'chickens', at: at(Lw / 2, -2.2), y: 0, rot: rotOut, seed: seed++, n: 4 });
-      if (rand() < 0.25) L.push({ t: 'laundry_pole', at: at(Lw / 2, 0), y: 3.3, rot: rotOut, seed: seed++, len: 1.6 });
+      if (rand() < 0.25) L.push({ t: 'laundry_pole', at: at(dr ? (dr.du > Lw / 2 ? Lw * 0.2 : Lw * 0.8) : Lw / 2, 0), y: 3.3, rot: rotOut, seed: seed++, len: 1.6 });
       if (rand() < 0.35) F(at(u2, -0.6), yPl, [-out[0], -out[1]], { pose: 'sit_low', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
       if (rand() < 0.2) L.push({ t: 'animal', kind: pickOf(['zebu', 'goat', 'goat']), at: at(u1, -2.6), y: 0, rot: rotOut + 1.0, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey']) });
       if (rand() < 0.15) L.push({ t: 'animal', kind: 'dog', at: at(Lw * 0.8, -3), y: 0, rot: rotOut + 2.5, seed: seed++ });

@@ -4,8 +4,10 @@
 
 import { ENCLOSURE, TOWER, PLATFORM, HILL, WEST, RECESS, ASCENT, VALLEY, height, inWalled, onAscent } from './layout.js';
 import { goodsAt, courtAt, kraals } from './life.js';
+import { walkRoutes } from './walkroutes.js';
 
 const E = [];
+const great_stair = [];
 const ellipse = (c, r, n, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: n + 1 }, (_, k) => { const a = a0 + (a1 - a0) * k / n; return [c[0] + Math.cos(a) * r[0], c[1] + Math.sin(a) * r[1]]; });
 const [ex, ez] = ENCLOSURE.c, [ra, rb] = ENCLOSURE.r;
 // the outer wall (11 m high at its greatest, chevron band on the north-east), with the north entrance
@@ -91,6 +93,32 @@ for (const [cx, cz, ra, rb, a0, a1] of [[8, -176, 6, 5, 0.5, 5.6], [20, -190, 5,
   E.push({ t: 'dry_wall', pts: [[bx - 2.0, bz + 1.6], [bx - 2.2, bz - 0.4], [bx - 1.2, bz - 1.9], [bx + 0.9, bz - 2.3], [bx + 2.2, bz - 1.2], [bx + 2.2, bz + 1.2]], h: 1.7, th: 0.9, y: top - 0.55, rubble: false });
 }
 
+// the covered stairway with its twist, and the cave's mouth (docs/settlements/great-zimbabwe.md §19.6)
+{
+  const sx = 10, w = 1.4, wall = (pts) => E.push({ t: 'dry_wall', pts, h: 3.1, th: 0.9, yAt: yh, rubble: false });
+  // flight A (south, w 1.4), a landing, and flight B 2.3 m to the east: the climb turns on the landing [the twist inferred; the covered stairway is stated, §Round 3]
+  const A = [sx, -188, -197.15], B = [sx + 2.3, -199.45, -208], LAND = [sx - 0.85, -199.45, sx + 3.45, -197.15];
+  const top = (x0, z0, x1, z1) => Math.max(...[[x0, z0], [x1, z0], [x0, z1], [x1, z1], [(x0 + x1) / 2, (z0 + z1) / 2]].map(([a, b]) => yh(a, b)));
+  E.push({ t: 'stone_steps', x: A[0], z0: A[1], z1: A[2], w, yAt: yh });
+  E.push({ t: 'stone_steps', x: (LAND[0] + LAND[2]) / 2, z0: LAND[3], z1: LAND[1], w: LAND[2] - LAND[0], yAt: yh });   // (the landing is laid in treads too: a riser under the roof would be a wall to the walker)
+  E.push({ t: 'stone_steps', x: B[0], z0: B[1], z1: B[2], w, yAt: yh });
+  wall([[sx - 1.3, -187], [sx - 1.3, -199.9], [sx + 1.1, -199.9], [sx + 1.1, -209]]);
+  wall([[sx + 1.4, -187], [sx + 1.4, -196.7], [sx + 3.9, -196.7], [sx + 3.9, -209]]);
+  // the roof of dressed slabs on the walls, 2.15 m over the highest ground each slab spans
+  for (let z = -188; z > -209; z -= 1.55) {
+    const zz = z - 1.7, lo = Math.min(z, zz), hi = Math.max(z, zz), y0 = top(sx - 1.5, lo, sx + 4.1, hi) + 2.15;
+    if (hi < -196.6 && lo > -199.9) { E.push({ t: 'block', rect: [sx - 1.5, lo, sx + 4.1, hi], y0, y1: y0 + 0.4, mat: 'granite_block' }); continue; }
+    const x0 = z > -198 ? sx - 1.5 : sx + 0.9, x1 = z > -198 ? sx + 1.6 : sx + 4.1;
+    E.push({ t: 'block', rect: [x0, lo, x1, hi], y0: top(x0, lo, x1, hi) + 2.15, y1: top(x0, lo, x1, hi) + 2.55, mat: 'granite_block' });
+  }
+  great_stair.push([[sx, -184], [sx, -189], [sx, -196.2], [sx, -198.3], [sx + 2.3, -198.3], [sx + 2.3, -203], [sx + 2.3, -207]]);
+  // the cave: a dark mouth between two boulders under a slab, set back a metre, on the hill's north side [mouth only: not entered; the hollow behind is dark]
+  const cx = -24, cz = -207, cy = Math.min(...[[cx, cz], [cx - 4, cz], [cx + 4, cz], [cx, cz + 3], [cx, cz - 3]].map(([a, b]) => yh(a, b)));
+  for (const [dx, sd] of [[-3.7, 61], [3.7, 67]]) E.push({ t: 'boulder', c: [cx + dx, cz], r: 2.6, h: 3.4, y: cy - 0.3, seed: sd });
+  E.push({ t: 'block', rect: [cx - 1.3, cz - 1.7, cx + 1.3, cz - 1.45], y0: cy, y1: cy + 2.1, mat: 'opening' });
+  E.push({ t: 'block', rect: [cx - 3.4, cz - 2.2, cx + 3.4, cz + 1.2], y0: cy + 2.1, y1: cy + 2.9, mat: 'granite_block' });
+}
+
 // the Eastern Enclosure at the hill's east end: a curved wall, the stone platform with the soapstone
 // birds on their columns in a row and tall monoliths behind them (Wikipedia, Zimbabwe Bird: eight
 // birds; slots in a platform here held the monoliths; the birds' order is unknown — ours a row)
@@ -144,4 +172,7 @@ export const great = {
     room('ascent top', [ASCENT.x - 0.8, -158, ASCENT.x + 0.8, -156], height(ASCENT.x, -157) + 0.08, 'open')],
   walks: [Object.assign([[ex + 6, ez - rb - 18], [ex + 6, ez - rb + 2], [ex + 6, ez]], { y0: 0 })],
 };
+// the routes into the opened houses of the homesteads on the visitor's walk and into the Valley courts (walkroutes.js)
+for (const r of great_stair) great.walks.push(Object.assign(r, { y0: yh(r[0][0], r[0][1]) }));
+for (const r of walkRoutes()) great.walks.push(Object.assign(r.route, { y0: r.y0 }));
 export default great;

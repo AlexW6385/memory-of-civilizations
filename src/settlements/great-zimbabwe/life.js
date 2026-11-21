@@ -3,7 +3,7 @@
 // sticks; women grinding and carrying water in the courts of the Valley Ruins; a trader with the goods of the
 // coast; a few people in the Great Enclosure. Kept few and quiet. Pure data.
 
-import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, daras, firings, compounds, inWalled, inEnclosure, pathDist } from './layout.js';
+import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, daras, firings, compounds, inWalled, inEnclosure, pathDist, yardFree } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -53,11 +53,11 @@ export function people() {
     const arr = [46, 60], dist = (k) => Math.hypot(k.c[0] - arr[0], k.c[1] - arr[1]);
     const near = [...compounds()].sort((p, q) => dist(p) - dist(q)).slice(0, 16);
     near.forEach((k, i) => {
-      const a = ((k.seed ?? 3) % 628) / 100, c = Math.cos(a), sn = Math.sin(a), W = (u, v) => [k.c[0] + c * u - sn * v, k.c[1] + sn * u + c * v], y = k.y + 0.06;
-      if (i % 2 === 0) { const p = W(1.5, -1.5); woman(p, y, face(p, W(1.5, -0.8)), { pose: 'kneel' }); }
-      if (i % 3 === 0) { const p = W(-0.4, -2.1); L.push({ t: 'animal', kind: 'goat', at: p, y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: rand() < 0.5 }); }
-      if (i % 4 === 1) { const p = W(0.2, 0.3); L.push({ t: 'animal', kind: 'dog', at: p, y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
-      if (i % 5 === 2) { const p = W(-2.2, 0.2); man(p, y, face(p, k.c), { h: 0.95, pose: 'stand' }); }
+      const a = k.a ?? ((k.seed ?? 3) % 628) / 100, c = Math.cos(a), sn = Math.sin(a), W = (u, v) => [k.c[0] + c * u - sn * v, k.c[1] + sn * u + c * v], y = k.y + 0.06;
+      if (i % 2 === 0) { const p = yardFree(k, a - 0.62, 2.3); woman(p, y, face(p, W(1.5, -0.8)), { pose: 'kneel' }); }
+      if (i % 3 === 0) { const p = yardFree(k, a - 1.7, 2.5); L.push({ t: 'animal', kind: 'goat', at: p, y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: rand() < 0.5 }); }
+      if (i % 4 === 1) { const p = yardFree(k, a + 1.0, 2.5); L.push({ t: 'animal', kind: 'dog', at: p, y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
+      if (i % 5 === 2) { const p = yardFree(k, a + 3.2, 2.6); man(p, y, face(p, k.c), { h: 0.95, pose: 'stand' }); }
     });
   }
   // inside: a woman at the hearth of every second open house nearest the arrival; the men on the stools of the meeting houses (dara)
@@ -77,10 +77,10 @@ export function people() {
   }
   // inside the Great Enclosure's homesteads: women at the mortars and a man at the granary
   compounds().filter((k) => k.inner).forEach((k, i) => {
-    const a = ((k.seed ?? 3) % 628) / 100, c = Math.cos(a), sn = Math.sin(a), W = (u, v) => [k.c[0] + c * u - sn * v, k.c[1] + sn * u + c * v];
-    const p = W(1.5, -1.5); woman(p, 0.06, face(p, W(1.5, -0.8)), { pose: 'kneel' });
-    if (i % 2 === 0) { const q = W(-1.0, 1.9); woman(q, 0.06, face(q, k.c), { carry: 'pot' }); }
-    else { const q = W(-2.2, -0.2); L.push({ t: 'animal', kind: 'goat', at: q, y: 0.06, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: true }); }
+    const a = k.a ?? ((k.seed ?? 3) % 628) / 100, c = Math.cos(a), sn = Math.sin(a), W = (u, v) => [k.c[0] + c * u - sn * v, k.c[1] + sn * u + c * v];
+    const p = yardFree(k, a - 0.62, 2.3); woman(p, 0.06, face(p, W(1.5, -0.8)), { pose: 'kneel' });
+    if (i % 2 === 0) { const q = yardFree(k, a + 2.0, 2.5); woman(q, 0.06, face(q, k.c), { carry: 'pot' }); }
+    else { const q = yardFree(k, a + 3.3, 2.5); L.push({ t: 'animal', kind: 'goat', at: q, y: 0.06, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: true }); }
   });
   // by the path to the Great Enclosure's north entrance, in sight of the arrival: women with pots, a man in his cape, a herd boy with four beasts
   {
