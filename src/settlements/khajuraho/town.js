@@ -3,6 +3,7 @@ import { lodTiles } from '../lod.js';
 // dressed shop-houses and homes (the ones near the temples enterable), yards with their walls, the rest house,
 // the tank's ghat; the dressing of every front at eye level in a plan of its own (style life).
 import { RADIUS, TANK, STREETS, lots, yards, height, streetRect, inRect, tankD } from './layout.js';
+import { homeDoorU } from './doors.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const OUT = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
@@ -122,7 +123,10 @@ export function dressing() {
     const out = OUT[l.front], Lw = (l.front === 's' || l.front === 'n') ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
     const P = (u, v) => frontPoint(l, u, v), yPl = 0.4, rotOut = awayDir(out);
     const at = (u, v) => P(Math.max(0.4, Math.min(Lw - 0.4, u)), v);
-    const u1 = Lw * (0.2 + rand() * 0.2), u2 = Lw * (0.6 + rand() * 0.2);
+    let u1 = Lw * (0.2 + rand() * 0.2), u2 = Lw * (0.6 + rand() * 0.2);
+    // keep the dressing out of the way in (door-probe): a shop's is the end of its front (L - 0.9), a house's is where the style cut its door
+    if (l.kind === 'shop' || l.kind === 'shed') { if (Lw >= 3.2) u2 = Math.min(u2, Lw - 2.1); }
+    else { const dU = homeDoorU(l); for (const k of [0, 1]) { const v = k ? u2 : u1, w = Math.abs(v - dU) < 1.0 ? dU + (v < dU ? -1.0 : 1.0) : v; if (k) u2 = w; else u1 = w; } }
     const kind = l.kind;
     // at home: the woman of an open house sits by her hearth at the back (styles/nagara/village.js: the hearth block at u = L − 1.3 … L − 0.4, v from the back wall 0.6 deep)
     if (l.open && (kind === 'home' || kind === 'haveli') && Lw >= 4.4 && rand() < 0.7) {

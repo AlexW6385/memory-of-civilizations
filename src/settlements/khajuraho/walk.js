@@ -16,6 +16,8 @@ export const WALK = [
   [[40, 14], [40, 104]],           // the tank way to the ghat
   [[88, 10], [316, 10]],           // the road on into the village
 ];
+/** Shops whose end door-lane is taken by dressing (found by door-probe): the u of a way in that was found open. */
+export const ALT_U = {};
 export const WALK_REACH = 12;
 export function segDist(p, a, b) {
   const vx = b[0] - a[0], vz = b[1] - a[1], l2 = vx * vx + vz * vz, t = Math.max(0, Math.min(1, ((p[0] - a[0]) * vx + (p[1] - a[1]) * vz) / l2));
@@ -34,13 +36,18 @@ export function doorway(l) {
   const { L, P } = frame(l), shopish = l.kind === 'shop' || l.kind === 'shed';
   // the verandah's posts, the plates, the bell and the dressing standing before a shop (random places) block the middle of its front: the walker goes in 0.9 m from its end,
   // which the probe (every 0.3 m along twelve shops) found open in all twelve; a home's door is where the style cut it
-  const u = shopish ? L - 0.9 : homeDoorU(l);
-  return { u, route: [P(u, -2.6), P(u, -1.0), P(u, 0.3), P(u, shopish ? 0.55 : 1.0)] };
+  const u = shopish ? (ALT_U[l.seed] ?? L - 0.9) : homeDoorU(l);
+  if (shopish) return { u, route: [P(u, -2.6), P(u, -1.0), P(u, 0.3), P(u, 0.55)] };
+  // a home's door may stand where the style's front post does (posts at k·L/nb, 0.14 m, 2.4 m tall; the probe found five doors so): step round it on the platform
+  const nb = Math.max(2, Math.round(L / 2.1)), dp = (x) => Math.min(...Array.from({ length: nb + 1 }, (_, k) => Math.abs(x - k * L / nb)));
+  if (dp(u) >= 0.5) return { u, route: [P(u, -2.6), P(u, -1.0), P(u, 0.3), P(u, 1.0)] };
+  const uu = [u - 0.7, u + 0.7].filter((x) => x > 0.5 && x < L - 0.5).sort((a, b) => dp(b) - dp(a))[0] ?? u;
+  return { u, route: [P(uu, -2.6), P(uu, -0.7), P(u, -0.5), P(u, 0.3), P(u, 1.0)] };
 }
 /** Lots whose door is clear of a crossing lane or a wayside thing is not known here: walk-check says which are stuck. */
 export const STUCK = [];
 /** The routes walk-check follows (landmark plan `walks`, world metres): into the open places nearest the arrival, shops first. */
-export function walkRoutes(nShops = 10, nHomes = 4) {
+export function walkRoutes(nShops = 24, nHomes = 10) {
   const R = [];
   for (const l of openPlaces(['shop', 'shed']).filter((q) => !STUCK.includes(q.seed)).slice(0, nShops)) R.push({ id: l.kind + ' ' + l.seed, route: doorway(l).route });
   for (const l of openPlaces(['home', 'haveli', 'mud']).filter((q) => !STUCK.includes(q.seed)).slice(0, nHomes)) R.push({ id: l.kind + ' ' + l.seed, route: doorway(l).route });
