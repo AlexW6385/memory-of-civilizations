@@ -110,3 +110,13 @@ Sources read this round: [Bauhaus Dessau Foundation, Bauhaus Building](https://b
 - **BAUHAUS lettering:** now on the west face of the plastered pier at the wing's north-west corner (before: the north face, seen edge-on from the arrival), black block letters 1.2 m tall standing in relief, reading downwards **[stated: the sign's place at the corner by the bridge, §2; the face and the letter forms inferred from the photographs, geometric block letters rather than Bayer's exact drawing]**. Departure from §2/§13: only the face the letters stand on.
 - **Prellerhaus balconies:** thin cantilevered slabs with a slim edge fascia and a coloured soffit, tube railings (round handrail, two intermediate tubes, posts on plates) on the three free sides; the solid red panel is gone **[inferred]**; coloured balcony undersides **[stated for the Masters' Houses, Bauhaus Dessau Foundation]**.
 - **Entrance, bridge, stair:** the door on Kothener Strasse has a steel frame with a fanlight, tube pulls, canopy tie rods, a lamp and two risers (handles designed by Gropius **[stated]**, forms **[inferred]**); the bridge shows down-stand beams under its slab, slab-edge stringcourses and steel sills; the scissor stairs carry tube balusters and a lower rail **[inferred]**.
+
+## 15. The standard of Suzhou, round 5 (walk, night, sound, animals, wear and writing)
+
+Sources: none newly read (the shell reaches no sites); everything below is from the sections above and general knowledge, marked honestly.
+
+### 15.1 The visitor's walk
+
+- **Shop fascias lettered.** The signwriter's blocks are replaced by the trade's German name in capitals of the 3 x 5 block alphabet (`src/styles/viennese/lettering.js`, whose glyphs were checked there; umlauts as dotted letters): KOLONIALWAREN (grocer), BÄCKEREI, FLEISCHEREI, TABAK, EISENWAREN, TEXTILWAREN (draper), GASTSTÄTTE (pub). **[inferred]** generic trade names of any German town of 1927; no personal or firm names are written, since none is documented.
+- **The tram.** Dessau had an electric tram from 1894 **[stated from general knowledge of the town's history; no page read]**. Shown: a double track along Kothener Strasse (metre gauge, z −4.5 and −1.5) **[inferred: line, gauge]**, a two-axle motor car (8.6 m, cream over red, trolley pole raised) standing at a stop east of the school **[inferred: size, colours]**, and the stop's enamel plate lettered HALTESTELLE (the usual German word for a stop **[inferred]**). The overhead wire is not drawn.
+- **Doors kept clear.** Tables that stood in a door's lane are moved out of it; `walks` of the landmark plan (`walks.js`) lead from the pavement through the door of the twelve shops and pubs nearest the arrival into their front rooms, and are walked by `tools/walk-check.mjs`.

@@ -14,7 +14,8 @@ const plan = (id, style, elements, rects, o = {}) => ({ id, style, origin: [0, 0
 const pick = (r, a) => a[Math.floor(r() * a.length) % a.length];
 const quad = (x, z) => (x < 0 ? 0 : 1) + (z < 0 ? 0 : 2);
 const RK = RADIUS - 10;
-const NEAR = 150;     // m from a quarter's middle: the town's houses in full inside, simple beyond
+const NEAR = 150;
+export const TRAM_TRACKS = [-4.5, -1.5], TRAM_STOP = [74, 0];   // Kothener Strasse's two tracks (z) and the stop east of the school     // m from a quarter's middle: the town's houses in full inside, simple beyond
 
 /** The kerbs of every street along both its edges (cut where another street crosses), as thin rectangles, split at the quarter axes. */
 function kerbs() {
@@ -91,6 +92,10 @@ function buildings() {
   for (let i = 0; i < 10; i++) bike(60 + i * 12, ROAD_K[3] + 0.6, Math.PI / 2);
   for (let i = 0; i < 8; i++) bike(ROAD_KV[2] + 1.0, -150 + i * 40 + rand() * 6, 0);
   bic.forEach((b, q) => { groups[q].push(...b); b.forEach((e) => rects[q].push([e.at[0], e.at[1], e.at[0], e.at[1]])); });
+  // the tram: the double track along Kothener Strasse (a pair of rails each, z −4.5 and −1.5), a car standing at its stop east of the school, the stop's plate
+  for (const [q, x0, x1] of [[0, -RK, 0], [1, 0, RK]]) { groups[q].push({ t: 'dessau_rails', x0, x1, tracks: TRAM_TRACKS }); rects[q].push([x0, -6, x1, 0]); }
+  groups[1].push({ t: 'dessau_tram', at: [TRAM_STOP[0] + 5, TRAM_TRACKS[1]], rot: 0, seed: 1 }, { t: 'dessau_tramstop', at: [TRAM_STOP[0], ROAD_K[3] + 0.7] });
+  rects[1].push([TRAM_STOP[0] - 6, -3, TRAM_STOP[0] + 12, ROAD_K[3] + 1]);
   const plans = [];
   for (let q = 0; q < 4; q++) {
     groups[q].push({ t: 'dessau_street', seed: 7 + q, ...by[q], field: q === 3 ? [52, 4, 140, 40] : null });
