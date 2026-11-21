@@ -30,6 +30,7 @@ const OG = [
 // (the Ashta Shakti Mandapam's entrance opens through the east wall south of the east gopuram)
 export const ASHTA = [104, 34, 128, 46];
 wallLoop(WALL, [...OG.map((g) => ({ s: g.s, at: g.s === 'n' || g.s === 's' ? g.c[0] : g.c[1], w: g.w })), { s: 'e', at: (ASHTA[1] + ASHTA[3]) / 2, w: ASHTA[3] - ASHTA[1] }], 9, 2);
+for (const g of OG) E.push({ t: 'mdu_wear', c: g.c, dir: g.s === 'n' || g.s === 's' ? 'ns' : 'ew', w: g.w, d: g.d });
 for (const g of OG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === 's' ? 'ns' : 'ew', w: g.w, d: g.d, h: g.h, tiers: g.n, fig: g.s === 's' ? 'near' : 'far', dvara: true, out: g.s === 'n' || g.s === 'w' ? -1 : 1 });
 // Sundareswarar's enclosure: gopurams east, north and south, the vimana, the flagstaff
 {
@@ -90,6 +91,9 @@ const rooms = [
 ];
 const walks = [[[GATES.s[0], 200], [GATES.s[0], 126], [GATES.s[0], 100], [GATES.s[0], 75]]];
 walks[0].y0 = 0;
+// on past the gate: the axis to the foot of the Sundareswarar enclosure, and across the court to the Golden Lotus tank's east steps
+walks.push([[GATES.s[0], 75], [GATES.s[0], 55], [GATES.s[0], 38]], [[GATES.s[0], 70], [-30, 60], [-37, 55]]);
+walks[1].y0 = 0; walks[2].y0 = 0;
 for (const r of visitorRoutes()) { r.y0 = 0; walks.push(r); }
 
 export const temple = {

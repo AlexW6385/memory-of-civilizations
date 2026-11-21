@@ -123,6 +123,16 @@ function pokrov(el, { bag, col, lights }) {
   bag.add(BR, box(cx - I, y - 0.5, cz - I, cx + I, y + P - 0.5, cz + I));
   bag.add(BR, box(cx - E, y + P - 0.5, cz - E, cx + E, y + P, cz + E));
   bag.add(WS, box(cx - E - 0.15, y + P - 0.75, cz - E - 0.15, cx + E + 0.15, y + P - 0.45, cz + E + 0.15));     // the white cornice under the platform
+  // weathering: dark damp and soot streaks run down the piers of the arcaded wall from under the white cornice (a hash of each place sets the length and width)
+  { const hs = (a, b) => { let h = Math.imul(a * 73856093 ^ b * 19349663, 0x5bd1e995); h ^= h >>> 15; return (h >>> 0) % 1000 / 1000; };
+    for (let i = 0; i <= bays; i++) for (let f = 0; f < 4; f++) {
+      if ((f === 0 || f === 2) && (i === 3 || i === 4)) continue;                       // the stairs' faces (west, north)
+      const q = hs(Math.round(cx) + i * 7 + f * 131, Math.round(cz) + f), q2 = hs(i * 11 + f, Math.round(cx * 3) + 5);
+      if (q < 0.2) continue;
+      const u = -E + i * bw + (i === 0 ? 0.3 : i === bays ? -0.3 : (q - 0.5) * 0.9), w = 0.1 + 0.16 * q2, h = 0.7 + 0.9 * q, yt = y + P - 0.8, e = 0.012, e2 = 0.03;
+      if (f < 2) { const x = cx + u, zz = f === 0 ? cz - E : cz + E, sg = f === 0 ? -1 : 1; bag.add('timber', box(x - w, yt - h, Math.min(zz + sg * e, zz + sg * e2), x + w, yt, Math.max(zz + sg * e, zz + sg * e2))); }
+      else { const z = cz + u, xx = f === 2 ? cx - E : cx + E, sg = f === 2 ? -1 : 1; bag.add('timber', box(Math.min(xx + sg * e, xx + sg * e2), yt - h, z - w, Math.max(xx + sg * e, xx + sg * e2), yt, z + w)); }
+    } }
   // the platform's parapet, white-capped, open at the stairheads
   const gap = 3 * s;
   for (const [a, b] of [[[cx - E + 0.3, cz - E + 0.3], [cx + E - 0.3, cz - E + 0.3]], [[cx - E + 0.3, cz + E - 0.3], [cx + E - 0.3, cz + E - 0.3]], [[cx - E + 0.3, cz - E + 0.3], [cx - E + 0.3, cz + E - 0.3]], [[cx + E - 0.3, cz - E + 0.3], [cx + E - 0.3, cz + E - 0.3]]]) {
@@ -136,6 +146,9 @@ function pokrov(el, { bag, col, lights }) {
     for (let k = 0; k < n; k++) {
       const d0 = E + L - (k + 1) * run, d1 = d0 + run + 0.02, yy = y + (k + 1) * P / n;
       if (dirx) bag.add('planks_grey', box(cx - d1, yy - 0.12, cz - hw, cx - d0, yy, cz + hw)); else bag.add('planks_grey', box(cx - hw, yy - 0.12, cz - d1, cx + hw, yy, cz - d0));
+      // wear: the rubbed, damp-darkened middle of each tread where the boots go (wider at the foot of the flight, a hair above the plank so that nothing is coplanar)
+      { const ww = 0.9 + 0.25 * ((k * 37) % 5) / 4, off = ((k * 53) % 7 - 3) * 0.08, e0 = d0 + 0.03, e1 = d1 - 0.07;
+        if (dirx) bag.add('timber', box(cx - e1, yy, cz + off - ww, cx - e0, yy + 0.012, cz + off + ww)); else bag.add('timber', box(cx + off - ww, yy, cz - e1, cx + off + ww, yy + 0.012, cz - e0)); }
     }
     for (const sd of [-1, 1]) {
       const a0 = E + L, P8 = (d, yy, w) => dirx ? [cx - d, yy, cz + sd * (hw + w)] : [cx + sd * (hw + w), yy, cz - d];
@@ -445,6 +458,8 @@ function lobnoye(el, { bag, col }) {
   // the stair on the west: five steps between low cheeks
   const sx0 = x - r - 1.75;
   for (let k = 0; k < 5; k++) bag.add(WS, box(sx0 + k * 0.35, y - 0.3, z - gap, x - r + 0.45, y + (k + 1) * 0.2, z + gap));
+  // wear: the stained, rubbed middle of each step where the crier and the condemned went up (a dark damp stain, wider at the foot)
+  for (let k = 0; k < 5; k++) { const hw = 0.38 + 0.04 * (4 - k), t = y + (k + 1) * 0.2; bag.add('timber', box(sx0 + k * 0.35 + 0.05, t, z - hw, sx0 + (k + 1) * 0.35 - 0.05, t + 0.008, z + hw)); }
   for (const e of [-1, 1]) { bag.add(WS, hexa([[sx0 - 0.1, y - 0.3, z + e * gap], [x - r + 0.3, y - 0.3, z + e * gap], [x - r + 0.3, y - 0.3, z + e * (gap + 0.35)], [sx0 - 0.1, y - 0.3, z + e * (gap + 0.35)], [sx0 - 0.1, y + 0.35, z + e * gap], [x - r + 0.3, top + 0.92, z + e * gap], [x - r + 0.3, top + 0.92, z + e * (gap + 0.35)], [sx0 - 0.1, y + 0.35, z + e * (gap + 0.35)]])); col.segment([sx0, z + e * (gap + 0.18)], [x - r + 0.3, z + e * (gap + 0.18)], 0.35, y, top + 0.9); }
   col.ramp([sx0, z - gap, x - r + 0.45, z + gap], y, top, 'e');
   // the gate in the lattice, standing open against the parapet

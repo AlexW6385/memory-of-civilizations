@@ -787,7 +787,7 @@
  },
  "bhaktapur-taumadhi": {
   "site": "bhaktapur",
-  "hash": "f8714f216e8f5b0d",
+  "hash": "934828fae457b4be",
   "rays": 128,
   "probes": 3416,
   "boxes": [
@@ -824,9 +824,9 @@
     ]
    }
   ],
-  "bytes": 61448,
-  "seconds": 53,
-  "baked": "2026-11-20"
+  "bytes": 61449,
+  "seconds": 64,
+  "baked": "2026-11-21"
  },
  "borobudur-temple": {
   "site": "borobudur",
@@ -1473,7 +1473,7 @@
  },
  "fez-bou-inania": {
   "site": "fez",
-  "hash": "3c39f6fced3a58a9",
+  "hash": "e4cbf2ec191bafe2",
   "rays": 128,
   "probes": 5806,
   "boxes": [
@@ -1543,9 +1543,9 @@
     ]
    }
   ],
-  "bytes": 101881,
-  "seconds": 29,
-  "baked": "2026-11-20"
+  "bytes": 101864,
+  "seconds": 129,
+  "baked": "2026-11-21"
  },
  "fez-qarawiyyin": {
   "site": "fez",
@@ -1573,8 +1573,8 @@
    }
   ],
   "bytes": 1137682,
-  "seconds": 190,
-  "baked": "2026-11-20"
+  "seconds": 986,
+  "baked": "2026-11-21"
  },
  "florence-centre": {
   "site": "florence",
@@ -1756,7 +1756,7 @@
  },
  "granada-alhambra": {
   "site": "granada",
-  "hash": "7d7b21d61656ffce",
+  "hash": "15227c67df173bf6",
   "rays": 128,
   "probes": 64680,
   "boxes": [
@@ -1813,9 +1813,9 @@
     ]
    }
   ],
-  "bytes": 1045168,
-  "seconds": 122,
-  "baked": "2026-11-20"
+  "bytes": 1045212,
+  "seconds": 384,
+  "baked": "2026-11-21"
  },
  "granada-generalife": {
   "site": "granada",
@@ -1890,8 +1890,8 @@
    }
   ],
   "bytes": 125339,
-  "seconds": 11,
-  "baked": "2026-11-20"
+  "seconds": 53,
+  "baked": "2026-11-21"
  },
  "hagia-sophia": {
   "site": "constantinople",
@@ -3815,7 +3815,7 @@
  },
  "nara-todaiji": {
   "site": "nara",
-  "hash": "40a6ac49037b745e",
+  "hash": "546e6d6265fb2302",
   "rays": 128,
   "probes": 76738,
   "boxes": [
@@ -3836,9 +3836,9 @@
     ]
    }
   ],
-  "bytes": 1259698,
-  "seconds": 151,
-  "baked": "2026-11-20"
+  "bytes": 1259719,
+  "seconds": 865,
+  "baked": "2026-11-21"
  },
  "new-york-esb": {
   "site": "new-york",
@@ -5138,7 +5138,7 @@
  },
  "teotihuacan-centre": {
   "site": "teotihuacan",
-  "hash": "23ae815fe095e578",
+  "hash": "37baf9e8abd87855",
   "rays": 128,
   "probes": 41582,
   "boxes": [
@@ -5176,9 +5176,9 @@
     ]
    }
   ],
-  "bytes": 682533,
-  "seconds": 292,
-  "baked": "2026-11-20"
+  "bytes": 682538,
+  "seconds": 294,
+  "baked": "2026-11-21"
  },
  "thebes-karnak": {
   "site": "thebes",

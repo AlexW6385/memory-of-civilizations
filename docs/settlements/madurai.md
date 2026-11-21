@@ -179,6 +179,15 @@ What was lit at night about 1650 [inferred: oil lamps and the temple's wicks; no
 - **Wear.** A worn, dark hollow of feet across the granite sill of every opened door (plaster_damp, 6 mm thick); damp, streaks and fallen plaster already in §14.
 - **Writing: none added.** The name boards keep their abstract chalk strokes (§14), which stand in for Tamil script; no Tamil glyph was written because none could be verified here glyph by glyph.
 
+## 22. Second pass, narrow (2026-11)
+
+- **Night.** Clear-weather night renders at the arrival (low preset): the gopuram's lit windows and the thinnai lamps read, but the door lamps' glow was faint and the street near the visitor dim. Door-lamp ball, pool and spill and the lamp stands' halos enlarged and brightened; halos added for the four great gopurams' passages (a lamp niche each side, a row inside) [inferred: evening services]. Confirmed only that the gopuram windows and one lamp at the brazier table show; the strengthened door lamps were not re-rendered. The festival car at night is still unlit (no source).
+- **Lanterns.** Hung white paper lanterns do not belong to 1650 Madurai: removed with one KIT_OVER line in life.js (`madurai`).
+- **Budget** (main draws / main tris): arrival 409 / 3.44 M; (-20,120) yaw 0 313 / 2.79 M; (-20,60) yaw 0 278 / 2.26 M, yaw pi 437 / 3.08 M. All within limits; no change needed. geo-one 74.7 MB, 2083 meshes.
+- **Walk.** Two routes added past the south gate: the axis to the foot of the Sundareswarar enclosure and across the court to the tank's east steps (walk-check: 15 routes, 55 legs). The tank colonnade stops the walker at x about -39.7.
+- **Wear** (`styles/dravidian/wear.js`, element `mdu_wear`, one per great gate): a lane of pale dished granite plates through each passage and 8 m beyond, more worn at the sill; narrow soot streaks (wood_dark) up the passage piers at the lamp niches [inferred]. Plates read faintly; the soot reads as dark slits.
+- **Still short:** interiors' keepers are still life figures; the car and passages have no night light of their own; the soot is too hard-edged; steps of the tank and the shrine gates not worn; no Tamil script.
+
 ## Sources
 
 - [Meenakshi Temple — Wikipedia](https://en.wikipedia.com/wiki/Meenakshi_Temple)

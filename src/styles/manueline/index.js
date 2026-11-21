@@ -16,7 +16,7 @@ import { range, pelourinho, fountain, hullOnStocks, timberStack, ropeWalk, crane
 
 export const manueline = {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { jeron_church: jeronChurch, cloister, belem_tower: belem, manu_house: manuHouse, manu_yard: manuYard, orange_tree: orangeTree, ship, quay: HARBOUR.quay, palace, se, castle, range, pelourinho, fountain, hull_stocks: hullOnStocks, timber_stack: timberStack, rope_walk: ropeWalk, crane, masons_yard: masonsYard },
+  elements: { jeron_church: jeronChurch, cloister, belem_tower: belem, manu_house: manuHouse, manu_yard: manuYard, orange_tree: orangeTree, ship, quay: HARBOUR.quay, palace, se, castle, range, pelourinho, fountain, hull_stocks: hullOnStocks, timber_stack: timberStack, rope_walk: ropeWalk, crane, masons_yard: masonsYard, door_clear: () => {} },
   objects: {},
 };
 registerStyle('manueline', manueline);

@@ -16,6 +16,7 @@ import { tamilHouse } from './houses.js';
 import { courtHouse } from './courthouse.js';
 import { figureParts, heroGuardian, hash3 } from './sculpture.js';
 import { beastParts } from './beasts.js';
+import { wearElements } from './wear.js';
 
 const G = 'granite_tamil';
 const PAINT = ['stucco_sky', 'stucco_rose', 'stucco_saffron', 'stucco_leaf', 'stucco_cream'];
@@ -1046,6 +1047,6 @@ function sculptShow(el, { bag }) {
 }
 registerStyle('dravidian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { sculpt_show: sculptShow, ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: tamilHouse, court_house: courtHouse, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite, wayside, well, pandal },
+  elements: { sculpt_show: sculptShow, ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: tamilHouse, court_house: courtHouse, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite, wayside, well, pandal, ...wearElements },
   objects: {},
 });

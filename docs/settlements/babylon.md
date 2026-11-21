@@ -260,6 +260,14 @@ Ours (`src/styles/babylonian/sculpt.js`): each beast is a height field over the 
 
 No real cuneiform; no near/far split for opened interiors; no Akitu procession; no stair wear on Etemenanki; no hollowed thresholds; upper storeys shut.
 
+## 24. Second pass, narrow form (2026-11-21)
+
+- **Night.** The arrival at night (low preset) showed the Way's mouth dark: the nearest braziers were 50 m off. Six braziers added at the Way's foot (z -366, -350, -336, x +-6), each with its halo and floor pool in the existing night plan (no draw added); re-rendered, the glow balls and the pools on the breccia are visible within 15 m. [inferred: no source gives the number; braziers at the Way are in §13.6/§19] Only one night pose was rendered (the second, on the walk, was not).
+- **Budget (MAIN).** Arrival 414 draws / 3.90 M before, 412 / 3.89 M after. Walk: (-40,-300) yaw pi 414 / 4.02 M, yaw 0 195 / 2.38 M; (-40,-200) 396 / 3.07 M and 231 / 2.85 M; (-40,-100) 365 / 2.73 M and 321 / 3.48 M. Nothing over; no split needed. After the landmark work: stair foot 394 main; arrival 414.
+- **Walk gaps.** Routes into opened places raised from 15 to 34 (37 routes, 147 legs, walk-check ok). The first try failed at one row whose north doors face the inner wall's towers 1 m off (a 14 m block across the lane): those lots (door n, z0 -286..-270) are no longer opened (the random stream is kept). Keepers stay life figures: converting them to near plans was not done. Doors lanes are kept clear by `door_clear` (§18).
+- **Landmark.** Etemenanki's stair gatehouse, bare before, is dressed: three pilasters and two blind niches on each tower front, a stepped frame of baked brick round the way with a lapis band and lintel, battlements on the tower tops (as the glazed gates of the period, [inferred]). Wear: two tracks of grime worn into every tread of the great stair, narrowing toward the top, and a grimy edge at the parapets (`stairWear` in src/styles/babylonian/temple.js) [inferred]. Seen from the stair's foot by day; the tracks are subtle at the low preset.
+- **Still short:** no hollowed thresholds, no wear on the Esagila steps, keepers still life figures, no near/far split of interiors, no real cuneiform, upper storeys shut, the stair's parapets still plain beams.
+
 ## Sources
 
 - [Ishtar Gate — World History Encyclopedia](https://www.worldhistory.org/Ishtar_Gate/)

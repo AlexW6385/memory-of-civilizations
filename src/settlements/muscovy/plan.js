@@ -1,5 +1,5 @@
 // Muscovy about 1600 (docs/settlements/muscovy.md §2–§4).
-import { openKeys, openShops, walkRoutes } from './openwalk.js';
+import { openKeys, openShops, walkRoutes, izbaRoutes } from './openwalk.js';
 import { TRADE_SHELF } from './lavki.js';
 import { KITAI, KITAI_GATES, RADIUS, KREMLIN, SPASSKY, NIKOLSKY, SQUARE, BASIL, LOBNOYE, ROWS, MOAT, CATHEDRALS as C, height, wallX, gateZ } from './layout.js';
 
@@ -25,7 +25,7 @@ export const square = {
   ],
   // the central church of St Basil's, entered from the platform (its octagon's inside; first, so that a point in it is not on the square)
   rooms: [...[0, 2, 4, 6].map((k) => { const a = k / 8 * Math.PI * 2 + Math.PI / 2, x = BASIL[0] + Math.cos(a) * 14, z = BASIL[1] + Math.sin(a) * 14; return { id: `chapel-${k}`, rect: [x - 2.8, z - 2.8, x + 2.8, z + 2.8], y: by + 4, kind: 'hall' }; }), { id: 'intercession', rect: [BASIL[0] - 4.4, BASIL[1] - 4.4, BASIL[0] + 4.4, BASIL[1] + 4.4], y: by + 4, kind: 'hall' }, { id: 'square', rect: SQUARE, y: 0, kind: 'open' }],
-  walks: [Object.assign([[40, 20], [40, 90], [BASIL[0], BASIL[1] - 26]], { y0: 0 }), ...walkRoutes()],
+  walks: [Object.assign([[40, 20], [40, 90], [BASIL[0], BASIL[1] - 26]], { y0: 0 }), ...walkRoutes(), ...izbaRoutes()],
 };
 export const kremlin = {
   id: 'muscovy-kremlin', style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true,

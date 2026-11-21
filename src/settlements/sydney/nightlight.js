@@ -11,6 +11,9 @@ import { registerStyle } from '../../core/build.js';
 import { MATERIALS } from '../../core/palette.js';
 import { frame } from '../../styles/modern/rooms.js';
 import { KINDS } from '../../styles/modern/shops.js';
+import { operaLight } from '../../styles/modern/index.js';
+import { opera } from './plan.js';
+import { shopGeom, layoutRooms } from '../../styles/modern/upper.js';
 import { RADIUS, LEVEL, BRIDGE, QUAY, height, lots } from './layout.js';
 import { streets } from './street.js';
 import { sceneLife } from './scene.js';
@@ -81,16 +84,41 @@ function lamps(H) {
 function shops(H) {
   for (const l of lots()) {
     if ((l.t !== 'shop_room' && l.t !== 'espresso_bar') || l.front == null) continue;
-    const f = l.front, K = KINDS[l.kind] ?? KINDS.newsagent, { L, W } = frame(l.rect, f), F = l.y + 0.12, fy1 = F + 2.7, n = OUT[f];
+    const f = l.front, K = KINDS[l.kind] ?? KINDS.newsagent, { L, Dp, W } = frame(l.rect, f), F = l.y + 0.12, fy1 = F + 2.7, n = OUT[f];
     const dw = 1.2, du = l.t === 'espresso_bar' ? L * 0.62 : L * K.door + (K.door > 0.4 ? 0 : 0.3);
     // (the hotel, the milk bar, the espresso bar and the fish-and-chip shop are open in the evening; the other trades shut at about half past five, their window lights left dim: Thursday night trading to 9 pm began only as a Christmas measure in 1971)
     const k = (OPEN_EVE[l.t === 'espresso_bar' ? 'espresso' : l.kind] ?? 0.26) * (0.85 + 0.3 * hashAt(l.rect[0], l.rect[1], 51));
-    const sheet = (a, b) => { if (b - a < 0.4) return; const A = W(a + 0.05, -0.14, F + 0.65), B = W(b - 0.05, -0.14, F + 0.65), C = W(b - 0.05, -0.14, fy1 - 0.05), D = W(a + 0.05, -0.14, fy1 - 0.05); H.quad(A, B, C, D, n, k); };
+    // the glass in its panes as the shop front's aluminium frames divide it (styles/modern/shops.js `front`): a mullion's gap between them,
+    // the shelves' band below the transom dimmer than the ceiling lamps' band above it
+    const sheet = (a, b) => {
+      if (b - a < 0.3) return;
+      const np = Math.max(1, Math.round((b - a) / 1.4)), pw = (b - a) / np, ft = F + 1.95;
+      for (let i = 0; i < np; i++) {
+        const u0 = a + i * pw + 0.05, u1 = a + (i + 1) * pw - 0.05, q = (y0, y1, kk) => H.quad(W(u0, -0.14, y0), W(u1, -0.14, y0), W(u1, -0.14, y1), W(u0, -0.14, y1), n, Math.min(0.95, kk));
+        q(F + 0.65, ft - 0.04, k * 0.85); q(ft + 0.04, fy1 - 0.05, k * 1.12);
+      }
+    };
     sheet(0.45, du - dw / 2); sheet(du + dw / 2, L - 0.45);
+    // the fascia's board lit from the shop's tubes under the awning, the lettering catching it
+    H.quad(W(0.55, -0.1, fy1 + 0.1), W(L - 0.55, -0.1, fy1 + 0.1), W(L - 0.55, -0.1, F + K.H1 - 0.06), W(0.55, -0.1, F + K.H1 - 0.06), n, Math.min(0.5, 0.18 + k * 0.4));
+    // the flat over the shop (the shops whose upper floor is open): a lit window or two behind the curtains, by the rooms' own places
+    if (l.up) {
+      const G = shopGeom(L, Dp, F, K.H1, 0.3);
+      for (const rm of layoutRooms(G, l.t === 'espresso_bar' ? 'espresso' : l.kind)) {
+        if (rm.zone !== 'front') continue;
+        const w = rm.rect[1] - rm.rect[0], nW = Math.max(1, Math.floor(w / 2.2));
+        for (let j = 0; j < nW; j++) {
+          const uc = rm.rect[0] + w * (j + 0.5) / nW, door = rm.door === j;
+          if (hashAt(uc + l.rect[0], l.rect[1] + l.rect[2], 71) > 0.62) continue;
+          const ya = G.Y + (door ? 0.05 : 0.9), yb = G.Y + (door ? 2.3 : 2.6), kk = 0.34 + 0.3 * hashAt(uc, l.rect[1], 72);
+          H.quad(W(uc - 0.5, 0.2, ya), W(uc + 0.5, 0.2, ya), W(uc + 0.5, 0.2, yb), W(uc - 0.5, 0.2, yb), n, kk);
+        }
+      }
+    }
     // the open door: the room's light on the step and the footpath; the pools of the two windows
     const gy = l.gy ?? l.y, p = W(du, -1.0, 0);
-    H.floor(p[0], gy + 0.1, p[2], 1.5, 1.7, 0, 8, 0.8);
-    for (const [a, b] of [[0.45, du - dw / 2], [du + dw / 2, L - 0.45]]) if (b - a > 1) { const q = W((a + b) / 2, -1.6, 0); H.floor(q[0], gy + 0.1, q[2], Math.min((b - a) * 0.6, 3.2), 1.8, f === 'n' || f === 's' ? 0 : Math.PI / 2, 8, 0.6 * k); }
+    H.floor(p[0], gy + 0.1, p[2], 2.2, 2.6, 0, 8, 0.85);
+    for (const [a, b] of [[0.45, du - dw / 2], [du + dw / 2, L - 0.45]]) if (b - a > 1) { const q = W((a + b) / 2, -1.6, 0); H.floor(q[0], gy + 0.1, q[2], Math.min((b - a) * 0.7, 4.2), 3.0, f === 'n' || f === 's' ? 0 : Math.PI / 2, 8, 0.6 * k); }
   }
 }
 
@@ -145,13 +173,49 @@ function harbour(H) {
   }
   for (let x = QUAY[0] + 6; x < QUAY[2]; x += 16) { H.ball(x, 13 + 5.6, 16, 1.3, 0.64); H.floor(x, 13.1, 16, 5, 6, 0, 8, 0.6); }
   for (let x = -40; x <= 36; x += 13) { H.ball(x, height(x, -3) + 4.4, -4.2, 1.1, 0.62); H.floor(x, height(x, -3) + 0.08, -4, 4.2, 3.4, 0, 8, 0.7); }
+  // the wharves' waiting sheds (styles/modern/wharf.js: walls 0.25 m, windows 1.6 m wide at 1.1 to 2.6 m up every 2.4 m from 1.5 m in, the gates at the north end, the way out at the south): the lit windows on both sides, the tubes' light on the floor, the doorways' spill
+  for (const x of [-36, -18, 0, 18]) {
+    const s0 = -8 - 12, s1 = -8 - 1.5, y = 1.2;
+    for (let z = s0 + 1.5; z < s1 - 1; z += 2.4) for (const [xx, nx] of [[x - 4.2 - 0.02, -1], [x + 4.2 + 0.02, 1]]) H.quad([xx, y + 1.15, z - 0.75], [xx, y + 1.15, z + 0.75], [xx, y + 2.55, z + 0.75], [xx, y + 2.55, z - 0.75], [nx, 0], 0.58 + 0.2 * hashAt(x, z, 91));
+    H.floor(x, y + 0.08, s0 - 1.6, 2.6, 2.4, 0, 8, 0.7); H.floor(x, y + 0.08, s1 + 1.2, 2.6, 1.8, 0, 8, 0.7);
+    H.floor(x, y + 0.05, (s0 + s1) / 2, 3.2, 4.6, 0, 8, 0.5);
+    H.floor(x - 5.9, y + 0.08, (s0 + s1) / 2, 1.8, 5, 0, 8, 0.42); H.floor(x + 5.9, y + 0.08, (s0 + s1) / 2, 1.8, 5, 0, 8, 0.42);
+  }
+  // the stands on the promenade, open of an evening: the kiosk's hatch, the flower seller's bulb, the pie cart's window
+  for (const [kind, x] of [['news', -27], ['flowers', -9], ['pies', 9], ['news', 29]]) {
+    const g = height(x, 0.2);
+    if (kind === 'news') H.quad([x - 1.0, g + 1.1, -0.62], [x + 1.0, g + 1.1, -0.62], [x + 1.0, g + 1.95, -0.62], [x - 1.0, g + 1.95, -0.62], [0, -1], 0.55);
+    else if (kind === 'flowers') { H.ball(x, g + 2.05, 0.7, 0.7, 0.6); }
+    else H.quad([x - 1.0, g + 1.2, -0.02], [x + 1.0, g + 1.2, -0.02], [x + 1.0, g + 2.0, -0.02], [x - 1.0, g + 2.0, -0.02], [0, -1], 0.8);
+    H.floor(x, g + 0.08, -1.2, 2.6, 2.0, 0, 8, kind === 'pies' ? 0.8 : 0.65);
+  }
   for (const x of [-36, -18, 0, 18]) for (const z of [-15, -26, -40]) { H.ball(x, 1.2 + 3.1, z, 0.9, 0.58); H.floor(x, 1.3, z, 3.6, 3.6, 0, 8, 0.62); }
 }
 
+/** The Opera House floodlit, its glass walls lit from within (§16): the sails' tiled skin lit from the foot, brighter low, and the glazing of each mouth glowing with the foyers' lamps; the glazed bands of the podium's sides and north front lit; the pools of the floods on the podium's top and the broadwalk. */
+function operaHouse(H) {
+  const el = opera.elements[0], { skin, glass } = operaLight(el), [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h, yf = y + h;
+  const put = (t) => { const f = [t[1], t[3], t[5]].map((v) => Math.min(0.9, v)), N = f.map((v) => [Math.sqrt(1 - v * v), v, 0]); H.tri(t[0], N[0], t[2], N[1], t[4], N[2]); };
+  for (const t of skin) put(t);
+  for (const t of glass) put(t);
+  // the podium's glazed bands (styles/modern/index.js: panes 5.4 m wide every 7 m from 6 m in, 1.2 m to h/2 − 0.4 m up) on both sides and the north front, the foyers beyond them lit
+  for (const [xa, sg] of [[x0 - 0.1, -1], [x1 + 0.1, 1]]) for (let zz = z0 + 6; zz < z1 - 6; zz += 7) H.quad([xa, y + 1.3, zz + 0.1], [xa, y + 1.3, zz + 5.3], [xa, yf / 2 + y / 2 + h / 2 - 1.0 - h / 2 + 0.2, zz + 5.3], [xa, yf / 2 + y / 2 + h / 2 - 1.0 - h / 2 + 0.2, zz + 0.1], [sg, 0], 0.5);
+  for (let xx = x0 + 6; xx < x1 - 6; xx += 7) H.quad([xx + 0.1, y + 1.3, z0 - 0.1], [xx + 5.3, y + 1.3, z0 - 0.1], [xx + 5.3, y + h / 2 - 0.6, z0 - 0.1], [xx + 0.1, y + h / 2 - 0.6, z0 - 0.1], [0, -1], 0.5);
+  // the floods at the sails' feet (pools on the podium's top along both halls' south and north bases) and the stair's lamps' wash on the treads
+  for (const hall of el.halls) for (const [a, b] of [[hall.shells[0][0], 0], [hall.shells[hall.shells.length - 1][1], 0]]) { void b; for (let k = -1; k <= 1; k++) H.floor(hall.x + k * hall.hw * 0.7, yf + 0.1, a + (a === hall.shells[0][0] ? 5 : -2), 7, 5, 0, 8, 0.5); }
+  // the great stair's treads washed by the floods at the podium's edge: each tread a strip brighter along the middle where people climb (the stair's 18 treads: x0 + 8 to x1 − 8, h/18 a rise, the run st/18)
+  { const n = 18, st = el.stair, xa = x0 + 8, xb = x1 - 8, xm = (xa + xb) / 2;
+    for (let k = 0; k < n; k++) {
+      const zz = z1 + st * (1 - k / n), zb = zz - st / n, yy = y + h * (k + 1) / n + 0.03;
+      for (const [a, b, f] of [[xa, xm - 9, 0.14], [xm - 9, xm + 9, 0.3], [xm + 9, xb, 0.14]]) H.quad([a, yy, zb + 0.1], [b, yy, zb + 0.1], [b, yy, zz - 0.1], [a, yy, zz - 0.1], [1, 0], f);
+    }
+    for (const sx of [x0 + 20, 100, x1 - 20]) H.floor(sx, height(sx, z1 + st + 6) + 0.12, z1 + st + 6, 11, 7, 0, 8, 0.26);   // the forecourt's foot
+  }
+}
 /** sydney_night: nothing but the plan's style hook; the light is made here from the places. */
 function sydneyNight(el, { bag }) {
   const H = new Halo();
-  lamps(H); shops(H); terraces(H); harbour(H);
+  lamps(H); shops(H); terraces(H); harbour(H); operaHouse(H);
   windows(H, 62000);
   if (H.pos.length) bag.add('halo', H.geometry());
 }

@@ -6,10 +6,11 @@
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { figure } from '../../objects/figures.js';
+import { Quads, letters, textLen, fitCell } from '../artdeco/dress.js';
 
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
 /** wharf: { rect (along z, the shore end at z1), y (deck), gangways: [{ side: -1 | 1 (west | east), z, down (the ferry's deck height, or none) }] } */
-export function wharf(el, { bag, col }) {
+export function wharf(el, { bag, col, lights = [] }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 1.2, W = x1 - x0, cx = (x0 + x1) / 2;
   // the deck, its planks and kerbs
   bag.add('planks_grey', box(x0, y - 0.25, z0, x1, y, z1)); col.floor(el.rect, y);
@@ -30,17 +31,17 @@ export function wharf(el, { bag, col }) {
     }
   }
   for (const z of [z0 + 6, z0 + 24]) bag.add('cloth_red', lathe([[0.25, -0.06], [0.31, 0], [0.25, 0.06], [0.19, 0]], 10, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(x1 - 0.15, y + 1.1, z));
-  // the waiting shed and ticket office at the shore end: walls, windows, doors, the turnstiles' openings, a flat roof
+  // the waiting shed and ticket office at the shore end (§1c, §16): a hollow room with a doorway at each end (the open gates to the
+  // wharf and the way out to the quay), the ticket office along its west wall and the newsagent's counter along its east wall, each with
+  // its keeper, benches with a waiting passenger or two, a clock, tubes in the ceiling
   const s0 = z1 - 12, s1 = z1 - 1.5, sh = 3.6;
-  bag.add('plaster_white', box(x0 + 0.8, y, s0, x1 - 0.8, y + sh, s1)); col.rect([x0 + 0.8, s0, x1 - 0.8, s1], y, y + sh);
-  for (let z = s0 + 1.5; z < s1 - 1; z += 2.4) for (const x of [x0 + 0.78, x1 - 0.8]) bag.add('glass_outer', box(x, y + 1.1, z - 0.8, x + 0.02, y + 2.6, z + 0.8));
-  for (let k = 0; k < 3; k++) { const u = x0 + 1.8 + k * (W - 3.6) / 2; bag.add('opening', box(u - 0.55, y, s0 - 0.02, u + 0.55, y + 2.3, s0)); }
-  bag.add('steel_grey', box(x0 + 0.5, y + sh, s0 - 0.3, x1 - 0.5, y + sh + 0.35, s1 + 0.3));
+  waitingShed({ bag, col, lights }, { wx0: x0 + 0.8, wx1: x1 - 0.8, s0, s1, sh, y, cx, seed: Math.round(cx * 7) });
   // the awning over the middle of the wharf on two rows of steel posts, the benches under it
   const a0 = z0 + 10, a1 = s0 - 0.3, ah = y + 3.3;
   for (let z = a0 + 1; z < a1; z += 5) for (const x of [cx - 1.6, cx + 1.6]) { bag.add('steel_grey', box(x - 0.08, y, z - 0.08, x + 0.08, ah, z + 0.08)); col.rect([x - 0.08, z - 0.08, x + 0.08, z + 0.08], y, ah); }
   const R = [], ex = W / 2 - 0.9;
-  for (const s of [-1, 1]) R.push(cx, ah + 0.35, a0, cx + s * ex, ah, a0, cx + s * ex, ah, a1, cx, ah + 0.35, a0, cx + s * ex, ah, a1, cx, ah + 0.35, a1);
+  // (two sheets 0.1 m apart, the corrugated roof and its soffit, so that the walker's raster reads a roof with an underside and a clear way beneath it)
+  for (const s of [-1, 1]) for (const dy of [0, -0.1]) R.push(cx, ah + 0.35 + dy, a0, cx + s * ex, ah + dy, a0, cx + s * ex, ah + dy, a1, cx, ah + 0.35 + dy, a0, cx + s * ex, ah + dy, a1, cx, ah + 0.35 + dy, a1);
   bag.add('iron_galv', fromTriangles(both(R)));
   bag.add('steel_grey', box(cx - 0.1, ah + 0.1, a0, cx + 0.1, ah + 0.38, a1));
   // the benches: back to back along the wharf's middle, slatted seats and a shared slatted back on cast-iron end frames
@@ -80,6 +81,77 @@ export function wharf(el, { bag, col }) {
   }
 }
 
+/** The wharf's waiting shed: walls with their windows and the two doorways, the ticket office, the newsagent's counter, the benches, the clock, the keepers. */
+function waitingShed({ bag, col, lights }, { wx0, wx1, s0, s1, sh, y, cx, seed }) {
+  const T = 0.25, DW = 1.2;                                                   // wall thickness; half the doorways' width (2.4 m clear)
+  const blk = (mat, a, b, ya, yb, c, d, solid = false) => { if (b - a < 1e-4 || d - c < 1e-4 || yb - ya < 1e-4) return; bag.add(mat, box(a, ya, c, b, yb, d)); if (solid) col.rect([a, c, b, d], ya, yb); };
+  const hs = (k) => { let h = Math.imul(seed + k * 7919, 2654435761) >>> 0; h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0; return (h >>> 0) / 4294967296; };
+  // the end walls (north to the wharf, south to the quay), each with its doorway, the head over it
+  for (const [c, d] of [[s0, s0 + T], [s1 - T, s1]]) {
+    blk('plaster_white', wx0, cx - DW, y, y + sh, c, d, true); blk('plaster_white', cx + DW, wx1, y, y + sh, c, d, true);
+    blk('plaster_white', cx - DW, cx + DW, y + 2.5, y + sh, c, d, true);
+    for (const sg of [-1, 1]) blk('steel_grey', cx + sg * DW - 0.05 + sg * 0.05, cx + sg * DW + 0.05 + sg * 0.05, y, y + 2.5, c - 0.03, d + 0.03);   // the posts of the gates
+  }
+  // the side walls with their windows (1.6 m wide, 1.1 to 2.6 m up), the glass in the middle of the thickness
+  const wz = []; for (let z = s0 + 1.5; z < s1 - 1; z += 2.4) wz.push(z);
+  for (const [a, b] of [[wx0, wx0 + T], [wx1 - T, wx1]]) {
+    blk('plaster_white', a, b, y, y + 1.1, s0 + T, s1 - T); blk('plaster_white', a, b, y + 2.6, y + sh, s0 + T, s1 - T);
+    let z = s0 + T; for (const w of wz) { blk('plaster_white', a, b, y + 1.1, y + 2.6, z, w - 0.8); z = w + 0.8; } blk('plaster_white', a, b, y + 1.1, y + 2.6, z, s1 - T);
+    for (const w of wz) { blk('glass_outer', (a + b) / 2 - 0.01, (a + b) / 2 + 0.01, y + 1.1, y + 2.6, w - 0.8, w + 0.8); blk('steel_grey', (a + b) / 2 - 0.03, (a + b) / 2 + 0.03, y + 1.1, y + 2.6, w - 0.03, w + 0.03); }
+    col.rect([a, s0 + T, b, s1 - T], y, y + sh);
+  }
+  blk('steel_grey', wx0 - 0.3, wx1 + 0.3, y + sh, y + sh + 0.35, s0 - 0.3, s1 + 0.3);   // the roof (its underside is the ceiling)
+  // the ceiling's tubes, and the lamps' light
+  for (let z = s0 + 2; z < s1 - 1; z += 2.6) for (const x of [cx - 1.8, cx + 1.8]) blk('plaster_white', x - 0.55, x + 0.55, y + sh - 0.1, y + sh - 0.02, z - 0.06, z + 0.06);
+  for (const z of [s0 + 3, s0 + 7.5]) lights.push({ at: [cx, y + sh - 0.4, z], color: '#f3ecd8', intensity: 2.2, distance: 8 });
+  // the ticket office along the west wall and the newsagent's counter along the east: a counter, a screen, a keeper
+  const cw = wx0 + T + 1.2, ce = wx1 - T - 1.55;
+  // west: the office behind a glass screen with its two wickets; shelves of tickets, a till, a stool
+  const oz0 = s0 + 1.8, oz1 = s0 + 7.4, ox = cw + 0.35;
+  blk('timber', cw, ox, y, y + 1.05, oz0, oz1); blk('timber', cw - 0.05, ox + 0.2, y + 1.05, y + 1.1, oz0, oz1); col.rect([cw - 0.05, oz0, ox + 0.2, oz1], y, y + 2.4);
+  for (const z of [oz0, oz1]) blk('timber', wx0 + T, ox, y, y + 2.4, z - 0.05, z + 0.05, true);
+  blk('glass_outer', cw + 0.15, cw + 0.17, y + 1.5, y + 2.4, oz0, oz1); blk('timber', cw + 0.12, cw + 0.2, y + 2.4, y + 2.9, oz0, oz1);
+  for (const z of [oz0, (oz0 + oz1) / 2, oz1 - 0.04]) blk('timber', cw + 0.12, cw + 0.2, y + 1.1, y + 2.4, z, z + 0.04);
+  for (const yy of [1.0, 1.7]) blk('timber', wx0 + T, wx0 + T + 0.3, y + yy, y + yy + 0.04, oz0, oz1);                   // the shelves on the wall behind
+  for (let z = oz0 + 0.2; z < oz1 - 0.3; z += 0.34) for (const [yy, m] of [[1.04, 'cloth_ochre'], [1.74, 'cloth_white'], [1.74 + 0.0, 'cloth_green']]) if (hs(z * 10 + yy * 3) < 0.8) blk(m, wx0 + T + 0.04, wx0 + T + 0.2, y + yy, y + yy + 0.22, z, z + 0.26);   // ticket boxes
+  blk('iron', cw - 0.25, cw + 0.05, y + 1.1, y + 1.4, oz0 + 1.2, oz0 + 1.5); blk('iron', cw - 0.25, cw + 0.05, y + 1.1, y + 1.35, oz1 - 1.5, oz1 - 1.2);   // the date stamps
+  { const zc = oz0 + 3.9; blk('timber', wx0 + T + 0.45, wx0 + T + 0.85, y + 0.62, y + 0.68, zc - 0.2, zc + 0.2); for (const dx of [0.5, 0.8]) for (const dz of [-0.15, 0.15]) bag.add('iron', rod([wx0 + T + dx, y, zc + dz], [wx0 + T + dx, y + 0.62, zc + dz], 0.015, 4)); }   // a stool
+  const q = new Quads(), tl = (t, w) => fitCell(t, w, 0.1);
+  { const t = 'TICKETS', cell = tl(t, 3.2), len = textLen(t, cell), zs = (oz0 + oz1) / 2 + len / 2; letters(q.t('cloth_white'), t, cell, (h, v) => [cw + 0.21, y + 2.46 + v, zs - h], 0, 0.0); }
+  // east: the counter, a rack of magazines, a case of sweets, newspapers, the shelves of cigarettes behind, the keeper
+  const nz0 = s0 + 2.2, nz1 = s0 + 7.0, ex = ce + 0.35;
+  blk('timber', ce, ex, y, y + 1.05, nz0, nz1); blk('timber', ce - 0.2, ex + 0.05, y + 1.05, y + 1.1, nz0, nz1); col.rect([ce - 0.2, nz0, ex + 0.05, nz1], y, y + 1.9);
+  for (const z of [nz0, nz1]) blk('timber', ex, wx1 - T, y, y + 2.4, z - 0.05, z + 0.05, true);
+  blk('timber', ce - 0.02, ce + 0.02, y + 1.1, y + 1.8, nz0 + 0.1, nz1 - 0.1);                                                      // (the rack's back board, lined with covers)
+  for (let z = nz0 + 0.2, k = 0; z < nz1 - 0.5; z += 0.27, k++) for (const [j, yy] of [[0, 1.12], [1, 1.45]]) blk(['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_green', 'cloth_white', 'cloth_maroon'][Math.floor(hs(k * 3 + j) * 6)], ce - 0.05, ce - 0.02, y + yy, y + yy + 0.3, z, z + 0.22);
+  blk('glass_outer', ce - 0.2, ce + 0.15, y + 1.1, y + 1.4, nz0 + 0.3, nz0 + 1.3);
+  for (let k = 0; k < 5; k++) blk(['cloth_red', 'cloth_green', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][k], ce - 0.15, ce + 0.1, y + 1.1, y + 1.24, nz0 + 0.38 + k * 0.17, nz0 + 0.5 + k * 0.17);   // the jars
+  blk('cloth_white', ce - 0.15, ce + 0.15, y + 1.1, y + 1.3, nz1 - 1.1, nz1 - 0.7);                                                // a stack of the evening's papers
+  blk('iron', ce - 0.1, ce + 0.15, y + 1.1, y + 1.3, nz1 - 0.5, nz1 - 0.25);                                                        // the till
+  for (const yy of [0.9, 1.4, 1.9]) blk('timber', wx1 - T - 0.35, wx1 - T, y + yy, y + yy + 0.04, nz0, nz1);
+  for (let z = nz0 + 0.15, k = 0; z < nz1 - 0.3; z += 0.3, k++) for (const [j, yy] of [[0, 0.94], [1, 1.44], [2, 1.94]]) if (hs(k * 5 + j + 40) < 0.85) blk(['cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_green'][Math.floor(hs(k + j * 9) * 4)], wx1 - T - 0.3, wx1 - T - 0.04, y + yy, y + yy + 0.2, z, z + 0.24);
+  { const t = 'NEWS', cell = tl(t, 2.0), zs = (nz0 + nz1) / 2 - textLen(t, cell) / 2; blk('timber', ce - 0.02, ce + 0.06, y + 1.8, y + 2.3, nz0, nz1); letters(q.t('cloth_white'), t, cell, (h, v) => [ce - 0.03, y + 1.84 + v, zs + h], 0, 0.0); }
+  q.flush(bag);
+  // the benches against the side walls at the south end, a passenger or two on them
+  const bench = (xw, sg, z0, z1) => {                                                                                              // sg: +1 the back to the west wall, facing east
+    for (let k = 0; k < 4; k++) { const u = xw + sg * (0.06 + k * 0.115); blk('timber', Math.min(u, u + sg * 0.09), Math.max(u, u + sg * 0.09), y + 0.43, y + 0.46, z0, z1); }
+    for (const yy of [0.58, 0.7, 0.82]) blk('timber', Math.min(xw + sg * 0.01, xw + sg * 0.05), Math.max(xw + sg * 0.01, xw + sg * 0.05), y + yy, y + yy + 0.08, z0, z1);
+    for (const e of [z0 + 0.1, z1 - 0.1]) { blk('iron', Math.min(xw, xw + sg * 0.5), Math.max(xw, xw + sg * 0.5), y + 0.4, y + 0.43, e - 0.025, e + 0.025); bag.add('iron', rod([xw + sg * 0.46, y, e], [xw + sg * 0.46, y + 0.4, e], 0.025, 5)); blk('iron', Math.min(xw, xw + sg * 0.04), Math.max(xw, xw + sg * 0.04), y, y + 0.9, e - 0.03, e + 0.03); }
+  };
+  bench(wx0 + T, 1, s0 + 8.0, s0 + 9.9); bench(wx1 - T, -1, s0 + 8.0, s0 + 9.9);
+  // the clock over the north gate, inside
+  blk('timber', cx - 0.32, cx + 0.32, y + 3.0, y + 3.64 - 0.04, s0 + T, s0 + T + 0.05); blk('cloth_white', cx - 0.27, cx + 0.27, y + 3.05, y + 3.55 - 0.04, s0 + T + 0.05, s0 + T + 0.06);
+  bag.add('iron', rod([cx, y + 3.3 - 0.02, s0 + T + 0.07], [cx + 0.04, y + 3.5 - 0.04, s0 + T + 0.07], 0.012, 4)); bag.add('iron', rod([cx, y + 3.3 - 0.02, s0 + T + 0.07], [cx + 0.18, y + 3.3 - 0.02, s0 + T + 0.07], 0.012, 4));
+  // the people: the ticket seller and a second clerk, the newsagent, the collector at the north gate, two waiting
+  const nocol = { circle() {}, rect() {}, segment() {}, floor() {} }, P = (x, z, rot, o) => figure({ t: 'figure', at: [x, z], y, rot, seed: Math.floor(hs(Math.round(x * 3 + z * 5)) * 1e9), dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_white', skin: 'skin_light', hat: 'none', hatMat: 'cloth_grey', hair: 'short', hairMat: 'hide_brown', over: 'none', ...o }, { bag, col: nocol });
+  P(wx0 + T + 0.7, oz0 + 1.4, Math.PI / 2, { cloth: 'cloth_indigo' });
+  P(wx0 + T + 0.7, oz0 + 4.1, Math.PI / 2, { dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_maroon', hair: 'bun', hairMat: 'hide_black' });
+  P(wx1 - T - 0.6, nz0 + 2.3, -Math.PI / 2, { cloth: 'cloth_green', cloth2: 'cloth_white', beard: true });
+  P(cx + 1.95, s0 + 0.9, 0, { cloth: 'cloth_indigo', cloth2: 'cloth_indigo', hat: 'brim', hatMat: 'cloth_indigo' });
+  P(wx0 + T + 0.3, s0 + 8.6, Math.PI / 2, { pose: 'sit', cloth: 'cloth_brown', hat: 'brim' });
+  P(wx1 - T - 0.3, s0 + 9.2, -Math.PI / 2, { pose: 'sit', dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_ochre', hair: 'long', hairMat: 'hide_brown' });
+}
+
 /**
  * quay_crowd: { rect (the quay's promenade), y, wharves: [{ x, y, a0, a1 }] (each wharf's middle line, deck and
  * awning's run), seed } — the people of Circular Quay on a weekday of 1973 (docs/settlements/sydney.md §1c):
@@ -114,4 +186,55 @@ export function quayCrowd(el, { bag }) {
       if (rand() < 0.4) person(w.x + (rand() < 0.5 ? -2.6 : 2.6), z + 2.5, w.y, rand() * 6.28, {});
     }
   }
+}
+
+/**
+ * quay_stall: { kind: 'news' | 'flowers' | 'pies', at: [x, z] (the middle of its back), y, seed } — the stands on Circular Quay's promenade
+ * (§16), each facing the harbour (north) with its keeper behind the counter: the newspaper kiosk, the flower seller's trestles and
+ * buckets, the pie cart with its flue. The counter is solid for the walker; nothing is walked into.
+ */
+export function quayStall(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, nocol = { circle() {}, rect() {}, segment() {}, floor() {} };
+  const hs = (k) => { let h = Math.imul(Math.round(x * 31 + z * 17) + k * 7919, 2654435761) >>> 0; h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0; return h / 4294967296; };
+  const blk = (mat, a, b, ya, yb, c, d, solid = false) => { if (b - a < 1e-4 || d - c < 1e-4 || yb - ya < 1e-4) return; bag.add(mat, box(x + a, y + ya, z + c, x + b, y + yb, z + d)); if (solid) col.rect([x + a, z + c, x + b, z + d], y + ya, y + yb); };
+  const P = (px, pz, rot, o) => figure({ t: 'figure', at: [x + px, z + pz], y, rot, seed: Math.floor(hs(Math.round(px * 9 + pz * 5)) * 1e9), dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_white', skin: 'skin_light', hat: 'none', hatMat: 'cloth_grey', hair: 'short', hairMat: 'hide_brown', over: 'none', ...o }, { bag, col: nocol });
+  const q = new Quads();
+  const sign = (t, w, a, yy, zz, reads, mat = 'cloth_white') => { const cell = fitCell(t, w, 0.09), len = textLen(t, cell); letters(q.t(mat), t, cell, (h, v) => [x + a + (reads < 0 ? len / 2 - h : h - len / 2), y + yy + v, z + zz], 0, 0); };
+  if (el.kind === 'news') {
+    // the kiosk: a timber box 2.4 by 1.5 with a hatch open on the harbour side, a counter, racks of papers and magazines, a striped canvas hood
+    blk('timber', -1.2, 1.2, 0, 2.3, 0.7, 0.78, true); blk('timber', -1.2, -1.12, 0, 2.3, -0.6, 0.7, true); blk('timber', 1.12, 1.2, 0, 2.3, -0.6, 0.7, true);
+    blk('timber', -1.2, 1.2, 0, 1.0, -0.6, -0.5, true); blk('timber', -1.3, 1.3, 1.0, 1.06, -0.75, -0.45);
+    blk('timber', -1.2, 1.2, 2.0, 2.3, -0.6, -0.5); blk('cloth_red', -1.35, 1.35, 2.3, 2.38, -1.1, 0.85); blk('cloth_white', -1.35, 1.35, 2.3, 2.38, -1.1, -0.9);
+    for (let k = 0; k < 8; k++) blk(['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_green', 'cloth_white', 'cloth_maroon'][Math.floor(hs(k) * 6)], -1.05 + k * 0.28, -0.8 + k * 0.28, 1.08, 1.4, -0.52, -0.5);
+    blk('cloth_white', -1.1, -0.55, 1.06, 1.2, -0.7, -0.5); blk('cloth_white', 0.6, 1.1, 1.06, 1.16, -0.7, -0.5);
+    for (const yy of [1.5, 1.8]) blk('timber', -1.12, 1.12, yy, yy + 0.04, 0.45, 0.7);
+    for (let k = 0; k < 9; k++) for (const yy of [1.54, 1.84]) blk(['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_green', 'cloth_white'][Math.floor(hs(k * 2 + yy * 5) * 5)], -1.05 + k * 0.25, -0.85 + k * 0.25, y * 0 + yy, yy + 0.24, 0.5, 0.56);
+    sign('NEWS', 1.8, 0, 2.03, -0.6 - 0.005, -1);
+    P(0.1, 0.1, Math.PI, { cloth: 'cloth_green', cloth2: 'cloth_white', hat: 'brim', hatMat: 'cloth_grey' });
+  } else if (el.kind === 'flowers') {
+    // the trestles with their tin buckets of cut flowers on tiers, a canvas sheet on two poles behind, the seller
+    blk('timber', -1.3, 1.3, 0.7, 0.76, -0.55, 0.1, true); for (const sx of [-1.2, 1.2]) for (const sz of [-0.5, 0.05]) blk('timber', sx - 0.04, sx + 0.04, 0, 0.7, sz - 0.04, sz + 0.04);
+    blk('timber', -1.3, 1.3, 0.9, 0.95, 0.2, 0.7); blk('timber', -1.3, 1.3, 0.4, 0.45, 0.2, 0.7); for (const sx of [-1.25, 0, 1.25]) blk('timber', sx - 0.04, sx + 0.04, 0, 0.95, 0.3, 0.38);
+    const cols = ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_maroon', 'cloth_green', 'cloth_indigo'];
+    for (let k = 0; k < 9; k++) { const u = -1.15 + k * 0.29; const m = cols[Math.floor(hs(k) * 6)]; blk('steel_grey', u - 0.09, u + 0.09, 0.76, 0.98, -0.45, -0.27); blk(m, u - 0.14, u + 0.14, 0.98, 1.2, -0.5, -0.22); }
+    for (let k = 0; k < 8; k++) { const u = -1.0 + k * 0.29; const m = cols[Math.floor(hs(k + 20) * 6)]; blk('steel_grey', u - 0.09, u + 0.09, 0.95, 1.17, 0.35, 0.53); blk(m, u - 0.14, u + 0.14, 1.17, 1.4, 0.3, 0.58); }
+    for (let k = 0; k < 6; k++) { const u = -1.0 + k * 0.4; blk('steel_grey', u - 0.1, u + 0.1, 0, 0.26, 0.4, 0.6); blk(cols[Math.floor(hs(k + 40) * 6)], u - 0.15, u + 0.15, 0.26, 0.5, 0.35, 0.65); }
+    for (const sx of [-1.4, 1.4]) blk('steel_grey', sx - 0.03, sx + 0.03, 0, 2.4, 0.78, 0.84, true);
+    blk('cloth_white', -1.45, 1.45, 2.2, 2.3, 0.6, 1.0); blk('cloth_green', -1.45, 1.45, 2.3, 2.34, 0.6, 1.0);
+    P(0.2, 0.9, Math.PI, { dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_ochre', hair: 'bun', hairMat: 'hide_brown' });
+  } else {
+    // the pie cart: a cream body 2.2 by 1.6 on four wheels, a serving hatch with a sill, the flue, a stripe of paint, the sign, three stools
+    blk('timber', -1.1, 1.1, 0.0, 0.3, 0.0, 1.6, true); blk('plaster_white', -1.1, 1.1, 0.3, 1.1, 0.0, 0.1, true);       // the floor and the front below the sill
+    blk('plaster_white', -1.1, 1.1, 0.3, 2.1, 1.5, 1.6, true); for (const sx of [-1.1, 1.04]) blk('plaster_white', sx, sx + 0.06, 0.3, 2.1, 0.0, 1.6, true);   // the back and the two sides
+    blk('car_red', -1.12, 1.12, 0.35, 0.55, -0.02, 0.0); blk('plaster_white', -1.1, 1.1, 1.9, 2.1, 0.0, 0.1);              // the stripe; the board over the hatch
+    blk('timber', -1.25, 1.25, 1.1, 1.16, -0.4, 0.1, true);
+    blk('steel_grey', -1.2, 1.2, 2.1, 2.2, -0.1, 1.7);                                                                         // the roof, over its flue
+    bag.add('steel_grey', lathe([[0.1, 0], [0.1, 0.7], [0.15, 0.75], [0.001, 0.75]], 8, null, x + 0.7, y + 2.2, z + 1.2));
+    for (const [sx, sz] of [[-0.8, 0.3], [0.8, 0.3], [-0.8, 1.3], [0.8, 1.3]]) blk('iron', sx - 0.05, sx + 0.05, 0.0, 0.35, sz - 0.3, sz + 0.3);
+    sign('PIES', 1.6, 0, 1.93, -0.005, -1, 'cloth_maroon');
+    for (let k = 0; k < 6; k++) blk(k % 2 ? 'timber' : 'cloth_ochre', -0.8 + k * 0.28, -0.6 + k * 0.28, 1.16, 1.22, -0.3, -0.1);   // the pies on their tray
+    for (const sx of [-0.7, 0, 0.7]) { blk('iron', sx - 0.02, sx + 0.02, 0, 0.62, -0.95, -0.91); blk('cloth_red', sx - 0.17, sx + 0.17, 0.62, 0.68, -1.12, -0.74); }
+    P(0.0, 0.8, Math.PI, { y: y + 0.3, cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'brim', hatMat: 'cloth_white' });
+  }
+  q.flush(bag);
 }

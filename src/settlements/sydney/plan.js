@@ -34,7 +34,9 @@ export const opera = {
     // and in at the Opera Theatre's west door, down the aisle between the stalls
     Object.assign([[100, oz1 - 4], [100, oz1 - 38], [ce - 8, oz1 - 38], [ce, oz1 - 38], [ce, oz1 - 50], [ce, oz1 - 60]], { y0: height(100, -190) + OPERA.h }),
     // and from the footpath up the stairs of the shops and the terraces whose upper floors are open (modern/upper.js)
-    ...upperWalks()],
+    ...upperWalks(),
+    // from the quay's promenade into each wharf's waiting shed (in at the south doorway, between the ticket office and the newsagent's counter, out by the gates) and down the wharf
+    ...[-36, -18, 0, 18].map((x) => Object.assign([[x, -4], [x, -9], [x, -14], [x, -21], [x, -30], [x, -44]], { y0: height(x, -4) }))],
 };
 export const harbour = {
   id: 'sydney-harbour', style: 'modern', origin: [0, 0], base: 0, yaw: 0, feature: true,
@@ -48,6 +50,8 @@ export const harbour = {
     ...[-36, -18, 0, 18].map((x) => ({ t: 'wharf', rect: [x - 5, -60, x + 5, -8], y: 1.2, gangways: [{ side: -1, z: -50 }, x === 18 ? { side: 1, z: -52.5, down: -0.3 } : { side: 1, z: -50 }] })),
     // the people on the quay's promenade and waiting on the wharves (§1c)
     { t: 'quay_crowd', rect: [-44, -6.4, 39, 1], y: height(0, -3), wharves: [-36, -18, 0, 18].map((x) => ({ x, y: 1.2, a0: -50, a1: -20.3 })), n: 34, seed: 1973 },
+    // the stands on the promenade between the wharves' heads (§16)
+    ...[['news', -27], ['flowers', -9], ['pies', 9], ['news', 29]].map(([kind, x]) => ({ t: 'quay_stall', kind, at: [x, 0.2], y: height(x, 0.2), seed: x })),
     // the ferry of 1973 berthed at the east wharf (the others are the moving ones of movers.js, crossing the harbour)
     { t: 'ferry', kind: 'lady', at: [28.6, -36], y: LEVEL, rot: 0 },
     { t: 'round_tower', c: AUSTRALIA_SQ, r: 21, h: 170, y: height(...AUSTRALIA_SQ) },
