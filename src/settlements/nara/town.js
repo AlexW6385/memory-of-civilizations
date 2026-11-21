@@ -134,6 +134,13 @@ function workers(open) {
   return L;
 }
 
+/** Figures built into near plans (60 m cells, drawn within 80 m of the visitor) instead of life elements, whose figures reach 170 m: the keepers, workers and the service quarter's people (docs §20.3). */
+function cells(id, list) {
+  const by = new Map();
+  for (const e of list) { const k = `${Math.floor(e.at[0] / 60)},${Math.floor(e.at[1] / 60)}`; if (!by.has(k)) by.set(k, []); by.get(k).push(e); }
+  return [...by].map(([k, els]) => { const [i, j] = k.split(',').map(Number); return { ...base(`${id}-${k}`, 'life', els), center: [i * 60 + 30, j * 60 + 30], near: 80 }; });
+}
+
 export async function town() {
   const all = lots(), open = openedLots();
   const houses = all.map((l) => ({ t: 'nara_house', ...l, shop: l.use ? !!l.shop : l.shop || l.seed % 4 === 0, ...(open.has(l) ? { open: true } : {}) }));
@@ -142,7 +149,7 @@ export async function town() {
   const lanes = houses.filter((h) => h.open).map((h) => ({ t: 'door_clear', rect: laneRect(h) }));
   const plans = [...lodTiles('nara-houses', 'nara', [...houses, ...lanes], { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } }), ...lodTiles('nara-wells', 'vernacular', wells, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
   plans.push(...lodTiles('nara-plots', 'nara', [...fences().map((f) => ({ t: 'nara_fence', y: 0, ...f, at: f.pts[0] })), ...gardens().map((g) => ({ t: 'nara_garden', y: 0, ...g })), ...streets().map((r) => ({ t: 'nara_gutter', rect: r, y: 0 }))], { R: RADIUS, near: 130, entrance: { at: [0, 180], facing: 'n' } }));
-  plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()), base('nara-beasts', 'life', beasts()), base('nara-service', 'life', service()), base('nara-workers', 'life', workers(open)), base('nara-keepers', 'life', keepers(open)));
+  plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()), base('nara-beasts', 'life', beasts()), ...cells('nara-service', service()), ...cells('nara-workers', workers(open)), ...cells('nara-keepers', keepers(open)));
   plans.push(base('nara-lane', 'nara', [[14, SERVICE_LANE[1], SERVICE_LANE[2], SERVICE_LANE[3]], [SERVICE_LANE[0], SERVICE_LANE[1], -14, SERVICE_LANE[3]]].map((rect) => ({ t: 'nara_gutter', rect, y: 0, inset: 2.6 }))));
   void blocks;
   return plans;
