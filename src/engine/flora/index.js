@@ -76,6 +76,13 @@ export function foliageMaterial(kind, amount, sp) {
     m.maskShadowNode = look.keep.greaterThan(0.5);
   }
   if (COVER_SEASON.has(kind)) m.colorNode = coverSeason(m.colorNode);
+  // by night leaves lose their colour and most of their brightness (the eye's rod vision): without
+  // this a ginkgo's autumn yellow stood out of a dark street as if lit (seen at Kaifeng, v12.57)
+  {
+    const nk = smoothstep(0.3, 0.9, ENV.night).mul(0.92), day = m.colorNode;
+    const grey = vec3(dot(day, vec3(0.3, 0.59, 0.11))).mul(vec3(0.15, 0.18, 0.24));
+    m.colorNode = mix(day, grey, nk);
+  }
   m.roughness = 0.8;
   // light through the leaves: a little of the sun's colour on the side away from it
   const back = max(dot(normalWorld, ENV.sunDir).negate(), 0).mul(0.18);

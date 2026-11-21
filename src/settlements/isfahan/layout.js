@@ -252,3 +252,9 @@ export function arcadeUpWalk(b) {
   const q = (s, d) => [b.c[0] + b.u[0] * s + b.n[0] * d, b.c[1] + b.u[1] * s + b.n[1] * d], s0 = -b.w / 2, sa = s0 + 1.35, sb = b.w / 2 - 1.15, k = b.c[0] < 0 && Math.abs(b.c[1] - 181.2) < 1 ? -2.2 : 2.2;   // (the side of the way in from the square that the street life's strollers leave free: found by search, re-run when the life's places shift)
   return [q(k, -9), q(k, -4.8), q(0.3, -2.2), q(0, 2.2), q(0, 4.7), q(s0 + 0.9, 4.9), q(s0 + 0.8, 8.9), q(s0 + 0.8, 9.55), q(s0 + 0.8, 10.3), q(sa + 0.3, 10.1), q(sb - 0.3, 10.1), q(sb + 0.4, 10.6), q(sb - 0.2, 11.0), q(sa + 0.3, 11.0), q(s0 + 0.85, 11.0), q(s0 + 0.8, 10.0), q(s0 + 0.8, 9.55), q(s0 + 0.8, 8.8), q(0, 7.0), q(0, 4.4), q(0, 3.0), q(0, 1.0), q(0, 0.1)];
 }
+
+/** The walk from the square into the front room of an entered arcade shop with no room over it (walk-check): across the passage, through the door, in to the cushion's front. */
+export function arcadeShopWalk(b) {
+  const q = (s, d) => [b.c[0] + b.u[0] * s + b.n[0] * d, b.c[1] + b.u[1] * s + b.n[1] * d];
+  return [q(0, -9), q(0, -4.8), q(0, -2.2), q(0, 2.2), q(0, 4.7)];
+}

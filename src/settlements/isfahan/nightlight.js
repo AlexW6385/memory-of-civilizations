@@ -168,10 +168,19 @@ function night(el, { bag }) {
     const len = z.z0 - z.z1, n = Math.max(1, Math.round(len / 5)), bw = len / n;
     for (const sd of [-1, 1]) for (let i = 0; i < n; i++) {
       const zc = z.z0 - (i + 0.5) * bw;
-      if (hashAt(sd * 7, zc, 41) > 0.6) continue;
+      if (hashAt(sd * 7, zc, 41) > 0.85) continue;
       H.ball(z.x + sd * (z.w / 2 + 1.4), 1.9, zc, 0.8);
-      H.floor(z.x + sd * (z.w / 2 - 0.9), 0.1, zc, 2.1, 1.7);
+      H.floor(z.x + sd * (z.w / 2 - 0.9), 0.1, zc, 2.4, 1.9);
+      if (sd < 0 && i % 2 === 0) { H.ball(z.x, 3.6, zc, 1.3); H.floor(z.x, 0.08, zc, 3.2, 2.6); }   // a lamp hung on a chain from the vault over the street [inferred]
     }
+  }
+  // the market's stalls on the square and along the walks, the goods mats and the storyteller's circle: an oil lamp hung under each awning (a glow
+  // and a pool on the ground before it), a small lamp set by a seller's mat [inferred: Isfahan.ir §5 has the square lit by oil lamps at night]
+  for (const s of el.stalls || []) {
+    const [x, zz] = s.at, h = hashAt(x, zz, 61);
+    if (h > (s.mat ? 0.7 : 0.9)) continue;
+    if (s.mat) { H.ball(x, 0.55, zz, 0.55); H.floor(x, 0.07, zz, 2.0, 1.7); }
+    else { H.ball(x, 1.95, zz - 0.2, 0.85 + 0.2 * h); H.floor(x, 0.07, zz - 0.6, 2.9, 2.4); }
   }
   for (const [x, y, zz] of el.iwans || []) H.ball(x, y, zz, 1.0);
   H.flush(bag);
