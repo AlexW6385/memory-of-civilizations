@@ -38,7 +38,7 @@ export function registerWear() {
     const top = y + 0.1, w = dw / 2 - 0.05;
     put('plaster_damp', du - w, du + w, -0.28, 0.42, top, top + 0.004);
     put('plaster_damp', du - w * 0.55, du + w * 0.55, -0.2, 0.3, top + 0.004, top + 0.007);
-    if (hostel) {
+    if (false && hostel) {   // off: invented, no source places an inscription here (docs/decisions.md)
       // PAX on a plaque of dressed stone, to the right of the door as one faces it, above the windows' row and below the string course
       const cu = du - dw / 2 - 0.75, yb = y + 2.15, W = 0.036, S = 0.05, gap = 0.1;     // stroke 3.6 cm, the grid cell 5 cm: a letter 0.2 × 0.3 m
       const wLet = 4 * S + W, total = 3 * wLet + 2 * gap;
