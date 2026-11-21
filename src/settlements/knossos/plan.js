@@ -104,6 +104,7 @@ E.push({ t: 'portico', a: [T0 + 16.2, T1 + 15.4], b: [T0 + 16.2, T1 + 10.6], n: 
 for (const z of [38, 52]) for (const x of [-2.3, 2.3]) E.push({ t: 'kn_lampstand', at: [x, z], y: 0.0, h: 1.1 });
 for (const z of [-52, -38]) for (const x of [-2.3, 2.3]) E.push({ t: 'kn_lampstand', at: [x, z], y: 0.0, h: 1.1 });
 for (const z of [1.3, 7.2]) E.push({ t: 'kn_lampstand', at: [-17.4, z], y: 0.05, h: 1.2 });
+for (const z of [15, 29]) for (const x of [-7.5, 7.5]) E.push({ t: 'kn_lampstand', at: [x, z], y: 0.0, h: 1.1 });   // the lamps of the court by the arrival (§20.6)
 // the wayside shrine at the south passage's mouth (§20.1): a stand of gypsum carrying the horns of consecration, jar stands and a tub either side of the propylon, a torch post
 E.push({ t: 'court_dress', y: 0.0, seed: 6, horns: [[-6.4, 62.4, 1], [6.4, 62.4, 1]], tubs: [[-8.2, 63.4], [8.2, 63.4]], stands: [[-4.6, 62.6], [4.6, 62.6]], torches: [[-9.6, 62.2], [9.6, 62.2]] });
 E.push({ t: 'court_shrubs', at: [[-8.2, 63.4], [8.2, 63.4]], y: 0.0, seed: 8 });
