@@ -171,6 +171,22 @@ function harbour(H) {
   }
   for (let x = QUAY[0] + 6; x < QUAY[2]; x += 16) { H.ball(x, 13 + 5.6, 16, 1.3, 0.64); H.floor(x, 13.1, 16, 5, 6, 0, 8, 0.6); }
   for (let x = -40; x <= 36; x += 13) { H.ball(x, height(x, -3) + 4.4, -4.2, 1.1, 0.62); H.floor(x, height(x, -3) + 0.08, -4, 4.2, 3.4, 0, 8, 0.7); }
+  // the wharves' waiting sheds (styles/modern/wharf.js: walls 0.25 m, windows 1.6 m wide at 1.1 to 2.6 m up every 2.4 m from 1.5 m in, the gates at the north end, the way out at the south): the lit windows on both sides, the tubes' light on the floor, the doorways' spill
+  for (const x of [-36, -18, 0, 18]) {
+    const s0 = -8 - 12, s1 = -8 - 1.5, y = 1.2;
+    for (let z = s0 + 1.5; z < s1 - 1; z += 2.4) for (const [xx, nx] of [[x - 4.2 - 0.02, -1], [x + 4.2 + 0.02, 1]]) H.quad([xx, y + 1.15, z - 0.75], [xx, y + 1.15, z + 0.75], [xx, y + 2.55, z + 0.75], [xx, y + 2.55, z - 0.75], [nx, 0], 0.58 + 0.2 * hashAt(x, z, 91));
+    H.floor(x, y + 0.08, s0 - 1.6, 2.6, 2.4, 0, 8, 0.7); H.floor(x, y + 0.08, s1 + 1.2, 2.6, 1.8, 0, 8, 0.7);
+    H.floor(x, y + 0.05, (s0 + s1) / 2, 3.2, 4.6, 0, 8, 0.5);
+    H.floor(x - 5.9, y + 0.08, (s0 + s1) / 2, 1.8, 5, 0, 8, 0.42); H.floor(x + 5.9, y + 0.08, (s0 + s1) / 2, 1.8, 5, 0, 8, 0.42);
+  }
+  // the stands on the promenade, open of an evening: the kiosk's hatch, the flower seller's bulb, the pie cart's window
+  for (const [kind, x] of [['news', -27], ['flowers', -9], ['pies', 9], ['news', 29]]) {
+    const g = height(x, 0.2);
+    if (kind === 'news') H.quad([x - 1.0, g + 1.1, -0.62], [x + 1.0, g + 1.1, -0.62], [x + 1.0, g + 1.95, -0.62], [x - 1.0, g + 1.95, -0.62], [0, -1], 0.55);
+    else if (kind === 'flowers') { H.ball(x, g + 2.05, 0.7, 0.7, 0.6); }
+    else H.quad([x - 1.0, g + 1.2, -0.02], [x + 1.0, g + 1.2, -0.02], [x + 1.0, g + 2.0, -0.02], [x - 1.0, g + 2.0, -0.02], [0, -1], 0.8);
+    H.floor(x, g + 0.08, -1.2, 2.6, 2.0, 0, 8, kind === 'pies' ? 0.8 : 0.65);
+  }
   for (const x of [-36, -18, 0, 18]) for (const z of [-15, -26, -40]) { H.ball(x, 1.2 + 3.1, z, 0.9, 0.58); H.floor(x, 1.3, z, 3.6, 3.6, 0, 8, 0.62); }
 }
 
