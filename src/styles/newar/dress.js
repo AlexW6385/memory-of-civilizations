@@ -47,7 +47,7 @@ export function offerings(el, { bag }) {
   const W = pl.stair ?? 4.4;
   for (let k = 0; k < n - 1; k++) {
     const y = (k + 1) * h + 0.1 - 0.1 + 0.0;
-    for (const side of [-1, 1]) for (let v = W / 2 + 0.7; v < pl.hw[k] - 0.5; v += 0.52) if (rand() < 0.78) diya(bag, X(uFace[k] - 0.3), y, cz + side * v);
+    for (const side of [-1, 1]) for (let v = W / 2 + 0.7; v < pl.hw[k] - (k === 0 && P.corner ? 1.5 : 0.5); v += 0.52) if (rand() < 0.78) diya(bag, X(uFace[k] - 0.3), y, cz + side * v);
   }
   for (let k = 0; k < n; k++) for (const v of [-1, 1]) {
     const s = 0.85 + 0.12 * k, px = X(uFace[k] + 1.25), pz = cz + v * (W / 2 + 1.05), y = k * h + 0.45 * s;

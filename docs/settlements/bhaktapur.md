@@ -160,3 +160,17 @@ The walk itself (item 1 of the assignment) stood already from §12–§16: forty
 **Walk.** Twelve further routes (`shopwalk.js`) take the visitor from the lane through the door into the front room of the doored open houses nearest the arrival that upstairs.js does not walk (25 routes, 218 legs in `walk-check`); the brass, cloth and pot shops' wide fronts and the weavers' rooms keep stock across the lane and are left out.
 
 Level: L2 deepened toward L3 (night, sound and animals now in place); still short of Suzhou: the Nyatapola's chamber and the second-floor houses beyond 62 m stay shut, no written boards, the critters are not seen in the showroom.
+
+## 18. Second pass, narrow form (November 2026)
+
+1. **Night near the visitor.** Rendered the arrival with `--night 1 --quality low` (radius 70): the Nyatapola's silhouette, the chaitya's glow and the lit upper panes of the nearer houses read; the brick of the square within 15 m is dark between the niche lamps. No change made (the glows of §17 are in place); the second night pose was not rendered (time).
+   Removed the hung white paper lanterns from the house fronts (`KIT_OVER` bhaktapur in `src/objects/life.js`): a paper lantern on a cord is not of the Malla valley in 1710 [inferred]; oil lamps in niches and doors (§17) stand instead.
+2. **Budget (MAIN pass).** Arrival 300 draws / 1.20 M tris (after the landmark work: 301 / 1.21 M). Walk poses (draw / main tris): Bhairabnath front 286 / 1.19 M and 211 / 1.01 M; Pottery Square edge 191 / 0.93 M and 269 / 1.09 M; the square's middle 235 / 1.10 M and 232 / 1.09 M. All under 450 / 4.5 M; nothing to split. geo-one: 19.8 MB, 553 meshes.
+3. **The walk's gaps.** Not worked this pass: the houses of two storeys, the pottery houses, the curd shops and the Nyatapola's chamber stay shut (see §16, §17).
+4. **The landmark.**
+   - Four Ganesh shrines on the first plinth stage's corners: a stone base, a sandstone cube with a dark niche and a vermilion seated figure, a timber band, a small tiled pidha roof and a gilt finial [stated: the shrines at the corners, bhaktapur.com/discover/nyatapola; the form inferred]. The row of lamps on that stage stops short of the front corners.
+   - A stone tap on the first stage's north face: a spout through the plinth into a stone basin [stated: "a stone tap on the first plinth", bhaktapur.com; form inferred].
+   - Three gilt umbrellas on the pinnacle's spire [inferred: the form of a Newar gajur].
+   - Wear on the Bhairabnath's stair as on the Nyatapola's (`newar_wear`, same materials, no extra draw).
+   Checks: surface-check, plan-check, walk-check (25 routes, 218 legs), view-check, disc-check and the worker test pass. One daytime render near the plinth showed a corner shrine; the tap and umbrellas were not seen in a render.
+Still short: the Nyatapola's ground chamber, hip-end figures and carved eave boards, written boards (no verified Newar glyphs), a second night pose, the critters seen in a render, the shut houses above.
