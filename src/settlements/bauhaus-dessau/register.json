@@ -19,7 +19,7 @@
       "特尔滕住宅区 —— 格罗皮乌斯事务所自1926年起建造的两层平屋顶联排住宅，带条形窗和菜园。"
     ]
   },
-  "soundscape": "T(NEAR, { animals: { dog: 0.3, rooster: 0.1 }, roof: 'flat' })",
+  "soundscape": "T({ ...EU, sparrow: 1, crow: 0.5 }, { animals: withLife({ dog: 0.3, rooster: 0.1, horse: 0.3 }, { market: 0.8, eaves: 1, map: BAUHAUS }), roof: 'flat' })",
   "lifeRegion": "industrial",
   "crop": "wheat"
 }

@@ -25,6 +25,7 @@ export const ROAD_C1 = [-190, -100, -34, -90], ROAD_C2 = [-190, 96, -34, 106];
 export const ROAD_E = [-20, 74, 190, 84];                     // Ebertallee
 export const ROADS = [ROAD_K, ROAD_M, ROAD_KV, ROAD_C1, ROAD_C2, ROAD_E];
 export const inRoad = (x, z, m = 0) => ROADS.some((r) => inRect(r, x, z, m));
+export const TRAM_TRACKS = [-4.5, -1.5], TRAM_STOP = [74, 0];  // Kothener Strasse's two tracks (z) and the stop east of the school (docs §15.1)
 export const FOOT = 2.5;                                       // the pavement beside each street
 
 /** The Masters' Houses on Ebertallee's north side: the director's house and three doubles. */
