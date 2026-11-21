@@ -7,6 +7,8 @@
 
 import { PLAZA, CENOTE, SACBE } from './layout.js';
 import { farElements } from './sculpt-plans.js';
+import { ground } from './ground.js';
+import { lotRoutes } from './walk.js';
 
 const E = [];
 E.push({ t: 'lane', rect: PLAZA, y: 0.04, mat: 'lime_plaster' });
@@ -43,6 +45,8 @@ const rooms = [
 ];
 const walks = [[[0, 60], [0, 37], [0, 34], [0, 12], [0, 9.6]]];
 walks[0].y0 = 0;
+// the visitor's walk (walk.js): into the street's houses and long houses
+for (const q of lotRoutes()) { const w = q.route.map((p) => [...p]); w.y0 = ground.height(w[0][0], w[0][1]); walks.push(w); }
 
 export const plaza = {
   id: 'chichen-itza-plaza',
