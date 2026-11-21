@@ -98,23 +98,32 @@ function lamp(bag, x, y, z, k) {
   bag.add('flame', box(x - 0.016, y + 0.03, z - 0.016, x + 0.016, y + 0.1, z + 0.016));
 }
 
+/**
+ * ur_lampware: the lamps and fire-pans themselves ({ doors, mats, pans }, as ur_night), built into a house plan that already holds pottery_dark and flame, so that they cost no draw.
+ */
+function lampware(el, { bag }) {
+  for (const d of el.doors || []) { const { p, out } = houseDoor(d.rect, d.door); lamp(bag, p[0] + out[0] * 0.14, 2.28, p[1] + out[1] * 0.14, d.rect[0] * 7 + d.rect[1]); }   // on the ledge of the niche over the door
+  for (const m of el.mats || []) lamp(bag, m.at[0], m.y ?? 0.012, m.at[1], m.at[0] * 3 + m.at[1]);
+  for (const b of el.pans || []) {
+    const [x, z] = b.at;
+    bag.add('pottery_dark', lathe([[0.001, 0.16], [0.28, 0.2], [0.34, 0.36], [0.3, 0.38], [0.22, 0.3], [0.001, 0.28]], 12, null, x, 0, z));
+    bag.add('flame', box(x - 0.14, 0.3, z - 0.14, x + 0.14, 0.52, z + 0.14));
+  }
+}
+
 function night(el, { bag }) {
   const H = new Halo();
   for (const d of el.doors || []) {
     const { p, out } = houseDoor(d.rect, d.door);
     H.ball(p[0] + out[0] * 0.3, 2.35, p[1] + out[1] * 0.3, 0.45);
-    lamp(bag, p[0] + out[0] * 0.14, 2.28, p[1] + out[1] * 0.14, d.rect[0] * 7 + d.rect[1]);   // the clay lamp itself, on the ledge of its niche over the door
     H.floor(p[0] + out[0] * 1.4, 0.04, p[1] + out[1] * 1.4, 1.8, 10);
   }
   for (const m of el.mats || []) {   // a lamp on the sellers' mat: its small glow and a pool on the ground and the goods
-    lamp(bag, m.at[0], m.y ?? 0.012, m.at[1], m.at[0] * 3 + m.at[1]);
     H.ball(m.at[0], (m.y ?? 0.012) + 0.16, m.at[1], 0.42);
     H.floor(m.at[0], 0.04, m.at[1], 2.1, 10);
   }
   for (const b of el.pans || []) {   // a clay fire-pan on three bricks, coals and a low flame (bakers and the square's night-sellers)
     const [x, z] = b.at;
-    bag.add('pottery_dark', lathe([[0.001, 0.16], [0.28, 0.2], [0.34, 0.36], [0.3, 0.38], [0.22, 0.3], [0.001, 0.28]], 12, null, x, 0, z));
-    bag.add('flame', box(x - 0.14, 0.3, z - 0.14, x + 0.14, 0.52, z + 0.14));
     H.ball(x, 0.75, z, 0.9);
     H.floor(x, 0.04, z, 3.3, 10);
   }
@@ -126,7 +135,7 @@ function night(el, { bag }) {
 }
 
 /** The element table additions: the night plan's element. */
-export const NIGHT_ELEMENTS = { ur_night: night };
+export const NIGHT_ELEMENTS = { ur_night: night, ur_lampware: lampware };
 
 
 // ── the Court of Nanna near the visitor (docs/settlements/ur.md §30) ────────────────────────────────────────────────────────────

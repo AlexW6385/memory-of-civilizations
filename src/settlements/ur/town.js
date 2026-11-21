@@ -8,7 +8,7 @@ import { doorClear } from './openwalk.js';
 const base = (id, elements) => ({ id, style: 'ur-g', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -110], facing: 's' } });
 export async function town() {
   const all = houses(), plans = [];
-  for (let i = 0; i < all.length; i += 150) plans.push(base(`ur-houses-${i / 150}`, all.slice(i, i + 150).flatMap((h) => [{ t: h.chapel ? 'ur_chapel' : 'ur_house', ...h }, ...(h.open ? [{ t: 'door_clear', rect: doorClear(h) }] : [])])));   // (door_clear: the lane before a door, kept clear of the street life)
+  for (let i = 0; i < all.length; i += 150) plans.push(base(`ur-houses-${i / 150}`, all.slice(i, i + 150).flatMap((h) => [{ t: h.chapel ? 'ur_chapel' : 'ur_house', ...h }, ...(h.open ? [{ t: 'door_clear', rect: doorClear(h) }, { t: 'ur_lampware', doors: [{ rect: h.rect, door: h.door }] }] : [])])));   // (door_clear: the lane before a door, kept clear of the street life)
   const { figures, gear } = urLife();
   plans.push({ ...base('ur-square', gear), rooms: [{ id: 'market square west', rect: [MARKET[0], MARKET[1], -9, MARKET[3]], y: 0, kind: 'open', market: true }, { id: 'market square east', rect: [9, MARKET[1], MARKET[2], MARKET[3]], y: 0, kind: 'open', market: true }] });   // (the way from the north street to the gate kept clear)
   // the boat being built on the yard, on its trestles; the palms in the lanes of the core
@@ -33,9 +33,11 @@ export async function town() {
   // the night: the lamp over the door of each house that can be entered and the pool it throws on the lane (nightlight.js)
   // the wear of use and weather: the stair's polished lane, the thresholds, the dust at the doors, the quay's damp band (wear.js)
   plans.push(base('ur-wear', [{ t: 'ur_wear', doors: all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door })) }]));
-  const mats = [];   // the sellers' lamps on the square's two rows, and fire-pans at the aisle's sides
+  const mats = [];  //    // the sellers' lamps on the square's two rows, and fire-pans at the aisle's sides
   for (const z of [-189, -204]) for (const x of [-38, -32, -26, -19, 13, 19, 25, 31, 37]) if ((Math.round(x * 3 + z) % 3) !== 0) mats.push({ at: [x + 0.7, z + (z > -195 ? -0.5 : 0.5)] });
-  plans.push(base('ur-night', [{ t: 'ur_night', doors: all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door })), mats, pans: [{ at: [-13, -197] }, { at: [12, -197] }, { at: [-13, -183] }, { at: [12, -210] }] }]));
+  const pans = [{ at: [-13, -197] }, { at: [12, -197] }, { at: [-13, -183] }, { at: [12, -210] }], nd = all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door }));
+  plans.find((p) => p.id === 'ur-square').elements.push({ t: 'ur_lampware', mats, pans });   // (the lamps' own pieces ride in the house and square plans: pottery and flame are held there already)
+  plans.push(base('ur-night', [{ t: 'ur_night', doors: nd, mats, pans }]));
   plans.push(base('ur-lane-palms', trees));
   // the city rampart with its three gates (§5.10), the brickyard at the north-east edge (§5.9), the royal mausoleum outside the temenos (§5.11)
   const [N, E, S] = [[-14, -374, 14, -360], [360, -34, 374, -6], [-14, 360, 14, 374]];
