@@ -16,7 +16,7 @@ import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { STYLES, registerStyle } from '../../core/build.js';
 import { lathe, rod } from '../../core/geom.js';
 import { HARAM, GATES, SEPULCHRE, SEP_Y, SEP_STAIR, height } from './layout.js';
-import { stairWear, colonnadeWear } from './wear.js';
+import { stairWear, wayWear, colonnadeWear } from './wear.js';
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -206,6 +206,7 @@ export function registerNight() {
   ]) wrapElement(I, name, o);
   // the worn stone (wear.js): the stairs' middles and the porticoes' floors
   I.elements.jer_stair_wear = stairWear;
+  I.elements.jer_way_wear = wayWear;
   I.elements.colonnade = colonnadeWear(I.elements.colonnade);
   registerStyle('jerusalem-lit', I);
   // the Dome of the Rock's own style (src/buildings/dome-of-the-rock/style.js): the crown of lamps, the lamps in the arcades, the censers, the cave's lamp

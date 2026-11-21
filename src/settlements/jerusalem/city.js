@@ -9,6 +9,7 @@ import { sepulchreFurnish, sepulchreLife } from './sepulchre-detail.js';
 import { haramFurnish, haramLife } from './haram-detail.js';
 import { platformFurnish, platformLife } from './platform-detail.js';
 import { braziers, wayBraziers } from './nightlight.js';
+import { platformWear } from './wear.js';
 import { sepulchreStairWear, haramStairWear } from './wear.js';
 import { cardoColonnades, bazaarColonnades, ZN, ZS } from './shopline.js';
 import { STREET, RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
@@ -247,7 +248,7 @@ export function city() {
     plan('jerusalem-palaces', 'islamic', palaces()),
     ...STREET.spans.map((sp, i) => plan(`jerusalem-bazaar-${i}`, LIT, bazaar(sp), { bounds: [sp[0] - 4, -STREET.half - 2, sp[1] + 4, STREET.half + 2] })),
     plan('jerusalem-markets', 'life', markets()),
-    plan('jerusalem-haram-furnish', LIT, [...haramFurnish(), ...platformFurnish(), ...haramStairWear(), ...wayBraziers()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
+    plan('jerusalem-haram-furnish', LIT, [...haramFurnish(), ...platformFurnish(), ...haramStairWear(), ...platformWear(), ...wayBraziers()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
     plan('jerusalem-haram-life', 'life', [...haramLife(), ...platformLife()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
   ];
 }
