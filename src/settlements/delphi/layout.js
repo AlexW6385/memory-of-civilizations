@@ -60,6 +60,13 @@ export const wayY = (s) => { for (let i = 0; i + 1 < WAY_S.length; i++) if (s <=
 export const STAIR = [84.2, 26, 87.8, 44];                            // the flight up through the terrace's wall: its foot at z = 44, y 13.1
 export const way2Y = (s) => TT_Y + (STADIUM_Y - TT_Y) * Math.min(1, s / L2.tot);
 export const WAY_LEN = L1.tot;
+// ── the village road: from a side gate in the precinct's east wall (where the Way's leg passes x = 96, z = 62) east to the village's own road
+// at x = 108.3, which runs along the west ends of the village's four lanes (z 45, 62, 79, 96) and joins them (docs/settlements/delphi.md §15.1).
+export const SIDE_GATE = { x: 104, z: 62, w: 3.4 };
+export const VROAD_X = 108.3;
+const mkPath = (P, ys) => { const Ls = lens(P), S = Ls.L.reduce((q, l) => (q.push(q[q.length - 1] + l), q), [0]); return { P, Ls, yf: (s) => { for (let i = 0; i + 1 < S.length; i++) if (s <= S[i + 1]) return ys[i] + (ys[i + 1] - ys[i]) * (s - S[i]) / (S[i + 1] - S[i]); return ys[ys.length - 1]; } }; };
+const Y_SG = wayY(pathAt(96, 62, WAY)[1]);
+export const VROADS = [mkPath([[96, 62], [VROAD_X, 62], [VROAD_X, 45]], [Y_SG, 10.95, 12.7]), mkPath([[VROAD_X, 62], [VROAD_X, 96]], [10.95, 5.45])];
 /** Points of a way every `step` m with their heights: [[x, y, z], …] */
 export function wayPoints(P, yf, step = 2.5) {
   const out = []; let acc = 0;
@@ -189,6 +196,10 @@ export function height(x, z) {
   for (const [P, yf] of [[WAY, wayY], [WAY2, way2Y]]) {
     const [d, s] = pathAt(x, z, P);
     if (d < 7.5) h = h + (yf(s) - h) * smooth(7.5, 2.8, d);
+  }
+  for (const V of VROADS) {
+    const [d, s] = pathAt(x, z, V.P, V.Ls);
+    if (d < 4.5) h = h + (V.yf(s) - h) * smooth(4.5, 1.9, d);
   }
   // the precinct's walls hold the ground (south side falls away)
   // the rim meets the open country at no more than 1 m in 1 m (tests/planet.test.mjs: no step)
