@@ -89,6 +89,11 @@ const wrap = (fn, scale = 1) => function haloed(el, ctx) {
 function flame(el, { lights, bag }) {
   const [x, y, z] = el.at, l = { at: [x, y, z], color: el.color ?? '#ffb46b', intensity: el.intensity ?? 3, distance: el.distance ?? 8 };
   lights.push(l);
+  if (el.brazier) {                         // an iron bowl of coals on three legs, the pilgrims' fire (iron: held by the lamps already)
+    const q = 0.95 + 0.1 * hashAt(x, z, 2), fy = el.floor ?? y - 0.9;
+    bag.add('iron', lathe([[0.001, 0], [0.16 * q, 0.02], [0.3 * q, 0.34], [0.34 * q, 0.4], [0.28 * q, 0.38], [0.001, 0.2]], 8, null, x, y - 0.42, z));
+    for (let k = 0; k < 3; k++) { const a = k * TAU / 3 + 0.5; bag.add('iron', rod([x + Math.cos(a) * 0.2, y - 0.02, z + Math.sin(a) * 0.2], [x + Math.cos(a) * 0.3, fy, z + Math.sin(a) * 0.3], 0.018, 4)); }
+  }
   const H = new Halo();
   lightHalo(H, l, el.floor, el.r ?? 1);
   H.flush(bag);
@@ -174,7 +179,18 @@ function litDome(fn) {
  */
 export function fires() {
   const [dx, dz] = [-10, 36], y = height(dx, dz);
-  return [
+  // the court by night [inferred]: the candle-sellers' lamps on their stalls, braziers where the pilgrims who wait for the night office warm themselves,
+  // the lamp at the cistern head, the guards' cresset at the door; all within the arrival's reach, as halo in the city plan (no draw of their own)
+  const lamp = (x, z, h = 1.25, r = 0.7) => ({ t: 'cn_flame', at: [x, height(x, z) + h, z], intensity: 2, distance: 8, floor: height(x, z), r });
+  const fire = (x, z, r = 1.4) => ({ t: 'cn_flame', at: [x, height(x, z) + 0.95, z], intensity: 2.8, distance: 12, floor: height(x, z), r, brazier: true });
+  const court = [
+    lamp(-36, 53.5), lamp(-32.6, 54.3), lamp(-29.2, 53.4), lamp(9, 54), lamp(15.8, 54.2), lamp(22.6, 54),
+    lamp(-20, 67.2, 2.2, 0.8), lamp(-40, 70, 0.6, 0.6), lamp(30, 66, 0.6, 0.6), lamp(-33, 79, 0.6, 0.6), lamp(36, 76, 0.6, 0.6),
+    fire(-3, 66), fire(-18, 78), fire(4, 76), fire(-1, 50),
+    { t: 'cn_flame', at: [dx - 3.3, y + 2.5, 39.6], intensity: 2.4, distance: 10, floor: y, r: 0.9 },
+    { t: 'cn_flame', at: [dx + 3.3, y + 2.5, 39.6], intensity: 2.4, distance: 10, floor: y, r: 0.9 },
+  ];
+  return [...court,
     { t: 'cn_flame', at: [dx, y + 2.4, dz - 1.2], intensity: 3, distance: 12, floor: y, r: 1.8 },
     { t: 'cn_flame', at: [dx, y + 0.9, dz + 3.4], intensity: 2.4, distance: 12, floor: y, r: 0.2 },
   ];
