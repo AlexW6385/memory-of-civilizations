@@ -1,7 +1,8 @@
 // Nan Madol — the animals (src/engine/fauna.js draws them; docs/settlements/nan-madol.md §7, §9): terns and swiftlets over the canals and
 // the reef (swallow and crow stand-ins), small birds on the islets' ground, an egret on the mud flat of the shore, small fish in the canals
 // [inferred: the eels that oral history says the canals were cut for, and the lagoon's fish].
-import { WATER, CANALS } from './layout.js';
+import { WATER, CANALS, ISLET, LANDINGS, edges } from './layout.js';
+import { walkHouses } from './walk.js';
 import { ground } from './ground.js';
 
 const fish = [];
@@ -23,4 +24,25 @@ const perches = [];
 for (const [x, z] of [[-30, 30], [10, 40], [-60, -40], [-65, 30], [50, 30], [55, -90], [-20, -100], [-60, 90], [-16, 70], [-4, 76], [-18, 84], [-3, 88], [-25, 20], [8, 20], [-14, 40], [20, -80], [-70, -90], [-100, -10], [-100, 50], [40, 60]]) if (ground.height(x, z) > -0.3) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z) + 0.05, rot: (x * 7) % 3, range: [1.8, 1.6] });
 for (const [x, z, r] of [[-130, -100, 0.4], [-160, -40, 2.1], [-172, 10, 1.0]]) perches.push({ kind: 'egret', x, z, y: ground.height(x, z), rot: r, stay: [60, 200], gone: [60, 160], alert: 10 });
 { const x = -150, z = -75; perches.push({ kind: 'egret', x, z, y: ground.height(x, z), rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); }
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §14.4) ──
+// Dogs, hens and a rooster (brought by the settlers), and the island's kingfisher at a mooring post; no cat, goat, horse, duck or goose (none in Pohnpei c. 1300 [inferred]).
+// Pigs have no rigged model yet: they stay the street life's static figures.
+const critters = [];
+// dogs asleep or ambling on the platforms of the nahs by the arrival, in the corner beside the door's lane (the platform is 0.45 m)
+walkHouses(10).forEach(({ h }, k) => {
+  if (k % 2) return;
+  const ca = Math.cos(h.yaw), sa = Math.sin(h.yaw), F = (u, v) => [h.c[0] + u * ca + v * sa, h.c[1] - u * sa + v * ca], q = F((k % 4 ? 1 : -1) * (h.w / 2 - 0.8), -h.l / 2 + 1.3);
+  critters.push({ model: 'dog', at: [q[0], 0.47, q[1]], rot: h.yaw + k * 1.7, range: [1.8, 0.8] });
+});
+// two dogs about the forecourt of Idehd, off the processional way, and one on Peiniot
+critters.push({ model: 'dog', at: [-19.2, 0.02, 17.0], rot: 0.6, range: [7, 3] }, { model: 'dog', at: [-1.8, 0.02, 12.2], rot: 3.4, range: [7, 3] }, { model: 'dog', at: [14.5, 0.02, 82], rot: 1.9, range: [6, 3] });
+// hens with a rooster in the worked ground of the forecourt and behind the landing's store
+for (const [model, x, z, size] of [['rooster', -20.4, 10.6, 1], ['hen_brown', -19.4, 11.2, 1], ['hen_brown', -20.8, 11.9, 0.96], ['hen_white', -2.4, 17.2, 1], ['hen_brown', -3.2, 18.0, 1], ['rooster', 15.2, 84, 1], ['hen_brown', 14.2, 84.8, 0.97]]) critters.push({ model, at: [x, 0.02, z], rot: x * 0.7, range: [3.2, 1.6], size });
+// the kingfisher on the nearer mooring post of Idehd's northern landing, looking out over the canal
+{
+  const [, a, b, nx, nz] = edges(ISLET.s1).find((q) => q[0] === 'n'), u = LANDINGS.s1.find((q) => q[0] === 'n')[1] - 2.4, L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const px = a[0] + (b[0] - a[0]) / L * u + nx * 0.62, pz = a[1] + (b[1] - a[1]) / L * u + nz * 0.62;
+  critters.push({ model: 'kingfisher', at: [px, 1.15, pz], rot: Math.atan2(nz, nx), water: [px + nx * 1.7, pz + nz * 1.7, WATER], cycle: 36 });
+}
+export default { fish, flights, perches, critters };
