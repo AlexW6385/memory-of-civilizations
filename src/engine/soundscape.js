@@ -129,6 +129,7 @@ import * as LALIBELA from '../settlements/lalibela/soundmap.js';
 import * as LHASA from '../settlements/lhasa/soundmap.js';
 import * as LUQUFU from '../settlements/lu-qufu/soundmap.js';
 import * as MACHUPICCHU from '../settlements/machu-picchu/soundmap.js';
+import * as MAORI from '../settlements/maori/soundmap.js';
 import * as MOHENJO from '../settlements/mohenjo-daro/soundmap.js';
 import * as NEWYORK from '../settlements/new-york/soundmap.js';
 import './voices-ny.js';
@@ -270,7 +271,7 @@ export const PROFILES = {
   'machu-picchu': T({ warbler: 0.6, tropic: 0.4, dove: 0.4 }, { animals: withLife({ dog: 0.2 }, { map: MACHUPICCHU }), roof: 'thatch' }),
   madurai: T(IND, { cicadas: 0.5, frogs: 0.5, animals: withLife({ cattle: 0.7, rooster: 0.4, goat: 0.4, dog: 0.3 }, { market: 1, eaves: 1, map: MADURAI }), roof: 'tile', bells: 'puja' }),
   'mamluk-cairo': T(NEAR, { animals: withLife({ donkey: 0.8, horse: 0.3, rooster: 0.3, dog: 0.4 }, { market: 1, map: CAIRO }), roof: 'flat', adhan: 1 }),
-  maori: T({ warbler: 1, tropic: 0.5 }, { cicadas: 0.6, animals: { dog: 0.3 }, roof: 'thatch' }),
+  maori: T({ warbler: 1, tropic: 0.5 }, { cicadas: 0.6, animals: withLife({ dog: 0.4 }, { market: 0.4, map: MAORI }), roof: 'thatch' }),
   'ming-suzhou': T(EAS, {
     cicadas: 0.7, frogs: 0.8, roof: 'xiaoqing', bells: 'suzhou',
     animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: SUZHOU }),
