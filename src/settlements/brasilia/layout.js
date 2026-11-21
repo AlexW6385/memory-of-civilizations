@@ -4,6 +4,7 @@
 // side, the Residential Axis' avenue and one superquadra south of it. Compressed (§1c, §1d). Pure data;
 // +x east, +z south; the plateau is flat (y = 0) save for the Cathedral's sunken nave.
 
+import { stripUnits } from '../../styles/brasilia/trades.js';
 export const RADIUS = 520;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -113,5 +114,24 @@ export const inBuilding = (x, z, m = 0) => inRect(PLATFORM, x, z, m) || inRect(P
 function TUNNEL_BOX() { return [TUNNEL.x0, TUNNEL.zR, TUNNEL.x1, TUNNEL.z0]; }
 
 // the kiosks (x, z, quarter turns toward the front, trade) and vendors' carts (x, z, trade): on the lawn, the Square, the Cathedral's plaza, the avenue
-export const KIOSKS = [[-420, -104, 0, 'lanchonete'], [-345, 104, 2, 'banca'], [-270, -104, 0, 'coco'], [-185, 104, 2, 'lanchonete'], [-100, -104, 0, 'banca'], [-60, 104, 2, 'coco'], [120, 60, 2, 'banca'], [120, -70, 0, 'coco'], [250, 100, 2, 'lanchonete'], [-130, 230, 0, 'coco'], [-132, 150, 2, 'sorvete'], [38.5, 300, 3, 'banca']];
+export const KIOSKS = [[-420, -104, 0, 'lanchonete'], [-345, 104, 2, 'banca'], [-270, -104, 0, 'coco'], [-185, 104, 2, 'lanchonete'], [-100, -104, 0, 'banca'], [-60, 104, 2, 'coco'], [120, 60, 2, 'banca'], [120, -70, 0, 'coco'], [250, 100, 2, 'lanchonete'], [-130, 230, 0, 'coco'], [-132, 150, 2, 'sorvete'], [38.5, 293.5, 3, 'banca']];
 export const CARTS = [[110, 20, 'pipoca'], [118, -22, 'picole'], [180, 40, 'churro'], [260, -60, 'pipoca'], [200, -110, 'picole'], [-120, -40, 'pipoca'], [-118, 40, 'picole'], [-100, 18, 'churro'], [-170, 142, 'pipoca'], [-150, 255, 'picole'], [-175, 262, 'churro'], [47, 330, 'pipoca'], [-20, 288, 'picole'], [92, 300, 'pipoca']];
+
+// ── the walk into the shops (docs §13): the units' doors, and the clear lanes to them ──
+export const SERV_SEED = 12, SHOPS_SEED = 5;
+export const GALLERY = stripUnits(SERV, SERV_SEED).map((u) => ({ ...u, strip: SERV, from: -6 }));
+export const STRIP = stripUnits(SHOPS, SHOPS_SEED).map((u) => ({ ...u, strip: SHOPS, from: -22 }));
+/** The units of the strip whose doors are walked to across the avenue (every third one: the cars keep clear of their crossings). */
+export const STRIP_WALKED = STRIP.filter((u) => u.k % 3 === 2);
+/** The door lanes of every unit: x from the strip's west edge less `from`, to 4.5 m inside the front plane, 1 m either side of the door's middle. */
+export function doorLane(x, z) {
+  for (const u of GALLERY) if (x >= u.strip[0] + u.from && x <= u.fx + 4.5 && Math.abs(z - u.door) < 1.0) return u;
+  for (const u of STRIP_WALKED) if (x >= u.strip[0] + u.from && x <= u.fx + 4.5 && Math.abs(z - u.door) < 1.0) return u;
+  return null;
+}
+/** Where the cars keep clear: the crossings of the avenue to the walked doors, and the foot of the lawn's way over the southern carriageway. */
+export function carKeepClear(x, z) {
+  return (x > 12 && x < 50 && STRIP_WALKED.some((u) => Math.abs(z - u.door) < 3.0)) || (x > 24 && x < 36 && z > 112 && z < 160);
+}
+/** The Escola Classe's classroom doors (school.js: five rooms of 9 m from the south end... z of each door's middle, on the front wall x = SCHOOL[0] + 8). */
+export const SCHOOL_DOORS = [0, 1, 2, 3, 4].map((k) => { const a = SCHOOL[1] + k * 9 + (k === 0 ? 0.25 : 0.125), b = SCHOOL[1] + (k + 1) * 9 - 0.125; return [SCHOOL[0] + 8, (a + b) / 2]; });

@@ -2,7 +2,7 @@
 // and the Justice palaces at the Congress end, the superquadra's eight blocks on pilotis with the commercial strip, the carriageways'
 // and the avenue's traffic of cars and buses, the lamps and benches, and the people of the lawn, the pavements, the square and the
 // plaza. Everything is placed from layout.js.
-import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, SCHOOL, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
+import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, SCHOOL, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng, doorLane, carKeepClear } from './layout.js';
 
 const LAWN_PICNICS = [];
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 0], facing: 'e' } });
@@ -43,7 +43,7 @@ export async function town() {
   const lane = (axis, c, from, to, rot, gap0, gap1, n0 = 24, n1 = 60) => {
     for (let v = from + rand() * 20; v < to; v += n0 + rand() * (n1 - n0)) {
       const x = axis === 'x' ? v : c, z = axis === 'x' ? c : v;
-      if (Math.hypot(x, z) > RADIUS - 40 || !clear(x, z, 2) || (gap0 !== undefined && v > gap0 && v < gap1)) continue;
+      if (Math.hypot(x, z) > RADIUS - 40 || !clear(x, z, 2) || carKeepClear(x, z) || (gap0 !== undefined && v > gap0 && v < gap1)) continue;
       if (rand() < 0.14) B.push({ t: 'bus', at: [x, z], rot, mat: pick(['paint_blue', 'paint_blue', 'car_red', 'paint_ochre']) });
       else B.push({ t: 'car60', at: [x, z], rot, kind: pick(KIND), mat: pick(CAR) });
     }
@@ -62,7 +62,7 @@ export async function town() {
   for (const x of [SQ[0] - RING / 2 - 2.5, SQ[0] - RING / 2 + 2.5]) lane('z', x, SQ[1] + 10, SQ[3] - 10, x < SQ[0] - RING / 2 ? 0 : Math.PI, undefined, undefined, 60, 120);
   B.push({ t: 'bus', at: [AVENUE[0] - 4.2, 322], rot: 0, mat: 'paint_blue' }, { t: 'bus', at: [AVENUE[0] - 4.2, 345], rot: 0, mat: 'car_red' });
   // parked: the cars at the ministries' feet and the shops' kerb
-  for (let z = SHOPS[1] + 4; z < SHOPS[3] - 3; z += 6.2 + rand() * 6) if (rand() < 0.75) B.push({ t: 'car60', at: [AVENUE[2] - 1.4, z], rot: 0, kind: pick(KIND), mat: pick(CAR) });
+  for (let z = SHOPS[1] + 4; z < SHOPS[3] - 3; z += 6.2 + rand() * 6) if (rand() < 0.75 && !carKeepClear(AVENUE[2] - 1.4, z)) B.push({ t: 'car60', at: [AVENUE[2] - 1.4, z], rot: 0, kind: pick(KIND), mat: pick(CAR) });
   // the car parks' bays: about two in five taken
   for (const pk of PARKS) {
     const [px0, pz0, px1, pz1] = pk.rect;
@@ -93,6 +93,7 @@ export async function town() {
   const person = (x, z, rot, o = {}) => {
     if (!o.camp && ((x + 120) ** 2 + z * z < 81 || (Math.abs(z) < 2.8 && x > -122 && x < -96))) return;     // nobody within 9 m of the arrival or in its line of sight to the ramp
     if (!o.camp && x > -125 && x < -92 && Math.abs(z) < 62 && Math.abs(x - (-110 + 6 * Math.abs(z) / 60)) < 2.2) return;     // the visitors' routes up the apron keep clear
+    { const u = doorLane(x, z); if (u) { z = u.door - 1.3; if (x < u.fx) x = u.strip[0] + 0.4; } }     // a door's lane stays clear: whoever stood in it stands beside it (the walk, docs §13)
     if ((!o.inside && !clear(x, z, 0.8)) || (Math.abs(z) < 3.5 && x > -140 && x < 80) || P.some((q) => Math.hypot(q.at[0] - x, q.at[1] - z) < 1.3)) return;
     const w = o.w ?? woman(), t = rand();
     const o2 = o.kind === 'student' ? { dress: w ? 'robe' : 'trousers', cloth: 'cloth_white', cloth2: 'cloth_blue', hat: 'none', hair: w ? 'bun' : 'short', h: 0.8 }

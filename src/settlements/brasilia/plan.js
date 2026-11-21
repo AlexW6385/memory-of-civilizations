@@ -1,7 +1,7 @@
 // Brasília about 1970 (docs/settlements/brasilia.md §1a–1c, §8): two landmarks. The Congress with the Three Powers Square, the Planalto and
 // the Supreme Court — entered from the Esplanade's lawn, up the ramp to the roof deck and into the Senate's dome and the Chamber's bowl;
 // and the Cathedral, entered down its open ramp and the tunnel under the pool to the sunken nave.
-import { PRACA, PLANALTO, STF, PLATFORM, DECK, DOME, BOWL, RAMP, CATH, TUNNEL, LAWN } from './layout.js';
+import { PRACA, PLANALTO, STF, PLATFORM, DECK, DOME, BOWL, RAMP, CATH, TUNNEL, LAWN, SHOPS, GALLERY, STRIP_WALKED, SCHOOL_DOORS } from './layout.js';
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const E1 = [
@@ -31,6 +31,11 @@ const walks1 = [
   Object.assign([[-110, 0], [-96, 0], [-52, 0], [-12, 0], [0, 0], [0, 72], [8, 72], [20, 72], [30, 72]], { y0: 0 }),
   Object.assign([[-110, 0], [-12, 0], [0, 0], [0, -72], [10, -72], [22, -72]], { y0: 0 }),
 ];
+// the visitor's walk into the shops: the services gallery on the lawn (its arcade faces west: along the pavement, in at the unit's door and to the counter),
+// and four units of the superquadra's strip (reached down the avenue's side)
+for (const u of GALLERY) walks1.push(Object.assign([[-110, 0], [-150, -30], [-185, -70], [-179, u.door], [u.fx - 1.5, u.door], [u.fx + 1.0, u.door], [u.fx + 1.8, u.door]], { y0: 0 }));
+for (const u of STRIP_WALKED.filter((q) => [2, 8, 14, 17].includes(q.k))) walks1.push(Object.assign([[-110, 0], [-104, 60], [-60, 114], [30, 114], [30, 150], [30, u.door], [SHOPS[0] - 1, u.door], [u.fx - 1.5, u.door], [u.fx + 1.0, u.door], [u.fx + 1.8, u.door]], { y0: 0 }));
+for (const k of [1, 3]) { const [dx, dz] = SCHOOL_DOORS[k]; walks1.push(Object.assign([[-110, 0], [-104, 60], [-60, 114], [30, 114], [30, 150], [30, 255], [75, 262], [169, 262], [172, 300], [172, dz], [dx + 1.5, dz], [dx - 1.0, dz], [dx - 2.0, dz]], { y0: 0 })); }
 void dome; void bowl;
 export const congress = {
   id: 'brasilia-congress',

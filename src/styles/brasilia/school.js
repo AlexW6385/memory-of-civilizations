@@ -27,10 +27,10 @@ export function school(el, { bag, col, lights }) {
   for (let y = 1.0; y < 2.8; y += 0.32) bag.add(CONC, box(x0 - 0.06, y - 0.06, z0, x0 - 0.0, y - 0.02, z1));                                                     // the cobogó's horizontal ribs (a thin line between rows)
   wall(x0, z1 - T, xw, z1); wall(x0, z0, xw, z0 + T);
   for (const zb of bounds.slice(1, -1)) wall(x0, zb - T / 2, xw, zb + T / 2);
-  // the doors: 1.1 m, on the front wall at the middle of each room; windows beside them
+  // the doors: 1.6 m, on the front wall at the middle of each room; windows beside them
   const rooms = [];
   for (let k = 0; k < bounds.length - 1; k++) {
-    const a = bounds[k] + (k === 0 ? T : T / 2), b = bounds[k + 1] - (k === bounds.length - 2 ? T : T / 2), zc = (a + b) / 2, dw = 0.6;
+    const a = bounds[k] + (k === 0 ? T : T / 2), b = bounds[k + 1] - (k === bounds.length - 2 ? T : T / 2), zc = (a + b) / 2, dw = 0.8;   // the door 1.6 m
     rooms.push({ a, b, zc, kind: k < 5 ? 'class' : k === 5 ? 'office' : 'cantina' });
     wall(xw - T, a, xw, zc - dw); wall(xw - T, zc + dw, xw, b);
     bag.add(WHITE, box(xw - T, 2.2, zc - dw, xw, H, zc + dw)); col.rect([xw - T, zc - dw, xw, zc + dw], 2.2, H);
