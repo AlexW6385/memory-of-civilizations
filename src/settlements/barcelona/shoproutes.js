@@ -16,9 +16,9 @@ export function shopRoute(s) {
   return Object.assign([P(3.0), P(1.2), P(0.1), P(-1.6), P(-3.2), P(-5.0)], { y0: s.y });
 }
 /** One shop of each of the eight trades nearest the first 60 m round the arrival, then the next nearest of those trades, `n` routes in all. */
-export function shopRoutes(els, n = 12) {
+export function shopRoutes(els, n = 12, per = 2, skip = 0) {
   const all = shopDoors(els), seen = {}, out = [];
-  for (const s of all) { if (out.length >= n) break; if ((seen[s.trade] = (seen[s.trade] ?? 0) + 1) > 2) continue; out.push(s); }
+  for (const s of all) { if (out.length >= n) break; const k = seen[s.trade] = (seen[s.trade] ?? 0) + 1; if (k > per + skip || k <= skip) continue; out.push(s); }
   return out.map(shopRoute);
 }
 
