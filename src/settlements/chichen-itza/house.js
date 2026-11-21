@@ -85,6 +85,24 @@ function czHouse(el, ctx) {
   bag.add(rm, flipGeo(lathe(prof.map(([r, y]) => [Math.max(0.001, r - 0.12), y - 0.1]), 24, oval, cx, Y0, cz)));
   { const e = lathe([[a * 1.25, L0], [a * 1.25 - 0.12, L0 - 0.1]], 24, oval, cx, Y0, cz); bag.add(rm, e); bag.add(rm, flipGeo(e.clone())); }
   col.floor([cx - (alongX ? a : b) * 0.7, cz - (alongX ? b : a) * 0.7, cx + (alongX ? a : b) * 0.7, cz + (alongX ? b : a) * 0.7], Y0 + F);
+  // soot (§19.5): the hearth's smoke leaves by the doors and blackens the wall above them [stated: Yucatán Today, §17: the smoke leaves a black layer on walls and roof]; and the thatch inside over the hearth
+  if (v.use !== 'store') {
+    for (const d of doors) for (const j of [-3, -1, 1]) {
+      const t0 = d + j * step, t1 = t0 + 0.7 * step, h0 = dh + 0.03, h1 = Math.min(dh + 0.3, top - 0.05), ts = [];
+      q(ts, P(t0, a + 0.014, h0), P(t1, a + 0.014, h0), P(t1, a + 0.014, h1), P(t0, a + 0.014, h1));
+      bag.add('pottery_dark', flipGeo(fromTriangles(ts)));
+    }
+  }
+  if (v.use === 'home') {
+    const pin = prof.map(([r, y]) => [Math.max(0.001, r - 0.12), y - 0.1]), yIn = (r) => { for (let k = 0; k + 1 < pin.length; k++) if (r <= pin[k][0] && r >= pin[k + 1][0]) return pin[k + 1][1] + (pin[k][1] - pin[k + 1][1]) * (r - pin[k + 1][0]) / (pin[k][0] - pin[k + 1][0]); return pin[0][1]; };
+    const ax = alongX ? [1, 0] : [0, 1], lat = [-ax[1], ax[0]];
+    for (const [rho, lt, sz] of [[a - 1.0, 0, 0.17], [a - 0.55, 0.28, 0.14], [a - 1.45, -0.22, 0.15]]) {
+      const pt = (du, dl) => { const rr = rho + du, y = yIn(rr) - 0.012; return [cx + ax[0] * rr + lat[0] * (lt + dl), Y0 + y, cz + ax[1] * rr + lat[1] * (lt + dl)]; };
+      const tri = [...pt(-sz, -sz), ...pt(sz, -sz), ...pt(sz, sz), ...pt(-sz, -sz), ...pt(sz, sz), ...pt(-sz, sz)];
+      const ny = (tri[4] - tri[1]) * 0 + ((tri[3] - tri[0]) * (tri[8] - tri[2]) - (tri[5] - tri[2]) * (tri[6] - tri[0]));      // the winding's y: the patch faces down into the room
+      if (ny > 0) { const f = tri.slice(); for (let k = 0; k < 3; k++) { f[3 + k] = tri[6 + k]; f[6 + k] = tri[3 + k]; f[12 + k] = tri[15 + k]; f[15 + k] = tri[12 + k]; } bag.add('pottery_dark', fromTriangles(f)); } else bag.add('pottery_dark', fromTriangles(tri));
+    }
+  }
   // a step stone before each doorway; a rolled mat above some
   doors.forEach((d, i) => {
     const n = doorNormal(alongX, i), w = [cx + n[0] * (b + 0.28), cz + n[1] * (b + 0.28)], hx = n[0] ? 0.3 : 0.45, hz = n[0] ? 0.45 : 0.3;

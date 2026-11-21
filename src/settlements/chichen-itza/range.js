@@ -16,7 +16,7 @@ function czRange(el, ctx) {
   piece('rubble', -a - 1.2, a + 1.2, -b - 1.2, b + 2.6, y0 - 0.2, F);
   piece('limestone', -a - 1.3, a + 1.3, b + 2.5, b + 2.7, F - 0.04, F + 0.04);                       // the lip
   // the platform's stair at the front, walked
-  piece('rubble', -2, 2, b + 2.6, b + 3.9, y0 - 0.2, y0 + 0.3); piece('rubble', -2, 2, b + 2.6, b + 3.3, y0 - 0.2, y0 + 0.6);
+  piece('rubble', -2, 2, b + 2.6, b + 3.9, y0 - 0.2, y0 + 0.3); piece('rubble', -2, 2, b + 2.6, b + 3.3, y0 - 0.2, y0 + 0.6); piece('pottery_dark', -0.15, 0.15, b + 3.45, b + 3.75, y0 + 0.28, y0 + 0.315); piece('pottery_dark', -0.15, 0.15, b + 2.8, b + 3.1, y0 + 0.58, y0 + 0.615);   // the stair's treads worn pale where the feet go (§19.5)
   col.ramp(rotRect(c, sn, cx, cz, -2, b + 2.6, 2, b + 4.0), y0, F, Math.abs(sn) > 0.5 ? (-sn > 0 ? 'e' : 'w') : (-c > 0 ? 's' : 'n'));
   const plat = rotRect(c, sn, cx, cz, -a - 1.2, -b - 1.2, a + 1.2, b + 2.6);
   col.rect(plat, y0 - 0.2, F - 0.31); col.floor(plat, F);
