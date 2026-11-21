@@ -79,6 +79,10 @@ for (const l of lots()) {
   walks.push(r);
 }
 
+// window light seen across the pond at night: the lamp-light of the Kannon-den's shoji and of the Tōgu-dō's lies on the water as a streak
+// toward the viewer (the existing `streak` halo unit: no new draw) [inferred: lit shoji over still water]
+for (const dx of [-3.6, 0, 3.6]) E.push({ t: 'kyoto_halo', kind: 'streak', at: [GINKAKU.kannon[0] + dx, -9.6], y: P.level + 0.02, rot: 0 });
+E.push({ t: 'kyoto_halo', kind: 'streak', at: [155, -3.4], y: P.level + 0.02, rot: Math.PI / 2 });
 E.push(...stoneHalos(E));                                    // the stone lanterns lit at night (nightlight.js)
 export const ginkaku = {
   id: 'muromachi-ginkaku',
