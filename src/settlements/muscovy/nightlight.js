@@ -12,7 +12,7 @@ import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import { STYLES, registerStyle } from '../../core/build.js';
 import '../../styles/muscovite/index.js';
-import { KITAI, KITAI_GATES, SPASSKY, NIKOLSKY, MOAT, wallX, gateZ, height } from './layout.js';
+import { KITAI, KITAI_GATES, SPASSKY, NIKOLSKY, LOBNOYE, MOAT, wallX, gateZ, height } from './layout.js';
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -119,6 +119,17 @@ export function cresset(el, { bag, col }) {
   col.rect([x - 0.3, z - 0.3, x + 0.3, z + 0.3], y, y + h);
 }
 
+// ── the watch-fire: the night watchmen's fire on the square (they guarded the stalls and the rows after dark) ──
+/** Crossed logs round a fire with its glow and a wide pool of light on the beaten earth. { at, y } [inferred: the watch kept fires, see dossier §16] */
+export function watchfire(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, H = new Halo(), q = hashAt(x, z, 51);
+  for (let k = 0; k < 4; k++) { const a = k * 1.57 + q * 2, c = Math.cos(a), s = Math.sin(a); bag.add('timber', rod([x + c * 0.55, y + 0.06, z + s * 0.55], [x - c * 0.1, y + 0.3 + 0.04 * k, z - s * 0.1], 0.07, 5)); }
+  bag.add('iron', lathe([[0.001, 0], [0.45, 0], [0.4, 0.05], [0.001, 0.05]], 8, null, x, y, z));
+  H.ball(x, y + 0.55, z, 1.6, 0.7); H.floor(x, y + 0.05, z, 6.5 + q, 6.5 + q, 0, 12, 0.9);
+  H.flush(bag);
+  col.rect([x - 0.6, z - 0.6, x + 0.6, z + 0.6], y, y + 0.4);
+}
+
 // ── the lit windows of what a builder makes ─────────────────────────────────────────────────────
 const WINDOW = { opening: 0.03, glass_lamp: 0.03 };
 /** One flame (the bounds of its geometry) into H: a small candle or lamp flame lights its own glow, and a pool on what it stands on when it is low (a stand on the floor). */
@@ -201,7 +212,7 @@ function litWall(base) {
 export function registerNight() {
   const S = STYLES.muscovite;
   if (!S || S.elements.cresset) return;
-  const E = { ...S.elements, cresset };
+  const E = { ...S.elements, cresset, watchfire };
   const wrap = (name, make) => { const base = E[name]; if (base && !base.__lit) E[name] = make(base); };
   wrap('izba', litIzba);
   wrap('russian_church', litHall(0.8, 1)); wrap('archangel', litHall(0.7, 1)); wrap('annunciation', litHall(0.7, 1)); wrap('pokrov', litHall(0.8, 1));
@@ -220,5 +231,7 @@ export function cressets() {
     let nx = -uz, nz = ux; if (nx * (150 - x) + nz * (0 - z) < 0) { nx = -nx; nz = -nz; }        // toward the middle of the town: inside
     for (const s of [-1, 1]) put(x + ux * 5.5 * s + nx * 4, z + uz * 5.5 * s + nz * 4);
   });
+  // the watchmen's fires on the square: two within a few paces of the arrival, one at the Lobnoye Mesto, two before the rows, one by the market
+  for (const [x, z] of [[29, 54], [52, 60], [LOBNOYE[0] + 9, LOBNOYE[1] + 3], [60, -30], [60, 62], [-8, -40]]) E.push({ t: 'watchfire', at: [x, z], y: height(x, z) });
   return E;
 }
