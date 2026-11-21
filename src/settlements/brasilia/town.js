@@ -2,6 +2,8 @@
 // and the Justice palaces at the Congress end, the superquadra's eight blocks on pilotis with the commercial strip, the carriageways'
 // and the avenue's traffic of cars and buses, the lamps and benches, and the people of the lawn, the pavements, the square and the
 // plaza. Everything is placed from layout.js.
+import { lampPosts } from './lamps.js';
+import { nightPlan } from './nightlight.js';
 import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, SCHOOL, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng, doorLane, carKeepClear } from './layout.js';
 
 const LAWN_PICNICS = [];
@@ -74,14 +76,11 @@ export async function town() {
   }
 
   // ── lamps, benches, flags ──
-  for (let x = -450; x < 80; x += 36) { L.push({ t: 'street_lamp', at: [x, -117], y: 0, h: 6.5 }, { t: 'street_lamp', at: [x, 117], y: 0, h: 6.5 }); }
-  for (let z = AVENUE[1] + 12; z < AVENUE[3] - 20; z += 36) L.push({ t: 'street_lamp', at: [AVENUE[0] - 1.5, z], y: 0, h: 6.5 }, { t: 'street_lamp', at: [AVENUE[2] + 1.5, z], y: 0, h: 6.5 });
-  for (let x = PRACA[0] + 12; x < PRACA[2] - 8; x += 40) for (const z of [-132, 132]) L.push({ t: 'street_lamp', at: [x, z], y: 0, h: 7 });
+  for (const l of lampPosts()) if (l.y === 0) L.push({ t: 'street_lamp', ...l });
   for (let x = -420; x < -120; x += 52) for (const z of [-104, 104]) L.push({ t: 'bench', at: [x, z], y: 0, rot: z < 0 ? Math.PI : 0, len: 1.9, back: true });
   for (let x = SQ[0] + 14; x < SQ[2] - 10; x += 34) for (let z = SQ[1] + 14; z < SQ[3] - 8; z += 38) if (!inBuilding(x, z, 4) && !inBuilding(x, z + 2, 2)) L.push({ t: 'bench', at: [x, z], y: 0, rot: rand() * 6.28, len: 1.9, back: true });
-  for (const z of [-28, -17, 17, 28]) L.push({ t: 'street_lamp', at: [-100.5, z], y: 0, h: 6.5 });
   // the roof deck: lamp posts along the parapets and benches facing the towers
-  for (const x of [0, 22, 60]) for (const z of [-104, 104]) L.push({ t: 'street_lamp', at: [x, z], y: 6.5, h: 6 });
+  for (const l of lampPosts()) if (l.y > 0) L.push({ t: 'street_lamp', ...l });
   for (const z of [-88, -62, 62, 88]) L.push({ t: 'bench', at: [2, z], y: 6.5, rot: Math.PI / 2, len: 1.9, back: true });
   const [cx, cz] = CATH.c;
   for (let a = 0; a < 6.28; a += 0.42) { const x = cx + Math.cos(a) * (CATH.pool + 8), z = cz + Math.sin(a) * (CATH.pool + 8); if (Math.abs(x - cx) < 14 && z < cz) continue; L.push({ t: 'bench', at: [x, z], y: 0, rot: a + Math.PI / 2, len: 1.9, back: true }); }
@@ -169,5 +168,5 @@ export async function town() {
   { const n = Math.floor((SERV[3] - SERV[1] - 0.4) / 4.2); for (let k = 0; k < n; k++) { const z = SERV[1] + 0.4 + k * 4.2; person(SERV[0] + 3.4 + 0.4 + 3.6, z + 3.6, 0, { inside: true, kind: rand() < 0.4 ? 'worker' : undefined, w: rand() < 0.5 }); if (rand() < 0.7) person(SERV[0] + 3.4 + 0.4 + 2.2 + rand() * 2.5, z + 1.9, Math.PI + (rand() - 0.5) * 0.6, { inside: true }); if (rand() < 0.4) person(SERV[0] + 1.5, z + 1.5 + rand() * 2, rand() * 6.28, { inside: true }); } }
   // the vehicles' fronts are not in the way: the people stand clear of the roadways (the carriageways are not walked by the still figures)
   void inRect; void POOLS; void RAMP; void PLATFORM; void TUNNEL; void LAWN;
-  return [base('brasilia-buildings', 'brasilia', B), base('brasilia-life', 'life', [...L, ...P])];
+  return [base('brasilia-buildings', 'brasilia', B), nightPlan(base), base('brasilia-life', 'life', [...L, ...P])];
 }
