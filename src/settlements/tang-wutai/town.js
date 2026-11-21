@@ -4,6 +4,8 @@ import { village } from './village.js';
 import { fields } from './fields.js';
 import { dress } from './dress.js';
 import './style.js';
+import { nightPlan } from './nightlight.js';
+import { hall, sengfang, monastery } from './plan.js';
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-80, 0], facing: 'e' } });
 export async function houses() {
   const v = village(), plans = [], N = 90;
@@ -12,5 +14,6 @@ export async function houses() {
   plans.push(base('tang-wutai-yardlife', 'life', [...v.life, ...f.life, ...d.life]));
   for (let i = 0; i < f.chinese.length; i += 40) plans.push(base(`tang-wutai-fields-${i / 40}`, 'wutai-site', f.chinese.slice(i, i + 40)));
   plans.push(base('tang-wutai-dress', 'wutai-site', d.chinese));
+  plans.push(nightPlan({ hall, sengfang, monastery, village: v, dress: d }));
   return plans;
 }
