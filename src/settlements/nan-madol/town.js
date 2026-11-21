@@ -3,7 +3,7 @@
 // in two rows along each islet's path, cook-houses with their earth ovens, the sea wall's columns, the mangroves of the shore; and
 // the people and animals: the sakau pounded at the stones of Nandauwas, priests in its courts, the household at every nah, canoe
 // builders on Dapahu, food landed by canoe at the Peiniot islet.
-import { RADIUS, WATER, ISLETS, ISLET, FORDS, LANDINGS, edges, gaps, village, cooks, height, inland, inRect, SAKAU, TOMB, INNER, OUTER, OUTER_GATE, INNER_GATE, TOMB_COURT, LESSER_TOMB, FORECOURT } from './layout.js';
+import { RADIUS, WATER, ISLETS, ISLET, FORDS, LANDINGS, edges, gaps, village, cooks, height, inland, inRect, SAKAU, TOMB, INNER, OUTER, OUTER_GATE, INNER_GATE, TOMB_COURT, LESSER_TOMB, FORECOURT, NAN_LAMPS } from './layout.js';
 import '../../objects/index.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 
@@ -92,8 +92,7 @@ export async function town() {
     E.push({ t: 'court', kind: 'topdress', a: [cx0, cz0], b: [cx1, cz0], top: () => 3.3, seed: 21 }); E.push({ t: 'court', kind: 'topdress', a: [cx1, cz0], b: [cx1, cz1], top: () => 3.3, seed: 22 });
   }
   for (const k of cooks()) E.push({ t: 'cookhouse', c: k.c, yaw: k.yaw, seed: k.seed });
-  // Peiniot, behind the landing's store and by its water steps: fish and breadfruit on racks, a net on poles, logs for the fires [inferred: §14.1]
-  E.push({ t: 'things', list: [{ k: 'rack', at: [16.2, 79.4], rot: 0 }, { k: 'net', at: [17.4, 85.2], rot: Math.PI / 2 }, { k: 'logs', at: [15.6, 88.2], rot: 0.1, len: 2.4 }, { k: 'nuts', at: [-14.8, 86.5], rot: 0.7 }], seed: 17 });
+  E.push({ t: 'nm_glow', list: NAN_LAMPS });   // the night glow of Nandauwas's lamps (nightlight.js)
   // the forecourt of Idehd, along the way from the crossroads to the causeway: worked ground either side, lamps down the way
   E.push({ t: 'things', list: FORECOURT.things, seed: 16 });
   for (const c of FORECOURT.lamps) E.push({ t: 'court', kind: 'lamp', c });

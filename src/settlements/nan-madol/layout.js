@@ -293,3 +293,6 @@ export const INNER_GATE = [-0.8, 2.4];                        // the gap at the 
 export const TOMB = { rect: [-17, -48, -3, -30], h: 2.4, pit: [-12.2, -43, -7.8, -35.6], roofZ: -40.4, ramp: [-12.2, -39, -7.8, -35.6], stair: [-11, -30, -9, -26.6] };
 export const SAKAU = [[-28.5, -38, Math.PI / 2], [8.5, -15.5, 0]];
 export const inNandauwas = (x, z, m = 0) => inRect(ISLET.nan.rect, x, z, m);
+
+/** The lamps on poles at Nandauwas's gates and walls (plan.js dresses them; town.js gives them their night glow). */
+export const NAN_LAMPS = [[-13, -5.4], [-7, -5.4], [-1.9, -20.2], [3.5, -20.2], [-26, -63], [9, -63]];

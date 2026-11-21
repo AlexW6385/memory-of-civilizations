@@ -3,7 +3,7 @@
 // court with the sakau stone, and the inner enclosure 26 × 32 m with walls to 4.6 m, entered at its south-east; in the inner court
 // the tomb — a platform of columns 2.4 m high with a crypt, roofed in part with columns laid across — reached by stairs.
 
-import { OUTER, OUTER_GATE, INNER, INNER_GATE, TOMB, SAKAU, ISLET } from './layout.js';
+import { OUTER, OUTER_GATE, INNER, INNER_GATE, TOMB, SAKAU, ISLET, NAN_LAMPS } from './layout.js';
 import { walkRoutes } from './walk.js';
 
 const E = [];
@@ -55,7 +55,7 @@ E.push({ t: 'court', kind: 'rake', rect: [-38.5, -5.5, 18.5, -2.9], skip: [[-12.
 for (const [a, b] of [[[-19.5, -4.2], [-14.2, -4.2]], [[-5.8, -4.2], [-0.5, -4.2]]]) E.push({ t: 'court', kind: 'seat', a, b });
 for (const [x, z, yaw, sd] of [[-26, -47, 0.2, 1], [-25.5, -29.5, 0.9, 2], [6, -22.5, 0.1, 3], [10.5, -9.8, 1.3, 4], [-19, -38, 1.57, 5], [-1.6, -38, 1.57, 6], [-10, -50.5, 0, 7], [-1.5, -45, 0.5, 8]]) E.push({ t: 'court', kind: 'offering', c: [x, z], yaw, seed: sd });
 for (const [a, b] of [[[-31.6, -64.2], [-13, -64.2]], [[-6.5, -64.2], [11.5, -64.2]], [[12.4, -60], [12.4, -44]], [[-32.2, -60], [-32.2, -45]], [[-32.2, -28], [-32.2, -14]], [[12.4, -36], [12.4, -22]]]) E.push({ t: 'court', kind: 'seat', a, b });
-for (const c of [[-13, -5.4], [-7, -5.4], [-1.9, -20.2], [3.5, -20.2], [-26, -63], [9, -63]]) E.push({ t: 'court', kind: 'lamp', c });
+for (const c of NAN_LAMPS) E.push({ t: 'court', kind: 'lamp', c });
 E.push({ t: 'court', kind: 'tabu', c: [-5.4, -4.6], yaw: 0 }); E.push({ t: 'court', kind: 'tabu', c: [-16.4, -4.6], yaw: 0 }); E.push({ t: 'court', kind: 'tabu', c: [6.0, -20.4], yaw: 0 });
 { const bx = (TOMB.pit[0] + TOMB.pit[2]) / 2, bz = TOMB.pit[1] + 1.3; E.push({ t: 'court', kind: 'tombgift', c: [bx, bz], seed: 4 }); }
 const wallsTop = [[[ox0, oz0], [ox1, oz0], outerTop, [0, -1]], [[ox1, oz0], [ox1, oz1], outerTop, [1, 0]], [[ox0, oz0], [ox0, oz1], outerTop, [-1, 0]], [[ox0, oz1], [OUTER_GATE[0], oz1], (u, L) => 5.8 + 2.3 * (1 - sm(0, 10, u)), [0, 1]], [[OUTER_GATE[1], oz1], [ox1, oz1], (u, L) => 5.8 + 2.3 * (1 - sm(0, 10, L - u)), [0, 1]]];
