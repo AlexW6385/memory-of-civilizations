@@ -178,6 +178,15 @@ All built by `src/settlements/ayutthaya/wear.js`, from the element's own numbers
 - The Siamese sellers' shops and every temple carry no writing, and no Thai script is modelled anywhere: the letterforms cannot be checked here. [stated as a limit]
 - Not done: mildew under the chedi cornices; it cost one arrival draw over the budget.
 
+## 14. Second pass (night, budget, the walk's gaps, the landmark's wear)
+
+All [inferred] unless it carries a source of §1-§12.
+- Night: the arrival and the bank road (x 20, z -70.5, looking east) rendered with `--night 1` at the low preset. Within 15 m of the arrival the gate's lantern, the candle stands and the offering-table lamps glow; on the bank road the shop lanterns and the pools before the counters show as halos. Nothing added.
+- Budget (MAIN pass): arrival 258 draws / 1.55 M triangles (unchanged by this pass). Walk poses: (10,-85) 261 / 437; (30,-70.5) 322 / 427; (-30,-70.5) 286 / 402 (the two figures are yaw 0 / yaw pi); the most 1.98 M triangles. Nothing over.
+- The entered stilt houses were rendered from the lane and from the door. The stair treads were worn in `tile_dark`, which read blue-grey on brown wood; they are now `pottery_dark` (a darker brown). The room had mats, hearth, altar and a chest but a bare middle: a low round table with bowls, a winnowing tray with rice, a betel set and a water jar by the wall now stand in it, only in materials the tile already holds (a new one costs the arrival a draw).
+- The chedis: black mildew in the gaps of the dentils under each tier's cornice of the three great chedis (the corner ones are too small), in `opening` (already in the landmark's plan: no extra draw).
+- Not done: the landmark's other gaps against §4 were not audited again; the room's new pieces were seen only in part (one low render showed the tray; the table was out of frame).
+
 ## Sources
 - Wikipedia, "Wat Phra Si Sanphet": https://en.wikipedia.org/wiki/Wat_Phra_Si_Sanphet
 - Ayutthaya Historical Research, "The architecture of Wat Phra Sri Sanphet": https://ayutthaya-history.com/Temples_Ruins_PhraSisanphet_Architecture.html
