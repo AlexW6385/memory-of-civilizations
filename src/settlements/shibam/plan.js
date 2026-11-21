@@ -3,6 +3,7 @@
 
 import { LM, LMD, shops, HALL, ups } from './layout.js';
 import { fl, topOf, T, houseDims } from '../../styles/hadhrami/dims.js';
+import { shopRoutes } from './walkroutes.js';
 import { kindOf, frameOf, upOf, upRoutes, routesIn } from '../../styles/hadhrami/up.js';
 
 const [X0, Z0, X1, Z1] = LM.rect, top = topOf(LM.storeys), dz = LMD.doorZ;
@@ -34,6 +35,8 @@ for (const l of ups()) {
   bnd[0] = Math.min(bnd[0], l.rect[0] - 4); bnd[1] = Math.min(bnd[1], l.rect[1] - 4); bnd[2] = Math.max(bnd[2], l.rect[2] + 4); bnd[3] = Math.max(bnd[3], l.rect[3] + 4);
   upTop = Math.max(upTop, topOf(l.storeys));
 }
+
+for (const r of shopRoutes()) { r.y0 = 0; walks.push(r); }
 
 export const house = {
   id: 'shibam-tower-house',
