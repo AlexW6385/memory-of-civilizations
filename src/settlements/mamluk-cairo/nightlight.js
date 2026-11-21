@@ -210,6 +210,12 @@ function cairoNight(el, { bag }) {
   H.flush(bag);
 }
 STYLES['mamluk-cairo'].elements.cairo_night = cairoNight;
+STYLES.mamluk.elements.cairo_square_fires = cairoNight;
+/** The Rumayla's own fires, built into the square's plan (no new draw): the camel-drivers' coals and a mashal near where the visitor arrives [inferred]. */
+export const SQUARE_FIRES = [
+  { k: 'brazier', x: 107, z: 92, y: 0, n: [0, 0], lit: true }, { k: 'brazier', x: 124, z: 94, y: 0, n: [0, 0], lit: true },
+  { k: 'stand', x: 114, z: 88, y: 0, n: [0, -1], lit: true }, { k: 'stand', x: 96, z: 86, y: 0, n: [0, -1], lit: true },
+];
 
 // ── the night plans: 48 m tiles, shown within 55 m ─────────────────────────────────────────────────────────
 export const NIGHT_TILE = 48, NIGHT_NEAR = 55;

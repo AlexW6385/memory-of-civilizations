@@ -200,6 +200,23 @@ Marks: [stated] with its source, [inferred] where the place and date suggest it.
 - Not done: worn thresholds and steps, and Greek inscriptions (the shop signs, the lintel texts, the dedications of Hagia Sophia). No letters are written: none could be checked in this pass, so the boards stay plain.
 - Not done, from the landmark's own gaps: the Pharos, the sea walls and the harbours.
 
+## 17. Second pass, narrow form (night, budget, walk gaps, landmark)
+
+Marks: [stated] with source, [inferred] where place and date suggest it.
+
+### 17.1 Night near the visitor
+- Seen at the arrival at 22:00 (low preset): the court was dark within 15 m, only the church's door and a few windows lit. Added in `nightlight.js` `fires()` (halo in the existing city plan, no new draw): a lamp on each candle-seller's stall (6), lamps on the mats and at the cistern head (5), four braziers of coals where pilgrims wait for the night office (iron bowl on three legs, new `brazier` option of `cn_flame`), a cresset by each of the two door guards. [inferred: lamps and braziers after the lamps of §16.2; the night vigil of pilgrims at the great church after the feasts named there; no lighting by the state.] Re-rendered: the halos and braziers show, the court's paving is still dim beyond them. A second pose on the Mese (-100, 110) stood in the Milion's arch and was dark under the vault; not lit.
+
+### 17.2 Budget
+- MAIN draws / main triangles, before my changes: arrival 426 / 2.66 M; (-10,60) 402 and 356; (-100,110) 428 and 353; (-180,75) 420 and 325 (yaws opposite); triangles at most 3.32 M. After: arrival 429 / 2.66 M; (-10,52) 397 and 362. Nothing over (440 / 450). geo-one 79.1 MB, 2134 meshes.
+
+### 17.3 The walk's gaps
+- Keepers: the ten shops the walk opens (`walk.js` OPEN) now always have their keeper, standing behind the counter on its side (`counterSide`), which the other 40% of shops did not; the keepers of the other shops are unchanged (the random stream is not disturbed: it moved other figures into a route's way the first time).
+- Two street shrines (`byz_shrine`, the lanes' pier with an icon in a niche) at the ends of the forecourt's porticoes, fronts to the court, each with a lamp [inferred: wall shrines of §14]. Not done: houses along the walk beyond the existing ones, the seventeen shop routes that fail in the raster, keepers inside the houses' trades.
+
+### 17.4 The landmark
+- The south door was a bare hole in the wall. Added the church's own `portal` (stone jambs and architrave, marble cornice, lunette of gold mosaic with a cross), as the narthex doors have [stated: bronze doors with marble frames, §4.9, pallasweb]. A marble sill and the dust of feet in broken patches from the door 22 m into the court, narrowing as they go (`wear.js`, laid 5 mm over the paving, no collision) [inferred]. Not done: wear on the seven steps of Justinian's column, steps under the portal (the doorway is level for the walker), Greek writing.
+
 ## Sources
 
 - [Zeno's constitution on private buildings (Scott, Corpus Juris Civilis) — droitromain.univ-grenoble-alpes.fr](https://droitromain.univ-grenoble-alpes.fr/Anglica/N63_Scott.htm)

@@ -227,3 +227,21 @@ Nothing added. The desert city's `damp` 0.04 and the dust band are in §12 and �
 
 Sources added:
 - [La nuit mamelouke — Eychenne, REMMM 136 (2014), search listing only](https://halshs.archives-ouvertes.fr/halshs-01091362v1/file/REMMM136_2014_EYCHENNE.pdf)
+
+## 19. Round 8 (second pass, narrow form): night near the visitor, the budget, keepers, the way to the portal
+
+All additions are [inferred] (no source read this round, as in §18).
+
+### 19.1 Night near the visitor
+Seen with `--night 1` at the arrival and at (-20, -11): the lit iwan and lamp windows of the madrasa showed, but the Rumayla within 15 m of the arrival was dark ground and silhouettes (no lamp stood within 90 m, `nightlight.js` header). Added to the square's own plan (element `cairo_square_fires`, no new draw): two braziers of the camel-drivers' coals at (107, 92) and (124, 94) and two mashal stands at (114, 88) and (96, 86), 12-20 m from the arrival, each with glow and pool on the sand. Re-rendered: the four fires and their pools show against the dark square at the low preset.
+
+### 19.2 Budget
+Main draws before (master): arrival 424; portal 410/403 (yaw 0/pi); market street 362/402; Bayn pose (-160,-250) 275/519. Over: the Bayn pose looking south (519). Cause: the blocks' near range of 150 m held ~110 fine shapes at once; set to 90 m (`NEAR` in `town.js`; beyond it the far twins show). After: arrival 392 (main 1.73 M triangles), portal 395, market street 367, Bayn 451/246. The Bayn pose looking south is still one draw over 450 (451; 448 at a step to the west) and could not be trimmed further without losing the Bayn fronts. Meshes (geo-one): 2678 before, 2753 after (keepers add 72); limit 2800, aim 2600 not met.
+
+### 19.3 The walk: keepers
+Each of the 26 enterable shops (the merchant's and the 25 trade shops) now has its keeper: a man in a robe, sash and white turban sitting cross-legged on the floor of the front room beside the walked lane (1.3 m off its middle, 2.5 m in), facing the street, built into near plans of 100 m cells shown within 76 m (`keepers.js`, element `cairo_keepers`, the life style's figure builder; one cloth colour to keep the materials few). The rab' tenements, the qa'a hall's upper tier and the wikala's gallery stay shut (shared styles).
+
+### 19.4 The landmark: the way to the portal
+The great portal's approach (x -37.5, z -9...6) is now paved in slabs of dark marble 3.8 m wide with a pale track worn smooth through the middle, wider and paler toward the door and a little off-centre from slab to slab, ending in a long pale dished threshold (`hasan_wear` in `tomb.js`; 2-3 cm proud, no collision) [inferred: paving and wear]. No new material. Not done: the tomb's south portal, the mastabas' polished edges, the iwans' floors.
+
+Still short: Arabic writing (no verified glyph table); keepers' goods-handling poses; lit town houses; donkey and camel critter models; the Bayn pose at 451 draws; mesh count above the 2600 aim; the shut upper floors of the shared rab'/qa'a/wikala.

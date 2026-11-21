@@ -6,7 +6,9 @@ import '../../styles/byzantine/interiors.js';
 import { height, special, EIRENE } from './layout.js';
 import { MESE_STOAS } from './plan.js';
 import { shopFrame } from '../../styles/byzantine/interiors.js';
-import { shopsOf } from './shops.js';
+import { shopsOf, shopRooms } from './shops.js';
+import { OPEN } from './walk.js';
+import { counterSide } from './walkside.js';
 import { upKind } from '../../styles/constantinople/upper.js';
 import { homeWalks } from '../../styles/constantinople/homes.js';
 
@@ -59,9 +61,14 @@ export function interiorLife() {
   const CL = ['cloth_indigo', 'cloth_white', 'cloth_grey', 'cloth_brown', 'cloth_green', 'cloth_ochre', 'cloth_red'];
   const fig = (at, y, rot, o = {}) => out.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), skin: rand() < 0.8 ? 'skin_light' : 'skin_medium', dress: 'tunic', legs: 'hose', cloth: pick(CL), cloth2: pick(CL), hat: 'none', pose: 'stand', ...o });
   const face = (p, q) => Math.atan2(-(q[0] - p[0]), -(q[1] - p[1]));
-  for (const s of shopsOf()) {
-    if (rand() < 0.4) continue;
-    const { W, y } = shopFrame(s.st, s.k, s.ns), p = W(0.2, 1.3), q = W(0.2, -3);
+  const rooms = shopRooms();
+  for (const [i, s] of shopsOf().entries()) {
+    const walked = OPEN.includes(`shop:${i}`), skip = rand() < 0.4;
+    if (skip && !walked) continue;
+    if (skip) { const cs = counterSide(rooms[i]), { W, y } = shopFrame(s.st, s.k, s.ns), p = W(cs * 1.25, 2.4); out.push({ t: 'figure', at: p, y, rot: face(p, W(cs * 1.25, -3)), seed: 7000 + i, skin: 'skin_light', dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_ochre', hat: 'none', pose: 'stand' }); continue; }   // (its own seed: the stream of the others stays as it was)
+    // the shops the walk opens always have their keeper, behind the counter (on the side the walk's route does not use)
+    const cs = walked ? counterSide(rooms[i]) : 0;
+    const { W, y } = shopFrame(s.st, s.k, s.ns), p = W(cs ? cs * 1.25 : 0.2, cs ? 2.4 : 1.3), q = W(cs ? cs * 1.25 : 0.2, -3);
     fig(p, y, face(p, q), { cloth: pick(['cloth_brown', 'cloth_white', 'cloth_ochre']) });
     if (rand() < 0.3) { const p2 = W(-0.9, 0.6); fig(p2, y, face(p2, W(0, 3)), { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'talk' }); }
   }
