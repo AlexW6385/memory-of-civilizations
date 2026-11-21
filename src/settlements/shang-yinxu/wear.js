@@ -7,6 +7,7 @@ import { box } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { HOOK } from '../../styles/shang/houses.js';
 import { TOMB, ARCHIVE } from './layout.js';
+import { hashAt } from './nightlight.js';
 
 /** Trodden patches down the middle of a flight (the rect and direction as geo.js steps() takes them): one on every tread, 1.6 m across, 0.6 of the tread deep. */
 function wornSteps(bag, rect, y0, y1, dir, across = 1.6) {
@@ -26,6 +27,39 @@ function hallStair(el, { bag }) {
   const M = (u, v) => (rot ? [cx + sv * v, cz + u] : [cx + u, cz + sv * v]), a = M(-3.2, pv), b = M(3.2, pv + run);
   wornSteps(bag, [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], 0, h, rot ? (sv > 0 ? 'w' : 'e') : (sv > 0 ? 'n' : 's'), 2.0);
 }
+/**
+ * The rammed platform's own layering and the way feet went: the beaten layers of the platform (5-10 cm each, §4) show on its four faces as thin lenses of darker and paler
+ * earth, a lens a few metres long at every second layer, offset by the hash of its place; and a trodden fan on the court's floor at the foot of the stair, narrowing toward the
+ * stair, where everyone who went up crossed. [inferred: the layering is the method of rammed earth; the track follows from use] Layers in 'silt', the trodden fan in 'mud_plaster' (a duller, warmer earth).
+ */
+function platformWear(el, { bag }) {
+  const [x0, z0, x1, z1] = el.plat, h = el.h ?? 1.2, rot = !!el.rot, sv = el.flip ? -1 : 1, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, o = 0.012;
+  const nL = Math.floor(h / 0.2);
+  for (let k = 0; k < nL; k++) {
+    const y = 0.14 + k * 0.2 + 0.03 * hashAt(x0, z0, k), t = 0.022;
+    for (const [fx, fz, alongX] of [[0, z0, true], [0, z1, true], [x0, 0, false], [x1, 0, false]]) {
+      const A = alongX ? x0 : z0, B = alongX ? x1 : z1, back = alongX ? fz === z0 : fx === x0;
+      let u = A + 0.6 + 4 * hashAt(fx + k, fz, 1);
+      while (u < B - 1) {
+        const len = 2.4 + 3.6 * hashAt(u + fx, fz + k, 2), e = Math.min(B - 0.4, u + len);
+        if (hashAt(u, fz + fx + k, 3) < 0.6 && y + t < h - 0.03) {
+          if (alongX) bag.add('silt', box(u, y, fz + (back ? -o : 0), e, y + t, fz + (back ? 0 : o)));
+          else bag.add('silt', box(fx + (back ? -o : 0), y, u, fx + (back ? 0 : o), y + t, e));
+        }
+        u = e + 1.2 + 3 * hashAt(e, fz + fx, 4);
+      }
+    }
+  }
+  // the fan of trodden earth before the stair
+  const pv = rot ? (sv > 0 ? x1 - cx : cx - x0) : (sv > 0 ? z1 - cz : cz - z0), run = h / 0.17 * 0.3 + 0.2;
+  const M = (u, v) => (rot ? [cx + sv * v, cz + u] : [cx + u, cz + sv * v]);
+  for (let i = 0; i < 40; i++) {
+    const v = pv + run + 5.5 * hashAt(x0 + i, z0, 11) ** 1.3, w = 2.8 - 0.35 * (v - pv - run), u = (hashAt(x0, z0 + i, 12) * 2 - 1) * Math.max(0.6, w) * 0.8, l = 0.5 + 0.9 * hashAt(i, x0, 13), d = 0.4 + 0.6 * hashAt(i, z0, 14);
+    if (hashAt(u + x0, v + z0, 15) > 0.8 - 0.1 * (v - pv - run)) continue;
+    const a = M(u - l / 2, v), b = M(u + l / 2, v + d);
+    bag.add('mud_plaster', box(Math.min(a[0], b[0]), 0.004, Math.min(a[1], b[1]), Math.max(a[0], b[0]), 0.012 + 0.006 * hashAt(i, v, 16), Math.max(a[1], b[1])));
+  }
+}
 const wrapAfter = (fn, extra) => function worn(el, ctx) { const r = fn.call(this, el, ctx); if (!el.simple) extra(el, ctx); return r; };
 
 let done = false;
@@ -33,7 +67,7 @@ export function registerWear() {
   if (done) return; done = true;
   const E = STYLES.shang?.elements;
   if (!E) return;
-  if (E.shang_hall) E.shang_hall = wrapAfter(E.shang_hall, hallStair);
+  if (E.shang_hall) E.shang_hall = wrapAfter(E.shang_hall, (el, c) => { hallStair(el, c); platformWear(el, c); });
   if (E.shang_tomb) E.shang_tomb = wrapAfter(E.shang_tomb, ({ }, { bag }) => { const cx = (TOMB.hall[0] + TOMB.hall[2]) / 2; wornSteps(bag, [cx - 1.4, TOMB.plat[3], cx + 1.4, TOMB.plat[3] + 1.2], 0, TOMB.h, 'n', 1.1); });
   if (E.shang_archive) E.shang_archive = wrapAfter(E.shang_archive, ({ }, { bag }) => { const cx = (ARCHIVE.rect[0] + ARCHIVE.rect[2]) / 2, z1 = ARCHIVE.rect[3]; wornSteps(bag, [cx - 1.3, z1 + 0.6, cx + 1.3, z1 + 2.4], 0, ARCHIVE.h, 'n', 1.3); });
   // the thresholds: the worn dark patch on the slab (houses.js doorway) or the bank's step (a pit house), the soot of the hearth above a house's lintel
