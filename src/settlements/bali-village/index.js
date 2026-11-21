@@ -2,6 +2,7 @@
 import '../../styles/balinese/index.js';
 import './walkwork.js';
 import './nightlight.js';
+import './wear.js';
 import pura from './plan.js';
 import music from './music.js';
 export { town } from './town.js';

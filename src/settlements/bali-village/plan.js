@@ -53,6 +53,9 @@ for (const s of [-1, 1]) { E.push({ t: 'bali_obor', at: [s * 5.4, zS + 3.3], y: 
 E.push({ t: 'bali_pelita_row', list: [-8, -6, -4, 4, 6, 8].map((x) => [x, y2 + 0.01, -136.2]) });
 E.push({ t: 'bali_stand', at: [23.4, -141.5], y: y2, h: 1.4 });
 
+// wear (wear.js): the worn lane down the temple's axis, forecourt and the two courts, and the damp ground of the pancuran (the town's, town.js)
+E.push({ t: 'bali_wear', lane: [[0, -48, -70, 0], [0, zS - 6, zM + 3.6, y1], [0, zM - 3.6, zN + 14, y2]] });
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('forecourt', [-12, zS + 1, 12, -46], 0, 'market'),
