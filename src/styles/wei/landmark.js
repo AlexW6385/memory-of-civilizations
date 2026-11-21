@@ -196,6 +196,16 @@ export function earthBay(bag, xf, z0, z1, ya, yb) {
   for (let k = 1; k < n; k++) { const y = bandBot + (bandTop - bandBot) * k / n; bag.add('mud_plaster', jb(xf - 0.02, y - 0.025, z0 + 0.12, xf + 0.03, y + 0.025, z1 - 0.12)); }   // the ramming courses
 }
 
+/** The bay of an earth face on any side: as earthBay, but on a face at `f` (fixed coordinate) looking out along `n` (+1/-1), the bay running t0..t1 along axis `ax` ('x' for the N and S faces, 'z' for the W face). */
+export function earthBaySide(bag, ax, f, n, t0, t1, ya, yb) {
+  const o = 0.05, B = (d0, d1, y0, y1, a, b) => { const lo = n > 0 ? f + d0 : f - d1, hi = n > 0 ? f + d1 : f - d0; return ax === 'x' ? jb(a, y0, lo, b, y1, hi) : jb(lo, y0, a, hi, y1, b); };
+  bag.add('bluestone', B(-0.02, 0.1, ya, ya + 0.5, t0, t1));
+  bag.add('mud_plaster', B(-0.02, o + 0.02, ya + 0.5, ya + 0.62, t0, t1));
+  bag.add('mud_plaster', B(-0.02, o + 0.02, yb - 1.12, yb - 1.0, t0, t1));
+  const bandTop = yb - 1.12, bandBot = ya + 0.62, k2 = Math.max(2, Math.round((bandTop - bandBot) / 0.42));
+  for (let k = 1; k < k2; k++) { const y = bandBot + (bandTop - bandBot) * k / k2; bag.add('mud_plaster', B(-0.02, 0.03, y - 0.025, y + 0.025, t0 + 0.12, t1 - 0.12)); }
+}
+
 /** Cross-bracing for the piers of a skyway (centre line along z at x = ax, or along x at z = az): X braces between neighbouring piers, tie beams across. */
 export function pierBracing(bag, alongX, ax, az, x0, z0, L, n, w, y) {
   const pos = (i, s) => (alongX ? [x0 + L * i / n, az + s * (w / 2 - 0.3)] : [ax + s * (w / 2 - 0.3), z0 + L * i / n]);
