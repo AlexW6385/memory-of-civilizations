@@ -19,3 +19,9 @@ export function nearShops(n = 10) {
 
 /** Routes for plan.walks: each from the pavement before a door, through it, to the room behind. */
 export function shopWalks(n = 10) { return nearShops(n).map((d) => [d.out, d.door, d.in, d.inner]); }
+
+/** The modern flats' ground floors (always enterable: tenement.js `enter`) nearest the arrival, nearest first. */
+export function nearFlats(n = 6) {
+  const A = ARRIVALS['bauhaus-dessau'];
+  return lots().filter((l) => !l.shop && l.modern).map(doorOf).sort((p, q) => Math.hypot(p.out[0] - A[0], p.out[1] - A[2]) - Math.hypot(q.out[0] - A[0], q.out[1] - A[2])).slice(0, n);
+}
