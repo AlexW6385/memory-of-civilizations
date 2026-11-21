@@ -35,6 +35,8 @@ function cliffWear(bag) {
 }
 /** The ledge: round each votive stupa a ring worn pale by circumambulation (pilgrims walk round clockwise keeping the stupa on the right), r 0.75–1.0 m. */
 function ledgeWear(bag, cx) {
+  // the lane along the ledge from the stair's head to the chaitya hall's door, a pale smooth strip worn where the sangha walks (a pad a metre long, its width and line its own)
+  for (let z = -41; z < C19.z - 1.5; z += 1.15) { const w = 0.22 + 0.16 * hashAt(z, 2, 81), c = cx - 2.1 + (hashAt(z, 4, 83) - 0.5) * 0.3; pad(bag, c - w, z, c + w, z + 1.0 - 0.1 * hashAt(z, 6, 85), Y1); }
   for (const z of [-3, 18, 41.5]) bag.add(POL, lathe([[0.75, 0.003], [0.78, 0.009], [0.97, 0.009], [1.0, 0.003]], 24, null, cx, Y1, z));
 }
 /** A house's door: a worn hollow in the middle of the granite threshold (the open houses and one in three of the others), and the monsoon's dark streaks down the front wall from the eave. */

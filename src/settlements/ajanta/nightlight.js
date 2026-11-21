@@ -60,20 +60,20 @@ const bounds = (g) => {
 };
 
 /** The glow of one lit piece (bounds b): a ball round the flame and a pool on the floor under it; the forge's and kiln's fire (a wide piece) glows larger and redder. `floors` the heights a lamp may stand on. */
-function lightOf(H, b, floors) {
+function lightOf(H, b, floors, G = 1) {
   const x = (b[0] + b[3]) / 2, y = (b[1] + b[4]) / 2, z = (b[2] + b[5]) / 2, wide = Math.max(b[3] - b[0], b[5] - b[2]) > 0.2;
   const fl = floors.filter((f) => f <= y + 0.2).pop() ?? floors[0], h = y - fl;
   if (wide) { H.ball(x, y + 0.2, z, 1.2, 0.7); H.floor(x, fl + 0.03, z, 3.0, 3.0, 10, 0.7); return; }
   if (h > 1.4) { H.ball(x, y + 0.08, z, 0.8, 0.6); return; }
-  if (h > 0.6) { H.ball(x, y + 0.08, z, 0.85, 0.62); H.floor(x, fl + 0.03, z, 2.3, 2.3, 10, 0.5); }
-  else { H.ball(x, y + 0.05, z, 0.5); if (h > 0.2) H.floor(x, fl + 0.03, z, 1.3, 1.3, 8, 0.55); }
+  if (h > 0.6) { H.ball(x, y + 0.08, z, 0.85 * G, 0.62); H.floor(x, fl + 0.03, z, 2.3 * G, 2.3 * G, 10, 0.5); }
+  else { H.ball(x, y + 0.05, z, 0.5 * G); if (h > 0.2) H.floor(x, fl + 0.03, z, 1.3 * G, 1.3 * G, 8, 0.55); }
 }
 
 /** Wrap a bag so that every `flame` piece added through it gets its halo (heights of the floors a lamp stands on: `floors`). */
-function lit(ctx, floors) {
+function lit(ctx, floors, G = 1) {
   const H = new Halo(), bag = new Proxy(ctx.bag, {
     get(t, k) {
-      if (k === 'add') return (mat, g, ...r) => { if (g?.attributes?.position && mat === 'flame') lightOf(H, bounds(g), floors); return t.add(mat, g, ...r); };
+      if (k === 'add') return (mat, g, ...r) => { if (g?.attributes?.position && mat === 'flame') lightOf(H, bounds(g), floors, G); return t.add(mat, g, ...r); };
       const v = t[k];
       return typeof v === 'function' ? v.bind(t) : v;
     },
@@ -114,7 +114,7 @@ const NAMES = ['aj_cliff', 'aj_ledge', 'aj_house', 'aj_smithy', 'aj_potter', 'aj
 /** Wrap one element builder of the style: the halo of every lamp it makes, the hut's hearth and door lamp, the kiln's mouth. */
 const wrap = (name, fn) => function haloed(el, ctx) {
   if (depth > 0 || !ctx?.bag || el.simple) { depth++; try { return fn.call(this, el, ctx); } finally { depth--; } }
-  const y0 = el.y ?? 0, L = lit(ctx, FLOORS[name] ?? [y0, y0 + 0.1, y0 + 0.32]);
+  const y0 = el.y ?? 0, L = lit(ctx, FLOORS[name] ?? [y0, y0 + 0.1, y0 + 0.32], FLOORS[name] ? 1.8 : 1);
   depth++;
   try { var r = fn.call(this, el, L.ctx); } finally { depth--; }
   if (name === 'aj_house') hutLight(L.H, el);

@@ -4,6 +4,7 @@
 import { RADIUS, RIVER, EAST, XF, ZW, FLOOR, VILLAGE, WELL, PEN, THRESH, VSHRINE, GRANARIES, GHATS, C1, C19, C12, PATHS, rng, inRect, riverX } from './layout.js';
 import '../../styles/ajanta/index.js';
 import { lots } from './layout.js';
+import { hashAt } from './nightlight.js';
 
 const base = (id, style, elements, b = 0) => ({ id, style, origin: [0, 0], base: b, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 14], facing: 'w' } });
 
@@ -42,24 +43,24 @@ export async function town() {
   worker([xh0 + 0.9, C1.z - 3.5], y1 + 3.2, -Math.PI / 2, { pose: 'squat', cloth: 'cloth_brown' });
   worker([xh0 + 0.7, C1.z - 3.0], y1 + 1.6, -Math.PI / 2, { pose: 'talk' });
   T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [xh0 + 1.0, C1.z - 1.9], y: y1 + 1.6, seed: 5 });
-  monk([xh0 - 3.0, C1.z + 1.0], y1, -Math.PI / 2, { pose: 'cross', arms: 'pray' });
-  monk([xh0 - 3.2, C1.z - 1.2], y1, -Math.PI / 2, { pose: 'cross', arms: 'pray' });
+  monk([xh0 - 3.0, C1.z + 1.0], y1, -Math.PI / 2, { nightKeep: 1, pose: 'cross', arms: 'pray' });
+  monk([xh0 - 3.2, C1.z - 1.2], y1, -Math.PI / 2, { nightKeep: 1, pose: 'cross', arms: 'pray' });
   monk([-71, C1.z + 7], y1, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
   lay([-69, C1.z - 4], y1, Math.PI, { pose: 'talk' }); lay([-69, C1.z - 5], y1, 0, { pose: 'talk' });
   monk([-62.5, C1.z + 9.5], y1, Math.PI, { pose: 'sit_ground' });
   // Cave 19: monks at the stupa
-  monk([-70.4, C19.z + 1.3], y1, -Math.PI / 2, { pose: 'kneel', arms: 'pray' }); lay([-69.6, C19.z - 0.6], y1, -Math.PI / 2, { pose: 'kneel', arms: 'pray' });
+  monk([-70.4, C19.z + 1.3], y1, -Math.PI / 2, { nightKeep: 1, pose: 'kneel', arms: 'pray' }); lay([-69.6, C19.z - 0.6], y1, -Math.PI / 2, { nightKeep: 1, pose: 'kneel', arms: 'pray' });
   woman([-67, C19.z + 2.0], y1, -Math.PI / 2, { pose: 'stand', carry: 'basket' });
   // Cave 12's cell: a monk reading on his stone bed
-  monk([-62.8, C12.z + 2.2], y1 + 0.45, 0, { pose: 'cross' });
+  monk([-62.8, C12.z + 2.2], y1 + 0.45, 0, { nightKeep: 1, pose: 'cross' });
   // the ledge: monks, pilgrims and offerings
   for (const [z, rot] of [[-36, -Math.PI / 2], [3, Math.PI / 2], [12, -Math.PI / 2], [38, Math.PI / 2]]) monk([XF + 3.4, z], y1, rot, { pose: 'stand', carry: 'staff' });
   for (const [z, rot, x] of [[-45, 0.5, -57.5], [8, 2.5, -57.6], [52, -2.0, -57.6]]) lay([x + rand() * 0.1, z], y1, rot, { pose: rand() < 0.5 ? 'pray' : 'talk' });
-  monk([XF + 2.0, 6], y1, -Math.PI / 2, { pose: 'cross', arms: 'pray' });
+  monk([XF + 2.0, 6], y1, -Math.PI / 2, { nightKeep: 1, pose: 'cross', arms: 'pray' });
   for (const z of [-8, 16]) T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [XF + 2.2, z], y: y1, seed: Math.round(z) });
   for (const z of [-44, -10, 29]) T.push({ t: 'basket', at: [XF + 4.6, z], y: y1, rot: z, seed: Math.round(z) });
   // the path along the gorge floor below the painted caves, seen from the arrival (-42, -4): pilgrims, porters and monks going up the gorge to the stair, women with pots coming down, a monk resting by the way
-  monk([-47.2, -12.5], 0, 0, { pose: 'stand', carry: 'staff' });
+  monk([-47.2, -12.5], 0, 0, { pose: 'staff' });
   lay([-46.4, -17.2], 0, 0, { pose: 'stand', carry: 'basket' });
   woman([-49.1, -9.0], 0, Math.PI, { pose: 'stand', carry: 'pot', arms: 'head' }); woman([-48.0, -7.4], 0, Math.PI, { pose: 'stand', carry: 'basket' });
   worker([-45.6, -24.5], 0, 0, { pose: 'stand', carry: 'basket' }); worker([-50.4, -27.0], 0, 0, { pose: 'stand', carry: 'basket' });
@@ -67,7 +68,7 @@ export async function town() {
   T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [-45.2, -14.0], y: 0, seed: 13 }); T.push({ t: 'basket', at: [-44.6, -19.6], y: 0, rot: 1.0, seed: 14 });
   T.push({ t: 'animal', kind: 'zebu', at: [-44.5, -31.0], y: 0, rot: 2.6, seed: 15, graze: true });
   // the stair's foot and the path: pilgrims coming up, porters with rubble baskets, water carriers
-  lay([XF + 9.2, -50], 0.0, 0.0, { pose: 'stand', carry: 'staff' }); monk([-43.5, -49.6], 0.06, Math.PI, { pose: 'sit_ground' });
+  lay([XF + 9.2, -50], 0.0, 0.0, { pose: 'staff' }); monk([-43.5, -49.6], 0.06, Math.PI, { pose: 'sit_ground' });
   lay([-45, -44], 0, Math.PI / 2, { pose: 'talk' }); lay([-43.6, -44.4], 0, -Math.PI / 2, { pose: 'talk' });
   // the mason at the north wing's niche, his labourers with baskets, the chips; a boy grinding colour on the apron
   const mz = -ZW + 1.9;
@@ -77,18 +78,18 @@ export async function town() {
   worker([XF + 9.5, -ZW + 5.0], 0, 0.6, { pose: 'squat' });
   // the river: women washing, a man at the ford, an egret is the fauna's
   woman([riverX(-30) - 4.8, -30], 0, Math.PI / 2, { pose: 'squat' }); woman([riverX(-28) - 5.2, -27], 0, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' });
-  worker([riverX(14) + 6.2, 14.5], 0, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  worker([riverX(14) + 6.2, 14.5], 0, -Math.PI / 2, { pose: 'staff' });
   // the flower, lamp-oil and cloth sellers' booths along the path to the stair (docs/settlements/ajanta.md §16): each keeper sits on her mat behind the board
   for (const [x, kind] of [[-32, 'flowers'], [-27, 'lamps'], [-22, 'cloth']]) {
     (kind === 'cloth' ? worker : woman)([x - 0.9, -47.3], 0.1, 0, { pose: 'sit_low' });
   }
   // the water-shed on the east bank's path (the booths, the shed and the wayside stupa are the landmark plan's: plan.js, the gorge floor's cell)
   woman([riverX(2) + 13.4 + 0.1, 2 + 0.9], 0.1, -Math.PI / 2, { pose: 'sit_low' });
-  lay([-29.5, -43.3], 0, Math.PI, { pose: 'talk' }); lay([-24.6, -43.5], 0, 3.6, { pose: 'stand' }); monk([-18.5, -44.6], 0, Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  lay([-29.5, -43.3], 0, Math.PI, { pose: 'talk' }); lay([-24.6, -43.5], 0, 3.6, { pose: 'stand' }); monk([-18.5, -44.6], 0, Math.PI / 2, { pose: 'staff' });
   // the masons' and painters' yard: the grinder of colours, the lime-stirrer, the chiseller at the pillar
   woman([XF + 22.7, -ZW + 9.9], 0, 0, { pose: 'squat', cloth: 'cloth_ochre' });
   worker([XF + 25.0, -ZW + 9.9], 0, Math.PI, { pose: 'squat', cloth: 'cloth_brown' });
-  worker([XF + 29.5, -ZW + 11.2], 0, Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  worker([XF + 29.5, -ZW + 11.2], 0, Math.PI / 2, { pose: 'staff' });
   worker([XF + 24.5, -ZW + 6.5], 0, Math.PI, { pose: 'squat', cloth: 'cloth_white' });
   worker([XF + 27.0, -ZW + 3.0], 0, 2.2, { pose: 'talk', cloth: 'cloth_brown' });
   // the washing places: the women kneeling at the stones, a buffalo and her herdboy in the shallows
@@ -96,35 +97,35 @@ export async function town() {
     for (const k of [-1.8, 0.2, 2.2]) woman([riverX(gz + k) - 5.4, gz + k], 0.12, Math.PI / 2, { pose: k > 0 ? 'squat' : 'stand', carry: k > 1 ? 'basket' : 'none' });
   }
   T.push({ t: 'animal', kind: 'buffalo', at: [riverX(34) + 3.2, 38], y: -0.3, rot: 1.0, seed: 71 }); T.push({ t: 'animal', kind: 'buffalo', at: [riverX(34) + 2.5, 41], y: -0.3, rot: 2.0, seed: 72 });
-  worker([riverX(34) + 6.2, 39], 0, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  worker([riverX(34) + 6.2, 39], 0, -Math.PI / 2, { pose: 'staff' });
   // pigeons on the ledge before the painted caves
   T.push({ t: 'chickens', kind: 'pigeon', at: [XF + 3.0, -12], y: FLOOR[1], seed: 5 }); T.push({ t: 'chickens', kind: 'pigeon', at: [XF + 3.0, 28], y: FLOOR[1], seed: 6 });
   // ── the arrival's view (the east bank's path at (-21.5, -4), looking west-north-west across the river at the cave row)
   // the river's foreground: a herd boy and two buffalo wallowing in the shallows, a reed boat drawn up on the bank, a fisherman
   T.push({ t: 'animal', kind: 'buffalo', at: [riverX(-9) + 2.4, -9], y: -0.3, rot: 1.9, seed: 81 });
   T.push({ t: 'animal', kind: 'buffalo', at: [riverX(-12) + 3.1, -12.5], y: -0.3, rot: 1.2, seed: 82, graze: true });
-  worker([riverX(-9) + 7.4, -9.5], 0, -1.9, { pose: 'stand', carry: 'staff', cloth: 'cloth_ochre' });
+  worker([riverX(-9) + 7.4, -9.5], 0, -1.9, { pose: 'staff', cloth: 'cloth_ochre' });
   T.push({ t: 'boat', kind: 'reed', at: [riverX(-17) + 4.4, -17], y: RIVER.water - 0.12, rot: 0.25, seed: 83 });
   worker([riverX(-17) + 8.0, -15.8], 0, -1.6, { pose: 'sit_ground', cloth: 'cloth_white' });
   T.push({ t: 'basket', at: [riverX(-17) + 8.6, -17.2], y: 0, rot: 0.4, seed: 84 });
   // the east bank's path: a family going up to the ford with a bundle, a woman with water, a pair of monks with bowls, a boy with goats
-  monk([riverX(2) + 8.7, 3], 0, 0, { pose: 'stand', carry: 'staff' }); monk([riverX(2) + 9.9, 5.2], 0, 0, { pose: 'stand' });
+  monk([riverX(2) + 8.7, 3], 0, 0, { pose: 'staff' }); monk([riverX(2) + 9.9, 5.2], 0, 0, { pose: 'stand' });
   lay([riverX(8) + 8.4, 9.5], 0, 0.2, { pose: 'stand', carry: 'basket' }); woman([riverX(8) + 9.4, 10.6], 0, 0.1, { pose: 'stand', carry: 'child' });
   woman([riverX(-25) + 8.8, -25.5], 0, Math.PI, { pose: 'stand', carry: 'pot', arms: 'head' });
-  worker([riverX(-30) + 12.5, -30], 0, 2.4, { pose: 'stand', carry: 'staff' });
+  worker([riverX(-30) + 12.5, -30], 0, 2.4, { pose: 'staff' });
   for (let k = 0; k < 4; k++) T.push({ t: 'animal', kind: 'goat', at: [riverX(-30) + 10.5 + (k % 2) * 1.5, -33 + k * 1.2], y: 0, rot: 1.5 + k, seed: 85 + k, graze: k % 2 === 0 });
   // across the river: the washing place's women are GHATS' own; the pilgrims climbing the stair to the ledge (the ramp's height under each)
   { const sx = XF + 8.1; for (const [z, k] of [[-55.2, 0], [-51.8, 1], [-47.6, 2], [-44.2, 3]]) { const y = (z + 57) / 15 * 9; (k % 2 ? lay : monk)([sx, z], y, 0, { pose: 'stand', carry: k === 1 ? 'basket' : k === 3 ? 'staff' : 'none' }); } }
   // before Cave 1's porch: the faithful coming with offerings, two lay friends in talk, a flute and a lute at the ledge's edge, a monk at his meditation in the porch, three standing in its pillars
-  lay([-58.0, -33.2], y1, -Math.PI / 2, { pose: 'stand', carry: 'basket' }); woman([-58.0, -31.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); monk([-58.3, -29.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  lay([-58.0, -33.2], y1, -Math.PI / 2, { pose: 'stand', carry: 'basket' }); woman([-58.0, -31.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); monk([-58.3, -29.4], y1, -Math.PI / 2, { pose: 'staff' });
   lay([-58.0, -20.4], y1, Math.PI / 2 + 0.3, { pose: 'talk' }); monk([-58.2, -19.2], y1, -Math.PI / 2 - 0.3, { pose: 'talk' });
   monk([-58.9, -13.2], y1, -Math.PI / 2, { pose: 'cross', carry: 'flute' }); lay([-58.9, -14.6], y1, -Math.PI / 2, { pose: 'cross', carry: 'lute' });
-  monk([-62.6, -23.9], y1, Math.PI / 2, { pose: 'cross', arms: 'pray' });
+  monk([-62.6, -23.9], y1, Math.PI / 2, { nightKeep: 1, pose: 'cross', arms: 'pray' });
   for (const [z, rot] of [[-33.6, 0.4], [-29.6, -0.3], [-21.8, 0.2]]) lay([-62.2, z], y1, Math.PI / 2 + rot, { pose: 'stand' });
   monk([-62.0, -17.8], y1, Math.PI / 2, { pose: 'stand', carry: 'staff' });
   // before Cave 19: a pair of monks come from the cell, pilgrims at the chaitya's porch, a woman with a lamp-oil jar
   monk([-58.0, 17.0], y1, Math.PI, { pose: 'stand' }); lay([-58.0, 19.2], y1, -Math.PI / 2, { pose: 'talk' }); monk([-58.5, 20.4], y1, -Math.PI / 2 + 0.4, { pose: 'talk' });
-  woman([-58.0, 30.0], y1, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); lay([-58.9, 27.0], y1, Math.PI / 2, { pose: 'kneel', arms: 'pray' }); lay([-58.4, 21.6], y1, Math.PI / 2, { pose: 'kneel', arms: 'pray' });
+  woman([-58.0, 30.0], y1, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); lay([-58.9, 27.0], y1, Math.PI / 2, { nightKeep: 1, pose: 'kneel', arms: 'pray' }); lay([-58.4, 21.6], y1, Math.PI / 2, { nightKeep: 1, pose: 'kneel', arms: 'pray' });
   T = V;
   // the village: the well and its women, hearths, grain, wood, fowl, goats and a zebu with a cart
   const [wx, wz] = WELL;
@@ -144,10 +145,10 @@ export async function town() {
   T.push({ t: 'animal', kind: 'zebu', at: [(PEN[0] + PEN[2]) / 2 - 1.5, (PEN[1] + PEN[3]) / 2 + 1], y: 0, rot: 0.6, seed: 61 });
   T.push({ t: 'animal', kind: 'buffalo', at: [(PEN[0] + PEN[2]) / 2 + 1.6, (PEN[1] + PEN[3]) / 2 + 0.8], y: 0, rot: 2.4, seed: 62, graze: true });
   T.push({ t: 'animal', kind: 'goat', at: [PEN[0] + 1.2, PEN[3] - 1.2], y: 0, rot: 1.0, seed: 63 });
-  worker([(PEN[0] + PEN[2]) / 2 + 2.6, PEN[1] - 1.0], 0, 0.3, { pose: 'stand', carry: 'staff' });
-  worker([THRESH[0] - 1.6, THRESH[1] + 0.8], 0, 1.0, { pose: 'stand', carry: 'staff' }); woman([THRESH[0] + 1.8, THRESH[1] + 2.4], 0, -2.0, { pose: 'squat' }); woman([THRESH[0] - 2.2, THRESH[1] + 1.6], 0, 0.8, { pose: 'talk' });
+  worker([(PEN[0] + PEN[2]) / 2 + 2.6, PEN[1] - 1.0], 0, 0.3, { pose: 'staff' });
+  worker([THRESH[0] - 1.6, THRESH[1] + 0.8], 0, 1.0, { pose: 'staff' }); woman([THRESH[0] + 1.8, THRESH[1] + 2.4], 0, -2.0, { pose: 'squat' }); woman([THRESH[0] - 2.2, THRESH[1] + 1.6], 0, 0.8, { pose: 'talk' });
   T.push({ t: 'sacks', at: [THRESH[0] + 3.2, THRESH[1] + 3.3], y: 0, seed: 3 });
-  monk([VSHRINE[0] + 1.6, VSHRINE[1] + 2.0], 0, Math.PI, { pose: 'kneel', arms: 'pray', cloth: 'cloth_white', hair: 'long', dress: 'wrap' });
+  monk([VSHRINE[0] + 1.6, VSHRINE[1] + 2.0], 0, Math.PI, { nightKeep: 1, pose: 'kneel', arms: 'pray', cloth: 'cloth_white', hair: 'long', dress: 'wrap' });
   T.push({ t: 'pot', kind: 'water_pot', n: 2, at: [VSHRINE[0] - 1.6, VSHRINE[1] + 1.5], y: 0, seed: 11 });
   for (const l of LOTS) {
     if (l.craft) continue;
@@ -163,15 +164,16 @@ export async function town() {
     const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, d = rng(l.seed ?? 1), uc = W * (0.38 + d() * 0.24), left = uc > W / 2, tt = 0.35, south = l.front === 's';
     const xz = (u, v) => (south ? [x0 + u, z1 - v] : [x1 - u, z0 + v]), rot = south ? 0 : Math.PI;           // v runs into the house; the person at the hearth faces the back wall
     if (Math.hypot((x0 + x1) / 2 + 21.5, (z0 + z1) / 2 + 4) > 125) continue;
-    if (l.seed % 2 === 0) woman(xz((left ? tt + 0.15 : W - tt - 0.85) + 0.35, D - tt - 1.25), 0.02, rot, { pose: 'squat' });
-    else if (l.seed % 3 === 0) { const cu = left ? W - tt - 1.8 : tt + 0.1; (rand() < 0.5 ? worker : lay)(xz(cu + 0.9, D - tt - 0.6), 0.5, rot + Math.PI, { pose: 'sit' }); }
+    const lit = l.open || hashAt(xz(uc, 0)[0], xz(uc, 0)[1], 5) <= 0.62;                     // a hut with its hearth lit at night (nightlight.js hutLight): the one at it stays
+    if (l.seed % 2 === 0) woman(xz((left ? tt + 0.15 : W - tt - 0.85) + 0.35, D - tt - 1.25), 0.02, rot, { pose: 'squat', nightKeep: lit ? 1 : 0 });
+    else if (l.seed % 3 === 0) { const cu = left ? W - tt - 1.8 : tt + 0.1; (rand() < 0.5 ? worker : lay)(xz(cu + 0.9, D - tt - 0.6), 0.5, rot + Math.PI, { pose: 'sit', nightKeep: lit ? 1 : 0 }); }
   }
   // the trades at work: the smith at his anvil, the potter at his wheel, the ox that drives the oil press, the weaver at his loom
   for (const l of LOTS) if (l.craft) {
     const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, south = l.front === 's', xz = (u, v) => (south ? [x0 + u, z1 - v] : [x1 - u, z0 + v]), face = south ? 0 : Math.PI, back = south ? Math.PI : 0;
     if (l.craft === 'smithy') { worker(xz(W * 0.5 + 0.5, D * 0.5 - 0.75), 0, face, { pose: 'stand', carry: 'none' }); worker(xz(W * 0.5 + 1.2, D * 0.5 + 0.2), 0, face + 2.2, { pose: 'squat' }); }
     if (l.craft === 'potter') { worker(xz(W * 0.5, D * 0.5 + 0.75), 0.2, back, { pose: 'sit', cloth: 'cloth_brown' }); woman(xz(1.2, -1.2), 0, face, { pose: 'squat' }); }
-    if (l.craft === 'oilpress') { T.push({ t: 'animal', kind: 'zebu', at: xz(W * 0.4 + 2.55, -2.9), y: 0, rot: south ? Math.PI / 2 : -Math.PI / 2, seed: 91 }); worker(xz(W * 0.4 + 1.2, -2.2), 0, face + 1.6, { pose: 'stand', carry: 'staff' }); }
+    if (l.craft === 'oilpress') { T.push({ t: 'animal', kind: 'zebu', at: xz(W * 0.4 + 2.55, -2.9), y: 0, rot: south ? Math.PI / 2 : -Math.PI / 2, seed: 91 }); worker(xz(W * 0.4 + 1.2, -2.2), 0, face + 1.6, { pose: 'staff' }); }
     if (l.craft === 'weaver') { worker(xz(W * 0.5, 0.35), 0.2, face, { pose: 'sit', cloth: 'cloth_white' }); woman(xz(W * 0.3, -2.0), 0, face + 0.4, { pose: 'stand' }); }
   }
   T.push({ t: 'chickens', at: [wx - 6, wz + 4], y: 0, seed: 3 }); T.push({ t: 'chickens', at: [wx + 9, wz - 5], y: 0, seed: 4 });
