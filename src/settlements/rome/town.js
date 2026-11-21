@@ -62,6 +62,7 @@ export async function town() {
   const dArr = (e) => Math.hypot((e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2 + 200);
   const upLots = [...openLots].sort((p, q) => dArr(p) - dArr(q)).slice(0, 3);                    // the three nearest the arrival: their first floors are walked (flats.js, docs §4.16)
   for (const e of upLots) e.upper = true;
+  for (const e of upLots.slice(0, 2)) e.upper2 = true;                                              // and the second floor of the two nearest (docs §4.23)
   const openSet = new Set(openLots.map((e) => e.rect));
   free.splice(0, free.length, ...free.filter((l) => !openSet.has(l.rect)));
   const inn = lots().find((l) => same(l.rect, INN)), full = lots().find((l) => same(l.rect, FULLER));
@@ -119,7 +120,7 @@ export async function town() {
       elements: [{ t: 'pistrinum', rect: PISTRINUM, front: 's', y: 0 }, { t: 'latrine', rect: LATRINE, front: 's', y: 0 }],
       rooms: [{ id: 'pistrinum', rect: [PISTRINUM[0] + 0.5, PISTRINUM[1] + 0.5, PISTRINUM[2] - 0.5, PISTRINUM[3] - 0.5], y: 0, kind: 'hall', market: false }, { id: 'latrine', rect: [LATRINE[0] + 0.5, LATRINE[1] + 0.5, LATRINE[2] - 0.5, LATRINE[3] - 0.5], y: 0, kind: 'hall', market: false }] },
     site('rome-flats', openLots), nightLife(ways), awningPlan(), ...shopKeepers(), ...forecourtLife(),
-    ...upLots.map((e, i) => furnPlan(`rome-up-flat-${i}`, { t: 'up_cells_flat', rect: e.rect, front: e.front, seed: e.seed })),
+    ...upLots.map((e, i) => furnPlan(`rome-up-flat-${i}`, { t: 'up_cells_flat', rect: e.rect, front: e.front, seed: e.seed, upper2: e.upper2 })),
     furnPlan('rome-up-inn', { ...cauponaFurn({ rect: inn.rect, front: 's' }), seed: inn.seed }), furnPlan('rome-up-fuller', { ...fullonicaFurn({ rect: full.rect, front: 's' }), seed: full.seed }),
     ...(inn2() ? [furnPlan('rome-up-inn2', { ...cauponaFurn({ rect: inn2().rect, front: 's' }), seed: inn2().seed })] : []),
     ...OPEN_ROWS.map((r, i) => furnPlan(`rome-up-row-${i}`, { ...rowFurnElement({ ...r, storeys: r.front === 's' && r.seed % 3 === 0 ? 2 : 3 }), seed: r.seed }, 14))];
