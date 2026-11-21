@@ -7,6 +7,7 @@ import { box, lathe, fromTriangles, frustum, orientOutward } from '../../core/ge
 import { Matrix4, Vector3 } from '../../core/three.js';
 import { Parts, ball, limb, T, merge, post as oldPost } from '../../styles/qing/carving.js';
 import { rampParts } from './ramp.js';
+import { polishTreads } from './palacewear.js';
 import { onBuildStart } from '../../core/build-reset.js';
 
 const M = 'marble_smooth';
@@ -165,6 +166,7 @@ function rampRelief(bag, el, fine = false) {
 function bjStairs(el, ctx) {
   STYLES.qing.elements.stairs(el.slab ? { ...el, carve: false } : el, { ...ctx, bag: swapPosts(ctx.bag) });
   if (el.slab && el.carve !== false) rampRelief(ctx.bag, el);
+  if (!el.slab) polishTreads(ctx.bag, el);
 }
 
 STYLES.qing.elements.bj_terrace = bjTerrace;
