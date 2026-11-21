@@ -185,8 +185,10 @@ export default function make(H) {
       Bx('lime_plaster', du - 1.0, -0.65, du + 1.0, 0, fy + 2.3, fy + 2.45);                                                  // the chhajja
       for (const s of [-1, 1]) Bx('brick_baked', du + s * 0.85 - 0.06, -0.6, du + s * 0.85 + 0.06, -0.45, fy + 2.0, fy + 2.3);
       Bx('lime_plaster', -0.01, -0.04, L + 0.01, 0, y + H0 - 0.55, y + H0 - 0.35);                                           // a plaster band under the roof
-      const ob = 0.95; Bx('brick', 0, -ob, L, 0, fy - 0.2, fy); Bx('brick_baked', 0, -ob, L, -ob + 0.12, fy, fy + 0.45); Bx('lime_plaster', 0, -ob, L, 0, fy + 0.45, fy + 0.5);
-      // the bench of the front, cut where the door's step is
+      // the bench of the front, cut where the door is (2.2 m, the door and its frame with room: an unbroken bench 0.5 m over the platform stood
+      // across the doorway and shut every opened brick house to the walker, which stopped 1.2 m before it)
+      const ob = 0.95, bg = Math.max(dw / 2 + 0.5, 1.1); Bx('brick', 0, -ob, L, 0, fy - 0.2, fy);
+      for (const [b0, b1] of [[0, du - bg], [du + bg, L]]) if (b1 - b0 > 0.05) { Bx('brick_baked', b0, -ob, b1, -ob + 0.12, fy, fy + 0.45); Bx('lime_plaster', b0, -ob, b1, 0, fy + 0.45, fy + 0.5); }
       ovLeft = 0;
       if (open) { /* the roof is the ceiling's collision above */ }
       col.floor(rect(0, -ob, L, 0), fy);
