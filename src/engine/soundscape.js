@@ -152,6 +152,7 @@ import * as ROME from '../settlements/rome/soundmap.js';
 import * as HANCHANGAN from '../settlements/han-changan/soundmap.js';
 import * as HANGZHOU from '../settlements/song-hangzhou/soundmap.js';
 import * as KAIFENG from '../settlements/song-kaifeng/soundmap.js';
+import * as SGANGGWAAY from '../settlements/sgang-gwaay/soundmap.js';
 import * as SHANGYINXU from '../settlements/shang-yinxu/soundmap.js';
 import * as SHAOLIN from '../settlements/shaolin/soundmap.js';
 import * as SHIBAM from '../settlements/shibam/soundmap.js';
@@ -252,7 +253,7 @@ export const PROFILES = {
   vienna: T({ ...EU, sparrow: 1 }, { animals: withLife({ horse: 0.5, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: VIENNA }), roof: 'slate', bells: null }),
   brasilia: T({ tropic: 0.7, dove: 0.5, sparrow: 0.6 }, { cicadas: 0.4, animals: {}, roof: 'flat', bells: 'angelus' }),
   'bauhaus-dessau': T(NEAR, { animals: { dog: 0.3, rooster: 0.1 }, roof: 'flat' }),
-  'sgang-gwaay': T({ gull: 1, crow: 0.8, warbler: 0.2 }, { animals: { dog: 0.3 }, roof: 'shingle' }),
+  'sgang-gwaay': T({ gull: 1, crow: 0.8, warbler: 0.2 }, { animals: withLife({ dog: 0.3 }, { eaves: 1, market: 0.3, map: SGANGGWAAY }), roof: 'shingle' }),
   'nan-madol': T(NEAR, { animals: { pig: 0.3, rooster: 0.4, tern: 0.5 }, roof: 'thatch' }),
   giza: T(NEAR, { frogs: 0.2, animals: withLife({ donkey: 0.5, cattle: 0.4, dog: 0.3 }, { market: 0.5, canal: 0.5, map: GIZA }), roof: 'flat' }),
   granada: T(MED, { cicadas: 0.7, animals: withLife({ donkey: 0.4, rooster: 0.4, horse: 0.2 }, { market: 1, eaves: 1, map: GRANADA }), roof: 'tile', adhan: 1 }),
