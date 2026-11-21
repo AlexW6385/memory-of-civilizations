@@ -78,6 +78,7 @@ import './voices-angkor.js';
 import * as ALEXANDRIA from '../settlements/alexandria/soundmap.js';
 import * as ATHENS from '../settlements/athens/soundmap.js';
 import * as BABYLON from '../settlements/babylon/soundmap.js';
+import * as BAGAN from '../settlements/bagan/soundmap.js';
 import * as BARCELONA from '../settlements/barcelona/soundmap.js';
 import './voices-barcelona.js';
 import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
@@ -205,7 +206,7 @@ export const PROFILES = {
   'shang-yinxu': T(EAS, { cicadas: 0.4, frogs: 0.5, animals: { cattle: 0.5, dog: 0.5, rooster: 0.4, horse: 0.2 }, roof: 'thatch' }),
   'manueline-lisbon': T({ ...MED, gull: 1, kite: 0.3 }, { animals: withLife({ donkey: 0.3, dog: 0.4, rooster: 0.3 }, { market: 1, eaves: 1, map: LISBON }), roof: 'tile', bells: 'angelus' }),
   'bali-village': T(TROP, { cicadas: 0.6, frogs: 0.9, animals: { rooster: 1, dog: 0.4 }, roof: 'thatch' }),
-  bagan: T(NEAR, { animals: { buffalo: 1, dog: 1, goat: 1 }, roof: 'thatch' }),
+  bagan: T({ sparrow: 0.8, dove: 0.8, kite: 0.4, crow: 0.6, koel: 0.3 }, { cicadas: 0.5, frogs: 0.4, animals: withLife({ rooster: 0.6, dog: 0.7, cattle: 0.5, goat: 0.4 }, { market: 0.8, canal: 0.6, map: BAGAN }), roof: 'thatch' }),
   kakadu: T({ tropic: 0.8, warbler: 0.3, crow: 0.4 }, { cicadas: 0.4, frogs: 0.5, animals: { dog: 0.3 }, roof: 'thatch' }),
   'benin-city': T(NEAR, { animals: { goat: 0.4, rooster: 0.5, dog: 0.3 }, cicadas: 0.4, roof: 'flat' }),
   dogon: T({ dove: 1, kite: 0.3 }, { cicadas: 0.4, animals: { goat: 0.5, rooster: 0.4, dog: 0.3, cattle: 0.2 }, roof: 'flat' }),
