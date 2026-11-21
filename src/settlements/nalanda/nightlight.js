@@ -63,7 +63,7 @@ const bounds = (g) => {
 function lightOf(H, b, floor) {
   const x = (b[0] + b[3]) / 2, y = (b[1] + b[4]) / 2, z = (b[2] + b[5]) / 2, h = y - floor;
   if (h > 3) H.ball(x, y + 0.08, z, 0.7);                                                                   // on a terrace of the temple or an upper floor
-  else if (h > 1.8) { H.ball(x, y + 0.08, z, 0.95); H.floor(x, floor + 0.04, z, 2.4, 2.4, 10, 0.55); }       // a lamp pillar's dish, or one on a high beam
+  else if (h > 1.8) { H.ball(x, y + 0.08, z, 0.95); H.floor(x, floor + 0.04, z, 3.8, 3.8, 12, 0.7); }       // a lamp pillar's dish, or one on a high beam
   else { H.ball(x, y + 0.05, z, 0.55); if (h > 0.2) H.floor(x, floor + 0.03, z, 1.4, 1.4, 8, 0.6); }
 }
 
