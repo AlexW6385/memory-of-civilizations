@@ -129,3 +129,12 @@ All [inferred]; no recording or description of Ajanta's sound in 480 exists. The
 - **People and animals.** Washing beaten on the stones at the two ghats morning and late afternoon, the water-shed's pour, the well's bucket, a bell on a zebu on the road, cloth and jars at the booths and the shelter; goats, cattle, dogs and a few cocks from the profile; the little owl and far dogs at night.
 - **Not made.** Wind in the teak, parakeets and bee-eaters (§9) are left to the engine's generic birds and leaf layers; the flute and the lute are the music's, not the map's.
 - **Measured, not heard.** tools/sound-render.mjs: the gong centres at 190 Hz with a ring of 4 s a stroke; the hand bell at 1.5 kHz; the chant's energy 0.3–1 kHz; the wash 13 slaps in 14 s; the fall is broadband (centroid 2.4 kHz) and its level was raised after a first render found it far under the gong.
+
+## 19. Matching the reference, 4: animals
+All [inferred]: nothing sources the fauna of Ajanta in 480; these are the animals a Deccan village and a pilgrimage cliff of the 5th century had, as `critters` (fauna-critters, one draw) in `src/settlements/ajanta/fauna.js`, test `tests/ajanta-critters.test.mjs`. 28 listed; the models are the engine's, none added.
+- **Dogs** lying 2.1 m beside the doors of two open huts (never in the door's lane), by the shelter and at the ledge's foot; **a cat** on a hut's step and one between the lamp-seller's and the cloth-seller's booths (the household cat is old in India).
+- **Fowl:** hens and cocks in the front yards of the huts that are not open (the jungle fowl was domesticated in the subcontinent).
+- **Goats** on the village yard's open ground.
+- **Rock pigeons** on the ledge, clear of the visitor's line at its middle, and on the wayside stupa's platform (the cliff is their natural roost; the ledge's kerb is not crossed: tested).
+- **Geese and a duck** on the slack river above the ford (the goose, hamsa, is the bird of the cave paintings and of Buddhist art), a loop that follows the river's axis; **a kingfisher** on the west bank below the second washing place.
+- **Not rigged** for want of a model: peafowl, monkeys (both in the paintings), elephants, zebu and buffalo (the life figures' ones remain), bees (the comb under the overhang is geometry only).
