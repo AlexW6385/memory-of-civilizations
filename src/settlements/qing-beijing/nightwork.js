@@ -80,8 +80,14 @@ export function palaceNight() {
     for (const z of [50, 20, -20]) stands.push({ x: sx * 84, z });
     stands.push({ x: sx * 18, z: 168 });
   }
+  // the halls' own light: the lamps of the Hall of Supreme Harmony burning inside (the throne's candles and lamps) show through its paper doors and
+  // out of the open middle bay on to the terrace; the open middle of the Gate of Supreme Harmony the same on both its faces [inferred]
+  const t = HALLS.taihe, g = HALLS.taihemen, pitch = (t.rect[2] - t.rect[0]) / 11, doors = [];
+  for (let i = 0; i < 11; i++) if (i !== 5 && hashAt(i, 2, 61) < 0.8) doors.push({ x: t.rect[0] + pitch * (i + 0.5), y: t.y + 2.2, z: t.rect[3] + 0.2, rw: pitch * 0.46, rh: 1.7 }, { x: t.rect[0] + pitch * (i + 0.5), y: t.y + 4.0, z: t.rect[3] + 0.2, rw: pitch * 0.46, rh: 1.4 });
+  const glows = { doors, balls: [[0, t.y + 3.4, t.rect[3] - 3.0, 3.2], [-9, t.y + 3.2, t.rect[3] - 4.0, 2.2], [9, t.y + 3.2, t.rect[3] - 4.0, 2.2], [0, g.y + 3.1, (g.rect[1] + g.rect[3]) / 2, 3.0]],
+    pools: [[0, t.y + 0.05, t.rect[3] + 2.0, 4.6, 3.2], [0, g.y + 0.05, g.rect[3] + 1.8, 4.2, 2.8], [0, g.y + 0.05, g.rect[1] - 1.8, 4.2, 2.8]] };
   void WALL;
-  return { lanterns, posts, embers, stands };
+  return { lanterns, posts, embers, stands, glows };
 }
 
 /** A bag that puts the lanterns' dark parts into materials the landmark's plan already has (a new material is a new draw): by `map`. */
@@ -120,6 +126,12 @@ function bjNightPalace(el, { bag }) {
     lanternLight(H, lx, lz, p.y + 1.97, p.y, 0.9, null, 2.6);
   }
   for (const e of embers) { H.ball(e.x, e.y, e.z, 0.7); H.floor(e.x, e.y - 1.3, e.z, 1.6); }
+  const G = el.list.glows;
+  if (G) {
+    for (const d of G.doors) H.wall(d.x, d.y, d.z, [0, 1], d.rw, d.rh);
+    for (const [x, y, z, r] of G.balls) H.ball(x, y, z, r);
+    for (const [x, y, z, rx, rz] of G.pools) H.floor(x, y, z, rx, rz);
+  }
   all.emit(remap(bag, PALACE_MAP), 0, 0, 0);
   H.flush(bag);
 }

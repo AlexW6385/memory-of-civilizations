@@ -78,7 +78,7 @@ function bjWearPalace(el, { bag }) {
   // 3. the gates' sills, hollowed (granite, the dip a hand's breadth across the middle)
   for (const g of el.sills) {
     const F = Frame(g.at[0], g.at[1], g.along === 'x' ? 's' : 'e');
-    wornSlab(bag, 'granite_grey', F, -g.w / 2, g.w / 2, -0.26, 0.26, 0.0, 0.13, 0.04);
+    wornSlab(bag, 'granite_grey', F, -g.w / 2, g.w / 2, -0.26, 0.26, g.y ?? 0, (g.y ?? 0) + 0.13, 0.04);
   }
   // 4. dust at the feet of the red walls
   const c = WALL.th / 2, y = 0.03;
