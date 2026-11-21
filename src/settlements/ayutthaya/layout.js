@@ -7,6 +7,7 @@ export const RADIUS = 330;
 export const WATER = -0.8, BED = -2.3, LAND = 0;
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+import { WALK_MAX, WALK_REACH, TRADES, walkDistance, frontPoint, ARRIVAL } from './walk.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** The island's dry land (the rest outside it is country, with the river along its west and south). */
@@ -129,6 +130,14 @@ export function lots() {
   // along the river's east bank (the bank road runs between them and the water) and the south bank
   for (let z = -230; z < 215;) { const w = 5 + Math.floor(rand() * 3), dp = 5 + Math.floor(rand() * 3); place([-235 + 12, z, -235 + 12 + w, z + dp], 'w', 0); z += dp + 1.4 + (rand() < 0.1 ? 4 : 0); }
   for (let x = -220; x < 290;) { const w = 5 + Math.floor(rand() * 4), dp = 5 + Math.floor(rand() * 3); place([x, 225 - 12 - dp, x + w, 225 - 12], 's', 0); x += w + 1.4 + (rand() < 0.1 ? 4 : 0); }
+  // the walk's lots: the nearest to the gate whose front is on the walk and that are deep enough for a counter and a stair become shops with a trade of their own (docs §13.1)
+  const onWalk = LOTS.filter((l) => walkDistance(frontPoint(l)) < WALK_REACH && l.front === 'n').sort((a, b) => Math.hypot(...[0, 1].map((i) => frontPoint(a)[i] - ARRIVAL[i])) - Math.hypot(...[0, 1].map((i) => frontPoint(b)[i] - ARRIVAL[i])));
+  let ti = 0;
+  for (const l of onWalk.slice(0, WALK_MAX)) {
+    const w = l.rect[2] - l.rect[0], d = l.rect[3] - l.rect[1];
+    if (d >= 6 && w >= 5 && !l.row) { l.kind = 'shop'; l.trade = TRADES[ti++ % TRADES.length]; l.walk = true; }
+    else l.walk = true;
+  }
   // the kitchen house behind a larger house, by its seed, where its footprint and the steps down (4.5 m behind the back wall) are clear of other lots, water, ways and bridges
   const FB = { n: [0, 1], s: [0, -1], e: [-1, 0], w: [1, 0] };
   for (const l of LOTS) {

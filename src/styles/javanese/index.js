@@ -771,9 +771,12 @@ function rumah(el, ctx) {
   const bx = (mat, u0, v0, u1, v1, y0, y1) => { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); return r; };
   F.plank = wr() < 0.28;                                   // some houses of grey sawn planks, the rest plaited bamboo
   F.mode = F.plank ? 1 : wallMode < 0.25 ? 2 : 0;           // 0 plaited bamboo, 1 planks, 2 planks to waist height under bamboo
+  const u0 = (rand() - 0.5) * W * 0.4, dw = 1.75, dh = 2.08;     // (a door the walker can pass: 1.6 m clear between the jamb posts, its head 2 m over the floor)
+  const suF = Math.max(-W / 2 + 1.3, Math.min(W / 2 - 1.3, u0));   // where the stair comes down: no footing under it
   // footings, posts, the floor
   const us = [-W / 2 + 0.2, -W / 6, W / 6, W / 2 - 0.2].slice(0, W > 6 ? 4 : 3), vs = [-D / 2 + 0.2, vw, D / 2 - 0.2];
   for (const u of W > 6 ? us : [-W / 2 + 0.2, 0, W / 2 - 0.2]) for (const v of vs) {
+    if (v > D / 2 - 0.3 && Math.abs(u - suF) < 1.05) continue;
     bx(A, u - 0.26, v - 0.26, u + 0.26, v + 0.26, 0, 0.2);
     if (wr() < 0.55) bx('sod', u - 0.2, v - 0.2, u + 0.2, v + 0.2, 0.2, 0.235);                               // moss on the footing's shaded top
     bx('timber', u - 0.11, v - 0.11, u + 0.11, v + 0.11, 0.2, fl - 0.2);
@@ -782,7 +785,6 @@ function rumah(el, ctx) {
   for (const u of [-W / 2 + 0.2, W / 2 - 0.2]) bx('timber', u - 0.08, -D / 2 + 0.1, u + 0.08, D / 2 - 0.1, fl - 0.34, fl - 0.2);       // the bearers
   const fr = bx('timber', -W / 2 - 0.1, -D / 2 - 0.1, W / 2 + 0.1, D / 2 + 0.1, fl - 0.2, fl); col.floor(fr, fl);
   // the walls, the door (offset by the seed), the plates and posts
-  const u0 = (rand() - 0.5) * W * 0.4, dw = 1.0, dh = 1.95;
   gedhek(bag, col, F, -e, -D / 2 + 0.16, e, -D / 2 + 0.16 + wt, fl, fl + H, -1);                                       // the back
   gedhek(bag, col, F, -e, -D / 2 + 0.16, -e + wt, vw, fl, fl + H, -1); gedhek(bag, col, F, e - wt, -D / 2 + 0.16, e, vw, fl, fl + H, 1);   // the ends
   gedhek(bag, col, F, -e, vw - wt, u0 - dw / 2, vw, fl, fl + H, 1); gedhek(bag, col, F, u0 + dw / 2, vw - wt, e, vw, fl, fl + H, 1);        // the front, the door between
@@ -811,17 +813,23 @@ function rumah(el, ctx) {
     } else bag.add('bamboo_culm', box(q[0], fl + 0.45, q[1], q[2], fl + 0.5, q[3]));
     col.rect(q, fl, fl + 0.95);
   };
-  const g = 0.75, su = Math.max(-W / 2 + 1.2, Math.min(W / 2 - 1.2, u0));
+  const g = 0.95, su = Math.max(-W / 2 + 1.3, Math.min(W / 2 - 1.3, u0));
   rail(-W / 2 + 0.1, D / 2 - 0.3, su - g, D / 2 - 0.24); rail(su + g, D / 2 - 0.3, W / 2 - 0.1, D / 2 - 0.24);
   rail(-W / 2 + 0.1, vw, -W / 2 + 0.16, D / 2 - 0.3); rail(W / 2 - 0.16, vw, W / 2 - 0.1, D / 2 - 0.3);
   for (const u of [-W / 2 + 0.1 + (su - g + W / 2) / 2, su + g + (W / 2 - 0.1 - su - g) / 2]) bx('bamboo_culm', u - 0.04, D / 2 - 0.3, u + 0.04, D / 2 - 0.24, fl, fl + 0.88);
   // the stair to the veranda, down to the yard
-  const sr = R(su - 0.55, D / 2 + 0.0, su + 0.55, D / 2 + fl * 1.3);
+  const sr = R(su - 0.85, D / 2 + 0.0, su + 0.85, D / 2 + fl * 1.3);
   STYLES.qing.elements.stairs({ rect: sr, y0: 0, y1: fl, dir: F.up, mat: 'timber' }, ctx);
   const roofMat = rand() < 0.5 ? 'thatch_palm' : 'ijuk';
   if (hip) hipThatch(bag, F, roofMat, W, D, fl + H, 0.9); else thatch(bag, F, roofMat, W, D, fl + H, 0.9);
   dressFront(el, ctx, F, { fl, vw, H, su, wr });
   if (el.interior) houseFit(el, ctx, F, { fl, vw, e, wt, rand });
+}
+/** Where a house's parts stand, by the same numbers rumah() draws them from (for the walk routes and the lights): floor height, the door's u, the stair's u, the front wall's v, and the frame's P(u, v) -> [x, z]. */
+export function rumahPlace(el) {
+  const F = frame(el), { W, D } = F, rand = rng(el.seed || 1), vr = rng((el.seed || 1) + 99), fl = 1.25 + rand() * 0.35, u0 = (rand() - 0.5) * W * 0.4;
+  const ve = el.interior ? 1.45 : 1.0 + vr() * 0.7, vw = D / 2 - ve, su = Math.max(-W / 2 + 1.3, Math.min(W / 2 - 1.3, u0));
+  return { fl, u0, su, vw, W, D, P: F.P, run: fl * 1.3 };
 }
 /** What hangs and stands on a house's veranda: a bamboo bench against the wall, a bird cage, a half-lowered blind, strings of corn and chillies drying under the eaves. */
 function dressFront(el, ctx, F, { fl, vw, H, su, wr }) {
@@ -981,7 +989,7 @@ function pendopo(el, { bag, col }) {
   bag.add(A, box(x0 - 1.05, y + 0.76, z0 - 1.05, x1 + 1.05, y + 0.84, z1 + 1.05));       // the cornice
   const sides = el.steps ?? ['e', 'w'];
   for (const sd of sides) {
-    const sw = Math.min(1.6, (sd === 'e' || sd === 'w' ? D : W) * 0.12);
+    const sw = Math.max(0.9, Math.min(1.6, (sd === 'e' || sd === 'w' ? D : W) * 0.12));      // (a stair 1.8 m wide at least: the walker's)
     const rect = sd === 'e' ? [x1 + 1.0, cz - sw, x1 + 1.0 + 0.9, cz + sw] : sd === 'w' ? [x0 - 1.9, cz - sw, x0 - 1.0, cz + sw] : sd === 's' ? [cx - sw, z1 + 1.0, cx + sw, z1 + 1.9] : [cx - sw, z0 - 1.9, cx + sw, z0 - 1.0];
     STYLES.qing.elements.stairs({ rect, y0: y, y1: fy, dir: { e: 'w', w: 'e', s: 'n', n: 's' }[sd], mat: A }, { bag, col });
   }
@@ -992,6 +1000,7 @@ function pendopo(el, { bag, col }) {
   for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
     if (i > 0 && i < nx - 1 && j > 0 && j < nz - 1) continue;
     const x = x0 + W * i / (nx - 1), z = z0 + D * j / (nz - 1);
+    if (gap(x, z)) continue;                      // (no post in the way up the stair)
     post(x, z, top);
   }
   // the beams on the posts' heads, the rail between the posts (open at the stairs)
