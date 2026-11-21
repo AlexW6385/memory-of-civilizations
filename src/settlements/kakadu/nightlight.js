@@ -64,13 +64,13 @@ function fireGlow(el, base) {
   const [x, z] = el.at, y = el.y ?? 0, H = new Halo(), S = shelterOf(x, z), Hs = houseAt(x, z);
   const q = 0.85 + 0.15 * hashAt(x, z, 3);
   if (Hs) {
-    H.ball(x, y + 0.5, z, 0.75, 0.7 * q); H.floor(x, y + 0.04, z, 2.1, 1.9, 0, 10, 0.9);
+    H.ball(x, y + 0.5, z, 0.75, 0.7 * q); H.floor(x, y + 0.08, z, 2.1, 1.9, 0, 10, 0.9);
     const r = houseRot(Hs), s = Math.sin(r), c = Math.cos(r), B = HOUSE[Hs.kind], w = (lx, lz) => [Hs.at[0] + lx * c + lz * s, Hs.at[1] - lx * s + lz * c];
     const [rx, rz] = w(0, 0); H.ball(rx, y + ROOF[Hs.kind] + 0.35, rz, 0.9, 0.38);                  // the smoke taking the light out through the roof
-    const [dx, dz] = w(0, B.hd + 1.1); H.floor(dx, y + 0.06, dz, 2.0, 1.5, r, 10, 0.5);               // the doorway's spill on the ground outside
+    const [dx, dz] = w(0, B.hd + 1.1); H.floor(dx, y + 0.12, dz, 2.0, 1.5, r, 10, 0.5);               // the doorway's spill on the ground outside
     if (Hs.kind !== 'dome') { const zw = Hs.kind === 'bark' ? -2.0 + 0.1 : -1.7 + 0.22, [px, pz] = w(0, zw); H.wall(px, y + 1.05, pz, [s, c], 1.15, 0.7, 8, 0.42); }   // the painting on the inner wall in the firelight
   } else {
-    H.ball(x, y + 0.5, z, 0.95, 0.72 * q); H.floor(x, y + 0.04, z, 3.3, 3.0, 0, 12, 0.88);
+    H.ball(x, y + 0.5, z, 0.95, 0.72 * q); H.floor(x, y + 0.08, z, 3.3, 3.0, 0, 12, 0.88);
     if (S) {
       const cy = ceilY(S, x, z) - 0.06;
       H.floor(x, cy, z, 3.6, 2.4, 0, 10, 0.5);                                                         // the roof over the hearth, black with soot, lit from below

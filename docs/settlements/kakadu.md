@@ -171,3 +171,8 @@ A sound map (`src/settlements/kakadu/soundmap.js`) and new voices (`src/engine/v
 - No hens, cats, goats, pigeons or any other domestic animal of later arrival: none in Arnhem Land about AD 1000 (the dingo is the only one).
 - Still missing: a brolga (the crane model is white) and a jabiru stay perched stand-ins (§13); no wallabies, goannas or turtles move (no models).
 - Repair found on the way: `src/engine/critter-models.js` on master did not parse (the Bali merge lost the closing of `pigNeolithic`, so every critter settlement and every `--site` render failed with "Unexpected token 'export'"); restored in its own commit.
+
+### 15.5 Wear and writing
+- **Wear** (`wear.js`, wrapping `ka_fire` and `ka_house` from the settlement folder, materials already in the plan so no new draw): the ground round every hearth stained dark with charcoal and ash and trodden bare (an annulus 0.55 to about 1.8 m, its edge blending into the earth) with an ash smear drawn out to one side; the earth before the door of every walk-in shelter worn dark in an oval along the way in and out [inferred: the dark ashy floor of hundreds of campfires is [stated] by the Madjedbebe excavation summary in §13; the shapes are ours]. The soot on the roofs over the hearths and the beaten tracks and camps in the ground were already there (§8, `ground.js`).
+- **Not done:** worn rock steps (the steps are crooked slabs with relief; a decal on them would float or sink), tufa stains and lichen on the rock (no reference, §10), dust on the paintings.
+- **Writing:** none. The people of Arnhem Land had no script about AD 1000; there are no signs, tablets or labels, and the rock paintings stay generic (§0). Nothing was lettered.
