@@ -146,3 +146,20 @@ The sounds of the place, put where they are made (src/settlements/nalanda/soundm
 - Engine voices reused: the loom, the mortar of the oil-presser, the grinder and kitchen, sacks and jars of the grain merchant, the refectory's bowls, cloth of the garland-maker, the pour of water at the east tank's ghats (dawn and evening) and the wheel and clay in the potters' yards; the wells' buckets; owls and far dogs at night.
 - Rooms: every open village house, annex and library hall has its own room tone and work (a hush, the roof's rain, one voice of its trade); the court shrine of Monastery 1 holds the chant.
 - Measured with tools/sound-render.mjs (levels peak 0.01–0.08, bands as intended: the gong under 1 kHz with its peak at 172 Hz, the stylus above 3 kHz); not heard.
+
+## 21. Animals
+
+Rigged critters (src/settlements/nalanda/fauna.js; the engine's fauna-critters.js; models added: none). [inferred throughout: nothing here is sourced to Nalanda itself; they are the animals of any Gangetic village and pilgrim town of the period]
+- Village dogs: one lying at the enclosure's gate, one at the way's margin by the arrival, one at the side of a village house's door (they get up and look when the visitor comes near).
+- Cats on the step of the second monastery's kitchen and of the refectory (the household cat of India is old).
+- Hens and a cock in the two village yards (pens) nearest the arrival (jungle fowl domesticated on the plains); two goats in a third pen.
+- Pigeons on the paving before the great temple's stair, in Monastery 1's court and in the library's yard (doves and pigeons were fed at shrines).
+- Ducks on the east tank's open water and a kingfisher on its margin by a ghat; swallows' mud nests under the eaves of two annexes (swallows already fly over the tanks, §Fix pass).
+- Not rigged: zebu, peafowl, monkeys (no model; the zebu are the life figures'); added a test (tests/nalanda-critters.test.mjs).
+- A village house that stood on an annex (the south-east one: two lots) is no longer built; its place in the lists and its draws are kept, its villager stands at the annex's door.
+
+## 22. Wear and writing
+
+- Wear (src/settlements/nalanda/wear.js; no new material, so no new draw): on the monasteries the outer walls' feet darkened with the monsoon's splash (a hash picks about four cells in ten, with a streak above one in seven); the gate's threshold worn pale across the passage; in the opened monasteries the doorsill of most cells worn pale in its middle; on the village houses a worn hollow in the middle of the door step (the opened houses and one in three of the others). The climate is §7's: hot monsoon plain, brick feet darkened and greened (the green is left out: no spare material that would not cost a draw). [inferred]
+- Writing: none drawn. The script of the place and time is Siddham (the Gupta-derived Brahmi of the sixth and seventh centuries) and the clay seals of Nalanda carry the "ye dharmā" verse; the glyphs cannot be verified here one by one, so tablets and signs stay plain.
+- Not done: worn steps on the great temple's stair, stains under the temple's niches, soot over the lamp niches (the lamps themselves glow at night, §19).

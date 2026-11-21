@@ -70,8 +70,9 @@ function people() {
   // the village: women at the doors with pots and baskets, men and porters, zebu and dogs
   const L = lots();
   for (let i = 0; i < L.length; i += 3) {
-    if (L[i].gone) continue;
-    const [rx0, rz0, rx1, rz1] = L[i].rect, f = L[i].front, x = f === 'w' ? rx0 - 1.6 : (rx0 + rx1) / 2 + 2, z = f === 'n' ? rz0 - 1.6 : (rz0 + rz1) / 2;
+    const [rx0, rz0, rx1, rz1] = L[i].rect, f = L[i].front;
+    let x = f === 'w' ? rx0 - 1.6 : (rx0 + rx1) / 2 + 2, z = f === 'n' ? rz0 - 1.6 : (rz0 + rz1) / 2;
+    if (L[i].gone) { const a = ANNEXES.find((q) => rx0 < q.rect[2] + 0.5 && rx1 > q.rect[0] - 0.5 && rz0 < q.rect[3] + 0.5 && rz1 > q.rect[1] - 0.5); if (a) { x = (a.rect[0] + a.rect[2]) / 2 + 2.4; z = a.rect[3] + 2.2; } }    // (a house not built: its villager stands at the annex's door instead)
     if (tankD(x, z) < 6) continue;
     const t = r();
     if (t < 0.4) woman([x, z], 0, f === 'w' ? [1, 0] : [0, 1], { pose: 'stand', carry: r() < 0.5 ? 'basket' : 'pot' });
