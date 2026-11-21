@@ -17,6 +17,8 @@ export const HALL2 = [-36, 74, -21, 83];
 export function summitElements() {
   const E = [];
   E.push({ t: 'floor', rect: WAY, y: TOP + 0.03, mat: 'sandstone_floor', th: 0.06 });
+  // the way's paving carried on to the south gateway (it stopped at z = 44, with bare earth between it and the gateway's foot) [inferred]
+  E.push({ t: 'floor', rect: [-4.2, 28.8, 4.2, 44], y: TOP + 0.03, mat: 'sandstone_floor', th: 0.06 });
   E.push({ t: 'floor', rect: [-12.5, 44, -4.2, 94], y: TOP + 0.02, mat: 'sandstone_floor', th: 0.04 });
   E.push({ t: 'floor', rect: [4.2, 44, 12.5, 94], y: TOP + 0.02, mat: 'sandstone_floor', th: 0.04 });
   for (const [cx, cz, front, trade] of SUMMIT_STALLS) E.push({ t: 'stall', rect: [cx - 1.3, cz - 1.8, cx + 1.3, cz + 1.8], front, y: TOP, seed: Math.floor(cx * 31 + cz * 17), trade });
@@ -40,6 +42,16 @@ export function summitElements() {
     E.push({ t: 'block', rect: [sx * 4.2 - 0.2, z - 0.2, sx * 4.2 + 0.2, z + 0.2], y0: TOP, y1: TOP + 1.5, mat: 'sandstone_dressed' });
     E.push({ t: 'rite', kind: 'lamp', at: [sx * 4.2, z], y: TOP + 1.5, s: 2.2, pool: TOP });
   }
+  // wear where feet went [inferred]: the pilgrims' track polished pale in patches on the way, between the stalls and up to the south gateway, through its threshold and along the
+  // way the walk takes to the stairway's foot (thin slabs 6 mm over the paving, no collision; their sizes and sides come from their own places)
+  const h = (x, z, k) => { let q = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(k + 1, 83492791); q = Math.imul(q ^ (q >>> 13), 1274126177); q ^= q >>> 16; return (q >>> 0) / 4294967296; };
+  const worn = (x0, z0, x1, z1, y) => E.push({ t: 'floor', rect: [x0, z0, x1, z1], y: TOP + y, mat: 'sandstone_dressed', th: 0.006, walk: false });
+  for (let z = 90; z > 33; z -= 5.5 + 2 * h(z, 3, 1)) {
+    const cx = (h(z, 5, 2) - 0.5) * 2.4, w = 0.9 + 0.5 * h(z, 7, 3), l = 2.6 + 2.2 * h(z, 9, 4);
+    worn(cx - w, z - l, cx + w, z, 0.038);
+  }
+  worn(-1.5, 25.3, 1.5, 28.8, 0.05); worn(-1.1, 22.3, 1.1, 25.3, 0.05);        // the south gateway's threshold and the way from it to the stairway
+  worn(0.4, 21.3, 7.2, 22.7, 0.05); worn(6.6, 20.9, 8.6, 22.7, 0.05);         // the turn east along the terrace's foot to the east flight
   // Temple 40: an altar at the hall's west end with lamps, an offering and a bell; garlands between the front pillars
   const [cx, cz] = TEMPLE40.c, top = TOP + 3.35, ax = cx - 16.2;
   E.push({ t: 'block', rect: [ax - 0.6, cz - 0.9, ax + 0.6, cz + 0.9], y0: top, y1: top + 0.55, mat: 'sandstone_dressed' });

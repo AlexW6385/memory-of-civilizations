@@ -3,6 +3,7 @@
 // itself, the tank's ghat; and every front dressed at eye level (a plan of its own, style life).
 import { lodTiles } from '../lod.js';
 import { houseDoor } from '../../styles/indian/village.js';
+import { hashAt } from './wear.js';
 import { RADIUS, TOP, STAIR, TANK, HALL, SHRINE, PLAZA, NORTH, STUPA2, STREETS, lots, yards, height, tankD } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -144,7 +145,10 @@ export function dressing() {
       else if (trade === 'bowls') { L.push({ t: 'pot', at: at(u1, -0.7), y: yPl, seed: seed++, kind: 'dark_pot', n: 5 }); L.push({ t: 'pot', at: at(u2, -1.8), y: 0, rot: rotOut, seed: seed++, kind: 'water_pot', n: 4 }); }
       else if (trade === 'ivory') { L.push({ t: 'crates', at: at(u1, -0.8), y: yPl, rot: rotOut, seed: seed++, n: 2 }); L.push({ t: 'stool', at: at(u2, -0.8), y: yPl, seed: seed++ }); }
       else L.push({ t: 'goods_mat', at: at(Lw / 2, -0.9), y: yPl, rot: faceDir(out), seed: seed++, goods: ['heap', 'heap', 'baskets'], produce: ['cloth_white', 'cloth_white', 'cloth_red'] });
-      if (!l.open || rand() < 0.5) F(at(Lw / 2 + (rand() - 0.5), -0.5), yPl, [-out[0], -out[1]], { pose: 'cross', top: 'bare', hat: pickOf(['turban', 'none']), arms: 'hang' });
+      const kr = l.open ? rand() : 0, late = trade === 'sweets' || trade === 'oil' || trade === 'lamps';
+      if (!l.open || kr < 0.5) F(at(Lw / 2 + (rand() - 0.5), -0.5), yPl, [-out[0], -out[1]], { pose: 'cross', top: 'bare', hat: pickOf(['turban', 'none']), arms: 'hang', ...(late ? { nightKeep: 1 } : {}) });
+      // an open shop always has its keeper (the draw above is kept so the rest of the village does not move); the extra keeper's place and dress come from the lot's own hash [inferred]
+      else F(at(Lw / 2 + (hashAt(l.rect[0], l.rect[1], 61) - 0.5), -0.5), yPl, [-out[0], -out[1]], { pose: 'cross', top: 'bare', hat: hashAt(l.rect[0], l.rect[1], 62) < 0.5 ? 'turban' : 'none', arms: 'hang', ...(late ? { nightKeep: 1 } : {}) });
       if (rand() < 0.3) F(at(u2, -2.4), 0, [out[1] * 0.5 - out[0] * 0.2, out[0] * 0.5], { carry: pickOf(['basket', 'none']), cloth: pickOf(['cloth_white', 'cloth_ochre']) });
       if (rand() < 0.18) L.push({ t: 'animal', kind: 'dog', at: at(Lw * 0.6, -2.8), y: 0, rot: rotOut + 2, seed: seed++ });
     } else if (kind === 'shed') {
@@ -157,6 +161,7 @@ export function dressing() {
         const Dl = (l.front === 's' || l.front === 'n') ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], vo = l.fr === 'court' && Dl >= 7 ? 1.6 : 0;
         woman(P(Lw - 0.3 - 0.6, -(vo + Dl - vo - 0.3 - 1.1)), 0.42, [-out[0], -out[1]], { pose: 'sit_low', carry: 'none' });
       }
+      if (l.open && kind === 'merchant') F(at(Lw * 0.5 + (hashAt(l.rect[0], l.rect[1], 63) - 0.5), -0.5), yPl, [-out[0], -out[1]], { pose: 'cross', top: 'bare', hat: 'turban', arms: 'hang', cloth: 'cloth_white', nightKeep: 1 }); // the merchant at his store's front [inferred]
       L.push({ t: 'pot', at: at(u1, -0.7), y: yPl, seed: seed++, kind: 'matka', n: 2 });
       if (rand() < 0.6) L.push({ t: 'bench', at: at(u2, -0.7), y: 0.0, rot: rotOut + 1.57, seed: seed++, len: 1.4 });
       if (rand() < 0.5) L.push({ t: 'firewood', at: P(Lw - 0.2, -0.1), y: yPl, rot: rotOut + 1.57, seed: seed++, len: 0.9 });
