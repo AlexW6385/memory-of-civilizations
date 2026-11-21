@@ -89,3 +89,16 @@ export function height(x, z) {
 export function flooded(x, z, y) { let h = Math.imul(Math.round(y / TREAD) | 0, 374761393) ^ Math.imul(Math.round(Math.atan2(z, x) * 7) | 0, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296 < 0.45; }
 export const inPura = (x, z, m = 0) => inRect([PURA.x0, PURA.zN, PURA.x1, PURA.zS], x, z, m);
 export const gardenOf = (x, z) => Math.hypot(x, z) < RADIUS - 6 && rectDist(x, z) <= 0;
+
+/**
+ * The pancuran (the bathing and washing place at the channel, docs §13.1): three, on the street's west edge, clear of every gate, footbridge, penjor and stall's steps on that side.
+ * z of each (x is −3.3).
+ */
+let PANCURAN = null;
+export function pancuranAt() {
+  if (PANCURAN) return PANCURAN;
+  PANCURAN = [];
+  const west = lots().filter((l) => l.front === 'e'), busy = (z) => west.some((l) => Math.abs(z - l.gate[1]) < 3.8 || (l.shop && Math.abs(z - lotFrame(l)((l.shop.u0 + l.shop.u1) / 2, 0)[1]) < 3.6));
+  for (let z = 24; z < 126 && PANCURAN.length < 3; z += 1.0) if (!busy(z) && !busy(z - 1.2) && !busy(z + 1.2) && (z - 24) > PANCURAN.length * 34) PANCURAN.push(z);
+  return PANCURAN;
+}

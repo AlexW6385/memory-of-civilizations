@@ -3,7 +3,7 @@
 // water temple; the people — the gamelan's players, the worshippers in the temple, the households in their natah, the farmers in the paddies.
 import { compoundParts } from '../../styles/balinese/compound.js';
 import './walkwork.js';
-import { RADIUS, CORE, WANTILAN, KULKUL, BANYAN, CHANNEL_X, PURA, DALEM_C, lots, lotFrame, outward, height, flooded, TREAD } from './layout.js';
+import { RADIUS, CORE, WANTILAN, KULKUL, BANYAN, CHANNEL_X, PURA, DALEM_C, lots, lotFrame, outward, height, flooded, TREAD, pancuranAt } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements, o = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -30], facing: 'n' }, ...o });
@@ -63,11 +63,7 @@ function village() {
   }
   // the pancuran: the bathing and washing place where the channel's water is let out through spouts into a stone trough, at the street's west edge, clear of every gate, footbridge,
   // penjor and stall's steps on that side (the visitor's lanes)
-  {
-    const west = L.filter((l) => l.front === 'e'), busy = (z) => west.some((l) => Math.abs(z - l.gate[1]) < 3.8 || (l.shop && Math.abs(z - (lotFrame(l)((l.shop.u0 + l.shop.u1) / 2, 0)[1])) < 3.6));
-    let n = 0;
-    for (let z = 24; z < 126 && n < 3; z += 1.0) if (!busy(z) && !busy(z - 1.2) && !busy(z + 1.2) && (z - 24) > n * 34) { E.push({ t: 'bali_pancuran', at: [-3.3, z], y: 0, turn: -1 }); n++; }
-  }
+  for (const z of pancuranAt()) E.push({ t: 'bali_pancuran', at: [-3.3, z], y: 0, turn: -1 });
   // the crossing by night: a resin torch at each corner of the crossing (nightlight.js)
   for (const [x, z] of [[-3.0, 5.0], [4.4, 5.0], [-3.0, 14.0], [4.4, 14.0]]) E.push({ t: 'bali_obor', at: [x, z], y: 0, h: 2.2, seed: Math.round(z) });
   // offerings on the ground before the temple's stair and at the crossing
