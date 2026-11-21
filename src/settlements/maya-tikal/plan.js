@@ -5,6 +5,7 @@
 
 import { PLAZA, T1, T2, NA, NA_TEMPLE, NA_SMALL, CA, BALL } from './layout.js';
 import { frame } from '../../styles/tikal/kit.js';
+import { routes as visitorRoutes } from './walk.js';
 
 export const WALKS = [
   [[-18, 28], [20, 0], [34, 0], [44, 0], [52, 0], [54.5, 0], [58.3, 0], [62.1, 0], [65.5, 0]],
@@ -103,7 +104,8 @@ const rooms = [
   room('court2-west', cb1.R(1.5, 3.6, -1.3, 1.3), CA.H),
   room('court2-east', cb2.R(1.5, 3.6, -1.3, 1.3), CA.H),
 ];
-const walks = WALKS; for (const w of walks) w.y0 = 0;
+for (const w of WALKS) w.y0 = 0;
+const walks = [...WALKS, ...visitorRoutes(E).map((r) => Object.assign(r.pts, { y0: r.y0, name: r.name }))];
 
 export const plaza = {
   id: 'maya-tikal-plaza',

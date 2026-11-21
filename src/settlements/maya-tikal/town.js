@@ -9,6 +9,8 @@ import { SOUTH_RANGE, STEP_PALACE } from './plan.js';
 import plazaPlan from './plan.js';
 import { frame } from '../../styles/tikal/kit.js';
 import { boatFloat } from '../../objects/index.js';
+import { hashAt } from './walk.js';
+import './stock.js';
 
 const base = (id, elements, style = 'tikal') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-18, 28], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -196,7 +198,8 @@ function quarterLife() {
     g.houses.forEach((h, k) => {
       const [dx, dz] = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[h.door], hw = h.w / 2 + 0.4, hd = h.d / 2 + 0.4;
       const dp = [h.c[0] + dx * (dx ? hw + 0.3 : 0), h.c[1] + dz * (dz ? hd + 0.3 : 0)], sd = [-dz, dx];   // the doorstep, and the way along the platform
-      const at = (a, b) => [dp[0] + dx * a + sd[0] * b, dp[1] + dz * a + sd[1] * b];
+      // a: out from the platform's edge (the goods lie on the platform's strip, 0.7 m wide, so a is moved in by 0.8), b: along the wall, moved out of the door's lane (the door is 1.6 m wide)
+      const at = (a, b) => { const bb = b < 0.3 ? b - 1.4 : b + 0.6; return [dp[0] + dx * (a - 0.8) + sd[0] * bb, dp[1] + dz * (a - 0.8) + sd[1] * bb]; };
       // the trade's goods on the platform before the door, the craftsman working beside them
       if (h.craft === 'obsidian') { for (let i = 0; i < 3; i++) L.push({ t: 'basket', n: 1, at: at(0.4, -0.9 + i * 0.5), y: P, seed: h.seed + i, goods: 'obsidian' }); L.push(person(rand, ...at(0.9, 0.9), P, face(-dx, -dz), { woman: false, pose: 'kneel' })); }
       else if (h.craft === 'potter') { L.push({ t: 'pot', kind: 'dark_pot', n: 3, at: at(0.5, -0.9), y: P, seed: h.seed }, { t: 'pot', kind: 'water_pot', n: 2, at: at(0.5, 0.2), y: P, seed: h.seed + 1 }); L.push(person(rand, ...at(1.0, 1.0), P, face(-dx, -dz), { woman: true, pose: 'kneel', over: 'none' })); }
@@ -229,6 +232,23 @@ function quarterLife() {
   }
   void M; void seat; void pick;
   return [{ ...base('maya-tikal-quarter-life', L), style: 'life' }];
+}
+
+/**
+ * What the opened places hold (stock.js, docs §16): the goods of each craftsman's house along its back wall, the market hall's rooms laid out by trade, and in each room of
+ * the hall its keeper on the bench (a near plan's figures, not a street-life element's).
+ */
+function openedPlaces() {
+  const rand = rng(6613), L = [], E = [];
+  for (const g of groups().filter((q) => q.ward)) for (const h of g.houses) E.push({ t: 'mt_stock', c: h.c, w: h.w, d: h.d, door: h.door, craft: h.craft, seed: h.seed });
+  const hall = { c: [141, 43], face: 'w', n: 8 };
+  const HE = [{ t: 'mt_stall', ...hall, y: 0 }];
+  const F = frame('w', ...hall.c), rw = 4.2, pt = 1.1, Lv = hall.n * rw + (hall.n + 1) * pt;
+  for (let i = 0; i < hall.n; i++) {
+    const vc = -Lv / 2 + pt + i * (rw + pt) + rw / 2, p = F.P(3.4 - 0.5 + 0.5, vc + 0.7), woman = hashAt(vc, 5, 1) < 0.5;
+    if (i % 4 !== 3) L.push(person(rand, p[0], p[1], 0.5, face(-1, 0), { woman, pose: 'sit', over: woman ? 'none' : 'cape', cloth2: i % 2 ? 'cloth_red' : 'cloth_blue' }));
+  }
+  return [base('maya-tikal-stock', E), base('maya-tikal-hall-stock', HE), { ...base('maya-tikal-hall-life', L), style: 'life' }];
 }
 
 /** The life at the reservoirs: women with jars and washing at the rim, a fisher in a dugout canoe, ducks. */
@@ -277,7 +297,7 @@ export async function town() {
     const [cx, cz] = R.c, r = Math.max(R.a, R.b) + 2;
     plans.push({ ...base(`maya-tikal-water-${R.id}`, [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: R.water, cell: 1, inside: (x, z) => resDist(R, x, z) < -0.3 && ground.height(x, z) < R.water + 0.3 }]), style: 'ming' });
   }
-  plans.push(...market(), ...people(), ...plazaLife(), ...quarterLife(), ...reservoirLife());
+  plans.push(...market(), ...people(), ...plazaLife(), ...quarterLife(), ...openedPlaces(), ...reservoirLife());
   void PLAZA;
   return plans;
 }
