@@ -77,7 +77,7 @@ function people() {
   man([2.0, 29.5], TOP, [0, -1], { pose: 'talk' }); woman([3.2, 30.6], TOP, [-0.4, -1], { carry: 'pot' }); monk([-12.6, 31.2], TOP, [-1, 0.4], { pose: 'talk' });
   // Temple 40: monks in the hall, a lay donor with them
   const [tx, tz] = TEMPLE40.c, ty = TOP + 3.35;
-  monk([tx - 3, tz + 1.8], ty, [0, -1]); monk([tx - 1.2, tz + 1.9], ty, [0, -1], { pose: 'talk' }); monk([tx + 0.6, tz + 1.8], ty, [-0.3, -1]);
+  monk([tx - 3, tz + 1.8], ty, [0, -1], { nightKeep: 1 }); monk([tx - 1.2, tz + 1.9], ty, [0, -1], { pose: 'talk', nightKeep: 1 }); monk([tx + 0.6, tz + 1.8], ty, [-0.3, -1]);
   monk([tx - 1.2, tz - 1.2], ty, [0, 1], { pose: 'talk' }); man([tx + 5.4, tz - 0.5], ty, [-1, 0]);
   // Stupa 2: a monk at its east entrance, pilgrims coming from the path
   monk([cx + 14.8, -2.9], STUPA2.y, [0, 1]); man([cx - 3, z0 + 2.0], STUPA2.y, [0, 1]); woman([cx - 1.6, z0 + 1.2], STUPA2.y, [0.2, 1], { carry: 'pot' });
@@ -124,18 +124,18 @@ function people() {
   monk([h0 + 3, h1 + 1.1], hy, [0, 1], { pose: 'cross' }); man([h0 + 6.5, h1 + 1.1], hy, [0, 1], { pose: 'sit_low' }); man([(h0 + h2) / 2, (h1 + h3) / 2 + 0.2], hy, [0, 1], { pose: 'cross', top: 'bare' }); woman([h2 - 1.3, h3 - 1.2], hy, [-1, 0], { carry: 'pot' });
   // the monastery's court: monks seated in the assembly's pavilion before the teacher on his stone seat, one at the well
   const vx = 49, vz = 17, vy = TOP + 0.4;
-  monk([vx, vz - 2.0], vy + 0.4, [0, 1], { pose: 'cross', arms: 'pray' });
-  for (const [dx, dz] of [[-1.7, 0.9], [0, 1.5], [1.7, 0.9], [-0.8, 2.4], [0.9, 2.4]]) monk([vx + dx, vz + dz], vy, [0, -1], { pose: 'cross' });
+  monk([vx, vz - 2.0], vy + 0.4, [0, 1], { pose: 'cross', arms: 'pray', nightKeep: 1 });
+  for (const [dx, dz] of [[-1.7, 0.9], [0, 1.5], [1.7, 0.9], [-0.8, 2.4], [0.9, 2.4]]) monk([vx + dx, vz + dz], vy, [0, -1], { pose: 'cross', nightKeep: 1 });
   monk([vx - 5.5 + 1.4, vz + 4], TOP, [-1, 0], { carry: 'pot' });
   // the second monastery's court: monks seated before the teacher in the pavilion
   { const wx = (VIHARA2[0] + VIHARA2[2]) / 2, wz = (VIHARA2[1] + VIHARA2[3]) / 2, wy = TOP + 0.4;
-    monk([wx, wz - 2.0], wy + 0.4, [0, 1], { pose: 'cross', arms: 'pray' });
-    for (const [dx, dz] of [[-1.5, 1.0], [0.2, 1.6], [1.6, 1.0], [-0.6, 2.4]]) monk([wx + dx, wz + dz], wy, [0, -1], { pose: 'cross' });
+    monk([wx, wz - 2.0], wy + 0.4, [0, 1], { pose: 'cross', arms: 'pray', nightKeep: 1 });
+    for (const [dx, dz] of [[-1.5, 1.0], [0.2, 1.6], [1.6, 1.0], [-0.6, 2.4]]) monk([wx + dx, wz + dz], wy, [0, -1], { pose: 'cross', nightKeep: 1 });
     monk([wx - 5.5 + 1.4, wz + 4], TOP, [-1, 0], { carry: 'pot' }); man([VIHARA2[0] - 2.2, wz + 0.8], TOP, [1, 0]); }
   // at the Great Bowl: a monk ladling the food, monks with their alms bowls coming for it, a lay donor
   monk([BOWL[0] + 1.9, BOWL[1] + 0.4], TOP, [-1, 0], { carry: 'pot' }); monk([BOWL[0] - 1.9, BOWL[1] - 0.6], TOP, [1, 0.2], { carry: 'basket' }); monk([BOWL[0] - 0.8, BOWL[1] + 2.3], TOP, [0.3, -1]); man([BOWL[0] + 0.8, BOWL[1] - 2.4], TOP, [-0.2, 1], { carry: 'basket' });
   // Temple 40: a monk and a pilgrim before the altar
-  { const [tx, tz] = TEMPLE40.c, ty = TOP + 3.35; monk([tx - 14.8, tz - 1.0], ty, [-1, 0], { pose: 'kneel', arms: 'pray' }); woman([tx - 14.6, tz + 1.3], ty, [-1, 0], { pose: 'kneel', arms: 'pray' }); monk([tx + 8, tz + 5.4], ty, [0, 1], { pose: 'cross' }); }
+  { const [tx, tz] = TEMPLE40.c, ty = TOP + 3.35; monk([tx - 14.8, tz - 1.0], ty, [-1, 0], { pose: 'kneel', arms: 'pray', nightKeep: 1 }); woman([tx - 14.6, tz + 1.3], ty, [-1, 0], { pose: 'kneel', arms: 'pray', nightKeep: 1 }); monk([tx + 8, tz + 5.4], ty, [0, 1], { pose: 'cross' }); }
   return { id: 'sanchi-people', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-300, -300, 300, 300], entrance: { at: [0, -180], facing: 's' } };
 }
 export const pilgrims = people();
