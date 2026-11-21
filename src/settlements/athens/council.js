@@ -8,6 +8,7 @@ export function council() {
   const E = [], [x0, z0, x1, z1] = COUNCIL, y = 0, yf = y + 0.35, h = 6.4, w = 0.8, zc = (z0 + z1) / 2;
   E.push({ t: 'block', rect: [x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], y0: y - 0.4, y1: yf, mat: 'limestone', walk: true });
   E.push({ t: 'stair', rect: [x1 + 0.5, zc - 1.6, x1 + 1.5, zc + 1.6], dir: 'w', y0: y, y1: yf, riser: 0.175, base: y - 0.3, mat: 'limestone' });
+  E.push({ t: 'athens_stairwear', rect: [x1 + 0.5, zc - 1.6, x1 + 1.5, zc + 1.6], dir: 'w', y0: y, y1: yf, riser: 0.175, wear: 'sandstone_white' });
   // the walls: mud-brick on a stone course, plastered [inferred]; the door 2.4 m wide, 3.6 m high, in the middle of the east wall
   const mat = 'mud_plaster', D = { at: (z1 - z0) / 2, w: 2.4, h: 3.6, y0: yf };
   E.push({ t: 'wall', a: [x1 - w / 2, z0], b: [x1 - w / 2, z1], th: w, y0: yf, y1: yf + h, mat, openings: [D] });
