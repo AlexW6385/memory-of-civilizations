@@ -7,6 +7,8 @@ import '../../styles/roman/saepta.js';
 import '../../styles/roman/baths.js';
 import pantheonPlan from '../../buildings/pantheon/plan.js';
 import { UPPER_WALKS, SHOP_WALKS } from './walks.js';
+import { forecourtElements } from './forecourt.js';
+import { nightElements, wearElements } from './pantheon-night.js';
 
 const E = [];
 E.push({ t: 'baths_agrippa', rect: BATHS });
@@ -41,5 +43,5 @@ for (let i = 0; i < 7; i++) {
   const zA = -51.2 + 0.3 * i, top = 0.18571 * (i + 1);
   WEAR.push({ t: 'slab', rect: [-3.2 + hz(i, 1) * 0.6, zA + 0.02, 3.2 - hz(i, 2) * 0.6, zA + 0.28 - 0.04 * hz(i, 3)], y0: top, y1: top + 0.005, mat: 'plaster_damp' });
 }
-export const pantheon = { ...pantheonPlan, elements: [...pantheonPlan.elements, ...WEAR], origin: [0, 0], base: 0, district: undefined, view: [-30, -70, 30, -40], walks: [...(pantheonPlan.walks || []), ...UPPER_WALKS, ...SHOP_WALKS] };
+export const pantheon = { ...pantheonPlan, elements: [...pantheonPlan.elements, ...WEAR, ...forecourtElements(), ...nightElements(), ...wearElements()], origin: [0, 0], base: 0, district: undefined, view: [-30, -70, 30, -40], walks: [...(pantheonPlan.walks || []), ...UPPER_WALKS, ...SHOP_WALKS] };
 export default pantheon;

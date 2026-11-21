@@ -12,7 +12,10 @@ import { rowFurnElement } from './upper-rows.js';
 import { cauponaFurn, fullonicaFurn } from './upper-inns.js';
 import './nightlight.js';
 import './writing.js';
+import './ruts.js';
 import { shopKeepers } from './keepers.js';
+import { forecourtLife } from './forecourt.js';
+import { pantheonHalos } from './pantheon-night.js';
 /** lodTiles of src/settlements/lod.js with a wider tile (the geometry budget counts plan x material buckets). */
 function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
   const tiles = new Map();
@@ -59,6 +62,7 @@ export async function town() {
   const dArr = (e) => Math.hypot((e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2 + 200);
   const upLots = [...openLots].sort((p, q) => dArr(p) - dArr(q)).slice(0, 3);                    // the three nearest the arrival: their first floors are walked (flats.js, docs §4.16)
   for (const e of upLots) e.upper = true;
+  for (const e of upLots.slice(0, 2)) e.upper2 = true;                                              // and the second floor of the two nearest (docs §4.23)
   const openSet = new Set(openLots.map((e) => e.rect));
   free.splice(0, free.length, ...free.filter((l) => !openSet.has(l.rect)));
   const inn = lots().find((l) => same(l.rect, INN)), full = lots().find((l) => same(l.rect, FULLER));
@@ -115,8 +119,8 @@ export async function town() {
     { id: 'rome-street', style: 'rome-town', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' },
       elements: [{ t: 'pistrinum', rect: PISTRINUM, front: 's', y: 0 }, { t: 'latrine', rect: LATRINE, front: 's', y: 0 }],
       rooms: [{ id: 'pistrinum', rect: [PISTRINUM[0] + 0.5, PISTRINUM[1] + 0.5, PISTRINUM[2] - 0.5, PISTRINUM[3] - 0.5], y: 0, kind: 'hall', market: false }, { id: 'latrine', rect: [LATRINE[0] + 0.5, LATRINE[1] + 0.5, LATRINE[2] - 0.5, LATRINE[3] - 0.5], y: 0, kind: 'hall', market: false }] },
-    site('rome-flats', openLots), nightLife(ways), awningPlan(), ...shopKeepers(),
-    ...upLots.map((e, i) => furnPlan(`rome-up-flat-${i}`, { t: 'up_cells_flat', rect: e.rect, front: e.front, seed: e.seed })),
+    site('rome-flats', openLots), nightLife(ways), awningPlan(), ...shopKeepers(), ...forecourtLife(),
+    ...upLots.map((e, i) => furnPlan(`rome-up-flat-${i}`, { t: 'up_cells_flat', rect: e.rect, front: e.front, seed: e.seed, upper2: e.upper2 })),
     furnPlan('rome-up-inn', { ...cauponaFurn({ rect: inn.rect, front: 's' }), seed: inn.seed }), furnPlan('rome-up-fuller', { ...fullonicaFurn({ rect: full.rect, front: 's' }), seed: full.seed }),
     ...(inn2() ? [furnPlan('rome-up-inn2', { ...cauponaFurn({ rect: inn2().rect, front: 's' }), seed: inn2().seed })] : []),
     ...OPEN_ROWS.map((r, i) => furnPlan(`rome-up-row-${i}`, { ...rowFurnElement({ ...r, storeys: r.front === 's' && r.seed % 3 === 0 ? 2 : 3 }), seed: r.seed }, 14))];
@@ -130,6 +134,7 @@ function nightLife(ways) {
   add.push({ t: 'rome_halo', kind: 'torch', at: [cx + f[0] * 4.6 + r[0] * 0.5, cz + f[1] * 4.6 + r[1] * 0.5], y: 0, rot: 0 });
   // the temple's braziers at the foot of the Pantheon's steps, and escorts with torches near the visitor's walk (Juvenal, Satire 3: a man out by night has slaves with flambeaux before him)
   for (const x of [-21, 21]) add.push({ t: 'rome_halo', kind: 'brazier', at: [x, -54.2], y: 0, rot: 0 });
+  add.push(...pantheonHalos());
   const slave = (at, rot, k) => ({ t: 'figure', at, y: 0, rot, seed: 7100 + k, skin: k % 2 ? 'skin_medium' : 'skin_light', dress: 'tunic', legs: 'bare', cloth: ['cloth_brown', 'cloth_ochre', 'cloth_grey'][k % 3], over: 'belt', hair: 'short', beard: 0, hat: 'none', pose: 'stand' });
   const master = (at, rot, k) => ({ t: 'figure', at, y: 0, rot, seed: 7200 + k, skin: 'skin_light', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', hair: 'short', beard: k % 2, hat: 'none', pose: 'stand' });
   const ESC = [[[-12, -131], Math.PI], [[-30, -175.4], -Math.PI / 2], [[-7, -175.4], Math.PI / 2], [[30, -175.4], -Math.PI / 2], [[100, -175.4], Math.PI / 2]];
