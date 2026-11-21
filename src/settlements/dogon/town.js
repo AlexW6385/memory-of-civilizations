@@ -3,6 +3,7 @@
 import { TOGUNA, PLACE, PLACE_Y, COMPOUNDS, FORGE, DYE, THRESH, PENS, SHADE, height, inCompound, nearBaobab } from './layout.js';
 import { frontOf, houseOf } from '../../styles/dogon/compound.js';
 import { dressing } from './dressing.js';
+import { WELLS } from './walk.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-90, -90, 90, 90], entrance: { at: [0, 30], facing: 'n' } });
@@ -100,6 +101,14 @@ export async function town() {
   for (const [i, p] of PENS.entries()) {
     const [px, pz] = p.at, py = height(px, pz);
     for (let k = 0; k < 6; k++) { const a = k * 1.05 + i, rr = 0.8 + (k % 3) * 0.55; A.push({ t: 'animal', kind: k % 3 === 2 ? 'sheep' : 'goat', at: [px + Math.cos(a) * rr, pz + Math.sin(a) * rr], y: py, rot: a + 1.3, seed: 70 + i * 10 + k }); }
+  }
+  // the wells: a woman drawing water at the curb, the next waiting with her jar, a child at the trough (docs/settlements/dogon.md §16.1)
+  for (const [i, [wx, wz]] of WELLS.entries()) {
+    const wy = height(wx, wz);
+    woman([wx - 0.1, wz - 1.05], wy, 0, { arms: 'hang', cloth: 'cloth_indigo' });
+    woman([wx - 1.7, wz + 0.9], wy, -1.2, { carry: 'pot', cloth: 'cloth_white' });
+    P.push({ t: 'figure', at: [wx + 2.1, wz + 1.0], y: wy, rot: 3.2, seed: 7700 + i, dress: 'tunic', legs: 'bare', cloth: 'cloth_white', over: 'none', hat: 'none', feet: 'bare', hair: 'short', beard: false, child: true, h: 1.05, ...SK() });
+    L.push({ t: 'pot', kind: 'water_pot', n: 3, at: [wx - 1.1, wz + 1.3], y: wy, rot: 0.5 * i, seed: 8100 + i });
   }
   // inside the opened ginnas (compound.js house(): lx/lz from the room's west and north wall): the household at its day — a woman at the hearth of
   // the central room with a child on the mat, the old man on the entrance hall's bench, the cook at the kitchen's fire

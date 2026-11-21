@@ -4,6 +4,8 @@
 
 import { COMPOUNDS, LANDMARK, TOGUNA, PUNULU, ALTARS, LEDGES, BAOBABS, SHADE, FORGE, DYE, THRESH, PENS, WALL_DX, WALL_DY, WALL_X, wallFace, wallZ, wallBase, wallTop, inCompound, height, RADIUS } from './layout.js';
 import { houseOf } from '../../styles/dogon/compound.js';
+import { walks as routes, WELLS } from './walk.js';
+import './furniture.js';
 
 const E = [];
 for (const c of COMPOUNDS) {
@@ -29,6 +31,10 @@ for (const [i, r] of [[-60, 34, -34, 44], [30, 33, 58, 43]].entries()) E.push({ 
 // the watchmen's platforms in the millet, one in each plot
 for (const [i, [x, z]] of [[-47, 38.5], [44, 38]].entries()) E.push({ t: 'field_hut', at: [x, z], y: height(x, z), seed: 60 + i });
 
+// the wells of the place and the bird-scarers in the millet (furniture.js)
+for (const [i, [x, z]] of WELLS.entries()) E.push({ t: 'dg_well', at: [x, z], y: height(x, z), seed: 80 + i });
+for (const [i, [x, z]] of [[-55, 36], [36, 35.5]].entries()) E.push({ t: 'dg_scare', at: [x, z], y: height(x, z), seed: 90 + i });
+
 // the opened ginnas (compound.js house(): the pad's west or east part, walls 0.45 m, rooms 6.5 × 4.5 m inside)
 const F = LANDMARK.y + 0.05;
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -44,9 +50,9 @@ const houseRooms = (c, tag) => {
 const rooms = [room('place', [-24, 22, 22, 32], 1.2, 'open'), ...houseRooms(LANDMARK, '')];
 let nOpen = 1;
 for (const c of COMPOUNDS) if (c.open && !c.landmark) rooms.push(...houseRooms(c, `house ${++nOpen}: `));
-const [lx0] = houseOf(LANDMARK).rect, hz1L = houseOf(LANDMARK).rect[3], hz0L = hz1L - 5.4, iz0L = hz0L + 0.45;
+const [lx0] = houseOf(LANDMARK).rect, hz1L = houseOf(LANDMARK).rect[3];
 const doorX = lx0 + 0.45 + 1.5;
-const walks = [Object.assign([[-1.0, 36], [-1.0, 26], [-1.0, 14], [-1.0, 12.6], [doorX - 4, 12.6], [doorX, 12.6], [doorX, hz1L - 1.2], [doorX, iz0L + 1.2]], { y0: 1.2 })];
+const walks = routes();
 void F;
 
 export const dogon = {
