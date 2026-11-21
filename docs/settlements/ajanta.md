@@ -138,3 +138,13 @@ All [inferred]: nothing sources the fauna of Ajanta in 480; these are the animal
 - **Rock pigeons** on the ledge, clear of the visitor's line at its middle, and on the wayside stupa's platform (the cliff is their natural roost; the ledge's kerb is not crossed: tested).
 - **Geese and a duck** on the slack river above the ford (the goose, hamsa, is the bird of the cave paintings and of Buddhist art), a loop that follows the river's axis; **a kingfisher** on the west bank below the second washing place.
 - **Not rigged** for want of a model: peafowl, monkeys (both in the paintings), elephants, zebu and buffalo (the life figures' ones remain), bees (the comb under the overhang is geometry only).
+
+## 20. Matching the reference, 5: wear and writing
+All [inferred] from use and climate (dry most of the year, a monsoon of four months); `src/settlements/ajanta/wear.js`. Pads of `polished_sandstone` 6 mm thick lie 3 mm over what they wear on; every size is a hash of its own place.
+- **Stairs.** Both rock-cut stairs (53 treads each) have a pale smooth run along the middle of each tread, its width and side differing tread to tread, where bare feet climb.
+- **Thresholds.** Worn pads before Cave 1's three doors on the porch side and inside, before the chaitya hall's and the cell hall's doors on the ledge; a hollow in the granite threshold of every open hut and one in three of the others.
+- **Ledge.** A pale ring round each votive stupa, worn by pilgrims walking round it (circumambulation, with the stupa on the right) [inferred: the practice is Buddhist and old; the ring's size is ours].
+- **Ford.** The top of each stepping stone worn smooth.
+- **Rain.** Two or three dark streaks down each hut's front wall from the eave, of the other kind of mud than the wall's.
+- **Writing: none.** The cave inscriptions of Ajanta (the Vakataka-period dedications in Cave 16 and 17 are in Brahmi, Sanskrit and Prakrit) are not drawn: the letters of the 5th-century Brahmi cannot be checked glyph by glyph here and none is invented; no shop signs (sellers of the time called their goods). The style's old comment on "marigold garlands" is corrected: marigold is a New World plant; the pieces are generic red and ochre flowers (jasmine and lotus in the booths).
+- **Not done:** soot over the lamps, moss in the gorge's shade (the engine's `damp` does the rock), dust drifts at the cave mouths.
