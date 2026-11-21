@@ -546,6 +546,15 @@ function temple(el, ctx) {
   }
   const sw = W * 0.28, sr = [T[2], cz - sw / 2, T[2] + J * 2.2, cz + sw / 2], n = Math.round(J / 0.22);
   for (let i = 0; i < n; i++) { const z = sr[0] + (sr[2] - sr[0]) * (1 - (i + 1) / n), yy = y0 + J * (i + 1) / n; bag.add(S, box(z, y0 - 0.5, sr[1], z + (sr[2] - sr[0]) / n + 0.02, yy, sr[3])); col.floor([z, sr[1], z + (sr[2] - sr[0]) / n, sr[3]], yy); }
+  // where the feet went: on each tread of the great stair the stone worn pale and smooth in a strip down the middle, wider where the flight is first stepped on and
+  // narrowing toward the head, each tread a little different (a hash of its own place); the strip lies 6 mm over the tread, the stone the porch's threshold wears in
+  if (!el.simple) {
+    const dx = (sr[2] - sr[0]) / n;
+    for (let i = 0; i < n; i++) {
+      const z = sr[0] + (sr[2] - sr[0]) * (1 - (i + 1) / n), yy = y0 + J * (i + 1) / n, h1 = hash3(z, cz, 3), h2 = hash3(cz, z, 5), half = 0.8 - 0.35 * (i / n) + 0.25 * h1, off = (h2 - 0.5) * 0.25;
+      bag.add(LIGHT, box(z + dx * 0.18, yy, cz + off - half, z + dx * 0.82, yy + 0.006, cz + off + half));
+    }
+  }
   // the stair's balustrades (panelled parapets climbing with the flight, a newel with its pot at the head, a seated lion at the foot) and the moonstone at its foot
   if (!el.simple) {
     for (const [zz, side] of [[sr[1] - 0.6, -1], [sr[3], 1]]) {
@@ -642,6 +651,7 @@ function temple(el, ctx) {
     for (let k = 0; k < n; k++) {
       const xa = x0 + run - (k + 1) * d, xb = x0 + run - k * d, yy = y + (top - y) * (k + 1) / n;
       bag.add(S, box(xa, y, z0, xb, yy, z1)); col.floor([xa, z0, xb, z1], yy);
+      if (!el.simple) { const hw = 0.55 + 0.2 * hash3(xa, yy, 9); bag.add(LIGHT, box(xa + d * 0.2, yy, cz - hw, xb - d * 0.1, yy + 0.006, cz + hw)); }   // the worn middle of each tread
     }
     for (const [zz, side] of [[z0 - 0.4, -1], [z1, 1]]) flightWall(bag, x0, top, x0 + run + 0.1, y, zz, zz + 0.4, side, y - 0.05, 0.7, !el.simple);
   }
