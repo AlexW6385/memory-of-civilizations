@@ -20,6 +20,13 @@ E.push({ t: 'shop_row', rect: SHOPS_S, front: 'n', unit: 3.6, enter: [5, 11, 17,
 }
 // worn sills at the doors of the madrasa's and the khanqah's portal passages (wear.js; the back wall of each iwan, pishtaq() in the style's index.js)
 E.push({ t: 'tim_wear', doors: [{ at: [-54.4, 0], axis: 'z', w: 4.5, dep: 0.5 }, { at: [KHANQAH.rect[0] + 0.6 + 5.8, 0], axis: 'z', w: 3.5, dep: 0.5 }] });
+// the way to the door (docs §21): five slabs of marble down the apron's middle, hollowed by feet, a worn threshold across the iwan's mouth, and the
+// two stepped courses round the foot of each of the four minarets
+E.push({
+  t: 'tim_wear',
+  flags: [0, 1, 2, 3, 4].map((i) => ({ at: [-33.6 - 2.4 * i, -1.5], axis: 'z', w: 3.0, dep: 2.2, y: 0.04, mat: 'limestone' })),
+  rings: [[-45, -28], [-45, 28], [-121, -28], [-121, 28]].map((c) => ({ c, r0: 3.4, h0: 0.2 })),
+});
 // the night's lamps of the square: stands, braziers, hung lanterns, the tea-houses' lamps (nightlight.js)
 E.push({ t: 'tim_night', part: 'square' });
 // a paved apron of limestone flags before the pishtaq, worn in the middle (the students' and the faithful's way), edged with a kerb of dressed stone
