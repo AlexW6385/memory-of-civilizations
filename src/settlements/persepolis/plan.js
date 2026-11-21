@@ -5,6 +5,7 @@
 
 import { TERRACE, STAIR, COURT, mountain } from './layout.js';
 import { people } from './people.js';
+import './wear.js';
 import { walkRoutes, placeRoutes } from './walkroutes.js';
 
 // the ways visitors walk on the terrace: the royal way from the stair's head to the Apadana's west stair, and the file from the
@@ -26,6 +27,16 @@ E.push({ t: 'terrace', rect: TERRACE.rect, y0: -1, y1: T, gaps: [[tx0 - 2, STAIR
     E.push({ t: 'block', rect: [x0 + w, Math.min(zA, zB), x0 + w + 1, Math.max(zA, zB)], y0: 0, y1: half + 1, mat: 'limestone_persian' });
   }
   E.push({ t: 'block', rect: [x0 + w, z - 4, tx0, z + 4], y0: 0, y1: T, mat: 'limestone_persian', walk: true });
+}
+// the wear of the treads: the great stair up the terrace's face and the Apadana's west stair (the flights the visitor climbs)
+{
+  const x0 = tx0 - 2 * STAIR.w - 2, z = STAIR.z, w = STAIR.w, half = T / 2, run = 46;
+  for (const s of [-1, 1]) {
+    const zA = z + s * 4, zB = zA + s * run;
+    E.push({ t: 'stair_wear', rect: [x0, Math.min(zA, zB), x0 + w, Math.max(zA, zB)], dir: s < 0 ? 'n' : 's', y0: 0, y1: half, riser: 0.1 });
+    E.push({ t: 'stair_wear', rect: [x0 + w + 1, Math.min(zA, zB), tx0, Math.max(zA, zB)], dir: s < 0 ? 's' : 'n', y0: half, y1: T, riser: 0.1 });
+  }
+  E.push({ t: 'stair_wear', rect: [-85.2, -73, -80, -64], dir: 's', y0: T + 0, y1: T + 2.6, riser: 0.1 }, { t: 'stair_wear', rect: [-85.2, -56, -80, -47], dir: 'n', y0: T + 0, y1: T + 2.6, riser: 0.1 });
 }
 // the paving of the court between the stair and the Apadana: slabs, and the stone drains that carried the rain off the terrace
 E.push({ t: 'terrace_paving', rect: [-148, -140, -86, -20], y: T, drains: [[-148, -81.4, -86, -81.2], [-114, -140, -113.8, -20]] });
