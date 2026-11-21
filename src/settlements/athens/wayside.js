@@ -215,14 +215,14 @@ export function houseSpots(n = 10) {
   });
 }
 
-/** Iron braziers at the lanes' edge, from the ramp's foot along the Way through the Agora: [{ at: [x, z], y }], every 26 m of the walk, alternating sides, 3.8 m off its middle,
+/** Iron braziers at the lanes' edge, from the ramp's foot along the Way through the Agora: [{ at: [x, z], y }], every 18 m of the walk, alternating sides, 3.8 m off its middle,
  *  clear of every building, lot, stall and the ramp (docs §24) [inferred]. */
 export function laneFires() {
   const out = [], from = WALK.findIndex(([x, z]) => x === -310 && z === 70), stalls = stallSites();
   let acc = 12, side = 1;
   for (let i = from; i + 1 < WALK.length; i++) {
     const a = WALK[i], b = WALK[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), tx = (b[0] - a[0]) / L, tz = (b[1] - a[1]) / L;
-    for (; acc < L; acc += 26) {
+    for (; acc < L; acc += 18) {
       const x = a[0] + tx * acc - tz * 3.8 * side, z = a[1] + tz * acc + tx * 3.8 * side; side = -side;
       if (z < -232 || BUILT.some((r) => inRect(r, x, z, 2)) || lotAt(x, z, 2) || pathAt(x, z, RAMP)[0] < 6) continue;
       if (stalls.some((s) => inRect(s.rect, x, z, 1.5))) continue;

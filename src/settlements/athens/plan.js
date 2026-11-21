@@ -28,6 +28,7 @@ const T = ACRO.top, E = [];
   E.push({ t: 'krepis', rect: [XE - 1.2, -10.05, XE + 0.95, 10.05], y0: y, steps: 4, rise: 0.24, tread: 0.35, mat: 'marble', cut: [[XE - 1.3, -2.0, XE + 2.5, 2.0]] });
   E.push({ t: 'stair', rect: [XW - 2.4, -2.0, XW + 1.25, 2.0], dir: 'e', y0: y, y1: y + K, riser: 0.12, base: y - 0.3, mat: 'marble' });
   E.push({ t: 'stair', rect: [XE - 1.25, -2.0, XE + 2.4, 2.0], dir: 'w', y0: y, y1: y + K, riser: 0.12, base: y - 0.3, mat: 'marble' });
+  E.push({ t: 'floor', rect: [-150, -5.5, XW - 2.4 + 0.0, 5.5], y: y + 0.02, th: 0.8, mat: 'travertine' });   // the paved forecourt before the gate, where the ramp ends (docs §24) [inferred]
   for (const r of [[XW - 2.4, -2.0, XW + 1.25, 2.0, 'e'], [XE - 1.25, -2.0, XE + 2.4, 2.0, 'w']]) E.push({ t: 'athens_stairwear', rect: r.slice(0, 4), dir: r[4], y0: y, y1: y + K, riser: 0.12 });   // the worn treads of the two flights (wear.js, docs §24)
   E.push({ t: 'floor', rect: [XW + 1.2, -10.05, XE - 1.2, 10.05], y: y + K, th: K + 0.3, mat: 'marble_floor' });
   for (const z of Z6) { E.push({ t: 'column', at: [XW, z], y: y + K, h: 8.81, d: 1.56, mat: 'marble_column' }); E.push({ t: 'column', at: [XE, z], y: y + K, h: 8.81, d: 1.56, mat: 'marble_column' }); }
