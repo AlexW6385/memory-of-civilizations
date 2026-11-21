@@ -148,3 +148,6 @@ All **[inferred]** (no recording of Ming Shaolin exists; sources not fetched). M
 
 ### 11.4 Animals (critters)
 All **[inferred]** (the animals of a Ming north-Henan village and monastery; no source fetched). `fauna.js` `critters` (rigged, with behaviour): dogs asleep at two shop doors of the walk (2.4 m off the door's lane), a tabby on a home's step, an orange cat at the kitchen range's door, a rooster and two hens at a farmhouse front, two goats at the forecourt's corner, five doves on the paving of two courts, and up to six swallows' mud nests under the eaves of open houses of the walk (the birds sweep out and home). Donkeys stay street-life elements (no donkey model yet). `tests/shaolin-critters.test.mjs`.
+
+### 11.5 Wear and writing, landmark gaps (status)
+Not extended this round. Already in place from §6b/§6e: mud splash, rain streaks and fallen plaster on every wall, dry grass in the joints, the pitted training floor, the tablet and name-board characters on steles, the Shanmen plaque and the shop boards. Worn door steps and thresholds were tried on paper only: the village hall's platform, kerb and the room's own floor stand at three heights within 5 cm of each other, so a wear patch needs a render-checked fit first. **[open]**
