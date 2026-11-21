@@ -10,6 +10,8 @@
 // palace's rooms) also gets its glow ball and the pool of light on the floor under it; `ur_night` is the plan of what no builder lights: the lamp over the door of each house
 // that can be entered, with the pool it throws on the lane.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
+import { box, lathe } from '../../core/geom.js';
+import { COURT } from './layout.js';
 
 const TAU = Math.PI * 2;
 
@@ -89,12 +91,32 @@ export function houseDoor(rect, f) {
 }
 
 /** ur_night: { doors: [{ rect, door }], fires: [{ at, y, h?, r? }] } — one plan, one draw: the door lamp's glow and the pool before the door of each house that can be entered; the fires. */
+/** A clay oil lamp: a saucer with a pinched lip and the wick's flame; varied by k so that no two share a shape. */
+function lamp(bag, x, y, z, k) {
+  const r = 0.065 + 0.01 * ((Math.abs(Math.round(k)) % 5) / 4);
+  bag.add('pottery_dark', lathe([[0.001, 0], [r, 0.012], [r * 1.08, 0.032], [r * 0.7, 0.036], [0.001, 0.026]], 9, null, x, y, z));
+  bag.add('flame', box(x - 0.016, y + 0.03, z - 0.016, x + 0.016, y + 0.1, z + 0.016));
+}
+
 function night(el, { bag }) {
   const H = new Halo();
   for (const d of el.doors || []) {
     const { p, out } = houseDoor(d.rect, d.door);
     H.ball(p[0] + out[0] * 0.3, 2.35, p[1] + out[1] * 0.3, 0.45);
+    lamp(bag, p[0] + out[0] * 0.14, 2.28, p[1] + out[1] * 0.14, d.rect[0] * 7 + d.rect[1]);   // the clay lamp itself, on the ledge of its niche over the door
     H.floor(p[0] + out[0] * 1.4, 0.04, p[1] + out[1] * 1.4, 1.8, 10);
+  }
+  for (const m of el.mats || []) {   // a lamp on the sellers' mat: its small glow and a pool on the ground and the goods
+    lamp(bag, m.at[0], m.y ?? 0.012, m.at[1], m.at[0] * 3 + m.at[1]);
+    H.ball(m.at[0], (m.y ?? 0.012) + 0.16, m.at[1], 0.42);
+    H.floor(m.at[0], 0.04, m.at[1], 2.1, 10);
+  }
+  for (const b of el.pans || []) {   // a clay fire-pan on three bricks, coals and a low flame (bakers and the square's night-sellers)
+    const [x, z] = b.at;
+    bag.add('pottery_dark', lathe([[0.001, 0.16], [0.28, 0.2], [0.34, 0.36], [0.3, 0.38], [0.22, 0.3], [0.001, 0.28]], 12, null, x, 0, z));
+    bag.add('flame', box(x - 0.14, 0.3, z - 0.14, x + 0.14, 0.52, z + 0.14));
+    H.ball(x, 0.75, z, 0.9);
+    H.floor(x, 0.04, z, 3.3, 10);
   }
   for (const f of el.fires || []) {
     H.ball(f.at[0], (f.y ?? 0) + (f.h ?? 1.25), f.at[1], f.r ?? 0.8);
@@ -105,3 +127,31 @@ function night(el, { bag }) {
 
 /** The element table additions: the night plan's element. */
 export const NIGHT_ELEMENTS = { ur_night: night };
+
+
+// ── the Court of Nanna near the visitor (docs/settlements/ur.md §30) ────────────────────────────────────────────────────────────
+
+/**
+ * ur_court_night: oil lamps and banked braziers of the court, placed where the visitor stands on arrival. Built into the landmark's plan (pottery_dark, flame and halo are
+ * already held there, so it costs no draw). The six standards of the way each carry a clay lamp on the ledge of their brick plinth; the two braziers that burn no flame by
+ * day glow with coals; a lamp stands on each jamb of the court's gate. Lights are pushed so that `lit` gives them their halo and pool.
+ */
+export function courtNight(el, { bag, lights }) {
+  const z0 = COURT[1], y = el.y ?? 0, saucer = (x, yy, z, r) => bag.add('pottery_dark', lathe([[0.001, 0], [r, 0.015], [r * 1.05, 0.035], [r * 0.75, 0.04], [0.001, 0.03]], 10, null, x, yy, z));
+  const flame = (x, yy, z, h = 0.07) => bag.add('flame', box(x - 0.018, yy, z - 0.018, x + 0.018, yy + h, z + 0.018));
+  for (const sx of [-1, 1]) for (const dz of [33, 41.5, 50]) {
+    const x = sx * 10.5, z = z0 + dz + 0.32, yy = y + 0.55;
+    saucer(x, yy, z, 0.08); flame(x, yy + 0.035, z);
+    lights.push({ at: [x, yy + 0.2, z], color: '#ffb060', intensity: 1.3, distance: 5 });
+  }
+  for (const [bx, bz] of [[7, z0 + 20], [-7, z0 + 44]]) {
+    bag.add('flame', box(bx - 0.13, y + 1.04, bz - 0.13, bx + 0.13, y + 1.3, bz + 0.13));
+    lights.push({ at: [bx, y + 1.5, bz], color: '#ff9a4a', intensity: 3.4, distance: 9 });
+  }
+  for (const sx of [-1, 1]) {   // the lamp stands on the court gate's jambs: a pottery stand, a saucer, a wick
+    const x = sx * 4.5, z = z0 + 1.9;
+    bag.add('pottery_dark', lathe([[0.15, y], [0.1, y + 0.12], [0.07, y + 0.7], [0.12, y + 0.95], [0.001, y + 0.95]], 10, null, x, 0, z));
+    saucer(x, y + 0.95, z, 0.1); flame(x, y + 0.99, z, 0.08);
+    lights.push({ at: [x, y + 1.3, z], color: '#ffb060', intensity: 1.8, distance: 6 });
+  }
+}

@@ -33,7 +33,9 @@ export async function town() {
   // the night: the lamp over the door of each house that can be entered and the pool it throws on the lane (nightlight.js)
   // the wear of use and weather: the stair's polished lane, the thresholds, the dust at the doors, the quay's damp band (wear.js)
   plans.push(base('ur-wear', [{ t: 'ur_wear', doors: all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door })) }]));
-  plans.push(base('ur-night', [{ t: 'ur_night', doors: all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door })) }]));
+  const mats = [];   // the sellers' lamps on the square's two rows, and fire-pans at the aisle's sides
+  for (const z of [-189, -204]) for (const x of [-38, -32, -26, -19, 13, 19, 25, 31, 37]) if ((Math.round(x * 3 + z) % 3) !== 0) mats.push({ at: [x + 0.7, z + (z > -195 ? -0.5 : 0.5)] });
+  plans.push(base('ur-night', [{ t: 'ur_night', doors: all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door })), mats, pans: [{ at: [-13, -197] }, { at: [12, -197] }, { at: [-13, -183] }, { at: [12, -210] }] }]));
   plans.push(base('ur-lane-palms', trees));
   // the city rampart with its three gates (§5.10), the brickyard at the north-east edge (§5.9), the royal mausoleum outside the temenos (§5.11)
   const [N, E, S] = [[-14, -374, 14, -360], [360, -34, 374, -6], [-14, 360, 14, 374]];
