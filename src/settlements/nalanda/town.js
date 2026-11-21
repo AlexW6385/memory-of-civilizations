@@ -175,8 +175,12 @@ function wayLife() {
 /** The bazaar of the village: booths along the road to it, south of the way's end, facing the road. */
 function bazaar() {
   const B = [], kinds = ['grain', 'veg', 'pots', 'cloth', 'flowers', 'veg', 'grain'];
-  for (let i = 0; i < 7; i++) B.push([52 + i * 10, 128.2, 'n', kinds[i], 700 + i]);
-  for (let z = -84; z < 80; z += 15) B.push([130.2, z, 'w', kinds[Math.floor((z + 84) / 15) % 7], 800 + z]);
+  // the doors the booths must not stand before (a booth is moved along the road, never a door): world points 2.4 m in front of each door
+  const doors = lots().filter((l) => !l.gone).map((l) => { const F = houseDoor(l), q = F.P(F.du + 0.3, -2.4); return { f: l.front, x: q[0], z: q[1] }; });
+  const free = (f, a) => doors.every((d) => (f === 'n' ? !(d.z > 118 && Math.abs(d.x - a) < 3.6) : !(d.x > 120 && d.x < 140 && Math.abs(d.z - a) < 3.6)));
+  const slide = (f, a) => { for (const k of [0, 1, -1, 2, -2, 3, -3, 4, -4]) if (free(f, a + k * 1.2)) return a + k * 1.2; return a; };
+  for (let i = 0; i < 7; i++) B.push([slide('n', 52 + i * 10), 128.2, 'n', kinds[i], 700 + i]);
+  for (let z = -84; z < 80; z += 15) B.push([130.2, slide('w', z), 'w', kinds[Math.floor((z + 84) / 15) % 7], 800 + z]);
   return B.filter(([x, z]) => tankD(x, z) > 8);
 }
 /** What stands behind the houses and in the yards: dung-cake stacks, clay bins, charpoys, hay, the pens and the potter's yard. */

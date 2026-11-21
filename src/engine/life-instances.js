@@ -9,6 +9,7 @@
 
 import * as THREE from 'three/webgpu';
 import { RANGE } from './range.js';
+import { ENV } from './env.js';
 import { material } from './materials.js';
 import { SMALL } from './layers.js';
 import { releaseAfterUpload } from './release.js';
@@ -82,6 +83,7 @@ export class LifeInstances {
         const k = p.matrices.length / 16;
         if (!p.reals) p.reals = new Array(k).fill(p.mat);
         if (!p.reach) p.reach = new Float32Array(k).fill(230);
+        if (!p.dusk) p.dusk = new Float32Array(k).fill(2);
         if (p.key == null) p.key = `auto:${p.mat}:${p.geometry.attributes.position.count}`;
         let alts = shapes.get(p.key);
         if (!alts) shapes.set(p.key, (alts = []));
@@ -107,20 +109,20 @@ export class LifeInstances {
               if ((i & 31) === 31) { await tick(); if (gone()) return; }
               const g = placeHanging(local.clone(), M.fromArray(p.matrices, i * 16));
               const list = rareByMat.get(p.reals[i]) || rareByMat.set(p.reals[i], []).get(p.reals[i]);
-              list.push({ g, x: p.matrices[i * 16 + 12], y: p.matrices[i * 16 + 13], z: p.matrices[i * 16 + 14], reach: p.reach[i] });
+              list.push({ g, x: p.matrices[i * 16 + 12], y: p.matrices[i * 16 + 13], z: p.matrices[i * 16 + 14], reach: p.reach[i], dusk: p.dusk[i] });
             }
           }
           local.dispose(); s.geometry.dispose();
           continue;
         }
-        const all = new Float32Array(s.n * 16), pos = new Float32Array(s.n * 3), reach = new Float32Array(s.n);
+        const all = new Float32Array(s.n * 16), pos = new Float32Array(s.n * 3), reach = new Float32Array(s.n), dusk = new Float32Array(s.n);
         const tinted = s.chunks.some(({ p }) => p.colors);
         const colors = tinted ? new Float32Array(s.n * 3).fill(1) : null;
         let o = 0;
         for (const { p } of s.chunks) {
           const k = p.matrices.length / 16;
           all.set(p.matrices, o * 16);
-          reach.set(p.reach, o);
+          reach.set(p.reach, o); dusk.set(p.dusk, o);
           if (colors && p.colors) colors.set(p.colors, o * 3);
           for (let i = 0; i < k; i++) { pos[(o + i) * 3] = p.matrices[i * 16 + 12]; pos[(o + i) * 3 + 1] = p.matrices[i * 16 + 13]; pos[(o + i) * 3 + 2] = p.matrices[i * 16 + 14]; }
           o += k;
@@ -143,7 +145,7 @@ export class LifeInstances {
         };
         // beyond LIFE_FULL the copies are drawn coarse (src/engine/cells.js), where the shape has a
         // faithful coarse version: made later, a shape at a time (a few ms each, update())
-        const near = make(true), shape = { near, far: null, all, colors, pos, reach, n: s.n };
+        const near = make(true), shape = { near, far: null, all, colors, pos, reach, dusk, n: s.n };
         const g = s.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array;
         // (made in the build worker where the tiles were built there: build-worker.js)
         const pre = s.chunks.map(({ p }) => p.geometry.userData.coarse).find((c) => c !== undefined);
@@ -169,13 +171,13 @@ export class LifeInstances {
     // the rare shapes, per real material: one geometry, drawn by an index of the copies chosen
     for (const [mat, list] of rareByMat) {
       await tick(); if (gone()) return;
-      const n = list.length, pos = new Float32Array(n * 3), reach = new Float32Array(n), ranges = new Uint32Array(n * 2);
+      const n = list.length, pos = new Float32Array(n * 3), reach = new Float32Array(n), dusk = new Float32Array(n), ranges = new Uint32Array(n * 2);
       let o = 0, size = 0;
       list.forEach((c, i) => {
         c.g.computeBoundingBox();
         const b = c.g.boundingBox;
         size = Math.max(size, Math.hypot(Math.max(b.max.x - c.x, c.x - b.min.x), Math.max(b.max.y - c.y, c.y - b.min.y), Math.max(b.max.z - c.z, c.z - b.min.z)));
-        pos[i * 3] = c.x; pos[i * 3 + 1] = c.y; pos[i * 3 + 2] = c.z; reach[i] = c.reach;
+        pos[i * 3] = c.x; pos[i * 3 + 1] = c.y; pos[i * 3 + 2] = c.z; reach[i] = c.reach; dusk[i] = c.dusk;
         const k = c.g.index ? c.g.index.count : c.g.attributes.position.count;
         ranges[i * 2] = o; ranges[i * 2 + 1] = k; o += k;
       });
@@ -203,7 +205,7 @@ export class LifeInstances {
         this.group.add(mesh);
         return mesh;
       };
-      this.rare.push({ near: make(true), index, ranges, pos, reach, n, size });
+      this.rare.push({ near: make(true), index, ranges, pos, reach, dusk, n, size });
     }
   }
 
@@ -225,6 +227,9 @@ export class LifeInstances {
     // chosen again after a step of 4 m or a turn of 35° (dir: the view's direction, in the
     // settlement's frame); the copies well behind the view are left out, as merge.js LodSet does
     // (those within NEAR_ALL kept: their shadows may fall into the view)
+    // (the figures that leave at night: chosen again whenever the night's level moves by a twentieth)
+    const night = ENV.night.value, nq = Math.round(night * 20);
+    if (nq !== this.nightQ) { this.nightQ = nq; force = true; }
     const turned = dir && (!this.lastDir || dir[0] * this.lastDir[0] + dir[1] * this.lastDir[1] + dir[2] * this.lastDir[2] < COS_TURN);
     if (!force && !turned && this.last && Math.hypot(x - this.last[0], y - this.last[1], z - this.last[2]) < 4) return;
     this.last = [x, y, z];
@@ -233,12 +238,12 @@ export class LifeInstances {
     const behind = (dx, dy, dz, d2, r) => dir && d2 > NEAR_ALL2 && dx * vx + dy * vy + dz * vz < Math.sqrt(d2) * COS_VIEW - r;
     const full2 = LIFE_FULL * LIFE_FULL;
     for (const L of this.meshes) {
-      const { near, far, all, colors, pos, reach, n } = L;
+      const { near, far, all, colors, pos, reach, dusk, n } = L;
       const Mn = near.instanceMatrix.array, Cn = near.instanceColor.array, Mf = far?.instanceMatrix.array, Cf = far?.instanceColor.array;
       let c = 0, f = 0;
       for (let i = 0; i < n; i++) {
         const dx = pos[i * 3] - x, dy = (pos[i * 3 + 1] - y) * 0.7, dz = pos[i * 3 + 2] - z, r = reach[i] * RANGE, d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 > r * r) continue;
+        if (d2 > r * r || dusk[i] < night) continue;
         if (behind(dx, pos[i * 3 + 1] - y, dz, d2, 3)) continue;
         // (the coarse copies beyond LIFE_FULL, where the shape has a coarse version)
         const toFar = far && d2 > full2, M = toFar ? Mf : Mn, C = toFar ? Cf : Cn, k = toFar ? f++ : c++;
@@ -259,14 +264,14 @@ export class LifeInstances {
     // the rare shapes: the index ranges of the copies within reach, gathered at the front of the
     // mesh's index; the bounds those of the copies chosen
     for (const B of this.rare) {
-      const { near: mesh, index, ranges, pos, reach, n, size } = B;
+      const { near: mesh, index, ranges, pos, reach, dusk, n, size } = B;
       const g = mesh.geometry, dst = g.index.array;
       let fill = 0, x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
       for (let i = 0; i < n; i++) {
         const px = pos[i * 3], py = pos[i * 3 + 1], pz = pos[i * 3 + 2];
         const dx = px - x, dy = (py - y) * 0.7, dz = pz - z, r = reach[i] * RANGE;
         const d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 > r * r) continue;
+        if (d2 > r * r || dusk[i] < night) continue;
         if (behind(dx, py - y, dz, d2, size)) continue;
         const s0 = ranges[i * 2], k = ranges[i * 2 + 1];
         dst.set(index.subarray(s0, s0 + k), fill); fill += k;
