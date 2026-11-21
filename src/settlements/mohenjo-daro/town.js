@@ -72,12 +72,13 @@ function people() {
   for (const l of lots()) if (!['house', 'small'].includes(l.kind)) { const p = P(l, l.rect[3] - l.rect[1] > 0 ? Math.min(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 99) / 2 : 6, 6.0); man(p, facing(l) + Math.PI, { y: l.y, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); }
   // an apprentice at each workshop, the mistress of each furnished house at her hearth in the court
   for (const l of lots()) {
+    if (l.walk) continue;   // (the walk's lots keep their master only: more figure kinds near the arrival cost draws)
     if (!['house', 'small'].includes(l.kind)) { const p = P(l, 3.5, 6.0); man(p, facing(l) + Math.PI + 0.6, { y: l.y, pose: 'stand', hair: 'short', cloth: 'cloth_white', beard: 0 }); }
     else if (l.open && l.kind === 'house') { const p = P(l, (l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]) * 0.45, 4.6); woman(p, rand() * 6.28, { y: l.y, pose: 'cross', carry: 'none' }); }
   }
   // inside the lit rooms of the open houses: the household just within the first rooms' doors, off the doorway's line (the rooms: back range, T 0.7, 4.4 deep, 2 or 3 to the width)
   for (const l of lots()) {
-    if (!l.open || l.kind === 'small') continue;
+    if (!l.open || l.kind === 'small' || l.walk) continue;
     const Wl = l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], Dl = l.front === 'w' || l.front === 'e' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
     const nb = Wl > 15 ? 3 : 2, bw = (Wl - 1.4) / nb, v = Dl - 0.7 - 4.4 + 1.0, rot = facing(l);
     for (let i = 0; i < Math.min(2, nb); i++) {
@@ -129,7 +130,7 @@ function life() {
     if (rand() > 0.55) continue;
     const Wl = Math.max(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 3), dU = doorU(l);
     let u = 1.2 + rand() * (Wl - 2.4);
-    if (Math.abs(u - dU) < 1.5) u = dU + (dU < Wl / 2 ? 1.6 : -1.6) * (1 + 0.3 * rand());   // (never in the doorway's lane)
+    if (Math.abs(u - dU) < 1.5) u = dU + (dU < Wl / 2 ? 1.6 : -1.6) * 1.15;   // (never in the doorway's lane)
     const du = P(l, Math.max(0.6, Math.min(Wl - 0.6, u)), -0.5);
     L.push({ t: pick(rand, ['pot', 'basket', 'firewood']), kind: pick(rand, ['water_pot', 'dark_pot', 'matka']), at: du, y: l.y, rot: rand() * 6.28, n: 2, seed: Math.floor(rand() * 1e9) });
   }
@@ -141,7 +142,7 @@ export async function town() {
   if (CACHE) return CACHE;
   const plans = [], LT = lots();
   plans.push(base('md-streets', [{ t: 'indus_streets', streets: streets(), lanes: lanes() }]));
-  { const ST = streets(); for (let i = 0; i < ST.length; i += 3) plans.push(base(`md-streetwork-${i / 3}`, [{ t: 'indus_streetwork', streets: ST.slice(i, i + 3), seed: 40 + i, avoid: [PLAZA, [QUAY.x0, QUAY.z0, QUAY.x1, QUAY.z1], CUSTOMS] }])); }
+  { const ST = streets(); for (let i = 0; i < ST.length; i += 3) plans.push(base(`md-streetwork-${i / 3}`, [{ t: 'indus_streetwork', streets: ST.slice(i, i + 3), seed: 40 + i, avoid: [PLAZA, [QUAY.x0, QUAY.z0, QUAY.x1, QUAY.z1], CUSTOMS] }, ...SPOTS.filter((sp) => sp[3] === 0 && ST.slice(i, i + 3).some((r) => inRect(r, sp[1], sp[2], 1) && ST.findIndex((q) => inRect(q, sp[1], sp[2], 1)) === ST.indexOf(r))).map((spot) => ({ t: 'md_lanework', spot, at: [spot[1], spot[2]] }))])); }
   // wells at the mouths of some lanes, in the street before them: the lanes' neighbours draw from them (one well to every three houses is the city's figure; the courts keep their own)
   {
     const W = [];
@@ -152,7 +153,6 @@ export async function town() {
     });
     for (let i = 0; i < W.length; i += 6) plans.push(base(`md-wells-${i / 6}`, W.slice(i, i + 6)));
   }
-  plans.push(base('md-walkwork', SPOTS.map((spot) => ({ t: 'md_lanework', spot, at: [spot[1], spot[2]] }))));
   plans.push(base('md-market', [{ t: 'indus_market', rect: PLAZA, well: WELL_BIG }, ...[[12, 12], [36, 12], [12, 36], [36, 36]].map(([a, b]) => ({ t: 'indus_shade', c: [PLAZA[0] + a, PLAZA[1] + b] }))], { rooms: [{ id: 'market place', rect: PLAZA, y: 0, kind: 'open', market: true }] }));
   // the river in strips of 30 m, each its own plan, so that each one's bounds stay inside the disc
   for (let x = QUAY.x1, k = 0; x < 439; x += 30, k++) plans.push(base('md-river-' + k, [{ t: 'indus_river', x0: x, x1: x + 30, level: RIVER.level }]));

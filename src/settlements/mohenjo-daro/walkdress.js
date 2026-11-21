@@ -31,18 +31,18 @@ function lanework(el, ctx) {
   const jar = (mat, u, v, s, y0 = 0) => { const p = P(u, v); bag.add(mat, lathe(JAR(s), 8, null, p[0], y + y0, p[1])); };
   if (kind === 'stand') {
     // a brick table for the water-jars with a clay ladle on a peg, a drip-pot below, a mat laid at its foot [inferred: the stands of later South Asian streets]
-    B('brick', -0.9, 0, 0.05, 0.9, 0.62, 0.65, true); B('brick_buff', -0.95, 0.62, 0.0, 0.95, 0.68, 0.7);
+    B('brick', -0.9, 0, 0.05, 0.9, 0.62, 0.65, true); B('brick', -0.95, 0.62, 0.0, 0.95, 0.68, 0.7);
     jar(h(1) < 0.5 ? 'terracotta' : 'pottery_dark', -0.45, 0.35, 1.5 + 0.3 * h(2), 0.68); jar('terracotta', 0.25, 0.33, 1.6 + 0.25 * h(3), 0.68);
     B('timber', 0.62, 0.68, 0.2, 0.66, 0.9, 0.24); B('terracotta', 0.58, 0.9, 0.12, 0.72, 0.95, 0.3);
     jar('pottery_dark', 0.0, 0.95, 0.9, 0);
     B('reed_mat', -0.9, 0, 0.8, 0.9, 0.025, 1.5);
   } else if (kind === 'shrine') {
     // a plinth of brick with a niche behind: terracotta figurines of the seated mother-goddess kind and bulls, a lamp blackened with soot, a cord of flowers [inferred: the figurines are stated finds, the way side is ours]
-    B('brick', -0.45, 0, 0.05, 0.45, 0.5, 0.75, true); B('brick_buff', -0.5, 0.5, 0.0, 0.5, 0.56, 0.8);
+    B('brick', -0.45, 0, 0.05, 0.45, 0.5, 0.75, true); B('brick', -0.5, 0.5, 0.0, 0.5, 0.56, 0.8);
     B('mudbrick', -0.4, 0.56, 0.05, 0.4, 1.35, 0.3); B('bitumen', -0.2, 0.9, 0.3, 0.2, 1.2, 0.32);
     for (let k = -1; k <= 1; k++) { const p = P(k * 0.22, 0.45); fig(bag, p[0], y + 0.56, p[1], 0.9 + 0.3 * hash(x + k, z, 4)); }
     { const p = P(0.34, 0.6); lamp(bag, p[0], y + 0.56, p[1]); }
-    B('cloth_ochre', -0.3, 0.57, 0.62, 0.3, 0.6, 0.7);
+    B('terracotta', -0.3, 0.57, 0.62, 0.3, 0.6, 0.7);
   } else if (kind === 'potmat') {
     // the potter's mat: rows of pots by size, a stack of bowls, a seller's low stool of mud brick (the keeper sits among the pots)
     B('reed_mat', -1.3, 0, 0.35, 1.3, 0.025, 1.9);
@@ -53,15 +53,15 @@ function lanework(el, ctx) {
     // the trader's mat: a balance (beam on a post, two pans) and the chert cubes of its weights in a 5:2:1 ratio [stated: Wikipedia "Mohenjo-daro", weights; the balance [inferred]]
     B('reed_mat', -1.0, 0, 0.35, 1.0, 0.025, 1.6);
     B('timber', -0.04, 0.025, 0.7, 0.04, 0.85, 0.76); B('timber', -0.45, 0.82, 0.69, 0.45, 0.85, 0.77);
-    for (const s of [-1, 1]) { B('rope_fibre', s * 0.43 - 0.006, 0.45, 0.72, s * 0.43 + 0.006, 0.82, 0.74); B('bronze', s * 0.43 - 0.13, 0.43, 0.65, s * 0.43 + 0.13, 0.45, 0.81); }
-    for (let k = 0; k < 6; k++) { const s = [0.07, 0.05, 0.05, 0.035, 0.035, 0.03][k]; B('granite_grey', -0.8 + k * 0.17, 0.025, 1.1, -0.8 + k * 0.17 + s, 0.025 + s, 1.1 + s); }
-    for (let k = 0; k < 3; k++) B('sacking', 0.35 + k * 0.2, 0.025, 1.0, 0.5 + k * 0.2, 0.2, 1.3);
+    for (const s of [-1, 1]) { B('timber', s * 0.43 - 0.006, 0.45, 0.72, s * 0.43 + 0.006, 0.82, 0.74); B('wood_dark', s * 0.43 - 0.13, 0.43, 0.65, s * 0.43 + 0.13, 0.45, 0.81); }
+    for (let k = 0; k < 6; k++) { const s = [0.07, 0.05, 0.05, 0.035, 0.035, 0.03][k]; B('pottery_dark', -0.8 + k * 0.17, 0.025, 1.1, -0.8 + k * 0.17 + s, 0.025 + s, 1.1 + s); }
+    for (let k = 0; k < 3; k++) B('reed_mat', 0.35 + k * 0.2, 0.025, 1.0, 0.5 + k * 0.2, 0.2, 1.3);
     B('mudbrick', -0.2, 0, 1.3, 0.2, 0.3, 1.65);
   } else if (kind === 'fuel') {
     // fuel for the hearths: a stack of tamarisk logs and dung cakes in a heap against the wall, a basket [stated: dung cakes are fuel in later South Asia; inferred here]
     for (let r = 0; r < 4; r++) for (let k = 0; k < 6 - r; k++) B('wood_dark', -1.0 + r * 0.17 + k * 0.33, r * 0.14, 0.05 + 0.02 * hash(x + k, z + r, 6), -0.72 + r * 0.17 + k * 0.33, r * 0.14 + 0.12, 0.7);
     for (let k = 0; k < 6; k++) B('mudbrick', 0.9 + (k % 3) * 0.2, (k > 2 ? 0.1 : 0), 0.1, 1.07 + (k % 3) * 0.2, (k > 2 ? 0.2 : 0.1), 0.34);
-    jar('wicker', -0.2, 1.0, 1.3, 0);
+    jar('reed_mat', -0.2, 1.0, 1.3, 0);
   }
 }
 

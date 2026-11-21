@@ -5,6 +5,7 @@
 import { PLAT, MOUND, MOUND_BATTER, EAST_STAIR, SOUTH_RAMP, BATH, GRANARY, PILLARED, COLLEGE, TOP, lanes, lots, houseEl, inRect } from './layout.js';
 import { house } from '../../styles/indus/house.js';
 import { walkRoutes } from './walkroutes.js';
+import { SPOTS } from './walkdress.js';
 
 const E = [];
 E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EAST_STAIR.rect, SOUTH_RAMP.rect], hole: BATH.pool });
@@ -38,6 +39,9 @@ E.push({ t: 'indus_college', rect: COLLEGE, y: PLAT });
   E.push({ t: 'indus_bathdress', B: BATH, y: PLAT, seed: 5 });
   E.push({ t: 'indus_topdress', y: PLAT, B: BATH, college: COLLEGE, pillared: PILLARED, granary: GRANARY, stair: EAST_STAIR.rect, seed: 8 });
 }
+
+// what stands in the streets of the platform on the visitor's walk (walkdress.js)
+for (const spot of SPOTS) if (spot[3] === 7) E.push({ t: 'md_lanework', spot, at: [spot[1], spot[2]] });
 
 const room = (id, rect, y, kind, o = {}) => ({ id, rect, y, kind, ...o });
 const [cx0, cz0, cx1, cz1] = BATH.court, ex = BATH.outer[2] - 7.2 - 0.45;
