@@ -2,6 +2,7 @@
 // scholars at the House of Wisdom's desks, the caliph and his court in the audience chamber, guards at the gates, worshippers in the mosque,
 // porters and boatmen at the jetties, water-carriers, women with jars, donkeys and camels, goods in the streets. Still figures and objects
 // of use (src/objects); the walkers are the movers'.
+import './elements.js';
 import { lodTiles } from '../lod.js';
 import { ALL_SUQS, C, PALACE, MOSQUE, LIBRARY, SUQS, RC, RIVER, CANAL, JETTIES, jettyAt, riverX, lots, inRect } from './layout.js';
 import { MASJIDS, KHAN_RECT, HAMMAM_RECT, WORKSHOPS, CANAL_BRIDGES, moored } from './layout.js';
@@ -14,9 +15,16 @@ const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));  
 const CL = ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_indigo', 'cloth_green', 'cloth_grey', 'cloth_maroon', 'cloth_white'];
 const BLACK = 'cloth_black';
 
+/** The keepers of the suq bays and of the south gate road's rooms, in 60 m cells, each cell a plan shown within 100 m of its middle (docs §20). */
+function keeperPlans(K) {
+  const cells = new Map();
+  for (const f of K) { const k = `${Math.floor(f.at[0] / 60)},${Math.floor(f.at[1] / 60)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(f); }
+  return [...cells].sort().map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { id: `abbasid-baghdad-keepers-${k}`, style: 'abbasid-baghdad', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t: 'bag_keepers', list }], rooms: [], bounds: [-520, -520, 520, 520], entrance: { at: [C[0], C[1] + 60], facing: 'n' }, center: [i * 60 + 30, j * 60 + 30], near: 100 }; });
+}
 export async function lifePlan() {
   const rand = rng(762), P = [], plans = [];
   const pick = (a) => a[Math.floor(rand() * a.length)];
+  const K = [], keep = (f) => { const n = P.length; f(); K.push(...P.splice(n)); };       // the keepers: made in the same order, built into near plans (keeperPlans)
   const skin = () => pick(['skin_medium', 'skin_medium', 'skin_dark', 'skin_light']);
   // men: the long tunic (qamis) with a sash, a turban; women: a long dress and a veil; porters: a short tunic, the head bound; the court in black
   const man = (at, y, rot, o = {}) => P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(CL), cloth2: pick(CL), over: pick(['sash', 'sash', 'cloak', 'none']), skin: skin(), hat: 'turban', hatMat: pick(['cloth_white', 'cloth_white', 'cloth_ochre', 'cloth_indigo']), feet: 'shod', hair: 'short', beard: rand() < 0.7, ...o });
@@ -28,7 +36,7 @@ export async function lifePlan() {
     for (const k of suqKeepers({ rect: s.rect })) {
       if (rand() < 0.22) continue;
       const rot = face(k.at, [k.at[0] + k.toward[0], k.at[1] + k.toward[1]]);
-      man(k.at, 0, rot, { pose: 'cross', over: pick(['sash', 'none']), beard: rand() < 0.8 });
+      keep(() => man(k.at, 0, rot, { pose: 'cross', over: pick(['sash', 'none']), beard: rand() < 0.8 }));
     }
   });
   // buyers at the stalls, in the suq streets and at the crossings (a few; the walkers are the movers')
@@ -152,7 +160,7 @@ export async function lifePlan() {
     for (const [dx, dz] of [[-3, 9], [2.5, 8], [-1, 4]]) P.push({ t: 'figure', at: [hx + dx, hz + dz], y: 0, rot: rand() * 6, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'bare', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'short', beard: rand() < 0.6, pose: 'sit_ground' });
     for (const w of WORKSHOPS) { const wx = (w.rect[0] + w.rect[2]) / 2, wz = (w.rect[1] + w.rect[3]) / 2; man([wx + 1.2, wz + 1.0], 0, 0, { pose: w.kind === 'perfumer' ? 'cross' : 'stand', cloth: pick(CL), over: 'sash' }); if (w.kind !== 'coppersmith') porter([wx - 1.5, wz + 2.2], 0, 3.14, { pose: 'stand' }); }
     // the service houses of the south gate road: goods and sitters before the fronts, the keepers inside
-    { const s = esplanadeShopFronts(); E.push(...s.E); for (const p of s.P) man(p.at, p.y, p.rot, { pose: p.pose, over: 'none' }); for (const q of s.I) (q.guard ? guard : man)(q.at, 0.03, q.rot, q.guard ? {} : { pose: q.pose ?? 'stand', cloth: pick(CL), over: 'sash' }); }
+    { const s = esplanadeShopFronts(); E.push(...s.E); for (const p of s.P) man(p.at, p.y, p.rot, { pose: p.pose, over: 'none' }); for (const q of s.I) keep(() => (q.guard ? guard : man)(q.at, 0.03, q.rot, q.guard ? {} : { pose: q.pose ?? 'stand', cloth: pick(CL), over: 'sash' })); }
     for (const x of [-110]) void x;
   }
   // ── the water's edge: fishermen in the moored quffas, ducks and geese on the banks and the canal's quay, a boat yard's fire and fuel at the canal's end ──
@@ -166,6 +174,7 @@ export async function lifePlan() {
   E.push(...streetHalos(E), ...bayLamps(), ...roomSpills(), ...gateBraziers(), ...doorGlows(), ...campBraziers());
   const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-520, -520, 520, 520], entrance: { at: [C[0], C[1] + 60], facing: 'n' } });
   plans.push(base('abbasid-baghdad-people', 'life', [...P, ...E]));
+  plans.push(...keeperPlans(K));
   void lodTiles; void CANAL;
   return plans;
 }
