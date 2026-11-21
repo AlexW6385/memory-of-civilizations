@@ -59,6 +59,10 @@ for (const s of [-1, 1]) for (const z of [54, 158]) E.push({ t: 'kagaribi', at: 
 for (let x = -38; x <= 38; x += 6.4) if (Math.abs(x) > 10) E.push({ t: 'tomyo', at: [x, -27], y: 0 });
 for (const s of [-1, 1]) for (const z of [24, 6, -8, -20]) E.push({ t: 'tomyo', at: [s * 7.4, z], y: 0 });
 for (const s of [-1, 1]) for (const z of [99.4, 108.6]) E.push({ t: 'taimatsu', at: [s * 4.5, z], y: 0 });
+// job 1 of the second pass: the service quarter's way (z 60 to 140) and Suzaku Avenue south of the Great South Gate were dark within 15 m of the walker;
+// lamp stands along the way's edge, torch posts down the avenue's sides [inferred, as above]
+for (const s of [-1, 1]) for (const z of [68, 80, 92, 116, 128, 140]) E.push({ t: 'tomyo', at: [s * 6.5, z + (s > 0 ? 3 : 0)], y: 0 });
+for (const s of [-1, 1]) for (const z of [172, 196, 220, 244]) E.push({ t: 'taimatsu', at: [s * 7, z + (s > 0 ? 6 : 0)], y: 0 });
 // the visitor's walk (walk.js, docs §19): from the arrival down the axis through the gates to the avenue and the market, and into the opened houses and shops along it
 walks.push(WALK[0].map(([x, z]) => [x, z]));
 for (const l of walkLots().slice(0, 40)) { const r = routeInto(l); r.y0 = 0; walks.push(r); }
