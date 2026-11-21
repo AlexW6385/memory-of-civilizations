@@ -3,6 +3,7 @@
 // the looms, the benches and the stairs, townspeople on the pavements, queues at the shops, children in the lane. Several plans (the four quarters, the grove, the estate)
 // so that each builds in turn and the viewer culls them by distance.
 import { streetLife, WHEELED } from './street-life.js';
+import { nightFigures } from './night-figures.js';
 import { lampSites, LAMP_H } from './lamps.js';
 import { nightPlan } from './nightlight.js';
 import { houseSpec } from '../../styles/bauhaus/tenement.js';
@@ -206,6 +207,7 @@ function life() {
     }
   }
   streetLife({ fig, woman, P, rand });
+  nightFigures(P);   // LAST: the figures of the night (nightKeep 1), with seeds of their own, so no other figure's seed moves
   return P;
 }
 
