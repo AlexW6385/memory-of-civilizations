@@ -215,6 +215,18 @@ export async function town() {
     K.push({ t: 'ka_barklitter', list: bl });
   }
   void poolD; void inRect;
+  // a small fire on the apron 6 m from the arrival, off the lane, with two who keep it (added last: no other figure's seed moves)
+  {
+    const fx = -5.6, fz = -16.4, y = height(fx, fz);
+    K.push({ t: 'ka_fire', at: [fx, fz], y, seed: 77 });
+    woman([fx + 1.0, fz + 0.8], y, -2.3, { pose: 'sit_ground' });
+    man([fx - 1.0, fz + 0.5], y, 1.2, { pose: 'sit_ground', beard: true });
+  }
+  // the people of the night's fires stay out after dusk (src/objects/kit.js nightDusk): whoever sits, kneels or stands within 3.4 m of a hearth, and the man poling the canoe that carries one (nightlight.js)
+  {
+    const fires = K.filter((e) => e.t === 'ka_fire').map((e) => e.at);
+    for (const e of L) if (e.t === 'figure' && (fires.some((f) => Math.hypot(f[0] - e.at[0], f[1] - e.at[1]) < 3.4) || e.pose === 'punt')) e.nightKeep = 1;
+  }
   // the country in four quarters (so that the far ones cull apart)
   const quad = [[], [], [], []];
   const qi = (p) => (p[0] > 0 ? 1 : 0) + (p[1] > 20 ? 2 : 0);

@@ -71,6 +71,7 @@ function fireGlow(el, base) {
     if (Hs.kind !== 'dome') { const zw = Hs.kind === 'bark' ? -2.0 + 0.1 : -1.7 + 0.22, [px, pz] = w(0, zw); H.wall(px, y + 1.05, pz, [s, c], 1.15, 0.7, 8, 0.42); }   // the painting on the inner wall in the firelight
   } else {
     H.ball(x, y + 0.5, z, 0.95, 0.72 * q); H.floor(x, y + 0.08, z, 3.3, 3.0, 0, 12, 0.88);
+    H.floor(x, y + 0.1, z, 7.5, 6.5, 0, 12, 0.3);                                                      // the wide faint spill: the apron round a camp, firelit as far as the next
     if (S) {
       const cy = ceilY(S, x, z) - 0.06;
       H.floor(x, cy, z, 3.6, 2.4, 0, 10, 0.5);                                                         // the roof over the hearth, black with soot, lit from below
