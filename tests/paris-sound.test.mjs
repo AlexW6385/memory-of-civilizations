@@ -143,7 +143,8 @@ test('the bells: each hour rings from the north tower, the parish churches answe
     assert.ok(m.ringBusy > t0 + 15, `${kind} rings for ${(m.ringBusy - t0).toFixed(0)} s`);
     assert.ok(count() - before < 400, `${kind} makes few nodes at once`);
     let worst = 0;
-    while (m.cues.length) { ctx.currentTime += 0.09; const c = count(); m.placeEvents(); worst = Math.max(worst, count() - c); }
+    // the ring's own cues are drained in its length (the placed life of the place keeps queueing its own, so 'until none are left' never ends)
+    for (const end = m.ringBusy + 3; ctx.currentTime < end;) { ctx.currentTime += 0.09; const c = count(); m.placeEvents(); worst = Math.max(worst, count() - c); }
     assert.ok(worst < 220, `${kind}: at most ${worst} nodes in a tick`);
   }
   // the curfew is the longest and the deepest; the night's matins is bells only
