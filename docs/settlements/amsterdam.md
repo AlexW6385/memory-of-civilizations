@@ -264,3 +264,16 @@ Marking: [stated] has a source named beside it; [inferred] is this dossier's rea
 - [stated] Latin capitals, as the Dutch Republic wrote on signs, gable stones and public buildings. The letter table is Rome's verified one (`src/settlements/rome/lettering.js`: A-Z without J, U, W), read only; a text is written only if every letter is in it.
 - [inferred] The board words in the spelling of the time: BROOD (bread), KAES (cheese), LAKEN (cloth), SPECERYE (spices), POTTEN (pots, for Delft ware), TABAK. The spellings are plausible for 1670 but were not checked against a dated sign.
 - Not done: wear (worn treads and thresholds, the quay walls' waterline stain) and inscriptions on the Town Hall and the Weigh House.
+
+## 11. Second pass (narrow form)
+
+### 11.1 Night near the visitor
+- Seen (arrival and the Damrak head, `--night 1`, low): the Dam's lamps and the houses' candle panes lit, but the Town Hall's whole front was dark and the Dam before it empty of light.
+- Built (`nightlight.js` `hallLights`, in the existing night plan, no new draw): candles behind a share of the Town Hall's 4 window rows (hash of bay and row; the clerks' and burgomasters' rooms lower, fewer above), a lantern hung in each of the seven arches with its pool, and a brazier of the watch before the middle arch. [stated] Amsterdam's oil street lamps from 1669 (§10.2). [inferred] The arch lanterns and the watch's brazier (the burgher guard kept the Dam at night); no source for the count of lit rooms. Re-rendered: the lit windows, the arch lanterns and the lamps' pools are visible at the low preset.
+### 11.2 Budget (MAIN pass)
+- Arrival 401 main draws / 3.09 M triangles (before and after). Walk poses (20,-225), (31.5,-275), (-14,-185), each at yaw 0 and 3.1416: 349, 405, 297, 434, 382, 390 main draws, all under 3.1 M triangles. Nothing over; no splitting needed.
+### 11.3 The walk's gaps
+- Tried opening the walk into the lot at (49.09, -210.39): the walker is stuck at the stoop (about 2.1 m from the front, the house's top-field roof shell in the shared dutch style); left in NOT_WALKED. The lot at (-0.76, -273) (stair block fills half the door) is likewise left. Both need a change in src/styles/dutch (read-only here). Keepers are already built into a near plan; the door lanes are kept by `nudge()`; walk-check ok (30 routes).
+### 11.4 The landmark and wear
+- `wear.js` (element `am_wear`, in the landmark plan's bluestone, no new draw, no collision): paving trodden dark before each of the seven arches (two ragged patches each) and splash/rising-damp tongues on the plinth's foot between the arches. [inferred]: wear from the geometry of use; no measured source. Seen by day: the patches are faint on the dark paving, the splash only at the foot of the front.
+- Still short: the quay walls' waterline stain; worn treads at the Weigh House and Nieuwe Kerk doors; inscriptions on the Town Hall and Weigh House; the two closed lots above; the Nieuwe Kerk dark at night.

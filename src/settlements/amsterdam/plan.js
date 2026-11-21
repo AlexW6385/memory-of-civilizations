@@ -1,5 +1,6 @@
 // The Dam about 1670 (docs/settlements/amsterdam.md §2–§4): the Town Hall, the Nieuwe Kerk's tower,
 // the Westerkerk; the canals' water and bridges; ships on the IJ.
+import './wear.js';
 import { RADIUS, C, RINGS, CANAL_W, HALL, DAM, IJ_Z, WATER, GROUND, QUAY, BRIDGE_ANGLES, DAMRAK, WAAG, FISH, NIEUWE_KERK, MONTEL, westerkerk, westerNave, height } from './layout.js';
 
 const wk = westerkerk(), wn = westerNave();
@@ -24,6 +25,7 @@ export const dam = {
     { t: 'dutch_church', rect: [wn[0], wk[1] + 4.5, wn[2], wn[3]], h: 15, transepts: [[wn[1] + 9, wn[1] + 22], [wn[1] + 30, wn[1] + 43]], tw: 3.5, gables: ['n', 's'], door: 's', y: GROUND, interior: true, seed: 1631 },
     // the Weigh House before the Town Hall's north wing; the square paved, its gutters; the fish benches at the Damrak's head; sledges
     { t: 'waag', rect: WAAG, y: GROUND },
+    { t: 'am_wear' },
     { t: 'dam_paving', y: GROUND, gz: [-231, -208.2, -259], gx: [5], fields: [
       { rect: [DAM[0], DAMRAK[3] + QUAY + 0.55, DAM[2], DAM[3]] },
       { rect: [DAM[0], -262.4, DAMRAK[0] - QUAY - 0.55, DAMRAK[3] + QUAY + 0.55], kerb: 'we' },
