@@ -56,7 +56,7 @@ function soot(bag, rect, f, y, h, mat, rand) {
 function wallAd(bag, rect, f, y, y0, h, r) {
   const F = face(rect, f), vis = h - y0;
   if (vis < 8.5 || F.L < 9) return;
-  const name = 'X'.repeat(8), bm = ADS[Math.floor(r() * ADS.length)], w = Math.min(14, F.L - 3), u0 = (F.L - w) / 2 + (r() - 0.5) * 1.5, cell = fitCell(['COCA-COLA', 'CAMELS', 'LUCKY STRIKE', 'WRIGLEYS', 'CHESTERFIELD', 'PEPSODENT', 'ARROW SHIRTS', 'CAMPBELLS SOUP'][ADS.indexOf(bm)], w - 1.2, 0.3), hh = Math.min(vis - 4.2, 5 * cell + 2.4), yb = y + h - 2.6 - hh;
+  const name = 'X'.repeat(8), bm = ADS[Math.floor(r() * ADS.length)], w = Math.min(14, F.L - 3), u0 = (F.L - w) / 2 + (r() - 0.5) * 1.5, cell = fitCell(['SODA', 'CIGARETTES', 'TOBACCO', 'CANDY', 'CIGARS', 'TOOTHPASTE', 'SHIRTS', 'SOUP'][ADS.indexOf(bm)], w - 1.2, 0.3), hh = Math.min(vis - 4.2, 5 * cell + 2.4), yb = y + h - 2.6 - hh;
   bag.add(bm, F.R(u0, u0 + w, yb, yb + hh, 0, 0.07));
   return name;
 }

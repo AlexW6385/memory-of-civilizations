@@ -137,7 +137,7 @@ function soot(bag, [x0, z0, x1, z1], f, y, h, mat, rand) {
   for (let i = 0; i < n; i++) put(i * L / n, (i + 1) * L / n, Math.max(low, top - 0.6 - rand() * 0.9), top);
   for (const u of [0.05, L - 0.55]) put(u, u + 0.5, Math.max(low, top - 4 - rand() * 6), Math.max(low, top - 0.6));
 }
-const ADS = [['COCA-COLA', 'car_red', 'paint_white'], ['CAMELS', 'paint_cab_yellow', 'car_black'], ['LUCKY STRIKE', 'shutter_green', 'gold'], ['WRIGLEYS', 'car_blue', 'paint_white'], ['CHESTERFIELD', 'paint_white', 'car_red'], ['PEPSODENT', 'prussian_blue', 'paint_white'], ['ARROW SHIRTS', 'stucco_cream', 'car_blue'], ['CAMPBELLS SOUP', 'cloth_red', 'paint_white']];
+const ADS = [['SODA', 'car_red', 'paint_white'], ['CIGARETTES', 'paint_cab_yellow', 'car_black'], ['TOBACCO', 'shutter_green', 'gold'], ['CANDY', 'car_blue', 'paint_white'], ['CIGARS', 'paint_white', 'car_red'], ['TOOTHPASTE', 'prussian_blue', 'paint_white'], ['SHIRTS', 'stucco_cream', 'car_blue'], ['SOUP', 'cloth_red', 'paint_white']];
 /** A painted sign board on the roof (docs §1i): on an iron frame behind the parapet, facing the street, the brand's name in block letters (about one low roof in five near the arrival). */
 function roofSign(bag, rect, front, yr, r) {
   if (r() > 0.22) return;
