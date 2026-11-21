@@ -298,13 +298,15 @@ export async function town() {
   // the night (nightlight.js): the lamp-stands and the lamps' glow of the causeway (what the arrival sees: one cell), of the court and the libraries and of the
   // sanctuary in plans drawn only near them; the forges' and kilns' glow; the glow of each house in plans of 40 m drawn within 55 m of the visitor
        // (in the road's plan, whose fine pieces and materials are already at the arrival)
-  plans.push({ ...base('angkor-night-court', [...stands().filter((q) => q.at[0] < 0 && q.y === 1.0).map((q) => ({ t: 'ak_lampstand', ...q })), { t: 'ak_halo', items: [...templeItems('causeway'), ...templeItems('court')] }]), center: [-125, 0], near: 45 });
+  plans.push({ ...base('angkor-night-court', [...[],{ t: 'ak_halo', items: templeItems('court') }]), center: [-125, 0], near: 45 });
+  // the causeway's own lamps, drawn from the arrival (48 m from the court's plan, which they used to wait for)
+  plans.push({ ...base('angkor-night-causeway', [{ t: 'ak_halo', items: templeItems('causeway') }]), center: [-160, 0], near: 48 });
   plans.push({ ...base('angkor-night-sanctuary', [...stands().filter((q) => q.y !== 1.0).map((q) => ({ t: 'ak_lampstand', ...q })), { t: 'ak_halo', items: templeItems('sanctuary') }]), center: [CX, 0], near: 50 });
   { const tiles = new Map();
     for (const h of houses()) { const c = [(h.rect[0] + h.rect[2]) / 2, (h.rect[1] + h.rect[3]) / 2], k = `${Math.floor(c[0] / 40)},${Math.floor(c[1] / 40)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push({ t: 'ak_halo', rect: h.rect, house: h }); }
     for (const it of workItems()) { const k = `${Math.floor(it.x / 40)},${Math.floor(it.z / 40)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push({ t: 'ak_halo', rect: [it.x, it.z, it.x, it.z], items: [it] }); }
     for (const [k, l] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ ...base(`angkor-night-houses-${k}`, l), center: [i * 40 + 20, j * 40 + 20], near: 38, nocollide: true }); } }
-  plans.push(base('angkor-road', K), { ...base('angkor-market', L), style: 'life', center: [-222, 10], near: 260 });
+  plans.push(base('angkor-road', [...K, ...stands().filter((q) => q.at[0] < -140 && q.y === 1.0).map((q) => ({ t: 'ak_lampstand', stone: true, ...q }))]), { ...base('angkor-market', L), style: 'life', center: [-222, 10], near: 260 });
   const PD = paddyPlans();
   plans.push({ ...base('angkor-paddy-tools', PD.K), center: [0, 0], near: 460 }, { ...base('angkor-farmers', PD.L), style: 'life', center: [0, 0], near: 230 });
   return [moat(), enclosurePlan(), ...village(), templeLife(), ...plans, ...PD.plans, ...yardPlans()];
