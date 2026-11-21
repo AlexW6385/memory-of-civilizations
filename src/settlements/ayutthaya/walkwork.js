@@ -106,14 +106,14 @@ export function registerWalk() {
     // a second sheet 0.08 m below it is its underside
     const real = ctx.bag, bag = el.simple ? real : new Proxy(real, { get(t, k) {
       if (k === 'add') return (mat, g, ...rest) => {
-        if (!globalThis.AY_OFF?.includes('under') && (mat === 'thatch_palm' || mat === 'roof_tile') && g?.attributes?.position?.count === 12) { g.computeBoundingBox(); const b = g.boundingBox; if (b.max.y - b.min.y < 0.2 && b.max.y - b.min.y > 0.02) t.add(mat, g.clone().translate(0, -0.08, 0)); }
+        if ((mat === 'thatch_palm' || mat === 'roof_tile') && g?.attributes?.position?.count === 12) { g.computeBoundingBox(); const b = g.boundingBox; if (b.max.y - b.min.y < 0.2 && b.max.y - b.min.y > 0.02) t.add(mat, g.clone().translate(0, -0.08, 0)); }
         return t.add(mat, g, ...rest);
       };
       const v = t[k]; return typeof v === 'function' ? v.bind(t) : v;
     } });
     ctx = el.simple ? ctx : { ...ctx, bag };
     const r = base.call(this, el, ctx);
-    if (el.simple || el.kind !== 'shop' || !el.trade || !STOCK[el.trade] || globalThis.AY_OFF?.includes('stock')) return r;
+    if (el.simple || el.kind !== 'shop' || !el.trade || !STOCK[el.trade]) return r;
     const k = kit(el, ctx), { hS, hF } = k, { side, ug } = shopGap(el, hS);
     // the table before the counter on the side away from the gap, on the lane's step (the plinth ends 0.25 m out from the front); the gap's middle stays clear
     const u = -side * Math.min(hS - 1.15, 1.5) + 0.0, v = hF + 0.82;
@@ -128,7 +128,7 @@ export function registerWalk() {
 }
 /** ay_gear: { at: [x, z], kind: 'angnam' | 'shrine' | 'mat', rot, seed } — the street's furniture; nothing in the far form. */
 function gear(el, ctx) {
-  if (el.simple || globalThis.AY_OFF?.includes('gear') || globalThis.AY_OFF?.includes(el.kind)) return;
+  if (el.simple) return;
   const { bag, col } = ctx, [x, z] = el.at, rot = el.rot ?? 0, s = Math.sin(rot), c = Math.cos(rot), P = (u, v) => [x + c * u + s * v, z - s * u + c * v], y = el.y ?? 0;
   const L = (m, prof, u, v, yy, seg = 8) => { const [px, pz] = P(u, v); bag.add(m, lathe(prof, seg, null, px, yy, pz)); };
   if (el.kind === 'angnam') {
