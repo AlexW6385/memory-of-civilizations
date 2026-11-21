@@ -5,6 +5,10 @@ import { RADIUS, PLAZA, CENOTE, lots, cenoteDist, PLAZA_STELAE, PLAZA_SHRINES, C
 import { ground } from './ground.js';
 import { variant } from './house.js';
 import { sculptPlans } from './sculpt-plans.js';
+import { laneKeep } from './walk.js';
+import './range.js';
+import { KINDS as WARES } from './wares.js';
+import { hashAt } from './hash.js';
 
 const base = (id, elements) => ({ id, style: 'maya', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 62], facing: 'n' } });
 
@@ -19,9 +23,9 @@ function lotElements(l) {
   });
   const others = (h) => [...l.houses.filter((o) => o !== h).map((o) => ({ c: o.c, r: 1.25 * Math.max(o.a, o.b) })), ...(l.range ? [{ c: l.range.c, r: 7.5 }] : [])];
   const keep = l.houses.map((h) => { const o = { ...h, others: others(h) }; E.push({ t: 'cz_house', ...o }); return { c: h.c, r: variant(o).keep }; });
-  if (l.range) E.push({ t: 'maya_range', ...l.range, y: ground.height(l.range.c[0], l.range.c[1]) });
+  if (l.range) E.push({ t: 'cz_range', ...l.range, y: ground.height(l.range.c[0], l.range.c[1]) });
   E.push({ t: 'maya_yard', rect: l.rect, gate: l.gate, seed: l.seed, level: l.level, h: ground.height,
-    keep: [...keep, ...(l.range ? [{ c: l.range.c, r: 9 }] : [])] });
+    keep: [...keep, ...(l.range ? [{ c: l.range.c, r: 9 }] : []), ...laneKeep(l)] });
   // agave grown in the lot along its wall, for its fibre (§13)
   const r = rng(Math.floor(x0 * 31 + z1 * 17) >>> 0), P = [];
   for (let i = 0; i < 2 + Math.floor(r() * 4); i++) {
@@ -50,11 +54,17 @@ function market(id = 'chichen-itza-market', X0 = 96, Z0 = 56, rows = 4, cols = 6
     M.push({ t: 'petate', at: [x, z + 0.4], y: Y, w: 1.8, d: 1.2, rot: (rand() - 0.5) * 0.2 });
     if (rand() < 0.85) M.push({ t: 'maya_awning', rect: [x - 1.9, z - 1.2, x + 1.9, z + 1.2], y: Y, h: 2.15 });
     L.push({ t: 'figure', at: [x, z - 0.55], y: Y, rot: Math.PI, h: woman ? 1.5 : 1.6, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'wrap', cloth: woman ? 'cloth_white' : pick(['cloth_white', 'cloth_ochre']), cloth2: pick(['cloth_red', 'cloth_white', 'cloth_ochre']), skin: skin(), hat: 'none', hair: woman ? pick(['long', 'bun']) : 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: woman ? 'none' : 'cape', pose: rand() < 0.6 ? 'squat' : 'sit_ground' });
+    // the wares laid out on the mat (wares.js): a kind of goods by the seller's own place; the baskets and pots then stand at the mat's ends
+    const wk = hashAt(x, z, 9) < 0.85 ? WARES[Math.floor(hashAt(x, z, 3) * WARES.length)] : null;
+    if (wk) L.push({ t: 'cz_wares', at: [x - 0.12, z + 0.45], y: Y, rot: (hashAt(x, z, 4) - 0.5) * 0.2, kind: wk, seed: Math.floor(x * 7 + z) });
     for (let k = 0; k < 3; k++) {
       const at = [x - 0.55 + k * 0.55 + (rand() - 0.5) * 0.1, z + 0.45 + (rand() - 0.5) * 0.3];
       const g = rand();
-      if (g < 0.55) L.push({ t: 'basket', at, y: Y + 0.015, seed: Math.floor(rand() * 1e6), goods: pick(['paint_ochre', 'cloth_red', 'pottery_dark', 'cloth_ochre', 'fresco_green']) });
-      else L.push({ t: 'pot', kind: pick(['dark_pot', 'water_pot']), at, y: Y + 0.015, seed: Math.floor(rand() * 1e6) });
+      const el = g < 0.55 ? { t: 'basket', at, y: Y + 0.015, seed: Math.floor(rand() * 1e6), goods: pick(['paint_ochre', 'cloth_red', 'pottery_dark', 'cloth_ochre', 'fresco_green']) }
+        : { t: 'pot', kind: pick(['dark_pot', 'water_pot']), at, y: Y + 0.015, seed: Math.floor(rand() * 1e6) };
+      if (wk && k === 1) continue;                                     // the middle of the mat holds the wares
+      if (wk) el.at = [el.at[0] + (k === 0 ? -0.55 : 0.55), el.at[1] + 0.05];
+      L.push(el);
     }
   }
   // buyers between the rows
@@ -186,6 +196,25 @@ function dressing() {
   return out;
 }
 const SACBE_A = [0, -140], SACBE_B = [0, -240];
+const TORCHES = [[-6.6, 38.6], [6.6, 38.6], [-6.6, -38.6], [6.6, -38.6], [5.6, -232.4]];
+/**
+ * The night (nightlight.js): every halo of the city in one plan of its own, so that it costs one draw: the fires of the lots' houses and long houses, the Castillo's braziers
+ * and the censer on its summit, the lamps in the Warriors' temple, the torches at the stairs, the pilgrims' camp fires, the altars' censers, the sweat bath, the censer at the cenote.
+ */
+function night() {
+  const lotsData = lots().map((l) => ({ houses: l.houses, range: l.range ? { ...l.range, y: ground.height(l.range.c[0], l.range.c[1]) } : null }));
+  const spots = [
+    ...[[-5.15, -5.15], [5.15, -5.15], [-5.15, 5.15], [5.15, 5.15]].map(([x, z]) => ({ k: 'fire', x, y: 25.0, z, g: 24.4 })), { k: 'censer', x: 0, y: 25.1, z: 8.6 },
+    { k: 'lamp', x: 118, y: 14.2, z: -13.2, g: 13.43 }, { k: 'lamp', x: 106.4, y: 14.4, z: -16.6, g: 13.43 },
+    ...TORCHES.map(([x, z]) => ({ k: 'torch', x, y: ground.height(x, z) + 2.5, z, g: ground.height(x, z) })),
+    ...[[-14, 100], [8, 99], [62, 98], [-68, 98]].map(([x, z]) => ({ k: 'fire', x, y: 0.5, z, g: 0.04 })),
+    ...PLAZA_SHRINES.map(([x, z]) => ({ k: 'censer', x: x - 0.4, y: 1.1, z })),
+    { k: 'fire', x: SWEATBATH.at[0], y: 1.2, z: SWEATBATH.at[1] + 3.4, g: ground.height(SWEATBATH.at[0], SWEATBATH.at[1] + 3.4) },
+    { k: 'censer', x: -5.6, y: ground.height(-5.6, -240.2) + 0.5, z: -240.2 },
+  ];
+  const E = [{ t: 'cz_night', box: [-RADIUS, -RADIUS, RADIUS, RADIUS], lots: lotsData, spots }];
+  return base('chichen-itza-night', E);
+}
 function riteObjects() { return base('chichen-itza-offering', [{ t: 'm_offering', at: [-5.6, -240.2], y: ground.height(-5.6, -240.2) + 0.02, dir: [0, -1] }]); }
 
 export async function town() {
@@ -194,5 +223,8 @@ export async function town() {
   // the water in the Sacred Cenote, 20 m below the rim (docs/settlements/chichen-itza.md)
   const [cx, cz] = CENOTE.c, r = CENOTE.r;
   plans.push({ ...base('chichen-itza-cenote-water', [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: CENOTE.water, cell: 0.75, inside: (x, z) => cenoteDist(x, z) < 0 && ground.height(x, z) < CENOTE.water }]), style: 'ming' });
-  return [...plans, ...market(), ...market('chichen-itza-market-e', 50, 54, 2, 4, 2001, 8), ...market('chichen-itza-market-w', -36, 58, 2, 3, 2002, 6), ...worksite(), rites(), riteObjects(), ...ballgame(), ...dressing(), ...sculptPlans()];
+  // the torches of ocote at the foot of the Castillo's two long stairs and at the sacbe's end: their poles are of the awnings' materials, so they go in the first market's plan and cost no draw (their glow is in the night plan)
+  const mk = market(), mats = mk.find((p) => p.id === 'chichen-itza-market-mats');
+  for (const [x, z] of TORCHES) mats.elements.push({ t: 'cz_torch', at: [x, z], y: ground.height(x, z) });
+  return [...plans, ...mk, ...market('chichen-itza-market-e', 50, 54, 2, 4, 2001, 8), ...market('chichen-itza-market-w', -36, 58, 2, 3, 2002, 6), ...worksite(), rites(), riteObjects(), ...ballgame(), ...dressing(), night(), ...sculptPlans()];
 }

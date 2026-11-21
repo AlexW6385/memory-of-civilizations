@@ -129,6 +129,55 @@ Tropical monsoon: hot and humid, the sky hazy; rainy season May–October, flood
 - The royal wihan's main roof is two stacked tiers (lower over the walls, upper set back on a red step-board with gilt tabs, its own gable board and chofa), over the aisles' lean-tos and the porch gable [inferred from the stepped roofs of Siamese halls; §4.2 gives a three-tiered roof].
 - The seated images of the cloister have crossed legs and shoulders as separate forms.
 
+## 13. Bringing the place up to the reference (the visitor's walk, night, sound, animals, wear)
+
+The shell could not reach the web for this pass: every line below is [inferred] from the sections above, from what is generally known of Siam in Narai's reign, or from the Thai tradition, unless it carries a source already cited in §1–§12. Nothing here contradicts a stated choice of §1–§12.
+
+### 13.1 The visitor's walk
+- The way: from the arrival inside the wat's wall, out through the south gate on the axis of the chedis, over the brick bridge on that axis (§2, layout BRIDGES) to the bank road on the far side of the canal (§5.2: "the ways on foot run along the banks as raised earth paths"), then east and west along it, where the south row of lots fronts the water (`walk.js`).
+- The shops: the nearest twelve lots on that row deep enough for a counter and a stair become shophouses of the Chinese kind of §11.1, each with a trade of its own, nearest the gate first: candles, incense and gold leaf for the images; lotus buds and garlands for the offering; rice; clay water jars and pots; betel and areca; cloth; dried and salted fish; a Chinese general store. [inferred: a great wat's gate drew the sellers of offerings, as at Thai temples now; betel was chewed by everyone (La Loubère describes its offering as a courtesy; not re-read here); rice and fish are the Siamese staples, the pots of the Mon potters came by boat; Coromandel painted cloth was the great import of the trade the court lived on (§1).] The stock stands on the lane's step before the counter, on a bamboo table or the ground, the entry gap beside the counter kept clear. The shops are enterable to the front room (the style's counter, shelves and stair).
+- The houses on the walk are the timber stilt houses of §11.1: stair, terrace, door, the room with its mats, hearth, altar and lamp. [Found broken and fixed: the lean-to over the terrace is a sheet with no underside, which the collision world takes for a slab from the floor up, so no stilt house could be entered by its stair; each such sheet now has a second sheet 0.08 m below it as its underside, added from `walkwork.js` without changing the style.]
+- Street furniture [inferred]: the water jar on a stand of three posts with a coconut-shell dipper, set out by the road for the traveller (the Thai custom of the ang nam: its antiquity in the 17th century is not documented in the sources read); mats on the bank with a seller's baskets of fruit and a pole laid beside them; the spirit house on its post at the bridge's head by the wat's road.
+- Routes: walk-check follows twelve shops and four houses of the walk from the lane to the room; the two long walks run out of the gate, over the bridge and along the bank both ways (plan.js `walks`).
+
+### 13.2 Night
+All [inferred]; no electric light (the date is 1687). What lit the city and where:
+- The oil lamp: a wick in a dish of coconut or fish oil, the lamp of the house, the household altar and the spirit house; the stilt house is lit by one lamp hanging from the tie beam over the room (already in the style), seen through the door and the windows. About seven in ten of the houses are shown lit, chosen by the hash of the house's own place (oil is dear); the doorway glows, the terrace takes its spill and the lantern hangs at the door.
+- The shophouse: the paper lanterns at the lintel (the Chinese merchants' custom, §11.1), a lamp over the counter and one upstairs; about six in ten of the upper windows lit; the lane before the shop takes the light.
+- The wat: candles of tallow and beeswax on the candle stands and a lamp on each offering table of the court; a small lamp in the niche of each chedi's four porches before the standing image, the lamps inside the royal wihan (the style's two). The palace gate's paper lanterns, one each side of the way on both faces.
+- The kitchen house's hearth fire, as it is lit through the kitchen's open reed walls (the style's light).
+- The water: the floating houses lit by one lamp each (about two in three), a lit doorway and a small lamp on the platform's shrine shelf; the floating shop's lamp over its counter; a lamp hung under the awning of about half the market's boats. [Fishing by torchlight and the festival of lamps floated on the river are known Thai customs; their place in this reach at this date is not documented in the sources read, so they are not shown.]
+- Model: every light of these is a `halo` (additive, night only) of one material, as in the reference: a glow round each flame, a pool on the floor, a pane before a lit door or window (`nightlight.js`). It reads at the low preset, where the engine's real lights are off.
+
+### 13.3 Sound
+All [inferred] (no recording or description of 17th-century Ayutthaya's sounds was read); instruments are those of §9. `soundmap.js` places each sound where it is made; `voices-ayutthaya.js` synthesises them (every voice prefixed `ay`); the engine's voices are used where they fit.
+- The wat: the great gong and the drum from the bell tower [§4.3: a bell tower before the wihan]: before dawn when the monks rise (4.2–5.4 h), at the hour before noon, the last meal of the monks, and at dusk, the drum quickening to a roll and stopping on slow beats before the gong's three strokes. The monks' chant (Pali, wordless, low voices on a drone with a second line answering) in the royal wihan and the ordination hall at dawn and dusk and by day; the halls are rooms (a hush of the outdoors, little roof noise).
+- The piphat (§9: ranat, khong wong gong circle, pi oboe, taphon drum): a phrase now and then by day before the royal wihan and in the palace court by the throne hall, not in rain.
+- The floating market (§5.3): the women's cries over the water (fruit, pots, fish, rice: wordless sung calls) before the heat, and the paddles among the moored boats; the engine's boats pass along the canals and the river (`canalTrack`), the canals' lap at the brick walls, the eaves' drip and rain on the thatch.
+- The bank road and its shops (§13.1): each trade's small noises by its own hours: coin and lid at the offering seller's, pouring at the flower seller's, sacks and pouring at the rice seller's, jars and clay at the potter's seller's, the betel mortar, cloth and scissors, water at the fish seller's (morning only: fish does not keep), the abacus, drawers and coins at the Chinese store (the abacus: the Chinese merchants of §11.1 [inferred]).
+- The stilt houses near the arrival: the kitchen, the rice mortar at dawn, a loom in a quarter of them, and at night the tokay gecko in the thatch; the frogs and cicadas of the profile.
+- The palace's elephants (§12.5): a trumpet and rumble now and then by day. Nothing here for a watchman or a call to prayer (the Muslim quarter of the Persians and Malays is not in the disc).
+- Measured with `tools/sound-render.mjs` (peak 0.03–0.12, no clipping; the gong and drum below 300 Hz, the chant 0.5–0.8 kHz, the cry 0.4–1 kHz, the piphat 0.3–3 kHz): not heard.
+
+### 13.4 Animals
+All [inferred] (`fauna.js`, `critters` of `src/engine/fauna-critters.js`, each a rigged small animal with its behaviour; the models are the engine's: nothing was added to `critter-models.js`). The dossier's perch and flight lists (egrets, swallows, doves, crows, sparrows, carp) stay.
+- Dogs: three lie by the wat's forecourt and its way (a Thai wat keeps its dogs; they rise and look when the visitor comes near).
+- Cats: one on the plinth of a shop of the walk, one on a stilt house's terrace. [The cat of Siam is much older than this date: the "Treatise on Cats" (Tamra Maew) is of the Ayutthaya period (Wikipedia, "Siamese cat"; not re-read here). The models have a tabby and an orange cat only: the colours of the old Siamese cats are not shown.]
+- Fowl: a rooster and two hens behind each of the first two stilt houses of the walk, a pair of hens behind two more (the red junglefowl is the Thai domestic fowl; cock-fighting was a pastime of Siam [inferred, La Loubère not re-read]), in the yard on the side away from the lane.
+- Ducks: five white and brown domestic ducks dabbling along the canal by the gate bridge (a raft that goes about its loop). The canals' carp (fauna.js) stay.
+- Doves on the court's brick way and the platform's foot (the spotted dove of the wats); a kingfisher on the canal's bank at the bridge, which dives for fish; songbirds in cages at the front posts of three houses of the walk (the Thai keep caged doves and bulbuls [inferred]).
+- Not shown, and why: the king's elephants (already the people plan's two figures at the palace gate); water buffalo (no model); the water monitor of the canals (no model); swallows' nests (the swallows of the dossier are in flight lists only); no goat, cormorant or turkey (the Chinese fishing cormorant was not a Siamese practice [inferred]).
+
+### 13.5 Wear and writing
+
+All built by `src/settlements/ayutthaya/wear.js`, from the element's own numbers (no randomness beyond the position hash).
+
+- Worn treads on the entered stilt houses' stairs and a worn sill before their doors, in `tile_dark`: the middle of each tread dark from feet. [inferred: from the house's use; no source describes wear]
+- A polished threshold at the gap of each walk shop, and black mildew streaks down the shophouse piers from under the lintel, three to a pier. [inferred from §10: black mildew on plaster in the monsoon]
+- Chinese shop signs: one character in relief on both faces of the plaque, 香 incense and candles, 米 rice, 布 cloth, 茶 tea, on the shops with a Chinese trade. [stated: the Chinese merchants' quarter, §11.1; the choice of character per trade is inferred]
+- The Siamese sellers' shops and every temple carry no writing, and no Thai script is modelled anywhere: the letterforms cannot be checked here. [stated as a limit]
+- Not done: mildew under the chedi cornices; it cost one arrival draw over the budget.
+
 ## Sources
 - Wikipedia, "Wat Phra Si Sanphet": https://en.wikipedia.org/wiki/Wat_Phra_Si_Sanphet
 - Ayutthaya Historical Research, "The architecture of Wat Phra Sri Sanphet": https://ayutthaya-history.com/Temples_Ruins_PhraSisanphet_Architecture.html

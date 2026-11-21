@@ -3,6 +3,7 @@
 // the monument on their right, as the reliefs are read, climbing terrace by terrace.
 import { nearArrival, RADIUS, MONUMENT, SQUARES, CIRCLES, MONASTERY, HAMLETS, houses, inRect, frontVec, wellAt } from './layout.js';
 import { villagePlans } from './village.js';
+import { atOf } from './houseat.js';
 const base = (id, elements) => ({ id, style: 'javanese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [90, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -99,7 +100,7 @@ function yards(hi) {
     if (h.hamlet !== hi) continue;
     const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, [fx, fz] = frontVec(h.front), tx = -fz, tz = fx, half = (h.front === 'e' || h.front === 'w' ? x1 - x0 : z1 - z0) / 2;
     // a point d in front of the house's front edge and u along it
-    const at = (d, u) => [cx + fx * (half + d) + tx * u, cz + fz * (half + d) + tz * u];
+    const at = atOf(h);
     const ok = ([x, z], m = 0.9) => !others.some((q) => inRect(q.rect, x, z, m));
     const put = (el, p, m) => { if (ok(p, m)) L.push({ ...el, at: p, y: 0 }); };
     const sd = h.seed, others = houses().filter((q) => q !== h);
@@ -119,6 +120,7 @@ function yards(hi) {
 
 export async function town() {
   const plans = [];
+  // (the houses stay in plans of their own, drawn in full everywhere: a near/far split of their interiors costs 14 to 40 more draws at the arrival than master's 436, over the walk's budget; §20.1)
   HAMLETS.forEach((h, hi) => plans.push(base(`borobudur-hamlet-${hi}`, houses().filter((q) => q.hamlet === hi).map((q) => ({ t: 'rumah', ...q }))), yards(hi)));
   plans.push(base('borobudur-wayhouses', houses().filter((q) => q.hamlet < 0).map((q) => ({ t: 'rumah', ...q }))), pilgrims(), monastery(), ...villagePlans());
   return plans;

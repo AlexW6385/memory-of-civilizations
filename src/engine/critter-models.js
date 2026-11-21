@@ -723,3 +723,20 @@ export function camel(variant) {
 }
 MODELS.camel_dun = () => camel('dun');
 MODELS.camel_dark = () => camel('dark');
+
+// ═════════════ the ocellated turkey (Chichén Itzá's forest edge) ═════════════
+/** The ocellated turkey of the Yucatán forest, standing, on the turkey's own model recoloured: the body an iridescent bronze-green, the tail grey-blue banded, the bare head bright blue with orange nodules (the Maya's own turkey, tamed from it or from the Mexican one, strutted in the plazas). */
+export function turkeyOcellated() {
+  const m = turkey();
+  for (let i = 0; i < m.col.length; i += 3) {
+    const r = m.col[i], g = m.col[i + 1], b = m.col[i + 2], lum = (r + g + b) / 3;
+    let c;
+    if (b > r + 0.1) c = [0.18, 0.4, 0.88];                                       // the bare head and neck
+    else if (r > 0.6 && g < 0.35) c = [0.92, 0.42, 0.1];                          // the nodules and wattle
+    else if (r > 0.6 && g > 0.4) c = [0.62, 0.48, 0.5];                           // the legs
+    else c = [lum * 0.55, lum * 1.05 + 0.05, lum * 1.0 + 0.08];                   // the bronze-green body
+    m.col[i] = c[0]; m.col[i + 1] = c[1]; m.col[i + 2] = c[2];
+  }
+  return m;
+}
+MODELS.turkey_ocellated = turkeyOcellated;

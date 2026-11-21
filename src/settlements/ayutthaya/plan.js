@@ -3,6 +3,7 @@
 // cross-shaped prasat of Narai's reign; east the royal wihan with the gilded image, the ubosot and the bell tower; the little chapels
 // along the wall; the palace's halls and wall west of it.
 
+import { walkRoutes } from './walkroutes.js';
 import { WAT, PLATFORM, WIHAN, BELL, PRASAT, UBOSOT, PALACE } from './layout.js';
 
 const E = [];
@@ -64,6 +65,8 @@ for (let x = wx0 + 8; x < wx1 - 6; x += 15) E.push({ t: 'chedi', c: [x, wz0 + 5]
   for (const [x, z] of palms) E.push({ t: 'sugar_palm', at: [x, z], y: 0, s: 0.9, rot: x * 3.1 });
   E.push({ t: 'k_sala', rect: [-112, -162, -106, -156], y: 0, front: 'w', seed: 31 }, { t: 'k_sala', rect: [-112, -122, -106, -116], y: 0, front: 'w', seed: 32 });
 }
+// the spirit house at the bridge's head on the wat's road (in the landmark's own plan: its fine pieces merge with the landmark's)
+E.push({ t: 'ay_gear', kind: 'shrine', at: [15.5, -89], rot: Math.PI });
 const f = 1.2;
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
@@ -77,6 +80,9 @@ const walks = [
   Object.assign([[gx, -100], [gx, -118], [gx, -127], [-2, -128]], { y0: 0 }),
   Object.assign([[gx, -100], [gx, -108], [60, -108], [60, -125], [100, -125], [100, -140], [86, -140], [72, -140]], { y0: 0 }),
 ];
+// the visitor's walk: out of the gate, over the bridge and along the bank road, then into every opened shop and house of it (walkroutes.js)
+walks.push(Object.assign([[gx, -100], [gx, -94], [gx, -86], [gx, -78], [gx, -69], [6.5, -69], [5.5, -70.6], [-40, -70.6]], { y0: 0 }), Object.assign([[gx, -69], [13.5, -69], [14, -70.6], [66, -70.6]], { y0: 0 }));
+for (const r of walkRoutes()) { const w = r.route; w.y0 = r.y0; walks.push(w); }
 export const wat = {
   id: 'ayutthaya-wat',
   name: { en: 'Wat Phra Si Sanphet', zh: '帕西桑碧寺' },
