@@ -6,6 +6,7 @@
 import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS, BOATS, ZIG, houses } from './layout.js';
 import { upperRoute, roofRoute, hasLadder } from '../../styles/sumerian-ur/upper.js';
 import { routes as openRoutes } from './openwalk.js';
+import './trim.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
@@ -64,7 +65,7 @@ export const precinct = {
   id: 'ur-ziggurat',
   name: { en: 'The Ziggurat of Ur', zh: '乌尔大塔庙' },
   era: { en: 'Third Dynasty of Ur, c. 2050 BC', zh: '乌尔第三王朝，约公元前2050年' },
-  style: 'sumerian',
+  style: 'ur-n',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [0, -110], facing: 's' },
   bounds: TEMENOS,

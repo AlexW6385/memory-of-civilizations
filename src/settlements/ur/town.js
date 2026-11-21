@@ -30,6 +30,8 @@ export async function town() {
     else for (const [dx, dz] of [[-0.25, -0.2], [0.25, 0.0], [-0.1, 0.25]]) trees.push({ t: 'ur_palm', at: [cx + dx * (r[2] - r[0]), cz + dz * (r[3] - r[1])], y: 0, h: 6.5 + (k % 4), seed: k + Math.round(3 * dx) });
   }
   plans.push(base('ur-lots', lots));
+  // the night: the lamp over the door of each house that can be entered and the pool it throws on the lane (nightlight.js)
+  plans.push(base('ur-night', [{ t: 'ur_night', doors: all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door })) }]));
   plans.push(base('ur-lane-palms', trees));
   // the city rampart with its three gates (§5.10), the brickyard at the north-east edge (§5.9), the royal mausoleum outside the temenos (§5.11)
   const [N, E, S] = [[-14, -374, 14, -360], [360, -34, 374, -6], [-14, 360, 14, 374]];
