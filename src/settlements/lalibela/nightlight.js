@@ -115,7 +115,7 @@ function winGlow({ wins }, { bag }) {
   for (const q of wins) {
     const k = 0.75 + 0.25 * hashAt(q.c[0], q.c[1], 31), yc = q.y + q.h / 2, o = 0.32;
     const c = [q.c[0] + q.n[0] * o, yc, q.c[1] + q.n[1] * o];
-    H.disc(c, [q.u[0], 0, q.u[1]], [0, 1, 0], q.w * 1.5, q.h * 0.95, q.n, 8, [k, 0.45 * k], [0, 0.55, 1].map((v) => v));
+    H.disc(c, [q.u[0], 0, q.u[1]], [0, 1, 0], q.w * 1.5, q.h * 0.95, q.n, 8, [k, 0.55 * k, 0], [0, 0.55, 1]);
     H.ball(q.c[0] - q.n[0] * 0.5, yc, q.c[1] - q.n[1] * 0.5, Math.min(q.w, q.h) * 0.8, 0.5 * k);
   }
   H.flush(bag);

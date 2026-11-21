@@ -5,6 +5,7 @@
 import { hutRoute, stallRoutes, houseRoutes } from './walkwork.js';
 import { WALK_REACH, segDist } from './walk.js';
 import { houses } from './layout.js';
+import { stairWear } from './wear.js';
 import { PITS, TRENCHES, EDGE, OUTER, HUT, POOL, inRect, slope, cutDepth } from './layout.js';
 
 const E = [];
@@ -167,7 +168,7 @@ E.push({ t: 'hut', c: HUT.c, r: HUT.r, y: 0, door: HUT.door, seed: 1220 });
 // ---- steps cut in the floors of the long descents (the masons left treads in the sloping floors: "a descending trench"): 0.9 m runs,
 // each tread level with the ground at its upper end, its riser standing proud of the ramp below it
 for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106], [4, -150, -121], [6, 181, 211]]) {
-  const T = TRENCHES[ti], [x0, z0, x1, z1] = T.rect, ax = T.axis === 'x', a0 = ax ? x0 : z0, a1 = ax ? x1 : z1, run = 0.9;
+  const wearSt = [], T = TRENCHES[ti], [x0, z0, x1, z1] = T.rect, ax = T.axis === 'x', a0 = ax ? x0 : z0, a1 = ax ? x1 : z1, run = 0.9;
   const hAt = (u) => { const c = (ax ? (z0 + z1) : (x0 + x1)) / 2; return ax ? slope(u, c) - cutDepth(u, c) : slope(c, u) - cutDepth(c, u); };
   const w0 = (ax ? z0 : x0) + EDGE - 0.1, w1 = (ax ? z1 : x1) - EDGE + 0.1;
   for (let u = from; u < to - 1e-6; u += run) {
@@ -175,7 +176,16 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
     if (hi > -0.1) continue;
     const r = ax ? [u, w0, ue, w1] : [w0, u, w1, ue];
     E.push({ t: 'block', walk: true, rect: r, y0: lo - 0.4, y1: hi + 0.01, mat: 'tuff_hewn' });
+    // where feet went: the tread's middle worn pale; and, every third tread, the wall polished at a hand's height on both sides (not where a cell or niche opens)
+    const mid = (ax ? z0 + z1 : x0 + x1) / 2, ln = (s, t) => (ax ? [s, t] : [t, s]);
+    wearSt.push([ln(u + 0.1, mid), ln(ue - 0.1, mid), 1.3, hi + 0.025, hi + 0.03]);
+    if (Math.round((u - from) / run) % 3 === 1) for (const [wf, sg] of [[w0 + 0.1, 1], [w1 - 0.1, -1]]) {
+      const m = (u + ue) / 2, pt = ln(m, wf);
+      if (E.some((e) => e.t === 'cave' && e.c && Math.hypot(e.c[0] - pt[0], e.c[1] - pt[1]) < 2.8)) continue;
+      wearSt.push([ln(m - 0.5, wf + sg * 0.04), ln(m + 0.5, wf + sg * 0.04), 0.04, hi + 0.95, hi + 1.27]);
+    }
   }
+  E.push({ t: 'lal_wear', c: [(x0 + x1) / 2, (z0 + z1) / 2], strips: wearSt });
 }
 // ---- the pool of the Jordan: a basin cut in the river-bed's floor (the Jordan is where the baptisms are done; docs §16), its kerb a
 // hand and a half above the floor, water standing in it
@@ -245,6 +255,20 @@ for (const [id, x, z] of [['giyorgis', gc[0] - 16.2, gc[1] - 4.2], ['giyorgis', 
   E.push({ t: 'lal_winglow', c: mc, box: body, wins: places(body, -M.depth + 0.15 + 3.2, 1.6, 0.9, 2.6) });
   for (const k of ['golgotha', 'amanuel', 'gabriel']) { const A = AKS[k], zc = (A.rect[1] + A.rect[3]) / 2;
     E.push({ t: 'lal_winglow', c: [(A.rect[0] + A.rect[2]) / 2, zc], box: A.rect, wins: places(A.rect, A.y + Math.max(2.8, A.h * 0.4), 1.5, 0.85, 3.4).filter((p) => !(p.n[0] === -1 && Math.abs(p.c[1] - zc) < 1.6)) }); }
+}
+// ---- where feet went at the churches (docs §23): the worn middle of every door's steps, and the trodden way across the courts of the three Aksumite-manner churches
+{
+  const yG0 = -G.depth + 0.15, a = 12, put = (c, strips) => E.push({ t: 'lal_wear', c, strips });
+  for (const [side, u] of [['w', gc[1]], ['n', gc[0]], ['s', gc[0]]]) put(side === 'w' ? [gc[0] - 14, gc[1]] : [gc[0], gc[1] + (side === 's' ? 14 : -14)], stairWear(side, [gc[0] - (a + 0.4), gc[1] - (a + 0.4), gc[0] + (a + 0.4), gc[1] + (a + 0.4)], u, 2.4, yG0, yG0 + 1.8));
+  const yM0 = -M.depth + 0.15, mr = [mc[0] - 16.75 - 0.5, mc[1] - 11.75 - 0.5, mc[0] + 16.75 + 0.5, mc[1] + 11.75 + 0.5];
+  for (const [side, u, w] of [['w', mc[1], 2.8], ['n', mc[0], 2.4], ['s', mc[0], 2.4]]) put([side === 'w' ? mr[0] : u, side === 'w' ? u : side === 'n' ? mr[1] : mr[3]], stairWear(side, mr, u, w, yM0, yM0 + 0.8));
+  const way = { golgotha: [[-52, -100], [-68, -100], [-68, -91], [-65.4, -91]], amanuel: [[40, 48], [40, 50], [27, 50], [27, 60], [28.6, 60]], gabriel: [[120, 32.5], [108, 32.5], [108, 40], [109.6, 40]] };
+  for (const [k, pts] of Object.entries(way)) {
+    const A = AKS[k], zc = (A.rect[1] + A.rect[3]) / 2, rr = [A.rect[0] - 0.6, A.rect[1] - 0.6, A.rect[2] + 0.6, A.rect[3] + 0.6];
+    const st = stairWear('w', rr, zc, 2.4, A.y, A.y + 0.9);
+    for (let i = 1; i < pts.length; i++) st.push([pts[i - 1], pts[i], 1.2, A.y + 0.015, A.y + 0.02]);
+    put([A.rect[0] - 3, zc], st);
+  }
 }
 // ---- wayside fires of the pilgrims on the knoll and along the way down (docs §23): a visitor at night has light within a few metres
 for (const [x, z] of [[-235.1, 169.1], [-246.2, 160.8], [-251.5, 141.0], [-253.5, 134.5], [-244.0, 112.0], [-255.0, 60.0]]) E.push({ t: 'lal_brazier', at: [x, z], y: slope(x, z) });
