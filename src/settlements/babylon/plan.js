@@ -75,7 +75,7 @@ for (const l of lots()) if ([216624, 47731].includes(l.seed)) {
   r.y0 = 0; walks.push(r);
 }
 // the shops and furnished houses nearest the arrival (the gate quarter), docs/settlements/babylon.md §18
-walks.push(...openRoutes(15));
+walks.push(...openRoutes(34));
 
 export const babylon = {
   id: 'babylon-centre',
