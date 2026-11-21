@@ -164,3 +164,31 @@ export function courtNight(el, { bag, lights }) {
     lights.push({ at: [x, y + 1.3, z], color: '#ffb060', intensity: 1.8, distance: 6 });
   }
 }
+
+// ── the terrace's stair (docs/settlements/ur.md §30) ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * ur_stair_cheeks: the flight from the court up to the terrace (plan.js: x -7..7, sixteen treads) walled in a stepped cheek of baked brick on each side, as the ziggurat's own flights
+ * are (a block to a group of four treads, a coping on each), ending at the court in a pier with a blue glazed band on its end face and a lamp ledge. `rect` is the flight's rect.
+ */
+export function stairCheeks(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, y1 = el.y1, n = Math.max(1, Math.round(y1 / 0.16)), rise = y1 / n, tr = (z1 - z0) / n, w = 0.9, g = 4;
+  for (const [c0, c1] of [[x0 - w, x0], [x1, x1 + w]]) {
+    for (let i = 0; i < n; i += g) {
+      const j = Math.min(n, i + g), a = z0 + i * tr, b = z0 + j * tr, top = j * rise + 0.95;
+      bag.add('brick_baked', box(c0, (i + 1) * rise - 0.7, a, c1, top, b));
+      bag.add('brick_buff', box(c0 - 0.07, top, a - 0.04, c1 + 0.07, top + 0.1, b + 0.04));
+      col.rect([c0, a, c1, b], 0, top + 0.1);
+    }
+    const pa = [z0 - w, z0], ph = 1.9;
+    bag.add('brick_baked', box(c0, -0.3, pa[0], c1, ph, pa[1]));
+    bag.add('brick_buff', box(c0 - 0.07, ph, pa[0] - 0.07, c1 + 0.07, ph + 0.12, pa[1] + 0.07));
+    bag.add('brick_buff', box(c0 + 0.1, ph + 0.12, pa[0] + 0.1, c1 - 0.1, ph + 0.3, pa[1] - 0.1));
+    bag.add('glaze_lapis', box(c0 + 0.12, 1.2, pa[0] - 0.03, c1 - 0.12, 1.6, pa[0]));
+    col.rect([c0, pa[0], c1, pa[1]], 0, ph + 0.3);
+    const lx = (c0 + c1) / 2, lz = pa[0] + 0.35;   // a clay lamp in a niche cut into the pier's inner face would be inside the brick: it stands on the coping
+    bag.add('pottery_dark', lathe([[0.001, 0], [0.07, 0.012], [0.075, 0.032], [0.05, 0.036], [0.001, 0.026]], 9, null, lx, ph + 0.3, lz));
+    bag.add('flame', box(lx - 0.016, ph + 0.33, lz - 0.016, lx + 0.016, ph + 0.4, lz + 0.016));
+    lights.push({ at: [lx, ph + 0.55, lz], color: '#ffb060', intensity: 1.3, distance: 5 });
+  }
+}

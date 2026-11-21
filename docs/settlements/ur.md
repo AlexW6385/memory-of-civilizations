@@ -225,6 +225,14 @@ A punter at the stern of most moored boats, a man seated amidships in some; wome
 
 No near/far split of the opened interiors (all hollow houses are built whole; the plans are merged by tile); the street door 0.95 m; no written signs; the door lamp has no lamp object; upper floors open in nine houses only; the terrace stair and the harbour steps are not worn; no inscriptions or stamped bricks; the landmark's remaining gaps against §5 were not examined beyond the night and the stair.
 
+## 30. Second pass, narrow form (2026-11-21)
+
+- Night [inferred, as §25]: the arrival's court was dark within 15 m (only the altar fires and one brazier glowed) and the square's first 15 m was bare pavement. Added: a clay oil lamp on the ledge of each of the six standards' plinths, the two braziers that burn no flame by day glowing at night, a lamp stand on each jamb of the court's gate (`ur_court_night`, built in the landmark's plan, so no draw); four fire-pans at the aisle's sides of the market square and a lamp on most sellers' mats, a clay lamp on the ledge over each opened house's door (`ur_lampware`, riding in the house and square plans). Seen in a night render at the square (pans with halos and floor pools; the mat lamps are too small to read) and at the court's stair (piers' lamps and braziers).
+- Budget (MAIN pass): arrival 350 -> 351 draws, 2.48 -> 2.52 M tris; at (0,-190) 240 / 372 (yaw 0 / pi), (0,-250) 401 at yaw pi, (0,-155) 367 at yaw pi; all main tris at most 2.7 M. Nothing over; no split needed. (Putting the lamp pieces in their own plan had cost +8 draws: they now ride in plans that hold pottery and flame.)
+- Walk: eight more houses have their upper floor opened (the brewer, baker, weaver, potter, smith and baker houses nearest the walk: `UPPER`), walk-check 37 -> 53 routes ok. Still short: the street door 0.95 m (shared style), no near/far split of interiors, keepers remain life figures.
+- Landmark: the flight from the Court up to the terrace had bare sides; it now has stepped cheeks of baked brick with copings and a pier at its foot with a lapis glaze band and a lamp (`ur_stair_cheeks`, as the ziggurat's flights have). Wear: the terrace stair's dished middle and corner dust, the harbour's three flights (wet-dark and slimed lower treads, a dip in the upper ones), in `brick_buff`/`silt`/`plaster_damp` (the first try in limestone read as white bars in daylight). No writing added.
+- Still short: the gate towers' thresholds are not worn; the sacred way's trodden middle; the house door lamps' niches are not cut into the wall; the stamped bricks; the street door width.
+
 ## Sources
 
 - [Craft Manufacture and Production — encyclopedia.com](https://encyclopedia.com/history/news-wires-white-papers-and-books/craft-manufacture-and-production)
