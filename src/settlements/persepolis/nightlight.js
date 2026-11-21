@@ -61,7 +61,7 @@ const bounds = (g) => {
 
 /** The glow of one flame (its geometry g): the ball round it and, where a floor lies under it, the pool of light on the floor. */
 function flameHalo(H, g, floor) {
-  const b = bounds(g), h = b[4] - b[1], r = Math.max(0.34, Math.min(0.85, h * 2.4)), cx = (b[0] + b[3]) / 2, cz = (b[2] + b[5]) / 2, cy = b[1] + h * 0.45;
+  const b = bounds(g), h = b[4] - b[1], r = Math.max(0.34, Math.min(1.0, h * 3.0)), cx = (b[0] + b[3]) / 2, cz = (b[2] + b[5]) / 2, cy = b[1] + h * 0.45;
   H.ball(cx, cy, cz, r);
   if (floor !== undefined && cy - floor > 0.15 && cy - floor < 2.6) H.floor(cx, floor + 0.03, cz, Math.min(3.0, r * 3.2 + 0.6), Math.min(3.0, r * 3.2 + 0.6), 10, 0.75);
 }
