@@ -305,6 +305,12 @@ export function egyptianRooms(el, y = 0) {
   const id = `rhakotis ${Math.round(el.rect[0])},${Math.round(el.rect[1])}`, out = [{ id: `${id}: room`, rect: F.R(0.7, 0.7, L - 0.7, hd - 0.7), y, kind: 'inner', market: false }];
   void D; return out;
 }
+/** The door and the room of an egyptian_house (the builder's own draws of its random numbers, in order): { F, L, hd, du, dw }. The door is 1.7 m clear, its lintel 2.1 m up. */
+export function egyptLayout(el) {
+  const F = frame(el.rect, el.front ?? 's'), { L, D } = F, rand = rng(el.seed || 1);
+  rand(); const hd = Math.min(D - 4.5, 8.6 + rand() * 2); rand();
+  return { F, L, D, hd, du: 1.2 + rand() * (L - 5.2), dw: 1.7 };
+}
 /**
  * egyptian_house: { rect (the lot), seed, y, front ('n' | 's': the street) } — a house of Rhakotis on the street: its front the whole width
  * of the lot, mudbrick battering in, 2–3 storeys, the ground room furnished and entered by the street door, an outside stair to the
@@ -315,7 +321,7 @@ function egyptianHouse(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed || 1), y = el.y ?? 0, F = frame(el.rect, el.front ?? 's'), { L, D } = F, [ox, oz] = F.out;
   const R = (u0, v0, u1, v1, y0, y1, m, solid = false) => { const r = F.R(u0, v0, u1, v1); bag.add(m, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); if (solid) col.rect(r, y + y0, y + y1); return r; };
   const n = 2 + (rand() < 0.4 ? 1 : 0), sh = 2.9, H = n * sh, hd = Math.min(D - 4.5, 8.6 + rand() * 2), b = 0.1 * n, wl = rand() < 0.6 ? 'plaster_white' : 'mud_plaster';
-  const dw = 1.1, du = 1.2 + rand() * (L - 5.2), side = rand() < 0.5 ? 1 : -1;
+  const dw = 1.7, du = 1.2 + rand() * (L - 5.2), side = rand() < 0.5 ? 1 : -1;
   const stairU = side > 0 ? L - 1.1 : 0.1;
   const simple = el.simple;
   R(-0.05, 0, L + 0.05, hd, -0.5, 0.5, 'limestone');
@@ -346,7 +352,7 @@ function egyptianHouse(el, ctx) {
   }
   { const [x0, z0] = F.P(L * 0.55, 1.3), [x1, z1] = F.P(L * 0.9, 1.3); const G = []; washLine({ add: (m, g) => G.push([m, g]) }, [x0, z0], [x1, z1], y + H + 1.6, rng((el.seed || 1) + 17), 0.8); for (const [m, g] of G) bag.add(m, g); }
   // the door and the front's dressing: the palm lintel, little high windows with a grille, the beams ending in the wall
-  R(du - 0.1, -0.1, du + dw + 0.1, 0.08, 0, 2.15, 'palm_trunk'); R(du + 0.04, 0.55, du + 0.1, 0.55 + dw * 0.9, 0, 2.0, 'wood_dark');
+  R(du - 0.12, -0.1, du, 0.08, 0, 2.15, 'palm_trunk'); R(du + dw, -0.1, du + dw + 0.12, 0.08, 0, 2.15, 'palm_trunk'); R(du + 0.04, 0.55, du + 0.1, 0.55 + dw * 0.9, 0, 2.0, 'wood_dark');       // the jambs of palm trunk, the leaf standing open against the inside of the wall
   R(du - 0.1, -0.12, du + dw + 0.1, 0.08, 2.1, 2.25, 'limestone');
   for (let k = 1; k <= n; k++) for (let u = 0.6; u < L - 0.5; u += 1.1) { if (k === 1 && u > du - 0.3 && u < du + dw + 0.3) continue; R(u, -0.2, u + 0.17, 0.0, k * sh - 0.35, k * sh - 0.18, 'palm_trunk'); }
   for (let k = 0; k < n; k++) for (let u = 1.4 + (k % 2) * 0.8; u < L - 1.0; u += 2.6) { if (k === 0 && Math.abs(u + 0.3 - du - dw / 2) < 1.4) continue; R(u, -0.04, u + 0.6, 0.06, (k + 1) * sh - 1.2, (k + 1) * sh - 0.5, 'wood_dark'); R(u + 0.28, -0.05, u + 0.32, 0.07, (k + 1) * sh - 1.2, (k + 1) * sh - 0.5, 'timber'); }

@@ -5,7 +5,7 @@
 // the placing of street furniture, the sound map and the night light read.
 
 import { frame } from '../../styles/greek/agora.js';
-import { houseLayout } from '../../styles/ptolemaic/house.js';
+import { houseLayout, egyptLayout } from '../../styles/ptolemaic/house.js';
 import { lots, shopRuns, SOMA, CANOPIC, GROUND, height } from './layout.js';
 
 export const ARRIVAL = [102, -86];
@@ -19,6 +19,7 @@ export const WALK = [
   [[48, -45], [-70, -45]],                       // and west, between the rows
   [[48, -8], [-70, -8]],
   [[72, -8], [126, -8]],
+  [[48, 21], [-200, 21]],                        // the cross street at z 21 west to Rhakotis: the mudbrick houses on both sides (§17)
 ];
 function segDist(p, a, b) {
   const vx = b[0] - a[0], vz = b[1] - a[1], l2 = vx * vx + vz * vz || 1, t = Math.max(0, Math.min(1, ((p[0] - a[0]) * vx + (p[1] - a[1]) * vz) / l2));
@@ -49,13 +50,28 @@ export function opened() {
   return OPENED;
 }
 
+let OPENED_E = null;
+/** The Rhakotis houses of the walk that are opened (their street door 1.7 m clear): those whose front is within 9 m of the walk, the four nearest the Soma street. { l, L (egyptLayout), F, door: u of the door's middle }. */
+export function openedEgypt() {
+  if (OPENED_E) return OPENED_E;
+  const list = [];
+  for (const l of lots()) {
+    if (l.warehouse || l.quarter !== 'egyptian') continue;
+    const [fx, fz] = frontMid(l);
+    if (walkDist(fx, fz) > 9) continue;
+    const K = egyptLayout({ rect: l.rect, seed: l.seed, front: l.front });
+    list.push({ l, K, F: K.F, door: K.du + K.dw / 2, n: Math.abs(fx - 60) });
+  }
+  OPENED_E = list.sort((a, b) => a.n - b.n).slice(0, 4);
+  return OPENED_E;
+}
 /**
  * Keep a prop out of an opened house's door lane (a metre either side of the line out from the street door, five metres out): the point moved along the front,
  * the way that has more room (the lanes of two doors are never closer than this to one another's neighbours).
  */
 export function laneClear(at) {
   let [x, z] = at;
-  for (const { F, door } of opened()) {
+  for (const { F, door } of [...opened(), ...openedEgypt()]) {
     for (let v = 0; v <= 5; v += 1) {
       const [px, pz] = F.P(door, -v);
       if (Math.abs(F.alongX ? x - px : z - pz) < 1.35 && Math.abs(F.alongX ? z - pz : x - px) < 1.1) { const d = F.alongX ? x - px : z - pz, s = d < 0 ? -1 : 1, t = s * 1.5 - d; if (F.alongX) x += t; else z += t; }
@@ -80,6 +96,9 @@ export function intoHouse({ l, K, F, door }, room) {
   return [...R, F.P(u, df + 1.2), F.P(cm + side * 1.9, (cv0 + cv1) / 2 - 0.3), F.P(a0, cv1 - 1.5), F.P(a0, cv1 + 1.5)];
 }
 
+/** Into a Rhakotis house by its street door, to the middle of the ground room (the family at the quern sits beyond). */
+export function intoEgypt({ K, F, door }) { return [F.P(door, -3), F.P(door, 0.3), F.P(door, 2.2), F.P(door, Math.min(K.hd / 2, 4.2))]; }
+
 /** The routes walk-check follows (world x, z; start on the ground of the first point): into the places the walk passes. */
 export function walkRoutes() {
   const out = [], O = opened();
@@ -87,6 +106,7 @@ export function walkRoutes() {
   O.slice(0, 6).forEach((o) => out.push(withY(intoHouse(o, 'a'))));
   O.slice(6, 9).forEach((o) => out.push(withY(intoHouse(o, 'court'))));
   O.slice(9, 11).forEach((o) => out.push(withY(intoHouse(o, 'andron'))));
+  openedEgypt().forEach((o) => out.push(withY(intoEgypt(o))));
   // the shops under the colonnades of the Canopic Way, within reach of the crossing: into the rooms
   const full = shopRuns().filter((r) => r.full && Math.abs(r.cx - 60) < 120).sort((a, b) => Math.abs(a.cx - 60) - Math.abs(b.cx - 60));
   for (const r of full.slice(0, 4)) out.push(withY(intoRoom(r.rect, r.front, 5, 6, 1)), withY(intoRoom(r.rect, r.front, 5, 6, 3)));

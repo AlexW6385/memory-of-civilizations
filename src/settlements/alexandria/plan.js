@@ -20,6 +20,7 @@ export const pharos = {
   elements: [
     { t: 'pharos', c: PH, y: g, base: PHAROS.base },
     { t: 'pharos_fit', c: PH, y: g, seed: 9 },
+    { t: 'pharos_court', c: PH, y: g, base: PHAROS.base },
     ...fires().pharos,                                   // the torches at the tower's door (nightlight.js)
     // the island's paved court round the tower
     { t: 'floor', rect: [PH[0] - 36, PH[1] - 36, PH[0] + 36, PH[1] + 36], y: g + 0.05, th: 0.2, mat: 'travertine' },
