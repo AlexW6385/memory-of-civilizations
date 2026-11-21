@@ -331,3 +331,17 @@ export async function town() {
   ]);
 }
 void avenue;
+
+let SPOTS = null;
+/** Where the sounds of the town are made (soundmap.js): the open fires, the places of work in the open, the animals; from the same plans the town is built from. */
+export function soundSpots() {
+  if (SPOTS) return SPOTS;
+  SPOTS = { fires: [], crafts: [], animals: [] };
+  for (const p of [...feast(), ...camp(), ...village()]) for (const e of p.elements) {
+    if (e.t === 'feast_fire') SPOTS.fires.push({ at: e.c, pig: e.pig !== false });
+    else if (e.t === 'craft') SPOTS.crafts.push({ kind: e.kind, at: e.c });
+    else if (e.t === 'animal') SPOTS.animals.push({ kind: e.kind, at: e.at });
+  }
+  for (const e of people()) if (e.t === 'animal') SPOTS.animals.push({ kind: e.kind, at: e.at });
+  return SPOTS;
+}

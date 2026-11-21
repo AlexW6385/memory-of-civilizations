@@ -147,6 +147,7 @@ import * as KAIFENG from '../settlements/song-kaifeng/soundmap.js';
 import * as SHANGYINXU from '../settlements/shang-yinxu/soundmap.js';
 import * as SHAOLIN from '../settlements/shaolin/soundmap.js';
 import * as SHIBAM from '../settlements/shibam/soundmap.js';
+import * as STONEHENGE from '../settlements/stonehenge/soundmap.js';
 import * as SYDNEY from '../settlements/sydney/soundmap.js';
 import './voices-sydney.js';
 import * as TANGCA from '../settlements/tang-changan/soundmap.js';
@@ -280,7 +281,7 @@ export const PROFILES = {
   sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: withLife({ cattle: 0.6, goat: 0.4, rooster: 0.3, dog: 0.2 }, { market: 0.5, map: SANCHI }), roof: 'thatch', bells: 'puja' }),
   'song-hangzhou': T(EAS, { cicadas: 0.7, frogs: 0.6, roof: 'tile', bells: null, animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: HANGZHOU }) }),
   'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, roof: 'tile', bells: null, animals: withLife({ donkey: 0.4, rooster: 0.3, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: KAIFENG }) }),
-  stonehenge: T({ warbler: 1, crow: 0.6 }, { animals: { cattle: 0.4, dog: 0.3 }, roof: 'thatch' }),
+  stonehenge: T({ warbler: 1, crow: 0.6 }, { animals: withLife({ cattle: 0.4, dog: 0.3 }, { market: 0.6, map: STONEHENGE }), roof: 'thatch' }),
   sydney: T({ gull: 0.6, koel: 0.25, sparrow: 0.5, dove: 0.3, crow: 0.2 }, { cicadas: 0.4, animals: withLife({ dog: 0.2 }, { market: 0.9, map: SYDNEY }), roof: 'flat' }),
   'tang-wutai': T({ warbler: 0.7, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.3, cattle: 0.3 }, roof: 'tile', bells: 'monastery' }),
   taos: T({ warbler: 0.6, crow: 0.6, dove: 0.3 }, { cicadas: 0.3, frogs: 0.2, animals: withLife({ dog: 0.6 }, { market: 0.5, map: TAOS }), roof: 'flat' }),
