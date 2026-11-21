@@ -12,6 +12,8 @@ import { face, fig } from '../greek/ward.js';
 import { rangeRoof, kline, trapeza, krater, lampstand } from '../greek/house-interior.js';
 import { furnishShop } from '../greek/shops.js';
 import { vase } from '../greek/vessels.js';
+import { TRADE_WORD, textWidth } from './writing.js';
+import { inscribe } from '../ptolemaic/script.js';
 
 /** the rough head of a herm still in the stone: a squat ovoid */
 function blobLike(x, y, z) { return lathe([[0.001, -0.17], [0.13, -0.1], [0.17, 0.0], [0.12, 0.13], [0.001, 0.18]], 9, null, x, y, z); }
@@ -126,6 +128,8 @@ function delphiHouse(el, ctx) {
   // the door leaf standing open inward, the shop's shutter propped as an awning, a threshold and a step on the lane
   { const u = (pa + pb) / 2, r = G.R(u - 0.78, T, u - 0.72, T + 0.9); bag.add('wood_dark', box(r[0], y + 0.04, r[1], r[2], y + 2.05, r[3]));
     const st = G.R(u - 0.95, -0.4, u + 0.95, 0.0); bag.add('limestone', box(st[0], y - 0.12, st[1], st[2], y + 0.02, st[3]));
+    // the door-stone worn: a darker, polished hollow where the feet cross it, a second by the jamb (wear.js: the same patches by the hash of the house's place)
+    { const w1 = G.R(u - 0.55, -0.34, u + 0.55, -0.04); bag.add('plaster_damp', box(w1[0], y + 0.02, w1[1], w1[2], y + 0.024, w1[3])); const w2 = G.R(u - 0.3, -0.28, u + 0.3, -0.1); bag.add('plaster_damp', box(w2[0], y + 0.024, w2[1], w2[2], y + 0.027, w2[3])); }
     const fm = [G.R(u - 0.92, -0.1, u - 0.8, 0.12), G.R(u + 0.8, -0.1, u + 0.92, 0.12)];
     for (const q of fm) bag.add('timber', box(q[0], y + 0.05, q[1], q[2], y + 2.3, q[3]));
     const hd = G.R(u - 0.94, -0.12, u + 0.94, 0.14); bag.add('timber', box(hd[0], y + 2.2, hd[1], hd[2], y + 2.4, hd[3]));
@@ -134,7 +138,10 @@ function delphiHouse(el, ctx) {
     const cb = G.R(so[0] + 0.1, -0.05, so[1] - 0.1, 0.5); bag.add('timber', box(cb[0], y + 0.05, cb[1], cb[2], y + 0.92, cb[3]));
     const bd = G.R(so[0] + 0.05, -0.34, so[1] - 0.05, 0.0); bag.add('wood_dark', box(bd[0], y + 0.88, bd[1], bd[2], y + 0.94, bd[3]));
     col.rect(cb, y, y + 0.92);
-    if (tier > 1 && vr !== 4) { const sg = G.R(so[0] + 0.3, -0.62, so[1] - 0.3, -0.56); bag.add('wood_ochre', box(sg[0], y + 2.65, sg[1], sg[2], y + 3.1, sg[3])); const em = G.R(so[0] + 0.7, -0.64, so[1] - 0.7, -0.62); bag.add(['paint_blue', 'wall_red', 'paint_ochre', 'pottery_dark'][(el.seed || 0) % 4], box(em[0], y + 2.75, em[1], em[2], y + 3.0, em[3])); }
+    if (tier > 1 && vr !== 4) { const sg = G.R(so[0] + 0.3, -0.62, so[1] - 0.3, -0.56); bag.add('wood_ochre', box(sg[0], y + 2.65, sg[1], sg[2], y + 3.1, sg[3])); const em = G.R(so[0] + 0.4, -0.64, so[1] - 0.4, -0.62); bag.add('paint_blue', box(em[0], y + 2.73, em[1], em[2], y + 3.02, em[3]));
+      // the trade's word on the board (Greek capitals, writing.js): the goods, in letters of white plaster
+      const word = TRADE_WORD[trade];
+      if (word) { const wd = so[1] - so[0] - 0.8, hh = Math.min(0.16, 0.9 * wd / (textWidth(word, 1) || 1)), pc = P((so[0] + so[1]) / 2, -0.64); inscribe(bag, [word], { at: [pc[0], pc[1]], n: [0, 1], y: y + 2.875 + hh / 2, h: hh, mat: 'plaster_white', pitch: 0.22 }); } }
   }
   // the weathering of the four faces (shared with the walls of Athens)
   const rr = rng((el.seed || 1) + 5);

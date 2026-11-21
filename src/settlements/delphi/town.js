@@ -45,6 +45,7 @@ export async function town() {
     for (const q of alleys()) if (q.up && q.dn) {
       const yU = q.up.y, yD = q.dn.y;
       E.push({ t: 'stair', rect: [q.x0 + 0.1, q.up.z + 1.2, q.x1 - 0.1, q.up.z + 1.2 + Math.max(4, (yU - yD) * 2.2)], dir: 'n', y0: yD, y1: yU, riser: 0.17, base: yD - 0.6, mat: 'limestone' });
+      E.push({ t: 'dl_stairwear', rect: [q.x0 + 0.1, q.up.z + 1.2, q.x1 - 0.1, q.up.z + 1.2 + Math.max(4, (yU - yD) * 2.2)], dir: 'n', y0: yD, y1: yU, riser: 0.17 });
       E.push({ t: 'ribbon', pts: [[(q.x0 + q.x1) / 2, q.up.z + 5.5], [(q.x0 + q.x1) / 2, q.dn.z - 0.5]], ys: [yD, yD], w: 1.8, mat: 'rubble', kerb: false, lift: 0.03 });
     }
     plans.push(base('delphi-lanes', 'delphi', E)); void ROW_PITCH; void wayPoints; }

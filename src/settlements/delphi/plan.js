@@ -44,6 +44,7 @@ export const temple_plan = {
 const S = [];
 terraceWalls(S);
 S.push({ t: 'stair', rect: STAIR, dir: 'n', y0: 13.1, y1: TT_Y, riser: 0.17, base: 11, mat: 'limestone' });
+S.push({ t: 'dl_stairwear', rect: STAIR, dir: 'n', y0: 13.1, y1: TT_Y, riser: 0.17 });
 S.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] >= 24 && !(p[0] > 85.9 && p[0] < 86.1 && p[2] < 43.9)), { w: 3.6, mat: 'flagstone', kerb: true, lift: 0.04 }));
 S.push(rib(wayPoints(WAY2, way2Y), { w: 2.4, mat: 'flagstone', kerb: false, lift: 0.04 }));
 wayDedications(S);

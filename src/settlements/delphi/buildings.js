@@ -1,6 +1,8 @@
 // The buildings of the sanctuary as plan elements (docs/settlements/delphi.md §4): the Temple of Apollo, the treasuries, the
 // Athenian Stoa, the Chians' altar, the terrace's walls. Pure data; each pushes onto the list it is given.
 import { subtractRects } from '../../core/build.js';
+import './wear.js';
+import { MAXIMS } from '../../styles/delphi/writing.js';
 import { STAIR, TT, TT_Y, TEMPLE, ALTAR, STOA, SPHINX, SERPENT, height, WALL_S, WALL_E, GATE, SIDE_GATE, inRect } from './layout.js';
 
 const PI = Math.PI;
@@ -55,6 +57,7 @@ export function temple(E) {
     for (const q of subtractRects(r, holes)) E.push({ t: 'block', rect: q, y0: i === 0 ? y0 - 0.6 : y0 + i * RISE, y1: y0 + (i + 1) * RISE, mat: 'marble', walk: true });
   }
   E.push({ t: 'stair', rect: [SBR[2], cz - 2.6, SBR[2] + 2.8, cz + 2.6], dir: 'w', y0, y1: ST, riser: 0.15, base: y0 - 0.3, mat: 'marble' });
+  E.push({ t: 'dl_stairwear', rect: [SBR[2], cz - 2.6, SBR[2] + 2.8, cz + 2.6], dir: 'w', y0, y1: ST, riser: 0.15, wear: 'limestone' });
   // ── the peristyle: 6 × 15, the front of Parian marble, the flanks and the back of poros
   for (const x of X) for (const z of [Z[0], Z[5]]) E.push({ t: 'column', at: [x, z], y: ST, h: COL_H, d: COL_D, mat: x === X[14] ? 'marble_column' : 'limestone' });
   for (const z of Z.slice(1, -1)) for (const x of [X[0], X[14]]) E.push({ t: 'column', at: [x, z], y: ST, h: COL_H, d: COL_D, mat: x === X[14] ? 'marble_column' : 'limestone' });
@@ -96,8 +99,9 @@ export function temple(E) {
   // the maxims cut in the pronaos' face of the cross wall: three tablets in lines of lettering, the E in bronze over the door
   for (const [za, zb, k] of [[cz - 6.0, cz - 3.9, 0], [cz - 3.7, cz - 2.2, 1], [cz + 1.4, cz + 3.9, 2]]) {
     E.push({ t: 'block', rect: [19.5, za, 19.56, zb], y0: FL + 1.8, y1: FL + 4.1, mat: 'marble_smooth', collide: false });
-    for (let i = 0; i < 9; i++) E.push({ t: 'block', rect: [19.56, za + 0.14, 19.585, zb - 0.14 - (i % 3 === 2 ? 0.45 : 0)], y0: FL + 1.95 + i * 0.22, y1: FL + 2.03 + i * 0.22, mat: 'marble_dark', collide: false });
-    void k;
+    // the first two tablets carry real letters (writing.js MAXIMS: Know thyself; Nothing in excess); the third, "Surety brings ruin", keeps its unlettered lines (the elided Greek is not in the table)
+    if (k < 2) E.push({ t: 'dl_text', lines: MAXIMS[k], at: [19.575, (za + zb) / 2], n: [1, 0], y: FL + 3.35, h: k === 0 ? 0.3 : 0.26, mat: 'marble_dark', pitch: 0.22 });
+    else for (let i = 0; i < 9; i++) E.push({ t: 'block', rect: [19.56, za + 0.14, 19.585, zb - 0.14 - (i % 3 === 2 ? 0.45 : 0)], y0: FL + 1.95 + i * 0.22, y1: FL + 2.03 + i * 0.22, mat: 'marble_dark', collide: false });
   }
   // the E of Delphi, in gilded bronze, on the frieze band over the door
   { const ye = ENT + ARCH + 0.12, xe = XE + 0.2 + 0.56;
