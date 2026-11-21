@@ -19,6 +19,8 @@ E.push({ t: 'ramp', pts: along([[-107, 0], [-92, 0]], -107, -92).map(([x, z]) =>
 E.push({ t: 'ramp', pts: along(RAMP, -85, 22), w: 4.6, kerb: true, seed: 42 });
 // the passage's floor inside the gate
 E.push({ t: 'floor', rect: [-86, -1.55, -82, 1.55], y: GATE_Y, th: 0.4, mat: 'flagstone' });
+// the wheel ruts worn into the passage's paving by the carts and sledges of two centuries: two dark strips a cart's gauge apart [inferred]
+for (const z of [-0.85, 0.85]) E.push({ t: 'floor', rect: [-86, z - 0.09, -82, z + 0.09], y: GATE_Y + 0.006, th: 0.01, mat: 'pottery_dark' });
 E.push({ t: 'granary', rect: GRANARY, y: GATE_Y + 0.1, face: 'n', seed: 7, du: 5, dw: 2.2, dh: 2.45 });
 E.push({ t: 'grave_circle', c: [GCA.x, GCA.z], r: GCA.r, y: GCA.y, entrance: Math.atan2(0 - GCA.z, LION.x - GCA.x), seed: 9 });
 

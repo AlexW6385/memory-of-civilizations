@@ -61,7 +61,7 @@ export class Halo {
 function lightHalo(H, l, floor) {
   const [x, y, z] = l.at, d = l.distance ?? 6, k = Math.min(1, (l.intensity ?? 2) / 2.4);
   H.ball(x, y, z, Math.max(0.42, Math.min(0.95, d * 0.11)) * (0.8 + 0.2 * k));
-  if (floor !== undefined && y - floor < 3.0 && y - floor > 0.2) H.floor(x, floor + 0.03, z, Math.max(1.3, Math.min(3.4, d * 0.42)), Math.max(1.3, Math.min(3.4, d * 0.42)), 10, 0.8);
+  if (floor !== undefined && y - floor < 3.0 && y - floor > 0.2) H.floor(x, floor + 0.07, z, Math.max(1.3, Math.min(3.4, d * 0.42)), Math.max(1.3, Math.min(3.4, d * 0.42)), 10, 0.8);
 }
 
 let depth = 0;
@@ -93,7 +93,7 @@ const wrap = (name, fn) => function haloed(el, ctx) {
   if (isHouse && el.lit && el.rect) {
     // the door: the hearth's light spilling over the step into the lane
     const m = mapper(el.rect, el.face ?? 'n'), du = el.du ?? m.W / 2, [px, pz] = m.P(du, -1.2);
-    H.floor(px, (el.gd ?? el.y - 0.2) + 0.08, pz, 2.2, 1.6, 8, 0.7);
+    H.floor(px, el.y + 0.11, pz, 2.2, 1.6, 8, 0.7);
   }
   H.flush(ctx.bag);
   return r;
