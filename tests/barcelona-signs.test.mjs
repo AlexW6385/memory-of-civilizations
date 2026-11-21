@@ -1,8 +1,8 @@
 // The writing on Barcelona's shop fascias (src/styles/modernisme/signs.js, docs/settlements/barcelona.md §14.5): every word is in the alphabet the lettering can write,
-// each of the town's 150 boards carries a text that fits its length at a legible height, and the house names are real Catalan surnames of the list.
+// each of the town's 150 boards carries a text that fits its length at a legible height; no name of a person or shop.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { signText, writeSign, WORDS, HOUSES } from '../src/styles/modernisme/signs.js';
+import { signText, writeSign, WORDS } from '../src/styles/modernisme/signs.js';
 import { widthOf } from '../src/styles/victorian/letters.js';
 import { blockElements } from '../src/settlements/barcelona/town.js';
 import { blockShops } from '../src/styles/modernisme/index.js';
@@ -11,7 +11,6 @@ const ALPHABET = /^[A-Z.,& ]+$/;
 
 test('every word and house name is writable (Latin capitals, no accents)', () => {
   for (const [trade, list] of Object.entries(WORDS)) for (const w of list) assert.match(w, ALPHABET, `${trade}: ${w}`);
-  for (const h of HOUSES) assert.match(h, ALPHABET, h);
   assert.deepEqual(Object.keys(WORDS).sort(), ['bodega', 'colmado', 'draperia', 'farmacia', 'ferreteria', 'forn', 'perruqueria', 'sabater']);
 });
 
@@ -25,9 +24,9 @@ test('every board of the town is written, fits, and stays legible', () => {
     seen.add(tx); n++;
   }
   assert.equal(n, 150);
-  assert.ok(seen.size >= 25, `${seen.size} different texts`);
+  assert.ok(seen.size >= 15, `${seen.size} different texts`);
   assert.ok(small <= 5, `${small} boards under 0.25 m`);
-  assert.ok([...seen].some((t) => /CASA /.test(t)), 'some boards carry the house\'s name');
+  for (const t of seen) assert.ok(Object.values(WORDS).some((l) => l.includes(t)), `${t} is a trade word`);
 });
 
 test('writeSign makes boxes on the board, mirrored so that the text reads from the street', () => {
