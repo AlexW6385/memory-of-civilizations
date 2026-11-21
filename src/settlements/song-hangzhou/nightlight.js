@@ -166,6 +166,31 @@ function pagodaLamps(H, bag, tiers, base) {
   H.ball(cx, yt + top.h * 0.55, cz, 5.2, 0.5);
 }
 
+// ── the processional stair by night: lamps on its landings and at its head, the lit temple gate (job 1 of the second pass) ──
+/** Stair (hz_stair in plan.js: x PAGODA.c[0] ± 6, z 130 to 102, 3 flights, landings 2.4 m, 0.16 m risers): stone lamps on the landings' edges, their pools, a glow over each flight, and the gate's lanterns at the head. */
+function stairLamps(H) {
+  const cx = PAGODA.c[0], zB = 130, zT = 102, rise = 0.16, N = 50, land = 2.4, run = (zB - zT - 2 * land) / N, per = [17, 17, 16];
+  let z = zB, y = 0;
+  for (let f = 0; f < 3; f++) {
+    const zf = z, yf = y; z -= per[f] * run; y += per[f] * rise;
+    // over the flight: a glow in the air above its middle, and a wash on the risers
+    H.ball(cx, (yf + y) / 2 + 1.7, (zf + z) / 2, 2.6, 0.6);
+    if (f < 2) {
+      const zl = z - land / 2;
+      for (const dx of [-5.3, 5.3]) { H.ball(cx + dx, y + 1.35, zl, 1.25, 0.7); H.floor(cx + dx, y + 0.06, zl, 1.9, 1.9, 0, 8, false, 0.85); }
+      H.floor(cx, y + 0.06, zl, 5.2, 1.2, 0, 10, false, 0.55);
+      z -= land;
+    }
+  }
+  // the foot: the lowest treads and the drum stones, lit by the stone lamps standing at the road's edge
+  H.floor(cx, 0.12, zB - 1.4, 6.2, 2.2, 0, 10, false, 0.7);
+  for (const dx of [-6.6, 6.6]) { H.ball(cx + dx, 1.5, zB + 0.6, 1.5, 0.7); H.floor(cx + dx, 0.06, zB + 0.8, 2.2, 2.2, 0, 8, false, 0.8); }
+  H.ball(cx, 1.9, zB - 2.2, 2.4, 0.5);
+  // the head: a lantern either side of the south gate's door and the court's floor lit beyond it
+  for (const dx of [-4.6, 4.6]) { H.ball(cx + dx, 9.6, zT + 0.4, 1.2, 0.7); H.floor(cx + dx, 8.06, zT + 0.8, 1.9, 1.9, 0, 8, false, 0.8); }
+  H.floor(cx, 8.1, zT - 4, 3.2, 3.4, 0, 10, false, 0.6);
+}
+
 /**
  * The night plan: every lamp of the finished `plans` as halo geometry, and the lamps of the pagoda's galleries, in one
  * static plan (one mesh of one material). The element carries data only (the lamps' own elements, trimmed); the geometry
@@ -195,6 +220,7 @@ function nightElement(el, { bag }) {
   for (const e of el.lamps) lampsOf(H, e);
   for (const e of el.fronts) frontLight(H, e);
   for (const [x, z, y] of el.stones) { H.ball(x, y + 1.35, z, 1.2); H.floor(x, y + 0.03, z, 1.6, 1.6, 0, 8, false, 0.7); }
+  stairLamps(H);
   pagodaLamps(H, bag, el.tiers, el.tbase);
   H.flush(bag);
 }
