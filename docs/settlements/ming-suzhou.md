@@ -506,6 +506,14 @@ This amends §11 (boards) and §20 (real characters): the plain-bar strokes are 
 
 **Numbers** (arrival, `draw-count`, against master at the same commit): main draws 284 → 285, main triangles 2.53 → 2.56 M (+1.2%); geo-one 79.6 → 107.2 MB, 753 → 818 meshes. Dense shop glyphs would have become instanced draws; six stroke-weight variants chosen by hash of position keep each shape below that threshold. Checks: surface-check ok, plan-check ok, walk-check --sites ok, view-check and disc-check clean, worker test passes.
 
+### 27.1 Characters added for the other settlements (`brush-data.js`, round 2; `tests/ming-glyph.test.mjs`)
+
+Twenty characters were added to the table, for the plaques and signs of the other settlements; none is placed yet. Stroke counts are the standard traditional counts. **No typeface was used this time** (the brief for this round forbade any font or stroke data): each was authored from the form of the character, drawn by `brush.js`, and looked at as a 300 px PNG beside two existing characters (`tools/script-sheet.mjs` for the outlines, a plain grid sheet with the strokes numbered), the count, the order of the components and the proportions compared with the standard form. Sheets: `shots/glyphs/batch1.png`, `batch2.png`, `batch3.png`, `batch3b.png` (local, not committed).
+- **Authored here (14):** 少 4, 林 8, 年 6, 清 11, 宮 10, 門 8 (the 門 of 閣, which is verified), 高 10, 孔 4, 莫 10, 油 8, 客 9 (宀 over 閣's verified 各), 忠 8 (心 of 恩), 厚 9, 詩 13 (言 and 寺's verified form), 仞 5.
+- **Taken from tables already verified against the typeface by the other settlements' agents (same brush, same format):** 午 4 (qing-beijing), 肉 6 (song-kaifeng), 魚 11 and 紙 10 (edo; 紙 reads 綠's 糸). My first 午, 肉 and 魚 differed from those in the length of the bars, the 人 pair and the top of 魚; the verified forms replaced them.
+- **雁 12:** 厂, an 亻 and the verified 隹 of 雄 (refitted to the right of the 亻).
+- **Left out because the form could not be fixed from knowledge of the character alone (a wrong plaque is worse than a plain one):** 祈 (斤), 乾, 承, 啟, 煙 (火 radical and 垔), 菜 (爫), 窟 (屈's 出), 廟 (朝), 成, 萬, 牆, 鞍 (革), 鐵, 鹽, 筆 (聿), 棧 (戔), 飯 (飠), 傳, 家 (豕), 久, 繼, 世, 長. They need a reference pass with the typeface (as §27 did) or a person who writes them.
+
 ## 28. The north zone at full standard: temple halls, climbable pagoda, wall and gate, court (`templefig.js`, `templehall.js`, `pagodawork.js`, `wallwork.js`, `north.js`; round 13)
 
 **Sources.** §12 (history, layout, wall) and §20 (gate furniture) stand. The Wikipedia pages on the Beisi Pagoda and the Bao'en Temple could not be fetched here (provenance refused), so nothing below is newly sourced from them. Marked **[stated]** where §12/§20 or the song pagoda dossier say it, **[inferred]** where the form is the usual one of a Jiangnan Chan temple of the Ming and the sources give no detail.
