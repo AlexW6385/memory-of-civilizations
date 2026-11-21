@@ -3,7 +3,7 @@
 // (wine, grain, cloth, pottery, bronze and iron, lacquer, salt and fish, leather and sandals, herbs). Always open to walk into.
 import { box, lathe, addCloth, clothBox, frustum } from '../../core/geom.js';
 import { rng } from '../../objects/kit.js';
-import { frame, gable, JAR } from './houses.js';
+import { frame, gable, JAR, decal } from './houses.js';
 
 export const TRADES = ['wine', 'grain', 'cloth', 'pottery', 'bronze', 'lacquer', 'salt', 'leather', 'herbs', 'cloth', 'wine', 'pottery'];
 const VAL = { wine: 'cloth_white', grain: 'cloth_ochre', cloth: 'cloth_indigo', pottery: 'cloth_brown', bronze: 'cloth_red', lacquer: 'cloth_black', salt: 'cloth_grey', leather: 'cloth_brown', herbs: 'cloth_green' };
@@ -23,6 +23,9 @@ export function qinShop(el, ctx) {
   F.b('lacquer_black', W / 2 - 0.75, 3.15, -0.1, W / 2 + 0.75, 3.35, -0.08, false);
   // the counters either side of the entrance (the entrance 2.2 m), with a lacquered top, the balance on one
   for (const [a, b] of [[th + 0.3, W / 2 - 1.1], [W / 2 + 1.1, W - th - 0.3]]) { F.b('timber', a, 0, 0.1, b, 0.9, 0.7); F.b('lacquer_red', a - 0.04, 0.9, 0.06, b + 0.04, 0.95, 0.76, false); }
+  // the wear of the trade: the customers' way worn dark across the entrance, the counters' ends polished by hands
+  decal(F, 'plaster_damp', W / 2 - 1.0, 0.1, W / 2 + 1.0, 2.6, 0.052);
+  for (const [a, b] of [[th + 0.3, W / 2 - 1.1], [W / 2 + 1.1, W - th - 0.3]]) decal(F, 'lacquer_black', a === th + 0.3 ? b - 0.9 : a, 0.18, a === th + 0.3 ? b - 0.1 : a + 0.9, 0.62, 0.953);
   const un = W / 2 + 1.5, vn = 0.4;
   F.b('timber', un - 0.03, 0.95, vn - 0.03, un + 0.03, 1.4, vn + 0.03, false); F.b('bronze', un - 0.3, 1.38, vn - 0.01, un + 0.3, 1.41, vn + 0.01, false);
   for (const s of [-1, 1]) F.b('bronze', un + s * 0.3 - 0.08, 1.1, vn - 0.08, un + s * 0.3 + 0.08, 1.14, vn + 0.08, false);

@@ -137,3 +137,8 @@ Hammers on clay, the beat of rammers (the labourers' chant), kiln roar, carts' a
 ## 13. Animals with behaviour (match pass)
 
 - `fauna.js` lists critters (one mesh, one draw) along the visitor's walk: dogs lying by the house fronts (they lift their heads and stand as the visitor comes), a cock and hens, geese, goats, and the swallows' mud nests under the eaves (the birds fly out and come home); hens, a cock and a dog in a clay yard. Nothing stands on the walking line. No cat (not certain for the Qin town), no pigeons. [inferred: the placing; the species are those a Warring States or Qin household kept - dog, hen, goose, goat are all attested in the household finds and the Qin legal texts' livestock rules, to be checked against a source before this is called stated]
+
+## 14. Wear and writing (match pass)
+
+- Wear, as single-quad decals (no thickness, never in the walker's way): the earth before each house door trodden dark with a smaller patch beside it, the way from the door worn into the floor of an open row house, the customers' way across a shop's entrance and the counters' ends polished by hands. [inferred]
+- Writing: none is written. The Qin small-seal script (xiaozhuan) is attested [stated] (the standard weights carry the edict of the 26th year of the First Emperor, the tiles and the bricks have stamps), but a glyph form cannot be checked here, so the signboards, the standards' edict and the tablets stay plain rather than carry invented marks.

@@ -110,6 +110,13 @@ function windowFit(F, u, y, w, h, v0, v1, kind, open) {
   if (kind === 'shutter') { F.b('planks_grey', u - w / 2, y, v0 + 0.02, u, y + h, v0 + 0.07, false); F.b('planks_grey', u + 0.04, y + 0.04, v0 - 0.02, u + w / 2, y + h - 0.04, v0 + 0.03, false); }
   else for (let q = 1; q < Math.round(w / 0.12); q++) F.b('timber', u - w / 2 + q * 0.12 - 0.012, y, v0 + 0.03, u - w / 2 + q * 0.12 + 0.012, y + h, v0 + 0.06, false);
 }
+/** A wear decal: ONE quad lying at height y over [u0, v0, u1, v1] of the lot's frame (a patch worn dark by feet or hands; no thickness, so it never stops the walker, collide.js inShell). */
+export function decal(F, mat, u0, v0, u1, v1, y) {
+  const a = [F.X(u0), y, F.Z(v0)], b = [F.X(u0), y, F.Z(v1)], c = [F.X(u1), y, F.Z(v1)], d = [F.X(u1), y, F.Z(v0)];
+  const up = (b[2] - a[2]) * (c[0] - b[0]) > 0;
+  const T = []; if (up) quad(T, a, b, c, d); else quad(T, d, c, b, a);
+  F.bag.add(mat, fromTriangles(T));
+}
 /** The wear of a street front: ramming courses, patches of mud wash, the splash of the foot, a tie-post, hanging bundles and gourds. */
 function frontWear(F, rand, W, H, uDoor, v0 = 0, dw = 1.0) {
   // (the plinth and the ledges stop at the door's jambs: a band across an opened doorway stops the walker, collide.js inShell)
@@ -119,6 +126,9 @@ function frontWear(F, rand, W, H, uDoor, v0 = 0, dw = 1.0) {
     F.b('granite_grey', a === 0 ? -0.02 : a, 0.02, v0 - 0.04, b === W ? W + 0.02 : b, 0.11, v0 + 0.02, false);                  // the plinth
     for (const y of [0.9, 1.8, 2.6]) if (y < H - 0.2) F.b('mud_plaster', a, y, v0 - 0.012, b, y + 0.045, v0 + 0.02, false);        // the ramming courses show as ledges
   });
+  // the feet's way: the earth before the door trodden dark, a smaller patch beside it where the household stops to talk
+  decal(F, 'plaster_damp', uDoor - dw * 0.4, v0 - 1.1, uDoor + dw * 0.4, v0 - 0.02, 0.012);
+  decal(F, 'plaster_damp', uDoor + dw * 0.4, v0 - 0.8, uDoor + dw * 0.4 + 0.7, v0 - 0.3, 0.012);
   for (let k = 0; k < 3; k++) { const u = rand() * (W - 1.6), w = 0.5 + rand() * 0.9; if (Math.abs(u + w / 2 - uDoor) > dw / 2 + w / 2 + 0.15) F.b(rand() < 0.5 ? 'mud_plaster' : 'plaster_damp', u, 0.35 + rand() * 1.8, v0 - 0.02, u + w, 0.7 + rand() * 2.0, v0 + 0.015, false); }
   if (rand() < 0.5) { const u = uDoor + (rand() < 0.5 ? -1 : 1) * (1.2 + rand() * 0.8); if (u > 0.3 && u < W - 0.3) { F.b('log_pine', u - 0.07, 0, v0 - 0.45, u + 0.07, 1.25, v0 - 0.31, false); F.b('iron', u - 0.09, 1.0, v0 - 0.47, u + 0.09, 1.04, v0 - 0.29, false); } }   // a tie-post
   for (let k = 0; k < 2; k++) { const u = 0.7 + rand() * (W - 1.4); if (Math.abs(u - uDoor) < 0.9) continue; F.b('rope_fibre', u - 0.01, 2.3, v0 - 0.18, u + 0.01, H - 0.1, v0 - 0.16, false); F.lathe(rand() < 0.5 ? 'wicker' : 'thatch', [[0.001, 0], [0.12, 0.08], [0.1, 0.4], [0.001, 0.46]], u, 1.85, v0 - 0.17, 7); }
@@ -240,6 +250,7 @@ export function rowHouse(el, ctx) {
   if (open) {
     F.b(wm, th, 0, D * 0.55, W * 0.55 - 0.8, H, D * 0.55 + 0.4); F.b(wm, W * 0.55 + 0.8, 0, D * 0.55, W - th, H, D * 0.55 + 0.4); F.b('timber', W * 0.55 - 0.8, 2.2, D * 0.55, W * 0.55 + 0.8, H, D * 0.55 + 0.4, false);
     furnish(F, rand, th, th, W - th, D * 0.55, hh, uD);
+    decal(F, 'plaster_damp', uD - 0.5, th, uD + 0.5, D * 0.3, 0.052);                                                     // the way from the door worn into the floor
     if (el.lit) F.light(W * 0.5, 2.3, D * 0.28);
     // the back room: the bed (a low platform with mats and a quilt), a chest, a lamp, a basket of mending
     const bu = th + 0.4, bv = D * 0.55 + 0.9;
