@@ -4,9 +4,23 @@
 import { RADIUS, GROUND, RIVER, BRIDGE, SQUARE, STREET_W, lots, bank, inLot, blocked, streetsZ, crossX } from './layout.js';
 import { ridersOf } from '../../styles/victorian/street.js';
 import { openSet, mirrors, variantOf, upSet, upLots } from './open.js';
+import { shopSpec } from '../../styles/victorian/upstairs.js';
 export { upLots };
 const base = (id, elements, style = 'victorian') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -180], facing: 'e' } });
 const W = Math.PI / 2, E = -Math.PI / 2, N = 0, S = Math.PI;
+/** The lanes before the doors of the open lots (pub, shop or house, by the builders' own door places): nothing may stand in them (the walker needs 1.6 m clear). */
+let LANES = null;
+function inLane(x, z) {
+  if (!LANES) {
+    const all = lots(); mirrors(all); LANES = [];
+    for (const l of openSet(all)) {
+      const [x0, z0, x1, z1] = l.rect, Wd = x1 - x0, uD = l.pub ? (l.corner === 'e' ? Wd - 1.3 : 1.3)
+        : l.shop ? (shopSpec({ rect: l.rect, seed: l.seed, front: l.front, storeys: l.storeys, y: l.y, mirror: l.mirror }).left ? 0.92 : Wd - 0.92) : (l.mirror ? 3 * Wd / 4 : Wd / 4);
+      LANES.push([x0 + uD, l.front === 's' ? z1 : z0, l.front === 's' ? 1 : -1]);
+    }
+  }
+  return LANES.some(([dx, zf, sg]) => Math.abs(x - dx) < 1.3 && (z - zf) * sg > -0.3 && (z - zf) * sg < 3.2);
+}
 
 function traffic() {
   const L = [], deck = GROUND + 0.4, zw = BRIDGE.z + 2.4, ze = BRIDGE.z - 2.4;          // keep to the left: westbound on the south half
@@ -19,7 +33,7 @@ function traffic() {
   veh('hansom_cab', 86, zw, GROUND, W, 16); veh('omnibus', 70, ze, GROUND, E, 17, { mat: 'car_blue', board: 'cloth_white' }); veh('hansom_cab', 54, ze, GROUND, E, 18);
   veh('hansom_cab', 47, -195, GROUND, N, 19); veh('hansom_cab', 51, -205, GROUND, S, 20);
   // the gas lamps along the kerbs
-  for (let x = 50; x <= 104; x += 18) for (const z of [BRIDGE.z - 6.5, BRIDGE.z + 6.5]) if (!inLot(x, z, 1)) L.push({ t: 'gas_lamp', at: [x, z], y: GROUND });
+  for (let x = 50; x <= 104; x += 18) for (const z of [BRIDGE.z - 6.5, BRIDGE.z + 6.5]) if (!inLot(x, z, 1) && !inLane(x, z)) L.push({ t: 'gas_lamp', at: [x, z], y: GROUND });
   for (let z = -210; z <= -180; z += 15) if (!inLot(43, z, 1)) L.push({ t: 'gas_lamp', at: [43, z], y: GROUND });
   // the river: the floating pier on the Westminster side north of the bridge with a steamer alongside; another steamer
   // coming down; lighters moored off Lambeth and one working across
@@ -56,10 +70,11 @@ function riverFolk() {
  *  ladies, a crossing sweeper, a policeman. */
 function streetFolk() {
   let sd = 1871; const rand = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296), L = [], pick = (a) => a[Math.floor(rand() * a.length)];
-  const fig = (at, rot, o) => { if (!inLot(at[0], at[1], 0.6)) L.push({ t: 'figure', at, y: GROUND, rot, h: 1.6 + rand() * 0.15, seed: Math.floor(rand() * 1e9), skin: 'skin_light', feet: 'shod', ...o }); };
+  const fig = (at, rot, o) => { if (!inLot(at[0], at[1], 0.6) && !inLane(at[0], at[1])) L.push({ t: 'figure', at, y: GROUND, rot, h: 1.6 + rand() * 0.15, seed: Math.floor(rand() * 1e9), skin: 'skin_light', feet: 'shod', ...o }); };
   const coster = (at, rot) => fig(at, rot, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_brown', hat: 'cap', hatMat: rand() < 0.5 ? 'cloth_red' : 'cloth_brown', over: 'collar', pose: rand() < 0.5 ? 'talk' : 'stand' });
   const kerbs = [[62, BRIDGE.z - 5.6, W], [92, BRIDGE.z + 5.6, E], [280, BRIDGE.z - 5.6, W], [300, BRIDGE.z + 5.6, E], [318, BRIDGE.z - 5.6, W]];
-  for (const [i, [x, z, rot]] of kerbs.entries()) {
+  for (const [i, [x0, z, rot]] of kerbs.entries()) {
+    let x = x0; while (inLane(x, z) || inLane(x - 1.4, z) || inLane(x + 1.4, z)) x += 2.5;
     if (inLot(x, z, 2)) continue;
     const side = z < BRIDGE.z ? -1 : 1;
     if (i === 2) L.push({ t: 'cart', at: [x, z], y: GROUND, rot: rot + Math.PI, seed: 40 + i, kind: 'two', load: 'sacks', beast: 'donkey' });
@@ -133,7 +148,7 @@ function streetFolk() {
  *  fountain on Bridge Street, trestle stalls of the street sellers at the kerbs of the busy streets. Within 280 m of the arrival. */
 function furniture() {
   let sd = 1872; const rand = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296), L = [];
-  const ok = (x, z) => Math.hypot(x, z) < 280 && !blocked(x, z, -1) && !inLot(x, z, 0.7);
+  const ok = (x, z) => Math.hypot(x, z) < 280 && !blocked(x, z, -1) && !inLot(x, z, 0.7) && !inLane(x, z);
   const add = (t, x, z, o = {}) => { if (ok(x, z)) L.push({ t, at: [x, z], y: GROUND, ...o }); };
   for (const zc of streetsZ()) for (const cx of crossX()) {
     const main = Math.abs(zc - BRIDGE.z) < 1, h = main ? 8 : STREET_W / 2, pw = main ? 2.6 : 1.9;
@@ -165,6 +180,19 @@ function square() {
   for (const [i, x] of [-48, -41, -34, -27].entries()) L.push({ t: 'hansom_cab', at: [x, -148.2], y: GROUND, rot: W, seed: 60 + i, riders: false });
   for (const [x, z] of [[-45, -190], [-45, -172], [30, -196], [30, -164], [-10, -199], [-10, -161], [8, -174], [-30, -186]]) L.push({ t: 'gas_lamp', at: [x, z], y: GROUND });
   return L;
+}
+/** Routes from the pavement through the door into the front room of each open lot whose upper floors are shut: [[x, z] ...] (the lanes above). */
+export function frontRoutes() {
+  inLane(0, 0);
+  const all = lots(); mirrors(all);
+  const open = openSet(all), ups = upSet(all, open), out = [];
+  for (const l of open) {
+    if (ups.has(l)) continue;
+    const [x0, z0, x1, z1] = l.rect, Wd = x1 - x0, sg = l.front === 's' ? 1 : -1, zf = l.front === 's' ? z1 : z0;
+    const uD = l.pub ? (l.corner === 'e' ? Wd - 1.3 : 1.3) : l.shop ? (shopSpec({ rect: l.rect, seed: l.seed, front: l.front, storeys: l.storeys, y: l.y, mirror: l.mirror }).left ? 0.92 : Wd - 0.92) : (l.mirror ? 3 * Wd / 4 : Wd / 4);
+    out.push([[x0 + uD, zf + sg * 2.4], [x0 + uD, zf - sg * 0.6], [x0 + uD, zf - sg * 2.6]]);
+  }
+  return out;
 }
 /** The terraces cut into TILE-metre tiles, each built in full (near) and simple (far) like ../lod.js lodTiles, but larger: a plan costs one mesh
  *  per material, so fewer, larger tiles keep the mesh count down (the geometry budget); `near` grows with the tile so the same ground shows in full. */

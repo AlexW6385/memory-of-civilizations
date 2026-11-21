@@ -57,9 +57,8 @@ export function write(F, text, u0, u1, ya, yb, d0, d1, m = 'gold') {
 const TITLE = { draper: 'DRAPER', grocer: 'GROCER', butcher: 'BUTCHER', chemist: 'CHEMIST', baker: 'BAKER', pawnbroker: 'PAWNBROKER', bootmaker: 'BOOTMAKER', barber: 'HAIRDRESSER', tobacconist: 'TOBACCONIST', greengrocer: 'GREENGROCER' };
 /** The shop's board: the trade word only (no keeper's name: none is known for these lots). */
 export function shopName(seed, trade) { return TITLE[trade] || 'DEALER'; }
-const PUBS = ['THE RED LION', 'THE CROWN', 'THE FEATHERS', 'THE ALBION', 'THE RISING SUN', 'THE ANCHOR', 'THE CROSS KEYS', 'THE WHITE HART', 'THE ROYAL OAK', 'THE GEORGE', 'THE GOAT & COMPASSES', 'THE WINDSOR CASTLE', 'THE PRINCE OF WALES', 'THE LAMB & FLAG', 'THE BLACK SWAN'];
-/** The public house's name on its fascia, by the lot's seed (real pub names of the period [inferred]). */
-export const pubName = (seed) => PUBS[(Math.imul(seed || 1, 2246822519) >>> 0) % PUBS.length];
+/** The public house's board: the trade's own words, not a name (no named house is known for these corners; a name was the first pass's invention). The fascia of a gin palace advertised its goods [inferred, dossier §12]. */
+export const pubName = () => 'WINES & SPIRITS';
 /** Does this open shop hang a songbird's wicker cage from a bracket under its fascia (the bootmaker's lark, the barber's linnet, the greengrocer's canary [inferred; Mayhew's bird-sellers])? One shop in two of those trades, by seed. */
 export const cagedAt = (el) => !!(el.open && !el.simple && (el.trade === 'bootmaker' || el.trade === 'barber' || el.trade === 'greengrocer') && (el.seed & 1) === 0);
 /** Where such a cage hangs: [u, d, height over the shop's floor]. */
