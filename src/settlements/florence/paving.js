@@ -3,10 +3,13 @@
 // generic 'floor' slab of core/build.js, a few centimetres thick and with no collision (the walker keeps the terrain under it), in one
 // plan of the renaissance style. Pure data from layout.js.
 
+import { STYLES } from '../../core/build.js';
+import '../../styles/renaissance/index.js';
+import { quad, fromTriangles } from '../../core/geom.js';
 import { RADIUS, lots, streets, subtract, KEEP, PIAZZA_DUOMO, SIGNORIA, MERCATO, ORSAN, MEDICI, BAPTISTERY, CAMPANILE, DUOMO, PALAZZO } from './layout.js';
 
 const Y = 0.025, TH = 0.1, GUT = 0.34;
-const flr = (rect, mat, y = Y, th = TH) => ({ t: 'floor', rect, y, th, mat, walk: false });
+const flr = (rect, mat, y = Y, th = TH) => ({ rect, y, th, mat });
 const big = (r) => r[2] - r[0] > 0.3 && r[3] - r[1] > 0.3;
 const shrink = (r, m) => [r[0] + m, r[1] + m, r[2] - m, r[3] - m];
 
@@ -41,8 +44,10 @@ function field(rect0, holes, mat, band, every = [12, 12], grow = 0) {
   for (const r of subtract(rect, cuts, 0)) if (big(r)) E.push(flr(r, mat));
   if (band) {
     const strips = [];
-    for (let x = rect[0] + every[0] / 2; x < rect[2] - 1; x += every[0]) strips.push([x - 0.22, rect[1], x + 0.22, rect[3]]);
-    for (let z = rect[1] + every[1] / 2; z < rect[3] - 1; z += every[1]) strips.push([rect[0], z - 0.18, rect[2], z + 0.18]);
+    // (each band a hair different in width, so that no twelve are one shape and the engine does not make an instanced draw of them)
+    let k = 0;
+    for (let x = rect[0] + every[0] / 2; x < rect[2] - 1; x += every[0]) strips.push([x - 0.22 - (k++ % 13) * 0.0007, rect[1], x + 0.22, rect[3]]);
+    for (let z = rect[1] + every[1] / 2; z < rect[3] - 1; z += every[1]) strips.push([rect[0], z - 0.18 - (k++ % 13) * 0.0007, rect[2], z + 0.18]);
     // (each strip is its own piece, cut by the holes; the east-west ones are cut by the north-south ones where they meet, so none overlaps)
     const ns = strips.filter((s) => s[3] - s[1] > s[2] - s[0]);
     for (const s of strips) for (const p of subtract(s, s[3] - s[1] > s[2] - s[0] ? cuts : [...cuts, ...ns], 0)) if (big(p) && Math.min(p[2] - p[0], p[3] - p[1]) > 0.2 && Math.max(p[2] - p[0], p[3] - p[1]) > 1.5) E.push(flr(p, band, Y + 0.012, TH));
@@ -66,5 +71,19 @@ export function pavingPlans() {
   // the ground round Orsanmichele, whose four streets are cleared, and round the Palazzo Medici: slabs up to the walls
   E.push(...field([ORSAN[0] - 5, ORSAN[1] - 5, ORSAN[2] + 5, ORSAN[3] + 5], [shrink([14, 18, 50.4, 44.1], 0.6), ...S], 'flagstone', null));
   E.push(...field([MEDICI[0] - 6, MEDICI[1] - 6, MEDICI[2] + 8, MEDICI[3] + 6], [[MEDICI[0] - 2, MEDICI[1] - 2, MEDICI[2] + 2, MEDICI[3] + 2], ...S], 'flagstone', null));
-  return [{ id: 'florence-paving', style: 'renaissance', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' } }];
+  return [{ id: 'florence-paving', style: 'renaissance', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t: 'florence_paving', slabs: E }], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' } }];
 }
+
+/** The element: every slab of one material in one geometry (no collision). Merged here, not left to the bag, which would draw the many equal boxes as an instanced mesh of their own: one more draw each. */
+function paving(el, { bag }) {
+  const by = new Map();
+  for (const { rect: [x0, z0, x1, z1], y, th, mat } of el.slabs) {
+    if (!by.has(mat)) by.set(mat, []);
+    const out = by.get(mat), y0 = y - th;
+    const b = [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]], t = [[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]];
+    quad(out, t[0], t[3], t[2], t[1]);
+    quad(out, b[0], t[0], t[1], b[1]); quad(out, b[1], t[1], t[2], b[2]); quad(out, b[2], t[2], t[3], b[3]); quad(out, b[3], t[3], t[0], b[0]);
+  }
+  for (const [mat, tris] of by) bag.add(mat, fromTriangles(tris));
+}
+if (STYLES.renaissance) STYLES.renaissance.elements.florence_paving = paving;
