@@ -126,6 +126,8 @@ export function makeShops(H) {
     const F = frame(el.rect, door), { Wd, Dp, P, R } = F;
     const iu = Wd / 2 - t, vi0 = t, vi1 = Dp - t;                   // the inner extent: u in ±iu, v from vi0 to vi1
     const B = (mat, u0, u1, v0, v1, y0, y1, solid = false) => { const r = R(u0, u1, v0, v1); bag.add(mat, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); if (solid) col.rect(r, y + y0, y + y1); };
+    // wear (docs/settlements/lhasa.md §19): the doorstep's timber sill dished in the middle by the feet that cross it (higher at its ends, but under 4 cm: the walker counts a face of 4 cm as a wall)
+    for (const [u0, u1, hh] of [[-dw / 2, -dw / 2 + 0.5, 0.034], [-dw / 2 + 0.5, dw / 2 - 0.5, 0.024], [dw / 2 - 0.5, dw / 2, 0.034]]) B('timber', u0, u1, -0.3, 0.55, -0.005, hh);
     // the ceiling's beams across the room, on the walls
     for (let v = vi0 + 0.6; v < vi1 - 0.3; v += 1.25) B('lacquer_red', -iu, iu, v - 0.11, v + 0.11, ceil - 0.2, ceil);
     B('lacquer_red', -iu, iu, vi0, vi0 + 0.2, ceil - 0.2, ceil);
@@ -158,7 +160,8 @@ export function makeShops(H) {
       const ns = Math.round(W2 * 2 / 0.45);
       for (let i = 0; i < ns; i++) {
         const u0 = -W2 + 2 * W2 * i / ns, u1 = -W2 + 2 * W2 * (i + 1) / ns, m = STRIPES[(i + (el.seed || 0)) % 5], a0 = A(u0, 0.0, 3.0), b0 = A(u1, 0.0, 3.0), c0 = A(u1, 1.8, 2.5), d0 = A(u0, 1.8, 2.5);
-        face(bag, m, [0, 1], a0, b0, c0, d0); face(bag, m, [0, -1], a0, b0, c0, d0);
+        const lo = (q) => [q[0], q[1] - 0.03, q[2]];                       // (the cloth has a thickness, its underside 3 cm below: the walker's roof test needs one, or the door under it is shut)
+        face(bag, m, [0, 1], a0, b0, c0, d0); face(bag, m, [0, -1], lo(a0), lo(b0), lo(c0), lo(d0));
         face(bag, m, [nn[0], nn[1]], d0, c0, [c0[0], c0[1] - 0.25, c0[2]], [d0[0], d0[1] - 0.25, d0[2]]); face(bag, m, [-nn[0], -nn[1]], d0, c0, [c0[0], c0[1] - 0.25, c0[2]], [d0[0], d0[1] - 0.25, d0[2]]);
       }
     }
