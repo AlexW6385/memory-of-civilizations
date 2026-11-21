@@ -24,7 +24,7 @@ export function qinShop(el, ctx) {
   // the counters either side of the entrance (the entrance 2.2 m), with a lacquered top, the balance on one
   for (const [a, b] of [[th + 0.3, W / 2 - 1.1], [W / 2 + 1.1, W - th - 0.3]]) { F.b('timber', a, 0, 0.1, b, 0.9, 0.7); F.b('lacquer_red', a - 0.04, 0.9, 0.06, b + 0.04, 0.95, 0.76, false); }
   // the wear of the trade: the customers' way worn dark across the entrance, the counters' ends polished by hands
-  decal(F, 'plaster_damp', W / 2 - 1.0, 0.1, W / 2 + 1.0, 2.6, 0.052);
+  decal(F, 'palm_trunk', W / 2 - 1.0, 0.1, W / 2 + 1.0, 2.6, 0.052);
   for (const [a, b] of [[th + 0.3, W / 2 - 1.1], [W / 2 + 1.1, W - th - 0.3]]) decal(F, 'lacquer_black', a === th + 0.3 ? b - 0.9 : a, 0.18, a === th + 0.3 ? b - 0.1 : a + 0.9, 0.62, 0.953);
   // a coil of ban liang cash on its cord (the round coin with the square hole, the one coin of the whole empire) on the left counter, two turns of the coil
   const cu = (th + 0.3 + W / 2 - 1.1) / 2;
