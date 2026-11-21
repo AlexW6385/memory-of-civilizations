@@ -78,7 +78,7 @@ function watch(ctx, el, o) {
       if (hashAt(x, z, 41) > 0.62) return;
       const out = el.flip ? 1 : -1, lz = z + out * 1.3;
       H.ball(x, top + 0.02, z + out * 0.05, 0.42, 0.7);
-      H.floor(x, Math.max(height(x, lz) + 0.085, y0 + 0.12), lz, 2.6, 2.1, 10, 0.75);
+      H.floor(x, Math.max(height(x, lz) + 0.25, y0 + 0.3), lz, 2.6, 2.1, 10, 0.75);
       if (lights) lights.push({ at: [x, top + 0.05, z + out * 0.3], color: '#ffb46b', intensity: 1.6, distance: 5 });
       return;
     }
@@ -103,7 +103,7 @@ function watch(ctx, el, o) {
           if (th < 0.05 && dy > 0.5 && dy < 1.3 && w > 0.14 && b[1] > y0 + 0.9) {
             const mx = (b[0] + b[3]) / 2, mz = (b[2] + b[5]) / 2;
             if (hashAt(mx, mz, 31 + Math.floor(b[1] / 2.5)) < o.windows) {
-              const f = 0.45 + 0.35 * hashAt(mx, mz, 7), m = 0.03, e = 0.027;
+              const f = 0.45 + 0.35 * hashAt(mx, mz, 7), m = 0.03, e = 0.033;
               if (dx < dz) { const s = mx > cx ? 1 : -1, x = (s > 0 ? b[3] : b[0]) + s * e; H.quad([x, b[1] + m, b[2] + m], [x, b[1] + m, b[5] - m], [x, b[4] - m, b[5] - m], [x, b[4] - m, b[2] + m], [s, 0], f); }
               else { const s = mz > cz ? 1 : -1, z = (s > 0 ? b[5] : b[2]) + s * e; H.quad([b[0] + m, b[1] + m, z], [b[3] - m, b[1] + m, z], [b[3] - m, b[4] - m, z], [b[0] + m, b[4] - m, z], [0, s], f); }
             }
@@ -140,11 +140,11 @@ const wrap = (name, fn) => function lit(el, ctx) {
   const W = watch(ctx, el, KINDS[name](el));
   depth++;
   try { var r = fn.call(this, el, W.ctx); } finally { depth--; }
-  if (name === 'swahili_mosque') for (const [x, z] of mosqueDoors(el)) { W.H.floor(x, height(x, z) + 0.085, z, 2.6, 2.6, 10, 0.55); }
+  if (name === 'swahili_mosque') for (const [x, z] of mosqueDoors(el)) { W.H.floor(x, height(x, z) + 0.25, z, 2.6, 2.6, 10, 0.55); }
   if (name === 'swahili_house' && el.open && !el.simple) {
     // the street door ajar on the lit court: the lamp's light over the step into the lane
     const f = houseFacts(el), lz = f.front + f.out * 1.2;
-    W.H.floor(f.doorX, Math.max(height(f.doorX, lz) + 0.095, (el.y ?? 0) + 0.13), lz, 1.9, 1.5, 8, 0.5);
+    W.H.floor(f.doorX, Math.max(height(f.doorX, lz) + 0.26, (el.y ?? 0) + 0.31), lz, 1.9, 1.5, 8, 0.5);
   }
   W.finish();
   return r;
