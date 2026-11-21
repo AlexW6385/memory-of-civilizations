@@ -125,8 +125,12 @@ const wrap = (name, fn) => function haloed(el, ctx) {
   else if (name === 'bgn_shop') {
     // the shop's front lit by its lamp and the counter's: the pool of light over the step and the road's edge, a glow at the counter
     const F = lotFrame({}, el.rect, el.front), W = F.W, [px, pz] = F.pt(W / 2 + (hashAt(el.rect[0], el.rect[1], 5) - 0.5) * 2, -1.5);
-    H.floor(px, 0.05, pz, Math.min(3.4, W * 0.3), 2.2, 10, 0.65);
-    const [cx, cz] = F.pt(W / 2, 0.2); H.ball(cx, 0.55 + 1.7, cz, 0.55, 0.5);
+    H.floor(px, 0.05, pz, Math.min(4.2, W * 0.36), 2.8, 10, 0.95);
+    const [cx, cz] = F.pt(W / 2, 0.2); H.ball(cx, 0.55 + 1.7, cz, 0.8, 0.7);
+    // the lit room seen through the open front: a pane of lamplight behind the counter, and a hanging lamp under the eave at each end of the front
+    const nn = [-F.V[0], -F.V[1]], q0 = F.pt(W * 0.14, 0.35), q1 = F.pt(W * 0.86, 0.35);
+    H.quad([q0[0], 1.0, q0[1]], [q1[0], 1.0, q1[1]], [q1[0], 2.1, q1[1]], [q0[0], 2.1, q0[1]], nn, 0.38);
+    for (const u of [0.9, W - 0.9]) { const [ex, ez] = F.pt(u, -0.6); H.ball(ex, 2.35, ez, 0.42, 0.6); }
   } else if (name === 'bgn_stall') {
     // the candle-seller's lamp on the counter and its pool
     const rot = el.rot ?? 0, [x, z] = el.c, vx = Math.sin(rot), vz = Math.cos(rot), y = el.y ?? 0;
