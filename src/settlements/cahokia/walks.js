@@ -4,12 +4,14 @@ import { HALLS, LODGES, SUMMIT, MOUNDS, FOX, lots, mRamp } from './layout.js';
 import { openSet } from './town.js';
 
 const STAIR_X = -25;
+/** Opened houses (by order in the open set) standing on the mound's skirt, whose floor the 0.5 m raster reads 0.75 m under the slope: no route is made into them (docs §10.7). */
+const SKIRT = new Set([9, 11, 12, 14, 17]);
 /** The opened house's door is in its south wall (toward the plaza), its middle at the rect's middle: [outside, in the door, inside]. */
 const houseRoute = (l) => { const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; return [[cx, z1 + 3], [cx, z1 + 0.4], [cx, Math.max(cz + 0.2, z1 - 1.3)]]; };
 const hallDoor = (r) => { const cx = (r[0] + r[2]) / 2; return [[cx, r[3] + 3], [cx, r[3] + 0.4], [cx, r[3] - 2]]; };
 /** The routes of the landmark plan: [[x, z], ...] each, the first leg starting on the floor. */
 export function walks() {
-  const L = lots(), open = [...openSet().keys()].slice(0, 8);
+  const L = lots(), open = [...openSet().keys()].slice(0, 24).filter((_, i) => !SKIRT.has(i));
   const R = [];
   // the stair: from the arrival to the foot of the first stair, up to the terrace's court, in at the first hall's door, out, along the court to the second stair, up to the summit, in at the great house's door
   R.push(Object.assign([[STAIR_X, -5], [STAIR_X, -36], [STAIR_X, -76], [STAIR_X, -84], ...hallDoor(HALLS[1]).slice(0, 2).map(([x, z]) => [x, z]), [(HALLS[1][0] + HALLS[1][2]) / 2, HALLS[1][3] - 3]], { y0: 0 }));

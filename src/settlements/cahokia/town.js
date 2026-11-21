@@ -82,6 +82,8 @@ function fillers() {
   return out;
 }
 export const PLAZA_STALLS = [[-105, -14, 'shell'], [-105, 28, 'pots'], [-105, 48, 'chert'], [-105, 90, 'hides'], [-105, 112, 'salt'], [105, -14, 'copper'], [105, 28, 'maize'], [105, 48, 'pots'], [105, 90, 'shell'], [105, 112, 'hides'], [-60, 138, 'maize'], [-20, 138, 'chert'], [20, 138, 'salt'], [60, 138, 'copper'], [-66, -30, 'pots'], [66, -30, 'hides']];
+/** Two fires in the corridor between the chunkey yards, before the first stair: where those waiting to go up, and the watchers of the games, sat on into the night [inferred] (docs §10.7). */
+export const WAIT_FIRES = [[-32.5, -29], [-17.5, -23]];
 export const PLAZA_ARBORS = [[8, -22, 14, -17], [-65, 104, -59, 109], [73, 120, 79, 125]];
 /** The fire rings beside the two arbors at the plaza's south end, where the watchers of the games sat on into the evening [inferred] (docs §10.2). */
 export const PLAZA_FIRES = PLAZA_ARBORS.slice(1).map(([x0, z0, x1, z1]) => [x1 + 3.2, (z0 + z1) / 2]);
@@ -90,6 +92,7 @@ function plazaGoods() {
   const E = PLAZA_STALLS.map(([x, z, kind], i) => ({ t: 'trade_mat', c: [x, z], y: 0, rot: x === -105 ? 0 : x === 105 ? 0 : 1.57, kind, seed: 50 + i }));
   for (const [x0, z0, x1, z1] of PLAZA_ARBORS) E.push({ t: 'shade_arbor', rect: [x0, z0, x1, z1], y: 0 });
   for (const c of PLAZA_FIRES) E.push({ t: 'yard_fire', c, y: 0, seed: Math.round(c[0] * 3 + c[1]) });
+  for (const c of WAIT_FIRES) E.push({ t: 'yard_fire', c, y: 0, seed: Math.round(c[0] * 3 + c[1]) });
   return [base('cahokia-plaza', E)];
 }
 const FIELD_CELLS = [34, 26];
@@ -183,7 +186,7 @@ function life() {
   for (const [x, z] of [[-31, -26], [-17, -31], [-35, -14], [-14, -12]]) E.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.floor(x + z * 3) + 400 });
   // a few people close to the stair's foot, walking up to it or waiting: a woman with a basket, two men talking, an elder with his staff
   { const w1 = [-29.5, -26], m1 = [-20.6, -27], m2 = [-19.2, -27.8], el = [-31.5, -31];
-    woman(w1, 0, face(w1, [-25, -60]), { carry: 'basket' }); man(m1, 0, face(m1, m2), { pose: 'talk', over: 'none' }); man(m2, 0, face(m2, m1), { pose: 'talk', over: 'cape' });
+    woman(w1, 0, face(w1, [-25, -60]), { carry: 'basket' }); man(m1, 0, face(m1, m2), { pose: 'talk', over: 'none', nightKeep: 1 }); man(m2, 0, face(m2, m1), { pose: 'talk', over: 'cape', nightKeep: 1 });
     man(el, 0, face(el, [-25, -60]), { carry: 'staff', len: 1.6, pose: 'stand', over: 'cape', cloth: 'cloth_white', cloth2: 'hide_white', hair: 'bun' }); }
   // the first terrace: the households of the chief's kin and the priests at their doors, men at the lip looking over the plaza
   for (let k = 0; k < 16; k++) {
@@ -204,8 +207,8 @@ function life() {
     const bench = kind === 'potter' || kind === 'basket' || kind === 'hide' || kind === 'fisher';
     const at = bench ? [cx + (kind === 'potter' || kind === 'basket' ? 1.0 : -1.0), z0 + 1.5] : kind === 'cook' ? [cx - 0.75, cz + 0.6] : kind === 'weaver' ? [cx + 0.3, z0 + 1.5] : kind === 'knapper' ? [x0 + 1.45, z0 + 2.2] : kind === 'shell' ? [cx - 0.4, z0 + 1.45] : kind === 'drum' ? [x0 + 1.4, z0 + 1.9] : [cx - 0.75, cz + 0.6];
     const look = kind === 'weaver' || kind === 'shell' || bench ? [at[0], z0] : kind === 'knapper' ? [x0, at[1]] : [cx, cz + 0.15];
-    (kind === 'knapper' || kind === 'drum' || kind === 'hide' || kind === 'fisher' ? man : woman)(at, F, face(at, look), { pose: kind === 'cook' ? 'kneel' : kind === 'weaver' ? 'squat' : 'cross', over: 'none' });
-    if (kind === 'cook' && rand() < 0.5) { const a2 = [cx + 1.1, cz - 0.4]; woman(a2, F, face(a2, [cx, cz]), { pose: 'squat', over: 'none' }); }
+    (kind === 'knapper' || kind === 'drum' || kind === 'hide' || kind === 'fisher' ? man : woman)(at, F, face(at, look), { pose: kind === 'cook' ? 'kneel' : kind === 'weaver' ? 'squat' : 'cross', over: 'none', nightKeep: 1 });
+    if (kind === 'cook' && rand() < 0.5) { const a2 = [cx + 1.1, cz - 0.4]; woman(a2, F, face(a2, [cx, cz]), { pose: 'squat', over: 'none', nightKeep: 1 }); }
     const d = [cx - 1.6, z1 + 1.4]; (rand() < 0.5 ? woman : man)(d, dd(d[0], d[1]), face(d, [cx + 3, z1 + 6]), { pose: rand() < 0.5 ? 'squat' : 'stand' });
   }
   // sentries on the palisade's bastions, every third one: a man with a staff on the fighting platform
@@ -221,8 +224,8 @@ function life() {
     if (Math.hypot(pl.c[0], pl.c[1]) > 250) return;
     const [cx, cz] = pl.c, y = (x, z) => height(x, z);
     const ax = cx + 5.1, az = cz - 5.6;                                       // the arbor's mat
-    (i % 2 ? man : woman)([ax - 0.3, az - 0.4], y(ax, az) + 0.04, face([ax, az], [ax + 0.5, az + 0.2]), { pose: 'cross', over: 'none' });
-    for (const [dx, dz, w] of [[1.6, 0.8, 1], [-1.8, 1.2, 0], [0.3, -1.9, 1]]) { const at = [cx + dx, cz + dz]; (w ? woman : man)(at, y(at[0], at[1]), face(at, [cx, cz]), { pose: 'squat', over: 'none' }); }
+    (i % 2 ? man : woman)([ax - 0.3, az - 0.4], y(ax, az) + 0.04, face([ax, az], [ax + 0.5, az + 0.2]), { pose: 'cross', over: 'none', nightKeep: 1 });
+    for (const [dx, dz, w] of [[1.6, 0.8, 1], [-1.8, 1.2, 0], [0.3, -1.9, 1]]) { const at = [cx + dx, cz + dz]; (w ? woman : man)(at, y(at[0], at[1]), face(at, [cx, cz]), { pose: 'squat', over: 'none', nightKeep: 1 }); }
     const rk = [cx - 2.7, cz + 6.9]; woman(rk, y(rk[0], rk[1]), Math.PI, { carry: 'basket' });
   });
   // round the other houses, here and there: people at the door, pots, firewood, a dog
@@ -259,5 +262,9 @@ function life() {
   }
   for (const x of [LANDINGS[0], LANDINGS[2]]) { const cx = x + 12, cz = creekZ(cx) + 19, a1 = [cx + 0.3, cz + 0.9], a2 = [cx - 2.2, cz - 0.9]; man(a1, height(a1[0], a1[1]), face(a1, [cx, cz]), { pose: 'squat', over: 'none' }); woman(a2, height(a2[0], a2[1]), face(a2, [cx - 1.7, cz]), { pose: 'squat', over: 'none' }); }
   for (let k = 0; k < 10; k++) { const at = [PLAZA[0] + 10 + rand() * 200, PLAZA[1] + 10 + rand() * 170]; E.push({ t: 'animal', kind: 'dog', at, y: 0, rot: rand() * 6.28, seed: 100 + k }); }
+  // LAST (no earlier figure's seed moves): those who sit on at the two corridor fires after dark, turned to the flames
+  WAIT_FIRES.forEach(([fx, fz], i) => {
+    [[-1.9, 0.5, 0], [0.4, 1.9, 1], [1.8, -0.6, 0]].slice(0, i ? 3 : 2).forEach(([dx, dz, w], j) => { const at = [fx + dx, fz + dz]; (w ? woman : man)(at, 0, face(at, [fx, fz]), { pose: j === 1 ? 'squat' : 'sit_ground', over: 'none', nightKeep: 1 }); });
+  });
   return E;
 }

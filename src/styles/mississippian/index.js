@@ -204,6 +204,10 @@ function palisade(el, { bag, col }) {
         for (let q = 0; q < 4; q++) { const aq = q * Math.PI / 2 + Math.PI / 4; bag.add('timber', rod([bx + Math.cos(aq) * 2.0, yb + h + 0.9, bz + Math.sin(aq) * 2.0], [bx + Math.cos(aq) * 2.0, yb + h + 3.6, bz + Math.sin(aq) * 2.0], 0.1, 6)); }
         bag.add(TH, lathe([[3.6, 0], [3.2, 0.18], [1.2, 1.5], [0.001, 2.4]], 14, null, bx, yb + h + 3.5, bz));
         bag.add('timber_red', rod([bx, yb + h + 5.8, bz], [bx, yb + h + 6.6, bz], 0.05, 5));
+        // the watch fire: a clay pot with its flame on the platform beside the sentry, 1.3 m along the wall from the bastion's middle (the night light is placed on it, nightlight.js)
+        { const tx = bx - oz * 1.3, tz = bz + ox * 1.3, pf = yb + h + 0.2;
+          bag.add(WALL, lathe([[0.001, 0], [0.13, 0], [0.24, 0.16], [0.22, 0.32], [0.27, 0.37], [0.21, 0.4], [0.001, 0.36]], 10, null, tx, pf, tz));
+          bag.add('flame', lathe([[0.12, 0], [0.09, 0.1], [0.04, 0.24], [0.001, 0.36]], 8, (th) => 1 + 0.25 * Math.sin(th * 3), tx, pf + 0.34, tz)); }
       }
       for (let q = 0; q < 40; q++) { const ang = q / 40 * Math.PI * 2; tops.push([bx + Math.cos(ang) * (R - 0.22), yb + h + 0.8, bz + Math.sin(ang) * (R - 0.22), 0.18, 0.5 + (q % 3) * 0.08]); }
     }

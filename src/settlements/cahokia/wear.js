@@ -3,7 +3,7 @@
 // to the style's elements (the style files stay as they were), in materials the plans already hold (no new draw); pure functions of each element's own
 // numbers. Nothing is written anywhere: the Mississippians of 1175 had no script (§10.5).
 import '../../styles/mississippian/index.js';
-import { lathe } from '../../core/geom.js';
+import { lathe, rod } from '../../core/geom.js';
 import { frontRule } from '../../styles/mississippian/front.js';
 import { hashAt } from './nightlight.js';
 import { STYLES } from '../../core/build.js';
@@ -14,7 +14,7 @@ let done = false;
 export function registerWear() {
   if (done) return; done = true;
   const E = STYLES.mississippian.elements;
-  const house = E.miss_house, hall = E.chief_hall, charnel = E.charnel_house;
+  const stair = E.log_stair, house = E.miss_house, hall = E.chief_hall, charnel = E.charnel_house;
   E.miss_house = function worn(el, ctx) {
     const r = house.call(this, el, ctx);
     if (!ctx?.bag || el.simple || (el.lod ?? 0) >= 2) return r;
@@ -30,6 +30,21 @@ export function registerWear() {
     if (!ctx?.bag) return r;
     const [x0, , x1, z1] = el.rect, cx = (x0 + x1) / 2, y = el.y ?? 0, j = hashAt(cx, z1, 4) - 0.5;
     patch(ctx.bag, 'bark_dark', cx + j * 0.4, y + 0.002, z1 + 2.2, 2.0, 1.4, j * 3);                         // the court trodden before the door
+    if (el.post) { const [px, pz] = el.post; ctx.bag.add('thatch', lathe([[0.512, 0.9], [0.512, 1.9]], 14, null, px, y, pz)); } // the great post rubbed bare of its paint at the height of hands
+    return r;
+  };
+  // the log stairs: the middle of every step rubbed pale of bark by feet, a little off the middle where the climb keeps to one side (the pale material the plan already holds)
+  E.log_stair = function worn(el, ctx) {
+    const r = stair.call(this, el, ctx);
+    if (!ctx?.bag) return r;
+    const [ax, az] = el.from, [bx, bz] = el.to, w = el.width ?? 3, st = el.step ?? 1.4, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux, n = Math.floor(L / st);
+    const yAt = typeof el.y === 'function' ? el.y : () => el.y ?? 0;
+    for (let k = 1; k <= n; k++) {
+      const c = (hashAt(ax + k, az, 6) - 0.5) * 0.8, half = Math.min(w * 0.3, 1.1 + 0.5 * hashAt(ax, az + k, 7)), cx = ax + ux * st * k, cz = az + uz * st * k;
+      const p = [cx + nx * (c - half), 0, cz + nz * (c - half)], q = [cx + nx * (c + half), 0, cz + nz * (c + half)];
+      p[1] = yAt(p[0], p[2]) + 0.1; q[1] = yAt(q[0], q[2]) + 0.1;
+      ctx.bag.add('thatch', rod(p, q, 0.216 + 0.008 * hashAt(cx, cz, 8), 8));
+    }
     return r;
   };
   E.charnel_house = function worn(el, ctx) {
