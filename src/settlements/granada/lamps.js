@@ -1,7 +1,9 @@
 // Where the lamps of Nasrid Granada hung and stood (docs/settlements/granada.md §21): pure data of layout.js for nightlight.js's `gr_night` element.
 // The palaces' rooms are given their lamps here because the builders hang none: bracket lamps on the Court of the Myrtles' side walls, lamps hung from the crown of the
 // Barca's vault, a corona of small lamps from the star ceiling of the Hall of the Ambassadors, lamps on stands in the halls round the Court of the Lions and in the Partal's tower.
-import { HILL, MYRTLES, COMARES, LIONS, PARTAL } from './layout.js';
+import { HILL, MYRTLES, COMARES, LIONS, PARTAL, lots } from './layout.js';
+import { frameOf, kindOf } from './walk.js';
+import { hashAt } from './hash.js';
 
 const T = HILL.top;
 /** The lamps of the landmark's plan: [{ k, x, z, y, yt?, n? }]. */
@@ -29,5 +31,18 @@ export function palaceLamps() {
   for (const dx of [-2.4, 2.4]) L.push({ k: 'stand', x: pc[0] + dx, z: pc[1], y: T + 0.06 });
   return L;
 }
-/** The lamps of the medina's plan (the Great Mosque's lamps, the Alcaicería's gate lamps): none placed yet. */
-export function townLamps() { return []; }
+/**
+ * The spill of light from the medina's open doors onto the lane (docs §25): a pool on the paving before each shop (always, its lamp and its fire behind the counter) and before
+ * three houses in four (a lamp in the room, the hearth). Each: { x, z, y, r, shop }. Pure data of the lots and the house's frame.
+ */
+export function townLamps() {
+  const out = [];
+  for (const l of lots()) {
+    if (l.y !== T) continue;
+    const h = frameOf(l), shop = kindOf(l).startsWith('shop');
+    if (!shop && hashAt(l.rect[0], l.rect[1], 41) > 0.75) continue;
+    const [x, z] = h.F(h.du, -1.3);
+    out.push({ x, z, y: T + 0.04, r: shop ? 2.5 : 1.9, shop });
+  }
+  return out;
+}
