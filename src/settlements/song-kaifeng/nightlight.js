@@ -14,7 +14,7 @@ import { shopElements } from './shops.js';
 import { TEMPLE } from './soundmap.js';
 
 /** The share of the ordinary shops open into the evening, their counter lamp lit (the night market of the scroll's age: Dongjing Meng Hua Lu). [inferred share] */
-export const SHOP_LIT = 0.4;
+export const SHOP_LIT = 0.8;
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
   let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791);
@@ -94,12 +94,27 @@ const KINDS = {
   gate:  { cy: 3.0, s: 1.2, wall: 0.3, pool: 3.0, gy: 0.04 },     // the red gardenia lamps of a wine house's colour gate
   hall:  { cy: 1.8, s: 1.3, wall: 0.4, pool: 3.4, gy: 0.28 },     // the lamp at a monastery hall's door (the hall's floor is 0.28 up)
   torch: { cy: 2.1, s: 1.15, wall: 0, pool: 3.6, gy: 0.04 },      // the torch at the city gate, a camel train's night halt
+  post:  { cy: 2.6, s: 1.25, wall: 0, pool: 4.6, gy: 0.04 },       // a lantern post of the night market street and the monastery approach (a pole, a lantern box)
   spill: {},                                                       // the counter lamp of a shop open into the evening, across its doorstep
 };
+/** A closed box w × h × d centred at height y (flat-shaded triangles). */
+function boxGeo(w, h, d, y) {
+  const x = w / 2, z = d / 2, y0 = y - h / 2, y1 = y + h / 2, P = [], N = [];
+  const f = (a, b, c, e, n) => { P.push(...a, ...b, ...c, ...a, ...c, ...e); for (let i = 0; i < 6; i++) N.push(...n); };
+  f([-x, y0, z], [x, y0, z], [x, y1, z], [-x, y1, z], [0, 0, 1]); f([x, y0, -z], [-x, y0, -z], [-x, y1, -z], [x, y1, -z], [0, 0, -1]);
+  f([x, y0, z], [x, y0, -z], [x, y1, -z], [x, y1, z], [1, 0, 0]); f([-x, y0, -z], [-x, y0, z], [-x, y1, z], [-x, y1, -z], [-1, 0, 0]);
+  f([-x, y1, z], [x, y1, z], [x, y1, -z], [-x, y1, -z], [0, 1, 0]); f([-x, y0, -z], [x, y0, -z], [x, y0, z], [-x, y0, z], [0, -1, 0]);
+  const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(P, 3)); g.setAttribute('normal', new Float32BufferAttribute(N, 3)); return g;
+}
 function unitOf(kind) {
   return assembly(`kf-halo|${kind}`, (a) => {
     const H = new Halo(), K = KINDS[kind];
-    if (kind === 'spill') H.floor(0, 0.06, 1.3, 2.2, 1.8, 0, 10);
+    if (kind === 'spill') { H.floor(0, 0.06, 1.4, 3.4, 2.6, 0, 10); H.ball(0, 2.0, 0.6, 1.1); }
+    else if (kind === 'post') {
+      lanternLight(H, 0, 0, K.cy, K.gy, K.s, null, K.pool / K.s);
+      const bx = (w, h, d, y) => boxGeo(w, h, d, y);
+      a('wood_dark', bx(0.12, 2.3, 0.12, 1.15)); a('wood_dark', bx(0.5, 0.06, 0.5, 2.43)); a('wood_painted', bx(0.34, 0.4, 0.34, 2.2 + 0.0));
+    }
     else lanternLight(H, 0, 0, K.cy, K.gy, K.s, K.wall ? { n: [0, 1], d: K.wall } : null, K.pool / K.s);
     const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(H.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(H.nor, 3)); a(MAT, g);
   });
@@ -128,6 +143,12 @@ export function nightLamps() {
     put('hall', [(x0 + x1) / 2 - (x1 - x0) * 0.2, zf + 0.9], 0, 0); put('hall', [(x0 + x1) / 2 + (x1 - x0) * 0.2, zf + 0.9], 0, 0);
   }
   put('hall', [PAGODA[0], PAGODA[1] + 7], 0, 0);
+  // the approach and the court (the visitor arrives here): lantern posts down both sides, round the pagoda's base
+  for (let z = -126; z <= -84; z += 7) for (const dx of [-4.5, 4.5]) put('post', [160 + dx, z], 0.04, 0);
+  for (const [dx, dz] of [[-9, 9], [9, 9], [-9, -9], [9, -9]]) put('post', [PAGODA[0] + dx, PAGODA[1] + dz], 0, 0);
+  // the shop street and the main street: a lantern post every 14 m on the walk (the night markets)
+  for (let x = -280; x <= 150; x += 14) put('post', [x, -80 + (x % 28 === 0 ? 5.2 : -5.2)], 0.04, 0);
+  for (let z = -70; z <= -20; z += 14) put('post', [(z % 28 === 0 ? 5.2 : -5.2), z], 0.04, 0);
   for (const dz of [-6, 6]) put('torch', [GATE.rect[2] + 1.2, GATE.z + dz], 0.04, Math.PI / 2);
   return out;
 }
