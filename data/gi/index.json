@@ -349,7 +349,7 @@
    }
   ],
   "bytes": 1245869,
-  "seconds": 1115,
+  "seconds": 498,
   "baked": "2026-11-21"
  },
  "ananda-temple": {
@@ -1346,8 +1346,8 @@
    }
   ],
   "bytes": 45429,
-  "seconds": 23,
-  "baked": "2026-11-20"
+  "seconds": 69,
+  "baked": "2026-11-21"
  },
  "dunhuang-mogao": {
   "site": "dunhuang",
@@ -1647,8 +1647,8 @@
     ]
    }
   ],
-  "bytes": 1216210,
-  "seconds": 345,
+  "bytes": 1214764,
+  "seconds": 894,
   "baked": "2026-11-21"
  },
  "foguang-east-hall": {
@@ -3487,7 +3487,7 @@
  },
  "muromachi-ginkaku": {
   "site": "muromachi-kyoto",
-  "hash": "1e2940f4920e148f",
+  "hash": "3ce0add0a92c9167",
   "rays": 128,
   "probes": 3882,
   "boxes": [
@@ -3526,7 +3526,7 @@
    }
   ],
   "bytes": 66735,
-  "seconds": 16,
+  "seconds": 49,
   "baked": "2026-11-21"
  },
  "muromachi-ryoanji": {
@@ -3553,7 +3553,7 @@
    }
   ],
   "bytes": 78354,
-  "seconds": 26,
+  "seconds": 44,
   "baked": "2026-11-21"
  },
  "muscovy-dormition": {
@@ -3782,7 +3782,7 @@
    }
   ],
   "bytes": 170129,
-  "seconds": 13,
+  "seconds": 70,
   "baked": "2026-11-21"
  },
  "nandauwas": {
@@ -4258,7 +4258,7 @@
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
-  "hash": "d2cd73cef896bbed",
+  "hash": "bea00fbba90aae0a",
   "rays": 128,
   "probes": 78200,
   "boxes": [
@@ -4281,8 +4281,8 @@
     ]
    }
   ],
-  "bytes": 1198078,
-  "seconds": 673,
+  "bytes": 1198343,
+  "seconds": 294,
   "baked": "2026-11-21"
  },
  "sainte-chapelle": {
@@ -4366,7 +4366,7 @@
  },
  "samarkand-registan": {
   "site": "timurid-samarkand",
-  "hash": "83b0b37a1933af6c",
+  "hash": "584315578623a717",
   "rays": 128,
   "probes": 70642,
   "boxes": [
@@ -4423,9 +4423,9 @@
     ]
    }
   ],
-  "bytes": 1200706,
-  "seconds": 492,
-  "baked": "2026-11-20"
+  "bytes": 1202938,
+  "seconds": 814,
+  "baked": "2026-11-21"
  },
  "sgang-gwaay-house": {
   "site": "sgang-gwaay",
@@ -5133,8 +5133,8 @@
    }
   ],
   "bytes": 429702,
-  "seconds": 247,
-  "baked": "2026-11-20"
+  "seconds": 131,
+  "baked": "2026-11-21"
  },
  "teotihuacan-centre": {
   "site": "teotihuacan",

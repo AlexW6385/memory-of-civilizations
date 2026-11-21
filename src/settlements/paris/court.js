@@ -4,6 +4,7 @@
 // from layout.js (the chapel's footprint and the hall's come from plan.js's numbers, written here as the court's skips).
 
 import { RIVER, CHAPEL, PALACE, inRect } from './layout.js';
+import { folk } from './court-folk.js';
 
 function lrng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const faceTo = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
@@ -25,6 +26,12 @@ export function courtGround() {
     id: 'paris-court', style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-250, -10], facing: 'e' }, bounds: [PALACE[0], PALACE[1], PALACE[2] + 4, PALACE[3]], rooms: [],
     elements: [
       { t: 'court_ground', rect: [-268, -74, PALACE[2] - 1.5, 58], y: y0, seed: 1248, skip: SKIP, walks: walks.filter((w) => !SKIP.some((s) => w[0] < s[2] && w[2] > s[0] && w[1] < s[3] && w[3] > s[1])), drain: [[-246, 12.2, -200, 13.2], [-199, -34, -198, 12]].filter((d) => !SKIP.some((s) => d[0] < s[2] && d[2] > s[0] && d[1] < s[3] && d[3] > s[1])) },
+      // wear before the Sainte-Chapelle (docs/settlements/paris.md §6g): the flags of the porch's apron, the slab of each arch's threshold hollowed by feet, the foot of the stair worn where the sergeants stand
+      { t: 'paris_flags', y: y0, slabs: [
+        ['flagstone', OX - 10.4, OZ - 6.2, OX - 4.6, OZ + 6.2, 0.012, 0.03],
+        ...[-3.8, 0, 3.8].flatMap((dz) => [['flagstone', OX - 5.5, OZ + dz - 1.7, OX - 4.5, OZ + dz + 1.7, 0, 0.08], ['flagstone', OX - 5.3, OZ + dz - 0.8, OX - 4.7, OZ + dz + 0.8, 0.08, 0.088]]),
+        ['flagstone', -222.2, -24.6, -218.4, -13.6, 0.012, 0.03],
+      ] },
       { t: 'may_tree', at: [-236, 16], y: y0, h: 6.8, seed: 5 },
       { t: 'mounting_block', at: [-226, 14.6], y: y0, rot: 0 },
       { t: 'hitching_rail', at: [-232, 15.6], y: y0, rot: 0, len: 3.2 },
@@ -100,7 +107,7 @@ export function courtLife() {
   fig([-283.6, 26.6], face([-283.6, 26.6], [-283.6, 24.4]), { child: true, h: 1.05, dress: 'tunic', hat: 'none', hair: 'short', cloth: 'cloth_red' });
   L.push({ t: 'animal', kind: 'dog', at: [-281.6, 26.4], y: y0, rot: 2.6, seed: 67, pose: 'lie' });
   for (const z of [-34.6, -29.6]) L.push({ t: 'barrel', at: [-273.4, z], y: y0, rot: 0, n: 1, seed: z | 0 });
-  L.push({ t: 'lantern', kind: 'iron', at: [-221.4, -21.0], y: y0, rot: 0, h: 2.9 });
-  return { id: 'paris-court-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-250, -10], facing: 'e' }, bounds: [PALACE[0], PALACE[1], PALACE[2] + 4, PALACE[3]], rooms: [], elements: L };
+  // (no lantern in the court: none is attested for 1248)
+  return { id: 'paris-court-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-250, -10], facing: 'e' }, bounds: [PALACE[0], PALACE[1], PALACE[2] + 4, PALACE[3]], rooms: [], elements: [...L, ...folk(SKIP)] };
 }
 void inRect;

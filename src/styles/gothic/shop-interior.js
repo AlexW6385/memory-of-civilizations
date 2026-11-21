@@ -10,7 +10,7 @@ export const FL = 0.1;                                  // the floor, over the s
 
 /** ctx: { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade (id), seed } — builds the stone storey in place of the solid one. */
 export function openGround(c) {
-  const { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade, lights, lit, up } = c, rand = rng((c.seed || 1) + 77);
+  const { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade, lights, lit, up, ajar } = c, rand = rng((c.seed || 1) + 77);
   const [x0, z0, x1, z1] = rect, T = 0.4, fl = y + FL;
   const P = (u, d) => (f === 's' ? [x0 + u, z1 - d] : f === 'n' ? [x1 - u, z0 + d] : f === 'e' ? [x1 - d, z0 + u] : [x0 + d, z1 - u]);
   const R = (u0, d0, u1, d1) => { const a = P(u0, d0), b = P(u1, d1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
@@ -27,7 +27,7 @@ export function openGround(c) {
   { const r = R(T, T, L - T, D - T); bag.add('flagstone', box(r[0], fl, r[1], r[2], fl + 0.012, r[3])); }
   W('limestone', 0, L, D - T, D, 0, st);
   W('limestone', 0, T * 0.75, 0.0, D - T, 0, st); W('limestone', L - T * 0.75, L, 0.0, D - T, 0, st);
-  const gaps = [[su, su + ws, 0.92, 2.75], [du - 0.02, du + 1.02, 0, 2.35]].sort((a, b) => a[0] - b[0]);
+  const gaps = [...(ajar ? [] : [[su, su + ws, 0.92, 2.75]]), [du - 0.02, du + 1.02, 0, 2.35]].sort((a, b) => a[0] - b[0]);
   let u = 0;
   for (const [g0, g1, lo, hi] of gaps) {
     if (g0 > u) W('limestone', u, g0, -0.1, T, 0, st);
@@ -63,10 +63,20 @@ export function openGround(c) {
   const WB = (m, d0, d1, ya, yb, th, k = false) => B(m, Math.min(wu, wu + sg * th), Math.max(wu, wu + sg * th), d0, d1, ya, yb, k);
   const shelves = (d0, d1, n, m = 'timber', th = 0.3) => { for (let k = 0; k < n; k++) WB(m, d0, d1, 0.5 + k * 0.45, 0.54 + k * 0.45, th); };
   // the shop's counter inside the opening: the shelf the board is let down from and the stool of the master behind it
-  B('timber', su, su + ws, T, T + 0.5, 0.78, 0.84);
+  if (!ajar) B('timber', su, su + ws, T, T + 0.5, 0.78, 0.84);
   const sh = (kind) => {
     const d1 = PD - 0.2, d0 = 1.4;
-    if (kind === 'baker') {
+    if (kind === 'hall') {
+      // a burgher's front room, the door ajar on it: the trestle table with its benches and a cloth, a dressoir of jugs along the wall, a coffer, a hanging
+      B('timber', mu - 0.8, mu + 0.8, 2.3, 3.0, 0.74, 0.8, true); for (const a of [-0.7, 0.7]) B('wood_dark', mu + a - 0.04, mu + a + 0.04, 2.35, 2.95, 0, 0.74);
+      for (const s2 of [2.05, 3.25]) B('timber', mu - 0.7, mu + 0.7, s2 - 0.12, s2 + 0.12, 0.42, 0.46, true);
+      B('cloth_red', mu - 0.4, mu + 0.4, 2.45, 2.85, 0.8, 0.815); B('wood_dark', mu - 0.36, mu - 0.24, 2.6, 2.72, 0.815, 1.0); B('wood_dark', mu + 0.2, mu + 0.3, 2.5, 2.6, 0.815, 0.92);   // a jug and a cup (boxes: a lathe shape would cost a draw) B('hide_tan', mu + 0.0, mu + 0.28, 2.75, 3.0, 0.8, 0.84);
+      WB('wood_dark', d0, d0 + 1.5, 0, 0.9, 0.45, true); WB('timber', d0 - 0.02, d0 + 1.52, 0.9, 0.95, 0.5); WB('timber', d0, d0 + 1.5, 1.55, 1.6, 0.3);
+      for (let d = d0 + 0.2; d < d0 + 1.4; d += 0.3) { B('wood_dark', wu + sg * 0.1 - 0.07, wu + sg * 0.1 + 0.07, d - 0.07, d + 0.07, 0.95, 0.95 + 0.16 + (d * 7 % 0.1)); B('wood_dark', wu + sg * 0.1 - 0.06, wu + sg * 0.1 + 0.06, d - 0.06, d + 0.06, 1.6, 1.72); }   // jugs and platters on the dressoir
+      B('wood_dark', mu - 0.5, mu + 0.5, d1 - 0.5, d1, 0, 0.55, true); B('iron', mu - 0.5, mu + 0.5, d1 - 0.5, d1, 0.55, 0.59);
+      WB('linen', d0 + 2.2, d0 + 3.3, 1.2, 2.0, 0.04); WB('cloth_red', d0 + 2.35, d0 + 3.15, 1.3, 1.5, 0.06);
+      B('wood_dark', u0 + 0.1, u0 + 0.5, 3.8, 4.1, 0, 0.42, true);   // a stool by the cold hearth side
+    } else if (kind === 'baker') {
       shelves(d0, d1 - 1.2, 3); for (let d = d0 + 0.2; d < d1 - 1.4; d += 0.36) for (let k = 0; k < 3; k++) WB('hide_tan', d, d + 0.26, 0.54 + k * 0.45, 0.66 + k * 0.45, 0.22);
       B('wood_dark', mu - 0.5, mu + 0.5, 2.2, 3.1, 0.7, 0.78, true); for (const a of [-0.45, 0.45]) for (const b of [2.25, 3.05]) B('timber', mu + a - 0.04, mu + a + 0.04, b - 0.04, b + 0.04, 0, 0.7);
       B('cloth_white', mu - 0.35, mu + 0.35, 2.4, 2.9, 0.78, 0.86);

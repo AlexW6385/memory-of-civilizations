@@ -13,7 +13,7 @@ export { courtLots };
 
 export function courtHouses() {
   const y = RIVER.ground, opts = { near: 200, R: 420, entrance: { at: [-250, -10], facing: 'e' } };
-  return lodTiles('paris-court-houses', 'gothic', courtLots().map((l) => ({ t: 'paris_house', y, foot: y, rect: l.rect, seed: l.seed, front: 'n', storeys: l.storeys, open: true, lit: true, upper: l.upper })), opts);
+  return lodTiles('paris-court-houses', 'gothic', courtLots().map((l) => ({ t: 'paris_house', noLantern: true, y, foot: y, rect: l.rect, seed: l.seed, front: 'n', storeys: l.storeys, open: true, lit: true, upper: l.upper })), opts);
 }
 /** Who is inside and at the doors: the master behind the counter, a customer, goods and a lantern outside. */
 export function courtHouseLife() {
@@ -33,7 +33,7 @@ export function courtHouseLife() {
         case 'fishmonger': L.push({ t: 'basket', at: q(1.1, 1.0), y: y0, rot: 0, s: 1, seed: Math.floor(rand() * 1e6) }); break;
         default: L.push({ t: 'basket', at: q(1.1, 1.2), y: y0, rot: rand() * 6, seed: Math.floor(rand() * 1e6) });
       }
-      L.push({ t: 'lantern', at: q(0.3, 1.9), y: y0, rot: 0, kind: 'iron', h: 2.7 });
+      // (no lantern at the door: none is attested for 1248)
     }
   }
   return { id: 'paris-court-houses-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-250, -10], facing: 'e' }, bounds: [-260, 10, -120, 60], rooms: [], elements: L };

@@ -47,6 +47,17 @@ export function walkSet() {
   return (WALKSET = lots().filter((l) => rich(l) && wide(l) && frontOf(l) === 'shop' && walkDist(frontAt(l)) <= WALK_REACH)
     .sort((a, b) => Math.hypot(mid(a)[0] - from[0], mid(a)[1] - from[1]) - Math.hypot(mid(b)[0] - from[0], mid(b)[1] - from[1])).slice(0, WALK_MAX));
 }
+export const AJAR_MAX = 8;
+let AJAR = null;
+/** The burghers' houses on the walk with the door ajar and a furnished front room (docs/settlements/paris.md §6g): lots whose front the rule makes a burgher's, wide and deep enough, on the walk's streets, nearest the way in first. Lot → 'burgher'. */
+export function ajarMap() {
+  if (AJAR) return AJAR;
+  const from = [ARRIVALS.paris[0], ARRIVALS.paris[2]], open = openMap();
+  const deep = (l) => (l.front === 's' || l.front === 'n' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]);
+  const c = lots().filter((l) => !open.has(l) && rich(l) && wide(l) && deep(l) >= 8.5 && frontOf(l) === 'burgher' && walkDist(frontAt(l)) <= WALK_REACH && mid(l)[1] > -12 && mid(l)[1] < 18 && mid(l)[0] < 0)   // (the main street's first tile only: the interiors cost draws per tile)
+    .sort((a, b) => Math.hypot(mid(a)[0] - from[0], mid(a)[1] - from[1]) - Math.hypot(mid(b)[0] - from[0], mid(b)[1] - from[1])).slice(0, AJAR_MAX);
+  return (AJAR = new Map(c.map((l) => [l, 'burgher'])));
+}
 export const outerOpen = (all) => all.filter((l) => !rich(l) && wide(l) && l.seed % 7 === 0).sort((a, b) => dist(a) - dist(b)).slice(0, OPEN_OUTER);
 let MAP = null;
 /** Lot → its use for every lot that can be entered: the three nearest the arrival ('inn', 'home'), the walk's shops, the core's shops (every fourth, nearest the Grand Pont and the parvis first), the outer rows' workshops. */

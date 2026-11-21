@@ -7,7 +7,7 @@ import { Music } from '../src/engine/audio.js';
 import * as VN from '../src/settlements/venice/soundmap.js';
 import { VENICE_VOICES } from '../src/settlements/venice/voices.js';
 import { wells, BASILICA, PIAZZA, BASIN_Z, MARKET } from '../src/settlements/venice/layout.js';
-import { shopRooms, shopLanes } from '../src/settlements/venice/shops.js';
+import { shopRooms, shopLanes, merceriaRooms } from '../src/settlements/venice/shops.js';
 
 const fake = () => {
   let nodes = 0;
@@ -47,7 +47,7 @@ test('Venice: every voice added exists and can be made', () => {
 test('the map: shops, San Marco, wells, waters, tracks', () => {
   const rooms = shopRooms();
   assert.ok(rooms.length >= 30);
-  assert.equal(VN.sites().length, rooms.length + 1, 'every shop and San Marco');
+  assert.equal(VN.sites().length, rooms.length + merceriaRooms().length + 1, 'every shop and San Marco');
   for (const s of VN.sites()) assert.ok(s.at.every(Number.isFinite) && Array.isArray(s.work), s.id);
   const gold = VN.sites().find((s) => s.use === 'gold'), cloth = VN.sites().find((s) => s.use === 'cloth');
   assert.ok(gold.work.some(([v]) => v === 'venGold') && cloth.work.some(([v]) => v === 'scissors'));

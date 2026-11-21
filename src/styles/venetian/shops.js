@@ -33,12 +33,12 @@ function solids(L, slots) {
  * The always-drawn part, into the Procuratie's builder: replaces the solid core behind the portico. `Sh` a Local, `col` the colliders, `FM`/`y`/`D`/`h` of the front.
  * [inferred: the walls' thickness, the doorway 1.8 m (the walker needs 1.5 m), the counter-window]
  */
-export function shopShell(Sh, col, FM, y, L, D, h, slots) {
-  const back = -P - FW - RD, wr = (a, b, d0, d1) => wrect(FM, a, d0, b, d1);
+export function shopShell(Sh, col, FM, y, L, D, h, slots, PP = P) {
+  const back = -PP - FW - RD, wr = (a, b, d0, d1) => wrect(FM, a, d0, b, d1);
   Sh.box(PL, 0, -0.5, -D, L, YA, back); col.rect(wr(0, L, -D, back), y, y + h);
-  for (const [a, b] of solids(L, slots)) { Sh.box(PL, a, -0.5, back, b, YA, -P); col.rect(wr(a, b, back, -P), y, y + h); }
+  for (const [a, b] of solids(L, slots)) { Sh.box(PL, a, -0.5, back, b, YA, -PP); col.rect(wr(a, b, back, -PP), y, y + h); }
   for (const s of slots) {
-    const { su0, su1, uc, uw } = s, d0 = -P - FW, d1 = -P, dc0 = uc - DOOR / 2, dc1 = uc + DOOR / 2, dw0 = uw - WIN / 2, dw1 = uw + WIN / 2;
+    const { su0, su1, uc, uw } = s, d0 = -PP - FW, d1 = -PP, dc0 = uc - DOOR / 2, dc1 = uc + DOOR / 2, dw0 = uw - WIN / 2, dw1 = uw + WIN / 2;
     // the front wall about the doorway and the window
     for (const [a, b] of [[su0, dc0], [dc1, dw0], [dw1, su1]]) { Sh.box(PL, a, -0.5, d0, b, YA, d1); col.rect(wr(a, b, d0, d1), y, y + h); }
     Sh.box(PL, dc0, 2.55, d0, dc1, YA, d1); col.rect(wr(dc0, dc1, d0, d1), y + 2.55, y + h);
@@ -80,14 +80,14 @@ export const TRADE_NAMES = Object.keys(TRADES);
  * `reach` shops only (a plan covers a stretch of the arcade). Lights and the night's halos too.
  */
 export function shopFit(el, ctx) {
-  const { bag, col, lights } = ctx, y = el.y ?? 0, { M: FM, L } = faceFrame(el.span, el.front, y), n = Math.max(2, Math.round(L / 3.1)), H = new Halo();
+  const PP = el.P ?? P, { bag, col, lights } = ctx, y = el.y ?? 0, { M: FM, L } = faceFrame(el.span, el.front, y), n = Math.max(2, Math.round(L / 3.1)), H = new Halo();
   const slots = shopSlots(L, n, el.shops);
   const Lc = new Local();
   const P3 = (u, yy, d) => new Vector3(u, yy, d).applyMatrix4(FM);
   const nd = (() => { const e = FM.elements; return [e[8], e[10]]; })();                   // the world direction of local +d (out of the front)
   const wr = (a, b, d0, d1) => wrect(FM, a, d0, b, d1);
   for (const s of slots) {
-    const { su0, uc, uw, trade, seed } = s, T = TRADES[trade], z0 = -P - FW;
+    const { su0, uc, uw, trade, seed } = s, T = TRADES[trade], z0 = -PP - FW;
     const R = (ru, rd) => [su0 + ru, z0 - rd];                                              // room coordinates: ru along from the room's left, rd inward from the front wall
     const B = (mat, ru0, ya, rd0, ru1, yb, rd1) => Lc.box(mat, su0 + ru0, ya, z0 - rd1, su0 + ru1, yb, z0 - rd0);
     const lat = (mat, prof, seg, ru, ya, rd) => Lc.add(mat, lathe(prof, seg, null, su0 + ru, ya, z0 - rd));
@@ -142,12 +142,12 @@ export function shopFit(el, ctx) {
     if (fl === 'hides') { for (let q = 0; q < 3; q++) B('hide_tan', fa, q * 0.06, fb, fa + 0.8, q * 0.06 + 0.06, fb + 0.55); blk(fa, fa + 0.8, fb, fb + 0.55, 0, 0.2); }
     if (fl === 'chair') { B(W, fa, 0, fb, fa + 0.5, 0.45, fb + 0.5); B(W, fa, 0.45, fb + 0.45, fa + 0.5, 1.1, fb + 0.5); blk(fa, fa + 0.5, fb, fb + 0.5, 0, 0.5); }
     if (T.herbs) for (let q = 0; q < 6; q++) B('cloth_green', 0.7 + q * 0.8, 2.15, 0.9 + (q % 2) * 0.3, 0.74 + q * 0.8, 2.6, 0.94 + (q % 2) * 0.3);
-    if (T.bars) for (let q = 0; q < 5; q++) rodAt(bag, 'iron', P3, [uw - 0.6 + q * 0.3, 0.95, -P - FW + 0.03], [uw - 0.6 + q * 0.3, 2.25, -P - FW + 0.03], 0.012);
+    if (T.bars) for (let q = 0; q < 5; q++) rodAt(bag, 'iron', P3, [uw - 0.6 + q * 0.3, 0.95, -PP - FW + 0.03], [uw - 0.6 + q * 0.3, 2.25, -PP - FW + 0.03], 0.012);
     // the window's shutter, let down to a board over the sill, on two chains; the goods on it
-    Lc.box(W, uw - WIN / 2, 0.93, -P - FW + 0.05, uw + WIN / 2, 0.97, -P + 0.55); col.rect(wr(uw - WIN / 2, uw + WIN / 2, -P - FW, -P + 0.55), y, y + 0.97);
-    for (const sg of [-1, 1]) rodAt(bag, 'iron', P3, [uw + sg * (WIN / 2 - 0.04), 0.97, -P + 0.55], [uw + sg * (WIN / 2 - 0.04), 1.4, -P - FW + 0.04], 0.006);
-    if (kind === 'bolt') for (let q = 0; q < 3; q++) Lc.box(mats[(q + seed) % mats.length], uw - 0.6 + q * 0.42, 0.97, -P + 0.1, uw - 0.25 + q * 0.42, 1.12, -P + 0.45);
-    else Lc.box(mats[0], uw - 0.4, 0.97, -P + 0.1, uw + 0.4, 1.0, -P + 0.45);
+    Lc.box(W, uw - WIN / 2, 0.93, -PP - FW + 0.05, uw + WIN / 2, 0.97, -PP + 0.55); col.rect(wr(uw - WIN / 2, uw + WIN / 2, -PP - FW, -PP + 0.55), y, y + 0.97);
+    for (const sg of [-1, 1]) rodAt(bag, 'iron', P3, [uw + sg * (WIN / 2 - 0.04), 0.97, -PP + 0.55], [uw + sg * (WIN / 2 - 0.04), 1.4, -PP - FW + 0.04], 0.006);
+    if (kind === 'bolt') for (let q = 0; q < 3; q++) Lc.box(mats[(q + seed) % mats.length], uw - 0.6 + q * 0.42, 0.97, -PP + 0.1, uw - 0.25 + q * 0.42, 1.12, -PP + 0.45);
+    else Lc.box(mats[0], uw - 0.4, 0.97, -PP + 0.1, uw + 0.4, 1.0, -PP + 0.45);
     // beams under the ceiling, the oil lamp hung from the middle one
     for (let q = 0; q < 3; q++) B('timber', 0.1, CEIL - 0.18, 0.9 + q * 1.7, RW + 0.05, CEIL, 1.1 + q * 1.7);
     const lu = su0 + 1.5, ld = z0 - 2.6, ly = CEIL - 0.45;
@@ -159,27 +159,40 @@ export function shopFit(el, ctx) {
     // the night: the glow round the lamp, its pool on the boards, and the light spilling out of the doorway across the portico (halo material, night only)
     const fy = (p) => p.y;
     H.ball(lw.x, lw.y - 0.05, lw.z, 1.0); H.floor(lw.x, y + 0.08, lw.z, 2.2, 1.8, 0, 10);
-    const dl = P3(uc, 0, -P - 1.0);
+    const dl = P3(uc, 0, -PP - 1.0);
     H.wall(dl.x, fy(lw) - 0.3, dl.z, [nd[0], nd[1]], 1.2, 1.0);
     // the damp of the wall's foot (rising damp and splash: a band of greyed plaster, higher in patches) and rain streaks under the counter-window's sill [inferred: Venice's walls]
     for (const [a, b, k] of [[su0, uc - DOOR / 2 - 0.14, 11], [uc + DOOR / 2 + 0.14, s.su1, 12]]) for (let x = a, j = 0; x < b - 0.2; j++) {
       const w = Math.min(b - x, 0.5 + 0.9 * h(k + j * 3)), top = 0.28 + 0.4 * h(k + 1 + j * 3);
-      if (h(k + 2 + j * 3) < 0.8) Lc.box('plaster_damp', x, 0, -P, x + w, top, -P + 0.006);
+      if (h(k + 2 + j * 3) < 0.8) Lc.box('plaster_damp', x, 0, -PP, x + w, top, -PP + 0.006);
       x += w;
     }
-    for (let q = 0; q < 3; q++) Lc.box('plaster_damp', uw - 0.62 + q * 0.5 + 0.1 * h(20 + q), 0.7, -P, uw - 0.62 + q * 0.5 + 0.1 * h(20 + q) + 0.06, 0.93 - 0.06 * h(23 + q), -P + 0.006);
+    for (let q = 0; q < 3; q++) Lc.box('plaster_damp', uw - 0.62 + q * 0.5 + 0.1 * h(20 + q), 0.7, -PP, uw - 0.62 + q * 0.5 + 0.1 * h(20 + q) + 0.06, 0.93 - 0.06 * h(23 + q), -PP + 0.006);
     // the portico's own lamp: an iron lantern on a chain from the vault before the door, lit through the night [inferred: lamps hung in the arcades; the decree of 1450 and the capitelli's lamps are the stated lights]
-    const pu = uc, pd = -P * 0.5;
-    rodAt(bag, 'iron', P3, [pu, 4.15, pd], [pu, 3.05, pd], 0.006);
-    Lc.add('iron', lathe([[0.001, 0], [0.07, 0.01], [0.075, 0.03], [0.001, 0.03]], 6, null, pu, 2.82, pd));
-    for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) Lc.box('iron', pu + a * 0.07 - 0.005, 2.85, pd + b * 0.07 - 0.005, pu + a * 0.07 + 0.005, 3.02, pd + b * 0.07 + 0.005);
-    Lc.add('iron', lathe([[0.09, 0.2], [0.001, 0.27]], 6, null, pu, 2.82, pd));
-    Lc.add('flame', lathe([[0.001, 0.06], [0.02, 0.09], [0.001, 0.17]], 6, null, pu, 2.82, pd));
-    const pl = P3(pu, 3.0, pd), pp = P3(pu, 0, pd);
-    H.ball(pl.x, pl.y, pl.z, 1.15); H.floor(pp.x, y + 0.07, pp.z, 3.0, 2.2, 0, 12);
-    H.wall(P3(uc, 0, -P + 0.04).x, pl.y - 0.1, P3(uc, 0, -P + 0.04).z, [nd[0], nd[1]], 1.8, 1.4);
+    if (el.P === undefined) {
+      const pu = uc, pd = -PP * 0.5;
+      rodAt(bag, 'iron', P3, [pu, 4.15, pd], [pu, 3.05, pd], 0.006);
+      Lc.add('iron', lathe([[0.001, 0], [0.07, 0.01], [0.075, 0.03], [0.001, 0.03]], 6, null, pu, 2.82, pd));
+      for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) Lc.box('iron', pu + a * 0.07 - 0.005, 2.85, pd + b * 0.07 - 0.005, pu + a * 0.07 + 0.005, 3.02, pd + b * 0.07 + 0.005);
+      Lc.add('iron', lathe([[0.09, 0.2], [0.001, 0.27]], 6, null, pu, 2.82, pd));
+      Lc.add('flame', lathe([[0.001, 0.06], [0.02, 0.09], [0.001, 0.17]], 6, null, pu, 2.82, pd));
+      const pl = P3(pu, 3.0, pd), pp = P3(pu, 0, pd);
+      H.ball(pl.x, pl.y, pl.z, 1.15); H.floor(pp.x, y + 0.07, pp.z, 3.0, 2.2, 0, 12);
+      H.wall(P3(uc, 0, -PP + 0.04).x, pl.y - 0.1, P3(uc, 0, -PP + 0.04).z, [nd[0], nd[1]], 1.8, 1.4);
+    } else {
+      // a street (the Merceria): the lantern on an iron bracket from the wall beside the door, lit all night [inferred: the lanterns of the Mercerie, venice.md §5f.2]
+      const bu = uc + DOOR / 2 + 0.5, by = 2.7;
+      rodAt(bag, 'iron', P3, [bu, by, -PP + 0.02], [bu, by, -PP + 0.5], 0.012); rodAt(bag, 'iron', P3, [bu, by - 0.45, -PP + 0.02], [bu, by, -PP + 0.4], 0.008);
+      Lc.add('iron', lathe([[0.001, 0], [0.07, 0.01], [0.075, 0.03], [0.001, 0.03]], 6, null, bu, by - 0.3, -PP + 0.5));
+      for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) Lc.box('iron', bu + a * 0.07 - 0.005, by - 0.27, -PP + 0.5 + b * 0.07 - 0.005, bu + a * 0.07 + 0.005, by - 0.1, -PP + 0.5 + b * 0.07 + 0.005);
+      Lc.add('iron', lathe([[0.09, 0.2], [0.001, 0.27]], 6, null, bu, by - 0.3, -PP + 0.5));
+      Lc.add('flame', lathe([[0.001, 0.06], [0.02, 0.09], [0.001, 0.17]], 6, null, bu, by - 0.3, -PP + 0.5));
+      const sl = P3(bu, by - 0.15, -PP + 0.5), sp = P3(bu, 0, -PP + 0.5);
+      H.ball(sl.x, sl.y, sl.z, 1.0); H.floor(sp.x, y + 0.07, sp.z, 2.4, 1.8, 0, 12);
+      H.wall(P3(bu, 0, -PP + 0.04).x, sl.y, P3(bu, 0, -PP + 0.04).z, [nd[0], nd[1]], 1.5, 1.3);
+    }
     // the sign over the doorway: a painted board on the wall of the portico with the trade's word in capitals
-    sign(Lc, bag, P3, T.word, uc, 3.35, -P + 0.02, seed);
+    sign(Lc, bag, P3, T.word, uc, 3.35, -PP + 0.02, seed);
     // the keeper behind the counter, facing the door; a patron now and then in front of it
     const kp = P3(su0 + cc, 0, z0 - cd1 - 0.45), rot = Math.atan2(-nd[0], -nd[1]), figs = STYLES.life?.elements.figure;
     if (figs) {
@@ -195,11 +208,11 @@ export function shopFit(el, ctx) {
  * doorstep, the lit doorway and the lit counter-window): the halo material only, no collision. The lamp's own glow and pool inside are shopFit's.
  */
 export function shopGlow(el, { bag }) {
-  const y = el.y ?? 0, { M: FM, L } = faceFrame(el.span, el.front, y), n = Math.max(2, Math.round(L / 3.1)), H = new Halo();
+  const PP = el.P ?? P, y = el.y ?? 0, { M: FM, L } = faceFrame(el.span, el.front, y), n = Math.max(2, Math.round(L / 3.1)), H = new Halo();
   const P3 = (u, yy, d) => new Vector3(u, yy, d).applyMatrix4(FM), nd = (() => { const e = FM.elements; return [e[8], e[10]]; })();
   for (const s of shopSlots(L, n, el.shops)) {
-    const { uc, uw } = s, d = -P + 0.03, q = (u0, y0, u1, y1, f) => { const a = P3(u0, y0, d), b = P3(u1, y0, d), c = P3(u1, y1, d), e = P3(u0, y1, d); H.quad([a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z], [e.x, e.y, e.z], nd, f); };
-    const dd = P3(uc, 0, -P + 0.9);
+    const { uc, uw } = s, d = -PP + 0.03, q = (u0, y0, u1, y1, f) => { const a = P3(u0, y0, d), b = P3(u1, y0, d), c = P3(u1, y1, d), e = P3(u0, y1, d); H.quad([a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z], [e.x, e.y, e.z], nd, f); };
+    const dd = P3(uc, 0, -PP + 0.9);
     H.floor(dd.x, y + 0.07, dd.z, 1.8, 1.4, 0, 10);
     q(uc - DOOR / 2, 0.1, uc + DOOR / 2, 2.5, 0.16);
     q(uw - WIN / 2, 0.95, uw + WIN / 2, 2.25, 0.1);

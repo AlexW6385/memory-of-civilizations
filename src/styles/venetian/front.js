@@ -115,6 +115,10 @@ export function westFront(bag, col, o) {
         Lc.box(GB, (sg < 0 ? a1 - 0.14 : a0 + 0.04), 2.0, 0.07, (sg < 0 ? a1 - 0.04 : a0 + 0.14), 2.1, 0.11);
       }
     }
+    if (k !== 2) {                                  // the threshold of each door: a marble sill worn to a dish by the feet of the centuries (the middle 1.2 cm lower) [inferred]
+      Lc.box(M, uc - hw, 0, 0.1, uc + hw, 0.058, 0.9);
+      for (const [a, b] of [[uc - hw, uc - hw + 0.4], [uc + hw - 0.4, uc + hw]]) Lc.box(M, a, 0, 0.1, b, 0.07, 0.9);
+    }
     for (const sg of [-1, 1]) Lc.box(M, sg < 0 ? uc - hw - 0.25 : uc + hw, 0, 0, sg < 0 ? uc - hw : uc + hw + 0.25, dh + 0.3, 0.16);
     Lc.box(PC, uc - hw - 0.3, dh + 0.3, 0, uc + hw + 0.3, dh + 0.55, 0.26);
     lunette(Lc, uc, dh + 0.55, YS - 0.5, R - 0.5, k === 2 ? 2 : k % 2 ? 1 : 0, 0.03, k === 2 ? 1.25 : 1.35);

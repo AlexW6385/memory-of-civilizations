@@ -1,7 +1,7 @@
 // Walk-check routes (docs/settlements/paris.md §6a) from the street through the door of an opened shop to its front room, in world [x, z]:
 // the door's place follows from the shop's counter opening (houses.js: the door stands at the end of the front away from the opening).
 import { shopPoint } from '../../styles/gothic/houses.js';
-import { openMap, walkSet } from './openwalk.js';
+import { openMap, walkSet, ajarMap } from './openwalk.js';
 import { height } from './layout.js';
 
 /** The street, the door, the corridor and the shop floor of one opened lot, as points [x, z]. */
@@ -18,6 +18,8 @@ export function shopWalks(n = 10) {
   const open = openMap();
   return walkSet().filter((l) => open.has(l) && l.rect[1] < 20 && l.rect[3] > -20).slice(0, n).map((l) => { const w = shopRoute(l); w.y0 = 0; return w; });
 }
+/** Routes into the burghers' houses with the door ajar (the door stands where the shop's would: the same draws). */
+export function ajarWalks() { return [...ajarMap().keys()].map((l) => { const w = shopRoute(l); w.y0 = 0; return w; }); }
 /** Is the point within `r` m of the street-to-corridor line of a route (its first four points: the door's lane)? */
 export function nearLane(p, route, r = 1.5) {
   const a = route[0], b = route[3], dx = b[0] - a[0], dz = b[1] - a[1], t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / (dx * dx + dz * dz)));

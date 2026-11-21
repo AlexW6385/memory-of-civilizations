@@ -22,7 +22,7 @@ export function walkways() {
   const rects = [
     { r: [PIAZZA[0] + 3, PIAZZA[1] + 3, PIAZZA[2] - 3, PIAZZA[3] - 3], weight: 3.2, market: 0.8, kind: 'street' },
     { r: [PIAZZETTA[0] + 4, PIAZZETTA[1] + 2, PIAZZETTA[2] - 4, BASIN_Z - 3], weight: 2.6, market: 0.5, kind: 'street' },
-    { r: [MERCERIA[0] + 2, MERCERIA[1], MERCERIA[2] - 2, MERCERIA[3] - 8], weight: 2.2, market: 2.2, kind: 'street' },
+    { r: [8.6, MERCERIA[1], 11.9, MERCERIA[3] - 2], weight: 2.2, market: 2.2, kind: 'street' },
     { r: [8, -60, 12.5, -36], weight: 2.2, market: 2.2, kind: 'lane' },
     { r: [MARKET[0] + 3, MARKET[1] + 3, MARKET[2] - 3, MARKET[3] - 3], weight: 2.4, market: 3, kind: 'street' },
   ];

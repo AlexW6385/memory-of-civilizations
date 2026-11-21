@@ -6,6 +6,7 @@ import { RIVER, NORTH_ARM, SOUTH_ARM, QUAY, lots, laneCenters, rowMids, LANE_WID
 import { shopPoint, frontKind } from '../../styles/gothic/houses.js';
 import { openSet } from './town.js';
 import { shopRoute, nearLane, awayFromLane } from './shoproutes.js';
+import { ajarMap } from './openwalk.js';
 
 function lrng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const faceTo = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
@@ -13,7 +14,7 @@ const CL = ['cloth_brown', 'cloth_grey', 'cloth_red', 'cloth_green', 'cloth_ochr
 const FOCUS = [70, 0], REACH = 190;
 
 export function lifePlans() {
-  const rand = lrng(1253), L = [], pick = (a) => a[Math.floor(rand() * a.length)], open = openSet();
+  const rand = lrng(1253), L = [], pick = (a) => a[Math.floor(rand() * a.length)], open = openSet(), ajar = ajarMap();
   const fig = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, h: 1.56 + rand() * 0.18, seed: Math.floor(rand() * 1e9), dress: rand() < 0.5 ? 'robe' : 'tunic', cloth: pick(CL), cloth2: pick(CL), skin: 'skin_light', hat: pick(['cap', 'none', 'brim', 'cap', 'veil']), hatMat: pick(['cloth_brown', 'cloth_red', 'cloth_black', 'cloth_white']), legs: 'hose', feet: 'shod', hair: pick(['short', 'long', 'short']), ...o });
   const tag = (l) => { const sp = shopPoint({ rect: l.rect, y: 1, seed: l.seed, front: l.front }); return sp; };
   const y0 = RIVER.ground;
@@ -49,11 +50,13 @@ export function lifePlans() {
       else { const a = q(1.0, 0.0); fig(a, y0, rot, { pose: 'stand', dress: 'robe', hat: 'veil', carry: pick(['basket', 'none']), broom: undefined }); nHome++; }
     }
     if (rand() < 0.07) { const a = q(2.0, (rand() - 0.5) * 2); fig(a, y0, rand() * 6.28, { pose: 'stand', h: 1.05 + rand() * 0.15, dress: 'tunic', hat: 'none', cloth: pick(CL) }); }
-    if (rand() < 0.35) L.push({ t: 'lantern', at: q(0.3, 1.9), y: y0 + 0, rot: 0, kind: 'iron', h: 2.7 });
+    void rand();   // (the street lanterns of an earlier pass are left out: none is attested for 1248; the draw keeps the random stream)
     // (nothing in the shop door's lane: goods and people moved out of it, not deleted)
-    if (shop) { const lane = shopRoute(l); for (let i = i0; i < L.length; i++) { const e = L[i]; if (e.at && nearLane(e.at, lane)) e.at = awayFromLane(e.at, lane); } }
+    if (shop || ajar.has(l)) { const lane = shopRoute(l); for (let i = i0; i < L.length; i++) { const e = L[i]; if (e.at && nearLane(e.at, lane)) e.at = awayFromLane(e.at, lane); } }
   }
   void nHome;
+  // nothing stands in the lane of an ajar door, whichever lot's dressing it came from (a neighbour's bench, a cart)
+  for (const l of ajar.keys()) { const lane = shopRoute(l); for (const e of L) if (e.at && nearLane(e.at, lane, 2.0)) e.at = awayFromLane(e.at, lane, 2.0); }
   // washing hung across the ruelles between the upper storeys, a wash rope from window to window
   const rows = rowMids(); let nw = 0;
   for (const c of laneCenters(FOCUS[0] - REACH, FOCUS[0] + REACH)) for (const z of rows) {

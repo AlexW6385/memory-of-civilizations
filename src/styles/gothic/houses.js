@@ -36,7 +36,7 @@ const TRADES = [
  * the wide lots). Open houses are always shops. Drawn from the seed, not from the house's own random stream.
  */
 export function frontKind(el) {
-  if (el.open) return 'shop';
+  if (el.open && !el.ajar) return 'shop';           // (an ajar house is opened as a burgher's: its front stays the burgher's)
   const f = el.front || 's', along = f === 's' || f === 'n', L = along ? el.rect[2] - el.rect[0] : el.rect[3] - el.rect[1];
   const k = (Math.imul((el.seed >>> 7) + 7, 2654435761) >>> 0) % 9;
   if (k < 2) return 'burgher';
@@ -116,7 +116,7 @@ function paris_house(el, { bag, col, lights }) {
   const lintel = 2.75;
   const kind = frontKind(el);
   const UPV = UP ? planUpper({ el, L, D, n, doorL, ST0, ST, FL: 0.1, chim, jet, kind: el.upper, trade: trade.id }) : null;
-  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: trade.id, seed: el.seed, lights, lit: !!el.lit, up: UPV });
+  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: el.ajar ? 'hall' : trade.id, seed: el.seed, lights, lit: !!el.lit, up: UPV, ajar: !!el.ajar });
   if (kind === 'shop') {
     if (!OPEN) B('opening', su, su + ws, 0.12, lintel, -0.03, 0.05);
     for (const u of [su - 0.2, su + ws]) B('timber', u, u + 0.2, 0, lintel + 0.3, -0.14, 0.06);                 // the posts
@@ -150,7 +150,7 @@ function paris_house(el, { bag, col, lights }) {
     // the burgher's front: two small windows with iron bars and wooden shutters, a stone bench, a niche over the door with a saint
     const wu = doorL ? [su + 0.3, su + ws * 0.5 + 0.3] : [su + 0.1, su + ws * 0.5 + 0.1], ww = Math.min(0.62, ws * 0.38);
     for (const u0 of wu) {
-      B('opening', u0, u0 + ww, 1.3, 2.1, -0.03, 0.05);
+      if (OPEN) B('opening', u0, u0 + ww, 1.3, 2.1, -0.125, -0.1); else B('opening', u0, u0 + ww, 1.3, 2.1, -0.03, 0.05);
       B('limestone', u0 - 0.1, u0 + ww + 0.1, 1.2, 1.3, -0.12, 0.06); B('limestone', u0 - 0.1, u0 + ww + 0.1, 2.1, 2.2, -0.1, 0.06);
       for (const u of [u0 - 0.1, u0 + ww]) B('limestone', u, u + 0.1, 1.3, 2.1, -0.1, 0.06);
       for (let k = 1; k < 4; k++) R('iron', [u0 + ww * k / 4, 1.3, -0.07], [u0 + ww * k / 4, 2.1, -0.07], 0.012, 4);
@@ -241,8 +241,8 @@ function paris_house(el, { bag, col, lights }) {
       for (let k = 0; k < nw; k++) if (r2() < 0.7) { const uc = (k + 0.5) * sp + (r2() - 0.5) * 0.2; B('plaster_streak', uc - 0.3, uc + 0.3, yq + 0.3, yq + 0.72, -jf - 0.085, -jf - 0.075); }
       yq += ST;
     }
-    // the corner lantern on its iron bracket, the stone gargoyle spout at the eaves, a pot of herbs or a cage at a window
-    if (r2() < 0.55) { const u = r2() < 0.5 ? 0.12 : L - 0.12; R('iron', [u, 2.9, -0.1], [u, 2.9, -0.7], 0.014, 4); B('glass_lamp', u - 0.09, u + 0.09, 2.45, 2.85, -0.8, -0.62); B('iron', u - 0.1, u + 0.1, 2.85, 2.9, -0.82, -0.6); }
+    // the corner lantern on its iron bracket (el.noLantern leaves it off: Paris of 1248 has none; the random stream is unchanged), the stone gargoyle spout at the eaves, a pot of herbs or a cage at a window
+    if (r2() < 0.55) { const u = r2() < 0.5 ? 0.12 : L - 0.12; if (!el.noLantern) { R('iron', [u, 2.9, -0.1], [u, 2.9, -0.7], 0.014, 4); B('glass_lamp', u - 0.09, u + 0.09, 2.45, 2.85, -0.8, -0.62); B('iron', u - 0.1, u + 0.1, 2.85, 2.9, -0.82, -0.6); } }
     if (r2() < 0.5) { const u = r2() < 0.5 ? 0.3 : L - 0.3; B('limestone', u - 0.08, u + 0.08, ye - 0.38, ye - 0.2, -jt - 0.55, -jt); }
     if (n > 2 && r2() < 0.45) { const uc = L * (0.3 + r2() * 0.4), ya2 = ST0 + ST + 0.55; B('timber', uc - 0.35, uc + 0.35, ya2, ya2 + 0.18, -jet(1) - 0.34, -jet(1) - 0.08); for (let k = -1; k <= 1; k++) bag.add(['terracotta', 'pottery_dark'][k & 1], lathe([[0.05, 0], [0.08, 0.1], [0.07, 0.17], [0.001, 0.17]], 7, null, ...P(uc + k * 0.2, ya2 + 0.18, -jet(1) - 0.2).map((v, i) => v))); }
     // the doorstep: a worn stone, and a boot-scraper

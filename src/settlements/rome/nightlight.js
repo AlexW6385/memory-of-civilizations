@@ -172,22 +172,25 @@ function paneOf(H, b, thinX, n, f, off) {
 
 // ── lamps in the open: the household gods' lamp at a crossroads, a torch before a litter ───────────────────────
 // { t: 'rome_halo', at, y, rot, kind } — elements of the street life (instanced)
-const KINDS = { shrine: 0, torch: 1, brazier: 2 };
+const KINDS = { shrine: 0, torch: 1, brazier: 2, stand: 3, hang: 4, pool: 5 };
 function unitOf(kind) {
   return assembly(`rome-halo|${kind}`, (a) => {
     const H = new Halo();
     if (kind === 'torch') {
-      // a pine torch (taeda) with its iron cup, held at 1.9 m, and its flame; the glow and its pool on the street
+      // a pine torch (taeda) held at 1.9 m with its pitch-dark head; by night the glow and its pool on the street (no flame piece: it would be one more draw, and the halo carries it)
       a('timber', rod([0, 0.9, 0], [0, 2.0, 0], 0.022, 5));
-      a('iron', lathe([[0.04, 2.0], [0.07, 2.08], [0.06, 2.12], [0.001, 2.1]], 8));
-      a('flame', lathe([[0.001, 2.12], [0.05, 2.15], [0.045, 2.27], [0.02, 2.42], [0.001, 2.5]], 6));
+      a('timber', lathe([[0.04, 2.0], [0.07, 2.08], [0.06, 2.12], [0.001, 2.1]], 8));
       H.ball(0, 2.3, 0, 1.4); H.floor(0, 0.06, 0, 4.0);
     } else if (kind === 'brazier') {
-      // a bronze tripod brazier on the paving at the foot of a temple's steps: three legs, a bowl of coals, a tall flame; a wide glow and pool
-      for (let k = 0; k < 3; k++) { const q = k * TAU / 3 + 0.5, c = Math.cos(q), s = Math.sin(q); a('iron', rod([c * 0.48, 0, s * 0.48], [c * 0.2, 0.85, s * 0.2], 0.03, 5)); }
-      a('iron', lathe([[0.001, 0.8], [0.22, 0.86], [0.46, 1.0], [0.44, 1.04], [0.2, 0.93], [0.001, 0.9]], 10));
-      a('flame', lathe([[0.001, 1.0], [0.2, 1.05], [0.16, 1.35], [0.07, 1.7], [0.001, 1.95]], 7));
+      // the glow of a temple brazier on the paving at the foot of the Pantheon's steps and its pool (the tripod itself is bronze in the Pantheon's plan: pantheon-night.js)
       H.ball(0, 1.45, 0, 3.4); H.floor(0, 0.06, 0, 6.5);
+    } else if (kind === 'stand') {
+      // a bronze lampstand of the Pantheon: a glow at the flame (1.9 m) and its pool on the floor
+      H.ball(0, 1.95, 0, 2.7); H.floor(0, 0.06, 0, 4.2);
+    } else if (kind === 'hang') {
+      H.ball(0, 0, 0, 7.5);                                   // the ring of lamps hung under the oculus
+    } else if (kind === 'pool') {
+      H.floor(0, 0.06, 0, 11, 11);                            // its light on the rotunda's floor
     } else {
       // the lamp before the lares of a crossroads shrine, on the altar's shelf: a small glow and a pool on the paving
       H.ball(0, 1.05, 0, 0.55); H.floor(0, 0.06, 0, 1.9);
@@ -195,7 +198,7 @@ function unitOf(kind) {
     const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(H.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(H.nor, 3)); a(MAT, g);
   });
 }
-const REACH = 70, REACH_OF = { brazier: 110, torch: 110 };
+const REACH = 70, REACH_OF = { brazier: 110, torch: 110, stand: 110 };
 function romeHalo(el, { bag }) {
   const U = unitOf(el.kind in KINDS ? el.kind : 'shrine'), [x, z] = el.at;
   const M = new Matrix4().compose(new Vector3(x, el.y ?? 0, z), new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), el.rot ?? 0), new Vector3(1, 1, 1));

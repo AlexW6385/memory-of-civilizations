@@ -181,7 +181,17 @@ const toXZ = (FM, u, d) => { const e = FM.elements; return [e[12] + e[0] * u + e
 export function columnStatue(el, { bag, col }) {
   const [x, z] = el.c, h = el.h ?? 12.5, y = el.y ?? 0, Lc = new Local();
   // the stepped base (three steps, its faces once carved with the trades), the plinth
-  for (let k = 0; k < 3; k++) { const s = 2.4 - k * 0.45; Lc.box(I, x - s, y - 0.3 + k * 0.38, z - s, x + s, y + 0.08 + k * 0.38, z + s); }
+  // (the treads dished where the feet came, on the faces in `el.worn` ('e' 'w' 's' 'n'): the rim stands the full height, the middle of a worn face's rim is gone, 1.2 cm lower [inferred])
+  for (let k = 0; k < 3; k++) {
+    const s = 2.4 - k * 0.45, t = y + 0.08 + k * 0.38, dish = 0.012, rim = 0.12, worn = el.worn ?? [];
+    Lc.box(I, x - s, y - 0.3 + k * 0.38, z - s, x + s, t - dish, z + s);
+    const piece = (face, a0, a1, b0, b1) => {          // a: along the face, b: across it, in the face's own coordinates (x, z for n/s; z, x for e/w)
+      const cuts = worn.includes(face) ? [[a0, Math.min(a1, a0 + 0.6)], [Math.max(a0, a1 - 0.6), a1]] : [[a0, a1]];
+      for (const [u0, u1] of cuts) if (u1 - u0 > 1e-6) Lc.box(I, ...(face === 'n' || face === 's' ? [x + u0, t - dish, z + b0, x + u1, t, z + b1] : [x + b0, t - dish, z + u0, x + b1, t, z + u1]));
+    };
+    piece('n', -s, s, -s, -s + rim); piece('s', -s + rim, s - rim, s - rim, s);
+    piece('e', -s + rim, s - rim, s - rim, s); piece('w', -s + rim, s - rim, -s, -s + rim);
+  }
   const yb = y + 0.84;
   Lc.add(I, lathe([[1.15, 0], [1.15, 0.5], [1.0, 0.65], [0.92, 0.75], [0.001, 0.75]], 8).rotateY(Math.PI / 8).translate(x, yb, z));
   // the shaft of granite, its torus, the Veneto-Byzantine capital (a basket of stiff leaves), the abacus

@@ -13,7 +13,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { fromTriangles } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
 import './domus.js';
-import { makeT, slab, wall as kwall, fence, hash, furnishElement, flatFrame } from './upper.js';
+import { makeT, slab, wall as kwall, fence, hash, furnishElement, flatFrame, flightRail } from './upper.js';
 
 export const FLAT_F1 = 4.6;
 
@@ -96,7 +96,12 @@ function insulaOpen(el, ctx) {
   faceH.front.push(udor(uBal, 0.6));
   const span = (lo, hi) => (h) => h.a >= lo && h.b <= hi;
   const sideH = (kit) => gridHoles(D).filter((h) => span(T + 0.1, DS - 0.1)(h) || span(D - BR + 0.1, D - T - 0.1)(h) || (kit && span(cd0 + 0.1, cd1 - 0.1)(h)));
-  faceH.sideA = sideH(mir); faceH.sideB = sideH(!mir);                                           // (u = 0 and u = W; the kitchen is on the side opposite the stair)
+  faceH.sideA = sideH(mir); faceH.sideB = sideH(!mir);
+  // the second floor (docs §4.23): the same rooms one storey up, reached by a second flight beside the first
+  const up2 = up && !!el.upper2, F2 = F1 + RH, ceilY2 = F2 + RH, nS = 3 + 0, dS = lendU + 1.0;
+  void nS;
+  const both = (list) => (up2 ? [...list, ...list.map((h) => ({ ...h, ya: h.ya + RH, yb: h.yb + RH }))] : list);
+  if (up2) for (const k of ['front', 'back', 'sideA', 'sideB']) faceH[k] = [...faceH[k], ...faceH[k].filter((h) => Math.abs(h.ya - (F1 + 0.9)) < 1e-6).map((h) => ({ ...h, ya: h.ya + RH, yb: h.ya + RH + (n === 3 ? 1.0 : 1.4) }))];                                           // (u = 0 and u = W; the kitchen is on the side opposite the stair)
   const hasHole = (list) => (a, b) => list.some((h) => Math.abs(h.a - a) < 1e-6 && Math.abs(h.b - b) < 1e-6);
   if (el.layoutOut) {
     const role = (i, k) => { const h = hash(i, k, el.seed || 1); return k === 0 ? (i === balCell ? 'sleep' : h < 0.45 ? 'work' : h < 0.75 ? 'sleep' : 'living') : (h < 0.5 ? 'sleep' : h < 0.8 ? 'store' : 'sleep'); };
@@ -111,6 +116,14 @@ function insulaOpen(el, ctx) {
       front: [[us, -3], [us, 1.2], [us, DS + 0.6], [us, cd0 + 0.7], [su, cd0 + 0.7], [su, d0s + 1.0], [su, lendU - 0.6, F1 - 0.2], [su, lendU + 0.2, F1], [su, dm, F1], [ks + (mir ? 0.6 : -0.6), dm, F1], [kin, cd1 - GW / 2, F1], [kin, cd0 + GW / 2, F1], [ks + (mir ? 0.6 : -0.6), cd0 + GW / 2, F1],
         [onBal, cd0 + GW / 2, F1], [onBal, DS - 0.5, F1], [uBal, T + 1.4, F1], [uBal, T / 2, F1], [uBal, -0.6, F1]],
     };
+    if (up2) {
+      const role2 = (i, k) => { const h = hash(i, k, (el.seed || 1) + 7); return k === 0 ? (h < 0.4 ? 'sleep' : h < 0.7 ? 'work' : 'cenaculum') : (h < 0.5 ? 'cenaculum' : h < 0.8 ? 'store' : 'sleep'); };
+      el.layoutOut.rooms2 = [...ivs.map((iv, i) => ({ rect: [iv[0], iv[1], T, DS], door: 'd1', dc: dF[i] - iv[0], y: F2, role: role2(i, 0) })), ...ivs.map((iv, i) => ({ rect: [iv[0], iv[1], cd1 + TI, D - T], door: 'd0', dc: dB[i] - iv[0], y: F2, role: role2(i, 1) })), { rect: [kitU[0], kitU[1], cd0, cd1], door: mir ? 'u1' : 'u0', dc: 0.6, y: F2, role: 'living' }];
+      const fu = mir ? W - (T + 2.35) : T + 2.35, kdoor = ks + (mir ? 0.6 : -0.6), rB2 = mir ? nw - 1 : 0, b0 = dB[rB2];
+      const toTop = [[us, -3], [us, 1.2], [us, DS + 0.6], [us, cd0 + 0.7], [su, cd0 + 0.7], [su, d0s + 1.0], [su, lendU - 0.6, F1 - 0.2], [su, lendU + 0.2, F1], [su, dS - 0.3, F1], [fu, dS - 0.3, F1 + 0.1], [fu, dS - 1.5], [fu, cd0 + GW + 0.3, F2 - 0.2], [fu, cd0 + GW / 2, F2]];
+      el.layoutOut.routes.front2 = [...toTop, [dF[0], cd0 + GW / 2, F2], [dF[0], cd0 + 0.3, F2], [dF[0], DS - 1.2, F2]];
+      el.layoutOut.routes.back2 = [...toTop, [kdoor, cd0 + GW / 2, F2], [kin, cd0 + GW / 2, F2], [kin, cd1 - GW / 2, F2], [kdoor, cd1 - GW / 2, F2], [b0, dm, F2], [b0, cd1 + TI + 1.0, F2], [b0, D - T - 1.0, F2]];
+    }
     el.layoutOut.F1 = F1;
   }
   if (el.dry) return;
@@ -128,17 +141,17 @@ function insulaOpen(el, ctx) {
   wallP(true, D - T / 2, T, W - T, T, -0.4, G0, 'brick'); upperWall(true, D - T / 2, T, W - T, T, faceH.back);
   // the shops' back wall with a door to the passage behind each, the partitions between the shops
   const doorsB = units.map((q) => q.stair ? [(q.a + q.b) / 2 - 0.9, (q.a + q.b) / 2 + 0.9, 2.8] : [(q.a + q.b) / 2 - 0.5, (q.a + q.b) / 2 + 0.5, 2.2]);
-  if (up) { wallP(true, DS + TI / 2, T, W - T, TI, -0.4, G0, 'stucco_rome', doorsB); kwall(Ts, 'stucco_rome', true, DS, TI, T, W - T, G0, H + 1.2, dF.map((c) => udor(c))); }
+  if (up) { wallP(true, DS + TI / 2, T, W - T, TI, -0.4, G0, 'stucco_rome', doorsB); kwall(Ts, 'stucco_rome', true, DS, TI, T, W - T, G0, H + 1.2, both(dF.map((c) => udor(c)))); }
   else wallP(true, DS + TI / 2, T, W - T, TI, -0.4, H + 1.2, 'stucco_rome', doorsB);
   for (let i = 1; i < units.length; i++) wallP(false, units[i].a, T, DS, TI, -0.3, CEIL + 0.1, 'stucco_rome');
   // the court's other sides: the wall of the back rooms (a door for each room), the wall of the side rooms
   const rooms = [], nr = W > 20 ? 3 : 2, rw = (W - 2 * T) / nr;
   for (let i = 0; i < nr; i++) rooms.push([T + i * rw, T + (i + 1) * rw]);
-  if (up) { wallP(true, D - BR - TI / 2, T, W - T, TI, -0.4, G0, 'stucco_rome', rooms.map(([a, b]) => [(a + b) / 2 - 0.55, (a + b) / 2 + 0.55, 2.2])); kwall(Ts, 'stucco_rome', true, D - BR - TI, TI, T, W - T, G0, H + 1.2, dB.map((c) => udor(c))); }
+  if (up) { wallP(true, D - BR - TI / 2, T, W - T, TI, -0.4, G0, 'stucco_rome', rooms.map(([a, b]) => [(a + b) / 2 - 0.55, (a + b) / 2 + 0.55, 2.2])); kwall(Ts, 'stucco_rome', true, D - BR - TI, TI, T, W - T, G0, H + 1.2, both(dB.map((c) => udor(c)))); }
   else wallP(true, D - BR - TI / 2, T, W - T, TI, -0.4, H + 1.2, 'stucco_rome', rooms.map(([a, b]) => [(a + b) / 2 - 0.55, (a + b) / 2 + 0.55, 2.2]));
   for (let i = 1; i < nr; i++) wallP(false, rooms[i][0], D - BR, D - T, TI, -0.3, CEIL + 0.1, 'stucco_rome');
   // the kitchen's side (opposite the stair): a wall with a door, partition at the back wall of the shops
-  if (up) { wallC(false, W - SIDE - TI / 2, cd0, cd1, TI, -0.4, G0, 'stucco_rome', [[(cd0 + cd1) / 2 - 0.55, (cd0 + cd1) / 2 + 0.55, 2.2]]); kwall(Tc, 'stucco_rome', false, W - SIDE - TI, TI, cd0, cd1, G0, H + 1.2, [udor(cd0 + GW / 2, 0.5), udor(cd1 - GW / 2, 0.5)]); }
+  if (up) { wallC(false, W - SIDE - TI / 2, cd0, cd1, TI, -0.4, G0, 'stucco_rome', [[(cd0 + cd1) / 2 - 0.55, (cd0 + cd1) / 2 + 0.55, 2.2]]); kwall(Tc, 'stucco_rome', false, W - SIDE - TI, TI, cd0, cd1, G0, H + 1.2, both([udor(cd0 + GW / 2, 0.5), udor(cd1 - GW / 2, 0.5)])); }
   else wallC(false, W - SIDE - TI / 2, cd0, cd1, TI, -0.4, H + 1.2, 'stucco_rome', [[(cd0 + cd1) / 2 - 0.55, (cd0 + cd1) / 2 + 0.55, 2.2]]);
   // the stair wall (the outer wall's inner face on the stair side) is the outer wall itself
   if (up) {
@@ -146,7 +159,12 @@ function insulaOpen(el, ctx) {
     slab(Ts, [T, W - T, T, cd0], F1); slab(Ts, [T, W - T, cd1, D - T], F1); slab(Ts, [kitS[0], kitS[1], cd0, cd1], F1);
     slab(Ts, [gF[0], gF[1], cd0, cd0 + GW], F1); slab(Ts, [gB[0], gB[1], lE, cd1], F1);
     const ceil2 = (u0, u1, d0, d1) => { Ts.B('timber', u0, u1, d0, d1, ceilY - 0.15, ceilY); for (let u = u0 + 0.4; u < u1 - 0.2; u += 0.75) Ts.B('wood_dark', u - 0.07, u + 0.07, d0, d1, ceilY - 0.45, ceilY - 0.15); };
-    ceil2(T, W - T, T, cd0); ceil2(T, W - T, cd1, D - T); ceil2(kitS[0], kitS[1], cd0, cd1);
+    if (!up2) { ceil2(T, W - T, T, cd0); ceil2(T, W - T, cd1, D - T); ceil2(kitS[0], kitS[1], cd0, cd1); }
+    else {
+      // the second floor: the same floors again, colliders (they are the first floor's ceilings from below)
+      slab(Ts, [T, W - T, T, cd0], F2); slab(Ts, [T, W - T, cd1, D - T], F2); slab(Ts, [kitS[0], kitS[1], cd0, cd1], F2);
+      slab(Ts, [gF[0], gF[1], cd0, cd0 + GW], F2); slab(Ts, [gB[0], gB[1], lE, cd1], F2);
+    }
     for (let i = 1; i < nw; i++) { kwall(Ts, 'stucco_rome', false, cuts[i] - TI / 2, TI, T, DS, F1, ceilY); kwall(Ts, 'stucco_rome', false, cuts[i] - TI / 2, TI, cd1 + TI, D - T, F1, ceilY); }
     for (let u = gF[0] + 0.7; u < gF[1] - 0.3; u += 1.6) { Ts.B('travertine', u - 0.12, u + 0.12, cd0, cd0 + GW / 2, F1 - 0.62, F1 - 0.47); Ts.B('travertine', u - 0.1, u + 0.1, cd0 + 0.4, cd0 + 0.58, F1 - 0.47, F1 - 0.16); }
     for (let u = gB[0] + 0.7; u < gB[1] - 0.3; u += 1.6) { Ts.B('travertine', u - 0.12, u + 0.12, cd1 - GW / 2, cd1, F1 - 0.62, F1 - 0.47); Ts.B('travertine', u - 0.1, u + 0.1, cd1 - 0.58, cd1 - 0.4, F1 - 0.47, F1 - 0.16); }
@@ -154,6 +172,23 @@ function insulaOpen(el, ctx) {
     fence(Ts, gF[0], cd0 + GW - 0.05, gF[1], cd0 + GW - 0.05, F1); fence(Ts, mir ? gF[1] - 0.05 : gF[0] + 0.05, cd0, mir ? gF[1] - 0.05 : gF[0] + 0.05, cd0 + GW, F1);
     fence(Ts, sx[0], lE + 0.05, sx[1], lE + 0.05, F1);
     Ts.L((gB[0] + gB[1]) / 2, cd1 - 0.5, F1 + 2.3, '#ffcf8a', 0.5, 5); Ts.L((gF[0] + gF[1]) / 2, cd0 + 0.5, F1 + 2.3, '#ffcf8a', 0.5, 5);
+    if (up2) {
+      // the partitions between the rooms of the second floor, the rails and posts of its galleries, the ceilings over its rooms
+      for (let i = 1; i < nw; i++) { kwall(Ts, 'stucco_rome', false, cuts[i] - TI / 2, TI, T, DS, F2, ceilY2); kwall(Ts, 'stucco_rome', false, cuts[i] - TI / 2, TI, cd1 + TI, D - T, F2, ceilY2); }
+      const ceil3 = (u0, u1, d0, d1) => { Ts.B('timber', u0, u1, d0, d1, ceilY2 - 0.15, ceilY2); for (let u = u0 + 0.4; u < u1 - 0.2; u += 0.75) Ts.B('wood_dark', u - 0.07, u + 0.07, d0, d1, ceilY2 - 0.45, ceilY2 - 0.15); };
+      ceil3(T, W - T, T, cd0); ceil3(T, W - T, cd1, D - T); ceil3(kitS[0], kitS[1], cd0, cd1);
+      for (let u = gF[0] + 0.7; u < gF[1] - 0.3; u += 1.6) { Ts.B('travertine', u - 0.12, u + 0.12, cd0, cd0 + GW / 2, F2 - 0.62, F2 - 0.47); Ts.B('travertine', u - 0.1, u + 0.1, cd0 + 0.4, cd0 + 0.58, F2 - 0.47, F2 - 0.16); }
+      for (let u = gB[0] + 0.7; u < gB[1] - 0.3; u += 1.6) { Ts.B('travertine', u - 0.12, u + 0.12, cd1 - GW / 2, cd1, F2 - 0.62, F2 - 0.47); Ts.B('travertine', u - 0.1, u + 0.1, cd1 - 0.58, cd1 - 0.4, F2 - 0.47, F2 - 0.16); }
+      // posts from the first floor's rails up to the second floor's edge (every 1.6 m, on the rail line)
+      for (let u = gF[0] + 0.8; u < gF[1] - 0.4; u += 1.6) Ts.B('timber', u - 0.07, u + 0.07, cd0 + GW - 0.12, cd0 + GW - 0.0, F1, F2 - 0.45, false);
+      for (let u = gB[0] + 0.8; u < gB[1] - 0.4; u += 1.6) Ts.B('timber', u - 0.07, u + 0.07, lE + 0.0, lE + 0.12, F1, F2 - 0.45, false);
+      // the front gallery's rail leaves the head of the second flight open (canonical u = T + 1.2 … T + 2.4); the back gallery's runs all along
+      const fo = mir ? [W - T - 3.1, W - T - 1.6] : [T + 1.6, T + 3.1];
+      if (mir) fence(Ts, gF[0], cd0 + GW - 0.05, fo[0], cd0 + GW - 0.05, F2); else fence(Ts, fo[1], cd0 + GW - 0.05, gF[1], cd0 + GW - 0.05, F2);
+      fence(Ts, mir ? gF[1] - 0.05 : gF[0] + 0.05, cd0, mir ? gF[1] - 0.05 : gF[0] + 0.05, cd0 + GW, F2);
+      fence(Ts, gB[0], lE + 0.05, gB[1], lE + 0.05, F2);
+      Ts.L((gB[0] + gB[1]) / 2, cd1 - 0.5, F2 + 2.3, '#ffcf8a', 0.5, 5); Ts.L((gF[0] + gF[1]) / 2, cd0 + 0.5, F2 + 2.3, '#ffcf8a', 0.5, 5);
+    }
   }
   // ── ceilings: joists and boards at the mezzanine's floor ────────────────────────────────────────────────────
   const ceil = (u0, u1, d0, d1, canonical) => {
@@ -185,7 +220,7 @@ function insulaOpen(el, ctx) {
         const uc = (i + 0.5) * len / cnt, groups = win === 'pair' ? [-0.55, 0.55] : win === 'triple' ? [-0.8, 0, 0.8] : [0];
         for (const dg of groups) {
           const half = win === 'triple' ? 0.22 : win === 'pair' ? 0.3 : 0.5;
-          const real = up && k === 1 && F.real && F.real(uc + dg - half, uc + dg + half), none = up && k === 1 && F.skip && F.skip(i);       // a window with a real reveal, or the door to the balcony
+          const real = up && (k === 1 || (up2 && k === 2)) && F.real && F.real(uc + dg - half, uc + dg + half), none = up && k === 1 && F.skip && F.skip(i);       // a window with a real reveal, or the door to the balcony
           if (!real && !none) put('opening', uc + dg - half, uc + dg + half, wy, wy + wh, 0);
           if (!none) put('travertine', uc + dg - half - 0.1, uc + dg + half + 0.1, wy - 0.1, wy, 1);
           const r = rand();
@@ -345,6 +380,7 @@ function insulaOpen(el, ctx) {
   {
     const su0 = T, su1 = T + 1.2, d0 = cd0 + 0.35, run = Math.min(5.4, cd1 - cd0 - 1.2), N = up ? 23 : 19, tread = run / N, rise = 0.2;
     for (let k = 0; k < N; k++) B(k % 2 ? 'travertine' : 'travertine', su0, su1, d0 + k * tread, d0 + (k + 1) * tread, 0, (k + 1) * rise);
+    for (let k = 0; k < N; k++) B('plaster_damp', su0 + 0.24, su1 - 0.24, d0 + k * tread + 0.05, d0 + (k + 1) * tread - 0.05, (k + 1) * rise, (k + 1) * rise + 0.004);   // the treads worn pale along their middle (docs §4.23)
     const ramp = rr(mir ? W - su1 : su0, mir ? W - su0 : su1, d0, d0 + run), dirW = { s: 'n', n: 's', e: 'w', w: 'e' }[f];
     col.ramp(ramp, y, y + N * rise, dirW);
     const lend = d0 + run, ly = N * rise;
@@ -358,14 +394,28 @@ function insulaOpen(el, ctx) {
     for (let k = 0; k <= N; k += 3) B('timber', su1 - 0.06, su1, d0 + k * tread - 0.03, d0 + k * tread + 0.03, Math.min(k, N) * rise, Math.min(k, N) * rise + 0.95);
     { const pts = (u, dd, yy) => { const [x, z] = P(mir ? W - u : u, dd); return [x, y + yy, z]; }, rail = []; hexa(rail, [pts(su1 - 0.07, d0, 0.9), pts(su1, d0, 0.9), pts(su1, d0 + run, N * rise + 0.9), pts(su1 - 0.07, d0 + run, N * rise + 0.9)], [pts(su1 - 0.07, d0, 0.98), pts(su1, d0, 0.98), pts(su1, d0 + run, N * rise + 0.98), pts(su1 - 0.07, d0 + run, N * rise + 0.98)]); bag.add('timber', fromTriangles(rail)); }
     if (lq - lend > 0.05) {
-      B('timber', su1 - 0.07, su1, lend, lq, ly + 0.9, ly + 0.98); B('timber', su1 - 0.07, su1, lq - 0.07, lq, ly, ly + 0.9);
-      if (up) col.rect(rr(mir ? W - su1 : su1 - 0.08, mir ? W - su1 + 0.08 : su1, lend, lq), y + ly, y + ly + 1.0);
+      const lr0 = up2 ? Math.min(lq, dS + 0.4) : lend;                                                      // (the second flight starts beside the landing: its rail leaves a gap)
+      B('timber', su1 - 0.07, su1, lr0, lq, ly + 0.9, ly + 0.98); B('timber', su1 - 0.07, su1, lq - 0.07, lq, ly, ly + 0.9);
+      if (up) col.rect(rr(mir ? W - su1 : su1 - 0.08, mir ? W - su1 + 0.08 : su1, lr0, lq), y + ly, y + ly + 1.0);
     }
     // the door to the flats in the outer wall (a dark opening with a lintel and a threshold) and a lamp beside it
     B('opening', T - 0.02, T + 0.02, lend + 0.2, lend + 1.0, ly, ly + 2.1); B('travertine', T - 0.03, T + 0.06, lend + 0.1, lend + 1.1, ly + 2.1, ly + 2.3); B('lacquer_black', T, T + 0.02, lend + 0.2, lend + 1.0, ly, ly + 0.03);
     // a worn stain under the stair and a cat's dish (the household's)
     B('bronze', su1 + 0.3, su1 + 0.31, d0 + 0.2, d0 + 0.5, 0.0, 0.01);
     col.rect(rr(mir ? W - su1 : su0, mir ? W - su0 : su1, d0 - 0.001, d0 + 0.001), y, y + 0.25);
+    if (up2) {
+      // the second flight (docs §4.23): beside the first, from the first floor at the landing's side up to the second floor's front gallery,
+      // timber treads 0.28 thick with their posts, a rail on each side; steps are in the court's frame (stair strip u = T … T + 1.2, this one T + 1.75 … T + 2.95 with a bridge of the first floor between: 0.5 m clear of the first flight's ramp, as the walker needs)
+      const f2 = { u0: T + 1.75, u1: T + 2.95, d0: cd0 + GW, d1: dS, up: '-d', yA: F1, yB: F2 }, n2 = Math.round((dS - (cd0 + GW)) / 0.26), tr2 = (dS - (cd0 + GW)) / n2, rs2 = (F2 - F1) / n2;
+      for (let k = 0; k < n2; k++) { const s1 = dS - k * tr2, s0 = s1 - tr2, top = F1 + (k + 1) * rs2; B('timber', f2.u0, f2.u1, s0, s1, top - 0.28, top); if (k % 2) B('wood_dark', f2.u0, f2.u1, s0, s0 + 0.03, top - 0.02, top + 0.005); }
+      for (let k = 2; k < n2; k += 3) { const s1 = dS - k * tr2; for (const u of [f2.u0 + 0.06, f2.u1 - 0.06]) B('timber', u - 0.06, u + 0.06, s1 - 0.12, s1, 0, F1 + (k + 1) * rs2 - 0.28); }
+      const T2 = makeT(ctx, y, (u, d) => P(mir ? W - u : u, d));
+      T2.B('timber', su1, f2.u0, lend, dS + 0.3, F1 - 0.2, F1); T2.col.floor(T2.R(su1, f2.u0, lend, dS + 0.3), y + F1);               // the bridge from the landing to the foot of the flight
+      fence(T2, su1, lend + 0.05, f2.u0, lend + 0.05, F1); fence(T2, su1, dS + 0.25, f2.u0, dS + 0.25, F1);
+      T2.col.ramp(T2.R(f2.u0, f2.u1, f2.d0, f2.d1), y + F1, y + F2, T2.dirW('-d'));
+      f2.n = n2;
+      flightRail(T2, f2, f2.u1, 1); flightRail(T2, f2, f2.u0, -1);
+    }
   }
   // ── the side room (the kitchen): the hearth bench, pots, the soot, wood, amphorae ─────────────────────────────
   {
@@ -415,13 +465,13 @@ function insulaOpen(el, ctx) {
 /** The furnishing of the opened first floor (the element `up_cells_flat` of the plan of its own, shown near): the rooms of the layout the builder gives. */
 function flatFurn(el, ctx) {
   const out = {};
-  insulaOpen({ rect: el.rect, front: el.front, seed: el.seed, y: el.y, upper: true, dry: true, layoutOut: out }, ctx);
-  furnishElement({ rect: el.rect, front: el.front, flat: true, y: el.y ?? 0, rooms: out.rooms }, ctx);
+  insulaOpen({ rect: el.rect, front: el.front, seed: el.seed, y: el.y, upper: true, upper2: el.upper2, dry: true, layoutOut: out }, ctx);
+  furnishElement({ rect: el.rect, front: el.front, flat: true, y: el.y ?? 0, rooms: el.upper2 ? [...out.rooms, ...out.rooms2] : out.rooms }, ctx);
 }
 /** The walks into the first floor of an opened insula, in world coordinates (for the walk-check routes of plan.js). */
 export function flatRoutes(el) {
   const out = {};
-  insulaOpen({ rect: el.rect, front: el.front, seed: el.seed, y: el.y, upper: true, dry: true, layoutOut: out }, { bag: { add() {} }, col: {}, lights: [] });
+  insulaOpen({ rect: el.rect, front: el.front, seed: el.seed, y: el.y, upper: true, upper2: el.upper2, dry: true, layoutOut: out }, { bag: { add() {} }, col: {}, lights: [] });
   const P = flatFrame(el);
   return Object.fromEntries(Object.entries(out.routes).map(([k, r]) => [k, r.map(([u, d, h]) => { const [x, z] = P(u, d); return h === undefined ? [+x.toFixed(2), +z.toFixed(2)] : [+x.toFixed(2), +z.toFixed(2), +((el.y ?? 0) + h).toFixed(2)]; })]));
 }

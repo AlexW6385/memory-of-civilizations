@@ -1,7 +1,7 @@
 // The canals' quay walls, the Rialto bridge and its market, a traghetto (docs/settlements/venice.md §4 "The
 // Rialto", §6). Pure data: the builders are the venetian style's (rive, rialto) and the shared objects (life).
 
-import { RADIUS, SEA, GROUND, RIALTO, MARKET, rivePieces, palazzi, bridges, bands, wells, squero } from './layout.js';
+import { BASIN_Z, RADIUS, SEA, GROUND, RIALTO, MARKET, rivePieces, palazzi, bridges, bands, wells, squero } from './layout.js';
 
 const plan = (id, style, elements, bounds, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -11,7 +11,7 @@ export function canalPlans() {
   // the quay walls, in four quarters so that what is out of view is not drawn
   const pieces = rivePieces(), Q = [[], [], [], []];
   for (const p of pieces) Q[(p[0] < 0 ? 0 : 1) + (p[1] < 0 ? 0 : 2)].push(p);
-  Q.forEach((list, i) => { if (list.length) plans.push(plan(`venice-rive-${i}`, 'venetian', [{ t: 'rive', pieces: list, sea: SEA, top: GROUND }], [-RADIUS, -RADIUS, RADIUS, RADIUS], { center: [i % 2 ? 160 : -160, i < 2 ? -160 : 160], near: 420 })); });
+  Q.forEach((list, i) => { if (list.length) plans.push(plan(`venice-rive-${i}`, 'venetian', [{ t: 'rive', pieces: list, sea: SEA, top: GROUND, worn: [24, BASIN_Z - 3, 152, BASIN_Z + 3] }], [-RADIUS, -RADIUS, RADIUS, RADIUS], { center: [i % 2 ? 160 : -160, i < 2 ? -160 : 160], near: 420 })); });
   // the bridge
   const { x, z, span } = RIALTO;
   plans.push(plan('venice-rialto', 'venetian', [{ t: 'rialto', x, z, span, y: GROUND, sea: SEA, w: 8.4 }], [x - span / 2 - 2, z - 6, x + span / 2 + 2, z + 6],
