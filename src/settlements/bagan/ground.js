@@ -2,7 +2,7 @@
 // the village tank; palmyra palms, neem, acacia, a few teak and banyan; a pale, hot, hazy sky of the Dry Zone.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, RIVER_Y, TANK, TANK_Y, PRECINCT, CITY, THAT_ENC, SHWE_PREC, SULA_PREC, PALACE, bankX, height, inRiver, inTank, inRect, inLot, lots, streets, inPlainTemple } from './layout.js';
+import { RADIUS, RIVER_Y, TANK, TANK_Y, PRECINCT, CITY, THAT_ENC, SHWE_PREC, SULA_PREC, PALACE, bankX, height, inRiver, inTank, inRect, inLot, inLane, lots, streets, inPlainTemple } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 const PRECS = [PRECINCT, SHWE_PREC, SULA_PREC, THAT_ENC, PALACE];
@@ -27,7 +27,7 @@ const fromWater = (x, z) => (inRiver(x, z) || inTank(x, z) ? -3 : Math.max(-5, M
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z, 2) || inTank(x, z, 0.5)) return null;
   if (x - bankX(z) < 6) return { grass_dry: 5, tamarisk: 0.4 };
-  if (onRoad(x, z, 0.5) || inLot(x, z, 0.4) || inPlainTemple(x, z, 1.2)) return null;
+  if (onRoad(x, z, 0.5) || inLot(x, z, 0.4) || inLane(x, z, 0.6) || inPlainTemple(x, z, 1.2)) return null;
   if (inRect(PRECINCT, x, z, 0)) {
     if (Math.hypot(x - 105, z) < 52) return null;
     return { banyan: 0.012, neem: 0.05, date_palm: 0.05, fig: 0.012, oleander: 0.03, grass_dry: 6 };

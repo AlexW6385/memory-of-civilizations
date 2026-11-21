@@ -58,6 +58,37 @@ function wearAnanda(el, ctx) {
   }
 }
 
+/** The Ananda's weathering above the rising damp: dark rain streaks running down from the corbel table's brackets (on some brackets, by the hash of their place), and moss in patches at the wall's foot on the north face. */
+function streaksAnanda(el, ctx) {
+  const f = el.f ?? 1.2, HO = 26.5, TOP1 = 12, Y = TOP1 - 0.78;
+  for (const s of ['n', 'e', 's', 'w']) {
+    const F = sideFrame(ctx, el.c, s);
+    for (let u = -HO + 0.6; u < HO - 0.4; u += 0.9) {
+      if (Math.abs(u) < 6.2 || [-22.5, -14.5, 14.5, 22.5].some((p) => Math.abs(u - p) < 0.7)) continue;
+      const q = hashAt(el.c[0] + u * (s === 'n' || s === 's' ? 1 : 3), el.c[1] + s.charCodeAt(0), 21);
+      if (q > 0.38) continue;
+      const L = 0.5 + 0.8 * hashAt(u, s.charCodeAt(0), 22), w = 0.07 + 0.08 * q;
+      F.b('plaster_damp', u - w, Y - L, HO, u + w, Y, HO + T, false);
+    }
+    if (s !== 'n') continue;
+    // moss on the north face (the side the sun does not dry): patches rising from the base in the damp, 0.3 to 0.9 m wide
+    const cuts = [-HO + 0.4, -22.5 - 0.6, -22.5 + 0.6, -14.5 - 0.6, -14.5 + 0.6, -5.9, 5.9, 14.5 - 0.6, 14.5 + 0.6, 22.5 - 0.6, 22.5 + 0.6, HO - 0.4];
+    for (let i = 0; i < cuts.length; i += 2) for (let u = cuts[i] + 0.3; u < cuts[i + 1] - 1.0; u += 0.8 + 1.4 * hashAt(u, i, 23)) {
+      const w = 0.3 + 0.6 * hashAt(u, i, 24), h = 0.12 + 0.3 * hashAt(u, i, 25);
+      F.b('glaze_green', u, f + 0.8, HO, u + w, f + 0.8 + h, HO + 0.014, false);
+    }
+  }
+}
+
+/** The Thatbyinnyu and Sulamani: the middle of the six steps up each side polished by bare feet (temple.js tower(): steps(S, ..., H + 4.9, 2.4)), and the entrance's threshold worn. */
+function wearTower(el, ctx) {
+  const k = el.k ?? 1, f = el.f ?? 1.4, H = 29 * k, v1 = H + 2.5 + 2.4, n = 6, d = 2.4 / n;
+  for (const s of ['n', 'e', 's', 'w']) {
+    const F = sideFrame(ctx, el.c, s);
+    for (let i = 0; i < n; i++) F.b('stucco_cream', -1.3, f * (i + 1) / n, v1 - (i + 1) * d + 0.05, 1.3, f * (i + 1) / n + T, v1 - i * d - 0.05, false);
+  }
+}
+
 /**
  * bgn_stele: { c: [x, z], rot, seed } — a stone stele of the temple's donors (the donative inscriptions of Pagan are on slabs like this): a slab 0.7 m wide and 1.5 m high on a brick footing, stepped at the top,
  * both faces ruled in lines of text broken into word-lengths. Only the ruled lines: no letter is drawn (see the head of this file).
@@ -87,7 +118,7 @@ let done = false;
 export function registerWear() {
   if (done) return; done = true;
   const E = STYLES.burmese.elements;
-  for (const [k, fn] of [['bgn_shop', wearShop], ['bgn_house', wearHouse], ['bgn_ananda', wearAnanda]]) {
+  for (const [k, fn] of [['bgn_shop', wearShop], ['bgn_house', wearHouse], ['bgn_ananda', wearAnanda], ['bgn_ananda', streaksAnanda], ['bgn_tower', wearTower]]) {
     const base = E[k];
     E[k] = function worn(el, ctx) { const r = base.call(this, el, ctx); if (!el.simple) fn(el, ctx); return r; };
   }

@@ -1,7 +1,7 @@
 // Pagan's road and precinct life beyond the lots' own (docs/settlements/bagan.md §10): bullock carts on the main road and the plain's tracks
 // (the ox-cart is the Burmese road's vehicle), flower and candle sellers on mats at the Ananda's west gate, pigeons on the precinct's
 // paving, sweepers and the dog asleep in the porch's shade, farmers with their oxen on the plain. Static life in the layout's coordinates.
-import { ANANDA, PRECINCT, MAIN_ROAD, inRect, inLot, inPlainTemple, inRiver, inTank, streets, bankX } from './layout.js';
+import { ANANDA, PRECINCT, MAIN_ROAD, inRect, inLot, inLane, inPlainTemple, inRiver, inTank, streets, bankX } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const ARRIVAL = [30, 0];
@@ -13,7 +13,7 @@ export function dressing() {
   const man = (at, y, rot, o = {}) => fig(at, y, rot, { dress: 'wrap', hair: 'short', cloth: pick(['cloth_brown', 'cloth_green', 'cloth_white']), ...o });
   const monk = (at, y, rot, o = {}) => fig(at, y, rot, { cloth: 'cloth_red', cloth2: 'cloth_red', over: 'shawl', hair: 'shaven', ...o });
   const far = (x, z, m = 8) => Math.hypot(x - ARRIVAL[0], z - ARRIVAL[1]) > m;
-  const open = (x, z, m = 3) => !inRiver(x, z, 4) && !inTank(x, z, 2) && !inLot(x, z, m) && !inPlainTemple(x, z, 2) && Math.hypot(x, z) < 300;
+  const open = (x, z, m = 3) => !inRiver(x, z, 4) && !inTank(x, z, 2) && !inLot(x, z, m) && !inLane(x, z, 1) && !inPlainTemple(x, z, 2) && Math.hypot(x, z) < 300;
 
   // bullock carts on the main road (the road lies at z = -4…4), going to and from the river, loaded with jars, rice sacks and baskets
   [[-84, 2.4, 'sacks', 'zebu', 0], [-61, -2.4, 'baskets', 'zebu', 1], [-35, 2.4, 'sacks', 'buffalo', 0], [-12, -2.4, 'crates', 'zebu', 1], [8, 2.6, 'sacks', 'zebu', 0]].forEach(([x, z, load, beast, dir], i) => {

@@ -82,20 +82,28 @@ export function lots() {
     const [x0, z0, x1, z1] = s.rect, alongX = s.axis === 'x';
     let a = alongX ? x0 : z0;
     const end = alongX ? x1 : z1;
+    let n = 0, prev = null;
     while (a < end - 8) {
       const wd = 10.5 + Math.floor(r() * 5) * 1.0, b = Math.min(a + wd, end);
       const rect = alongX ? [a, z0, b, z1] : [x0, a, x1, b];
       const hit = streets().some((q) => q[0] < rect[2] && q[2] > rect[0] && q[1] < rect[3] && q[3] > rect[1]);
       r();                       // (the stream the old gaps used; every lot that fits is built now)
       if (b - a >= 8.5 && !hit) {
-        LOTS.push({ rect, front: s.front, seed: Math.floor(r() * 1e6), open: true, kind: r() < 0.35 ? 'large' : 'small', village: si >= 6 && si < 14, shop: SHOP_STRIPS.has(si) });
-      }
-      a = b + 0.3;
+        const L = { rect, front: s.front, seed: Math.floor(r() * 1e6), open: true, kind: r() < 0.35 ? 'large' : 'small', village: si >= 6 && si < 14, shop: SHOP_STRIPS.has(si) };
+        if (prev && prev.lane) L.laneBefore = prev.lane;
+        LOTS.push(L); prev = L; n++;
+      } else prev = null;
+      // between every third pair of the market's shops a lane (2.6 m) runs back past the shops to the owners' houses behind them (docs §16: the houses are entered by it, not through the shop)
+      const lane = SHOP_STRIPS.has(si) && prev && n % 3 === 0 && b - a >= 8.5 && !hit;
+      if (lane) prev.lane = alongX ? [b, z0, b + 2.6, z1] : [x0, b, x1, b + 2.6];
+      a = b + (lane ? 2.6 : 0.3);
     }
   });
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** In a lane between two shops (nothing grows or stands there: the owners' houses are reached by it). */
+export const inLane = (x, z, m = 0) => lots().some((l) => l.lane && inRect(l.lane, x, z, m));
 
 /** The small temples and stupas of the plain: { c, kind ('stupa' | 'cella' | 'tall'), h | w, facing, seed }. Scattered on a jittered grid, never on a road, a lot or a precinct. */
 let PLAIN = null;

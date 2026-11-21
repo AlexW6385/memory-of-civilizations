@@ -4,12 +4,14 @@
 import '../../styles/burmese/index.js';
 import { dressing } from './dressing.js';
 import { sculpture, gateLions } from './sculpt.js';
+import { walkDistance } from './walk.js';
 import { houseSpots } from '../../styles/burmese/houses.js';
 import { lodTiles } from '../lod.js';
+import { STYLES } from '../../core/build.js';
 import { torchEls, GATES } from './nightlight.js';
 import {
   RADIUS, RIVER_Y, bankX, CITY, WALL, GATE, THAT, THAT_ENC, PALACE, PAL_HALL, SHWE, SHWE_PREC, SULA, SULA_PREC, TANK, TANK_Y, KILNS, KYAUNGS, PRECINCT, MAIN_ROAD,
-  ANANDA, OKKYAUNG, lots, plainTemples, cityWalls, streets, inLot, inPlainTemple, inRect, inRiver, inTank,
+  ANANDA, OKKYAUNG, lots, plainTemples, cityWalls, streets, inLot, inLane, inPlainTemple, inRect, inRiver, inTank,
 } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -95,7 +97,7 @@ function houses() {
 /** Roadside props along the streets (water-pot stands, shrines, benches, festival poles, lamp pillars, firewood, drying mats), placed from the street rectangles, on the verge, facing the road. */
 function roadside() {
   const r = rng(1213), items = [], taken = [];
-  const free = (x, z, m) => !inRiver(x, z, 4) && !inTank(x, z, 2) && !inLot(x, z, m) && !inPlainTemple(x, z, 1) && !taken.some(([a, b]) => Math.hypot(a - x, b - z) < 5)
+  const free = (x, z, m) => !inRiver(x, z, 4) && !inTank(x, z, 2) && !inLot(x, z, m) && !inLane(x, z, 1) && !inPlainTemple(x, z, 1) && !taken.some(([a, b]) => Math.hypot(a - x, b - z) < 5)
     && !streets().some((q) => inRect(q, x, z, 0.4)) && ![PRECINCT, SHWE_PREC, SULA_PREC, THAT_ENC, PALACE].some((q) => inRect(q, x, z, 0.5)) && Math.hypot(x, z) < RADIUS - 24;
   const kinds = [['potstand', 4], ['bench', 2], ['pole', 1.2], ['shrine', 1.0], ['lamp', 1.0], ['firewood', 1.2], ['dry', 1.4], ['spirit', 0.8], ['pounder', 0.5]];
   const tot = kinds.reduce((a, [, w]) => a + w, 0);
@@ -195,12 +197,14 @@ function temples() {
   return base('bagan-temples', E);
 }
 
+let KEEP = [];
 /** The people (monks in their robes, women with loads, farmers, children) and the animals (oxen, goats, dogs) about the streets; goods at the doors come from the life kit. */
 function people() {
-  const rand = rng(1211), P = [];
+  const rand = rng(1211), P = [], K = [];
+  KEEP = K;
   const skin = () => (rand() < 0.75 ? 'skin_medium' : 'skin_dark');
   const fig = (at, rot, o) => P.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_ochre', cloth2: 'cloth_red', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'bun', beard: false, ...o });
-  const free = (x, z, m = 1.6) => !inRiver(x, z, 4) && !inTank(x, z, 2) && !lots().some((l) => inRect(l.rect, x, z, 1)) && !P.some((p) => p.t === 'figure' && Math.hypot(p.at[0] - x, p.at[1] - z) < m);
+  const free = (x, z, m = 1.6) => !inRiver(x, z, 4) && !inTank(x, z, 2) && !lots().some((l) => inRect(l.rect, x, z, 1)) && !inLane(x, z, 1) && !P.some((p) => p.t === 'figure' && Math.hypot(p.at[0] - x, p.at[1] - z) < m);
   const monk = (at, rot, o = {}) => fig(at, rot, { cloth: 'cloth_red', cloth2: 'cloth_red', top: undefined, over: 'shawl', hair: 'shaven', ...o });
   const lay = (at, rot, o = {}) => fig(at, rot, { cloth: ['cloth_white', 'cloth_ochre', 'cloth_green', 'cloth_brown'][Math.floor(rand() * 4)], cloth2: 'cloth_red', hair: rand() < 0.5 ? 'bun' : 'long', ...o });
   // the Ananda's precinct: pilgrims before the porches, monks at the gate, someone sweeping the terrace
@@ -241,7 +245,7 @@ function people() {
     if (!l.shop) continue;
     const [x0, z0, x1, z1] = l.rect, W = x1 - x0, s = l.front === 's' ? 1 : -1, cx = x0 + W / 2, fz = s > 0 ? z1 : z0;
     const keeper = (rand() < 0.75);
-    if (keeper) P.push({ t: 'figure', at: [cx + (rand() - 0.5) * 2, fz - s * 1.5], y: 0.55, rot: s > 0 ? Math.PI : 0, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: ['cloth_green', 'cloth_brown', 'cloth_red', 'cloth_white'][Math.floor(rand() * 4)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: rand() < 0.5 ? 'bun' : 'short', beard: false, ...(rand() < 0.4 ? { pose: 'cross' } : {}) });
+    if (keeper) K.push({ t: 'figure', at: [cx + (rand() - 0.5) * 2, fz - s * 1.5], y: 0.55, rot: s > 0 ? Math.PI : 0, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: ['cloth_green', 'cloth_brown', 'cloth_red', 'cloth_white'][Math.floor(rand() * 4)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: rand() < 0.5 ? 'bun' : 'short', beard: false, ...(rand() < 0.4 ? { pose: 'cross' } : {}) });
     if (rand() < 0.4) { const x = cx + (rand() - 0.5) * 4, z = fz + s * 2.6; if (free(x, z, 1.2)) lay([x, z], s > 0 ? 0 : Math.PI, { pose: 'talk', carry: rand() < 0.5 ? 'basket' : undefined }); }
   }
   // monks and laity in the rest houses
@@ -263,12 +267,12 @@ function people() {
     for (const e of houseEls()) {
       if (e.t !== 'bgn_house') continue;
       const cx = (e.rect[0] + e.rect[2]) / 2, cz = (e.rect[1] + e.rect[3]) / 2;
-      if (Math.hypot(cx - AR[0], cz - AR[1]) > 130 || hr() < 0.2) continue;
+      if ((Math.hypot(cx - AR[0], cz - AR[1]) > 130 && walkDistance([cx, cz]) > 30) || hr() < 0.2) continue;
       const sp = houseSpots(e); if (!sp) continue;
       const hp = [sp.hearth[0] - (sp.hearth[0] - sp.door[0]) * 0.2, sp.hearth[1] - (sp.hearth[1] - sp.door[1]) * 0.2];
-      P.push({ t: 'figure', at: hp, y: sp.fl, rot: at(hp, sp.hearth), seed: Math.floor(hr() * 1e9), dress: 'wrap', cloth: ['cloth_green', 'cloth_brown', 'cloth_red', 'cloth_ochre'][Math.floor(hr() * 4)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'squat' });
+      K.push({ t: 'figure', at: hp, y: sp.fl, rot: at(hp, sp.hearth), seed: Math.floor(hr() * 1e9), dress: 'wrap', cloth: ['cloth_green', 'cloth_brown', 'cloth_red', 'cloth_ochre'][Math.floor(hr() * 4)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'squat' });
       const q = hr();
-      P.push({ t: 'figure', at: sp.mat, y: sp.fl, rot: at(sp.mat, sp.door), seed: Math.floor(hr() * 1e9), dress: 'wrap', cloth: ['cloth_white', 'cloth_brown', 'cloth_green'][Math.floor(hr() * 3)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: q < 0.5 ? 'short' : 'bun', beard: false, pose: 'sit', ...(q > 0.7 ? { child: true, h: 0.8 } : {}) });
+      K.push({ t: 'figure', at: sp.mat, y: sp.fl, rot: at(sp.mat, sp.door), seed: Math.floor(hr() * 1e9), dress: 'wrap', cloth: ['cloth_white', 'cloth_brown', 'cloth_green'][Math.floor(hr() * 3)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: q < 0.5 ? 'short' : 'bun', beard: false, pose: 'sit', ...(q > 0.7 ? { child: true, h: 0.8 } : {}) });
     } }
   const A = [];
   for (let k = 0; k < 26; k++) {
@@ -280,7 +284,24 @@ function people() {
   return base('bagan-people', [...P, ...A], 'life');
 }
 
+/** bgn_keepers { list: [figure parameters] }: the keepers behind the counters and the households at their hearths, built into the near plan of their 60 m cell (a life element's figures reach 170 m
+ *  wherever they stand; the pattern of Tang Chang'an's keeperPlans). */
+STYLES.burmese.elements.bgn_keepers = function keepers(el, ctx) {
+  const fig = STYLES.life?.elements?.figure;
+  if (fig) for (const f of el.list) fig({ ...f }, { bag: ctx.bag, col: ctx.col });
+};
+function keeperPlans() {
+  const cells = new Map();
+  for (const f of KEEP) {
+    const i = Math.floor(f.at[0] / 60), j = Math.floor(f.at[1] / 60), k = `${i}_${j}`;
+    if (!cells.has(k)) cells.set(k, { i, j, list: [] });
+    cells.get(k).list.push(f);
+  }
+  return [...cells].map(([k, c]) => ({ ...base(`bagan-keepers-${k}`, [{ t: 'bgn_keepers', list: c.list }]), center: [c.i * 60 + 30, c.j * 60 + 30], near: 80 }));
+}
+
 export async function town() {
-  return [...city(), ...houses(), temples(), people(), base('bagan-dressing', dressing(), 'life'), ...sculpture()];
+  const pe = people();
+  return [...city(), ...houses(), temples(), pe, ...keeperPlans(), base('bagan-dressing', dressing(), 'life'), ...sculpture()];
 }
 void MAIN_ROAD; void PRECINCT;
