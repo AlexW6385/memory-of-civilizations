@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.69 — two real name boards; second pass: Yinxu, Khajuraho, Great Zimbabwe, Sanchi, Qufu (2026-11-21)
+
+The Meridian Gate in Beijing carries 午門 and the Dacheng Hall in Qufu 大成殿, in checked characters; Shaolin's gate board, the Temple of Heaven and the Wild Goose Pagoda stay plain because their known wording is later than the date shown. Yinxu: watch fires with their keepers before the arrival, inside the south gate and on the Huan's landings; rammed-earth layers on the hall platforms. Khajuraho: all ninety-three open fronts on the walk can now be entered (twelve were blocked by posts and goods). Great Zimbabwe: a herders' fire by the arrival, fires along the lane of the Great Enclosure, someone at every open house's hearth. Sanchi: lamp pillars up the summit way, the south approach paved to the gateway, a keeper in every open shop. Qufu: watch fires in the great court, ridge beasts on the Dacheng Hall, five lane houses opened.
+
 ## v12.68 — second pass: Tikal, Karakorum, Mohenjo-daro, Ur, Conques and five more (2026-11-21)
 
 Tikal: braziers at the arrival, torches along two causeways, the offerings back on the shrine benches, ways into all fifteen craft houses and eight market rooms. Karakorum: the kilns' smoke is lit at night, the Great Hall has butter lamps before its Buddhas and an upper storey one can climb to. Mohenjo-daro: the platform lane, the one view over budget, is a quarter lighter; lamps on the Bath court; workshop masters stand in their shops. Ur: lamps in the Court of Nanna and over each open door, brick cheeks on the terrace stair, eight more upper floors. Conques: light from the west door on the parvis, keepers and goods in fourteen shops. Taos: fires near the arrival, people in the eighteen upper rooms, roof spouts. Ajanta, Benin City, Ye: night fires and lamps near the visitor, more houses opened, worn ways on the landmarks.

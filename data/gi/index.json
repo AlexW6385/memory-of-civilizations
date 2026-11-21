@@ -2562,7 +2562,7 @@
  },
  "kilwa-mosque": {
   "site": "kilwa",
-  "hash": "6358588716028f06",
+  "hash": "6ddc6334aceae900",
   "rays": 128,
   "probes": 54109,
   "boxes": [
@@ -2602,8 +2602,8 @@
     ]
    }
   ],
-  "bytes": 900387,
-  "seconds": 1071,
+  "bytes": 900528,
+  "seconds": 776,
   "baked": "2026-11-21"
  },
  "knossos-palace": {
@@ -2643,7 +2643,7 @@
  },
  "lalibela-churches": {
   "site": "lalibela",
-  "hash": "618666c27739170d",
+  "hash": "3e36a25f56c5e4b3",
   "rays": 128,
   "probes": 32743,
   "boxes": [
@@ -2777,8 +2777,8 @@
     ]
    }
   ],
-  "bytes": 573717,
-  "seconds": 375,
+  "bytes": 573814,
+  "seconds": 102,
   "baked": "2026-11-21"
  },
  "lhasa-potala": {
@@ -3678,7 +3678,7 @@
  },
  "nalanda-mahavihara": {
   "site": "nalanda",
-  "hash": "758c9e4fa6c697cc",
+  "hash": "3fbe8019d3c9204a",
   "rays": 128,
   "probes": 11593,
   "boxes": [
@@ -3782,7 +3782,7 @@
    }
   ],
   "bytes": 170129,
-  "seconds": 70,
+  "seconds": 12,
   "baked": "2026-11-21"
  },
  "nandauwas": {
