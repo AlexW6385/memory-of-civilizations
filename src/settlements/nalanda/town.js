@@ -3,6 +3,7 @@ import { lodTiles } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, MONASTERIES, TEMPLES, TANKS, LEVEL, WAY, T3, M1, LIBRARY, mgate, lots, yards, tankD, WAY_LAMPS, BOOTHS, JALS, OTLAS, ANNEXES, GATE, STUPA_END } from './layout.js';
 import { HALL, TOWERS } from './plan.js';
+import { houseDoor } from '../../styles/nalanda/houses.js';
 import '../../styles/nalanda/index.js';
 import '../../styles/vernacular/index.js';
 import '../../objects/index.js';
@@ -70,7 +71,9 @@ function people() {
   // the village: women at the doors with pots and baskets, men and porters, zebu and dogs
   const L = lots();
   for (let i = 0; i < L.length; i += 3) {
-    const [rx0, rz0, rx1, rz1] = L[i].rect, f = L[i].front, x = f === 'w' ? rx0 - 1.6 : (rx0 + rx1) / 2 + 2, z = f === 'n' ? rz0 - 1.6 : (rz0 + rz1) / 2;
+    const [rx0, rz0, rx1, rz1] = L[i].rect, f = L[i].front;
+    let [x, z] = (() => { const F = houseDoor(L[i]); return F.P(F.du < F.L / 2 ? Math.min(F.L - 0.6, F.du + 2.2) : Math.max(0.6, F.du - 2.2), -1.6); })();       // (beside the door, off its lane)
+    if (L[i].gone) { const a = ANNEXES.find((q) => rx0 < q.rect[2] + 0.5 && rx1 > q.rect[0] - 0.5 && rz0 < q.rect[3] + 0.5 && rz1 > q.rect[1] - 0.5); if (a) { x = (a.rect[0] + a.rect[2]) / 2 + 2.4; z = a.rect[3] + 2.2; } }    // (a house not built: its villager stands at the annex's door instead)
     if (tankD(x, z) < 6) continue;
     const t = r();
     if (t < 0.4) woman([x, z], 0, f === 'w' ? [1, 0] : [0, 1], { pose: 'stand', carry: r() < 0.5 ? 'basket' : 'pot' });
@@ -123,7 +126,7 @@ function people() {
   // pilgrims coming in with their bundles
   lay([-1.5, GATE.c[1] + 9], 0, [0, -1], { pose: 'stand', carry: 'bundle' }); woman([1.8, GATE.c[1] + 11], 0, [0, -1], { pose: 'stand', carry: 'basket' });
   // the yards: zebu and goats in the pens, hay
-  yards().forEach((y, i) => { const [a0, b0, a1, b1] = y.rect; if (i % 3 === 2) return; P.push({ t: 'animal', kind: 'zebu', at: [(a0 + a1) / 2 - 1, (b0 + b1) / 2], y: 0, rot: r() * 6, seed: 300 + i }, { t: 'animal', kind: i % 2 ? 'goat' : 'zebu', at: [(a0 + a1) / 2 + 1.5, (b0 + b1) / 2 + 1], y: 0, rot: r() * 6, seed: 400 + i }); });
+  yards().forEach((y, i) => { const [a0, b0, a1, b1] = y.rect; if (i % 3 === 2 || y.gone) return; P.push({ t: 'animal', kind: 'zebu', at: [(a0 + a1) / 2 - 1, (b0 + b1) / 2], y: 0, rot: r() * 6, seed: 300 + i }, { t: 'animal', kind: i % 2 ? 'goat' : 'zebu', at: [(a0 + a1) / 2 + 1.5, (b0 + b1) / 2 + 1], y: 0, rot: r() * 6, seed: 400 + i }); });
   void LEVEL;
   return base('nalanda-people', 'life', P);
 }
@@ -179,7 +182,10 @@ function bazaar() {
 /** What stands behind the houses and in the yards: dung-cake stacks, clay bins, charpoys, hay, the pens and the potter's yard. */
 function villageItems() {
   const r = rng(77), I = [];
+  let n0 = 0, prevGone = false;
   for (const l of lots()) {
+    if (prevGone) I.length = n0;                                  // (a lot not built keeps its draws but leaves nothing behind it)
+    n0 = I.length; prevGone = !!l.gone;
     const [x0, z0, x1, z1] = l.rect, south = l.front === 'n', strip = south ? z0 + 8.6 - z1 : x0 + 10.2 - x1;
     if (strip < 1.5 || r() < 0.25) continue;
     const t = r(), at = (u) => (south ? [x0 + u * (x1 - x0), z1 + 0.85] : [x1 + 0.85, z0 + u * (z1 - z0)]), [px, pz] = at(0.2 + r() * 0.6);
@@ -189,7 +195,9 @@ function villageItems() {
     else I.push({ k: 'haypile', x: px, z: pz, s: 0.6 });
     if (r() < 0.3) { const [qx, qz] = at(r() < 0.5 ? 0.08 : 0.92); I.push({ k: 'dung', x: qx, z: qz, s: 0.7 }); }
   }
+  if (prevGone) I.length = n0;
   yards().forEach((y, i) => {
+    if (y.gone) return;
     const [x0, z0, x1, z1] = y.rect, f = (a, b) => ({ k: 'fence', seg: [...a, ...b] }), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     if (i % 4 === 0) { I.push({ k: 'kiln', x: cx - 1.5, z: cz - 0.5 }, { k: 'potstack', x: cx + 2.6, z: z1 - 1.2 }, { k: 'dung', x: x0 + 0.9, z: z1 - 0.9, s: 1 }); return; }
     const fr = y.back === 's' ? 'n' : 'w';       // the open side: the yard's front
@@ -222,7 +230,7 @@ export async function town() {
   for (const a of ANNEXES) E.push({ t: 'annex', ...a });
   E.push({ t: 'gate', ...GATE, c: GATE.c });
   E.push({ t: 'village', items: villageItems() });
-  const all = lots(), houses = [], rr = rng(5), AR2 = [ARRIVALS['nalanda'][0], ARRIVALS['nalanda'][2]];
+  const all = lots().filter((l) => !l.gone), houses = [], rr = rng(5), AR2 = [ARRIVALS['nalanda'][0], ARRIVALS['nalanda'][2]];
   // every house is built by rule (style nalanda: kind from the lot's size, the front by its bays); those within 175 m of the arrival stand open, each with the use of its hall
   const uses = ['home', 'weaver', 'grain', 'home', 'oil', 'garland', 'scribe', 'rest', 'home', 'garland'];
   let ui = 0;
