@@ -86,10 +86,10 @@ export function nightElements() {
   for (const zz of [TANK[1] + 0.17, TANK[3] - 0.17]) for (let i = 0; i < 12; i++) put('diya', [TANK[0] + 2 + (i + 0.5) * (TANK[2] - TANK[0] - 4) / 12, zz], 0, 0);
   for (const sx of [-1, 1]) put('stand', [(HALL[0] + HALL[2]) / 2 + sx * 2.3, HALL[1] + 4.4], 0.5, 0);
   // the great gopurams' passages: a lamp stand each side of the mouth and one inside, where the pilgrims entered after dark [inferred: the temple never closed its gates to the lamp-lit evening services]
-  for (const [gx, gz, dz] of [[GATES.s[0], GATES.s[1], 1], [GATES.n[0], GATES.n[1], -1], [GATES.e[0], GATES.e[1], 0], [GATES.w[0], GATES.w[1], 0]]) {
-    const out_ = dz ? [0, dz] : [gx > 0 ? 1 : -1, 0];
-    for (const s of [-1, 1]) put('stand', [gx + (dz ? s * 3.2 : out_[0] * 5), gz + (dz ? out_[1] * 5 : s * 3.2)], 0, 0);
-    put('row', [gx + out_[0] * 0, gz - out_[1] * 3], 0, 0);
+  for (const [gx, gz, ax, sg] of [[GATES.s[0], GATES.s[1], 'z', 1], [GATES.n[0], GATES.n[1], 'z', -1], [GATES.e[0], GATES.e[1], 'x', 1], [GATES.w[0], GATES.w[1], 'x', -1]]) {
+    const P = (u, v) => ax === 'z' ? [gx + u, gz + sg * v] : [gx + sg * v, gz + u];       // u across the passage (it is 5 m wide), v from its middle toward the street
+    for (const s of [-1, 1]) put('stand', P(s * 1.9, 7), 0, 0);
+    put('row', P(0, -3), 0, 0);
   }
   void RADIUS; void WALL; void GATES;
   return out;
