@@ -133,3 +133,10 @@ Drums and voices, rattles, a cedar flute (a drone, a voice and the ney stand in)
 - [Pueblo architecture and its relationship to place — Smarthistory](https://smarthistory.org/pueblo-architecture-place)
 - [Museum Lesson: Pueblo Agriculture — Albuquerque Museum](https://www.cabq.gov/artsculture/albuquerque-museum/casa-san-ysidro/documents/museum-lesson-pueblo-agriculture.pdf/@@download/file/Museum%20Lesson%20Pueblo%20Agriculture.pdf)
 - [Peoples of the Mesa Verde Region: Pueblo III artifacts — Crow Canyon](https://crowcanyon.org/EducationProducts/peoples_mesa_verde/pueblo_III_artifacts.php)
+
+## 10. Bring-up to the Suzhou standard (items 1–6)
+
+### 10.1 The visitor's walk (§4.8)
+- Taos c. 1500 has no shops or stalls: trade was household work, so the "open fronts" are the fifteen furnished plaza rooms (§4.5), the eighteen terraced rooms (§4.6, §4.7), the cook and mud yards and the mealing bins under the racks [inferred from §4.2–§4.5]. The doorways are open by design: the pueblo had no doors of the Spanish kind (§4.1), only hides over the few openings [stated: Wikipedia "Taos Pueblo"; ICT News].
+- Walked routes (`walks` in plan.js): the arrival to the log bridge and North House (as before), 15 routes over the sill into each plaza room and along its front room, 4 routes to the edge of the cook and mud yards, and the 18 ladder-and-terrace routes of §4.7; walk-check brings the walker to every waypoint (38 routes). Interiors exist only as plan elements of the two house blocks (the blocks are near/far by the engine's own tiling); no far-form split was needed: draw-count at the arrival is 151 main draws.
+- No wells, signs or shrines added: the pueblo drew water from Red Willow Creek (§2), signs and writing are not part of the culture, and shrines/ceremonial places are left unbuilt on purpose (§4.1).
