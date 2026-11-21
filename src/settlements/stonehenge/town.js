@@ -126,7 +126,8 @@ export function camp() {
     }
     // a windbreak of hurdles on the windward side (the wind is from the south-west: ENV wind [0.9, 0.3])
     const wa = Math.PI + 0.3 + (rand() - 0.5) * 0.5, wx = cx + Math.cos(wa) * 3.6, wz = cz + Math.sin(wa) * 3.6, wl = 2.4 + rand() * 1.2;
-    if (ok(wx, wz, 1)) { const p0 = [wx - Math.sin(wa) * wl, wz + Math.cos(wa) * wl], p1 = [wx + Math.sin(wa) * wl, wz - Math.cos(wa) * wl]; N.push({ t: 'hurdle', a: p0, b: p1, y: Math.min(height(...p0), height(...p1)), h: 1.2, seed: 5 }); }
+    const laneHit = (p0, p1) => HUTS.some((h) => { const c = Math.cos(h.yaw), s = Math.sin(h.yaw); for (let d = h.r - 0.5; d <= h.r + 4.5; d += 0.5) { const px = h.c[0] - d * s, pz = h.c[1] + d * c, vx = p1[0] - p0[0], vz = p1[1] - p0[1], t = Math.max(0, Math.min(1, ((px - p0[0]) * vx + (pz - p0[1]) * vz) / (vx * vx + vz * vz))); if (Math.hypot(p0[0] + vx * t - px, p0[1] + vz * t - pz) < 1.5) return true; } return false; });   // a windbreak never shuts a hut's door lane (§11a)
+    if (ok(wx, wz, 1)) { const p0 = [wx - Math.sin(wa) * wl, wz + Math.cos(wa) * wl], p1 = [wx + Math.sin(wa) * wl, wz - Math.cos(wa) * wl]; if (!laneHit(p0, p1)) N.push({ t: 'hurdle', a: p0, b: p1, y: Math.min(height(...p0), height(...p1)), h: 1.2, seed: 5 }); }
     const nP = 4 + Math.floor(rand() * 4);
     for (let k = 0; k < nP; k++) {
       const t = yaw + (k / nP) * 6.28 + rand() * 0.3, r = 1.9 + rand() * 0.5, at = [cx + Math.cos(t) * r, cz + Math.sin(t) * r];
@@ -348,6 +349,15 @@ export async function town() {
 }
 void avenue;
 
+/** The camp huts a visitor can enter (§11a): the walk from 3.5 m before the doorway, through it, to just short of the hearth; huts left empty too. */
+export function campHutWalks() {
+  const fires = camp().flatMap((p) => p.elements.filter((e) => e.t === 'feast_fire').map((e) => e.c)), seen = new Set();
+  return HUTS.filter((h) => { const k = h.c.join(); if (seen.has(k)) return false; seen.add(k); return true; }).map((h) => {
+    const c = Math.cos(h.yaw), s = Math.sin(h.yaw), W = (u, v) => [h.c[0] + u * c - v * s, h.c[1] + u * s + v * c];
+    let a = 3.5; while (a > 1.0 && fires.some((f) => Math.hypot(f[0] - W(0, h.r + a)[0], f[1] - W(0, h.r + a)[1]) < 3.4)) a -= 0.5;       // starts short of the camp's fire when it stands in the way
+    return Object.assign([W(0, h.r + a), W(0, h.r + 0.5), W(0, h.r - 0.8), W(0, 1.2)], { y0: h.y + 0.05 });
+  });
+}
 let SPOTS = null;
 /** Where the sounds of the town are made (soundmap.js): the open fires, the places of work in the open, the animals; from the same plans the town is built from. */
 export function soundSpots() {

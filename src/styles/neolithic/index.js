@@ -747,8 +747,8 @@ function campShelter(el, { bag, col }) {
 function campHut(el, { bag, col, lights }) {
   const rand = rng(el.seed || 31), [x, z] = el.c, y = el.y ?? 0, a = el.yaw ?? 0, R = el.r ?? 2.3, apex = el.h ?? 3.9, thatch = el.kind === 'thatch';
   const fr = { x, z, y, c: Math.cos(a), s: Math.sin(a) };
-  const N = 12, wh = 2.0, th = 0.14, eave = R + 0.34, ye = wh - 0.03, D = Math.PI * 2 / N;
-  const th_ = (j) => Math.PI / 2 + (j - 0.5) * D;                       // vertex j; the doorway between 0 and 1
+  const N = 12, wh = 2.2, th = 0.14, eave = R + 0.34, ye = wh - 0.03, D = Math.PI * 2 / N;
+  const th_ = (j) => Math.PI / 2 + (j - 1) * D;                         // vertex j; the doorway between 0 and 2 (two panels wide, 1.0 R: a walker's door; vertex 1 is its middle)
   const Wp = (r, t, yy) => W(fr, r * Math.cos(t), yy, r * Math.sin(t));
   const hint = (t) => [Math.cos(t) * fr.c - Math.sin(t) * fr.s, 0, Math.cos(t) * fr.s + Math.sin(t) * fr.c];
   const quad = (T, p, q, r, s2, h) => {
@@ -763,7 +763,7 @@ function campHut(el, { bag, col, lights }) {
   bag.add('chalk', lathe([[R + th, -0.25], [R + th, 0.03], [0.001, 0.03]], 28, null, x, y, z));
   // the wall: panels between the stakes, outer and inner faces and the top (the doorway left open)
   const wallMat = thatch ? 'chalk' : 'wicker', wall = [], top = [];
-  for (let j = 1; j < N; j++) {
+  for (let j = 2; j < N; j++) {
     const t0 = th_(j), t1 = th_(j + 1), tm = (t0 + t1) / 2, hh = hint(tm);
     quad(wall, Wp(R + th, t0, -0.25), Wp(R + th, t1, -0.25), Wp(R + th, t1, wh), Wp(R + th, t0, wh), hh);
     quad(wall, Wp(R, t0, 0), Wp(R, t1, 0), Wp(R, t1, wh), Wp(R, t0, wh), [-hh[0], 0, -hh[2]]);
@@ -771,11 +771,11 @@ function campHut(el, { bag, col, lights }) {
     col.segment(P2(R + th / 2, t0), P2(R + th / 2, t1), th, y - 0.1, y + wh);
   }
   bag.add(wallMat, fromTriangles(wall)); bag.add('timber', fromTriangles(top));
-  if (thatch) { for (let j = 1; j < N; j++) { const t0 = th_(j), t1 = th_(j + 1), hh = hint((t0 + t1) / 2), sk = []; quad(sk, Wp(R + th + 0.015, t0, -0.25), Wp(R + th + 0.015, t1, -0.25), Wp(R + th + 0.015, t1, 0.4), Wp(R + th + 0.015, t0, 0.4), hh); bag.add('plaster_damp', fromTriangles(sk)); } }
+  if (thatch) { for (let j = 2; j < N; j++) { const t0 = th_(j), t1 = th_(j + 1), hh = hint((t0 + t1) / 2), sk = []; quad(sk, Wp(R + th + 0.015, t0, -0.25), Wp(R + th + 0.015, t1, -0.25), Wp(R + th + 0.015, t1, 0.4), Wp(R + th + 0.015, t0, 0.4), hh); bag.add('plaster_damp', fromTriangles(sk)); } }
   // the stakes: a post at every vertex, the jambs thicker and rising to the lintel
-  for (let j = 0; j < N; j++) { const jamb = j === 0 || j === 1; bag.add('timber', stick(Wp(R + th / 2, th_(j), -0.2), Wp(R + th / 2, th_(j), wh + 0.1), jamb ? 0.085 : 0.05, 6)); }
-  { const p = Wp(R + th / 2, th_(0), 1.92), q = Wp(R + th / 2, th_(1), 1.92); bag.add('timber', stick(p, q, 0.06, 6));
-    const f0 = Wp(R + th / 2 + 0.05, th_(0) + 0.04, 1.84), f1 = Wp(R + th / 2 + 0.05, th_(1) - 0.04, 1.84); bag.add('hide_brown', stick(f0, f1, 0.09, 6)); }
+  for (let j = 0; j < N; j++) { if (j === 1) continue; const jamb = j === 0 || j === 2; bag.add('timber', stick(Wp(R + th / 2, th_(j), -0.2), Wp(R + th / 2, th_(j), wh + 0.1), jamb ? 0.085 : 0.05, 6)); }
+  { const p = Wp(R + th / 2, th_(0), 2.12), q = Wp(R + th / 2, th_(2), 2.12); bag.add('timber', stick(p, q, 0.06, 6));
+    const f0 = Wp(R + th / 2 + 0.05, th_(0) + 0.04, 2.04), f1 = Wp(R + th / 2 + 0.05, th_(2) - 0.04, 2.04); bag.add('hide_brown', stick(f0, f1, 0.09, 6)); }
   // the roof: panels of hide (or thatch), outer; the lining within; the soffit of the eave
   const M = 4, hides = ['hide_tan', 'hide_brown', 'hide_grey', 'hide_tan'];
   const rr = (f) => 0.3 + (eave - 0.3) * (1 - f) * (1 + 0.07 * Math.sin(f * Math.PI)), ry = (f) => ye + (apex - ye) * Math.pow(f, 0.8);

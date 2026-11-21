@@ -5,6 +5,7 @@
 // Slaughter Stone and its partner at the entrance and the Heel Stone; the four Station Stones.
 // +x east, +z south; the axis runs to the north-east (AXIS).
 
+import { campHutWalks } from './town.js';
 import { height, AXIS, HEEL, STATIONS, DITCH, ringGrid, houses, DURR } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -140,6 +141,6 @@ export const henge = {
   bakeTop: 10,
   elements: E,
   rooms: [{ id: 'circle', rect: [-14, -14, 14, 14], y: Y0, kind: 'open' }],
-  walks: [Object.assign([[40, -40], [18, -18], [0, 0]], { y0: height(40, -40) }), walkToDurrington(), ...houseWalks()],
+  walks: [Object.assign([[40, -40], [18, -18], [0, 0]], { y0: height(40, -40) }), walkToDurrington(), ...houseWalks(), ...campHutWalks()],
 };
 export default henge;
