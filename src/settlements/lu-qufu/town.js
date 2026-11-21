@@ -175,6 +175,8 @@ function people() {
   for (const [x, z] of [[-9.5, -44], [9.5, -44], [0, ALTAR.c[1] + 7]]) fig([x + 1.6, z + 0.2], Math.PI / 2, { pose: 'kneel', arms: 'pray', cloth: pick(CL) });
   for (let k = 0; k < 18; k++) { const at = [-50 + rand() * 100, -96 + rand() * 40]; if (Math.hypot(at[0], at[1] - ALTAR.c[1]) < 10 || Math.abs(at[0]) < 4.5) continue; fig(at, rand() * 6.28, { cloth: pick(['cloth_blue', 'cloth_white', 'cloth_indigo']), pose: rand() < 0.4 ? 'talk' : 'stand' }); }
   for (let k = 0; k < 12; k++) { const at = [-14 + rand() * 28, -16 + rand() * 40]; if (Math.abs(at[0]) < 4.5) continue; fig(at, rand() * 6.28, { cloth: pick(CL), pose: 'stand', carry: rand() < 0.2 ? 'staff' : 'none' }); }
+  // the temple's night keepers by the watch fires of the Apricot court (they stay out all night)
+  for (const [x, z, r] of [[-31.6, -66.6, 0.5], [31.6, -66.6, -0.5], [28.6, -82.6, -1.2]]) fig([x, z], r, { pose: 'staff', carry: 'staff', len: 1.9, cloth: 'cloth_red', over: 'sash', nightKeep: 1 });
   // the farmers at the threshing yards outside the wall: one forking the straw, one by the roller
   for (const [yx, yz] of YARDS) { fig([yx + 1.6, yz - 1.6], rand() * 6.28, { dress: 'trousers', hat: 'straw', cloth: 'cloth_brown', pose: 'staff', carry: 'staff', len: 1.8 }); fig([yx - 3.0, yz + 3.2], 0, { dress: 'trousers', hat: 'straw', cloth: 'cloth_grey', pose: 'stand' }); }
   // the Duke's household: guards at the mansion's gate, the Duke at his table in the great hall, clerks at their desks, servants in the court

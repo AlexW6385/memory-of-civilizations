@@ -4,6 +4,7 @@
 import '../../styles/lu/index.js';
 import './nightlight.js';
 import { STYLES } from '../../core/build.js';
+import { box } from '../../core/geom.js';
 import { lotFrame } from '../../styles/lu/kit.js';
 
 let done = false;
@@ -28,4 +29,11 @@ export function registerWear() {
     return r;
   };
 }
+
+/** lu_wear: { patches: [[x0, z0, x1, z1, y, layer]] } — worn patches laid on a floor (thin boxes, no collision): the darkened stone where feet go. */
+function wornWay({ patches }, { bag }) {
+  for (const [x0, z0, x1, z1, y, k = 0] of patches) bag.add('marble_dark', box(x0, y + 0.002 + k * 0.003, z0, x1, y + 0.005 + k * 0.003, z1));
+}
+const E0 = STYLES.lu?.elements;
+if (E0) E0.lu_wear = wornWay;
 registerWear();

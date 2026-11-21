@@ -310,7 +310,7 @@ export function luHouse(el, ctx) {
   // the gate: rank 2 the hooded gate hall (tall, or low by the lot's luck), rank 1 the low hood, rank 0 a gap in the earth wall with a plank gate under a little thatched roof
   const gateH = tier === 2 ? (luck > 0.5 ? 4.1 : 3.6) : 3.2;
   if (tier) {
-    Hall({ rect: [gx - gw - 0.9, fz0 - 0.2, gx + gw + 0.9, fz1 + 0.1], y: 0.35, H: gateH, front: 's', four: false, roof: 'gable', plat: 0.35, bays: [1, 1], pal, eave: tier === 2 ? 0.8 : 0.65, platMargin: 0.3 }, ctx);
+    Hall({ rect: [gx - gw - 0.9, fz0 - 0.2, gx + gw + 0.9, fz1 + 0.1], y: 0.35, H: gateH, front: 's', four: false, roof: 'gable', plat: 0.35, bays: [1, 1], doors: ['n'], pal, eave: tier === 2 ? 0.8 : 0.65, platMargin: 0.3 }, ctx);
     if (!far) for (const sx of [-1, 1]) bag.add('lacquer_red', box(gx + sx * gw * 0.5 - 0.03, 0.35, fz0 + 0.2, gx + sx * gw * 0.5 + 0.03, 2.5, fz0 + 1.1));
     // the screen wall inside the gate
     if (!far) Wall({ a: [gx - 2.0, fz0 - 2.4], b: [gx + 2.0, fz0 - 2.4], y: 0, h: 2.5, th: 0.36, pal, simple: true }, ctx);
