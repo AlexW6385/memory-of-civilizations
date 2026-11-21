@@ -89,6 +89,8 @@ import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
 import * as BENIN from '../settlements/benin-city/soundmap.js';
 import * as BHAKTAPUR from '../settlements/bhaktapur/soundmap.js';
 import * as BOROBUDUR from '../settlements/borobudur/soundmap.js';
+import * as BRASILIA from '../settlements/brasilia/soundmap.js';
+import './voices-brasilia.js';
 import * as CATALHOYUK from '../settlements/catalhoyuk/soundmap.js';
 import * as CHICHEN from '../settlements/chichen-itza/soundmap.js';
 import * as CONQUES from '../settlements/conques/soundmap.js';
@@ -250,7 +252,7 @@ export const PROFILES = {
   dogon: T({ dove: 1, kite: 0.3 }, { cicadas: 0.4, animals: withLife({ goat: 0.5, rooster: 0.4, dog: 0.3, cattle: 0.2 }, { market: 0.5, map: DOGON }), roof: 'flat' }),
   'maya-tikal': T(TROP, { cicadas: 1, frogs: 0.7, animals: withLife({ dog: 0.3 }, { market: 0.9, map: MAYATIKAL }), roof: 'thatch' }),
   vienna: T({ ...EU, sparrow: 1 }, { animals: withLife({ horse: 0.5, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: VIENNA }), roof: 'slate', bells: null }),
-  brasilia: T({ tropic: 0.7, dove: 0.5, sparrow: 0.6 }, { cicadas: 0.4, animals: {}, roof: 'flat', bells: 'angelus' }),
+  brasilia: T({ tropic: 0.7, dove: 0.5, sparrow: 0.6 }, { cicadas: 0.4, animals: withLife({}, { market: 0.7, map: BRASILIA }), roof: 'flat', bells: 'angelus' }),
   'bauhaus-dessau': T(NEAR, { animals: { dog: 0.3, rooster: 0.1 }, roof: 'flat' }),
   'sgang-gwaay': T({ gull: 1, crow: 0.8, warbler: 0.2 }, { animals: { dog: 0.3 }, roof: 'shingle' }),
   'nan-madol': T(NEAR, { animals: { pig: 0.3, rooster: 0.4, tern: 0.5 }, roof: 'thatch' }),
