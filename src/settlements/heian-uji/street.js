@@ -33,7 +33,7 @@ function laneLife() {
     if (Math.hypot(cx, cz) > RADIUS - 40) continue;
     const back = [-f.n[0], -f.n[1]], side = (t, off) => f.P(t, off);
     // what stands before the front keeps out of the door's way (the opened houses' door lane: the door 1.6 m wide and the walker's width): moved along the front, never removed
-    const door = traits({ ...l, open: true }).door;
+    const door0 = traits({ ...l, open: true }).door, door = l.front === 'n' || l.front === 'w' ? f.L - door0 : door0;   // (P runs the other way along the front of a north or west front: the house frame's u is measured from the other end)
     const clear = (t, half) => { const m = 0.8 + half + 0.25, u = t * f.L; if (Math.abs(u - door) >= m) return t; const side = u < door ? -1 : 1, v = door + side * m; return v > 0.2 && v < f.L - 0.2 ? v / f.L : (door - side * m) / f.L; };
     // the wash on its line in the yard behind the house, firewood against the side
     if (rand() < 0.38) { const p = [cx + back[0] * ((f.n[0] ? x1 - x0 : z1 - z0) / 2 + 2.6), cz + back[1] * ((f.n[1] ? z1 - z0 : x1 - x0) / 2 + 2.6)]; L.push({ t: 'laundry', at: p, y: 0, rot: f.rot + Math.PI / 2, len: 3 + rand(), seed: seed() }); }

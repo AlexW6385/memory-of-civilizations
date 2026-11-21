@@ -55,7 +55,7 @@ export function depths(tr) { const T = 0.2, earth = Math.min(tr.D - 2.4, 2.6); r
  * Routes into the opened houses of the walk, in the hall plan's local frame (origin at the hall; the plan's `walks`): in from the lane at the
  * door, across the earth floor, up the step board onto the raised floor. At most `max` of them, nearest the way first.
  */
-export function walkRoutes(max = 40) {
+export function walkRoutes(max = 90) {
   const out = [];
   for (const [l, s] of walkSet()) {
     if (out.length >= max) break;
