@@ -146,6 +146,7 @@ import './voices-paris.js';
 import * as NORSEBORGUND from '../settlements/norse-borgund/soundmap.js';
 import * as PERSEPOLIS from '../settlements/persepolis/soundmap.js';
 import * as PETRA from '../settlements/petra/soundmap.js';
+import * as QINXIANYANG from '../settlements/qin-xianyang/soundmap.js';
 import * as ROME from '../settlements/rome/soundmap.js';
 import * as HANCHANGAN from '../settlements/han-changan/soundmap.js';
 import * as HANGZHOU from '../settlements/song-hangzhou/soundmap.js';
@@ -219,7 +220,7 @@ export const PROFILES = {
   dunhuang: T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: withLife({ dog: 0.3, donkey: 0.3, camel: 0.2 }, { market: 0.8, map: DUNHUANG }), roof: 'flat', bells: 'monastery' }),
   'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, roof: 'shingle', bells: null, animals: withLife({ dog: 0.2, crow: 0.2, rooster: 0.25 }, { canal: 1, market: 0.8, eaves: 1, map: KYOTO }) }),
   'abu-simbel': T(NEAR, { frogs: 0.3, animals: withLife({ donkey: 0.5, cattle: 0.3, dog: 0.4 }, { market: 0.6, canal: 0.5, map: ABUSIMBEL }), roof: 'flat' }),
-  'qin-xianyang': T(NEAR, { animals: { cattle: 0.5, dog: 0.3, horse: 0.3 }, roof: 'tile' }),
+  'qin-xianyang': T(NEAR, { animals: withLife({ cattle: 0.5, dog: 0.3, horse: 0.3 }, { market: 0.8, map: QINXIANYANG }), roof: 'tile' }),
   thebes: T(NEAR, { frogs: 0.3, animals: withLife({ donkey: 0.5, dog: 0.3, cattle: 0.3 }, { market: 0.7, canal: 0.5, map: THEBES }), roof: 'flat' }),
   fez: T(NEAR, { animals: withLife({ donkey: 0.6, rooster: 0.3, cat: 0.3 }, { market: 1, map: FEZ }), roof: 'flat', adhan: 1 }),
   'mongol-karakorum': T(NEAR, { animals: withLife({ horse: 0.8, dog: 0.6, sheep: 0.4, camel: 0.2 }, { market: 0.9, map: KARAKORUM }), roof: 'flat', adhan: 1 }),

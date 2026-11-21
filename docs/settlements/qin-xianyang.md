@@ -112,3 +112,38 @@ Hammers on clay, the beat of rammers (the labourers' chant), kiln roar, carts' a
 - **Armour.** The lamellar cuirass and skirt were wound inside out and never showed from outside; now drawn with rows of plates stepped over each other and offset, a standing collar, shoulder lames, lacings. [stated: lamellar armour with laced plates, same source; plate sizes inferred]
 - **Pit.** Roof logs over the aisles and the gallery are round, none under the heaped earth; the partitions' end faces on the gallery carry ramming courses and form-board seams; posts along the aisles stand on stone bases with a bearing block and a bracket arm under the beam. [inferred]
 - **Chariots.** Thirty-spoke wheels with a double felloe, iron tyre, nave bands and bronze axle caps; carriage rails with balusters; neck-yokes, bronze ornaments and reins to the driver. [inferred from the excavated chariots' wheel of about 1.4 m and 30 spokes; the harness is ours]
+
+## 10. The visitor's walk (match pass)
+
+- The walk runs from the front gallery of Pit 1 out by the middle ramp, round the workshop yard's gear, down the lane to the main street, west along it to the lane at x 60, down to the imperial road and west to the market and the palace forecourt; branches go north to the figure-makers' street. Its lines are in `walk.js`; every lot whose door lies within 9.5 m of it is opened (`layout.js`), the filler lots off the walk are thinned from one in two to one in three so the arrival's draw count stays at baseline+2. [inferred: the route is a design choice, not a sourced path]
+- Open houses have a door leaf ajar and a clear lane from the street to the hearth: no raised sill, no jars or looms in the lane; the court gate's hurdle is built only when the house is shut. [inferred]
+- The figure-makers' yards on the walk carry one or two workers at the trade's own place (treading ring, turntables, finishing bench, kiln mouth, painters' table, sledge gang) and an overseer with a tablet at some gates; the shops have a keeper beside the counter. That the terracotta army was made in workshops under officials who signed the pieces is [stated] (the inscribed names); the poses are [inferred].
+- The imperial road has wells with a sweep (jiegao, the lever well of the Zhuangzi) and troughs along its edges. [stated: the sweep is a Warring States device; placement inferred]
+
+## 11. Night (match pass)
+
+- The light of the time: bronze and pottery oil lamps (the pit's hung lamps, the palace's lamp trees and forecourt lamp-posts), fire baskets (the ramps' braziers, the watch tower's beacon), the smith's forge and the potters' kiln. [stated for the oil lamp and the fire basket as the light of the period; the placement is inferred]
+- Every flame the style draws gets a glow (`halo` material, night only, no light, no shadow), and a pool on the floor where it stands on one. Open houses with a lamp burn it in about four of five households, the rest are dark (their lamps removed from the plan's lights); a lit house shows a pane of light at its lattice windows on the side away from the lamp. [inferred]
+- The kiln's mouth glows through the night with a pool before it and the hot gas over the chimney hole (a kiln fired for days, as updraught kilns were [inferred]).
+- A lamp hangs on each ward gate's lintel (the keeper's, the lane closed at dusk) and two lamp stands stand at the market tower's stair head. [inferred]
+
+## 12. Sound map (match pass)
+
+- Placed sounds, from §7: the beat of the rammers with their chant at the building yard, the sledge gang on the haul road, the kiln's roar and the clay, the chisel and the brushes in the figure-makers' yards, the palace's bronze bells before the morning audience, carts' axles on the imperial road, the market's calls. [stated in the dossier's §7 as the sounds of the place; where and when each is made is inferred]
+- The market tower's drum opens and shuts the market (6.5-7.2 h and 16.8-17.5 h), the ward gates' bars drop at dusk and lift at dawn, the watch's clapper goes the rounds from 20 h to 4.5 h. [inferred: ward gates and a closed market are Qin practice, the drum and clapper patterns are ours]
+- The pit's lamps tick and the draught moves along the corridors at every hour; the listener in the pit hears them as a long cold hall (`pit` room), in the hall as a stone-and-timber one (`hall`). [inferred]
+- No Qin music survives; the bells are bronze with the inharmonic partials of a flat-mouthed bell, pitches ours. Voices: `src/engine/voices-qin.js`, all prefixed `qin` (the engine's own `qin` is the zither). Heard by no one yet: only rendered and measured (tools/sound-render.mjs).
+
+## 13. Animals with behaviour (match pass)
+
+- `fauna.js` lists critters (one mesh, one draw) along the visitor's walk: dogs lying by the house fronts (they lift their heads and stand as the visitor comes), a cock and hens, geese, goats, and the swallows' mud nests under the eaves (the birds fly out and come home); hens, a cock and a dog in a clay yard. Nothing stands on the walking line. No cat (not certain for the Qin town), no pigeons. [inferred: the placing; the species are those a Warring States or Qin household kept - dog, hen, goose, goat are all attested in the household finds and the Qin legal texts' livestock rules, to be checked against a source before this is called stated]
+
+## 14. Wear and writing (match pass)
+
+- Wear, as single-quad decals (no thickness, never in the walker's way): the earth before each house door trodden dark with a smaller patch beside it, the way from the door worn into the floor of an open row house, the customers' way across a shop's entrance and the counters' ends polished by hands. [inferred]
+- Writing: none is written. The Qin small-seal script (xiaozhuan) is attested [stated] (the standard weights carry the edict of the 26th year of the First Emperor, the tiles and the bricks have stamps), but a glyph form cannot be checked here, so the signboards, the standards' edict and the tablets stay plain rather than carry invented marks.
+
+## 15. Remaining landmark gaps (match pass)
+
+- Closed from §5: the round ban liang coin with a square hole, a coil of cash on a cord lying on the left counter of every market shop. [stated in §5: the ban liang; the coil's place is inferred]
+- Still open: the script (see §14), the wheel gauge of the town's carts (the yard's ruts are at 1.39 m, the generic carts' axles are not checked against it), hollow-brick patterns (the stair's cheeks are plain), a she (earth altar) at the market, fired-clay stamps on tiles and bricks. [not built]
