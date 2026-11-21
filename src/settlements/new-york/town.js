@@ -177,7 +177,7 @@ function yards() {
     out.push({ t: 'laundry', pole: [cx, zm], y: height(cx, zm), h: Math.min(16, Math.max(...lines.map((p) => p[1])) - l.y + 2), lines, seed: Math.floor(rand() * 1e6) });
   }
   // (one plan: the newsstands and the yards' washing are 0.7 MB in all, and a plan's every material is a mesh)
-  return [{ ...base('new-york-yards', out), center: [0, 0], near: RADIUS + 400 }];
+  return [{ ...base('new-york-yards', out), style: 'artdeco_street', center: [0, 0], near: RADIUS + 400 }];
 }
 /**
  * The pavements and what stands on them (docs §1i), in tiles: the flags and curbs of every block, then the street furniture
@@ -226,7 +226,7 @@ function pavePlans() {
   // the flags and curbs (two materials) stay in tiles of 150 m, shown to 320 m as before; the things standing on them (a mesh for each of their materials) are in tiles of 300 m
   return [
     ...[...flags].map(([k, t]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-flags-${k}`, [{ t: 'pavement', segs: t.segs, curbs: t.curbs }]), center: toCity(i * 150 + 75, j * 150 + 75), near: 320 }; }),
-    ...[...tiles].map(([k, t]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-street-${k}`, [{ t: 'curb', items: t.items }]), center: toCity((i + 0.5) * ST_TILE, (j + 0.5) * ST_TILE), near: ST_NEAR }; }),
+    ...[...tiles].map(([k, t]) => { const [i, j] = k.split(',').map(Number); return { ...base(`new-york-street-${k}`, [{ t: 'curb', items: t.items }]), style: 'artdeco_street', center: toCity((i + 0.5) * ST_TILE, (j + 0.5) * ST_TILE), near: ST_NEAR }; }),
   ];
 }
 /**

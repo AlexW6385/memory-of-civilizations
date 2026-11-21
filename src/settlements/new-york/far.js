@@ -207,7 +207,12 @@ const lowBox = (h, m) => (el, { bag }) => { const [x0, z0, x1, z1] = el.rect, y 
  * blues, maroon and black to one each, the soot to the dark brick, the gilt letters to gold, the chimney pots to brick, the
  * awnings' green to the shutters', the pale stucco to cream, the lamps' glasses to one.
  */
-const FOLD = { prussian_blue: 'car_blue', cloth_blue: 'car_blue', cloth_maroon: 'cloth_red', car_black: 'cloth_black', plaster_damp: 'pottery_dark', gilt_bronze: 'gold', terracotta: 'brick', cloth_green: 'shutter_green', stucco_pale: 'stucco_cream', timber: 'wood_dark', lamp_white: 'lamp_glass', glass_lamp: 'lamp_glass', wood_ochre: 'wood_painted' };
+const FOLD = { prussian_blue: 'car_blue', cloth_blue: 'car_blue', cloth_maroon: 'cloth_red', car_black: 'cloth_black', plaster_damp: 'pottery_dark', gilt_bronze: 'gold', terracotta: 'brick', cloth_green: 'shutter_green', stucco_pale: 'stucco_cream', timber: 'wood_dark', lamp_white: 'lamp_glass', glass_lamp: 'lamp_glass', wood_ochre: 'wood_painted',
+  // second pass: the rare materials of the shop rooms and goods folded into the commoner (each distinct material of a near tile is a draw at the arrival)
+  glaze_blue: 'glaze_white', glaze_green: 'glaze_white', glaze_red: 'glaze_white', marble_dark: 'granite_black', marble: 'plaster_white', mirror_tin: 'steel_chrome', silver: 'steel_chrome',
+  asphalt: 'granite_black', brushbox: 'wood_dark', fresco_green: 'shutter_green', car_cream: 'stucco_cream', car_red: 'cloth_red', tile_dark: 'granite_black', tile_white: 'plaster_white',
+  linen: 'cloth_white', sacking: 'wood_painted', planks_grey: 'wood_dark', limestone_yellow: 'limestone', leather_bench: 'cloth_black', rope_fibre: 'wood_dark', ivory: 'plaster_white', iron_galv: 'iron',
+  cloth_indigo: 'cloth_grey', cloth_brown: 'cloth_grey' };
 const FOLD_FAR = { ...FOLD, paint_cab_yellow: 'cloth_ochre', limestone_yellow: 'limestone' };
 const folded = (bag, T) => {
   const b = Object.create(bag);
@@ -227,3 +232,6 @@ registerStyle('artdeco_far', {
 });
 // the near form: the style's own builders, their materials folded
 registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: lean(withUpstairs(A.skyscraper)), walkup: withTenement(A.walkup) }, FOLD) });
+// the street's things (pavements' furniture, vans, carts, yards, stands): the same folds, so that a lamp's glass or a crate's boards is one mesh a tile, not two
+const FOLD_STREET = { ...FOLD, glass_lamp: 'lamp_glass', timber: 'wood_dark', cloth_green: 'shutter_green', car_black: 'cloth_black', car_red: 'car_red' };
+registerStyle('artdeco_street', { ...STYLES.artdeco, elements: wrapAll({ ...A }, FOLD_STREET) });
