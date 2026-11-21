@@ -21,7 +21,10 @@ export function changleNight() {
 }
 /** The crown's apron before the Front Hall (landmark plan): the pair of courtyard torches beside the way to the hall's steps. */
 export function crownNight() {
-  return [-1, 1].map((s) => T(AX + s * 17.5, -145, CROWN));
+  const E = [-1, 1].map((s) => T(AX + s * 17.5, -145, CROWN));
+  // watch fires at the head of the ramp, so the visitor arriving stands in firelight (the ramp's head is 10 m wide: kept clear)
+  for (const s of [-1, 1]) E.push({ t: 'han_cresset', at: [AX + s * 6.8, -133], y: CROWN }, { t: 'han_cresset', at: [AX + s * 13, -152], y: CROWN });
+  return E;
 }
 /** The city gates (plan 'han-citywall'): the inner and the outer sides of the west and the south gate. */
 export function cityNight() {
