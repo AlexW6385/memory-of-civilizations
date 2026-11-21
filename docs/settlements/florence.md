@@ -229,3 +229,12 @@ A placed map (`soundmap.js`, `src/engine/voices-florence.js`): each sound has a 
 - The walk's first 100 m: its extra homes and the nearest goldsmith are closed to hold the first frame's draws.
 - The Calzaiuoli view costs about 4.8 M triangles a frame, mostly the pietra_serena of the near tile (338 k in one mesh).
 - The kitchen at the Via de' Gori lot (-46.5, -147) has no route in: the walker stops short of its step for a reason not found.
+
+## 21. Second pass
+- Seen (rain, low preset, 1024x576): the arrival at night had no light within 60 m of the visitor; the Via Calzaiuoli's flanks were blank rusticated walls with windows only above; the cathedral's open west door was a black hole at night; the street ground is plain wet grey.
+- Palazzi now carry a torch-holder lantern at both ends of every exposed face (before: 30% of casas, no palazzo rule), and the casas' lantern share is 45%. [stated: palace lanterns and torch-stands at the corners — dossier §17 sources; the count is inferred]
+- A flank that gives on a street or square has a ground storey: barred windows high in the wall (1.7 to 2.6 m) and, on a lot longer than 5.5 m, a closed side door with its worn step. [inferred: a flank wall was not blind; same forms as the fronts]
+- `nightlamps.js`: iron torch-holders with lantern, wall wash, glow and ground pool on the Palazzo della Signoria's and the Palazzo Medici's fronts, and a warm lit sheet and pool in the cathedral's open west door. [inferred from §17: palaces carried torch-holders; the cathedral's lamps burnt before its altars]
+- Triangles: houses in tiles of 115 m (was 150) so a street view draws fewer; quoin courses 0.75 m (was 0.5); the full house form within 28 m of the walk (was 42). Calzaiuoli 4.82 to 3.92 M a frame, arrival 4.18 to 4.08 M (main draws 266 to 247), 2335 meshes, 107.8 MB. The homes near the arrival are opened as well (HELD_NEAR 0): 49 routes.
+- Not done: Latin lettering (no verified table stated by the dossier for text standing at a place); the kitchen at (-46.5, -147) is no longer opened, so its route problem is not reproduced; moss, dust and hand-worn rails.
+- Still short: plain wet ground without paving texture or gutters; wash discs on walls read as soft-edged rectangles; Orsanmichele, the Baptistery and Santa Maria Novella have no lamps; the Medici corner loggia has no lamp.
