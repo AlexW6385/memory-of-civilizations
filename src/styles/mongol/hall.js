@@ -295,6 +295,38 @@ export function hallFurnish(bag, col, lights, rect, F, top, kind, seed) {
 const cz0 = (a, b) => (a + b) / 2;
 
 /**
+ * The furnishing of the Great Hall's upper storey [inferred: a Chinese-model hall's upper gallery round the well of the stupa, DAI/Artefacts; no source describes it]: a timber
+ * balustrade round the opening, a gilt band at the head of the inner walls and a dado of painted timber at the foot, red silk hangings between the windows, and four paper
+ * lanterns hung from the ceiling beside the corners. f is the floor, U the half width of the room, UH its height, hole the opening [x0, z0, x1, z1].
+ */
+function upperStorey(bag, cx, cz, f, U, UH, hole) {
+  const [h0, g0, h1, g1] = [hole[0] - 0.3, hole[1] - 0.3, hole[2] + 0.3, hole[3] + 0.3], R = 1.0, step = 1.3;
+  for (const [a, b] of [[[h0, g0], [h1, g0]], [[h1, g0], [h1, g1]], [[h1, g1], [h0, g1]], [[h0, g1], [h0, g0]]]) {
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.round(len / step), ux = (b[0] - a[0]) / len, uz = (b[1] - a[1]) / len;
+    bag.add('timber_red', obox(a, b, 0.12, f + R - 0.1, f + R + 0.06));
+    bag.add('timber_red', obox(a, b, 0.08, f + 0.45, f + 0.53));
+    for (let k = 0; k < n; k++) { const px = a[0] + ux * k * len / n, pz = a[1] + uz * k * len / n; bag.add('timber_red', box(px - 0.06, f, pz - 0.06, px + 0.06, f + R - 0.1, pz + 0.06)); }
+  }
+  const e = U - 0.2, top = f - 0.16 + UH;
+  for (const [nx, nz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+    const px = -nz, pz = nx, at = (u, d) => [cx + nx * (e - d) + px * u, cz + nz * (e - d) + pz * u];
+    const span = (u0, u1, y0, y1, d, m) => { const A = at(u0, d), B = at(u1, d); bag.add(m, box(Math.min(A[0], B[0]) - 0.02, y0, Math.min(A[1], B[1]) - 0.02, Math.max(A[0], B[0]) + 0.02, y1, Math.max(A[1], B[1]) + 0.02)); };
+    span(-U + 0.5, U - 0.5, top - 0.55, top - 0.3, 0.03, 'gilt_bronze');
+    span(-U + 0.2, U - 0.2, f, f + 0.9, 0.03, 'timber_red');
+    for (const u of [-3.2, 3.2]) {
+      span(u - 0.5, u + 0.5, f + 1.0, top - 0.75, 0.06, 'cloth_red');
+      span(u - 0.58, u + 0.58, top - 0.75, top - 0.65, 0.07, 'gilt_bronze');
+    }
+  }
+  for (const [dx, dz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const x = cx + dx * (U - 2.6), z = cz + dz * (U - 2.6), ly = top - 1.5;
+    bag.add('timber_red', rod([x, top, z], [x, ly + 0.65, z], 0.025, 5));
+    bag.add('lamp_paper', lathe([[0.001, 0], [0.32, 0.14], [0.4, 0.4], [0.32, 0.66], [0.001, 0.8]], 10, null, x, ly - 0.15, z));
+    bag.add('gilt_bronze', box(x - 0.2, ly - 0.2, z - 0.2, x + 0.2, ly - 0.15, z + 0.2));
+  }
+}
+
+/**
  * great_hall: the Great Hall of Karakorum [stated: DAI: 38 × 38 m, rammed-earth podium in alternating layers, 64 granite column bases,
  * a stupa presumably at the centre, Chinese-type roof tiles, four Buddhas on lotus thrones in the reconstruction]. { c: [cx, cz], y }
  */
@@ -318,6 +350,7 @@ export function greatHall(el, { bag, col, lights }) {
   const uwin = [4.2, 10.4, 16.6].map((at) => ({ at, w: 2.4, h: 1.7, y0: Y + H + 2.7, lat: true }));
   for (const [a, b] of [[[ux0, uz0], [ux1, uz0]], [[ux1, uz0], [ux1, uz1]], [[ux1, uz1], [ux0, uz1]], [[ux0, uz1], [ux0, uz0]]]) wallRun(bag, NOCOL, a, b, T, Y + H, Y + H + UH + 0.8, 'timber_red', uwin, 'lattice_red');
   bag.add('ceiling_painted', box(ux0, Y + H + UH, uz0, ux1, Y + H + UH + 0.15, uz1));
+  upperStorey(bag, cx, cz, Y + H + 0.16, U, UH, hole);
   rectRoof({ c: [cx, cz], A: half + 2.7, B: half + 2.7, y: Y + H + 0.9, rise: 3.6, kind: 'hip', sweep: 1.2, mat: 'tile_green', soffit: COL, hole: [ux0 + 0.4, uz0 + 0.4, ux1 - 0.4, uz1 - 0.4] }, bag);
   rectRoof({ c: [cx, cz], A: U + 2.2, B: U + 2.2, y: Y + H + UH + 0.75, rise: 4.6, kind: 'hip', sweep: 1.0, mat: 'tile_green', soffit: COL }, bag);
   for (const [a, b] of [[[x0, z1], [x1, z1]], [[x0, z0], [x1, z0]], [[x0, z0], [x0, z1]], [[x1, z0], [x1, z1]]]) bag.add('timber_red', obox(a, b, T, Y + H, Y + H + 0.85));
