@@ -19,6 +19,8 @@ walks.push([ARRIVAL, [75, 22], [55, 22], [55, -43.2], [40, -43.2], [38, -48], [0
 for (let i = 0; i < SHOP_N; i++) { const S = shopAt(i); walks.push([[S.entry, -43.2], [S.entry, -44.5], [S.entry, -47.2], [S.entry, S.zBack + 1.6]]); }
 // the Great Mosque: up the north stair, round the entrance tower to the main door (between the towers, the hall's fourth aisle), down the aisle and east through the arches to the qibla wall by the mihrab of each side tower
 for (const zz of [-13, 14]) { const r = [[0, -48], [0, -36], [12.65, -36], [12.65, -31], [12.65, -20], [12.65, zz], [31.5, zz]]; r.y0 = 0; walks.push(r); }
+// from the hall by the south-west stair tower's flights to the roof and along it to the crier's room over the central mihrab (docs §21.4)
+{ const r = [...[[0,-48],[0,-36],[12.65,-36],[12.65,-31],[12.65,-20],[12.65,14],[12.65,27],[5.85,27],[5.85,28.5]], ...[[5.85,30.7],[7.0,30.9],[7.0,31.9],[7.0,33.5],[7.0,34.5],[6.0,34.5],[4.4,34.5],[3.4,34.5],[3.4,33.5],[3.4,31.9],[3.4,30.9],[4.4,30.9],[6.0,30.9],[7.0,30.9],[7.0,31.9],[7.0,33.5],[7.0,34.5],[6.0,34.5],[4.4,34.5],[3.4,34.5],[3.4,33.5],[3.4,31.9],[3.4,30.9],[3.4,29.0],[3.4,27],[3.4,0],[27.5,0],[29.6,0]]]; r.y0 = 0; walks.push(r); }
 // the court house: through the door and the vestibule to the court, into the workshop, the reading room and up the court's stair to the east roof
 { const C = courtAt(), dz = C.zf + 0.0;
   walks.push([[C.xm, C.z1 + 1.8], [C.xm, C.z1 - 0.2], [C.xm, dz - 2], [C.xm, C.zp - 0.25], [C.xm, C.zp - 2.5], [C.west, C.zp - 2.5], [C.west, C.zp + 0.1], [C.west, C.zp + 2.0]]);
