@@ -12,7 +12,7 @@ import { inscription, canWrite } from '../ming-suzhou/script.js';
 import { STAIR, FLOOR, rng } from './layout.js';
 
 /** The sign of a trade: the one character of its board [inferred: the wine-shop's banner (酒旗) is the Tang custom named in its poetry; the others are the plainest names of their trades]. */
-export const SIGNS = { wine: '酒', drugs: '藥', cloth: '布', scribe: '書' };
+export const SIGNS = { wine: '酒', drugs: '藥', cloth: '布', scribe: '書', grain: '米', bake: '麵', pottery: '瓷', smith: '金' };
 
 let done = false;
 export function registerWear() {
