@@ -35,11 +35,15 @@ export const isShop = (h) => h.seed % 4 === 1;
 export const tradeOf = (h) => TRADES[Math.floor(h.seed / 4) % 4];
 /** The routes walk-check follows: out in the road, to the door, over the sill, into the hall, round the tea table to the altar bay. */
 export function walkRoutes() {
-  return openedHouses().map(({ h }) => {
+  const out = [];
+  for (const { h } of openedHouses()) {
     const W = frameOfHouse(h), hz = h.d / 2;
-    const r = [W(0, hz + 2.6), W(0, hz + 0.6), W(0, hz - 0.6), W(0, hz - 1.0), W(1.35, 2.0), W(1.35, 0.7), W(0, -0.3)];
-    r.y0 = 0;
-    return r;
-  });
+    const head = [W(0, hz + 2.6), W(0, hz + 0.6), W(0, hz - 0.6), W(0, hz - 1.0), W(1.35, 2.0), W(1.35, 0.7)];
+    const hall = [...head, W(0, -0.3)];
+    hall.y0 = 0; out.push(hall);
+    // on through the door in the partition into each back room (the kitchen and the other room, door middles at x ±2.34, partition at z 0.2)
+    for (const sx of [-1, 1]) { const r = [W(0, hz + 2.6), W(0, hz + 0.6), W(0, hz - 0.6), W(0, hz - 1.0), W(sx * 1.35, 2.0), W(sx * 1.35, 0.7), W(sx * 2.34, 0.7), W(sx * 2.34, -0.3), W(sx * 2.34, -1.2), W(sx * 2.34, -1.45)]; r.y0 = 0; out.push(r); }
+  }
+  return out;
 }
 void HOUSE;
