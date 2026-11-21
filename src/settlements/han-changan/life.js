@@ -106,7 +106,7 @@ function market(rect, seedBase) {
   for (let z = z0 + 16; z < z1 - 14; z += 11 + rand() * 3) { if (Math.abs(z - cz) < 13) continue; if (rand() < 0.5) continue; stall(cx - 5.0, z, Math.PI / 2, Math.floor(rand() * 1e9)); if (rand() < 0.7) stall(cx + 5.0, z + 4, -Math.PI / 2, Math.floor(rand() * 1e9)); }
   // goods laid on mats at the lane edges, a barrow and an ox-cart unloading by each gate
   for (const [gx, gz, f] of [[cx, z0 + MARKET_WALL.th + 4, 1], [cx, z1 - MARKET_WALL.th - 4, -1], [x0 + MARKET_WALL.th + 4, cz, 0], [x1 - MARKET_WALL.th - 4, cz, 0]]) {
-    const alongX = f !== 0, ox = alongX ? 2.5 : 0, oz = alongX ? 0 : 2.5;
+    const alongX = f !== 0, ox = alongX ? 6.5 : 0, oz = alongX ? 0 : 6.5;      // (the cart, mat and carter stand beside the gate's passage, never in it)
     L.push({ t: 'cart', at: [gx + ox, gz + oz], y: 0, rot: alongX ? 0 : Math.PI / 2, seed: Math.floor(rand() * 1e9), beast: 'ox' });
     L.push({ t: 'goods_mat', at: [gx - ox * 1.6, gz - oz * 1.6], y: 0, rot: 0, seed: Math.floor(rand() * 1e9), goods: ['pottery', 'baskets'] });
     L.push(figure(rand, [gx + ox * 0.2 - oz * 0.5, gz + oz * 0.2 + ox * 0.5], rand() * 6, 'labourer'));
