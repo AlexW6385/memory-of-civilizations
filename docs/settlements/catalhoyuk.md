@@ -113,3 +113,13 @@ No site could be fetched this pass; every line is from the sections above or fro
 
 - Fire is the light: the hearth of each house under its hatch, the oven's mouth with embers, the fire pits of the courts and yards [stated: hearth and oven per §4; fire pits ringed with stones per §11 (inferred there)]. The houses have no windows [stated: §12], so the only light a passer-by sees leaves by the hatch, with the smoke lit from beneath [inferred]. No lamp is shown: pottery and stone vessels that may have burned fat exist, but none is certain from the pages read [inferred].
 - About six houses in ten keep a fire in at night, the rest let it die [inferred]; the court and yard fires burn on at about seven in ten [inferred]. Light: halo glow over hatches, hearth pools on the plaster floors of the opened houses, glow at oven mouths. Code: `src/settlements/catalhoyuk/nightlight.js`, wrapping the style from the settlement's folder.
+
+### 14.3 Sound
+
+All [inferred]: nothing of the town's sound survives; the works are those §4, §7, §11 name. Code: `src/engine/voices-catal.js` (voices prefixed `cat`), `src/settlements/catalhoyuk/soundmap.js` (places, hours, rooms), `tests/catalhoyuk-sound.test.mjs`.
+
+- **Work, from the courts by trade:** the saddle quern and the baker's oven (mornings, a second baking at dusk), obsidian knapping, hide scraping, reed plaiting, potter's clay and jars (hours of light) [§11 trades; §7 work].
+- **Rooms:** the opened houses and the landmark's main room and storeroom are rooms for the engine (soft mud roof, the hatch the only opening): quern, hearth crackle, knapping in the knapper's house, plaster laid by hand now and then [§4 plaster renewed; §12 "up to 450 times"].
+- **People:** a wordless murmur and calls across the roofs by day (no words are written or spoken in the map); in the evening a hand drum and a bone flute from two roofs [§9 inferred music].
+- **Animals:** sheep, goats and cattle at the two pens [stated: §2 penned animals]; far dogs at night; jackals on the plain and owls in the willows at night [inferred: Anatolian steppe fauna]; cranes over the marsh at morning and evening [inferred: §8]; wind in the reeds at every pool, frogs round the pools in the warm months.
+- **Not here:** bells, hens, horses, donkeys (domestic donkey and horse not yet in Anatolia c. 6500 BC [inferred]), metal, carts. Levels were measured with `tools/sound-render.mjs` (spectrum, onsets); no one has listened.
