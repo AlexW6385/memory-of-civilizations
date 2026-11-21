@@ -12,7 +12,7 @@ import '../qing/index.js';
 import '../artdeco/index.js';
 import { rocksTerrace } from './rocks.js';
 import { archBridge } from './bridge.js';
-import { wharf, quayCrowd } from './wharf.js';
+import { wharf, quayCrowd, quayStall } from './wharf.js';
 import { seaWall } from './seawall.js';
 import { espressoBar } from './rooms.js';
 import { streetKit } from './street.js';
@@ -125,6 +125,46 @@ function shell(bag, cx, z0, z1, hw, H, y) {
     }
   }
 }
+/** The clip of a hall's shells: inside its enclosure (below the shells' inner surface) and through the slot of the door in the shell's flank. */
+function hallClip(hall, y, h) {
+  const last = hall.shells[hall.shells.length - 1], zN = last[1] + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10 - 16, aw = hall.hw * 0.55;
+  // (and the door's way in through the shell's flank: a 2.6 m wide slot, through the whole thickness, from the gap between the halls to the enclosure's wall)
+  const dz = zS - 0.6 - 1.5, side = hall.concert ? 1 : -1, wx0 = hall.x + side * (aw - 0.3), wx1 = hall.x + side * (hall.hw + 3);
+  return hall.concert || hall.theatre ? (px, py, pz) => (px > hall.x - aw + 0.25 && px < hall.x + aw - 0.25 && pz > zN && pz < zS - 0.25 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2)
+    || (px > Math.min(wx0, wx1) && px < Math.max(wx0, wx1) && pz > dz - 1.3 && pz < dz + 1.3) : null;
+}
+/**
+ * The Opera House as the night's lights see it (nightlight.js, §13/§16): triangles of the floodlit shells' tiled skin (a hair above it,
+ * a brightness `f` at each corner, the floods at the foot lighting the lower sails more than their tips) and of the glass walls lit
+ * from within the halls' foyers (brighter low, where the foyer's lamps are), both cut by the same clip as the drawn shells.
+ * Returns { skin: [[a, fa, b, fb, c, fc], …], glass: [...] }.
+ */
+export function operaLight(el) {
+  const y = el.y ?? 0, h = el.h ?? 9, yf = y + h, skin = [], glass = [], sh = [];
+  const run = (cx, z0, z1, hw, H, clip) => {
+    CLIP = clip;
+    const nu = 20, nv = 16, P = (i, j, up = 0.3) => { const s = -1 + 2 * i / nu, t = j / nv; return [cx + s * widthOf(hw, t), yf + H * ridgeOf(t) * secOf(s) + up, z0 + (z1 - z0) * t + (z1 - z0) * 0.2 * t * t * (1 - Math.abs(s))]; };
+    const T = [];
+    for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { T.push(...P(i, j), ...P(i + 1, j), ...P(i + 1, j + 1), ...P(i, j), ...P(i + 1, j + 1), ...P(i, j + 1)); }
+    const flood = (v) => 0.4 - 0.22 * Math.min(1, (v[1] - yf) / 48);
+    const C = clipped(T); for (let k = 0; k < C.length; k += 9) { const a = C.slice(k, k + 3), b = C.slice(k + 3, k + 6), c = C.slice(k + 6, k + 9); skin.push([a, flood(a), b, flood(b), c, flood(c)]); }
+    // the glass wall hung in the mouth (as in shell(): from the shell's edge down to the podium, pleated by the feet's alternate depths)
+    const depth = (z0 - z1) * 0.07, foot = (i) => { const a = P(i, nv, 0); return [a[0], yf, z1 + depth + (i % 2 ? 1.1 : -0.2) + (z1 - z0) * 0.2 * (1 - Math.abs(-1 + 2 * i / nu)) * 0.7]; };
+    // (whole panes, dropped when any of nine points of one lies in the clipped room: the long triangles would be split into thousands)
+    const g = (v) => 0.34 + 0.3 * Math.max(0, 1 - (v[1] - yf) / 20), at = (p, q, u, w) => [0, 1, 2].map((k) => (p[k] * (1 - w) + q[k] * w) * (1 - u) );
+    void at;
+    for (let i = 0; i < nu; i++) {
+      const a = P(i, nv, 0), b = P(i + 1, nv, 0), fa = foot(i), fb = foot(i + 1); if (a[1] - yf < 0.3 && b[1] - yf < 0.3) continue;
+      if (CLIP) { let hit = false; for (const u of [0, 0.5, 1]) for (const w of [0.1, 0.5, 0.95]) { const t = [0, 1, 2].map((k) => ((a[k] * (1 - u) + b[k] * u) * (1 - w) + (fa[k] * (1 - u) + fb[k] * u) * w)); if (CLIP(t[0], t[1], t[2])) hit = true; } if (hit) continue; }
+      glass.push([a, g(a), b, g(b), fb, g(fb)], [a, g(a), fb, g(fb), fa, g(fa)]);
+    }
+    CLIP = null; void sh;
+  };
+  for (const hall of el.halls ?? []) for (const [a, b, H, hw] of hall.shells) run(hall.x, a, b, hw ?? hall.hw, H, hallClip(hall, y, h));
+  const [x0, , , z1] = el.rect;
+  run(x0 + 14, z1 - 4, z1 - 20, 9, 12, null); run(x0 + 14, z1 - 18, z1 - 30, 8, 9, null);
+  return { skin, glass };
+}
 /** opera_house: { rect (the podium), y, h (podium height), halls: [{ x, hw, shells: [[z0, z1, H]] }], stair (depth, on the south) } */
 function operaHouse(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 9, st = el.stair ?? 22;
@@ -176,13 +216,23 @@ function operaHouse(el, { bag, col, lights }) {
     paved(gx0 + 0.3, z0 + pt + 0.3, gx1 - 0.3, z1 - pt - 0.3); paved(x0 + pt + 0.3, z0 + pt + 0.3, x1 - pt - 0.3, z0 + 9); paved(x0 + 6.8, z1 - 6, x1 - 6.8, z1 - pt - 0.3); }
   // the broadwalk round the podium's foot
   bag.add('granite_grey', box(x0 - 6, y - 4, z0 - 6, x1 + 6, y + 0.2, z1 + st + 2));
+  // the forecourt before the stair (§16): a granite apron level with the ground (a hair above it), its joints every 2.4 m, a darker band course every fourth joint
+  { const fa = z1 + st + 2, fb = fa + 20, fx0 = x0 - 6, fx1 = x1 + 6, ft = y + 0.05;
+    bag.add('granite_grey', box(fx0, y - 1.5, fa, fx1, ft, fb)); col.floor([fx0, fa, fx1, fb], ft);
+    for (let xx = fx0 + 1.2, k = 0; xx < fx1; xx += 2.4, k++) bag.add(k % 4 === 0 ? 'granite_podium' : 'granite_grey', box(xx - (k % 4 === 0 ? 0.06 : 0.015), ft, fa, xx + (k % 4 === 0 ? 0.06 : 0.015), ft + 0.012, fb));
+    for (let zz = fa + 1.2, k = 0; zz < fb; zz += 2.4, k++) bag.add(k % 4 === 0 ? 'granite_podium' : 'granite_grey', box(fx0, ft, zz - (k % 4 === 0 ? 0.06 : 0.015), fx1, ft + 0.012, zz + (k % 4 === 0 ? 0.06 : 0.015)));
+    // where feet went: the slabs in the line from the apron to the stair's foot polished paler, 7 m wide, a little ragged at its edges
+    for (let zz = fa; zz < fb - 0.5; zz += 2.4) { const w = 3.4 + 0.5 * Math.sin(zz * 1.7); bag.add('concrete_light', box((x0 + x1) / 2 - w, ft + 0.012, zz + 0.1, (x0 + x1) / 2 + w, ft + 0.02, Math.min(fb, zz + 2.3))); }
+  }
+  // the treads worn: a dished, polished patch down the middle of every tread, deepest at the front edge (the climbers' line, 5 m wide), the sides left as cut
+  for (let k = 0; k < n; k++) {
+    const zz = z1 + st * (1 - k / n), yy = y + h * (k + 1) / n, xm = (x0 + x1) / 2, w = 2.2 + 0.4 * Math.sin(k * 2.3 + 1);
+    bag.add('granite_podium', box(xm - w, yy, zz - st / n + 0.1, xm + w, yy + 0.012, zz - 0.14));
+  }
+  // and on the podium's top the line from the stair's head to the doors between the halls, worn the same way
+  for (let zz = z1 - 1; zz > z1 - 40; zz -= 3.1) { const w = 1.5 + 0.3 * Math.sin(zz * 1.3); bag.add('granite_podium', box((x0 + x1) / 2 - w, y + h + 0.012, zz - 3.0, (x0 + x1) / 2 + w, y + h + 0.02, zz)); }
   for (const hall of el.halls ?? []) {
-    // (inside the Concert Hall's room, below its ceiling, the later shells' bases are not drawn — hall.js)
-    const last = hall.shells[hall.shells.length - 1], zN = last[1] + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10 - 16, aw = hall.hw * 0.55;
-    // (and the door's way in through the shell's flank: a 2.6 m wide slot, through the whole thickness, from the gap between the halls to the enclosure's wall)
-    const dz = zS - 0.6 - 1.5, side = hall.concert ? 1 : -1, wx0 = hall.x + side * (aw - 0.3), wx1 = hall.x + side * (hall.hw + 3);
-    CLIP = hall.concert || hall.theatre ? (px, py, pz) => (px > hall.x - aw + 0.25 && px < hall.x + aw - 0.25 && pz > zN && pz < zS - 0.25 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2)
-      || (px > Math.min(wx0, wx1) && px < Math.max(wx0, wx1) && pz > dz - 1.3 && pz < dz + 1.3) : null;
+    CLIP = hallClip(hall, y, h);   // (inside the Concert Hall's room, below its ceiling, the later shells' bases are not drawn — hall.js)
     for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
     CLIP = null;
   }
@@ -294,6 +344,6 @@ function ferry(el, { bag, col }) {
 }
 registerStyle('modern', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall, espresso_bar: espressoBar, street_kit: streetKit, shop_room: shopRoom, craft: smallCraft, macquarie_chair: macquarieChair, quay_crowd: quayCrowd },
+  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, quay_stall: quayStall, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall, espresso_bar: espressoBar, street_kit: streetKit, shop_room: shopRoom, craft: smallCraft, macquarie_chair: macquarieChair, quay_crowd: quayCrowd },
   objects: {},
 });
