@@ -9,7 +9,7 @@ export async function town() {
     const [gx, gz] = k.granary;
     E.push({ t: 'granary', c: [gx, gz], y: height(gx, gz), rot: Math.atan2(k.c[1] - gz, k.c[0] - gx), seed: k.seed });
   }
-  for (const k of compounds()) E.push({ t: 'homestead_goods', c: k.c, r: k.r, gap: k.gap, yAt: height, seed: k.seed });
+  for (const k of compounds()) E.push({ t: 'homestead_goods', c: k.c, r: k.r, gap: k.gap, yAt: height, seed: k.seed, a: k.a, rackAt: k.rackAt, sectorAt: k.sectorAt });
   // plots of standing millet beside every second homestead, on the side away from its gate, clear of the other compounds, the walls and the kraals
   {
     const all = compounds();

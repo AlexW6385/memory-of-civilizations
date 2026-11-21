@@ -4,6 +4,7 @@
 
 import { ENCLOSURE, TOWER, PLATFORM, HILL, WEST, RECESS, ASCENT, VALLEY, height, inWalled, onAscent } from './layout.js';
 import { goodsAt, courtAt, kraals } from './life.js';
+import { walkRoutes } from './walkroutes.js';
 
 const E = [];
 const ellipse = (c, r, n, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: n + 1 }, (_, k) => { const a = a0 + (a1 - a0) * k / n; return [c[0] + Math.cos(a) * r[0], c[1] + Math.sin(a) * r[1]]; });
@@ -144,4 +145,6 @@ export const great = {
     room('ascent top', [ASCENT.x - 0.8, -158, ASCENT.x + 0.8, -156], height(ASCENT.x, -157) + 0.08, 'open')],
   walks: [Object.assign([[ex + 6, ez - rb - 18], [ex + 6, ez - rb + 2], [ex + 6, ez]], { y0: 0 })],
 };
+// the routes into the opened houses of the homesteads on the visitor's walk and into the Valley courts (walkroutes.js)
+for (const r of walkRoutes()) great.walks.push(Object.assign(r.route, { y0: r.y0 }));
 export default great;
