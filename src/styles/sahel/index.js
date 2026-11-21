@@ -947,6 +947,6 @@ const s_home = (el, c) => {
 };
 registerStyle('sahel', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_shops: shopRow, sahel_court_house: (el, c) => { sahelHouse({ ...el, hollow: true, front: 's', storeys: 2, kind: 'tukulor', dw: 0.65 }, c); courtHouse(el, c); }, sahel_home: s_home, mosque_fittings: mosqueFittings, brick_yard: brickYard, sahel_wall: sahelWall, sahel_near_wall: (el, c) => (el.home ? s_home(el, c) : sahelHouse(el, c)), sahel_house_lot: () => {}, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
+  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_shops: shopRow, sahel_court_house: (el, c) => { sahelHouse({ ...el, hollow: true, front: 's', storeys: 2, kind: 'tukulor', dw: 0.85 }, c); courtHouse({ ...el, dw: 0.85 }, c); }, sahel_home: s_home, mosque_fittings: mosqueFittings, brick_yard: brickYard, sahel_wall: sahelWall, sahel_near_wall: (el, c) => (el.home ? s_home(el, c) : sahelHouse(el, c)), sahel_house_lot: () => {}, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
   objects: {},
 });
