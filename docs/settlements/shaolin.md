@@ -127,3 +127,10 @@ No new sources could be fetched this round; every form below is **[inferred]** f
 - **Stone lions**: the seated lion with the curled mane, open jaw, ball under the male's paw and cub under the lioness's, on a carved sumeru plinth (lotus petals, framed panels on the waist).
 - **Steles**: the tortoise (bixi) with scutes, rim, claws and a dragon head with horn and teeth; a tablet with a raised border and scroll band; a head of dragons coiled to a title panel; characters on the field. Rich ones at the forecourt, plainer ones elsewhere.
 - **Great pagodas of the Forest** (the seven tall brick ones): the tablet's inscription and a name plaque over it, engaged corner pilasters, brick dentil courses under every eave, blind niches on the upper storeys, a false door with studded red leaves on the back face; all brick pagodas now have a soffit closing the underside of each eave.
+
+## 11. Match pass (2026-11-20): the visitor's walk, night, sound, animals, wear
+Brought toward the Suzhou reference (docs/suzhou-method.md). The shell could not fetch pages this round, so every line below is **[inferred]** from the standard picture of a Ming north-Henan village and monastery and from what §1–§10 already state; no line contradicts them.
+
+### 11.1 The visitor's walk
+- **The walk** [inferred]: from the arrival on the approach road (0, 160) north to the forecourt and the gate (the processional way, §6c), and along the village street east and west of the crossing (x ±52 at z 155). The houses whose fronts lie within 9 m of it (28 of the 50) are the opened ones: the doorway stands open in the middle bay (a village house has no leaf across it by day: the door-paper and the couplets frame it, §6c), a shop shows its trade on the apron and its counter just inside, a farmhouse its kang and table. `src/settlements/shaolin/walk.js`; the routes (out in the street, in at the doorway, into the front room) are on the landmark plan's `walks` and walk-check follows all 28.
+- Nothing alive or standing within 1.2 m of an opened door's lane (town.js `offLane`: moved along the front, never deleted).
