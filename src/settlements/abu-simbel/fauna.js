@@ -1,6 +1,7 @@
 // Abu Simbel — the animals (docs/settlements/abu-simbel.md §9): black kites over the cliff, swallows over the river, the terrace and the lanes, sparrows in the
 // lanes and on the market's roofs, egrets and a heron at the water's edge and among the papyrus, tilapia and Nile perch in the shallows by the quay.
-import { QUAY, TERRACE, MARKET, lanes } from './layout.js';
+import { QUAY, QUAY_Y, WATER, TERRACE, MARKET, GRAN_YARD, lanes, lots } from './layout.js';
+import { doorX } from './walk.js';
 import { ground } from './ground.js';
 
 const nile = (x) => 54 - x;
@@ -28,4 +29,26 @@ for (const z of [-14, 4, 15]) sp(TERRACE[0] + 12, z);
 perches.push({ kind: 'egret', x: QUAY[2] - 0.6, z: QUAY[3] - 2, y: -6.3, rot: 0, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'egret', x: 57, z: -26, y: ground.waterLevel(60) + 0.05, rot: 1.0, stay: [60, 200], gone: [60, 160], alert: 10 });
 perches.push({ kind: 'heron', x: 55, z: 27, y: ground.waterLevel(60) + 0.05, rot: 1.6, stay: [80, 240], gone: [60, 180], alert: 12 });
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; docs/settlements/abu-simbel.md §21) ──
+// What lived at a Nubian frontier town of Ramesses II and no more: dogs at the doors of the lanes, cats at some houses (tame since the Middle Kingdom), goats
+// in the granaries' yard, geese on the bank at the quay, a crane at the quay's edge, a kingfisher on the river's brink, ducks afloat among the reeds.
+// No hens or cocks (the fowl are not shown in Nubia at this date), no pigeons, no turkeys; the donkeys and cattle have no model yet.
+const critters = [];
+const QY = QUAY_Y + 0.02, H = (x, z) => ground.height(x, z);
+{ let dogs = 0, cats = 0;
+  for (const l of lots().filter((q) => q.kind === 'house' && Math.abs((q.rect[0] + q.rect[2]) / 2 + 8) < 40)) {
+    const n = l.front === 'n', xd = doorX(l), zf = n ? l.rect[1] : l.rect[3], x = xd + (l.seed % 2 ? 1.9 : -1.9), z = zf + (n ? -0.9 : 0.9);
+    if (dogs < 8 && l.seed % 3 !== 0) { critters.push({ model: 'dog', at: [x, H(x, z), z], rot: n ? 0 : Math.PI, range: [9, 3.5] }); dogs++; }
+    else if (cats < 4 && l.seed % 3 === 0) { critters.push({ model: l.seed % 2 ? 'cat_tabby' : 'cat_orange', at: [x, H(x, z), z], rot: 0.4, range: [7, 2.5] }); cats++; }
+    if (dogs >= 8 && cats >= 4) break;
+  } }
+// goats loose in the granaries' yard (the round granaries stand in rows; the beasts keep to the gaps, in the yard's east margin)
+for (let k = 0; k < 4; k++) { const x = GRAN_YARD[2] - 0.8, z = GRAN_YARD[1] + 2 + k * 3.2; critters.push({ model: k % 2 ? 'goat_white' : 'goat_black', at: [x, H(x, z), z], rot: k * 1.7, range: [6, 2.4] }); }
+// the quay: geese on the stone by the river's face, a crane stalking its edge, the kingfisher on the brink, ducks afloat among the reeds
+for (const [z, rot] of [[-3.6, 0.3], [-2.4, 1.1], [-4.4, 2.0], [14.4, 0.8]]) critters.push({ model: z < 0 ? 'goose_grey' : 'goose_white', at: [QUAY[2] - 3.2, QY, Math.min(z, QUAY[3] - 0.5)], rot, range: [3, 1.8], size: 1 });
+critters.push({ model: 'crane', at: [QUAY[2] - 2.4, QY, QUAY[3] - 1.4], rot: 1.57, range: [3, 1.2], tau: 50, speed: 0.4 });
+critters.push({ model: 'kingfisher', at: [QUAY[2] - 0.4, QY + 0.05, QUAY[1] + 1.4], rot: Math.PI / 2, water: [QUAY[2] + 2.5, QUAY[1] + 1.4, WATER], cycle: 34 });
+critters.push({ type: 'floaters', models: ['duck_brown', 'duck_white', 'duck_brown'], area: [58, -36, 90, -16], dist: nile, margin: 2, a: [10, 8], ratio: 0.5, speed: 0.5, y: WATER });
+critters.push({ type: 'floaters', models: ['duck_white', 'duck_brown'], area: [58, 18, 88, 38], dist: nile, margin: 2, a: [10, 8], ratio: 0.5, speed: 0.5, y: WATER });
+export default { fish, flights, perches, critters };

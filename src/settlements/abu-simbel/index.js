@@ -5,4 +5,8 @@ import { great, small } from './plan.js';
 import music from './music.js';
 export { town } from './town.js';
 export { music };
+import { registerNight } from './nightlight.js';
+registerNight();                                      // (idempotent: the night's halo, lamp-stands and watch-fires)
+import { walkRoutes } from './walk.js';
+great.walks.push(...walkRoutes());                   // the visitor's walk and the routes into the town's places (walk.js)
 export const landmarks = [{ plan: great, music }, { plan: small, music }];

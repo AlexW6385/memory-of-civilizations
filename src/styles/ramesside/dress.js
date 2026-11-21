@@ -162,17 +162,17 @@ export function laneDress(el, { bag }) {
     if (L.kind === 'cross') {
       // a line across the cross lane at about every 14 m: rope from wall to wall, cloths hung
       for (let z = z0 + 6 + rand() * 6; z < z1 - 3; z += 12 + rand() * 6) {
-        const xm = (x0 + x1) / 2, y = 2.35;
+        const xm = (x0 + x1) / 2, y = 2.62;
         bag.add('rope_fibre', box(x0 - 0.1, y, z - 0.008, x1 + 0.1, y + 0.016, z + 0.008));
-        for (let k = 0, x = x0 + 0.25; x < x1 - 0.55; x += 0.75, k++) addCloth(bag, ['cloth_white', 'linen', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][Math.floor(rand() * 5)], clothBox(x, y - 0.4 - rand() * 0.55, z - 0.015, x + 0.6, y, z + 0.015), y);
+        for (let k = 0, x = x0 + 0.25; x < x1 - 0.55; x += 0.75, k++) addCloth(bag, ['cloth_white', 'linen', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][Math.floor(rand() * 5)], clothBox(x, y - 0.3 - rand() * 0.25, z - 0.015, x + 0.6, y, z + 0.015), y);
         void xm;
       }
     } else if (L.kind === 'lane') {
       for (let x = x0 + 7 + rand() * 6; x < x1 - 4; x += 16 + rand() * 8) {
         if ((el.gaps ?? []).some(([a, b]) => x > a - 0.4 && x < b + 0.4)) continue;      // (not across the gap of a cross lane: no wall holds the line there)
-        const y = 2.45, za = z0 + 0.15, zb = z1 - 0.15;
+        const y = 2.62, za = z0 + 0.15, zb = z1 - 0.15;
         bag.add('rope_fibre', box(x - 0.008, y, za, x + 0.008, y + 0.016, zb));
-        for (let z = za + 0.3; z < zb - 0.7; z += 0.9) addCloth(bag, ['cloth_white', 'linen', 'cloth_ochre', 'cloth_white'][Math.floor(rand() * 4)], clothBox(x - 0.015, y - 0.45 - rand() * 0.5, z, x + 0.015, y, z + 0.7), y);
+        for (let z = za + 0.3; z < zb - 0.7; z += 0.9) addCloth(bag, ['cloth_white', 'linen', 'cloth_ochre', 'cloth_white'][Math.floor(rand() * 4)], clothBox(x - 0.015, y - 0.3 - rand() * 0.25, z, x + 0.015, y, z + 0.7), y);
       }
     }
   }

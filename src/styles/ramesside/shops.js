@@ -70,7 +70,7 @@ const TRADES = {
     const wx = f.ix0 + 1.0, wz = (f.iz0 + f.iz1) / 2 + 0.2;
     bag.add('timber', lathe([[0.3, 0.3], [0.3, 0.34], [0.001, 0.34]], 14, null, wx, 0, wz)); bag.add('timber', lathe([[0.04, 0], [0.04, 0.3], [0.001, 0.3]], 6, null, wx, 0, wz));
     bag.add('terracotta', lathe([[0.001, 0.4], [0.14, 0.4], [0.17, 0.45], [0.001, 0.46]], 10, null, wx, 0, wz)); bag.add('limestone_core', box(wx + 0.5, 0, wz - 0.2, wx + 0.9, 0.3, wz + 0.2)); col.circle(wx, wz, 0.34, 0, 0.4);
-    const kx = f.ix1 - 0.85, kz = f.iz1 - 1.0;
+    const kx = f.ix1 - 0.85, kz = Math.abs(o.door - kx) < 1.5 ? f.iz0 + 1.4 : f.iz1 - 1.0;   // (the kiln never stands in the doorway: at the back when the door is on its side)
     bag.add('mudbrick', lathe([[0.7, 0], [0.7, 0.4], [0.55, 0.85], [0.3, 1.05], [0.001, 1.1]], 14, null, kx, 0, kz)); bag.add('pottery_dark', box(kx - 0.25, 0.04, kz - 0.74, kx + 0.25, 0.5, kz - 0.64)); col.circle(kx, kz, 0.72, 0, 1.1);
     // a pyramid of jars outside by the counter
     for (let k = 0; k < 6; k++) { const row = k < 3 ? 0 : k < 5 ? 1 : 2, i = k < 3 ? k : k < 5 ? k - 3 : 0; jar(bag, o.ox + (i - (row === 0 ? 1 : row === 1 ? 0.5 : 0)) * 0.4, row * 0.4, o.oz + 0.3, 0.95, 'terracotta'); }
@@ -219,6 +219,6 @@ export function ramShop(el, ctx) {
   // the lit room: a hanging oil lamp from a log of the roof, a light of its flame
   { const lx = (f.ix0 + f.ix1) / 2, lz = (f.iz0 + f.iz1) / 2 - 0.4; bag.add('timber', box(lx - 0.01, 2.55, lz - 0.01, lx + 0.01, h - 0.12, lz + 0.01)); oilLamp(bag, c.lights, lx, 2.45, lz, el.front === 'n' ? z0 + z1 : null, 3); }
   // the trade's room, and a painted board of the guild's colour over the door
-  TRADES[el.trade]?.(c, f, rand, { ox: (cxa + cxb) / 2, oz: f.zf + 0.9 });
+  TRADES[el.trade]?.(c, f, rand, { ox: (cxa + cxb) / 2, oz: f.zf + 0.9, door: U(d0 + dw / 2) });
   { const a = U(d0 + dw / 2); bag.add(ACCENT[Math.floor(rand() * 4)], box(a - 0.3, 2.35, f.zf + 0.005, a + 0.3, 2.7, f.zf + 0.02)); }
 }
