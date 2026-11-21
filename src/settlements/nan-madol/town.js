@@ -147,7 +147,7 @@ export async function town() {
   // the sakau stones of Nandauwas: men beside the slab pounding, one seated at its head; the kohlo wrap of hibiscus bark
   for (const [x, z, yaw] of SAKAU) {
     const W = frameW([x, z], yaw);
-    for (const [u, s] of [[-1.05, 1], [-0.3, 1], [0.6, 1], [-0.7, -1], [0.2, -1], [1.0, -1]]) { const at = W(u, s * 0.9); man(at, 0, face(at, W(u, 0)), { cloth: 'hide_tan', cloth2: 'hide_tan', pose: 'talk' }); }
+    for (const [u, s] of [[-1.05, 1], [-0.3, 1], [0.6, 1], [-0.7, -1], [0.2, -1], [1.0, -1]]) { const at = W(u, s * 0.9); man(at, 0, face(at, W(u, 0)), { cloth: 'hide_tan', cloth2: 'hide_tan', pose: 'talk', nightKeep: 1 }); }
     const head = W(2.9, 0); man(head, 0, face(head, W(0, 0)), { pose: 'cross', cloth: 'cloth_white', beard: true, hair: 'bun', nightKeep: 1 });
   }
   // priests in the outer court, at the gate and about the inner court and the tomb's stair

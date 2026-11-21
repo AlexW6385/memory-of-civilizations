@@ -14,11 +14,14 @@ export function WALK() {
   return [[[ax, az + 40], [ax, az], [ax, -8]], [[s1[0] + 3, az], [s1[2] - 3, az]], [[s1[0] + 3, pc], [s1[2] - 3, pc]]];
 }
 
+/** Two nahs whose route from the path stops short for a cause not yet found (a cell with nothing listed at 0.6 m before the platform, and a 0.5 m kerb): they are enterable, only not routed. */
+const NO_ROUTE = new Set([298838, 420983]);
+
 /** The nahs the walk opens: the first rows of Idehd and Peiniot, nearest the arrival first, with the point on the islet's path they are entered from. */
-export function walkHouses(n = 14) {
+export function walkHouses(n = 26) {
   const [ax, az] = A(), out = [];
   for (const h of village().houses) {
-    if (h.back || (h.islet !== 's1' && h.islet !== 's4')) continue;
+    if (h.back || NO_ROUTE.has(h.seed)) continue;
     const r = ISLET[h.islet].rect, alongX = r[2] - r[0] >= r[3] - r[1], pc = alongX ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2;
     const path = alongX ? [h.c[0], pc] : [pc, h.c[1]];
     out.push({ h, path, d: Math.hypot(h.c[0] - ax, h.c[1] - az) });
