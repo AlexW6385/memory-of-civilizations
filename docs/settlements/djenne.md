@@ -178,6 +178,25 @@ Sources added: [Wikiwand](https://www.wikiwand.com/en/articles/Great_Mosque_of_D
 ### 20.6 Landmark gaps
 - Still open from section 17: the crier's room over the central mihrab, the three missing platform stairs, carved doors in the open (hollow) houses, indoor lamps by trade beyond the shops' counters, weathering inside the hall, the hall's sound beyond its room tone.
 
+## 21. Second pass, narrow form (2026-11-21)
+
+### 21.1 Budget
+- Arrival main draws 294 -> 286 (master before the first pass: 287); main triangles 1.69 M -> 1.60 M. The cuts: the houses' full-detail ring 135 m -> 120 m (`NEAR` in `town.js`; tile (1,1) now far at the arrival), and the worn patches of section 20.5 turned a few hundredths of a radian and varied in size (the merge instances every axis-aligned box of a material once a dozen are alike, which had added a draw). Poses on the walk (main draws / main triangles): shops row 266 / 1.62 M north, 306 / 1.70 M south; market edge 307 / 1.83 M west-facing, 262 / 1.67 M east; north stair of the mosque 200 / 1.41 M and 317 / 1.73 M.
+- Figures of the walk (keepers, weaver, teacher, well people) cost 3 main draws as life elements; built into the near plan as fine pieces they cost 5, so they stay life elements.
+
+### 21.2 Night (second look)
+- Found: from the arrival the square and the qibla front were fully dark and the sellers sat at night as by day. Added (`dj_lamps` in `nightlight.js`, halo only, in the shops plan so no draw): a clay lamp on the table of about 55 % of the stalls, on the ground by 45 % of the mats and every third kola seller's, seven cooking fires at the aisles' ends (glow only, nothing modelled; women selling cooked millet and fish at dusk), a lamp on the cheek wall of each of the four new market-side stairs and five lamps hung over the hall's door aisle. [inferred: no source records the lamps of Djenne's market; markets in the Sahel ran to dusk and the forms are as section 20.2]
+- The engine cannot thin STATIC figures by hour (only the movers thin: 72 by day, 4 at night), so the seated sellers stay; the lamps and fires make them read as the dusk market. Rendered twice at night (arrival, and 62,-38 looking south-east): the lamps and one fire pool are plainly visible at the low preset; the qibla front itself stays a silhouette (no lamp there is stated).
+
+### 21.3 The walk
+- Routes into the prayer hall (two, to the mihrabs at z -13 and +14) from the north stair round the entrance tower to the door and down the fourth aisle; and a long one from the hall to the south-west stair tower, up its seven flights, along the roof to the crier's room. The old first route (arrival strip to the north stair) was blocked by buyers and kola sellers: the strip x < 47.5, z < 8 now keeps no buyers, children or porters, and the route runs down x 43-44. Mats of the old men at the platform foot moved off the new stairs (z -36, -12, 4, 10, 34). walk-check: 56 routes, 671 legs.
+- Still short: carved doors of the open houses, forge/dyer glow by trade in the houses, keepers as life figures.
+
+### 21.4 Landmark
+- **Three more platform stairs** (six in all, as stated: Designing Buildings; wondermondo): two on the market side (z -27..-17 and 17..27) and a second on the west (z 19..29), each with cheek walls and pinnacles, the edge's coping and foot course broken where they meet it. [positions inferred]
+- **The crier's room** over the central mihrab: a banco room 2.6 x 2.8 m on the hall's roof against the central tower's west face (the tower is its east wall), door 1.6 m with a palm-wood lintel, reed mat, rounded roof edge with a small pinnacle; the opening in its floor (the mihrab's ceiling) is not drawn. [stated: Wikiwand; Aramco World 1990 (crier's opening); size and place inferred]
+- **Wear**: every tread of the six flights has a pale rubbed strip down its middle (width and offset vary tread by tread), the door's sill is worn smooth, and the two piers flanking the door aisle show pale smears at shoulder and hand height (all `mud_plaster`, already in the plan). [inferred] No weathering of the hall's walls (soot, damp) was built: no source and no way to see it from the walk; still short.
+
 ## Sources
 
 - [Great Mosque of Djenne — Designing Buildings Wiki](https://designingbuildings.co.uk/wiki/Great_Mosque_of_Djenne)

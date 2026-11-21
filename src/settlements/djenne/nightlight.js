@@ -117,12 +117,19 @@ function glow({ at, y = 0, r = 0.55, pool = 1.6 }, { bag }) {
   H.flush(bag);
 }
 
+/** dj_lamps: { at, list: [[x, y, z, r, pool], ...] } — the lamps and fires of the market at dusk and the lamps of the mosque's steps, halo only. */
+function lamps({ list }, { bag }) {
+  const H = new Halo();
+  for (const [x, y, z, r, pool] of list) { H.ball(x, y, z, r); if (pool) H.floor(x, y > 2.5 ? 3.03 : y > 1.5 ? 0.0 + 0.06 : 0.06, z, pool, pool, 8, y < 0.5 && pool > 3 ? 0.85 : 0.65); }
+  H.flush(bag);
+}
+
 let done = false;
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.sahel.elements;
   E.sahel_near_wall = house(E.sahel_near_wall); E.sahel_house = house(E.sahel_house); E.sahel_home = house(E.sahel_home);
   E.sahel_shops = shops(E.sahel_shops); E.sahel_court_house = courtHouse(E.sahel_court_house);
-  E.dj_glow = glow;
+  E.dj_glow = glow; E.dj_lamps = lamps;
 }
 registerNight();
