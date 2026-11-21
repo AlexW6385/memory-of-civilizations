@@ -21,7 +21,7 @@ export function hashAt(x, z, s = 0) {
   return (h >>> 0) / 4294967296;
 }
 /** The share of the valley's houses with a lamp burning, of the shops open into the evening (the rest shuttered: dear oil) [inferred]. */
-export const HOUSE_LIT = 0.42, SHOP_LIT = 0.4;
+export const HOUSE_LIT = 0.42, SHOP_LIT = 0.5;
 
 const TAU = Math.PI * 2, MAT = 'halo';
 export class Halo {
@@ -113,6 +113,9 @@ function shopGlow(el, H) {
   pane(H, P, n, 0, -0.4, dw - 0.3, y + 0.1, y + 2.0, 0.55);
   const [lx, lz] = P(0.7, -2.2); H.ball(lx, y + 1.9, lz, 0.8);
   const [fx, fz] = P(0, 1.1); H.floor(fx, y + 0.07, fz, 2.0, 1.5, 8, 0.7);
+  // the lamp at the door and its spill across the portico and the paving's edge (a shopkeeper's lamp set on the sill) [inferred]
+  const [dx, dz] = P(0.9, 0.5); H.ball(dx, y + 1.25, dz, 0.55, 0.7);
+  const [sx, sz] = P(0, 3.4); H.floor(sx, y + 0.07, sz, 3.4, 2.6, 10, 0.6);
 }
 
 // ── props: lampstands, braziers, the baetyl shrine's lamps, the niches' votive lamps ──

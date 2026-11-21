@@ -36,6 +36,8 @@ export function fronts() {
   // the forecourt before the Khazneh: benches round the edge (their backs to the wall), the baetyl shrine and a basin
   const [px, pz] = PLAZA.c;
   for (const a of [-125, -100, -80, -55, 55, 80, 100, 125]) { const r = a * Math.PI / 180, c = Math.cos(r), s = Math.sin(r); E.push({ t: 'petra_prop', kind: 'bench', at: [+(px + c * 17.6).toFixed(2), +(pz + s * 17.6).toFixed(2)], rot: dirRot(c, s), y: height(px + c * 17.6, pz + s * 17.6), len: 2.6, back: true, seed: a }); }
+  // braziers before the Khazneh's steps, burning for those who come in at dusk [inferred]
+  for (const [bx, bz] of [[px - 8.5, pz - 5.5], [px - 8.5, pz + 5.5], [px - 2, pz - 12.5], [px - 2, pz + 12.5]]) E.push({ t: 'petra_prop', kind: 'brazier', at: [bx, bz], y: 0, seed: 11 });
   E.push({ t: 'petra_prop', kind: 'shrine', at: [px + 5, pz - 12], rot: dirRot(-1, 0.55), y: 0, seed: 3 });
   E.push({ t: 'petra_prop', kind: 'basin', at: [px + 1, pz + 15.2], rot: 0, y: 0, seed: 4 });
   // the Outer Siq: wayside shrines and benches against the walls, basins, slabs
