@@ -39,17 +39,17 @@ export function registerWear() {
     put('plaster_damp', du - w, du + w, -0.28, 0.42, top, top + 0.004);
     put('plaster_damp', du - w * 0.55, du + w * 0.55, -0.2, 0.3, top + 0.004, top + 0.007);
     if (hostel) {
-      // PAX on a plaque of dressed stone, left of the door, above the windows' row and below the string course
+      // PAX on a plaque of dressed stone, to the right of the door as one faces it, above the windows' row and below the string course
       const cu = du - dw / 2 - 0.75, yb = y + 2.15, W = 0.036, S = 0.05, gap = 0.1;     // stroke 3.6 cm, the grid cell 5 cm: a letter 0.2 × 0.3 m
       const wLet = 4 * S + W, total = 3 * wLet + 2 * gap;
       put('limestone_yellow', cu - total / 2 - 0.1, cu + total / 2 + 0.1, -0.03, 0.0, yb - 0.1, yb + 0.4);
-      let u = cu - total / 2 + W / 2;
+      let t0 = W / 2;                                   // (u runs from the viewer's right to his left on a front seen from the lane: the letters are laid out left to right and mapped back, so they read true)
       for (const ch of 'PAX') {
         for (const [a0, b0, a1, b1] of LETTERS[ch]) {
           const n = Math.max(1, Math.round(Math.hypot((a1 - a0) * S, (b1 - b0) * S) / 0.03));
-          for (let k = 0; k <= n; k++) { const t = n ? k / n : 0, px = u + (a0 + (a1 - a0) * t) * S, py = yb + (b0 + (b1 - b0) * t) * S; put('iron', px - W / 2, px + W / 2, -0.04, -0.03, py - W / 2, py + W / 2); }
+          for (let k = 0; k <= n; k++) { const t = n ? k / n : 0, px = cu + total / 2 - (t0 + (a0 + (a1 - a0) * t) * S), py = yb + (b0 + (b1 - b0) * t) * S; put('iron', px - W / 2, px + W / 2, -0.04, -0.03, py - W / 2, py + W / 2); }
         }
-        u += wLet + gap;
+        t0 += wLet + gap;
       }
     }
     return r;
