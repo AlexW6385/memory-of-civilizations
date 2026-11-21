@@ -169,6 +169,12 @@ for (const r of [
   [[-112, -80], [-112, -106], [-112, -112], [-102, -119.2], [-98, -119.2], [-92, -119.2], [-88, -119.2]],
   [[-112, -80], [-112, -106], [-112, -112], [-122, -119.2], [-126, -119.2], [-132, -119.2], [-136, -119.2]],
 ]) { r.y0 = 0; walks.push(r); }
+// the palace of Moctezuma (outside the precinct's east wall): from the south gate round the wall to the stair on its west face, through the passage into the first court,
+// and into the north range's room and the south block's hall by their doorways on the court (palace first court cA, door at u = 181.96)
+{
+  const to = [[0, 140], [0, 156], [40, 160], [100, 160], [150, 160], [155, 150], [155, 134], [155, 126.25], [158.5, 126.25], [165, 126.25], [173, 126.25], [180, 126.25]];
+  for (const tail of [[[181.96, 122], [181.96, 116], [181.96, 112], [181.96, 110]], [[181.96, 132], [181.96, 138], [181.96, 141], [181.96, 144]]]) { const r = [...to, ...tail]; r.y0 = 0; walks.push(r); }
+}
 
 export const precinct = {
   id: 'tenochtitlan-precinct',
