@@ -4,6 +4,7 @@
 
 import { hutRoute, stallRoutes, houseRoutes } from './walkwork.js';
 import { WALK_REACH } from './walk.js';
+import { houses } from './layout.js';
 import { PITS, TRENCHES, EDGE, OUTER, HUT, POOL, inRect, slope, cutDepth } from './layout.js';
 
 const E = [];
@@ -218,6 +219,10 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
     E.push({ t: 'court', y: -p.depth, seed: seed++, shoes: shoes[id] ?? [], walls });
   }
 }
+// ---- braziers at the church doors, where the pilgrims keep the night's vigil (docs §19)
+for (const [id, x, z] of [['giyorgis', gc[0] - 16.2, gc[1] - 4.2], ['giyorgis', gc[0] - 16.2, gc[1] + 4.2], ['medhane', mc[0] - 20.0, mc[1] - 4.4], ['medhane', mc[0] - 20.0, mc[1] + 4.4],
+  ...['golgotha', 'amanuel', 'gabriel'].flatMap((k) => { const r = AKS[k].rect, zc = (r[1] + r[3]) / 2; return [[k, r[0] - 2.6, zc - 3.6], [k, r[0] - 2.6, zc + 3.6]]; })]) E.push({ t: 'lal_brazier', at: [x, z], y: -PITS[id].depth + 0.15 });
+E.push({ t: 'lal_glow', houses: houses().map((h) => ({ c: h.c, door: h.door, r: h.r, seed: h.seed, y: slope(h.c[0], h.c[1]), enter: !!h.enter })).concat([{ c: HUT.c, door: HUT.door, r: HUT.r, seed: 1220, y: 0, enter: true }]) });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // (the halls first: a position is given to the first room that holds it, and the pits' open rooms hold the halls)
 const rooms = [room('hut', [HUT.c[0] - 3.3, HUT.c[1] - 3.3, HUT.c[0] + 3.3, HUT.c[1] + 3.3], 0, 'hut'), room('giyorgis-in-x', [gc[0] - 10.4, gc[1] - 3, gc[0] + 10.4, gc[1] + 3], GY, 'hall'), room('giyorgis-in-z', [gc[0] - 3, gc[1] - 10.4, gc[0] + 3, gc[1] + 10.4], GY, 'hall'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall'), ...Object.entries(AKS).map(([id, a]) => room(id + '-in', [a.rect[0] + 1.3, a.rect[1] + 1.3, a.rect[2] - 1.3, a.rect[3] - 1.3], a.y + 0.9, 'hall')), room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];

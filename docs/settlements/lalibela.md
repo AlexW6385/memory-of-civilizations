@@ -123,6 +123,13 @@ Written against the Suzhou reference (docs/suzhou-method.md). The shell could no
 - **Opened houses.** The doorway of every enterable round house was 1.0 m wide: now 1.7 m clear (two wall segments cut back, the lintel stone carried over), the door leaf folded back against the inside of the wall rather than across the opening. In every yard whose main house is opened, the way from the gate to the door is kept clear: the grindstone stands to the side, no beehives or haystack on the way, the pen to the far side; the woman who squats at her work by the door moved to the side [inferred: technical].
 - **Routes.** The walk-check follows twenty routes: the original through the trench, the house beside the arrival, the front of each of the six stalls, and in at the door and across the room of the twelve opened houses within 60 m of the walk.
 
+## 19. The reference pass: night (item 2)
+
+All [inferred] (no page could be read in this pass); the hanging lamps of the great churches (§16) and the niches the masons left for lamps (§14 trench walls) are the dossier's own.
+
+- **What lit the place.** Clay lamps with a fibre wick in butter or oil (the highland household's), the embers of the hearth, and at the church doors the braziers of the pilgrims who keep the night's vigil [inferred: the all-night vigil of the Ethiopian church is well known; its being kept at the doors of the rock churches about 1220 is our reading].
+- **Built** (`nightlight.js`; one `halo` mesh per plan, light added at night only, readable at the low preset): halos on every hanging lamp of the churches and on the three lamps of each Aksumite-manner church; a lit niche in each trench wall beside the way down; braziers (`lal_brazier`, an iron bowl on a tripod) flanking the west doors of Giyorgis, Medhane Alem, Golgotha, Amanuel and Gabriel-Rufael; the stalls' lamps; the embers glowing through the low door of each of the opened houses and their spill on the threshold; in about two closed houses in five a glimmer of the hearth at the door, by the hash of the house's place. The whole village's glow is one element of the churches' plan, so it is one mesh.
+
 ## Sources (ninth pass)
 
 - [House of the Saviour of the World — dragontravelmag](https://dragontravelmag.blogspot.com/2010/10/house-of-saviour-of-world.html)

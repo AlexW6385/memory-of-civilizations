@@ -51,14 +51,14 @@ export function stallEl(el, { bag, col, lights }) {
     for (let b = 0; b < 4; b++) { const [bx, bz] = P(-1.2 + b * 0.5, -0.32); bag.add('rope_fibre', lathe([[0.03, -0.015], [0.032, 0.015]], 6, null, bx, top + 0.04, bz)); }
     { const [bx, bz] = P(0.95, -0.4); bag.add('wicker', lathe([[0.001, 0], [0.17, 0.0], [0.22, 0.12], [0.2, 0.14], [0.001, 0.13]], 12, null, bx, top, bz)); for (let k = 0; k < 6; k++) { const a = k * 1.05; bag.add('hide_tan', lathe([[0.001, 0.0], [0.035, 0.015], [0.03, 0.04], [0.001, 0.05]], 5, null, bx + Math.cos(a) * 0.07, top + 0.13, bz + Math.sin(a) * 0.07)); } }
     { const [bx, bz] = P(-1.45, -1.1);
-      bag.add('pottery_dark', lathe([[0.001, 0.0], [0.12, 0.0], [0.2, 0.18], [0.24, 0.26], [0.2, 0.28], [0.001, 0.26]], 12, null, bx, y, bz)); bag.add('flame', lathe([[0.001, 0.26], [0.13, 0.26], [0.07, 0.3], [0.001, 0.31]], 8, null, bx, y, bz)); col.circle(bx, bz, 0.25, y, y + 0.3); }
+      bag.add('pottery_dark', lathe([[0.001, 0.0], [0.12, 0.0], [0.2, 0.18], [0.24, 0.26], [0.2, 0.28], [0.001, 0.26]], 12, null, bx, y, bz)); bag.add('hide_grey', lathe([[0.001, 0.26], [0.13, 0.26], [0.001, 0.27]], 8, null, bx, y, bz)); /* the ash and embers: their glow is the night's halo (nightlight.js) */ col.circle(bx, bz, 0.25, y, y + 0.3); }
     // crosses of wood and of brass on cords from the front beam: a lobed cross each, small crosses budding on the Lalibela pattern
     for (let k = 0; k < 6; k++) { const u = -1.45 + k * 0.58, [cx, cz] = P(u, 0.18), len = 0.45 + rand() * 0.35, m = k % 2 ? 'bronze' : 'wood_dark', th = Math.atan2(el.at[1], el.at[0]);
       const t = []; rod(t, [cx, y + 2.3, cz], [cx, y + 2.3 - len, cz], 0.006, 3); bag.add('rope_fibre', fromTriangles(t));
       const hy = y + 2.3 - len; const ax = P(u - 0.07, 0.18), bx2 = P(u + 0.07, 0.18);
       bag.add(m, orientedBox(ax, bx2, 0.02, hy - 0.05, hy - 0.035)); bag.add(m, box(cx - 0.009, hy - 0.16, cz - 0.009, cx + 0.009, hy + 0.01, cz + 0.009)); void th; }
     // a clay lamp on the counter, its flame (and, at night, its glow)
-    { const [lx, lz] = P(-0.1, -0.35); bag.add('terracotta', lathe([[0.001, 0], [0.06, 0.0], [0.09, 0.03], [0.1, 0.045], [0.001, 0.05]], 8, null, lx, top, lz)); bag.add('flame', lathe([[0.001, 0.05], [0.014, 0.05], [0.008, 0.09], [0.001, 0.11]], 5, null, lx + 0.07, top, lz));
+    { const [lx, lz] = P(-0.1, -0.35); bag.add('terracotta', lathe([[0.001, 0], [0.06, 0.0], [0.09, 0.03], [0.1, 0.045], [0.001, 0.05]], 8, null, lx, top, lz)); bag.add('rope_fibre', lathe([[0.008, 0.045], [0.006, 0.075], [0.001, 0.08]], 4, null, lx + 0.07, top, lz)); /* the wick */
       if (lights) lights.push({ at: [lx, top + 0.18, lz], color: '#ffb468', intensity: 2.0, distance: 7 }); }
   } else {
     // mats rolled and standing, prayer staffs (the maqomia, with its T-head) in a stand, pairs of sandals, white cloth folded in stacks, a bundle of stakes
