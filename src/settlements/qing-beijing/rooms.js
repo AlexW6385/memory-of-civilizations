@@ -9,6 +9,7 @@
 import { box, lathe } from '../../core/geom.js';
 import { Parts, ball, limb } from '../../styles/qing/carving.js';
 import { houseParts, southPlan } from './houses.js';
+import { yardHousehold } from './yardwork.js';
 import { table, chair, stool, bench, cabinet, kang, stove, vat, frame } from './interiors.js';
 
 const W = 'wood_dark', RED = 'lacquer_red';
@@ -198,6 +199,7 @@ export function bjRooms(el, { bag, col, lights }) {
     S.emit(bag, F.origin[0], rm.y + 0.04, F.origin[1], F.yaw);
   }
   if (P.south) deepRooms(el, { bag, col, lights }, P, r, w);
+  yardHousehold(el, P, { bag, col });
 }
 export function bookcase(P, w, h) {
   P.add(W, box(-w / 2, 0, -0.18, w / 2, h, 0.18));
