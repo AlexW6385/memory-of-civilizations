@@ -7,7 +7,7 @@ import { STYLES } from '../../core/build.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import { Parts } from '../../styles/qing/carving.js';
 import { HALLS, TIERS, WALL, TEMPLE, DANBI, houses, WALK_UP } from './layout.js';
-import { GATE } from './houses.js';
+import { GATE, Frame, houseParts } from './houses.js';
 import './townstyle.js';
 import './style.js';
 import { Halo, hashAt, lanternLight, litWindows, lampLights } from './nightlight.js';
@@ -71,8 +71,17 @@ export function palaceNight() {
   for (const [x, z, rot] of [[-13, 163.8, Math.PI], [13, 163.8, Math.PI], [-22, 163.8, Math.PI], [22, 163.8, Math.PI], [-20, 103.5, Math.PI], [20, 103.5, Math.PI], [-16, -158, 0], [16, -158, 0]]) posts.push({ x, z, y: 0.03, rot });
   // the terrace's four bronze burners before the Hall of Supreme Harmony (smoke.js: x ±22, ±9 at z 17) keep their embers at night
   for (const x of [-22, 22, -9, 9]) embers.push({ x, y: TIERS[2].y + 1.9, z: 17 });
+  // the standing lanterns of the courts (a pole with a crossarm and a palace lantern, beside the imperial way and before the gate stairs) [inferred]
+  const stands = [];
+  for (const sx of [-1, 1]) {
+    for (const z of [36, 52, 68, 84, 98]) stands.push({ x: sx * 7.2, z });
+    for (const z of [46, 78]) stands.push({ x: sx * 38, z });
+    for (const z of [134, 152]) stands.push({ x: sx * 9, z });
+    for (const z of [50, 20, -20]) stands.push({ x: sx * 84, z });
+    stands.push({ x: sx * 18, z: 168 });
+  }
   void WALL;
-  return { lanterns, posts, embers };
+  return { lanterns, posts, embers, stands };
 }
 
 /** A bag that puts the lanterns' dark parts into materials the landmark's plan already has (a new material is a new draw): by `map`. */
@@ -91,6 +100,17 @@ function bjNightPalace(el, { bag }) {
     H.ball(l.x, cy, l.z, 0.95 * s * 1.15);
     H.floor(l.x + l.face[0] * 0.5, l.fy + 0.03, l.z + l.face[1] * 1.3, 3.0 * s, 3.4 * s);
     H.wall(l.x - l.face[0] * 0.5, cy, l.z - l.face[1] * 0.5, l.face, 1.9 * s, 1.5 * s);
+  }
+  for (const l of el.list.stands ?? []) {
+    const P = new Parts(), d = -Math.sign(l.x) * 0.55, k = 1.25, y = 3.9;
+    P.add('timber', box(l.x - 0.06, 0.03, l.z - 0.06, l.x + 0.06, y + 0.1, l.z + 0.06));
+    P.add('timber', box(Math.min(l.x, l.x + d) - 0.04, y + 0.02, l.z - 0.035, Math.max(l.x, l.x + d) + 0.04, y + 0.09, l.z + 0.035));
+    P.add('iron', box(l.x - 0.14, 0.03, l.z - 0.14, l.x + 0.14, 0.2, l.z + 0.14));
+    P.emit(all, 0, 0, 0, 0);
+    const L = new Parts(); palaceLantern(L, k); L.emit(all, l.x + d, y + 0.02, l.z, 0);
+    const cy = y - 0.5 * k;
+    H.ball(l.x + d, cy, l.z, 1.2);
+    H.floor(l.x + d, 0.06, l.z, 4.2, 4.2);
   }
   for (const p of posts) {
     const P = new Parts(); watchLamp(P);
@@ -167,11 +187,11 @@ function shrineWithLamp(base) {
 
 // ── registration ────────────────────────────────────────────────────────────────────────────────────────────
 /** Wrap a style's element in the lit windows: STYLES[style].elements[name] */
-function wrapWindows(style, name, share, ok = () => true) {
+function wrapWindows(style, name, share, ok = () => true, extra = null) {
   const S = STYLES[style];
   if (!S?.elements[name] || S.elements[name].__night) return;
   const base = S.elements[name];
-  const f = (el, ctx) => { if (!ok(el)) return base(el, ctx); const L = litWindows(ctx, el.litShare ?? share); base(el, L.ctx); L.finish(); };
+  const f = (el, ctx) => { if (!ok(el)) return base(el, ctx); const L = litWindows(ctx, el.litShare ?? share); base(el, L.ctx); if (extra) extra(el, L.halo); L.finish(); };
   f.__night = true;
   S.elements[name] = f;
 }
@@ -185,13 +205,49 @@ function wrapLamps(style, name, floorOf, opt = {}, extra = null) {
   S.elements[name] = f;
 }
 
+/**
+ * The light of a shop's open front at night: the lamp-lit bays wash the posts and the apron (a wall of light on the front plane over each
+ * bay that is lit), the doorway of an entered shop spills across its two steps, and the name board and the standing signboards take the
+ * lanterns' light [inferred: a lit shop front; the board's gilt letters were read by it]. Same frame as shopfront.js qingShop.
+ */
+function shopGlow(el, H) {
+  const L = el.z1 - el.z0, dep = el.depth ?? 8.4, st = el.storeys || 1, sgn = el.side === 'w' ? 1 : -1, cz = (el.z0 + el.z1) / 2;
+  const F = Frame(el.front - sgn * dep / 2, cz, sgn > 0 ? 'e' : 'w'), dF = dep / 2, y = 0.3, Hh = st === 2 ? 6.3 : 3.7;
+  const bays = Math.max(2, Math.round(L / 3.2)), bw = (L - 1.0) / bays, s0 = -L / 2;
+  const nh = [F.n[0], F.n[1]], door = Math.floor(bays / 2);
+  for (let i = 0; i < bays; i++) {
+    const sc = s0 + 0.5 + bw * (i + 0.5), p = F.P(sc, dF + 0.04, y + 1.5);
+    if (i === door && el.enter) { H.wall(p[0], y + 1.25, p[2], nh, bw * 0.5, 1.25); const q = F.P(sc, dF + 1.5, 0); H.floor(q[0], WALK_UP + 0.1, q[2], 1.6, bw * 0.55, Math.atan2(F.n[0], F.n[1])); continue; }
+    if (hashAt(p[0], p[2], 31) < 0.6) H.wall(p[0], y + 1.6, p[2], nh, bw * 0.42, 0.75);
+  }
+  const b = F.P(0, dF + 0.8, Hh + 1.08);
+  H.wall(b[0], b[1], b[2], nh, Math.min(L - 1.6, 4.2) * 0.5, 0.4);
+  for (const sg of [-1, 1]) { const p = F.P(sg * (L / 2 - 0.55), dF + 1.42, 1.7); if (hashAt(p[0], p[2], 37) < 0.7) H.wall(p[0], p[1], p[2], nh, 0.4, 1.1); }
+}
+
+/**
+ * The light on the floor of a yard: the lamp-light of the rooms whose doors open on it falls out across the paving (a pool before the main
+ * house's door, one before each side house's door, a wash on the wall at each lit door) [inferred: the paper windows' glow is in litWindows;
+ * a door left ajar or a screen of paper let the light out]. The near houses only (lod 0 and 1).
+ */
+function yardLight(el, H) {
+  if ((el.lod ?? 0) > 1 || !el.enter) return;
+  const P = houseParts(el), [mx0, mz0, mx1, mz1] = P.main, mcx = (mx0 + mx1) / 2;
+  if (hashAt(mcx, mz1, 41) < 0.8) { H.floor(mcx, 0.07, mz1 + 1.5, 2.8, 1.9); H.wall(mcx, 0.55 + 1.35, mz1 + 0.04, [0, 1], 1.3, 1.3); }
+  for (const w of P.wings) {
+    const zm = (w.rect[1] + w.rect[3]) / 2, east = w.side === 'e', fx = east ? w.rect[2] : w.rect[0], sg = east ? 1 : -1;
+    if (hashAt(fx, zm, 43) < 0.7) { H.floor(fx + sg * 1.4, 0.07, zm, 1.9, 2.2, Math.PI / 2); H.wall(fx + sg * 0.04, 0.35 + 1.3, zm, [sg, 0], 1.2, 1.2); }
+  }
+}
+
 export function registerNight() {
   // the courtyard houses' windows: a share of the rooms lit (the near houses; the far ones are dark masses)
-  wrapWindows('beijing-site', 'hutong_house', 0.36, (el) => (el.lod ?? 0) <= 2);
+  wrapWindows('beijing-site', 'hutong_house', 0.36, (el) => (el.lod ?? 0) <= 2, yardLight);
   // the shop street's fronts: the lanterns under the eave and the lamp-light of the open front across the apron
   wrapLamps('beijing-site', 'qing_shop', () => WALK_UP + 0.04, { pool: 2.0 }, (el, H) => {
     const out = el.side === 'w' ? 1 : -1, L = el.z1 - el.z0, cz = (el.z0 + el.z1) / 2;
     if (hashAt(el.front, cz, 5) < 0.85) H.floor(el.front + out * 1.3, WALK_UP + 0.08, cz, 2.2, Math.min(2.9, L / 2 + 0.4), Math.PI / 2);
+    shopGlow(el, H);
   });
   // the interiors: the lanterns of the rooms (their real point lights are the engine's; these show at the low preset)
   const floorY = (el) => (el.y ?? 0.3) + 0.04;
