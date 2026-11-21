@@ -7,6 +7,7 @@ import { PLAZA, T1, T2, NA, NA_TEMPLE, NA_SMALL, CA, BALL } from './layout.js';
 import { frame } from '../../styles/tikal/kit.js';
 import { routes as visitorRoutes } from './walk.js';
 import './nightlight.js';
+import './wear.js';
 
 export const WALKS = [
   [[-18, 28], [20, 0], [34, 0], [44, 0], [52, 0], [54.5, 0], [58.3, 0], [62.1, 0], [65.5, 0]],

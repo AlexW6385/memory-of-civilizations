@@ -12,6 +12,7 @@ import { boatFloat } from '../../objects/index.js';
 import { hashAt } from './walk.js';
 import './stock.js';
 import './nightlight.js';
+import './wear.js';
 
 const base = (id, elements, style = 'tikal') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-18, 28], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
