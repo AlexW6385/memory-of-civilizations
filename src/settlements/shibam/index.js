@@ -2,6 +2,7 @@
 // square, the wall and its gate, the palm gardens of the wadi floor.
 import '../../styles/hadhrami/index.js';
 import './nightlight.js';
+import './wear.js';
 import { house, mosque } from './plan.js';
 import music from './music.js';
 export { town } from './town.js';
