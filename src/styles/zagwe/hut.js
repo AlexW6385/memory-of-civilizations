@@ -61,6 +61,10 @@ export function hut(el, { bag, col }) {
     bag.add('timber', orientedBox(P(-hw - 0.2, rm), P(hw + 0.2, rm), TH + 0.2, y + 1.95, y + 2.12));
     bag.add('timber', orientedBox(P(hw + 0.04, ri - 0.14), P(hw + 0.95, ri - 0.3), 0.05, y, y + 1.75));      // the leaf folded back against the inside of the wall
     bag.add('rubble', orientedBox(P(-hw - 0.3, rm + 0.3), P(hw + 0.3, rm + 0.3), 0.5, y - 0.1, y + 0.12)); }       // the threshold stone
+  // wear (docs §22): the threshold stone's middle worn smooth and pale by the feet that cross it, and the inner floor before it trodden darker
+  { const P = (s2, d) => W(s2, d), hw2 = rm * Math.sin((0.5 + CUT) * dth);
+    bag.add('mud_plaster', orientedBox(P(-hw2 * 0.8, rm + 0.3), P(hw2 * 0.8, rm + 0.3), 0.34, y + 0.12, y + 0.126));
+    bag.add('hide_grey', orientedBox(P(-hw2 * 0.9, ri - 0.5), P(hw2 * 0.9, ri - 0.5), 0.9, y + 0.052, y + 0.056)); }
   // the eave carried on posts over the doorstep, or a stone seat by the door
   { const OUT = (sx, sd) => W(sx, sd);
     if (veranda) {

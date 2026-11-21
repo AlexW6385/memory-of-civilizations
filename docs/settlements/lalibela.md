@@ -143,6 +143,13 @@ All [inferred]: no recording of the twelfth century exists and no page could be 
 
 All [inferred] (no page read in this pass). Rigged critters (`fauna.js`, `critters`, engine models as they are; none added): dogs lying in the yards of the opened houses nearest the arrival, cats at their doorsteps, hens and a rooster scratching in others' yards, goats tethered at a yard's side (`goat_black`, `goat_white`), rock doves on the floors of the courts of Bete Giyorgis, Medhane Alem and Maryam. Each stands beside the way from gate to door, on whichever side has nothing else within the animal's range (the yard keeps the way itself clear, §18). The highland's own wild-in-town animals are not in the engine's models and none was added: the rock hyrax of the escarpments, the gelada and the hyena at night (the owls of §20 stand for the night). Mules and zebu in the yards remain the older still life (§15).
 
+## 22. The reference pass: wear, writing, found faults (items 5 and 6)
+
+- **Wear** [inferred]: in every opened round house the threshold stone's middle worn smooth and pale by the feet that cross it, and the floor just inside it trodden darker (`hut.js`); the ground before each stall trodden bare (`stall.js`). Soot on the thatch lining was tried and left out (a disc floating under a 5 m ceiling is worse than none).
+- **Writing: none added.** The only script of the place is Ge'ez; no glyph table was available or verifiable in this pass, so no inscription, sign or tablet was cut. The school's sheet of letters (§17) stays as it was.
+- **Faults found by walking in, and mended** (technical): the north trench to Bete Medhane Alem ended in a ridge of ground 0.3 m wide and 1.9 m high across the mouth of the pit (the pit's edge drop starts 0.35 m inside it): every trench now runs 0.8 m past its ends in `cutDepth` (layout.js), which also clears the mouths to Golgotha, Amanuel and Gabriel-Rufael; a pillar stood in the lane of Medhane Alem's west door (the ring's middle west pillar, now left out: the ring is 33, the source's 34 [stated, §17] less the one before the door); the court's dressing on Medhane Alem's west side is left off the way round to that door. Walk routes now enter Bete Giyorgis (to the crossing) and Bete Medhane Alem (to the middle nave).
+- **Candle stall lamps** have no engine light (a light makes a flame mesh of its plan, a draw): only their halo.
+
 ## Sources (ninth pass)
 
 - [House of the Saviour of the World — dragontravelmag](https://dragontravelmag.blogspot.com/2010/10/house-of-saviour-of-world.html)

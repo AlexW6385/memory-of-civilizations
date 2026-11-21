@@ -45,8 +45,10 @@ const DROP = (e) => Math.max(0, Math.min(1, (e - 0.35) / 0.3));
 export function cutDepth(x, z) {
   let d = 0;
   for (const p of Object.values(PITS)) if (inRect(p.rect, x, z)) d = Math.max(d, p.depth * DROP(edgeIn(p.rect, x, z)));
-  for (const t of TRENCHES) if (inRect(t.rect, x, z)) {
-    const [x0, z0, x1, z1] = t.rect, u = t.axis === 'x' ? (x - x0) / (x1 - x0) : (z - z0) / (z1 - z0);
+  // (a trench runs 0.8 m on past each end: where it opens into a pit the ground between its end and the pit's drop had stood as a ridge 0.3 m wide and 1.9 m high across
+  // the mouth, which the walker could not cross; docs §22)
+  for (const t of TRENCHES) if (inRect(t.axis === 'x' ? [t.rect[0] - 0.8, t.rect[1], t.rect[2] + 0.8, t.rect[3]] : [t.rect[0], t.rect[1] - 0.8, t.rect[2], t.rect[3] + 0.8], x, z)) {
+    const [x0, z0, x1, z1] = t.rect, u = Math.max(0, Math.min(1, t.axis === 'x' ? (x - x0) / (x1 - x0) : (z - z0) / (z1 - z0)));
     const side = t.axis === 'x' ? Math.min(z - z0, z1 - z) : Math.min(x - x0, x1 - x);
     d = Math.max(d, (t.d0 + (t.d1 - t.d0) * u) * DROP(side));
   }

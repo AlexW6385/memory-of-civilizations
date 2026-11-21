@@ -423,7 +423,7 @@ function basilica(el, { bag, col }) {
   // the pillars round it, the roof slab, the low gable
   const ring = [];
   for (let i = 0; i < nl; i++) { const x = x0 + 0.7 + (x1 - x0 - 1.4) * i / (nl - 1); ring.push([x, z0 + 0.7], [x, z1 - 0.7]); }
-  for (let j = 1; j < ns - 1; j++) { const z = z0 + 0.7 + (z1 - z0 - 1.4) * j / (ns - 1); ring.push([x0 + 0.7, z], [x1 - 0.7, z]); }
+  for (let j = 1; j < ns - 1; j++) { const z = z0 + 0.7 + (z1 - z0 - 1.4) * j / (ns - 1); if (Math.abs(z - (z0 + z1) / 2) > 0.5) ring.push([x0 + 0.7, z]); ring.push([x1 - 0.7, z]); }   // (no pillar before the west door: it stood in the doorway's lane, docs §22)
   for (const [x, z] of ring) { bag.add(TH, box(x - 0.55, yf, z - 0.55, x + 0.55, yTop, z + 0.55)); col.rect([x - 0.55, z - 0.55, x + 0.55, z + 0.55], y0, y0 + h); }
   solid(bag, col, TH, [x0, z0, x1, z1], yTop, y0 + h - 0.6);
   const t = [], yb = y0 + h - 0.6, yr = y0 + h, zm = (z0 + z1) / 2;

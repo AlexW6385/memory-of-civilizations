@@ -58,8 +58,7 @@ export function stallEl(el, { bag, col, lights }) {
       const hy = y + 2.3 - len; const ax = P(u - 0.07, 0.18), bx2 = P(u + 0.07, 0.18);
       bag.add(m, orientedBox(ax, bx2, 0.02, hy - 0.05, hy - 0.035)); bag.add(m, box(cx - 0.009, hy - 0.16, cz - 0.009, cx + 0.009, hy + 0.01, cz + 0.009)); void th; }
     // a clay lamp on the counter, its flame (and, at night, its glow)
-    { const [lx, lz] = P(-0.1, -0.35); bag.add('terracotta', lathe([[0.001, 0], [0.06, 0.0], [0.09, 0.03], [0.1, 0.045], [0.001, 0.05]], 8, null, lx, top, lz)); bag.add('rope_fibre', lathe([[0.008, 0.045], [0.006, 0.075], [0.001, 0.08]], 4, null, lx + 0.07, top, lz)); /* the wick */
-      if (lights) lights.push({ at: [lx, top + 0.18, lz], color: '#ffb468', intensity: 2.0, distance: 7 }); }
+    { const [lx, lz] = P(-0.1, -0.35); bag.add('terracotta', lathe([[0.001, 0], [0.06, 0.0], [0.09, 0.03], [0.1, 0.045], [0.001, 0.05]], 8, null, lx, top, lz)); bag.add('rope_fibre', lathe([[0.008, 0.045], [0.006, 0.075], [0.001, 0.08]], 4, null, lx + 0.07, top, lz)); /* the wick */ }
   } else {
     // mats rolled and standing, prayer staffs (the maqomia, with its T-head) in a stand, pairs of sandals, white cloth folded in stacks, a bundle of stakes
     { const t = [];

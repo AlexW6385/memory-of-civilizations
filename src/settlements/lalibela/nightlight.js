@@ -7,6 +7,7 @@ import '../../styles/zagwe/index.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { lathe, box } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
+import { stallFrame } from '../../styles/zagwe/stall.js';
 
 export function hashAt(x, z, s = 0) {
   let h = (Math.round(x * 16) * 73856093) ^ (Math.round(z * 16) * 19349663) ^ Math.imul(s + 1, 83492791);
@@ -82,6 +83,12 @@ function nicheGlow(el, H) {
   H.ball(x + n[0] * 0.15, el.y + 0.25, z + n[1] * 0.15, 0.4, 0.6);
 }
 
+/** The lamp on a candle seller's counter (it has no engine light: a light would make a flame mesh of its plan, a draw): its glow and the pool on the counter. */
+function stallGlow(el, H) {
+  if (el.kind !== 'candles') return;
+  const [lx, lz] = stallFrame(el).P(-0.1, -0.35), y = (el.y ?? 0) + 0.87;
+  H.ball(lx, y + 0.18, lz, 0.55, 0.6); H.floor(lx, y + 0.02, lz, 0.9, 0.9, 8, 0.6);
+}
 /** lal_brazier: { at: [x, z], y } — a clay-and-iron bowl on a tripod with embers and a flame, where the pilgrims keep the vigil at a church door. */
 function brazier({ at, y = 0 }, { bag, col, lights }) {
   const [x, z] = at, q = hashAt(x, z, 5), s = 0.9 + 0.2 * q;
@@ -104,7 +111,8 @@ let done = false;
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.zagwe.elements;
-  for (const k of ['lamp', 'aksumite', 'pilgrim_stall']) E[k] = wrap(E[k]);
+  for (const k of ['lamp', 'aksumite']) E[k] = wrap(E[k]);
+  E.pilgrim_stall = wrap(E.pilgrim_stall, stallGlow);
   E.cave = wrap(E.cave, nicheGlow);
   E.lal_brazier = brazier; E.lal_glow = glow;
 }

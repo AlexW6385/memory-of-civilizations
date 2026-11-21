@@ -213,6 +213,7 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
         const pt = horiz ? [I[0] + t, side === 'n' ? I[1] + 0.05 : I[3] - 0.05] : [side === 'w' ? I[0] + 0.05 : I[2] - 0.05, I[1] + t], nn = horiz ? [0, side === 'n' ? 1 : -1] : [side === 'w' ? 1 : -1, 0];
         if (TRENCHES.some((tr) => inRect(tr.rect, pt[0], pt[1], 1.8)) || inRect([-262, 120, -200, 136], pt[0], pt[1], 1.5)) { k++; continue; }
         if (id === 'giyorgis' && side === 'n' && pt[0] < gc[0] - 2) { k++; continue; }
+        if (id === 'medhane' && side === 'w') { k++; continue; }                  // (the way round to the west door is kept clear)
         walls.push([pt[0], pt[1], nn[0], nn[1], KINDS[k++ % KINDS.length]]);
       }
     }
@@ -228,6 +229,10 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('hut', [HUT.c[0] - 3.3, HUT.c[1] - 3.3, HUT.c[0] + 3.3, HUT.c[1] + 3.3], 0, 'hut'), room('giyorgis-in-x', [gc[0] - 10.4, gc[1] - 3, gc[0] + 10.4, gc[1] + 3], GY, 'hall'), room('giyorgis-in-z', [gc[0] - 3, gc[1] - 10.4, gc[0] + 3, gc[1] + 10.4], GY, 'hall'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall'), ...Object.entries(AKS).map(([id, a]) => room(id + '-in', [a.rect[0] + 1.3, a.rect[1] + 1.3, a.rect[2] - 1.3, a.rect[3] - 1.3], a.y + 0.9, 'hall')), room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];
 const walks = [[[-280, 128], [-262, 128], [-216, 128], [-211, 128]]];
 walks[0].y0 = slope(-280, 128);
+// into Bete Giyorgis: out of the tunnel into the court, up the steps at the west door and along the west arm to the crossing (docs §22)
+{ const r = [[-214, 128], [-210.5, 135], [-203, 135], [-195, 135]]; r.y0 = -G.depth + 0.15 + 0.5; walks.push(r); }
+// into Bete Medhane Alem: down the trench from the north into the court, round to the west door and into the middle nave
+{ const r = [[10, -140], [10, -111], [-11.3, -108], [-11.3, -90], [-6, -90], [-3, -90]]; r.y0 = slope(10, -140); walks.push(r); }
 // the visitor's walk (docs §18): into the house beside the arrival, into every opened house within reach of the walk (in at the door and on to the middle of the room), to the front of each stall
 for (const r of [hutRoute(), ...stallRoutes(), ...houseRoutes((x, z) => (x < 0 ? 0 : 1) + (z < 0 ? 0 : 2)).filter((q) => q.dist <= WALK_REACH)]) walks.push(Object.assign(r.route, { y0: r.y0 }));
 
