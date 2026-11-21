@@ -18,7 +18,7 @@ export function dressing() {
   // bullock carts on the main road (the road lies at z = -4…4), going to and from the river, loaded with jars, rice sacks and baskets
   [[-84, 2.4, 'sacks', 'zebu', 0], [-61, -2.4, 'baskets', 'zebu', 1], [-35, 2.4, 'sacks', 'buffalo', 0], [-12, -2.4, 'crates', 'zebu', 1], [8, 2.6, 'sacks', 'zebu', 0]].forEach(([x, z, load, beast, dir], i) => {
     E.push({ t: 'cart', kind: 'two', beast, load, at: [x, z], y: 0, rot: dir ? -Math.PI / 2 : Math.PI / 2, seed: 30 + i });
-    man([x + (dir ? -2.6 : 2.6), z + (z > 0 ? 1.2 : -1.2)], 0, dir ? -Math.PI / 2 : Math.PI / 2, { carry: 'staff' });
+    man([x + (dir ? -2.6 : 2.6), z + (z > 0 ? -1.2 : 1.2)], 0, dir ? -Math.PI / 2 : Math.PI / 2, { carry: 'staff' });
   });
   // a cart outspanned by the roadside on the plain, the oxen tied to it, the driver asleep in its shade
   for (const [x, z, rot] of [[-20, 60, 0.4], [70, -130, 2.6], [30, 150, 1.1]]) if (open(x, z, 6) && !streets().some((s) => inRect(s, x, z, 2))) {

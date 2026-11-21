@@ -46,6 +46,13 @@ export function shop(el, ctx) {
   F.b(tint, u0, fl, v1 - t, u1, fl + H, v1, true);
   F.b(tint, u0, fl, v0 + 1.6, u0 + t, fl + H, v1, true); F.b(tint, u1 - t, fl, v0 + 1.6, u1, fl + H, v1, true);
   F.b(tint, u0, fl, v0, u0 + t, fl + H, v0 + 1.6, true); F.b(tint, u1 - t, fl, v0, u1, fl + H, v0 + 1.6, true);
+  if (el.simple) {
+    r();     // (the door's side, drawn in the near form: the roof's rise stays the same)
+    // the far form: the shell and its deep roof, the front a plank wall, no goods, no fittings
+    F.b(tint, u0, fl, v0, u1, fl + H, v0 + t, false);
+    gable(F, 'thatch_palm', u0 - 0.15, u1 + 0.15, v0 - 1.3, v1 + 0.5, fl + H, (V === 3 ? 2.6 : V === 2 ? 1.6 : 2.0) + 0.2 * r(), true);
+    return;
+  }
   // the front: two posts, the beam, the counter under it with a gap for the door at one side
   const dpos = r() < 0.5 ? u0 + 1.2 : u1 - 1.2;
   for (const u of [u0 + 0.2, (u0 + u1) / 2, u1 - 0.2]) F.b('timber', u - 0.09, fl, v0 - 0.09, u + 0.09, fl + wh, v0 + 0.09, false);

@@ -5,6 +5,8 @@ import '../../styles/burmese/index.js';
 import { dressing } from './dressing.js';
 import { sculpture, gateLions } from './sculpt.js';
 import { houseSpots } from '../../styles/burmese/houses.js';
+import { lodTiles } from '../lod.js';
+import { torchEls, GATES } from './nightlight.js';
 import {
   RADIUS, RIVER_Y, bankX, CITY, WALL, GATE, THAT, THAT_ENC, PALACE, PAL_HALL, SHWE, SHWE_PREC, SULA, SULA_PREC, TANK, TANK_Y, KILNS, KYAUNGS, PRECINCT, MAIN_ROAD,
   ANANDA, OKKYAUNG, lots, plainTemples, cityWalls, streets, inLot, inPlainTemple, inRect, inRiver, inTank,
@@ -63,6 +65,7 @@ function city() {
     const part = edge.slice(i, i + 15), zm = Math.max(...part.map((q) => Math.abs(q[0])));
     RIV.push(base('bagan-river-' + RIV.length, [{ t: 'bgn_river', edge: part, y: RIVER_Y, x0: -Math.min(RADIUS + 4, Math.floor(Math.sqrt(460 * 460 - zm * zm))) }]));
   }
+  E.push(...torchEls(GATES.tharabar));
   E.push({ t: 'bgn_ghat', at: [bankX(0) - 1, 0], y: RIVER_Y, w: 7 });
   for (const b of moored()) E.push({ t: 'bgn_boat', ...b });
   E.push({ t: 'bgn_tank', rect: TANK, y: TANK_Y });
@@ -85,7 +88,8 @@ function houseEls() {
 }
 /** The stilt houses in their strips. */
 function houses() {
-  return base('bagan-houses', houseEls());
+  // in 100 m tiles, each in two forms: the full houses and shops (interiors, yards, goods, colliders) while the visitor is near, closed shells beyond (the style's `simple`)
+  return lodTiles('bagan-houses', 'burmese', houseEls(), { near: 110, R: RADIUS, entrance: { at: [30, 0], facing: 'e' } });
 }
 
 /** Roadside props along the streets (water-pot stands, shrines, benches, festival poles, lamp pillars, firewood, drying mats), placed from the street rectangles, on the verge, facing the road. */
@@ -125,6 +129,20 @@ function anandaCourt() {
   for (const [x, z] of [[40, -12], [40, 12], [170, -12], [170, 12], [105, -75], [105, 75]]) items.push({ k: 'potstand', c: [x, z], rot: 0, seed: x + z });
   void r; void OKKYAUNG;
   return items;
+}
+
+/** The furniture of the visitor's walk where the shop rows leave room (walk.js; dossier §14.1): the free-standing water-pot stands (yay-zayat) and wayside shrines by the Tharabar Gate's two sides,
+ *  a well, a bench, a festival pole and a spirit house at the corners of the cross street. Facing the road. */
+function walkProps() {
+  const it = [];
+  for (const sd of [-1, 1]) {
+    const rot = sd < 0 ? 0 : Math.PI;
+    it.push({ k: 'potstand', c: [-102.9, sd * 7.5], rot, seed: 1701 + sd }, { k: 'potstand', c: [-97.2, sd * 7.5], rot, seed: 1703 + sd });
+    it.push({ k: 'shrine', c: [-102.9, sd * 13], rot, seed: 1705 + sd }, { k: 'bench', c: [-97.2, sd * 13], rot, seed: 1707 + sd });
+    it.push({ k: 'well', c: [-135.2, sd * 12], r: 0.8, rot }, { k: 'pole', c: [-135.2, sd * 17.5], rot, seed: 1709 + sd });
+    it.push({ k: 'spirit', c: [-123.2, sd * 9.5], rot, seed: 1711 + sd }, { k: 'potstand', c: [-123.2, sd * 15], rot, seed: 1713 + sd });
+  }
+  return it;
 }
 
 /** The other courts: the Thatbyinnyu's enclosure and the palace (brick libraries, lions at the gates, poles, lamps, votive stupas), the Shwezigon and the Sulamani (lions, votive rows, lamps). */
@@ -168,7 +186,8 @@ function temples() {
   const goods = ['flowers', 'candles', 'pots', 'fruit'];
   [[26, -8, 0], [26, 8, Math.PI], [105 - 9, 100, Math.PI], [105 + 9, -100, 0], [96, -112, Math.PI / 2], [96, 112, Math.PI / 2]].forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 40, goods: goods[(i + 1) % 4] }));
   E.push(...courts());
-  E.push({ t: 'bgn_props', items: [...anandaCourt(), ...roadside()] });
+  E.push(...torchEls(GATES.courts));
+  E.push({ t: 'bgn_props', items: [...anandaCourt(), ...roadside(), ...walkProps()] });
   E.push(...gateLions());   // the modelled chinthe of the Ananda's four gates (sculpt.js)
   // more stalls inside the Ananda's west gate and by the gates of the other two great temples (flowers, candles, gold leaf, water-pots for the pilgrims)
   [[31, -10.5, 0], [31, 10.5, Math.PI], [45, -10.5, 0], [45, 10.5, Math.PI], [120, -100, Math.PI / 2], [150, -144, Math.PI], [130, 153, 0], [112 - 8, 190, Math.PI / 2], [112 - 8, 206, Math.PI / 2]]
@@ -262,6 +281,6 @@ function people() {
 }
 
 export async function town() {
-  return [...city(), houses(), temples(), people(), base('bagan-dressing', dressing(), 'life'), ...sculpture()];
+  return [...city(), ...houses(), temples(), people(), base('bagan-dressing', dressing(), 'life'), ...sculpture()];
 }
 void MAIN_ROAD; void PRECINCT;
