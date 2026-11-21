@@ -153,12 +153,25 @@ function stand({ at, y = 0, simple }, { bag, col }) {
   H.flush(bag);
 }
 
+/**
+ * bn_fire: { at: [x, z], y } — an open night fire on the king's square: a ring of stones, a heap of embers and a few logs laid like spokes, the glow and a wide pool on the earth
+ * [inferred: people kept to the square after dark by the palace gate and warmed and lit it with wood fires; nothing is recorded of it].
+ */
+function fire({ at, y = 0, simple }, { bag, col }) {
+  const [x, z] = at, H = new Halo();
+  bag.add('scoria_red', lathe([[0.001, 0], [0.62, 0], [0.7, 0.1], [0.62, 0.2], [0.45, 0.2], [0.45, 0.06], [0.001, 0.06]], 9, null, x, y, z));
+  col.circle(x, z, 0.7, y, y + 0.2);
+  if (simple) return;
+  H.ball(x, y + 0.5, z, 0.9, 0.72); H.floor(x, y + 0.03, z, 5.2, 5.2, 12, 0.75);
+  H.flush(bag);
+}
+
 let done = false;
 /** Wraps the benin style's elements that hold a fire (once, after the style has registered); registers the new stand. */
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.benin.elements;
   for (const k of ['benin_house', 'benin_lamp', 'benin_brazier', 'benin_shelter', 'caster_yard', 'benin_gate']) if (typeof E[k] === 'function') E[k] = wrap(k, E[k]);
-  E.bn_stand = stand;
+  E.bn_stand = stand; E.bn_fire = fire;
 }
 registerNight();
