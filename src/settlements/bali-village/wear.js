@@ -41,20 +41,18 @@ function wear({ lane = [], damp = [], paths = [] }, ctx) {
 }
 
 /**
- * bali_treadwear: { c: [x, z], gap, depth, y, rise } — the top of the split gate's stair block (the shared style's `steps` builds it as one solid block at y + rise, see the
- * dossier §14): the middle of it rubbed smooth by the feet that cross it (pale slabs 8 mm proud, the lane's continuation), and the little offerings (canang sari) set at its
+ * bali_treadwear: { c: [x, z], gap, depth, y, rise } — the split gate's stair: the middle of each tread rubbed smooth by the feet that cross it (pale slabs 8 mm proud, the lane's continuation), and the little offerings (canang sari) set at its
  * edges by those who pass and at the feet of the two guardians outside the gate.
  */
 function treadwear({ c: [cx, cz], gap = 5, depth = 3.6, y = 0, rise = 1.2 }, ctx) {
-  const top = y + rise, z0 = cz - depth / 2 + 0.25, z1 = cz + depth / 2 - 0.25;
-  for (let z = z0, k = 0; z < z1 - 0.3; k++) {
-    const l = 0.7 + 0.35 * hashAt(cx, z, 71), w = 1.3 + 0.4 * hashAt(cx, z, 72), c = cx + (hashAt(cx, z, 73) - 0.5) * 0.3;
-    if (z + l > z1) break;
-    ctx.bag.add('tuff_hewn', box(c - w / 2, top, z, c + w / 2, top + 0.008, z + l));
-    z += l + 0.07;
+  // (one worn slab on each tread: the stair rises to the north, its treads as the style's `steps` cuts them)
+  const top = y + rise, n = Math.max(1, Math.round(rise / 0.17)), zs = cz + depth / 2, td = depth / n;
+  for (let i = 0; i < n; i++) {
+    const zn = zs - td * (i + 1), yt = y + rise * (i + 1) / n, w = 1.3 + 0.4 * hashAt(cx, zn, 72), c = cx + (hashAt(cx, zn, 73) - 0.5) * 0.3;
+    ctx.bag.add('tuff_hewn', box(c - w / 2, yt, zn + 0.04, c + w / 2, yt + 0.008, zn + td - 0.03));
   }
   const side = gap / 2 - 0.6;
-  canang(ctx, cx - side, top, cz + depth / 2 - 0.4, 0); canang(ctx, cx + side, top, cz + depth / 2 - 0.9, 1); canang(ctx, cx + side, top, cz - depth / 2 + 0.5, 3);
+  canang(ctx, cx + side, top, cz - depth / 2 + 0.25, 3);
   for (const s of [-1, 1]) canang(ctx, cx + s * (gap / 2 + 4.4 + 0.55) - s * 0.6, y, cz + depth / 2 + 0.75, s > 0 ? 1 : 2);
 }
 
