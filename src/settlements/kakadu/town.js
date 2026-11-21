@@ -217,7 +217,7 @@ export async function town() {
   void poolD; void inRect;
   // a small fire on the apron 6 m from the arrival, off the lane, with two who keep it (added last: no other figure's seed moves)
   {
-    const fx = -5.6, fz = -16.4, y = height(fx, fz);
+    const fx = -3.6, fz = -19.2, y = height(fx, fz);
     K.push({ t: 'ka_fire', at: [fx, fz], y, seed: 77 });
     woman([fx + 1.0, fz + 0.8], y, -2.3, { pose: 'sit_ground' });
     man([fx - 1.0, fz + 0.5], y, 1.2, { pose: 'sit_ground', beard: true });
