@@ -10,6 +10,10 @@ const TRADES = ['cloth', 'carpet', 'saddler', 'spice', 'pots', 'metal', 'food', 
 const BOLT = ['cloth_red', 'cloth_blue', 'cloth_green', 'cloth_ochre', 'cloth_white', 'cloth_maroon', 'cloth_indigo'];
 
 const bu0 = (u) => u + 0.3;
+/** The trades of a row's bays, in order (a pure function of the row's seed: the first thing the builder does with its random stream; the sound map and the walk read it too). */
+export function rowTrades(seed) { const r = rng(seed || 9); return TRADES.slice().sort(() => r() - 0.5); }
+/** Whether the counter of bay i of a row stands on the left (the way in on the right): a hash of the row's seed and the bay, so that the walk can find the way in. */
+export function bayLeft(seed, i) { let h = Math.imul((seed | 0) ^ Math.imul(i + 1, 0x9e3779b1), 0x85ebca6b); h ^= h >>> 15; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 13; return (h & 1) === 0; }
 function stock(L, trade, ua, ub, d, rand, side) {
   const pk = (a) => a[Math.floor(rand() * a.length)], bz = -d + 0.4, y0 = 0.03, mid = (ua + ub) / 2;
   const shelf = (y) => { L.box('timber', ua + 0.25, bz, ub - 0.25, bz + 0.5, y, y + 0.05); };
@@ -69,7 +73,7 @@ export function shopRow(el, { bag, col, lights }) {
   const r0 = face === 's' || face === 'n' ? [el.a[0], el.a[1], el.a[0] + n * w, el.a[1] + d] : [el.a[0], el.a[1], el.a[0] + d, el.a[1] + n * w];
   const F = frontFrame(r0, face), L = new Local(bag, col, lights, F.O, F.U, F.V);
   const awn = ['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_white', 'cloth_green', 'cloth_maroon'];
-  const trades = TRADES.slice().sort(() => rand() - 0.5);
+  const trades = rowTrades(el.seed || 9);
   // the shell: the back wall, the party walls (a doorway through between neighbours in some), the roof of poplar poles under earth
   L.wall('mudbrick', 0, -d + T / 2, n * w, -d + T / 2, T, 0, H);
   for (let i = 0; i <= n; i++) L.wall(i % 3 === 1 && i < n && i > 0 ? 'mud_plaster' : 'mudbrick', i * w, 0, i * w, -d, 0.4, 0, H, (i > 0 && i < n && rand() < 0.3) ? [{ at: d * 0.6, w: 0.9, h: 2.0 }] : []);
@@ -85,7 +89,7 @@ export function shopRow(el, { bag, col, lights }) {
   L.box('mudbrick', 0, 0.03, n * w, 0.0, 0, 0.35);
   for (let k = 0; k < n; k++) { const u = rand() * (n * w - 1), y = 0.4 + rand() * 1.8; L.box('mudbrick', u, 0.03, u + 0.4 + rand() * 0.8, 0.0, y, y + 0.3 + rand() * 0.5); }
   for (let i = 0; i < n; i++) {
-    const ua = i * w + 0.2, ub = (i + 1) * w - 0.2, mid = (ua + ub) / 2, trade = trades[i % trades.length], left = (i + Math.floor(rand() * 2)) % 2 === 0;
+    const ua = i * w + 0.2, ub = (i + 1) * w - 0.2, mid = (ua + ub) / 2, trade = trades[i % trades.length], left = bayLeft(el.seed || 9, i);
     stock(L, trade, ua, ub, d, rand, left);
     // the counter at the front on one side, the way in beside it: cloth over it, scales or goods on it
     const cu0 = left ? ua : ub - 1.5, cu1 = cu0 + 1.5;
@@ -106,7 +110,8 @@ export function shopRow(el, { bag, col, lights }) {
     addCloth(bag, am, clothBox(xa, H - 0.55, za, xb, H - 0.48, zb, 0.35), H - 0.4);
     for (const u of [ua, ub]) { L.rod('timber', [u, 0, 1.8], [u, H - 0.45, 1.8], 0.05, 5); L.circle(u, 1.8, 0.06, 0, H); }
     // a trestle or a bale at the apron
-    if (rand() < 0.5) { const su = left ? ub - 0.7 : ua + 0.7; L.box('timber', su - 0.5, 1.1, su + 0.5, 1.7, 0.0, 0.5, true); L.box(BOLT[Math.floor(rand() * BOLT.length)], su - 0.45, 1.15, su + 0.45, 1.65, 0.5, 0.6); }
+    if (rand() < 0.5) { const su = left ? ua + 0.7 : ub - 0.7;   // (at the counter's end, away from the way in)
+      L.box('timber', su - 0.5, 1.1, su + 0.5, 1.7, 0.0, 0.5, true); L.box(BOLT[Math.floor(rand() * BOLT.length)], su - 0.45, 1.15, su + 0.45, 1.65, 0.5, 0.6); }
   }
   // the row's character (docs/settlements/mongol-karakorum.md §3b): the east rows of the Cathayan quarter keep a Chinese front — red lacquered posts between the bays,
   // a tile eave on painted brackets with its green ridge; some of the Saracen rows carry a plastered upper storey with latticed windows over the shops

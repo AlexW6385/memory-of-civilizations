@@ -8,6 +8,8 @@ import {
 } from './layout.js';
 import { campElements } from './camp.js';
 import { frontFrame } from '../../styles/mongol/local.js';
+import { bayLeft } from '../../styles/mongol/shops.js';
+import { bays } from './walkroutes.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, elements });
@@ -133,16 +135,16 @@ export async function town() {
     const F = frontFrame(shopRect(s), s.face), Pf = (u, v) => [F.O[0] + F.U[0] * u + F.V[0] * v, F.O[1] + F.U[1] * u + F.V[1] * v];
     const out = Math.atan2(F.V[0], F.V[1]), faceOut = Math.atan2(-F.V[0], -F.V[1]), faceIn = Math.atan2(F.V[0], F.V[1]);
     for (let i = 0; i < s.n; i++) {
-      const um = (i + 0.5) * 3.6, r = rand();
+      const r = rand(), uc = bayLeft(s.seed || 9, i) ? i * 3.6 + 0.95 : (i + 1) * 3.6 - 0.95;   // (the counter's middle: keepers, buyers and goods stand at the counter, off the way in)
       // the seller in his bay (a woman at the food shops, a Chinese craftsman in the east)
-      if (r > 0.12) { const sp = Pf(um + (rand() < 0.5 ? 0.9 : -0.9), -1.5); const sell = s.east ? cathay : rand() < 0.72 ? saracen : mongol; sell(sp, 0, faceOut, { pose: 'stand' }); }
-      if (rand() < 0.4) { const bp = Pf(um + (rand() - 0.5) * 1.2, 2.7); (s.east ? cathay : rand() < 0.5 ? mongol : saracen)(bp, 0, faceIn, { pose: rand() < 0.5 ? 'talk' : 'stand' }); }
+      if (r > 0.12) { const sp = Pf(uc + (rand() < 0.5 ? 0.25 : -0.25), -1.5); const sell = s.east ? cathay : rand() < 0.72 ? saracen : mongol; sell(sp, 0, faceOut, { pose: 'stand' }); }
+      if (rand() < 0.4) { const bp = Pf(uc + (rand() - 0.5) * 0.6, 2.9); (s.east ? cathay : rand() < 0.5 ? mongol : saracen)(bp, 0, faceIn, { pose: rand() < 0.5 ? 'talk' : 'stand' }); }
       // the goods out at the front: on a mat with a seller, crates, barrels, a bench with a stool, a cart, pots, firewood, chickens
-      const k = Math.floor(rand() * 9), at = Pf(um + (rand() - 0.5) * 1.0, 3.3 + rand() * 0.4);
+      const k = Math.floor(rand() * 9), at = Pf(uc + (rand() - 0.5) * 0.6, 3.3 + rand() * 0.4);
       if (k === 0) T.push({ t: 'goods_mat', at, y: 0, rot: out, seed: seed(), goods: goodsOf[['cloth', 'carpet', 'saddler', 'spice', 'pots', 'metal', 'food', 'wine'][Math.floor(rand() * 8)]] });
       else if (k === 1) T.push({ t: 'crates', at, y: 0, rot: out, seed: seed(), n: 3 });
       else if (k === 2) T.push({ t: 'barrel', at, y: 0, rot: out, seed: seed(), n: 2 });
-      else if (k === 3) { T.push({ t: 'bench', at, y: 0, rot: out + Math.PI / 2, seed: seed(), len: 1.6 }); T.push({ t: 'stool', at: Pf(um + 1.4, 3.3), y: 0, rot: out, seed: seed() }); }
+      else if (k === 3) { T.push({ t: 'bench', at, y: 0, rot: out + Math.PI / 2, seed: seed(), len: 1.6 }); T.push({ t: 'stool', at: Pf(uc, 4.1), y: 0, rot: out, seed: seed() }); }
       else if (k === 4) T.push({ t: 'pot', at, y: 0, rot: out, seed: seed(), kind: pick(['amphora', 'pithos', 'water_pot', 'glazed_jar', 'blue_jar']), n: 3 });
       else if (k === 5) T.push({ t: 'firewood', at, y: 0, rot: out + Math.PI / 2, seed: seed() });
       else if (k === 6) T.push({ t: 'chickens', at, y: 0, rot: rand() * 6, seed: seed(), n: 4 });
@@ -154,9 +156,15 @@ export async function town() {
     T.push({ t: 'pot', at: Pf(s.n * 3.6 + 0.8, 0.9), y: 0, rot: out, seed: seed(), kind: 'water_pot', n: 2 });
   }
   // along the main street's margins (the strip between the awnings and the paving): stalls under cloth, camels and horses at rest, water troughs, carts
+  // the ways in of the bays on each side of the main street (x of the middle of each): what stands in the street's margin is moved off them (shops.js: bayLeft)
+  const WAYS = { '-1': [], 1: [] };
+  for (const b of bays()) if (Math.abs(b.row.a[1] + (b.row.face === 's' ? 5 : 0)) < 14 && (b.row.face === 's' || b.row.face === 'n')) WAYS[b.row.face === 's' ? -1 : 1].push(b.route[0][0]);
+  WAYS[-1].push(70);   // (the palace gate's lane)
+  const clearOfWays = (x, side) => { let best = x, bd = -1; for (let d = -6; d <= 6; d += 0.5) { const m = Math.min(...WAYS[side].map((w) => Math.abs(w - (x + d)))); if (m > bd + 0.05 || (Math.abs(m - bd) <= 0.05 && Math.abs(d) < Math.abs(best - x))) { bd = m; best = x + d; } } return best; };
   for (let x = -128; x < 128; x += 11 + rand() * 7) {
     const side = rand() < 0.5 ? -1 : 1, z = side * (4.9 + rand() * 0.5);
     if (Math.abs(x) < 6) continue;
+    x = clearOfWays(x, side);
     const kind = rand();
     if (kind < 0.4) { T.push({ t: 'stall', at: [x, z], y: 0, rot: side < 0 ? 0 : Math.PI, seed: seed(), awning: pick(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_white']), goods: [pick(['basket', 'cloth', 'produce'])] }); saracen([x, z + side * -1.3 * -1], 0, side < 0 ? 0 : Math.PI, {}); }
     else if (kind < 0.6) { T.push({ t: 'trough', at: [x, z], y: 0, rot: 0, seed: seed() }); E_animal(T, rand() < 0.6 ? 'horse' : 'camel', [x + 1.8, z + side * 0.4], 0, 1.57 + rand() * 0.4, seed()); }
@@ -164,7 +172,10 @@ export async function town() {
     else { T.push({ t: 'handcart', at: [x, z], y: 0, rot: rand() * 6, seed: seed(), load: 'baskets' }); cathay([x + 1.6, z], 0, 0.8, { carry: 'basket' }); }
   }
   // the cross-street's wells and lanes' ends
-  for (let z = -90; z < 90; z += 14 + rand() * 8) if (Math.abs(z) > 14) { T.push({ t: 'barrel', at: [side_(rand) * 3.2, z], y: 0, rot: 0, seed: seed(), n: 2 }); }
+  const XWAYS = { '-1': [], 1: [] };      // the ways in of the bays on each side of the cross-street (z of the middle of each)
+  for (const b of bays()) if (b.row.face === 'e' || b.row.face === 'w') XWAYS[b.row.face === 'e' ? -1 : 1].push(b.route[0][1]);
+  const clearZ = (z, side) => { let best = z, bd = -1; for (let d = -6; d <= 6; d += 0.5) { const m = Math.min(...XWAYS[side].map((w) => Math.abs(w - (z + d)))); if (m > bd + 0.05 || (Math.abs(m - bd) <= 0.05 && Math.abs(d) < Math.abs(best - z))) { bd = m; best = z + d; } } return best; };
+  for (let z = -90; z < 90; z += 14 + rand() * 8) if (Math.abs(z) > 14) { const sd = side_(rand); T.push({ t: 'barrel', at: [sd * 3.2, clearZ(z, sd)], y: 0, rot: 0, seed: seed(), n: 2 }); }
   // ── the Cathayan quarter's people: smiths at the forges, kiln tenders, monks at the temples ──
   for (const q of FORGES) { const cx = (q[0] + q[2]) / 2; cathay([cx + 0.5, q[3] - 1.5], 0, 0.6, { pose: 'stand', cloth: col.brown, over: 'apron' }); cathay([q[0] + 2.2, q[1] + 1.6], 0, -0.7, { cloth: col.grey, over: 'apron' }); }
   for (const [x, z] of KILNS) cathay([x + 3.4, z + 0.6], 0, 1.4, { carry: 'basket' });
