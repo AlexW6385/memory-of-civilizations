@@ -391,7 +391,11 @@ export function shopHouse(el, ctx, base) {
   B('granite_grey', uDoor - dw / 2 + 0.12, uDoor + dw / 2 - 0.12, y + 0.03, y + 0.034, bayD - 0.12, bayD + 0.2);      // the worn threshold
   if (tn === 'chemist') for (const [i, m] of ['lamp_glass', 'lamp_glass'].entries()) F.L(m, [[0.001, 0], [0.1, 0.02], [0.17, 0.18], [0.19, 0.3], [0.14, 0.44], [0.06, 0.52], [0.05, 0.62]], 10, wu0 + (wu1 - wu0) * (0.3 + 0.4 * i), y + 0.78 + 0.0, 0.2);
   // the blind and the pavement goods
-  if (tr.awn && rand() < 0.7) awning(F, tr, 0.0, Wd, y + g0 + 0.05, 1.45, rand);
+  if (tr.awn && rand() < 0.7) {
+    // (an opened shop's blind is left off the lane of its door: the walker takes a sheet over it for a wall)
+    if (isOpen) { if (uDoor - 0.95 > 1.0) awning(F, tr, 0.0, uDoor - 0.95, y + g0 + 0.05, 1.45, rand); if (Wd - uDoor - 0.95 > 1.0) awning(F, tr, uDoor + 0.95, Wd, y + g0 + 0.05, 1.45, rand); }
+    else awning(F, tr, 0.0, Wd, y + g0 + 0.05, 1.45, rand);
+  }
   else if (tn === 'greengrocer' || tn === 'grocer') pavementGoods(F, tr, rand, wu0 + 0.2, Math.min(wu1, wu0 + 3.2), y);
   if (['pawnbroker', 'barber', 'bootmaker'].includes(tn) || rand() < 0.5) hangingSign(F, tr, tn, rand, uDoor + (left ? -0.5 : 0.5), y);
   if (isOpen) { C(0, uDoor - dw / 2 - 0.05, y, y + g0, 0, bayD + 0.02); C(uDoor + dw / 2 + 0.05, Wd, y, y + g0, 0, bayD + 0.02); } else C(0, Wd, y, y + g0, 0, bayD + 0.02);

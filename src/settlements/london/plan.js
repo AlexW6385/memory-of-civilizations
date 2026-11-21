@@ -1,5 +1,5 @@
 // Westminster about 1870 (docs/settlements/london.md §2–§4).
-import { upLots } from './town.js';
+import { upLots, frontRoutes } from './town.js';
 import { terraceRoute, shopRoute, pubRoute } from '../../styles/victorian/upstairs.js';
 import { RADIUS, GROUND, PALACE, CLOCK, VICTORIA, ABBEY, BRIDGE, RIVER, HALL, PORCH, STEPHEN, LOBBY, bank } from './layout.js';
 
@@ -50,7 +50,9 @@ export const westminster = {
     { id: 'house of lords', rect: [LOBBY[0] - 6.85, LOBBY[1] + 37, LOBBY[0] + 6.85, LOBBY[1] + 61.4], y: P, kind: 'chamber' }],
   walks: [Object.assign([[0, -180], [10, -182.6], [26, -183.4], [38.4, -180], [46, -170.4], [60, -170]], { y0: g }),
     // from the pavement up the stair of each house whose upper floors are open to a room at the top (dossier §9)
-    ...upLots().map((l) => Object.assign((l.pub ? pubRoute : l.shop ? shopRoute : terraceRoute)(l), { y0: g }))],     // from the arrival south of Canning's plinth, out of the square by its east gate, to Bridge Street
+    ...upLots().map((l) => Object.assign((l.pub ? pubRoute : l.shop ? shopRoute : terraceRoute)(l), { y0: g })),
+    // from the pavement through the door into the front room of the open lots whose upper floors stay shut (dossier §12)
+    ...frontRoutes().map((r) => Object.assign(r, { y0: g }))],     // from the arrival south of Canning's plinth, out of the square by its east gate, to Bridge Street
 };
 // Westminster Bridge (1862): seven iron arches on granite piers, Barry's Gothic detail
 export const bridge = {
