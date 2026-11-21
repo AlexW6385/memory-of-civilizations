@@ -224,16 +224,16 @@ export function terraceRich(el, ctx, base) {
 // ── the shops ────────────────────────────────────────────────────────────────
 // by trade: the fascia's paint, the blind's two colours, the window's goods
 const TRADE = {
-  draper: { fascia: 'lacquer_black', awn: ['linen', 'cloth_green'], goods: ['cloth_red', 'cloth_green', 'cloth_red', 'cloth_green', 'linen', 'cloth_red', 'wicker'], kind: 'bolts' },
-  grocer: { fascia: 'shutter_green', awn: ['linen', 'cloth_green'], goods: ['wicker', 'wicker', 'wood_dark', 'linen', 'linen'], kind: 'jars' },
-  butcher: { fascia: 'wall_red', awn: ['linen', 'cloth_green'], goods: ['wicker', 'cloth_red', 'linen'], kind: 'hooks' },
-  chemist: { fascia: 'lacquer_black', awn: null, goods: ['glaze_blue', 'glaze_blue', 'glaze_blue', 'linen'], kind: 'carboys' },
-  baker: { fascia: 'lacquer_black', awn: ['cloth_red', 'linen'], goods: ['wicker', 'wicker', 'hide_black'], kind: 'loaves' },
+  draper: { fascia: 'lacquer_black', awn: ['cloth_white', 'cloth_green'], goods: ['cloth_red', 'cloth_green', 'cloth_red', 'cloth_green', 'cloth_white', 'cloth_red', 'wicker'], kind: 'bolts' },
+  grocer: { fascia: 'shutter_green', awn: ['cloth_white', 'cloth_green'], goods: ['wicker', 'wicker', 'wood_dark', 'cloth_white', 'cloth_white'], kind: 'jars' },
+  butcher: { fascia: 'wall_red', awn: ['cloth_white', 'cloth_green'], goods: ['wicker', 'cloth_red', 'cloth_white'], kind: 'hooks' },
+  chemist: { fascia: 'lacquer_black', awn: null, goods: ['glaze_blue', 'glaze_blue', 'glaze_blue', 'cloth_white'], kind: 'carboys' },
+  baker: { fascia: 'lacquer_black', awn: ['cloth_red', 'cloth_white'], goods: ['wicker', 'wicker', 'hide_black'], kind: 'loaves' },
   pawnbroker: { fascia: 'lacquer_black', awn: null, goods: ['gold', 'wood_dark', 'cloth_red', 'gold', 'cloth_green'], kind: 'boxes' },
   bootmaker: { fascia: 'lacquer_black', awn: ['wicker', 'cloth_red'], goods: ['hide_black', 'hide_black', 'wicker'], kind: 'boots' },
-  barber: { fascia: 'lacquer_black', awn: null, goods: ['hide_black', 'hide_black', 'linen'], kind: 'wigs' },
-  tobacconist: { fascia: 'lacquer_black', awn: ['cloth_red', 'linen'], goods: ['wood_dark', 'cloth_red', 'wood_dark', 'cloth_red'], kind: 'boxes' },
-  greengrocer: { fascia: 'shutter_green', awn: ['cloth_red', 'linen'], goods: ['cloth_green', 'cloth_red', 'cloth_red', 'wicker'], kind: 'baskets' },
+  barber: { fascia: 'lacquer_black', awn: null, goods: ['hide_black', 'hide_black', 'cloth_white'], kind: 'wigs' },
+  tobacconist: { fascia: 'lacquer_black', awn: ['cloth_red', 'cloth_white'], goods: ['wood_dark', 'cloth_red', 'wood_dark', 'cloth_red'], kind: 'boxes' },
+  greengrocer: { fascia: 'shutter_green', awn: ['cloth_red', 'cloth_white'], goods: ['cloth_green', 'cloth_red', 'cloth_red', 'wicker'], kind: 'baskets' },
 };
 /** gilt lettering on a board: blocks of letters' height and varying width with gaps, in the middle of u0..u1 */
 function lettering(F, rand, u0, u1, ya, yb, d, m = 'gold') {
@@ -251,7 +251,7 @@ function goods(F, tr, rand, u0, u1, dBack, dFront, y) {
       const m = pick(rand, G), d = dBack + 0.06 + rand() * (dFront - dBack - 0.25);
       switch (tr.kind) {
         case 'bolts': { const h = 0.35 + rand() * 0.3; B(m, u - 0.09, u + 0.09, y + ty, y + ty + h, d, d + 0.2); if (rand() < 0.5) B(pick(rand, G), u - 0.1, u + 0.1, y + ty + h, y + ty + h + 0.12, d - 0.01, d + 0.21); break; }
-        case 'jars': if (rand() < 0.55) L(m === 'linen' ? 'linen' : 'glaze_blue', [[0.001, 0], [0.07, 0.01], [0.075, 0.2], [0.05, 0.24], [0.001, 0.25]], 8, u, y + ty, d + 0.1); else B(m, u - 0.12, u + 0.12, y + ty, y + ty + 0.22, d, d + 0.25); break;
+        case 'jars': if (rand() < 0.55) L(m === 'cloth_white' ? 'cloth_white' : 'glaze_blue', [[0.001, 0], [0.07, 0.01], [0.075, 0.2], [0.05, 0.24], [0.001, 0.25]], 8, u, y + ty, d + 0.1); else B(m, u - 0.12, u + 0.12, y + ty, y + ty + 0.22, d, d + 0.25); break;
         case 'hooks': break;
         case 'carboys': if (ti > 0) L(pick(rand, G), [[0.001, 0], [0.07, 0.01], [0.08, 0.14], [0.05, 0.22], [0.02, 0.28], [0.03, 0.34]], 8, u, y + ty, d + 0.08); break;
         case 'loaves': L(m, [[0.001, 0], [0.13, 0.02], [0.14, 0.09], [0.1, 0.17], [0.001, 0.2]], 8, u, y + ty, d + 0.1); break;
@@ -265,8 +265,8 @@ function goods(F, tr, rand, u0, u1, dBack, dFront, y) {
   if (tr.kind === 'hooks') {
     // the butcher's rail with carcasses and joints hanging, the marble slab below
     B('iron', u0, u1, y + 2.35, y + 2.4, dBack + 0.1, dBack + 0.14);
-    for (let u = u0 + 0.3; u < u1 - 0.3; u += 0.42) { const hh = 0.5 + rand() * 0.4; B(rand() < 0.5 ? 'wicker' : 'cloth_red', u - 0.11, u + 0.11, y + 2.35 - hh, y + 2.35, dBack + 0.06, dBack + 0.2); B('linen', u - 0.1, u + 0.1, y + 2.35 - hh, y + 2.35 - hh + 0.06, dBack + 0.05, dBack + 0.21); }
-    B('linen', u0, u1, y + 0.85, y + 0.9, dBack, dFront - 0.04);
+    for (let u = u0 + 0.3; u < u1 - 0.3; u += 0.42) { const hh = 0.5 + rand() * 0.4; B(rand() < 0.5 ? 'wicker' : 'cloth_red', u - 0.11, u + 0.11, y + 2.35 - hh, y + 2.35, dBack + 0.06, dBack + 0.2); B('cloth_white', u - 0.1, u + 0.1, y + 2.35 - hh, y + 2.35 - hh + 0.06, dBack + 0.05, dBack + 0.21); }
+    B('cloth_white', u0, u1, y + 0.85, y + 0.9, dBack, dFront - 0.04);
   }
 }
 /** the striped blind: stripes of cloth sloping from the cornice out to the front bar, a valance, iron arms; u0..u1 */
@@ -293,7 +293,7 @@ function hangingSign(F, tr, tname, rand, uS, y) {
   B('iron', uS - 0.02, uS + 0.02, ys, ys + 0.05, 0.0, d1);
   switch (tname) {
     case 'pawnbroker': for (const [du, dy] of [[-0.18, 0], [0.18, 0], [0, 0.3]]) L('gold', [[0.001, -0.14], [0.14, 0], [0.001, 0.14]], 10, uS + du, ys - 0.3 + dy + 0.14 - 0.0 + 0.0, d1 - 0.1 - 0.12); B('iron', uS - 0.01, uS + 0.01, ys - 0.45, ys, d1 - 0.22, d1 - 0.2); break;
-    case 'barber': { const bx = uS, h = 0.9; for (let k = 0; k < 6; k++) B(k % 2 ? 'cloth_red' : 'linen', bx - 0.06, bx + 0.06, ys - h + k * h / 6, ys - h + (k + 1) * h / 6, d1 - 0.12, d1); B('gold', bx - 0.08, bx + 0.08, ys - h - 0.04, ys - h, d1 - 0.14, d1 + 0.02); B('gold', bx - 0.08, bx + 0.08, ys, ys + 0.04, d1 - 0.14, d1 + 0.02); break; }
+    case 'barber': { const bx = uS, h = 0.9; for (let k = 0; k < 6; k++) B(k % 2 ? 'cloth_red' : 'cloth_white', bx - 0.06, bx + 0.06, ys - h + k * h / 6, ys - h + (k + 1) * h / 6, d1 - 0.12, d1); B('gold', bx - 0.08, bx + 0.08, ys - h - 0.04, ys - h, d1 - 0.14, d1 + 0.02); B('gold', bx - 0.08, bx + 0.08, ys, ys + 0.04, d1 - 0.14, d1 + 0.02); break; }
     case 'bootmaker': B('hide_black', uS - 0.1, uS + 0.1, ys - 0.7, ys - 0.1, d1 - 0.1, d1 + 0.1); B('hide_black', uS - 0.1, uS + 0.5, ys - 0.7, ys - 0.45, d1 - 0.1, d1 + 0.1); B('hide_black', uS - 0.1, uS + 0.5, ys - 0.75, ys - 0.7, d1 - 0.1, d1 + 0.1); break;
     default: B(tr.fascia, uS - 0.04, uS + 0.04, ys - 0.7, ys - 0.05, d1 - 0.5, d1 + 0.4); lettering(F, rand, uS, uS, ys - 0.6, ys - 0.25, d1 + 0.4, 'gold');
   }
@@ -306,7 +306,7 @@ function shopFront(F, rand, tn, tr, uDoor, left, y) {
   if (rand() < 0.55) {      // the A-frame board: two leaves and a chalked panel
     const u = uA, d = 1.15;
     B('wood_dark', u - 0.3, u + 0.3, y + 0.1, y + 0.95, d - 0.27, d - 0.22); B('wood_dark', u - 0.3, u + 0.3, y + 0.1, y + 0.95, d + 0.22, d + 0.27);
-    B('lacquer_black', u - 0.25, u + 0.25, y + 0.3, y + 0.85, d + 0.27, d + 0.29); B('linen', u - 0.2, u + 0.2, y + 0.4, y + 0.44, d + 0.29, d + 0.3); B('linen', u - 0.14, u + 0.14, y + 0.55, y + 0.58, d + 0.29, d + 0.3);
+    B('lacquer_black', u - 0.25, u + 0.25, y + 0.3, y + 0.85, d + 0.27, d + 0.29); B('cloth_white', u - 0.2, u + 0.2, y + 0.4, y + 0.44, d + 0.29, d + 0.3); B('cloth_white', u - 0.14, u + 0.14, y + 0.55, y + 0.58, d + 0.29, d + 0.3);
     B('iron', u - 0.3, u + 0.3, y + 0.94, y + 0.97, d - 0.1, d + 0.1);
   }
   const uC = left ? Wd - 1.4 : 1.4;
@@ -314,7 +314,7 @@ function shopFront(F, rand, tn, tr, uDoor, left, y) {
     case 'grocer': case 'greengrocer':
       for (let k = 0; k < 3; k++) B('sacking', uC - 0.25 + k * 0.2, uC - 0.02 + k * 0.2, y + 0.12, y + 0.7 - k * 0.12, 0.7, 1.05);
       L('wood_dark', [[0.3, 0], [0.34, 0.2], [0.34, 0.6], [0.3, 0.8]], 10, uC + 0.6 * side, y + 0.12, 0.9); break;
-    case 'butcher': B('wood_dark', uC - 0.4, uC + 0.4, y + 0.12, y + 0.85, 0.7, 1.2); B('linen', uC - 0.4, uC + 0.4, y + 0.85, y + 0.88, 0.7, 1.2); break;
+    case 'butcher': B('wood_dark', uC - 0.4, uC + 0.4, y + 0.12, y + 0.85, 0.7, 1.2); B('cloth_white', uC - 0.4, uC + 0.4, y + 0.85, y + 0.88, 0.7, 1.2); break;
     case 'baker': B('wicker', uC - 0.35, uC + 0.35, y + 0.12, y + 0.4, 0.75, 1.15); for (let k = 0; k < 4; k++) L('wicker', [[0.001, 0], [0.12, 0.02], [0.13, 0.08], [0.001, 0.16]], 7, uC - 0.25 + k * 0.17, y + 0.4, 0.95); break;
     case 'draper': L('wood_dark', [[0.2, 0], [0.04, 0.02], [0.04, 1.0], [0.001, 1.05]], 6, uC, y + 0.12, 0.9); B('cloth_red', uC - 0.18, uC + 0.18, y + 0.9, y + 1.55, 0.78, 1.0); break;
     case 'bootmaker': case 'tobacconist': case 'pawnbroker': B('wood_dark', uC - 0.35, uC + 0.35, y + 0.12, y + 0.5, 0.75, 1.2); break;
@@ -437,7 +437,7 @@ export function pub(el, ctx, base) {
     cuts.push(a);
   }
   // the fascia: a deep dark board with the name in large gilt letters, a cornice over it
-  const fasc = pick(rand, ['lacquer_black', 'shutter_green', 'paint_blue', 'wall_red']);
+  const fasc = pick(rand, ['lacquer_black', 'shutter_green', 'wall_red', 'lacquer_black']);
   B(fasc, 0, Wd, y + g0 - 1.0, y + g0 - 0.2, 0, bayD); B('gold', 0, Wd, y + g0 - 1.0, y + g0 - 0.97, bayD - 0.01, bayD + 0.01); B('gold', 0, Wd, y + g0 - 0.23, y + g0 - 0.2, bayD - 0.01, bayD + 0.01);
   write(F, pubName(el.seed), 0.6, Wd - 0.6, y + g0 - 0.92, y + g0 - 0.32, bayD, bayD + 0.07, 'gold');      // the house's name, standing proud of the consoles (letters.js)
   B('plaster_white', -0.05, Wd + 0.05, y + g0 - 0.2, y + g0, 0, bayD + 0.18); B('plaster_white', -0.08, Wd + 0.08, y + g0, y + g0 + 0.1, 0, bayD + 0.22);
@@ -474,7 +474,7 @@ export function pub(el, ctx, base) {
   // the board hanging on an iron bracket from the corner's first floor: a painted sign with gilt lettering
   const uS = east ? Wd - 0.2 : 0.2, ys = y + g0 + 0.6;
   B('iron', uS - 0.02, uS + 0.02, ys + 1.2, ys + 1.25, 0.0, 1.4); B('iron', uS - 0.02, uS + 0.02, ys - 0.05, ys + 1.25, 1.0, 1.04);
-  B(pick(rand, ['paint_blue', 'wall_red', 'shutter_green', 'lacquer_black']), uS - 0.03, uS + 0.03, ys, ys + 1.1, 0.5, 1.4); B('gold', uS - 0.05, uS + 0.05, ys - 0.03, ys, 0.5, 1.4); B('gold', uS - 0.05, uS + 0.05, ys + 1.1, ys + 1.13, 0.5, 1.4);
+  B(pick(rand, ['wall_red', 'lacquer_black', 'shutter_green', 'wall_red']), uS - 0.03, uS + 0.03, ys, ys + 1.1, 0.5, 1.4); B('gold', uS - 0.05, uS + 0.05, ys - 0.03, ys, 0.5, 1.4); B('gold', uS - 0.05, uS + 0.05, ys + 1.1, ys + 1.13, 0.5, 1.4);
   for (let i = 0; i < 4; i++) B('gold', uS - 0.05, uS + 0.05, ys + 0.2 + i * 0.22, ys + 0.3 + i * 0.22, 0.65, 1.25 - (i % 2) * 0.3);
   // upper floors: stucco hoods over the first-floor windows, plain sashes above; a string course at each floor
   B('plaster_white', 0, Wd, y + g0 + 0.1, y + g0 + 0.3, 0, 0.06);
@@ -531,10 +531,10 @@ export function trestleStall(el, { bag, col }) {
   const put = (m, a0, a1, y0, y1, b0, b1) => { const g = box(a0, y0, b0, a1, y1, b1); g.rotateY(r); g.translate(x, y, z); bag.add(m, g); };
   for (const sx of [-0.7, 0.7]) for (const sz of [-0.4, 0.4]) put('wood_dark', sx - 0.03, sx + 0.03, 0, 0.85, sz - 0.03, sz + 0.03);
   put('wood_dark', -0.8, 0.8, 0.85, 0.9, -0.5, 0.5);
-  for (let k = 0; k < 6; k++) put(k % 2 ? 'linen' : 'cloth_red', -0.8 + k * 0.267, -0.533 + k * 0.267, 0.9, 0.92, -0.5, 0.5);
+  for (let k = 0; k < 6; k++) put(k % 2 ? 'cloth_white' : 'cloth_red', -0.8 + k * 0.267, -0.533 + k * 0.267, 0.9, 0.92, -0.5, 0.5);
   for (let k = 0; k < 5; k++) put(el.goods ?? 'wicker', -0.6 + k * 0.3, -0.4 + k * 0.3, 0.92, 1.08, -0.2, 0.2);
   put('iron', -0.8, -0.74, 0.92, 1.9, -0.5, -0.44); put('iron', 0.74, 0.8, 0.92, 1.9, -0.5, -0.44);
-  put('linen', -0.82, 0.82, 1.9, 1.94, -0.55, 0.15);
+  put('cloth_white', -0.82, 0.82, 1.9, 1.94, -0.55, 0.15);
   col.rect([x - 0.9, z - 0.6, x + 0.9, z + 0.6], y, y + 1.1); void P;
 }
 /** horse_trough: { at, y, rot } — the Metropolitan Drinking Fountain and Cattle Trough Association's granite trough for horses (and a dog's bowl at the end), a low
