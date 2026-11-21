@@ -5,6 +5,7 @@
 // stepping down from it to the beach; mangroves, baobabs and coconut palms; the island ends at the
 // disc's edge in the Indian Ocean. Pure data. +x east, +z south (the sea and the harbour to the north).
 
+import { onWalk } from './walk.js';
 export const RADIUS = 340;
 export const SEA = -2.5, RIM = -12;
 export const MOSQUE = [-40, -10, 20, 40];
@@ -116,7 +117,7 @@ const heart = (cx, cz) => Math.hypot(cx + 45, cz - 10);
 /** The outer ring beyond this distance from the town's heart stays a solid block with a varied front (docs/settlements/kilwa.md §20). */
 export const SIMPLE_FROM = 190;
 /** Is the stone house of this lot furnished and open to the visitor? (every house within 95 m of the town's heart but one in seven; one in two to 140 m; one in three beyond, to the solid outer ring) */
-export const isOpen = (l) => (l.dh < 95 ? l.seed % 7 !== 0 : l.dh < 140 ? l.seed % 2 === 0 : l.dh < SIMPLE_FROM && l.seed % 3 === 0);
+export const isOpen = (l) => (l.dh < SIMPLE_FROM && onWalk(l)) || (l.dh < 95 ? l.seed % 7 !== 0 : l.dh < 140 ? l.seed % 2 === 0 : l.dh < SIMPLE_FROM && l.seed % 3 === 0);
 let LOTS = null;
 export function lots() {
   if (LOTS) return LOTS;

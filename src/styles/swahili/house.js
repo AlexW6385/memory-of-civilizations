@@ -41,7 +41,7 @@ function mirrorCtx(ctx, zc) {
   return { ...ctx, bag, col };
 }
 
-let LAST = undefined;
+let LAST = undefined, FRONT = undefined;
 const NULL_CTX = { bag: { add() {}, addInstance() {} }, col: { floor() {}, rect() {}, circle() {}, segment() {}, ramp() {} } };
 /** The routes up a house with an upper floor (a dry run of its build): { A, B, yU, zc, flip, z0 } in the house's own coordinates, or null. */
 export function upRoute(el) {
@@ -161,7 +161,7 @@ export function house(el, ctx0) {
   for (const xx of [x0 + 0.6, x1 - 0.6]) bag.add(DRESSED, box(xx - 0.07, yS, zf - T - 0.55, xx + 0.07, yS + 0.1, zf - T));
   if (!open) return;
   fo.frontDoorU = [frontDoor.u0, frontDoor.u1];
-  if (UP) fo.fdc = fdc;
+  fo.fdc = fdc;
   if (UP) fo.up = { sg: UP.sg, xs: UP.xs, xtop: UP.xtop };
   if (front) furnishFront(ctx, fo, front.rooms[0]);
   furnishBack(ctx, fo, back.rooms[1] ?? back.rooms[0]);
@@ -181,5 +181,13 @@ export function house(el, ctx0) {
   bag.add(RAG, box(x1 - T - 0.9, cf, z0 + T + 0.3, x1 - T - 0.4, cf + 0.18, z0 + T + 0.8));
   // the step up from the court to the front room
   solid(ctx, DRESSED, frontDoor.u0 - 0.1, cf - 0.02, zf - T - 0.4, frontDoor.u1 + 0.1, cf + 0.15, zf - T, false);
+  if (FRONT !== undefined) FRONT = { doorX, fdc, z0, zf, T, fl, cf, zc: (el.rect[1] + el.rect[3]) / 2, flip: !!el.flip, R0, shop: fo.shop || null };
   void B0;
+}
+/** The front of an opened house (a dry run of its build; docs/settlements/kilwa.md §22): the street door, the court, the front room's door and room, the shop's counter, in the house's own coordinates (unflipped), or null. */
+export function houseFront(el) {
+  FRONT = null;
+  house({ ...el, up: false }, NULL_CTX);
+  const f = FRONT; FRONT = undefined;
+  return f;
 }

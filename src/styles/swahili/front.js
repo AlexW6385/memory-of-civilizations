@@ -158,6 +158,7 @@ export function furnishFront(ctx, o, R0) {
     let cx = (rx0 + rx1) / 2 + (rand() - 0.5) * 2, cw = Math.min(2.6, (rx1 - rx0) * 0.4), cz = rz0 + depth * 0.55;
     // (a house with a stair: the counter in the part away from it, nearer the court, so that the stair's foot and the back door stay open)
     if (o.up) { const lo = o.up.sg > 0 ? rx0 + 0.2 : o.up.xs + 1.2, hi = o.up.sg > 0 ? o.up.xs - 1.2 : rx1 - 0.2; cw = Math.min(cw, hi - lo); cx = (lo + hi) / 2; cz = rz0 + depth * 0.35; }
+    o.shop = { cx, cz, cw };
     bag.add('lime_plaster', box(cx - cw / 2, fl - 0.05, cz, cx + cw / 2, fl + 0.9, cz + 0.45)); col.rect([cx - cw / 2, cz, cx + cw / 2, cz + 0.45], fl, fl + 0.9);
     bag.add('timber', box(cx - cw / 2 - 0.04, fl + 0.9, cz - 0.04, cx + cw / 2 + 0.04, fl + 0.95, cz + 0.49));
     bag.add('iron', box(cx - 0.01, fl + 0.95, cz + 0.2, cx + 0.01, fl + 1.35, cz + 0.22)); bag.add('iron', box(cx - 0.3, fl + 1.34, cz + 0.2, cx + 0.3, fl + 1.36, cz + 0.22));
@@ -194,7 +195,7 @@ export function furnishCourt(ctx, o, C) {
   let hx = cx0 + 0.9 + rand() * Math.max(0.2, cx1 - cx0 - 1.8);
   const hz = cz1 - 0.55;
   // (a house with a stair: the hearth and the mortar at the end of the court farther from the front door, which is walked)
-  if (o.up) hx = o.fdc - cx0 > cx1 - o.fdc ? cx0 + 0.9 : cx1 - 1.0;
+  if (o.fdc !== undefined) hx = o.fdc - cx0 > cx1 - o.fdc ? cx0 + 0.9 : cx1 - 1.0;   // (every opened house: the hearth and the mortar away from the line the front room's door is walked on)
   for (let k = 0; k < 3; k++) { const a = k * 2.094; bag.add('rubble', box(hx + Math.cos(a) * 0.14 - 0.06, cf, hz + Math.sin(a) * 0.14 - 0.06, hx + Math.cos(a) * 0.14 + 0.06, cf + 0.13, hz + Math.sin(a) * 0.14 + 0.06)); }
   bag.add('pottery_dark', lathe([[0.001, 0.13], [0.15, 0.15], [0.21, 0.28], [0.17, 0.4], [0.18, 0.42], [0.001, 0.42]], 9, null, hx, cf, hz));
   for (let k = 0; k < 4; k++) bag.add('wood_dark', box(hx + 0.35, cf + k * 0.045, hz - 0.12 + k * 0.03, hx + 0.95, cf + k * 0.045 + 0.04, hz - 0.08 + k * 0.03));

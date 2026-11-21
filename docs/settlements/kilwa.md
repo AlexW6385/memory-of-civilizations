@@ -202,3 +202,15 @@ Ten of the furnished houses nearest the arrival and the main walk (the nine near
 - **Walked**: `plan.walks` has a route from the lane to the gallery of each opened house and, where there is a terrace, from the upper room onto it; `tools/walk-check.mjs --sites kilwa` passes (the ramp under the stair, obstacles for the guard wall and the steps, 0.3 m of clear room beside the rail).
 - **Budget**: the roof poles of every house ceiling (instanced, about a million triangles in view at the arrival) are drawn within 90 m only: from farther they are hidden under their roofs.
 - **Still shut**: the other furnished houses' upper rooms; the roof over the upper room (no way up); the outer ring's solid blocks; the inner room's and back room's upper floors.
+
+## 22. Bring-up to the reference (Suzhou standard): the visitor's walk, night, sound, animals, wear (2026-11-20)
+
+**Sources.** Those of §11–§21 (Archnet 3779/3780/3783, Songo Mnara, Wikipedia "Kilwa Kisiwani", Smithsonian, African History Extra). The shell reached no further pages this session; everything below that those pages do not give is [inferred] from the general record of the Swahili coast and says so.
+
+### 22.1 The visitor's walk
+
+- **The route** [inferred from the layout of §17–§18]: from the arrival in the Great Mosque's hall (−9.95, 32.5) up the aisle to the north door, across the forecourt (tank, well, benches) to the mosque street, north along the spine to the market street (soko) and along it, and down the lanes to the beach's landing places (`src/settlements/kilwa/walk.js`: six lines, `WALK_REACH` 9.5 m).
+- **Opened as by day** [inferred, after §12 and §18]: every lot whose front lies within 9.5 m of the walk and which is not an outer-ring block is now furnished and open (`layout.js isOpen`): 36 lots on the walk, 12 more than before. Each is entered by the street door, the sunk court (hearth of three stones, mortar, water jars), the front room (mat, shelves, hanging lamp); a shop (duka) has its counter with scales and coin box, goods heaped at the end, and **its keeper standing behind the counter** (a man in a white robe and cap, `fronts.js`; the counter's place read from the house's own dry run, `house.js houseFront`).
+- **The hearth and the mortar** of every furnished court now stand at the end of the court away from the line the front room's door is walked on (before, only the houses with a stair kept it clear): `front.js furnishCourt`.
+- **Routes** (`walkroutes.js`, `plan.walks`): from the lane through the street door, across the court, into the front room, for every opened lot of the walk without a stair (the houses with one keep their own routes of §21); `tools/walk-check.mjs --sites kilwa` walks all of them.
+- Street furniture on the walk was already there (§17–§18: the baraza benches either side of the carved doors, lamp niches, the tank and well before the mosque, stalls under mat awnings). No shop sign is written: Swahili shops of the 14th century carried none that we know of [inferred].
