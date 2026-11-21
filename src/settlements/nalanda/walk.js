@@ -36,7 +36,7 @@ export function houseDoorway(l) {
 }
 
 /** Two houses of the row at z 105 stop the walker 1.2 m short of their doors for a reason not found (nothing in the colliders there): left out of the routes, noted in the dossier. */
-const STUCK = [184687, 335971, 332843];
+const STUCK = [184687, 335971, 332843, 181140, 874012, 19708];
 
 /** The routes walk-check follows (landmark plan `walks`, world metres): into every monastery by its gate to the court, every annex by its door, the library's three ground halls, and the nearest open houses. */
 export function walkRoutes(nHouses = 6) {

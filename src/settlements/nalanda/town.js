@@ -3,6 +3,7 @@ import { lodTiles } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, MONASTERIES, TEMPLES, TANKS, LEVEL, WAY, T3, M1, LIBRARY, mgate, lots, yards, tankD, WAY_LAMPS, BOOTHS, JALS, OTLAS, ANNEXES, GATE, STUPA_END } from './layout.js';
 import { HALL, TOWERS } from './plan.js';
+import { houseDoor } from '../../styles/nalanda/houses.js';
 import '../../styles/nalanda/index.js';
 import '../../styles/vernacular/index.js';
 import '../../objects/index.js';
@@ -71,7 +72,7 @@ function people() {
   const L = lots();
   for (let i = 0; i < L.length; i += 3) {
     const [rx0, rz0, rx1, rz1] = L[i].rect, f = L[i].front;
-    let x = f === 'w' ? rx0 - 1.6 : (rx0 + rx1) / 2 + 2, z = f === 'n' ? rz0 - 1.6 : (rz0 + rz1) / 2;
+    let [x, z] = (() => { const F = houseDoor(L[i]); return F.P(F.du < F.L / 2 ? Math.min(F.L - 0.6, F.du + 2.2) : Math.max(0.6, F.du - 2.2), -1.6); })();       // (beside the door, off its lane)
     if (L[i].gone) { const a = ANNEXES.find((q) => rx0 < q.rect[2] + 0.5 && rx1 > q.rect[0] - 0.5 && rz0 < q.rect[3] + 0.5 && rz1 > q.rect[1] - 0.5); if (a) { x = (a.rect[0] + a.rect[2]) / 2 + 2.4; z = a.rect[3] + 2.2; } }    // (a house not built: its villager stands at the annex's door instead)
     if (tankD(x, z) < 6) continue;
     const t = r();
