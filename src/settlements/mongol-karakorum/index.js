@@ -1,6 +1,7 @@
 // Mongol Karakorum, c. 1254: Möngke's palace and the silver tree, the walled town, the ger camps.
 import '../../styles/mongol/index.js';
 import './nightlight.js';
+import './wear.js';
 import palace from './plan.js';
 import gerCamp from './gercamp.js';
 import music from './music.js';
