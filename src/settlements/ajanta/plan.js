@@ -2,6 +2,7 @@
 // painted vihara (Cave 1), the chaitya hall (Cave 19), a monk's cell hall, the shrine niches, the Waghora with its ford and
 // waterfall, the painters' scaffold in Cave 1 and a mason's at a niche of the north wing.
 import { XF, ZW, ZOUT, WX1, ROCK, FLOOR, C1, C19, C12, FALL, SHELTER, GHATS } from './layout.js';
+import { walkRoutes } from './walk.js';
 import { viharaGeo, chaityaGeo } from '../../styles/ajanta/caves.js';
 
 const E = [];
@@ -35,6 +36,8 @@ const rooms = [
 const walks = [[[-48, -46], [-48, -58], [-52.8, -58.4], [-52.8, -43], [-56, -41], [-56, -26], [-62, -26], [-66, -26], [-74, -26], [-84, -26], [-87.5, -26], [-84, -26], [-66.75, -26], [-66.75, -33], [-66.75, -37.5],
   [-66.75, -33], [-66.75, -26], [-62, -26], [-56, -26], [-56, 24], [-62, 24], [-69.5, 24], [-62, 24], [-56, 24], [-56, 46], [-62, 46], [-65, 46]]];
 walks[0].y0 = 0;
+// the visitor's walk and the opened places of the gorge floor and the village (walk.js)
+for (const r of walkRoutes()) { const w = r.route.map(([x, z]) => [Math.round(x * 100) / 100, Math.round(z * 100) / 100]); w.y0 = r.y0; w.id = r.id; walks.push(w); }
 
 export const ajanta = {
   id: 'ajanta-caves',

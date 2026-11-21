@@ -23,13 +23,15 @@ export function lots() {
   });
   // four of the lots are the trades' sheds (docs/settlements/ajanta.md §14): the potter near the ford's road, the oil-presser, the smith and the weaver at the village's far edge
   for (const [i, craft] of [[3, 'potter'], [8, 'oilpress'], [10, 'smithy'], [15, 'weaver']]) if (out[i]) { out[i].craft = craft; out[i].variant = 0; }
+  // the six houses nearest the road from the ford stand open to the visitor: a door of 1.64 m, the front room walkable (walk.js)
+  out.filter((l) => !l.craft).sort((a, b) => Math.hypot(a.rect[0] - 40, a.rect[1] - 30) - Math.hypot(b.rect[0] - 40, b.rect[1] - 30)).slice(0, 6).forEach((l) => { l.open = true; });
   return out;
 }
 
 export async function town() {
   const E = [], L = [], V = [], rand = rng(481), seed = () => Math.floor(rand() * 1e9);
   const LOTS = lots();
-  for (const l of LOTS) E.push(l.craft ? { t: 'aj_' + l.craft, rect: l.rect, front: l.front, seed: l.seed } : { t: 'aj_house', rect: l.rect, front: l.front, mud: l.mud, variant: l.variant, seed: l.seed });
+  for (const l of LOTS) E.push(l.craft ? { t: 'aj_' + l.craft, rect: l.rect, front: l.front, seed: l.seed } : { t: 'aj_house', rect: l.rect, front: l.front, mud: l.mud, variant: l.variant, seed: l.seed, ...(l.open ? { open: true } : {}) });
   // low mud walls close the street front between the houses (a gap left to pass)
   for (let i = 0; i < LOTS.length - 1; i++) {
     const a = LOTS[i], b = LOTS[i + 1];
@@ -79,7 +81,7 @@ export async function town() {
   monk([-47.2, -12.5], 0, 0, { pose: 'stand', carry: 'staff' });
   lay([-46.4, -17.2], 0, 0, { pose: 'stand', carry: 'basket' });
   woman([-49.1, -9.0], 0, Math.PI, { pose: 'stand', carry: 'pot', arms: 'head' }); woman([-48.0, -7.4], 0, Math.PI, { pose: 'stand', carry: 'basket' });
-  worker([-47.6, -24.5], 0, 0, { pose: 'stand', carry: 'basket' }); worker([-48.6, -27.0], 0, 0, { pose: 'stand', carry: 'basket' });
+  worker([-45.6, -24.5], 0, 0, { pose: 'stand', carry: 'basket' }); worker([-50.4, -27.0], 0, 0, { pose: 'stand', carry: 'basket' });
   monk([-44.2, -21.5], 0, Math.PI / 2, { pose: 'sit_ground' }); lay([-43.0, -22.4], 0, Math.PI / 2, { pose: 'talk' });
   T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [-45.2, -14.0], y: 0, seed: 13 }); T.push({ t: 'basket', at: [-44.6, -19.6], y: 0, rot: 1.0, seed: 14 });
   T.push({ t: 'animal', kind: 'zebu', at: [-44.5, -31.0], y: 0, rot: 2.6, seed: 15, graze: true });
@@ -95,11 +97,15 @@ export async function town() {
   // the river: women washing, a man at the ford, an egret is the fauna's
   woman([riverX(-30) - 4.8, -30], 0, Math.PI / 2, { pose: 'squat' }); woman([riverX(-28) - 5.2, -27], 0, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' });
   worker([riverX(14) + 6.2, 14.5], 0, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
-  // the flower and lamp-oil sellers' stalls along the path to the stair, a basket seller on a mat
-  for (const [x, goods, aw] of [[-32, ['produce', 'basket'], 'cloth_ochre'], [-27, ['water_pot', 'cloth'], 'cloth_red'], [-22, ['basket', 'produce'], 'cloth_white']]) {
-    T.push({ t: 'stall', at: [x, -46.9], y: 0, rot: 0, awning: aw, goods, seed: seed() });
-    (rand() < 0.5 ? woman : worker)([x, -48.0], 0, 0, { pose: 'stand' });
+  // the flower, lamp-oil and cloth sellers' booths along the path to the stair (docs/settlements/ajanta.md §16): each keeper sits on her mat behind the board
+  for (const [x, kind] of [[-32, 'flowers'], [-27, 'lamps'], [-22, 'cloth']]) {
+    E.push({ t: 'aj_offerstall', at: [x, -46.9], y: -EAST, front: 's', kind, seed: Math.round(-x * 7) });
+    (kind === 'cloth' ? worker : woman)([x - 0.9, -47.3], 0.1, 0, { pose: 'sit_low' });
   }
+  // the water-shed on the east bank's path and the votive stupa at the ford's east end
+  E.push({ t: 'aj_offerstall', at: [riverX(2) + 13.4, 2], y: -EAST, front: 'w', kind: 'water', seed: 31 });
+  woman([riverX(2) + 13.4 + 0.1, 2 + 0.9], 0.1, -Math.PI / 2, { pose: 'sit_low' });
+  E.push({ t: 'aj_wayshrine', at: [-16.2, 9.6], y: -EAST });
   lay([-29.5, -43.3], 0, Math.PI, { pose: 'talk' }); lay([-24.6, -43.5], 0, 3.6, { pose: 'stand' }); monk([-18.5, -44.6], 0, Math.PI / 2, { pose: 'stand', carry: 'staff' });
   // the masons' and painters' yard: the grinder of colours, the lime-stirrer, the chiseller at the pillar
   woman([XF + 22.7, -ZW + 9.9], 0, 0, { pose: 'squat', cloth: 'cloth_ochre' });

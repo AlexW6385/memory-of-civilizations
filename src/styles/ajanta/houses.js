@@ -31,7 +31,7 @@ const MUDS = ['mud_plaster', 'earth_wall'];
 /** aj_house: { rect, front, seed, variant 0–3, mud } — see the file header. */
 export function house(el, { bag, col, lights }) {
   const rect = el.rect, F = frame(rect, el.front), { W, D } = F, rand = rng(el.seed ?? 1), mud = el.mud ?? MUDS[Math.floor(rand() * 2)], V = el.variant ?? 0;
-  const flat = V === 3, H = flat ? 2.55 : 2.3, t = 0.35, uc = W * (0.38 + rand() * 0.24), dw = 0.52, dh = 1.75, y = 0;
+  const open = !!el.open, flat = V === 3, H = flat ? 2.55 : 2.3, t = 0.35, uc = W * (0.38 + rand() * 0.24), dw = open ? 0.82 : 0.52, dh = open ? 2.08 : 1.75, y = 0;   // an opened house: a door 1.64 m clear, its head 2.08 m up (the walker's)
   const ops = [[uc, dw, 0, dh]];
   const wf = W * (uc > W / 2 ? 0.2 : 0.8);
   if (rand() < 0.8) ops.push([wf, 0.22, 1.15, 1.6]);
@@ -106,7 +106,7 @@ export function house(el, { bag, col, lights }) {
     B(F, bag, 'banco', 0.25, 0.18, -0.55, 1.35, 0.5, -0.05); C(F, col, 0.25, -0.55, 1.35, -0.05, 0.18, 0.5);
   }
   if (V === 2) {
-    const wl = 3.1, wh = 1.15, wt = 0.28, g = 0.85;
+    const wl = 3.1, wh = 1.15, wt = 0.28, g = open ? 0.98 : 0.85;
     const wallU = (u0, u1, v0, v1) => { B(F, bag, 'mud_plaster', u0, 0, v0, u1, wh, v1); B(F, bag, 'thatch', u0 - 0.05, wh, v0 - 0.06, u1 + 0.05, wh + 0.1, v1 + 0.06); C(F, col, u0, v0, u1, v1, 0, wh); };
     wallU(-0.1, -0.1 + wt, -wl, 0); wallU(W - wt + 0.1, W + 0.1, -wl, 0);
     wallU(-0.1, W / 2 - g, -wl, -wl + wt); wallU(W / 2 + g, W + 0.1, -wl, -wl + wt);

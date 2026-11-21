@@ -7,9 +7,10 @@ import { VILLAGE_ELEMENTS } from './village.js';
 import { HOUSE_ELEMENTS } from './houses.js';
 import { DRESS_ELEMENTS } from './dress.js';
 import { CRAFT_ELEMENTS } from './crafts.js';
+import { STALL_ELEMENTS } from './stalls.js';
 
 registerStyle('ajanta', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { aj_cliff: cliff, ...VILLAGE_ELEMENTS, ...HOUSE_ELEMENTS, ...DRESS_ELEMENTS, ...CRAFT_ELEMENTS },
+  elements: { aj_cliff: cliff, ...VILLAGE_ELEMENTS, ...HOUSE_ELEMENTS, ...DRESS_ELEMENTS, ...CRAFT_ELEMENTS, ...STALL_ELEMENTS },
   objects: {},
 });
