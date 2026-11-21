@@ -6,6 +6,8 @@ import { RADIUS, FX, FXS, ZS, WATER, BANK_X, QUAY, QUAY_Y, TERRACE, GATE, SGATE,
 import { ground } from './ground.js';
 import { sculptPlans } from './sculpt.js';
 import { cliffTop } from '../../styles/ramesside/dims.js';
+import { STANDS, FIRES, registerNight } from './nightlight.js';
+registerNight();
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, y = 0, rooms = []) => ({ id, style: 'ramesside', origin: [0, 0], base: y, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [FX + 44, 0], facing: 'w' } });
@@ -202,6 +204,7 @@ export async function town() {
       { t: 'block', walk: true, rect: [QUAY[0], QUAY[1], QUAY[2], QUAY[3]], y0: -10, y1: QUAY_Y, mat: 'sandstone_dressed' },
       { t: 'bollards', y: QUAY_Y, posts: [[QUAY[2] - 0.6, -9], [QUAY[2] - 0.6, -3], [QUAY[2] - 0.6, 3], [QUAY[2] - 0.6, 9]] },
       { t: 'quay_dress', rect: [QUAY[0], QUAY[1], QUAY[2], QUAY[3]], y: QUAY_Y, seed: 41 },
+      ...FIRES.filter(([x]) => x > 40).map(([x, z, y]) => ({ t: 'abu_fire', at: [x, z], y })),   // the quay's watch-fires (built into the quay's plan: no new draw)
     ]));
   }
   // the bank: contour ridges of the fields (low walls of mud holding the water), shadufs at the lower edge
@@ -230,7 +233,8 @@ export async function town() {
   plans.push(base('abu-simbel-lanes', [{ t: 'lane_dress', lanes: lanes().filter((x) => x.r[1] >= 60 && x.kind !== 'cross'), gaps: lanes().filter((x) => x.kind === 'cross').map((x) => [x.r[0], x.r[2]]), seed: 24 }]));
   plans.push(base('abu-simbel-chapel', [{ t: 'camp_chapel', rect: CHAPEL, seed: 71 }]));
   plans.push(base('abu-simbel-granaries', [{ t: 'granaries', list: granaryList(), y: 0 }]));
-  if (yardHere) plans.push(base('abu-simbel-yard', [{ t: 'masons_yard', rect: YARD, y: 0, seed: 53 }]));
+  if (yardHere) plans.push(base('abu-simbel-yard', [{ t: 'masons_yard', rect: YARD, y: 0, seed: 53 }, ...FIRES.filter(([x]) => x < 40).map(([x, z, y]) => ({ t: 'abu_fire', at: [x, z], y }))]));
+  plans.push(base('abu-simbel-night', [{ t: 'abu_halo' }, ...STANDS.map(([x, z, y]) => ({ t: 'abu_stand', at: [x, z], y }))]));
   plans.push(...sculptPlans());
   plans.push({ ...base('abu-simbel-people', people()), style: 'life' });
   plans.push({ ...base('abu-simbel-boats', [...boats(), ...crews()], 0), style: 'life' });
