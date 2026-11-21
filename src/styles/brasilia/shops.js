@@ -2,8 +2,9 @@
 // entered by its door, its trade furnished (bakery, news stand, haberdashery, pharmacy, snack bar, grocery, shoemaker, barber,
 // stationer, butcher, greengrocer, optician), fascia boards with pseudo-lettering, goods out under the arcade.
 import { box, lathe, rod } from '../../core/geom.js';
-import { rngOf, solidBox, shelving, counter, stool, letters } from './kit.js';
+import { rngOf, solidBox, shelving, counter, stool } from './kit.js';
 import { shopOrder } from './trades.js';
+import { sign } from './sign.js';
 
 const WHITE = 'plaster_white', CONC = 'concrete_light';
 const FASCIA = ['cloth_red', 'cloth_blue', 'cloth_green', 'cloth_ochre', 'paint_blue', 'wood_painted', 'cloth_maroon', 'paint_ochre'];
@@ -113,7 +114,13 @@ export function shopsRow(el, { bag, col, lights }) {
     bag.add('wood_painted', box(fx - 0.06, 3.0, z + 0.05, fx + 0.1, 3.55, z + W - 0.05));
     const fc = FASCIA[Math.floor(R() * FASCIA.length)];
     bag.add(fc, box(fx - 0.1, 3.05, z + 0.2, fx - 0.06, 3.5, z + W - 0.2));
-    letters(bag, 'cloth_white', fx - 0.1, 3.12, z + W / 2, 8 + Math.floor(R() * 3), 'x-', R, 0.3, 0.19);
+    // the trade's name in capitals, on a board standing on the awning's outer edge (the fascia behind is hidden from the street by the awning) (docs §16)
+    bag.add(fc, box(x0 - 0.3, 3.1, z + 0.25, x0 - 0.2, 3.58, z + W - 0.45));
+    sign(bag, WHITE, trade, { x: x0 - 0.3, y: 3.22, zc: z + (W - 0.2) / 2, cell: 0.052 });
+    R(); R(); R();                                                                                     // (the three draws the pseudo-lettering made: the rest of the unit keeps its variety)
+    // the sill worn by the feet, and red dust drifted into the corners of the glass
+    bag.add('granite_black', box(fx - 0.28, 0.064, zd0 + 0.02, fx + 0.28, 0.07, zd1 - 0.02));
+    for (const [dz, dw] of [[z + 0.12, 0.5], [z + W - 0.62, 0.5]]) bag.add('laterite', box(fx - 0.45, 0.064, dz, fx - 0.04, 0.074, dz + dw));
     bag.add(aw[Math.floor(R() * 5)], box(x0 - 0.2, 2.9, z + 0.1, fx, 3.1, z + W - 0.3));
     // out under the arcade: the trade's goods at the door
     const gx = x0 + 1.0;
