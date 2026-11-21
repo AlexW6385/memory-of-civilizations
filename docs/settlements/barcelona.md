@@ -270,3 +270,6 @@ Code: `src/styles/modernisme/signs.js` (text and writing), `shops.js` (the board
 
 ### 15.0 Names off the fascias
 The first pass put invented house names (a Catalan surname after "CASA": PUIG, SERRA, ...) on the longer boards [inferred, no source]. All are removed (`src/styles/modernisme/signs.js`: `HOUSES` gone): every fascia reads the trade word alone, in Catalan or Castilian (FORN, BODEGA, FARMACIA ...), as London's did. No board carries the name of a person, shop or brand.
+
+### 15.1 Night near the visitor
+Rendered the arrival and the Marina's west pavement at the kiosk (x 226.6, z -58, yaw 0) at night (1024x576, low, radius 70). The walk pose reads well (kiosk glow, lit shops and windows, the tram's lamp); at the arrival the foot of the façade, the cabs and the stall stood dark, with only the corner lamp lit. Added to the existing night halo (`nightlight.js`, no new plan, no draw): the cabs' carriage lamps (two each, candle lanterns) with a pool under each, the fruiterer's stall lantern, lanterns on the works' gate posts and three pools on the paving along the hoarding [inferred: stalls, cabs and building sites were lit by candle or oil lantern]. Re-rendered: the cab and stall glows show as halos in the arrival frame; the gate's lanterns are small at 50 m. Shots: shots/bcn-night-*.png (not committed).

@@ -12,7 +12,7 @@ import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { STYLES } from '../../core/build.js';
 import { blockShops, blockWindows, blockPortals } from '../../styles/modernisme/index.js';
 import { nightSites } from './town.js';
-import { RADIUS, GRACIA_X, CASA, BATLLO, height, bancsFanals } from './layout.js';
+import { RADIUS, GRACIA_X, CASA, BATLLO, PITCH, SAGRADA, height, bancsFanals } from './layout.js';
 
 const TAU = Math.PI * 2;
 /** A number in [0, 1) from numbers alone. */
@@ -103,6 +103,14 @@ export function halos() {
   for (const l of L.lamps) { H.ball(l.x, l.y + l.h, l.z, l.r); H.floor(l.x, l.y + 0.17, l.z, l.pool, l.pool * 0.9, 0, 8); }
   // the arrival's corner lamp (arrival.js street_lamp, 4.2 m)
   { const x = 219.15 + 1.0, z = -92 + 35 - 3.2, y = height(x, z); H.ball(x, y + 3.7, z, 1.5); H.floor(x, y + 0.17, z, 3.4, 3.0, 0, 8); }
+  // the arrival's street near the visitor (arrival.js): the cabs' carriage lamps (a candle lantern each side of the dash), the fruiterer's stall lantern, the lanterns hung on the
+  // works' gate posts with their light on the lane to the façade, the pavement before the hoarding [inferred: a stall, a cab and a gate were lit by candle or oil lantern]
+  {
+    const XM = PITCH * 2.5, GZ = SAGRADA[1];
+    for (const z of [GZ + 25, GZ + 31]) { const x = XM + 6.2, y = height(x, z); for (const sg of [-1, 1]) H.ball(x + sg * 0.95, y + 1.95, z - 1.5, 0.5); H.floor(x, y + 0.1, z - 1.2, 2.6, 2.2, 0, 6); }
+    { const x = XM + 8.4 - 0.2, z = GZ + 6, y = height(x, z); H.ball(x, y + 2.05, z, 0.75); H.floor(x, y + 0.1, z, 2.6, 2.4, 0, 6); }
+    { const [gx, , gy] = L.gate; for (const sg of [-1, 1]) { const z = GZ + sg * 3.2; H.ball(gx + 0.95, gy + 2.4, z, 0.8); } H.floor(gx + 1.6, gy + 0.08, GZ, 3.6, 4.2, 0, 8); H.floor(gx + 3.4, gy + 0.08, GZ + 6, 3.2, 3.0, 0, 6); H.floor(gx + 3.4, gy + 0.08, GZ - 6, 3.2, 3.0, 0, 6); }
+  }
   // Falqués's bench-lamps of the Passeig: the crown lantern and four on arms, a wide pool (the avenue's best light)
   for (const b of L.benches) {
     H.ball(b.x, b.y + 6.9, b.z, 1.3);
