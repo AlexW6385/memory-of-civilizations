@@ -105,7 +105,7 @@ What "detailed" means. Every settlement reaches all of this at L3; L1 and L2 are
 
 **Plants.** The species of the place and time, at the right size and spacing, with wind; grass, weeds in cracks, ivy, moss; crops in their fields; trees with real bark and canopy density.
 
-**Figures and life.** Where the dossier describes who was there and what they did, still figures in the right dress may stand in their places (a priest at the altar, a merchant at the stall, a monk in the cloister), kept few and quiet; never animated crowds, never dialogue.
+**Figures and life.** Where the dossier describes who was there and what they did, still figures in the right dress may stand in their places (a priest at the altar, a merchant at the stall, a monk in the cloister), kept few and quiet; never animated crowds, never dialogue. **By night** the still figures thin: each figure carries the night level (`ENV.night`) beyond which it is not drawn, from a hash of its place, so a street empties over dusk and fills over dawn; a fraction `nightKeep` (default 0.25; a kit or `KIT_OVER` sets it, an element may too) stays all night, as do figures with a staff (watchmen). It is done where the street life's copies are already chosen (`src/engine/life-instances.js`, re-chosen when the night level moves a twentieth): no draw, no shader, shadows go with the figure. Figures merged into tiles by real material (not in the life instances) do not thin.
 
 **Scale of care.** Anything within 20 m of a walkable spot must bear a close look; anything within 200 m must read correctly in form, material and colour; beyond that, impostors and simplified shells are allowed as long as the skyline and the colours are right.
 
