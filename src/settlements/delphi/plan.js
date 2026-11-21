@@ -17,7 +17,7 @@ T.push({ t: 'floor', rect: [TT[0] + 0.5, TT[1] + 0.5, TT[2] - 0.5, TT[3] - 0.5],
 terraceMonuments(T);
 terraceDedications(T);
 // the torches of the terrace at night (nightlight.js): at the head of the stair, and before the altar of the Chians
-for (const [x, z] of [[89.4, 24.4], [82.6, 24.4], [56, -4], [56, 3]]) T.push({ t: 'dl_torch', at: [x, z], y: TT_Y + 0.03 });
+for (const [x, z] of [[89.4, 24.4], [82.6, 24.4], [56, -4], [56, 3], [67.5, 10.5], [56.5, 21.5], [56.5, 11], [68.5, 21.5], [75, 15]]) T.push({ t: 'dl_torch', at: [x, z], y: TT_Y + 0.03 });
 const rib = (P, o) => ({ t: 'ribbon', pts: P.map((p) => [p[0], p[2]]), ys: P.map((p) => p[1]), ...o });
 T.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] < 30), { w: 3.6, mat: 'flagstone', kerb: false, lift: 0.04 }));
 T.push(...lampHalos(T));

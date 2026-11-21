@@ -1,13 +1,14 @@
 // The town of Delphi (docs/settlements/delphi.md §4.5, §8): the houses of the Delphians on their terraces west and east of the
 // sanctuary, and the people of the oracle: pilgrims and consultants on the Sacred Way, the priests and the Pythia's escort at the
 // temple, the goat for the sacrifice, the washers at the Castalian spring, the sellers at the gate, athletes in the stadium.
+import './nightlight.js';
 import { STALLS } from './layout.js';
 import { YARD, PEN } from './votives.js';
 import { fronts, openLife } from './fronts.js';
 import { houseRooms } from '../../styles/delphi/house.js';
 import { retain } from './buildings.js';
 import { wayPoints } from './layout.js';
-import { VROADS, inLot, inLane, lanes, alleys, ROW_PITCH, RADIUS, lots, height, pathAt, WAY, WAY2, TT_Y, TEMPLE, ALTAR, SPRING, STADIUM, STADIUM_Y, FC, FC_Y, THEATRE, TREASURIES, STOA, TT, inRect } from './layout.js';
+import { VROAD_X, VROADS, inLot, inLane, lanes, alleys, ROW_PITCH, RADIUS, lots, height, pathAt, WAY, WAY2, TT_Y, TEMPLE, ALTAR, SPRING, STADIUM, STADIUM_Y, FC, FC_Y, THEATRE, TREASURIES, STOA, TT, inRect } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [98, 134], facing: 'n' } });
@@ -42,6 +43,8 @@ export async function town() {
       for (let i = 0; i + 1 < V.P.length; i++) { const a = V.P[i], b = V.P[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / 2.5)); for (let k = i ? 1 : 0; k <= n; k++) seg.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n, V.yf(acc + L * k / n)]); acc += L; }
       E.push({ t: 'ribbon', pts: seg.map((q) => [q[0], q[1]]), ys: seg.map((q) => q[2]), w: 3.0, mat: 'rubble', kerb: false, lift: 0.03 });
     }
+    // the pitch-pine torches along the village road (nightlight.js dl_torch): a light every nine metres, on the road's east edge out of the walker's lane
+    for (const z of [52, 70, 79, 88, 95]) { const V = z < 62 ? VROADS[0] : VROADS[1], sy = z < 62 ? 12.3 + (62 - z) : z - 62; E.push({ t: 'dl_torch', at: [VROAD_X + 1.3, z], y: V.yf(sy) + 0.03 }); }
     for (const q of alleys()) if (q.up && q.dn) {
       const yU = q.up.y, yD = q.dn.y;
       E.push({ t: 'stair', rect: [q.x0 + 0.1, q.up.z + 1.2, q.x1 - 0.1, q.up.z + 1.2 + Math.max(4, (yU - yD) * 2.2)], dir: 'n', y0: yD, y1: yU, riser: 0.17, base: yD - 0.6, mat: 'limestone' });
