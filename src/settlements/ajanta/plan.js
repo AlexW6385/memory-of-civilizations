@@ -1,7 +1,7 @@
 // The Ajanta cliff (docs/settlements/ajanta.md §2–§5): the horseshoe of rock-cut caves, the ledge and its stair, the
 // painted vihara (Cave 1), the chaitya hall (Cave 19), a monk's cell hall, the shrine niches, the Waghora with its ford and
 // waterfall, the painters' scaffold in Cave 1 and a mason's at a niche of the north wing.
-import { XF, ZW, ZOUT, WX1, ROCK, FLOOR, C1, C19, C12, FALL, SHELTER, GHATS } from './layout.js';
+import { XF, ZW, ZOUT, WX1, ROCK, FLOOR, C1, C19, C12, FALL, SHELTER, GHATS, riverX } from './layout.js';
 import { walkRoutes } from './walk.js';
 import { viharaGeo, chaityaGeo } from '../../styles/ajanta/caves.js';
 
@@ -14,6 +14,10 @@ E.push({ t: 'aj_shelter', rect: SHELTER });
 E.push({ t: 'aj_ledge' });
 E.push({ t: 'aj_workyard' });
 E.push({ t: 'aj_clifflife' });
+// the pilgrims' booths on the path to the stair, the water-shed on the east bank's path, the votive stupa at the ford's east end (docs/settlements/ajanta.md §16)
+for (const [x, kind] of [[-32, 'flowers'], [-27, 'lamps'], [-22, 'cloth']]) E.push({ t: 'aj_offerstall', at: [x, -46.9], y: 0, front: 's', kind, seed: Math.round(-x * 7) });
+E.push({ t: 'aj_offerstall', at: [riverX(2) + 13.4, 2], y: 0, front: 'w', kind: 'water', seed: 31 });
+E.push({ t: 'aj_wayshrine', at: [-16.2, 9.6], y: 0 });
 for (const z of GHATS) E.push({ t: 'aj_ghat', z, seed: Math.round(z) });
 const y1 = FLOOR[1], v = viharaGeo(XF, C1.z, y1), ch = chaityaGeo(XF, C19.z, y1);
 // the painters' scaffold at Vajrapani on the rear wall of Cave 1's hall; a mason's at a niche on the north wing

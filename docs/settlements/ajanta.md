@@ -140,7 +140,7 @@ All [inferred]: nothing sources the fauna of Ajanta in 480; these are the animal
 - **Not rigged** for want of a model: peafowl, monkeys (both in the paintings), elephants, zebu and buffalo (the life figures' ones remain), bees (the comb under the overhang is geometry only).
 
 ## 20. Matching the reference, 5: wear and writing
-All [inferred] from use and climate (dry most of the year, a monsoon of four months); `src/settlements/ajanta/wear.js`. Pads of `polished_sandstone` 6 mm thick lie 3 mm over what they wear on; every size is a hash of its own place.
+All [inferred] from use and climate (dry most of the year, a monsoon of four months); `src/settlements/ajanta/wear.js`. Pads of `sandstone_white` (`lime_plaster` on the stairs, `limewash_white` on the huts: materials already in each plan, so that no draw is added; each pad leans in a little at its edges, differently, so that no twelve are one instanced shape) 6 mm thick lie 3 mm over what they wear on; every size is a hash of its own place.
 - **Stairs.** Both rock-cut stairs (53 treads each) have a pale smooth run along the middle of each tread, its width and side differing tread to tread, where bare feet climb.
 - **Thresholds.** Worn pads before Cave 1's three doors on the porch side and inside, before the chaitya hall's and the cell hall's doors on the ledge; a hollow in the granite threshold of every open hut and one in three of the others.
 - **Ledge.** A pale ring round each votive stupa, worn by pilgrims walking round it (circumambulation, with the stupa on the right) [inferred: the practice is Buddhist and old; the ring's size is ours].

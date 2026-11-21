@@ -66,7 +66,7 @@ function shelter(el, { bag, col }) {
   // what pilgrims left and use (docs/settlements/ajanta.md §16 [inferred]): sleeping mats, cloth bundles with a staff, a water jar on a rack, a lamp on a post
   bag.add('reed_mat', box(x0 + 0.4, 0.06, z0 + 0.3, x0 + 2.0, 0.075, z0 + 1.1)); bag.add('reed_mat', box(x0 + 2.3, 0.06, z0 + 0.5, x1 - 0.4, 0.075, z0 + 1.3));
   bag.add('cloth_white', lathe([[0.001, 0], [0.22, 0], [0.28, 0.14], [0.1, 0.24], [0.001, 0.24]], 8, null, x0 + 1.2, 0.075, z0 + 0.7));
-  bag.add('cloth_brown', lathe([[0.001, 0], [0.2, 0], [0.24, 0.12], [0.001, 0.2]], 8, null, x1 - 1.0, 0.075, z0 + 0.9));
+  bag.add('cloth_ochre', lathe([[0.001, 0], [0.2, 0], [0.24, 0.12], [0.001, 0.2]], 8, null, x1 - 1.0, 0.075, z0 + 0.9));
   bag.add('timber', rod([x0 + 2.0, 0.075, z0 + 0.45], [x0 + 2.2, 1.5, z0 + 0.4], 0.02, 4));
   for (const [dx, dz] of [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2]]) bag.add('timber', rod([x1 - 0.7 + dx, 0.06, z1 - 0.4 + dz], [x1 - 0.7 + dx * 0.5, 0.5, z1 - 0.4 + dz * 0.5], 0.025, 4));
   bag.add('terracotta', lathe([[0.001, 0.5], [0.2, 0.52], [0.3, 0.74], [0.24, 0.98], [0.14, 1.05], [0.17, 1.12], [0.001, 1.12]], 10, null, x1 - 0.7, 0, z1 - 0.4)); col.circle(x1 - 0.7, z1 - 0.4, 0.32, 0.06, 1.1);

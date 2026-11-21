@@ -80,13 +80,10 @@ export async function town() {
   worker([riverX(14) + 6.2, 14.5], 0, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
   // the flower, lamp-oil and cloth sellers' booths along the path to the stair (docs/settlements/ajanta.md §16): each keeper sits on her mat behind the board
   for (const [x, kind] of [[-32, 'flowers'], [-27, 'lamps'], [-22, 'cloth']]) {
-    E.push({ t: 'aj_offerstall', at: [x, -46.9], y: -EAST, front: 's', kind, seed: Math.round(-x * 7) });
     (kind === 'cloth' ? worker : woman)([x - 0.9, -47.3], 0.1, 0, { pose: 'sit_low' });
   }
-  // the water-shed on the east bank's path and the votive stupa at the ford's east end
-  E.push({ t: 'aj_offerstall', at: [riverX(2) + 13.4, 2], y: -EAST, front: 'w', kind: 'water', seed: 31 });
+  // the water-shed on the east bank's path (the booths, the shed and the wayside stupa are the landmark plan's: plan.js, the gorge floor's cell)
   woman([riverX(2) + 13.4 + 0.1, 2 + 0.9], 0.1, -Math.PI / 2, { pose: 'sit_low' });
-  E.push({ t: 'aj_wayshrine', at: [-16.2, 9.6], y: -EAST });
   lay([-29.5, -43.3], 0, Math.PI, { pose: 'talk' }); lay([-24.6, -43.5], 0, 3.6, { pose: 'stand' }); monk([-18.5, -44.6], 0, Math.PI / 2, { pose: 'stand', carry: 'staff' });
   // the masons' and painters' yard: the grinder of colours, the lime-stirrer, the chiseller at the pillar
   woman([XF + 22.7, -ZW + 9.9], 0, 0, { pose: 'squat', cloth: 'cloth_ochre' });

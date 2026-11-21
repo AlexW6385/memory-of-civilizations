@@ -4,22 +4,26 @@
 // glyph here, and none is invented).
 import '../../styles/ajanta/index.js';
 import './nightlight.js';
-import { box, lathe } from '../../core/geom.js';
+import { box, lathe, frustum } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { XF, FLOOR, STAIR, STAIR2, C1, C19, C12, FORD, riverX, rng } from './layout.js';
 import { hashAt } from './nightlight.js';
 
-const POL = 'polished_sandstone', Y1 = FLOOR[1];
+const POL = 'sandstone_white', HPOL = 'limewash_white', Y1 = FLOOR[1];       // (materials already in each plan: a new one near the arrival would cost a draw)
 /** A worn pad of polished stone on a floor (top at y), x0..x1 by z0..z1, 6 mm thick, 3 mm over what it lies on. */
-const pad = (bag, x0, z0, x1, z1, y) => bag.add(POL, box(x0, y + 0.003, z0, x1, y + 0.009, z1));
+// (a pad leans in a little at its edges, each differently: boxes of one shape at twelve places would be an instanced draw of their own)
+const pad = (bag, x0, z0, x1, z1, y, mat = POL) => {
+  const h = (k) => 0.004 + 0.006 * hashAt(x0 + k, z0, 77 + k), w = Math.min(x1 - x0, z1 - z0) * 0.3;
+  bag.add(mat, frustum([x0, z0, x1, z1], y + 0.003, y + 0.009, Math.min(w, h(1) * 6), Math.min(w, h(2) * 6), Math.min(w, h(3) * 6), Math.min(w, h(4) * 6)));
+};
 
 /** The rock-cut stairs: every tread worn pale and smooth along its middle where bare feet climb (the width and the place differ by tread), and the approaches to the caves' doors. */
 function cliffWear(bag) {
   const n = Math.round((FLOOR[1] - FLOOR[0]) / 0.17), dy = (FLOOR[1] - FLOOR[0]) / n;
   { const { x0, x1, z0, z1 } = STAIR, L = (z1 - z0) / n, c = (x0 + x1) / 2;
-    for (let k = 0; k < n; k++) { const h = hashAt(k, 3, 61), w = 0.4 + 0.32 * h, cx = c + (hashAt(k, 5, 63) - 0.5) * 0.35, top = FLOOR[0] + dy * (k + 1); pad(bag, cx - w, z0 + k * L + 0.05, cx + w, z0 + (k + 1) * L - 0.03, top); } }
+    for (let k = 0; k < n; k++) { const h = hashAt(k, 3, 61), w = 0.4 + 0.32 * h, cx = c + (hashAt(k, 5, 63) - 0.5) * 0.35, top = FLOOR[0] + dy * (k + 1); pad(bag, cx - w, z0 + k * L + 0.05, cx + w, z0 + (k + 1) * L - 0.03, top, 'lime_plaster'); } }
   { const { x0, x1, z0, z1 } = STAIR2, L = (z1 - z0) / n, c = (x0 + x1) / 2;
-    for (let k = 0; k < n; k++) { const h = hashAt(k, 7, 65), w = 0.36 + 0.3 * h, cx = c + (hashAt(k, 9, 67) - 0.5) * 0.35, top = FLOOR[0] + dy * (k + 1); pad(bag, cx - w, z1 - (k + 1) * L + 0.03, cx + w, z1 - k * L - 0.05, top); } }
+    for (let k = 0; k < n; k++) { const h = hashAt(k, 7, 65), w = 0.36 + 0.3 * h, cx = c + (hashAt(k, 9, 67) - 0.5) * 0.35, top = FLOOR[0] + dy * (k + 1); pad(bag, cx - w, z1 - (k + 1) * L + 0.03, cx + w, z1 - k * L - 0.05, top, 'lime_plaster'); } }
   // Cave 1: the porch's three doors (x −63.8 porch side, −65.7 hall side), worn in front of each by the sangha's feet
   for (const [dz, hw] of [[0, 1.3], [-5.4, 0.8], [5.4, 0.8]]) {
     const z = C1.z + dz, a = hw * (0.5 + 0.2 * hashAt(dz, 1, 71));
@@ -40,7 +44,7 @@ function houseWear(el, bag) {
   const uc = W * (0.38 + rng(el.seed ?? 1)() * 0.24);
   if (el.open || hashAt(x0, z0, 41) < 0.33) {
     const w = 0.32 + 0.15 * hashAt(x0, z0, 43), a = xz(uc - w, -0.28), b = xz(uc + w, t - 0.05);
-    bag.add(POL, box(Math.min(a[0], b[0]), 0.1 + 0.003, Math.min(a[1], b[1]), Math.max(a[0], b[0]), 0.1 + 0.009, Math.max(a[1], b[1])));
+    bag.add(HPOL, box(Math.min(a[0], b[0]), 0.1 + 0.003, Math.min(a[1], b[1]), Math.max(a[0], b[0]), 0.1 + 0.009, Math.max(a[1], b[1])));
   }
   // streaks: two or three narrow dark runs from the eave down the wall (mud of the other kind than the wall's), clear of the door, window and garlands
   const k = 2 + Math.floor(hashAt(x0, z0, 47) * 2);
