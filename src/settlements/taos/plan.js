@@ -48,6 +48,16 @@ for (const B of [NORTH, SOUTH]) for (const r of roomsOf(B)) { const x0 = B.x0 + 
 // from the gap in the south wall round by the South House's alley (x 10…15) to the plaza, to the log bridge and the North House
 const walks = [KEEP_ROUTE];
 walks[0].y0 = 0;
+// the visitor's walk into the plaza rooms (docs/settlements/taos.md §4.8): from the plaza over the sill, in at the doorway, along the front room
+for (const B of [NORTH, SOUTH]) for (const r of roomsOf(B)) {
+  const x0 = B.x0 + r.j * CELL, z0 = B.z0 + r.i * CELL, du = x0 + CELL / 2 + 0.3, s = r.door === 's';
+  const wall = s ? z0 + CELL : z0, g = s ? 1 : -1;
+  const route = [[du, wall + g * 2.2], [du, wall + g * 0.4], [du, wall - g * 0.9], [du, wall - g * 1.6]];
+  route.y0 = 0;
+  walks.push(route);
+}
+// the working yards: to the griddle's and the puddling pit's edge
+for (const [x, z] of [...YARDS.cook, ...YARDS.mud]) { const rt = [[x + 0.6, z + 4], [x + 0.6, z + 2.4]]; rt.y0 = 0; walks.push(rt); }
 // the ladders walked (docs/settlements/taos.md §4.7): for each terraced room a route from the plaza (or the block's end) up its column's ladders,
 // across the terrace to the doorway and into the room — walk-check must bring the walker to every waypoint
 for (const u of UPPER) {
