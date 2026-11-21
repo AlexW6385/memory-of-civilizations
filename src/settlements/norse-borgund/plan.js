@@ -1,5 +1,6 @@
 // Norse Norway about 1250 (docs/settlements/norse-borgund.md §2–§4).
 import { CHURCH, BELL, YARD, height } from './layout.js';
+import { openRoutes } from './openwalk.js';
 
 const cy = height(...CHURCH), S = 0.85, GATE = { w: 3.2 };
 // the way from the gate to the west porch, laid with flat stones
@@ -49,6 +50,8 @@ export const church = {
     Object.assign([[0, YARD[3] + 6], [0, YARD[3] - 4], [CHURCH[0] - 14, CHURCH[1]]], { y0: cy }),
     // in at the west porch, through the nave to the chancel
     Object.assign([[CHURCH[0] - 9, CHURCH[1]], [CHURCH[0] - 3.6, CHURCH[1]], [CHURCH[0], CHURCH[1]], [CHURCH[0] + 6.5, CHURCH[1]]], { y0: cy }),
+    // from the yard into the nearest farms' open dwellings, barns and the smithy (openwalk.js)
+    ...openRoutes(12),
   ],
 };
 export default church;
