@@ -245,7 +245,7 @@
  },
  "alexandria-museion": {
   "site": "alexandria",
-  "hash": "62bdb40d93ebaf33",
+  "hash": "2badbaab14107a18",
   "rays": 128,
   "probes": 51696,
   "boxes": [
@@ -285,8 +285,8 @@
    }
   ],
   "bytes": 868436,
-  "seconds": 78,
-  "baked": "2026-11-17"
+  "seconds": 473,
+  "baked": "2026-11-21"
  },
  "amsterdam-dam": {
   "site": "amsterdam",
@@ -354,7 +354,7 @@
  },
  "ananda-temple": {
   "site": "bagan",
-  "hash": "998059276508fde5",
+  "hash": "1fa49b6dd8ceee11",
   "rays": 128,
   "probes": 74727,
   "boxes": [
@@ -379,9 +379,9 @@
     ]
    }
   ],
-  "bytes": 1179762,
-  "seconds": 125,
-  "baked": "2026-11-18"
+  "bytes": 1179868,
+  "seconds": 843,
+  "baked": "2026-11-21"
  },
  "angkor-wat": {
   "site": "angkor",
@@ -1061,7 +1061,7 @@
  },
  "delphi-sanctuary": {
   "site": "delphi",
-  "hash": "3dfae69cdab81476",
+  "hash": "7dbe7f3c7035fd85",
   "rays": 128,
   "probes": 17685,
   "boxes": [
@@ -1149,13 +1149,13 @@
     ]
    }
   ],
-  "bytes": 300929,
-  "seconds": 24,
-  "baked": "2026-11-18"
+  "bytes": 301301,
+  "seconds": 70,
+  "baked": "2026-11-21"
  },
  "delphi-temple": {
   "site": "delphi",
-  "hash": "95b5735038211250",
+  "hash": "f01f3bd6b18e1e92",
   "rays": 128,
   "probes": 12784,
   "boxes": [
@@ -1177,9 +1177,9 @@
     ]
    }
   ],
-  "bytes": 209341,
-  "seconds": 45,
-  "baked": "2026-11-18"
+  "bytes": 209430,
+  "seconds": 224,
+  "baked": "2026-11-21"
  },
  "djenne-great-mosque": {
   "site": "djenne",
@@ -1751,8 +1751,8 @@
    }
   ],
   "bytes": 489852,
-  "seconds": 175,
-  "baked": "2026-11-18"
+  "seconds": 376,
+  "baked": "2026-11-21"
  },
  "granada-alhambra": {
   "site": "granada",
@@ -2821,8 +2821,8 @@
    }
   ],
   "bytes": 290780,
-  "seconds": 27,
-  "baked": "2026-11-17"
+  "seconds": 253,
+  "baked": "2026-11-21"
  },
  "london-westminster": {
   "site": "london",
@@ -2992,8 +2992,8 @@
    }
   ],
   "bytes": 440558,
-  "seconds": 78,
-  "baked": "2026-11-18"
+  "seconds": 242,
+  "baked": "2026-11-21"
  },
  "mamluk-cairo-hasan": {
   "site": "mamluk-cairo",
@@ -3616,7 +3616,7 @@
  },
  "mycenae-citadel": {
   "site": "mycenae",
-  "hash": "b3fde2eb622e3ee8",
+  "hash": "e9b8850dd8ce2a34",
   "rays": 128,
   "probes": 35960,
   "boxes": [
@@ -3643,9 +3643,9 @@
     ]
    }
   ],
-  "bytes": 598250,
-  "seconds": 46,
-  "baked": "2026-11-18"
+  "bytes": 598525,
+  "seconds": 265,
+  "baked": "2026-11-21"
  },
  "mycenae-treasury": {
   "site": "mycenae",
@@ -3672,9 +3672,9 @@
     ]
    }
   ],
-  "bytes": 138704,
-  "seconds": 11,
-  "baked": "2026-11-18"
+  "bytes": 138750,
+  "seconds": 46,
+  "baked": "2026-11-21"
  },
  "nalanda-mahavihara": {
   "site": "nalanda",
@@ -4000,7 +4000,7 @@
  },
  "persepolis-terrace": {
   "site": "persepolis",
-  "hash": "f2a9657c2d0f940b",
+  "hash": "8216c53cef5969c0",
   "rays": 128,
   "probes": 75069,
   "boxes": [
@@ -4085,9 +4085,9 @@
     ]
    }
   ],
-  "bytes": 1259866,
-  "seconds": 152,
-  "baked": "2026-11-18"
+  "bytes": 1259867,
+  "seconds": 455,
+  "baked": "2026-11-21"
  },
  "petra-khazneh": {
   "site": "petra",
@@ -4198,8 +4198,8 @@
    }
   ],
   "bytes": 961558,
-  "seconds": 90,
-  "baked": "2026-11-18"
+  "seconds": 597,
+  "baked": "2026-11-21"
  },
  "qin-palace": {
   "site": "qin-xianyang",
