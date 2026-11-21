@@ -150,6 +150,11 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     const [x, z] = el.at, s = el.s ?? 1, y = el.y ?? 0;
     H.ball(x, y + 1.72 * s, z, 0.62 * s); H.floor(x, y + 0.04, z, 1.5 * s, 1.5 * s, 8, 0.6);
   }
+  if (name === 'court_censer' && el.at) {
+    // the bowl of a court's great censer holds a bed of embers under the sticks: a low red glow and a pool on the stone round it
+    const [x, z] = el.at, s = el.s ?? 1, y = el.y ?? 0;
+    H.ball(x, y + 1.85 * s, z, 0.5 * s, 0.5, 6 + Math.floor(hashAt(x, z, 14) * 4)); H.floor(x, y + 0.04, z, 1.9 * s, 1.9 * s, 8, 0.5);
+  }
   if (name === 'shaolin_gear' && el.kind === 'wayshrine') {
     // the little lamp in the shrine's niche, and the sill's offerings lit by it
     const [x, z] = el.at, s = el.s ?? 1, y = el.y ?? 0, rot = el.rot ?? 0, ox = Math.sin(rot) * 0.6 * s, oz = Math.cos(rot) * 0.6 * s;
@@ -194,7 +199,7 @@ let done = false;
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.shaolin.elements;
-  for (const k of ['ming_hall', 'shaolin_room', 'shaolin_interior', 'hall_furniture', 'shaolin_gear']) if (typeof E[k] === 'function') E[k] = wrap(k, E[k]);
+  for (const k of ['ming_hall', 'shaolin_room', 'shaolin_interior', 'hall_furniture', 'shaolin_gear', 'court_censer']) if (typeof E[k] === 'function') E[k] = wrap(k, E[k]);
   if (STYLES.life) STYLES.life.elements.sl_halo = slHalo;
 }
 registerNight();

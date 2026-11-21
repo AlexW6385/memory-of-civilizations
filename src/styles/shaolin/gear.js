@@ -117,6 +117,24 @@ function doorstep(P, w = 1.5, seed = 0) {
   P.add('limestone', box(-w * 0.3 + (j - 0.5) * 0.1, 0.23, -0.42, w * 0.3, 0.2362, -0.02));
 }
 /**
+ * The wear of a stair's treads (el.stair = the plan's `stair` element): on each tread the middle is where the feet land, a darker polished patch a hair
+ * over the stone. Each tread's patch has its own width and length by the hash of its place (twelve like boxes would be
+ * an instanced draw of their own). Heights as build.js `stair` makes them: tread i tops at y0 + rise (i + 1) / n.
+ */
+function treadwear(P, st) {
+  const [ax, az, bx, bz] = st.rect, x0 = Math.min(ax, bx), x1 = Math.max(ax, bx), z0 = Math.min(az, bz), z1 = Math.max(az, bz);
+  const rise = st.y1 - st.y0, n = Math.max(1, Math.round(Math.abs(rise) / (st.riser || 0.17)));
+  const NS = st.dir === 'n' || st.dir === 's', W = NS ? x1 - x0 : z1 - z0, L = NS ? z1 - z0 : x1 - x0, mid = (NS ? x0 + x1 : z0 + z1) / 2;
+  for (let i = 0; i < n; i++) {
+    const f0 = i / n, f1 = (i + 1) / n, top = st.y0 + rise * f1, h = (((Math.round(mid * 8) * 73856093) ^ (i * 19349663) ^ Math.round((NS ? z0 : x0) * 8)) >>> 0) / 4294967296;
+    // along the ascent: the tread's own span (f0..f1) measured from the low end
+    const a0 = NS ? (st.dir === 'n' ? z1 - L * f1 : z0 + L * f0) : (st.dir === 'e' ? x0 + L * f0 : x1 - L * f1), a1 = a0 + L / n;
+    const pw = W * (0.3 + 0.16 * h), pc = mid + (h - 0.5) * W * 0.1, d0 = a0 + (a1 - a0) * (0.18 + 0.1 * h), d1 = a1 - (a1 - a0) * 0.08;
+    const bx0 = NS ? pc - pw / 2 : d0, bx1 = NS ? pc + pw / 2 : d1, bz0 = NS ? d0 : pc - pw / 2, bz1 = NS ? d1 : pc + pw / 2;
+    P.add('bluestone', box(bx0, top, bz0, bx1, top + 0.007, bz1));
+  }
+}
+/**
  * shaolin_steps { pts, w, from (z where the treads begin), ground }: the stone treads of a mountain path laid on a slope along a polyline running
  * mostly north–south; each tread a slab 0.55 deep, its top 0.16 above the ground at its middle, its foot sunk 0.3 below the lowest ground under it.
  */
@@ -153,6 +171,7 @@ export function shaolinGear(el, { bag, col }) {
     case 'offering': offering(P, s); col.rect([x - 0.65 * s, z - 0.3 * s, x + 0.65 * s, z + 0.3 * s], y, y + 0.7 * s); break;
     case 'millstone': millstone(P, s); col.circle(x, z, 0.85 * s, y, y + 0.7 * s); break;
     case 'doorstep': doorstep(P, el.w ?? 1.5, seed); { const c = Math.cos(rot), sn = Math.sin(rot), hw = (el.w ?? 1.5) / 2, ex = Math.abs(hw * c) + Math.abs(0.26 * sn), ez = Math.abs(hw * sn) + Math.abs(0.26 * c); col.rect([x + sn * 0.26 - ex, z + c * 0.26 - ez, x + sn * 0.26 + ex, z + c * 0.26 + ez], y, y + 0.13); } break;
+    case 'treadwear': treadwear(P, el.stair); break;
     case 'brooms': brooms(P); break;
     default: throw new Error('shaolin_gear: ' + el.kind);
   }

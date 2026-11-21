@@ -222,6 +222,9 @@ for (const [z, side, k] of [[-132, 1, 0], [-146, -1, 1], [-162, 1, 2]]) {
   E.push({ t: 'shaolin_gear', kind: 'wayshrine', at: [x, z], y: H(x, z) + 0.02, rot: -side * Math.PI / 2, s: 1, seed: k });
 }
 
+// the wear of the stairs' treads: where the feet land (every `stair` above, the halls', the court's and the towers')
+for (const st of E.filter((e) => e.t === 'stair')) E.push({ t: 'shaolin_gear', kind: 'treadwear', stair: st, at: [0, 0], y: 0, rot: 0 });
+
 // ── rooms and the walk ────────────────────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
