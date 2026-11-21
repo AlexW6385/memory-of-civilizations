@@ -3,10 +3,10 @@
 // Pure data from layout.js (the shops' and the chapel's own rects); the doors are the style's (styles/tibetan/shops.js: the front's middle).
 import { shops, CHAPEL, PRINTERY } from './layout.js';
 
-/** The routes into the street's shops: the three tea houses and the seven trading houses nearest the street's middle, from the street's axis through the door into the room. */
+/** The routes into the street's shops: the three tea houses and the sixteen trading houses nearest the street's middle, from the street's axis through the door into the room. */
 export function shopWalks() {
   const near = shops().filter((s) => s.kind !== 'stall').map((s) => ({ s, d: Math.abs((s.rect[1] + s.rect[3]) / 2 - 110) }));
-  const pick = [...near.filter((q) => q.s.kind === 'tea'), ...near.filter((q) => q.s.kind === 'trade').sort((a, b) => a.d - b.d).slice(0, 7)];
+  const pick = [...near.filter((q) => q.s.kind === 'tea'), ...near.filter((q) => q.s.kind === 'trade').sort((a, b) => a.d - b.d).slice(0, 16)];
   return pick.map(({ s }) => {
     const [x0, z0, x1, z1] = s.rect, e = s.door === 'e', o = e ? 1 : -1, fx = e ? x1 : x0, zc = (z0 + z1) / 2, deep = s.kind === 'tea' ? 3.2 : 1.7;
     return [[0, zc], [fx + o * 1.2, zc], [fx - o * 1.2, zc], [fx - o * deep, zc]];
