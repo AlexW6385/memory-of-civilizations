@@ -33,5 +33,13 @@ export const campus = {
     ];
   })(),
 };
-export const pantheon = { ...pantheonPlan, origin: [0, 0], base: 0, district: undefined, view: [-30, -70, 30, -40], walks: [...(pantheonPlan.walks || []), ...UPPER_WALKS, ...SHOP_WALKS] };
+// Wear of the landmark (docs/settlements/rome.md §4.22): the seven steps of the portico trodden pale in the middle, as thin slabs 5 mm proud of the marble, no collision.
+// (Patches of greyed paving down the forecourt's axis were tried and read as dark rectangles: left out.)
+const hz = (a, b) => { let h = Math.imul(Math.round(a * 8) ^ 0x9e3779b1, 73856093) ^ Math.imul(Math.round(b * 8) + 17, 19349663); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+const WEAR = [];
+for (let i = 0; i < 7; i++) {
+  const zA = -51.2 + 0.3 * i, top = 0.18571 * (i + 1);
+  WEAR.push({ t: 'slab', rect: [-3.2 + hz(i, 1) * 0.6, zA + 0.02, 3.2 - hz(i, 2) * 0.6, zA + 0.28 - 0.04 * hz(i, 3)], y0: top, y1: top + 0.005, mat: 'plaster_damp' });
+}
+export const pantheon = { ...pantheonPlan, elements: [...pantheonPlan.elements, ...WEAR], origin: [0, 0], base: 0, district: undefined, view: [-30, -70, 30, -40], walks: [...(pantheonPlan.walks || []), ...UPPER_WALKS, ...SHOP_WALKS] };
 export default pantheon;
