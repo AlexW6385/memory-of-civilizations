@@ -35,6 +35,11 @@ export function summitElements() {
   // lamp pillars at the way's head by the stair
   for (const sx of [-1, 1]) E.push({ t: 'block', rect: [sx * 4.2 - 0.25, 91.5, sx * 4.2 + 0.25, 92], y0: TOP, y1: TOP + 1.7, mat: 'sandstone_dressed' });
   for (const sx of [-1, 1]) E.push({ t: 'rite', kind: 'lamp', at: [sx * 4.2, 91.75], y: TOP + 1.7, s: 2.2, pool: TOP });
+  // more lamp pillars at the way's edge, between the stalls and seats: the way is lit by oil lamps at night [inferred]
+  for (const z of [46, 59.5, 73.5, 86]) for (const sx of [-1, 1]) {
+    E.push({ t: 'block', rect: [sx * 4.2 - 0.2, z - 0.2, sx * 4.2 + 0.2, z + 0.2], y0: TOP, y1: TOP + 1.5, mat: 'sandstone_dressed' });
+    E.push({ t: 'rite', kind: 'lamp', at: [sx * 4.2, z], y: TOP + 1.5, s: 2.2, pool: TOP });
+  }
   // Temple 40: an altar at the hall's west end with lamps, an offering and a bell; garlands between the front pillars
   const [cx, cz] = TEMPLE40.c, top = TOP + 3.35, ax = cx - 16.2;
   E.push({ t: 'block', rect: [ax - 0.6, cz - 0.9, ax + 0.6, cz + 0.9], y0: top, y1: top + 0.55, mat: 'sandstone_dressed' });
