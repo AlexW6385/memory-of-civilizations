@@ -12,6 +12,7 @@ import '../../styles/nalanda/index.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { STYLES } from '../../core/build.js';
 import { houseDoor } from '../../styles/nalanda/houses.js';
+import { niches, burns } from './templework.js';
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -141,6 +142,18 @@ function booths(H, el) {
   }
 }
 
+/** The lamps of the temples' niches (a dish of oil on the throne before the Buddha): a glow in the recess, a pane of light on its back, a pool on the ledge — the faces of the great temple lit tier by tier. */
+function templeLamps(H, el) {
+  for (const q of niches(el)) {
+    if (!burns(q)) continue;
+    const { p, o, tg, by, ah } = q, P = (t, d, y) => [p[0] + o[0] * d + tg[0] * t, y, p[1] + o[1] * d + tg[1] * t];
+    const c = P(0, 0.34, by + 0.5);
+    H.ball(c[0], c[1], c[2], 0.5, 0.6);
+    const a = P(-0.36, 0.075, by + 0.2), b = P(0.36, 0.075, by + 0.2), d = P(0.36, 0.075, by + ah - 0.75), e = P(-0.36, 0.075, by + ah - 0.75);
+    H.quad(a, b, d, e, o, 0.5);
+    const g = P(0, 0.9, by - 0.6); H.floor(g[0], by + 0.0, g[2], 0.9, 0.9, 8, 0.35);
+  }
+}
 let depth = 0;
 const OPEN = new Set(['monastery', 'temple', 'tower', 'lamps', 'booth', 'annex', 'gate', 'house_bihar']);
 /** Wrap one element builder of the style: the halo of every lamp it makes, the lit cells and windows, the spill of an opened door. */
@@ -152,6 +165,7 @@ const wrap = (name, fn) => function haloed(el, ctx) {
   const H = L.H;
   if (name === 'monastery' && el.enter) cells(H, el);
   if (name === 'booth') booths(H, el);
+  if (name === 'temple' && !el.simple) templeLamps(H, el);
   if (house && el.open) {
     // the door ajar: the lamp's light spilling over the step into the lane
     const F = houseDoor(el), [px, pz] = F.P(F.du, -1.0);
