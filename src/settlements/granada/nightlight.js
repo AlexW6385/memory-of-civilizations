@@ -181,11 +181,13 @@ function night(el, { bag }) {
   const H = new Halo();
   for (const l of el.lamps || []) {
     const j = 0.9 + 0.2 * hashAt(l.x, l.z, 3);
-    if (l.k === 'wall') { const c = wall(bag, l.x, l.y, l.z, l.n); H.ball(c[0], c[1], c[2], 0.8 * j); }
+    if (l.k === 'wall') { const c = wall(bag, l.x, l.y, l.z, l.n); H.ball(c[0], c[1], c[2], 0.8 * j); H.floor(l.x + l.n[0] * 1.2, l.y - 2.8 + 0.06, l.z, 1.9 * j, 1.5 * j); }
     else if (l.k === 'hang') { const c = hang(bag, l.x, l.z, l.yt, l.y); H.ball(c[0], c[1], c[2], 0.95 * j); }
     else if (l.k === 'stand') { const c = stand(bag, l.x, l.y, l.z); H.ball(c[0], c[1], c[2], 0.9 * j); H.floor(l.x, l.y + 0.06, l.z, 1.9 * j, 1.9 * j); }
     else if (l.k === 'corona') { corona(bag, l.x, l.z, l.yt, l.y); H.ball(l.x, l.y + 0.1, l.z, 2.3 * j); H.ball(l.x, l.y + 0.1, l.z, 1.4 * j); }
   }
+  // the light of open doors on the lane (lamps.js townLamps): a pool on the paving, and over it a glow at the height of the lamp inside
+  for (const s of el.spills || []) { H.floor(s.x, s.y, s.z, s.r, s.r * 0.8, 0, 10); H.ball(s.x, s.y + 1.1, s.z, s.shop ? 1.3 : 0.9); }
   H.flush(bag);
 }
 void box;

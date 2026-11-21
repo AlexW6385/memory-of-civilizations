@@ -4,6 +4,7 @@ import { RADIUS, HILL, gardens, lots, height, hillE, DARRO, DARRO_BRIDGES, SITES
 import { lifePlan, aljibeLife } from './life.js';
 import { courtLife } from './court.js';
 import './trim.js';
+import { townLamps } from './lamps.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, 30], facing: 'n' } });
 export async function town() {
   const all = lots(), plans = [], open = new Map();
@@ -35,6 +36,7 @@ export async function town() {
   plans.push({ ...base('granada-streets', [
     { t: 'lane_dress', lots: dressed },
     { t: 'medina_garden', rects: gardens() },
+    { t: 'gr_night', lamps: [], spills: townLamps() },
     { t: 'darro_dress', z: DARRO.z, w: DARRO.w, y: DARRO.y, x0: -140, x1: 230, seed: 7, gaps: DARRO_BRIDGES },
   ]), style: 'nasrid-g' });
   plans.push({ ...base('granada-aljibe-life', aljibeLife(cis)), style: 'life' });
