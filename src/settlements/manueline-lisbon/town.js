@@ -5,6 +5,8 @@ import '../../styles/manueline/index.js';
 import { lodTiles } from '../lod.js';
 import { lifeElements } from './life.js';
 import { haloElements } from './nightlight.js';
+import { walkClear, doorClear } from './route.js';
+import { frame } from '../../styles/greek/agora.js';
 import { RADIUS, GROUND, SEA, QUAY, PALACE, TERREIRO, YARD, SE, CASTLE, SQUARE, SHIPS, SLIPS, PLAZA, RUA_NOVA, ZS, ALLEYS, shore, height, lots, onStreet, inRect, wet } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -55,6 +57,7 @@ function streets() {
   line(true, (RUA_NOVA[1] + RUA_NOVA[3]) / 2, RUA_NOVA[0], RUA_NOVA[2], 4);
   for (const z of ZS.slice(0, 5)) line(true, z, -290, 250, 3.0);
   for (const x of ALLEYS) line(false, x, -250, 90, 2.2);
+  E.push(...walkClear(), ...doorClear(lots(), frame));
   return base('lisbon-streets', E);
 }
 function yard() {

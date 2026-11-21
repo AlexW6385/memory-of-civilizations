@@ -4,6 +4,7 @@
 // beach at Belém with its nets and drying fish, the Alfama's lanes. Elements of style `life`, in tiles of 100 m.
 import { frame } from '../../styles/greek/agora.js';
 import { storeysOf, HEIGHTS } from '../../styles/manueline/houses.js';
+import { nearWalk } from './route.js';
 import { SE, SE_Y, CASTLE, RADIUS, GROUND, QUAY, RUA_NOVA, TERREIRO, YARD, PLAZA, SQUARE, ZS, SHIPS, height, lots, onStreet, inRect, wet, shore, inLot } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -176,6 +177,8 @@ export function lifeElements() {
   // the doors of the open houses and of those whose upper floors are open: nobody stands, and nothing is set, in the way in (3 m wide, from 4.5 m out to the first metre in)
   { const lanes = lots().filter((l) => l.up || l.open).map((l) => { const F = frame(l.rect, l.front); return [F.R(F.L / 2 - 2.6, -4.5, F.L / 2 + 2.6, 1.0), l]; });
     for (let i = L.length - 1; i >= 0; i--) { const e = L[i]; if (e.t === 'shop_sign') continue; if (lanes.some(([r]) => e.at[0] > r[0] && e.at[0] < r[2] && e.at[1] > r[1] && e.at[1] < r[3])) L.splice(i, 1); } }
+  // the main walk (route.js): a 4.4 m corridor kept clear of stalls, props, figures and posts (signs hang on the walls)
+  for (let i = L.length - 1; i >= 0; i--) { const e = L[i]; if (e.t === 'shop_sign') continue; if (nearWalk(e.at[0], e.at[1], e.t === 'stall' || e.t === 'cart' || e.t === 'handcart' ? 3.4 : 2.2)) L.splice(i, 1); }
   // tile them
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
