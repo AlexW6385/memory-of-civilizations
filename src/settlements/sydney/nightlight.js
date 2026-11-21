@@ -203,7 +203,14 @@ function operaHouse(H) {
   for (let xx = x0 + 6; xx < x1 - 6; xx += 7) H.quad([xx + 0.1, y + 1.3, z0 - 0.1], [xx + 5.3, y + 1.3, z0 - 0.1], [xx + 5.3, y + h / 2 - 0.6, z0 - 0.1], [xx + 0.1, y + h / 2 - 0.6, z0 - 0.1], [0, -1], 0.5);
   // the floods at the sails' feet (pools on the podium's top along both halls' south and north bases) and the stair's lamps' wash on the treads
   for (const hall of el.halls) for (const [a, b] of [[hall.shells[0][0], 0], [hall.shells[hall.shells.length - 1][1], 0]]) { void b; for (let k = -1; k <= 1; k++) H.floor(hall.x + k * hall.hw * 0.7, yf + 0.1, a + (a === hall.shells[0][0] ? 5 : -2), 7, 5, 0, 8, 0.5); }
-  for (let k = 0; k < 3; k++) H.floor(100, y + h * (0.3 + 0.3 * k), z1 + 22 * (1 - (0.3 + 0.3 * k)), 14, 6, 0, 8, 0.45);
+  // the great stair's treads washed by the floods at the podium's edge: each tread a strip brighter along the middle where people climb (the stair's 18 treads: x0 + 8 to x1 − 8, h/18 a rise, the run st/18)
+  { const n = 18, st = el.stair, xa = x0 + 8, xb = x1 - 8, xm = (xa + xb) / 2;
+    for (let k = 0; k < n; k++) {
+      const zz = z1 + st * (1 - k / n), zb = zz - st / n, yy = y + h * (k + 1) / n + 0.03;
+      for (const [a, b, f] of [[xa, xm - 9, 0.14], [xm - 9, xm + 9, 0.3], [xm + 9, xb, 0.14]]) H.quad([a, yy, zb + 0.1], [b, yy, zb + 0.1], [b, yy, zz - 0.1], [a, yy, zz - 0.1], [1, 0], f);
+    }
+    for (const sx of [x0 + 20, 100, x1 - 20]) H.floor(sx, height(sx, z1 + st + 6) + 0.12, z1 + st + 6, 11, 7, 0, 8, 0.26);   // the forecourt's foot
+  }
 }
 /** sydney_night: nothing but the plan's style hook; the light is made here from the places. */
 function sydneyNight(el, { bag }) {

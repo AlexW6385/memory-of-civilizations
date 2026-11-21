@@ -216,6 +216,21 @@ function operaHouse(el, { bag, col, lights }) {
     paved(gx0 + 0.3, z0 + pt + 0.3, gx1 - 0.3, z1 - pt - 0.3); paved(x0 + pt + 0.3, z0 + pt + 0.3, x1 - pt - 0.3, z0 + 9); paved(x0 + 6.8, z1 - 6, x1 - 6.8, z1 - pt - 0.3); }
   // the broadwalk round the podium's foot
   bag.add('granite_grey', box(x0 - 6, y - 4, z0 - 6, x1 + 6, y + 0.2, z1 + st + 2));
+  // the forecourt before the stair (§16): a granite apron level with the ground (a hair above it), its joints every 2.4 m, a darker band course every fourth joint
+  { const fa = z1 + st + 2, fb = fa + 20, fx0 = x0 - 6, fx1 = x1 + 6, ft = y + 0.05;
+    bag.add('granite_grey', box(fx0, y - 1.5, fa, fx1, ft, fb)); col.floor([fx0, fa, fx1, fb], ft);
+    for (let xx = fx0 + 1.2, k = 0; xx < fx1; xx += 2.4, k++) bag.add(k % 4 === 0 ? 'granite_podium' : 'granite_grey', box(xx - (k % 4 === 0 ? 0.06 : 0.015), ft, fa, xx + (k % 4 === 0 ? 0.06 : 0.015), ft + 0.012, fb));
+    for (let zz = fa + 1.2, k = 0; zz < fb; zz += 2.4, k++) bag.add(k % 4 === 0 ? 'granite_podium' : 'granite_grey', box(fx0, ft, zz - (k % 4 === 0 ? 0.06 : 0.015), fx1, ft + 0.012, zz + (k % 4 === 0 ? 0.06 : 0.015)));
+    // where feet went: the slabs in the line from the apron to the stair's foot polished paler, 7 m wide, a little ragged at its edges
+    for (let zz = fa; zz < fb - 0.5; zz += 2.4) { const w = 3.4 + 0.5 * Math.sin(zz * 1.7); bag.add('concrete_light', box((x0 + x1) / 2 - w, ft + 0.012, zz + 0.1, (x0 + x1) / 2 + w, ft + 0.02, Math.min(fb, zz + 2.3))); }
+  }
+  // the treads worn: a dished, polished patch down the middle of every tread, deepest at the front edge (the climbers' line, 5 m wide), the sides left as cut
+  for (let k = 0; k < n; k++) {
+    const zz = z1 + st * (1 - k / n), yy = y + h * (k + 1) / n, xm = (x0 + x1) / 2, w = 2.2 + 0.4 * Math.sin(k * 2.3 + 1);
+    bag.add('granite_podium', box(xm - w, yy, zz - st / n + 0.1, xm + w, yy + 0.012, zz - 0.14));
+  }
+  // and on the podium's top the line from the stair's head to the doors between the halls, worn the same way
+  for (let zz = z1 - 1; zz > z1 - 40; zz -= 3.1) { const w = 1.5 + 0.3 * Math.sin(zz * 1.3); bag.add('granite_podium', box((x0 + x1) / 2 - w, y + h + 0.012, zz - 3.0, (x0 + x1) / 2 + w, y + h + 0.02, zz)); }
   for (const hall of el.halls ?? []) {
     CLIP = hallClip(hall, y, h);   // (inside the Concert Hall's room, below its ceiling, the later shells' bases are not drawn — hall.js)
     for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
