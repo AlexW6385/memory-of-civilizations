@@ -139,6 +139,21 @@ The village already stood open from the earlier passes (§5, §15: shops 85 %, h
 - **Routes** (`plan.js` `walks`): fourteen routes from the lane over the verandah's platform into opened places, ten shops and sheds of the approach and the bazaar and four houses (homes, a mud house, a merchant's house) at the door the style cut (`doors.js` repeats the style's own draw, so a door is found without building it); walk-check follows all of them. Shop routes go in 0.9 m from the front's end: the middle of a shop's front is taken by the verandah's posts, the flower-sellers' plates, the bell and the dressing, which stand at random places [measured: a probe along twelve shops found the end open in all twelve].
 - Not built here: no new stall or water-shed on the lane (the arrival's draw budget is spent: §16).
 
+## 19. Night (2026-11 match-the-reference pass, item 2)
+
+What lit the place and date [inferred throughout; no source for Khajuraho itself]: the clay lamp (dīpa) of sesame, mustard or ghee oil with a cotton wick; the bronze lamp stands and the lamp columns before the temples (§11); the lamp in the niche of a house; the hearth's glow through a door; the potter's kiln; a shop's lamp hung under its verandah. No electric light, no glass, no street lighting.
+Built (`nightlight.js`, all in the `halo` material, night only, no light or collision, so the day view is unchanged; elements of the style nagara wrapped from the settlement's folder, the style files untouched):
+- Every `flame` piece of the temples, shrines, Varaha pavilion, `rite` things, lamp columns, wayside shrines and the houses gets its glow (a ball round it and, on lamps near the floor, a pool); a temple's lamps take the floor they stand on (jagati or hall plinth).
+- Before each temple's porch door a pool and a glow on the axis: the sanctum's lamps coming out.
+- Shops: a hanging lamp under the eave (4 shops in 5 of the open ones, 3 in 10 of the closed), its pool on the platform and the lane; the sweet-maker's fire and the smith's forge glow.
+- Houses: windows glow by hash (half of the open houses', 3 in 10 of the closed), on the outward face only; an open home's hearth and the door's spill on the step; some closed homes, mud houses and huts a lamp on the step.
+- The kilns glow at the stoke-hole (half of them), the rest house has two hung lamps.
+Seen: a night render at the arrival (shots/kh-night-arrival.png, low quality): the halos read, lit windows left, the hanging lamp, the glow at the lamp columns by the stair, the porch's lamps far up the stair. Not built: lamps on the temples' towers or niches (nothing sourced), floating lamps on the tank (no source for the date).
+
+## 20. Sound (item 3)
+
+[inferred throughout; no recording exists] `soundmap.js` (places, hours, rooms) with `src/engine/voices-khajuraho.js` (voices prefixed `kha`, all synthesised, human voices wordless): the bell hung in each porch rung by pilgrims by day (`khaPorchBell`); the temple drum and the priests' chant at dawn and at the lamp-waving at dusk at each of the five porches, and Kandariya's sanctum chanting by day (`khaDrum`, `khaChant`); the flower-sellers' calls at the forecourt stalls and the foot of each stair (`khaCall`); the sweet-makers' pans at the fronts of the approach lane's sweet shops (`khaPan`); zebu carts' wooden bells on the road (`khaCartBell`); peafowl at dawn and dusk and the spotted owlet by night on the plain (`khaPeafowl`, `khaOwl`; both birds of the dry Bundelkhand country); the pour of water at the ghat, the wells of the lane crossings, potters' wheels in the yards; rooms by trade and habit for the open shops, homes and sheds, and the hall and sanctum of Kandariya (hushed, a bell and a chant inside). Measured with tools/sound-render.mjs (spectra and envelopes only; not heard). The profile line in soundscape.js now carries the map; `tests/khajuraho-sound.test.mjs`.
+
 ## Sources
 
 - [Kandariya Mahadeva Temple — Wikipedia](https://en.wikipedia.org/wiki/Kandariya_Mahadeva_Temple)
