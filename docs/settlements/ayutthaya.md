@@ -159,6 +159,15 @@ All [inferred] (no recording or description of 17th-century Ayutthaya's sounds w
 - The palace's elephants (§12.5): a trumpet and rumble now and then by day. Nothing here for a watchman or a call to prayer (the Muslim quarter of the Persians and Malays is not in the disc).
 - Measured with `tools/sound-render.mjs` (peak 0.03–0.12, no clipping; the gong and drum below 300 Hz, the chant 0.5–0.8 kHz, the cry 0.4–1 kHz, the piphat 0.3–3 kHz): not heard.
 
+### 13.4 Animals
+All [inferred] (`fauna.js`, `critters` of `src/engine/fauna-critters.js`, each a rigged small animal with its behaviour; the models are the engine's: nothing was added to `critter-models.js`). The dossier's perch and flight lists (egrets, swallows, doves, crows, sparrows, carp) stay.
+- Dogs: three lie by the wat's forecourt and its way (a Thai wat keeps its dogs; they rise and look when the visitor comes near).
+- Cats: one on the plinth of a shop of the walk, one on a stilt house's terrace. [The cat of Siam is much older than this date: the "Treatise on Cats" (Tamra Maew) is of the Ayutthaya period (Wikipedia, "Siamese cat"; not re-read here). The models have a tabby and an orange cat only: the colours of the old Siamese cats are not shown.]
+- Fowl: a rooster and two hens behind each of the first two stilt houses of the walk, a pair of hens behind two more (the red junglefowl is the Thai domestic fowl; cock-fighting was a pastime of Siam [inferred, La Loubère not re-read]), in the yard on the side away from the lane.
+- Ducks: five white and brown domestic ducks dabbling along the canal by the gate bridge (a raft that goes about its loop). The canals' carp (fauna.js) stay.
+- Doves on the court's brick way and the platform's foot (the spotted dove of the wats); a kingfisher on the canal's bank at the bridge, which dives for fish; songbirds in cages at the front posts of three houses of the walk (the Thai keep caged doves and bulbuls [inferred]).
+- Not shown, and why: the king's elephants (already the people plan's two figures at the palace gate); water buffalo (no model); the water monitor of the canals (no model); swallows' nests (the swallows of the dossier are in flight lists only); no goat, cormorant or turkey (the Chinese fishing cormorant was not a Siamese practice [inferred]).
+
 ## Sources
 - Wikipedia, "Wat Phra Si Sanphet": https://en.wikipedia.org/wiki/Wat_Phra_Si_Sanphet
 - Ayutthaya Historical Research, "The architecture of Wat Phra Sri Sanphet": https://ayutthaya-history.com/Temples_Ruins_PhraSisanphet_Architecture.html
