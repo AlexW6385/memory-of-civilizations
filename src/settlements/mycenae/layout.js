@@ -3,6 +3,7 @@
 // Circle A inside the gate to the south, the stepped road climbing east to the palace on the summit, the Treasury of Atreus outside the
 // walls to the south-west, the lower town's houses on the slopes. Pure data and the terrain's height. Metres; +x east, +z south, y up.
 
+import { walkDistance, frontPoint, WALK_REACH, ROAD_SHOPS } from './walk.js';
 export const RADIUS = 190;
 /** The Lion Gate's threshold, the palace platform, and the wall's thickness. */
 export const GATE_Y = 6, PAL_Y = 22.5, TH = 6;
@@ -160,9 +161,16 @@ export function lots() {
       }
     }
   }
+  // the visitor's walk (docs §16.1): the three lots at the halt become the road's shops (a potter's, a smith's, a caravan store), and every lot whose front lies within reach of the walk
+  // is opened by day: a wide door (1.8 m a house, 2.2 m a shop or store) under a lintel 2.45 m high, with a counter and the goods outside the shop
+  for (const l of LOTS_CACHE) {
+    if (!l.inside) for (const [trade, [x, z]] of Object.entries(ROAD_SHOPS)) if (inRect(l.rect, x, z)) { l.kind = trade === 'store' ? 'store' : 'workshop'; l.trade = trade === 'store' ? undefined : trade; l.storeys = 1; }
+    if (l.kind !== 'granary' && walkDistance(frontPoint(l)) <= WALK_REACH) { l.open = true; l.lit = true; }
+  }
   // every lot gets its door's place along the front (the house builder uses it), then the pads are indexed
   for (const l of LOTS_CACHE) {
-    const alongX = l.face === 'n' || l.face === 's', W = alongX ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], wide = l.kind === 'workshop' || l.kind === 'store', dw = wide ? 1.5 : 1.05;
+    const alongX = l.face === 'n' || l.face === 's', W = alongX ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], wide = l.kind === 'workshop' || l.kind === 'store', dw = l.open ? (wide ? 2.2 : 1.8) : (wide ? 1.5 : 1.05);
+    if (l.open) l.dh = 2.45;
     l.W = W; l.dw = dw; l.du = Math.max(dw / 2 + 0.75, Math.min(W - dw / 2 - 0.75, W * (rand() < 0.5 ? 0.3 : 0.7) + (rand() - 0.5) * 0.8));
   }
   // the front of each house by rule from its kind, storeys, width and seed (docs §13): a porch of two posts under a clay canopy (one-storey houses with room beside the door,

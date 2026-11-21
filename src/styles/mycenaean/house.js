@@ -55,6 +55,12 @@ export function house(el, ctx) {
     let c = s0;
     for (const o of list) {
       const a = o.c - o.w / 2, b = o.c + o.w / 2;
+      // (a window: its sill above the floor; handed to the night wrapper, which lights some of them from inside)
+      if (ctx.onWindow && o.y0 > ya + 0.3 && o.y1 - o.y0 < 1.3) {
+        const outward = axis === 'u' ? (fixed0 === 0 ? 'f' : 'b') : (fixed0 === 0 ? 'l' : 'r');
+        const p0 = axis === 'u' ? m.P(a, outward === 'f' ? 0 : D) : m.P(outward === 'l' ? 0 : W, a), p1 = axis === 'u' ? m.P(b, outward === 'f' ? 0 : D) : m.P(outward === 'l' ? 0 : W, b), q = axis === 'u' ? m.P(a + 1, outward === 'f' ? -1 : D + 1) : m.P(outward === 'l' ? -1 : W + 1, a + 1), r0 = axis === 'u' ? m.P(a + 1, outward === 'f' ? 0 : D) : m.P(outward === 'l' ? 0 : W, a + 1);
+        ctx.onWindow({ a: p0, b: p1, y0: o.y0, y1: o.y1, n: [q[0] - r0[0], q[1] - r0[1]] });
+      }
       pcs(c, a, ya, yb);
       if (o.y0 > ya) pcs(a, b, ya, o.y0);
       pcs(a, b, o.y1, yb);
@@ -134,6 +140,26 @@ export function house(el, ctx) {
     const n = Math.min(6, Math.ceil(rise / 0.19)), tread = 0.36, w2 = dw + 0.3;
     for (let j = 1; j < n; j++) add('limestone_yellow', B(du - w2 / 2, y - rise - 0.4, -j * tread - 0.45, du + w2 / 2, y - j * (rise / n), -(j - 1) * tread - 0.45));
     col.ramp(R(du - w2 / 2, -n * tread - 0.45, du + w2 / 2, -0.0), y - rise, y, m.dirV);
+  }
+  // ── an open shop (docs §16.1): by day the front is open — a counter of mudbrick under a plank top beside the door, the trade's goods on it, a tally board at the door-post ──
+  if (el.open && (kind === 'workshop' || kind === 'store')) {
+    const sd = du < W / 2 ? 1 : -1, ua = sd > 0 ? du + dw / 2 + 0.4 : T + 0.45, ub = sd > 0 ? W - T - 0.45 : du - dw / 2 - 0.4;
+    if (ub - ua >= 1.0) {
+      const cl = Math.min(2.4, ub - ua), u0c = sd > 0 ? ua : ub - cl, u1c = u0c + cl, ty = y + 0.88, yb2 = y - 1.0, cb = [], gj = [], gm = [], gc = [];
+      cb.push(B(u0c, yb2, -0.62, u1c, ty - 0.06, -0.12));
+      add('mudbrick', mergeG(cb)); add('timber', B(u0c - 0.06, ty - 0.06, -0.68, u1c + 0.06, ty, -0.08)); solid(u0c - 0.06, -0.68, u1c + 0.06, -0.08, yb2, ty);
+      const n = Math.max(3, Math.floor(cl / 0.42)), trade = el.trade ?? 'store';
+      for (let i = 0; i < n; i++) {
+        const uu = u0c + 0.25 + i * ((cl - 0.5) / (n - 1)), vv = -0.4 + (i % 2) * 0.1, [gx, gz] = m.P(uu, vv), k = rand();
+        if (trade === 'potter' || trade === 'store' || trade === 'perfume') gj.push(lathe((k < 0.35 ? [[0.001, 0], [0.09, 0.01], [0.14, 0.12], [0.1, 0.26], [0.05, 0.3], [0.07, 0.36], [0.001, 0.36]] : k < 0.7 ? [[0.001, 0], [0.12, 0.01], [0.17, 0.1], [0.13, 0.2], [0.04, 0.24], [0.001, 0.25]] : [[0.001, 0], [0.1, 0.01], [0.2, 0.07], [0.22, 0.14], [0.2, 0.14], [0.14, 0.08], [0.001, 0.04]]), 8, null, gx, ty, gz));
+        else if (trade === 'smith') gm.push(B(uu - 0.12, ty, vv - 0.05 - 0.12 * (i % 2), uu + 0.12, ty + 0.05 + 0.03 * (i % 3), vv + 0.1 + 0.02 * (i % 2)));
+        else if (trade === 'weaver') gc.push(B(uu - 0.2, ty, vv - 0.18, uu + 0.2, ty + 0.1 + 0.06 * (i % 3), vv + 0.18));
+        else gc.push(B(uu - 0.04, ty, vv - 0.2, uu + 0.04, ty + 0.28, vv + 0.2));
+      }
+      if (gj.length) add('terracotta', mergeG(gj)); if (gm.length) add('bronze', mergeG(gm)); if (gc.length) add(trade === 'weaver' ? 'cloth_ochre' : 'ivory', mergeG(gc));
+      // the tally board: a plank on the door-post with notches
+      add('timber', B(sd > 0 ? du + dw / 2 + 0.2 : du - dw / 2 - 0.5, y + 1.2, -0.1, sd > 0 ? du + dw / 2 + 0.5 : du - dw / 2 - 0.2, y + 1.7, -0.07));
+    }
   }
   // ── the front by rule (docs/settlements/mycenae.md §13): porch, quoins, dado, frieze ──
   const fk = el.front ?? 'plain';
