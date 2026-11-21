@@ -85,7 +85,7 @@ function way() {
   }
   E.push({ t: 'umbul', at: [WAY.gate - 4, 2.8], y: 0, h: 5.6, seed: 91 }, { t: 'umbul', at: [WAY.gate - 4, -2.8], y: 0, h: 5.6, seed: 92 });
   // resin torches on bamboo poles along the way (§20.2): a pair before the gate's pylons, then one every 14 m, alternating sides, none in the visitor's view at the arrival
-  for (const sd of [-1, 1]) E.push({ t: 'bb_torch', at: [WAY.gate - 3.0, sd * 3.6], y: 0, seed: sd });
+  for (const sd of [-1, 1]) E.push({ t: 'bb_torch', at: [WAY.gate - 3.0, sd * 3.6], y: 0, seed: sd }, { t: 'bb_torch', at: [WAY.gate + 4.2, sd * 3.9], y: 0, seed: sd + 5 });   // and a pair on the gate's outer face, which the visitor at the arrival sees
   for (let x = 70, k = 0; x < WAY.x1 - 30; x += 14, k++) {
     const side = k % 2 ? 1 : -1;
     if (nearArrival(x, side * 3.3, 1.8) || Math.abs(x - WAY.gate) < 8) continue;
