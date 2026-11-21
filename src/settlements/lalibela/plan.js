@@ -3,7 +3,7 @@
 // Giyorgis alone to the south-west.
 
 import { hutRoute, stallRoutes, houseRoutes } from './walkwork.js';
-import { WALK_REACH } from './walk.js';
+import { WALK_REACH, segDist } from './walk.js';
 import { houses } from './layout.js';
 import { PITS, TRENCHES, EDGE, OUTER, HUT, POOL, inRect, slope, cutDepth } from './layout.js';
 
@@ -195,6 +195,13 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
   for (const x of [66.2, 72.4]) E.push({ t: 'lamp', at: [x, yP - 2.0, -90] });
 }
 // ---- the courts: sandals at the doors, and at the foot of the rock walls the pilgrims' staffs, bundles, jars and the masons' rock seats
+// routes into the other churches of the two groups (docs §23): down each trench, round to the west door, and in to the middle of the nave; the courts' dressing keeps off them
+const INTO = [
+  [[[-52, -140], [-52, -106], [-52, -100], [-68, -100], [-68, -91], [-64, -91], [-58, -91], [-52, -91]], slope(-52, -140)], // Golgotha
+  [[[40, -14], [40, 42], [40, 50], [27, 50], [27, 60], [30, 60], [34, 60], [40, 60]], slope(40, -14)], // Amanuel
+  [[[120, -14], [120, 24], [120, 32.5], [108, 32.5], [108, 40], [111, 40], [116, 40], [120, 40]], slope(120, -14)], // Gabriel-Rufael
+  [[[37, -90], [44, -90], [56, -90], [62, -90], [70, -90]], -M.depth + 0.15], // Maryam, from Medhane's court by its trench
+];
 {
   const foot = { giyorgis: [gc[0] - 12.8, gc[1] - 12.8, gc[0] + 12.8, gc[1] + 12.8], medhane: [mc[0] - 17.25, mc[1] - 12.25, mc[0] + 17.25, mc[1] + 12.25], maryam: [59.3, -97.2, 78.3, -82.8] };
   for (const [id, a] of Object.entries(AKS)) foot[id] = [a.rect[0] - 0.6, a.rect[1] - 0.6, a.rect[2] + 0.6, a.rect[3] + 0.6];
@@ -212,6 +219,7 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
       for (let t = 4.5 + (k % 3); t < L - 3; t += 7.5 + (k % 2) * 2) {
         const pt = horiz ? [I[0] + t, side === 'n' ? I[1] + 0.05 : I[3] - 0.05] : [side === 'w' ? I[0] + 0.05 : I[2] - 0.05, I[1] + t], nn = horiz ? [0, side === 'n' ? 1 : -1] : [side === 'w' ? 1 : -1, 0];
         if (TRENCHES.some((tr) => inRect(tr.rect, pt[0], pt[1], 1.8)) || inRect([-262, 120, -200, 136], pt[0], pt[1], 1.5)) { k++; continue; }
+        if (INTO.some(([r]) => r.some((q, i) => i && segDist(pt, r[i - 1], q) < 2.6))) { k++; continue; }
         if (id === 'giyorgis' && side === 'n' && pt[0] < gc[0] - 2) { k++; continue; }
         if (id === 'medhane' && side === 'w') { k++; continue; }                  // (the way round to the west door is kept clear)
         walls.push([pt[0], pt[1], nn[0], nn[1], KINDS[k++ % KINDS.length]]);
@@ -250,6 +258,7 @@ walks[0].y0 = slope(-280, 128);
 { const r = [[-214, 128], [-210.5, 135], [-203, 135], [-195, 135]]; r.y0 = -G.depth + 0.15 + 0.5; walks.push(r); }
 // into Bete Medhane Alem: down the trench from the north into the court, round to the west door and into the middle nave
 { const r = [[10, -140], [10, -111], [-11.3, -108], [-11.3, -90], [-6, -90], [-3, -90]]; r.y0 = slope(10, -140); walks.push(r); }
+for (const [pts, y0] of INTO) { const r = pts.map((q) => q.slice()); r.y0 = y0; walks.push(r); }
 // the visitor's walk (docs §18): into the house beside the arrival, into every opened house within reach of the walk (in at the door and on to the middle of the room), to the front of each stall
 for (const r of [hutRoute(), ...stallRoutes(), ...houseRoutes((x, z) => (x < 0 ? 0 : 1) + (z < 0 ? 0 : 2)).filter((q) => q.dist <= WALK_REACH)]) walks.push(Object.assign(r.route, { y0: r.y0 }));
 
