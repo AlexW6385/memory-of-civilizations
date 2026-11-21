@@ -39,6 +39,14 @@ E.push({ t: 'lane', rect: [cx0 + 3, cz0 + 3, cx1 - 3, cz1 - 3], y: 0.04, mat: 'g
 // in two rows beside it, from the platform's stair to the gate (the civil ranks east, the military west)
 E.push({ t: 'block', rect: [-1.6, 56, 1.6, cz1 - 3], y0: 0, y1: 0.2, mat: 'granite_korea', collide: false, walk: true });
 for (const sx of [-1, 1]) E.push({ t: 'block', rect: sx < 0 ? [-3.6, 56, -1.6, cz1 - 3] : [1.6, 56, 3.6, cz1 - 3], y0: 0, y1: 0.12, mat: 'granite_korea', collide: false, walk: true });
+// wear: the officials' two side lanes are darkened and polished along the strip their feet kept to, and before the stair's foot where they stopped; the king's lane, walked by him alone, stays pale
+for (const sx of [-1, 1]) for (let z = 56, k = 0; z < cz1 - 4; k++) {
+  // patches, not a road: each 1.4 to 3 m long, 0.4 to 0.9 m wide, a little off line, a gap now and then (by the patch's own number)
+  const h = (n) => { const t = Math.sin((k + 1) * 12.9898 + sx * 78.233 + n * 37.719) * 43758.5453; return t - Math.floor(t); };
+  const len = 1.4 + 1.6 * h(1), w = 0.4 + 0.5 * h(2), x = sx * (2.6 + (h(3) - 0.5) * 0.5), keep = z < 62 ? 0.95 : 0.6;
+  if (h(4) < keep) E.push({ t: 'block', rect: [x - w / 2, z, x + w / 2, Math.min(z + len, cz1 - 3.5)], y0: 0.12, y1: 0.124, mat: 'granite_grey', collide: false, walk: false });
+  z += len + 0.5 * h(5);
+}
 for (let i = 0; i < 12; i++) for (const sx of [-1, 1]) {
   const z = 59 + i * 2.25, x = sx * 7.5;
   E.push({ t: 'rank_stone', at: [x, z], face: [-sx, 0], y: 0, rank: i < 6 ? 0 : 1 });

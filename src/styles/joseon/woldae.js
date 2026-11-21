@@ -120,6 +120,8 @@ export function woldaeStairs(el, { bag, col }) {
       const f0 = k / n, f1 = (k + 1) / n, za = z1 - run * f1, zb = z1 - run * f0;
       bag.add(g, box(a, y0 - 0.2, za, b, y0 + rise * f1, zb));
       bag.add(g, box(a + 0.01, y0 + rise * f1 - 0.03, zb - 0.06, b - 0.01, y0 + rise * f1, zb + 0.02));     // a nosing's shadow line
+      // where feet went: the middle of each tread, darkened and polished by the officials' soles (a pad of the darker granite, 1.2 m wide, a hair proud)
+      { const ac = (a + b) / 2, hw = Math.min(0.6, (b - a) / 2 - 0.1); bag.add('granite_grey', box(ac - hw, y0 + rise * f1, za + 0.05, ac + hw, y0 + rise * f1 + 0.012, zb - 0.08)); }
     }
     col.ramp([a, z0, b, z1], y0, y1, 'n');
   }
