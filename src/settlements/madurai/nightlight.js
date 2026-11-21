@@ -53,8 +53,8 @@ class Halo {
 function unitOf(kind) {
   return assembly(`mdu-halo|${kind}`, (a) => {
     const H = new Halo();
-    if (kind === 'door') { H.ball(0, 1.62, 0.5, 0.85); H.floor(0, 0.6, 1.2, 1.7, 1.3, 0, 10, 0.75); H.floor(0, 0.05, 3.6, 2.0, 1.7, 0, 10, 0.5); }   // the lamp by a door or under a shop's awning: its ball, the pool on the thinnai, the spill on the street
-    else if (kind === 'stand') { H.ball(0, 1.35, 0, 0.8); H.floor(0, 0.03, 0, 1.6, 1.6, 0, 8, 0.8); }                 // a tall bronze lamp with its five wicks
+    if (kind === 'door') { H.ball(0, 1.62, 0.5, 1.25); H.floor(0, 0.6, 1.2, 2.1, 1.7, 0, 10, 1); H.floor(0, 0.05, 3.6, 2.7, 2.2, 0, 10, 0.75); }   // the lamp by a door or under a shop's awning: its ball, the pool on the thinnai, the spill on the street
+    else if (kind === 'stand') { H.ball(0, 1.35, 0, 1.3); H.floor(0, 0.03, 0, 2.4, 2.4, 0, 8, 1); }                 // a tall bronze lamp with its five wicks
     else if (kind === 'diya') { H.ball(0, 0.12, 0, 0.5); H.floor(0, 0.03, 0, 1.1, 1.1, 0, 8, 0.7); }                  // two clay lamps of a row on a step
     else if (kind === 'row') { H.ball(0, 0.2, 0, 0.8); H.floor(0, 0.03, 0, 1.0, 1.7, 0, 8, 0.85); }                    // the five lamps before a flagstaff
     const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(H.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(H.nor, 3)); a(MAT, g);
@@ -85,6 +85,12 @@ export function nightElements() {
   for (const [x, z] of [[SUNDARA[2] + 10, (SUNDARA[1] + SUNDARA[3]) / 2], [MEENAKSHI[2] + 8, (MEENAKSHI[1] + MEENAKSHI[3]) / 2]]) put('row', [x + 1.3, z], 0, 0);
   for (const zz of [TANK[1] + 0.17, TANK[3] - 0.17]) for (let i = 0; i < 12; i++) put('diya', [TANK[0] + 2 + (i + 0.5) * (TANK[2] - TANK[0] - 4) / 12, zz], 0, 0);
   for (const sx of [-1, 1]) put('stand', [(HALL[0] + HALL[2]) / 2 + sx * 2.3, HALL[1] + 4.4], 0.5, 0);
+  // the great gopurams' passages: a lamp stand each side of the mouth and one inside, where the pilgrims entered after dark [inferred: the temple never closed its gates to the lamp-lit evening services]
+  for (const [gx, gz, ax, sg] of [[GATES.s[0], GATES.s[1], 'z', 1], [GATES.n[0], GATES.n[1], 'z', -1], [GATES.e[0], GATES.e[1], 'x', 1], [GATES.w[0], GATES.w[1], 'x', -1]]) {
+    const P = (u, v) => ax === 'z' ? [gx + u, gz + sg * v] : [gx + sg * v, gz + u];       // u across the passage (it is 5 m wide), v from its middle toward the street
+    for (const s of [-1, 1]) put('stand', P(s * 1.9, 7), 0, 0);
+    put('row', P(0, -3), 0, 0);
+  }
   void RADIUS; void WALL; void GATES;
   return out;
 }
