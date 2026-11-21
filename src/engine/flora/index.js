@@ -18,7 +18,7 @@ import { HITCH } from '../hitch.js';
 
 const BIG = 128, SMALL = 16, NEAR_R = 64;
 
-const FOLIAGE_TEX = { acacia: 'acacia', broad: 'broad', broad_dark: 'broad', tamarisk: 'tamarisk', reed: 'reed', grass: 'grass', grass_dry: 'grass', needles: 'needles', scale: 'scale', olive: 'olive', oleander: 'oleander', sugi: 'scale', maple: 'maple', bamboo: 'bamboo', teak: 'broad' };
+const FOLIAGE_TEX = { acacia: 'acacia', broad: 'broad', broad_dark: 'broad', tamarisk: 'tamarisk', willow: 'willow', reed: 'reed', grass: 'grass', grass_dry: 'grass', needles: 'needles', scale: 'scale', olive: 'olive', oleander: 'oleander', sugi: 'scale', maple: 'maple', bamboo: 'bamboo', teak: 'broad' };
 const FOLIAGE_TINT = { teak: '#c4c48a', sugi: '#a8b29a', broad_dark: '#9aa58f', grass_dry: '#e2cf96', grass: '#ffffff' };
 
 /** The wind: a sway of the upper parts, stronger in a windy weather, each plant with its own phase. */

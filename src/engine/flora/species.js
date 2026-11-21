@@ -133,6 +133,12 @@ function tree(T, seed, lod) {
       // card orientation: random, biased toward lying flat (up) for umbrella and flat crowns
       const n = V(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize().lerp(V(0, 1, 0), cr.up ?? 0.2).normalize();
       const sway = 0.5 + 0.5 * Math.min(1, p.y / H);
+      if (cr.hang) {
+        // a curtain: a tall narrow card hanging from its top edge at p, facing out sideways
+        const hh = size * cr.hang * (0.75 + rand() * 0.5), a2 = Math.atan2(p.z - centre.z, p.x - centre.x) + (rand() - 0.5) * 1.6;
+        card(leaves, V(p.x, p.y - hh / 2, p.z), size * (0.8 + rand() * 0.5), hh, V(Math.cos(a2), 0.05, Math.sin(a2)).normalize(), (rand() - 0.5) * 0.12, centre, 0.3, sway);
+        continue;
+      }
       card(leaves, p, size * (0.75 + rand() * 0.5), size * (0.75 + rand() * 0.5), n, rand() * Math.PI * 2, centre, 0.65, sway);
     }
   }
@@ -320,7 +326,7 @@ export const SPECIES = {
   oak: { make: (s, l) => tree({ height: 18, trunk: { r: 0.6, lean: 0.05, fork: 0.32, limbs: 7, gnarl: 0.7 }, crown: { shape: 'round', w: 8.5, h: 6.5, y: 0.6, clumps: 16, cards: 56, card: 2.0, up: 0.15 } }, s, l), foliage: 'broad', bark: 'bark_grey', scale: [0.7, 1.2], shadow: true, lod: [190, 1700] },
   elm: { make: (s, l) => tree({ height: 22, trunk: { r: 0.5, lean: 0.03, fork: 0.45, limbs: 6, gnarl: 0.3 }, crown: { shape: 'round', w: 7, h: 9, y: 0.62, clumps: 14, cards: 50, card: 2.0, up: 0.35 } }, s, l), foliage: 'broad', bark: 'bark_dark', scale: [0.75, 1.15], shadow: true, lod: [190, 1700] },
   poplar: { make: (s, l) => tree({ height: 22, trunk: { r: 0.3, lean: 0.01, fork: 0.15, limbs: 0 }, crown: { shape: 'spindle', w: 2.4, h: 15, y: 0.55, clumps: 16, cards: 34, card: 1.4, up: 0.0, clumpR: 1.3 } }, s, l), foliage: 'broad', bark: 'bark_grey', scale: [0.8, 1.2], shadow: true, lod: [190, 1700] },
-  willow: { make: (s, l) => tree({ height: 11.5, trunk: { r: 0.45, lean: 0.25, fork: 0.25, limbs: 6, gnarl: 0.9 }, crown: { shape: 'round', w: 6.5, h: 5.0, y: 0.58, clumps: 14, cards: 52, card: 1.7, up: -0.5 } }, s, l), foliage: 'tamarisk', bark: 'bark_grey', scale: [0.8, 1.2], shadow: true, lod: [160, 1400] },
+  willow: { make: (s, l) => tree({ height: 11.5, trunk: { r: 0.45, lean: 0.25, fork: 0.25, limbs: 6, gnarl: 0.9 }, crown: { shape: 'umbrella', w: 5.4, h: 2.4, y: 0.7, clumps: 14, cards: 38, card: 1.7, hang: 1.9 } }, s, l), foliage: 'willow', bark: 'bark_grey', scale: [0.8, 1.2], shadow: true, lod: [160, 1400] },
   apple: { make: (s, l) => tree({ height: 5, trunk: { r: 0.17, lean: 0.1, fork: 0.25, limbs: 5, gnarl: 0.6 }, crown: { shape: 'round', w: 3.6, h: 2.6, y: 0.6, clumps: 9, cards: 34, card: 1.2, up: 0.2 } }, s, l), foliage: 'broad', bark: 'bark_dark', scale: [0.8, 1.15], shadow: true, lod: [130, 1000] },
   chinese_pine: { make: (s, l) => tree({ height: 13, trunk: { r: 0.32, lean: 0.18, fork: 0.55, limbs: 7, gnarl: 0.5 }, crown: { shape: 'flat', w: 6.0, h: 2.4, y: 0.78, clumps: 12, cards: 40, card: 1.6, up: 0.55 } }, s, l), foliage: 'needles', bark: 'bark_pine', scale: [0.75, 1.2], shadow: true, lod: [180, 1600] },
   arborvitae: { make: (s, l) => tree({ height: 10, trunk: { r: 0.22, lean: 0.03, fork: 0.15, limbs: 0 }, crown: { shape: 'spindle', w: 2.4, h: 6.5, y: 0.5, clumps: 12, cards: 28, card: 1.2, up: 0.0, clumpR: 1.1 } }, s, l), foliage: 'scale', bark: 'bark_dark', scale: [0.75, 1.2], shadow: true, lod: [170, 1500] },

@@ -30,6 +30,12 @@ export function piazzaLines(el, { bag }) {
     for (let x = x0 + 4; x < x1 - 1; x += 6) bag.add(T, box(x, y0, z0 + 1.0, x + 0.3, y1, z1 - 1.0));
     bag.add(T, box(x0 + 0.5, y0, (z0 + z1) / 2 - 0.2, x1 - 2.5, y1, (z0 + z1) / 2 + 0.2));
     for (const z of [z0 + 0.4, z1 - 0.4]) bag.add('granite_grey', box(x0, y0, z - 0.3, x1, y1 + 0.02, z + 0.3));
+    // the wheel-ruts of the coaches along the middle of the way, worn into the setts' crowns as two dark broken strips (the long pieces cut by the place)
+    for (const zr of [-0.95, 0.95]) for (let x = x0 + 1; x < x1 - 3; x += 3.2) {
+      const h = Math.imul(Math.round(x * 4) + 1, 73856093) ^ Math.imul(Math.round(zr * 4) + 9, 19349663), r = (((h ^ (h >>> 15)) >>> 0) % 1000) / 1000;
+      if (r < 0.3) continue;
+      bag.add('granite_black', box(x + r * 0.4, 0.0, (z0 + z1) / 2 + zr - 0.09, x + 2.2 + r * 0.8, 0.0235, (z0 + z1) / 2 + zr + 0.09));
+    }
   }
 }
 

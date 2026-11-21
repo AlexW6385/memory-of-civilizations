@@ -145,3 +145,4 @@ The record of decisions behind `DESIGN.md` (its §11 points here). **Agents do n
 - 2026-11-19: lantern light at the low preset is geometry in one additive 'halo' material (no lights, no shadow, no collision, skipped by the baker), because the pool of real lamps is off at low.
 
 - Conques: the PAX plaque by the hostel door (v12.54) is switched off — it was invented, and nothing is written on a building without a source for that inscription there.
+- Baroque Rome: the frieze and the dome band were removed as unverified, then restored after their wording was checked against sources (dossier §8); the obelisk's tablets stay plain until checked. Rule: a text goes on a building when its wording is checked, and trade words on shop boards are not inscriptions.

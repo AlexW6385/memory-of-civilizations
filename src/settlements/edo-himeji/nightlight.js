@@ -190,12 +190,35 @@ function votive(el, ctx) {
   H.ball(px, y + v, pz, 0.55, 0.6); H.floor(px, y + 0.04, pz, 1.6, 1.6, 0, 8, false, 0.55);
   H.flush(ctx.bag);
 }
+/** A lit stone lantern (ishidōro): the glow at its fire box and a pool on the ground round its foot (the lantern of a garden or of the baileys). */
+function stoneLamp(el, ctx) {
+  const [x, z] = el.at, y = el.y ?? 0, k = el.s ?? 1, H = new Halo();
+  H.ball(x, y + 0.78 * k, z, 0.6 + 0.2 * k, 0.65); H.floor(x, y + 0.04, z, 1.7 + 0.4 * k, 1.7 + 0.4 * k, 0, 8, false, 0.6);
+  H.flush(ctx.bag);
+}
+/** The light of a standing paper lantern of the street life's props (props.js: a pole `h` m high, the lantern at its head): a glow and a pool, 70-100 % of them lit by their place. */
+function lampGlow(el, ctx) {
+  const [x, z] = el.at, y = el.y ?? 0, H = new Halo();
+  if (hashAt(x, z, 41) > 0.85) return;
+  H.ball(x, y + (el.h ?? 2.2) - 0.3, z, 1.0, 0.7); H.floor(x, y + 0.04, z, 2.3, 2.3, 0, 8, false, 0.75);
+  H.flush(ctx.bag);
+}
+/** A paper lantern (chōchin) hung under the pent roof over an open shop's passage, lit: the shop's sign after dark (docs §10.1); the halo and the pool on the street. */
+function shopLantern(el, ctx) {
+  const [x, z] = el.at, H = new Halo();
+  chochin(ctx.bag, x, 3.25, z, 0.17, 0.42);
+  H.ball(x, 2.95, z, 0.95, 0.7); H.floor(x, 0.04, z + (el.s ?? 1) * 0.4, 2.3, 2.3, 0, 8, false, 0.7);
+  H.flush(ctx.bag);
+}
 /** Register the elements and the lit windows and lanterns of the houses, the halls, the gates, the stores and the turrets. */
 export function registerNight() {
   if (!STYLES.edo) return;
   STYLES.edo.elements.kagaribi = kagaribi;
+  STYLES.edo.elements.lamp_glow = lampGlow;
+  STYLES.edo.elements.shop_lantern = shopLantern;
   for (const [name, share, lanterns] of [['machiya', 0.42, 0.75], ['yashiki', 0.4, 0.8], ['goten', 0.6, 0.9], ['kura_in', 0.5, 0.9], ['yagura', 0.35, 0.9], ['yagura_mon', 0.35, 1], ['hishi_mon', 0.4, 1], ['kabuki_mon', 0.3, 1], ['watari', 0.3, 0.9]]) wrapElement(name, share, lanterns);
   wrapElement('hinomi_yagura', 0, 1, watchLamp);
+  wrapElement('ishidoro', 0, 0, stoneLamp);
   wrapElement('jizo', 0, 0, votive); wrapElement('inari', 0, 0, votive);
 }
 registerNight();

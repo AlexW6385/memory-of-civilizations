@@ -17,6 +17,7 @@ import { haul } from './haulers.js';
 import { roomThings, courtCraft } from './houses.js';
 import { gizaHouse, gizaBakery } from './walkhouse.js';
 import { rationStall } from './ration.js';
+import { faceWorks } from './facework.js';
 
 const OK = STYLES.oldkingdom;
 /** Khafre's valley temple's alabaster floor in slabs over the halls and rooms (docs §17): a grey joint layer, the slabs on it. */
@@ -65,10 +66,19 @@ registerStyle('oldkingdom-giza', {
       if (el.backDoor && el.court[2] - el.court[0] > 20 && el.door === 'e') falseDoor(c.bag, c.col, { rect: el.rect, th: 2.2, s: (el.rect[3] - el.rect[1]) / 2 - 7 });
     },
     bakery: gizaBakery,
+    // the far form of a gallery: closed walls and a roof (the interior only within reach of the visitor)
+    gallery_hall: (el, c) => {
+      if (!el.simple) return OK.elements.gallery_hall(el, c);
+      const [x0, z0, x1, z1] = el.rect, h = el.h ?? 3.4, th = 0.6;
+      c.bag.add('mud_plaster', box(x0 - th / 2, 0, z0 - th / 2, x1 + th / 2, h, z0 + th / 2)); c.bag.add('mud_plaster', box(x0 - th / 2, 0, z1 - th / 2, x1 + th / 2, h, z1 + th / 2));
+      c.bag.add('mud_plaster', box(x1 - th / 2, 0, z0 + th / 2, x1 + th / 2, h, z1 - th / 2));
+      c.bag.add('mud_plaster', box(x0 - 0.2, h, z0 - 0.2, x1 + 0.2, h + 0.4, z1 + 0.2));
+    },
     ok_ration: rationStall,
+    ok_face_works: faceWorks,
     mud_house: (el, c) => {
       gizaHouse(el, c);
-      if (!el.furnish) return;
+      if (!el.furnish || el.simple) return;
       roomThings(c.bag, c.col, el); courtCraft(c.bag, c.col, el);
     },
   },

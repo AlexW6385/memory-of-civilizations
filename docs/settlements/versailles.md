@@ -223,3 +223,8 @@ Method: `docs/suzhou-method.md`. Web access was not available in this round, so 
 
 ### 11.7 Falls short of the reference
 Worn treads on the Ambassadors' Staircase, the Cent Marches and the avenue's kerbs; a worn line down the avenue's paving; stains and rain-streaks under eaves; inscriptions; interiors above the ground floor and goods out of doors; the chapel's, Trianon's and statues' L3 pieces (§ header); the court and its ceremonies as figures. The sounds are not listened to, the lit windows and keepers' places are computed from the builders' formulas and seen only at the arrival by night and one shop door by day.
+
+## 12. Second pass (geometry, night near the visitor)
+- Geometry: `unshare.js` now varies only the far (simple) houses and the stables; near houses stay instanced (the Madurai way). geo-one 106.2 → 71.9 MB (1731 → 1758 meshes). Main draws: arrival 374 → 380, (60,6.1,0) 337 → 358, (300,y,0) 156 → 173; main triangles 2.13 / 2.01 / 1.09 M before, 2.13 / 2.01 / 0.78 M after. [measured]
+- Night: the arrival's frame was dark within 15 m (the lit bays are 60 m off); six iron torchères with a halo each and a floor pool on the terrace by the water parterre (`nightlight.js` TORCHERES, post and cup of `iron`, in the night plans) [inferred: flambeaux for the evening promenades]. Seen at the arrival by night: the lit posts read at 15–30 m, the foreground within 10 m is still only moonlit. The avenue pose already had halos within 15 m.
+- Not done: step D (landmark gaps, worn treads of the Ambassadors' staircase and Cent Marches); a day render at (30, y, 0) came out black (inside the château), so no day walk frame was judged.

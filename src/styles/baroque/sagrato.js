@@ -8,6 +8,8 @@ import { ext } from '../renaissance/face.js';
 import { human } from '../greek/sculpture.js';
 
 const T = 'travertine', CV = 'limestone_carved';
+/** A number in [0, 1) from two integers (the wear's variation: from the place, never random). */
+const hs = (a, b) => { let h = Math.imul(a + 1, 73856093) ^ Math.imul(b + 7, 19349663); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
 /** The socle under the church's outer walls: each plan rect [x0, z0, x1, z1] and each circle [x, z, r] widened by a 0.6 m plinth, from the ground up to the floor y. */
 export function socle(bag, col, { rects, circles, y }) {
@@ -51,6 +53,11 @@ export function sagrato(bag, col, { fx, cz, fw, y }) {
       const lip = box(0, -0.5, cz - wz, 0.06, 0, cz + wz), pa = lip.attributes.position.array;
       for (let i = 0; i < pa.length; i += 3) { const top0 = pa[i + 1] === 0; pa[i + 1] = top0 ? h - dip - (pa[i] > 0.03 ? 0.03 : 0) : pa[i + 1]; pa[i] += x + tread - 0.06; }
       lip.computeVertexNormals(); bag.add(T, lip);
+      // the stone polished by the feet in lanes where people climb: a few strips, their place and length from the step's own place
+      for (let q = 0; q < 3; q++) {
+        const r1 = hs(j * 31 + k * 7 + q, 1), r2 = hs(j * 31 + k * 7 + q, 2), zc = cz + (q - 1) * 6.5 + (r1 - 0.5) * 3, hw = 0.3 + 0.4 * r2;
+        bag.add('marble_smooth', box(x + 0.05, h - dip, zc - hw, x + tread - 0.14, h - dip + 0.004, zc + hw));
+      }
       x += tread;
     }
     col.ramp([xa, cz - wst, x, cz + wst], top - rise, top, 'w');

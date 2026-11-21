@@ -56,6 +56,11 @@ export function props() {
     E.push({ t: 'lantern', kind: 'paper', at: [-38.8, -21.2], y: h, h: 2.2, rot: 0, seed: 11 }, { t: 'lantern', kind: 'paper', at: [-23.2, -21.2], y: h, h: 2.2, rot: 0, seed: 12 }); }
   const tiles = new Map();
   for (const e of E) { const k = Math.floor(e.at[0] / 100) + ',' + Math.floor(e.at[1] / 100); if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
-  return [...tiles].map(([k, elements]) => { const [i, j] = k.split(',').map(Number); return { id: `edo-himeji-props-${k}`, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' }, center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
+  // the glow of every standing lantern (nightlight.js lampGlow): one plan of the style's own, builds nothing by day
+  const glow = { id: 'edo-himeji-lamp-glow', style: 'edo', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' }, nocollide: true,
+    elements: [...E.filter((e) => e.t === 'lantern').map((e) => ({ t: 'lamp_glow', at: e.at, y: e.y ?? 0, h: e.h })),
+      // a lit paper lantern over the passage of every open shop within 150 m of the avenue (the shops of the walk)
+      ...lots().filter((l) => l.t === 'machiya' && isOpen(l) && Math.abs((l.rect[0] + l.rect[2]) / 2) < 150).map((l) => { const s = l.front === 's' ? 1 : -1, fz = s > 0 ? l.rect[3] : l.rect[1]; return { t: 'shop_lantern', at: [l.rect[0] + 0.95, fz + s * 0.85], s }; })] };
+  return [glow, ...[...tiles].map(([k, elements]) => { const [i, j] = k.split(',').map(Number); return { id: `edo-himeji-props-${k}`, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' }, center: [i * 100 + 50, j * 100 + 50], near: 230 }; })];
 }
 void STREET; void MIDDLE; void LEVEL;

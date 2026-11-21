@@ -27,7 +27,7 @@ import { ENV } from '../env.js';
 export const PHEN = {
   // plum / peach / cherry stand-in (a plant of the Jiangnan gardens flowers before it leafs)
   apple: { out: [88, 118], drop: [318, 350], turn: [292, 322], autumn: ['#c9a13a', '#b9772a'], fresh: [1.25, 1.3, 0.8], bloom: { col: ['#eeb3c4', '#f9e6e8'], on: [35, 52], off: [100, 124], share: 0.9 }, jitter: 12 },
-  willow: { out: [58, 88], drop: [338, 362], turn: [312, 338], autumn: ['#c8b04a', '#a8963c'], fresh: [1.5, 1.45, 0.7], twig: 0.42, twigCol: '#8f8445', jitter: 10 },
+  willow: { out: [58, 88], drop: [338, 362], turn: [312, 338], autumn: ['#a9b55a', '#98a64c'], fresh: [1.0, 1.15, 0.85], twig: 0.42, twigCol: '#8f8445', jitter: 10 },
   maple: { out: [84, 112], drop: [334, 360], turn: [296, 324], autumn: ['#b3261a', '#d1561b'], fresh: [1.2, 1.1, 0.75], jitter: 9 },
   mulberry: { out: [86, 112], drop: [322, 352], turn: [302, 326], autumn: ['#c9b03a', '#b89030'], fresh: [1.3, 1.3, 0.8], jitter: 10 },
   elm: { out: [88, 116], drop: [320, 352], turn: [296, 322], autumn: ['#c8a63a', '#b07a28'], fresh: [1.25, 1.3, 0.8], jitter: 10 },
