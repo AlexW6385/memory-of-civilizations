@@ -148,7 +148,12 @@ What lit Rome at night in 1670, and nothing else (`src/settlements/baroque-rome/
 
 ### 6e. Writing
 
-Latin capitals from the verified set of Rome's `lettering.js` (read-only; V for U): the four tablets of the obelisk's pedestal in raised bronze letters — CHRISTVS VINCIT, CHRISTVS REGNAT, CHRISTVS IMPERAT, CHRISTVS AB OMNI MALO PLEBEM SVAM DEFENDAT [the acclamation is cut on the obelisk's pedestal: from general knowledge, not re-fetched in this session (the shell cannot reach the site cited in §4), so marked inferred; which phrase stands on which face is ours]; the words on the open shops' hanging signs, in dark raised capitals on both faces of the board: OLIO (grocer), PANE (baker), DRAPPI (cloth), VINO (wine), ERBE (apothecary), OSTERIA, SCARPE (cobbler), CORONE (rosaries and medals) [inferred: ordinary Italian trade words; painted signs in Roman capitals]. Not written: the dedications of Sixtus V and the Augustan dedications on the pedestal (the exact wording is not certain here), street-name plaques (later than 1670), the notices on the walls (plain paper, no text). The façade's inscription to Paul V is as in §4.
+Rule applied (second pass): an inscription not verified against a source does not stand. None of the lettering below was [stated] with a fetched source (the fetches of stpetersbasilica.info were refused in two sessions), so all of it is removed and nothing is written in the settlement:
+- the obelisk's four tablets (the acclamation CHRISTVS VINCIT / REGNAT / IMPERAT / AB OMNI MALO PLEBEM SVAM DEFENDAT, written from memory and split by us over four faces): removed, the tablets are plain framed panels. The sources of §4 state only the obelisk's size, its re-erection by Fontana and its lions and emblem, not the wording or the faces.
+- the frieze of Maderno's front (the inscription to Paul V): that it exists and its letter height (about a metre) are [stated: stpetersbasilica.info]; its wording was [inferred], so the frieze is plain. To restore: fetch the wording and set it with `src/styles/baroque/lettering.js`.
+- the drum's band inside (TV ES PETRVS…): [inferred], removed, the band is plain gold.
+- the hanging signs of the open shops (OLIO, PANE, DRAPPI, VINO, ERBE, OSTERIA, SCARPE, CORONE): [inferred], removed, the boards are plain painted boards in the trade's colour.
+- Not written, as before: the dedications of Sixtus V on the pedestal, street-name plaques (later than 1670), the notices on the walls. The Sistine Chapel's "lettering of the titles" is a row of short iron dashes, not letters.
 
 ### 6f. Wear and gaps closed on the way
 

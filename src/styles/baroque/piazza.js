@@ -7,7 +7,6 @@
 
 import { box, lathe, rod, frustum } from '../../core/geom.js';
 import { Local, ext, sheet } from '../renaissance/face.js';
-import { letterGeometry, widthOf } from './lettering.js';
 import { human, blob, limb } from '../greek/sculpture.js';
 
 const T = 'travertine', GB = 'gilt_bronze', BR = 'bronze', W = 'water', WJ = 'water_jet', MB = 'marble';
@@ -43,18 +42,7 @@ export function obelisk(el, { bag, col }) {
     pb(-1.55, 1.55, 1.85, 4.35, 0.06);                                                     // the tablet, a little proud
     pb(-2.1, 2.1, 5.15, 5.4, 0.3);                                                          // the cornice over the die
   }
-  // the acclamation of the Cross cut in the four tablets, in raised bronze capitals: CHRISTVS VINCIT, REGNAT, IMPERAT, AB OMNI MALO PLEBEM SVAM DEFENDAT
-  // (the words are those of the pedestal [stated: stpetersbasilica.info, the obelisk]; which stands on which face is ours)
-  if (!el.simple) {
-    const FACES = [[-1, 0, ['CHRISTVS', 'VINCIT']], [1, 0, ['CHRISTVS', 'REGNAT']], [0, -1, ['CHRISTVS', 'IMPERAT']], [0, 1, ['CHRISTVS', 'AB OMNI MALO', 'PLEBEM SVAM', 'DEFENDAT']]];
-    for (const [dx, dz, lines] of FACES) {
-      const h = Math.min(0.41, 3.0 / Math.max(...lines.map((t) => widthOf(t)))), step = h * 1.5, y0 = p0 + 3.1 + (lines.length - 1) * step / 2 - 0.35 * h;
-      lines.forEach((text, i) => {
-        const yb = y0 - i * step, P = (u, v, d) => [x + dx * (die + 0.06 + d) + dz * u * h, yb + v * h, z + dz * (die + 0.06 + d) - dx * u * h];
-        const g = letterGeometry(text, h, P, 0.03); if (g) L.add('bronze', g);
-      });
-    }
-  }
+  // the four tablets are left plain: the pedestal's inscriptions are not verified against a source (docs/settlements/baroque-rome.md §6e), so no lettering is cut
   L.add(T, frustum([x - die, z - die, x + die, z + die], p0 + 5.6, p0 + 6.0, -0.45, -0.45, -0.45, -0.45));
   L.add(T, box(x - die - 0.45, p0 + 6.0, z - die - 0.45, x + die + 0.45, p0 + 6.35, z + die + 0.45));
   L.add(T, box(x - 2.3, p0 + 6.35, z - 2.3, x + 2.3, p0 + 6.9, z + 2.3));

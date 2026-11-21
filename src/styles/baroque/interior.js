@@ -31,19 +31,6 @@ function lineFrame(a, b, y) {
 /** A world point of a line frame. */
 const atF = (F, u, yy, d) => { const e = F.M.elements; return [e[12] + e[0] * u + e[8] * d, e[13] + yy, e[14] + e[2] * u + e[10] * d]; };
 
-// the stroke alphabet of the front (facade.js) — the letters the drum's inscription needs
-const FONT = {
-  A: [[0, 0, 2, 6], [4, 0, 2, 6], [1, 2, 3, 2]], B: [[0, 0, 0, 6], [0, 6, 3, 6], [3, 6, 3.5, 4.5], [3.5, 4.5, 0, 3], [0, 3, 3.6, 1.6], [3.6, 1.6, 3, 0], [3, 0, 0, 0]],
-  C: [[4, 6, 1, 6], [1, 6, 0, 4.5], [0, 4.5, 0, 1.5], [0, 1.5, 1, 0], [1, 0, 4, 0]], D: [[0, 0, 0, 6], [0, 6, 2.5, 6], [2.5, 6, 4, 4.5], [4, 4.5, 4, 1.5], [4, 1.5, 2.5, 0], [2.5, 0, 0, 0]],
-  E: [[0, 0, 0, 6], [0, 6, 4, 6], [0, 3, 3, 3], [0, 0, 4, 0]], F: [[0, 0, 0, 6], [0, 6, 4, 6], [0, 3, 3, 3]], G: [[4, 6, 1, 6], [1, 6, 0, 4.5], [0, 4.5, 0, 1.5], [0, 1.5, 1, 0], [1, 0, 4, 0], [4, 0, 4, 2.5], [4, 2.5, 2.5, 2.5]],
-  H: [[0, 0, 0, 6], [4, 0, 4, 6], [0, 3, 4, 3]], I: [[0.6, 0, 0.6, 6]], L: [[0, 6, 0, 0], [0, 0, 4, 0]],
-  M: [[0, 0, 0.5, 6], [0.5, 6, 2, 1.5], [2, 1.5, 3.5, 6], [3.5, 6, 4, 0]], N: [[0, 0, 0, 6], [0, 6, 4, 0], [4, 0, 4, 6]],
-  O: [[1, 0, 0, 1.5], [0, 1.5, 0, 4.5], [0, 4.5, 1, 6], [1, 6, 3, 6], [3, 6, 4, 4.5], [4, 4.5, 4, 1.5], [4, 1.5, 3, 0], [3, 0, 1, 0]],
-  P: [[0, 0, 0, 6], [0, 6, 3, 6], [3, 6, 4, 5], [4, 5, 4, 4], [4, 4, 3, 3], [3, 3, 0, 3]], R: [[0, 0, 0, 6], [0, 6, 3, 6], [3, 6, 4, 5], [4, 5, 4, 4], [4, 4, 3, 3], [3, 3, 0, 3], [1.5, 3, 4, 0]],
-  S: [[4, 6, 1, 6], [1, 6, 0, 5], [0, 5, 0, 4], [0, 4, 4, 2], [4, 2, 4, 1], [4, 1, 3, 0], [3, 0, 0, 0]], T: [[0, 6, 4, 6], [2, 6, 2, 0]], V: [[0, 6, 2, 0], [2, 0, 4, 6]],
-};
-const adv = (ch) => (ch === ' ' ? 2.6 : ch === 'I' ? 2.2 : ch === 'M' ? 5.2 : 4.9);
-
 /** A twisted (Solomonic) column shaft from y0 to y1 of radius r at (x, z): a spiral lathe. */
 function solomonic(Lc, mat, x, y0, z, r, h, turns = 3, n = 10) {
   const rows = 28, prof = [];
@@ -245,18 +232,7 @@ export function stPeterInterior(bag, col, o) {
     Lc.add(ST, dbl(t));
     const ring = (r0, r1, y0, y1, mat) => Lc.add(mat, lathe([[r0, y0], [r1, y0], [r1, y1], [r0, y1]], 48, null, cx, 0, cz));
     ring(R0 - 0.9, R0, yd0, yd0 + 0.8, TR); ring(R0 - 0.25, R0, yd0 + 0.8, yd0 + 3.2, GO); ring(R0 - 1.1, R0, yd0 + 3.2, yd0 + 4.0, TR);
-    // the letters in blue on the gold band, running round
-    const text = 'TV ES PETRVS ET SVPER HANC PETRAM AEDIFICABO ECCLESIAM MEAM ET TIBI DABO CLAVES REGNI CAELORVM', hL = 1.6, k = hL / 6, sw = hL * 0.12, R = R0 - 0.27;
-    let total = 0; for (const ch of text) total += adv(ch) * k;
-    let u = (2 * Math.PI * R - total) / 2;
-    const toCyl = (uu, yy) => { const a = Math.PI + uu / R; return [cx + Math.cos(a) * R, yy, cz + Math.sin(a) * R, a]; };
-    for (const ch of text) {
-      for (const [a, b0, c, d] of FONT[ch] ?? []) {
-        const [x0, y0, z0] = toCyl(u + a * k, yd0 + 1.2 + b0 * k), [x1, y1, z1] = toCyl(u + c * k, yd0 + 1.2 + d * k);
-        Lc.add(BL, rod([x0, y0, z0], [x1, y1, z1], sw / 2, 4));
-      }
-      u += adv(ch) * k;
-    }
+    // (the band is left without lettering: the wording of the drum's inscription is not verified against a source, docs/settlements/baroque-rome.md §6e)
     for (let i = 0; i < 16; i++) {
       const a = (i + 0.5) / 16 * Math.PI * 2, c = [cx + Math.cos(a) * (R0 - 0.03), cz + Math.sin(a) * (R0 - 0.03)], tg = [-Math.sin(a), Math.cos(a)];
       const F = lineFrame([c[0] - tg[0] * 1.6, c[1] - tg[1] * 1.6], [c[0] + tg[0] * 1.6, c[1] + tg[1] * 1.6], 0);
