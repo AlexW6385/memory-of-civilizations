@@ -40,13 +40,13 @@ export function people() {
   VALLEY.forEach((V, i) => {
     const [cx, cz] = V.c, y = height(cx, cz) + 0.06, gm = (V.a1 + V.a0 + Math.PI * 2) / 2;
     const g = [cx + Math.cos(gm) * V.r[0] * 0.3, cz + Math.sin(gm) * V.r[1] * 0.3];
-    if (i === 0) man([g[0] - Math.sin(gm) * 1.0, g[1] + Math.cos(gm) * 1.0], y, face(g, [cx, cz]) + Math.PI, { pose: 'cross', dress: 'wrap', top: 'bare', cloth: 'cloth_white', over: 'none' });
+    if (i === 0) man([g[0] - Math.sin(gm) * 1.0, g[1] + Math.cos(gm) * 1.0], y, face(g, [cx, cz]) + Math.PI, { pose: 'cross', dress: 'wrap', top: 'bare', cloth: 'cloth_white', over: 'none', nightKeep: 1 });
     else woman([cx + 1.5, cz - 1.2], y, face([cx + 1.5, cz - 1.2], [cx, cz]), { pose: 'kneel' });
     woman([g[0] + Math.cos(gm) * 2.5, g[1] + Math.sin(gm) * 2.5], y, face(g, [cx, cz]), { carry: 'pot' });
   });
   // the smith at his forge, the carver at his column, a woman with water between the courts
   { const a = courtAt(1), b = courtAt(2), c0 = Math.cos(a.gm), s0 = Math.sin(a.gm);
-    man([a.at[0] + c0 * 0.3 - s0 * 1.5, a.at[1] + s0 * 0.3 + c0 * 1.5], a.y, face([a.at[0] - s0 * 1.5, a.at[1] + c0 * 1.5], a.at) , { pose: 'cross' });
+    man([a.at[0] + c0 * 0.3 - s0 * 1.5, a.at[1] + s0 * 0.3 + c0 * 1.5], a.y, face([a.at[0] - s0 * 1.5, a.at[1] + c0 * 1.5], a.at) , { pose: 'cross', nightKeep: 1 });
     man([b.at[0] + Math.cos(b.gm) * 0.1 + Math.sin(b.gm) * 0.1, b.at[1] + Math.sin(b.gm) * 0.1 - Math.cos(b.gm) * 0.1], b.y, face([b.at[0] + Math.cos(b.gm) * 0.1 + Math.sin(b.gm) * 0.1, b.at[1] + Math.sin(b.gm) * 0.1 - Math.cos(b.gm) * 0.1], b.at) + Math.PI, { pose: 'cross', cloth: 'cloth_white', dress: 'wrap' }); }
   // the homesteads nearest the arrival: a woman kneeling at the mortar, a goat or two, a dog, a child; those inside the Great Enclosure too
   {
@@ -64,14 +64,13 @@ export function people() {
   {
     const arr = [46, 60], open = huts().filter((h) => h.open && Math.hypot(h.c[0] - arr[0], h.c[1] - arr[1]) < 110).sort((p, q) => Math.hypot(p.c[0] - arr[0], p.c[1] - arr[1]) - Math.hypot(q.c[0] - arr[0], q.c[1] - arr[1]));
     open.forEach((h, i) => {
-      if (i % 2) return;
       const a = (h.seed % 628) / 100, Q = (rr, t) => [h.c[0] + Math.cos(a + t) * rr, h.c[1] + Math.sin(a + t) * rr], p = Q(0.95, 2.3), hearth = Q(0.25, 0);
-      woman(p, h.y + 0.24, face(p, hearth), { pose: i % 4 === 0 ? 'kneel' : 'sit_ground' });
+      woman(p, h.y + 0.24, face(p, hearth), { pose: i % 3 === 0 ? 'kneel' : 'sit_ground', nightKeep: 1 });
     });
     daras().forEach((d, i) => {
       for (const k of i % 2 ? [0, 2] : [1]) {
         const t = d.gap + 0.9 + k * 1.3, p = [d.c[0] + Math.cos(t) * 1.25, d.c[1] + Math.sin(t) * 1.25];
-        man(p, d.y + 0.22 + 0.34, face(p, d.c), { pose: 'sit', over: 'cape', cloth: 'hide_tan' });
+        man(p, d.y + 0.22 + 0.34, face(p, d.c), { pose: 'sit', over: 'cape', cloth: 'hide_tan', nightKeep: 1 });
       }
     });
   }
@@ -118,8 +117,16 @@ export function people() {
   woman([WEST.c[0] - 4, WEST.c[1] + 8], WEST.y, -0.6, { carry: 'basket' });
   man([43.5, 112], 0, 1.9, { over: 'cape', cloth: 'hide_tan' });
   man([56, 113], 0, -1.2);
+  // the people of the night's fires (nightlight.js, town.js): they stay when the day's figures go home (nightKeep 1). The herders' fire by the way in sight of the arrival, the watch-fires on the forecourt [placing inferred]
+  { const sit = (p, to, o = {}) => L.push({ t: 'figure', at: p, y: height(p[0], p[1]), rot: face(p, to), seed: 7100 + Math.round(p[0] * 3 + p[1]), dress: 'loincloth', top: 'bare', cloth: 'hide_tan', skin: 'skin_dark', hat: 'none', hair: 'short', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: 'cape', carry: 'none', pose: 'cross', nightKeep: 1, ...o });
+    sit([49.6, 68.2], HERD_FIRE); sit([53.2, 66.4], HERD_FIRE, { over: 'none', h: 1.3 });
+    sit([53.0, 120.9], ENCL_FIRES[0]); sit([49.2, 143.6], ENCL_FIRES[1], { over: 'none' }); sit([52.0, 140.6], ENCL_FIRES[1]);
+    sit([36.6, 89.9], [38.5, 88.5]); sit([52.4, 87.6], [50.5, 88.5], { over: 'none' }); }
   return L;
 }
+/** Fires beside the lane inside the Great Enclosure's east side, clear of the walk (x 46) [placing inferred]. */
+export const ENCL_FIRES = [[51.0, 119.5], [50.5, 142.0]];
+export const HERD_FIRE = [51.4, 66.9];
 /** The working place of Valley court i: between the court's entrance and its houses (the goods of the coast in court 0, the smithy in 1, the stone carver in 2). */
 export function courtAt(i) {
   const V = VALLEY[i], gm = (V.a1 + V.a0 + Math.PI * 2) / 2;

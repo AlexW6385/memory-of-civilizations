@@ -49,6 +49,33 @@ export function troddenWay(from, to, w, yAt, seed, lift = 0.045) {
   return sheet(T, [0, 1, 0]);
 }
 
+/** The worn middle of a flight of treads: on each, a dished, paler patch where the feet fall (the front 65% of the tread, the middle 60% of its width, ragged), 1.2 cm over its top. */
+export function wornTreads(el) {
+  const { x, z0, z1, w } = el, sg = Math.sign(z1 - z0), go = 0.42, n = Math.floor(Math.abs(z1 - z0) / go), T = [];
+  for (let k = 0; k < n; k++) {
+    const za = z0 + sg * k * go, zb = za + sg * go, zl = Math.min(za, zb), zh = Math.max(za, zb);
+    const yt = Math.max(el.yAt(x - w / 2, (za + zb) / 2), el.yAt(x + w / 2, (za + zb) / 2), el.yAt(x, za), el.yAt(x, zb)) + 0.08 + 0.012;
+    const h = (i) => hashAt(x + i, zl, 61), hw = w * 0.26 * (0.8 + 0.3 * h(1)), cx = x + (h(2) - 0.5) * 0.2;
+    const zf = sg > 0 ? zl : zh, zi = zf + sg * go * 0.65 * (0.7 + 0.3 * h(3));       // from the tread's near edge into it
+    const a = [cx - hw, yt, zf + sg * 0.03], b = [cx + hw, yt, zf + sg * 0.03], c = [cx + hw * (0.75 + 0.2 * h(4)), yt, zi], d = [cx - hw * (0.75 + 0.2 * h(5)), yt, zi];
+    T.push(...a, ...b, ...c, ...a, ...c, ...d);
+  }
+  return sheet(T, [0, 1, 0]);
+}
+/** The worn way over the stepped threshold of an entrance: a polished band across each tread and the packed earth on its top, toward the walker's point `from`. */
+export function wornThreshold(el) {
+  const [x, z] = el.c, r = el.r ?? 3.4, y = el.y ?? 0, f = el.from ?? [46, 60], a0 = Math.atan2(f[1] - z, f[0] - x), T = [], U = [];
+  for (let k = 0; k < 3; k++) {
+    const rk = r - k * 0.75, y1 = y + k * 0.14 + 0.14 + (k ? 0 : 0.06) + (k === 2 ? 0.02 + 0.012 : 0.012), ro = k === 2 ? rk - 0.35 : rk - 0.03, ri = k === 2 ? 0.3 : rk - 0.7, n = 6, sp = 0.3 + 0.05 * k;
+    for (let i = 0; i < n; i++) {
+      const t0 = a0 - sp + 2 * sp * i / n, t1 = t0 + 2 * sp / n, e0 = ro - 0.05 * hashAt(x + i, z + k, 62), e1 = ro - 0.05 * hashAt(x + i + 1, z + k, 62);
+      const P = (t, rr) => [x + Math.cos(t) * rr, y1, z + Math.sin(t) * rr];
+      (k === 2 ? U : T).push(...P(t0, ri), ...P(t0, e0), ...P(t1, e1), ...P(t0, ri), ...P(t1, e1), ...P(t1, ri));
+    }
+  }
+  return [sheet(T, [0, 1, 0]), sheet(U, [0, 1, 0])];
+}
+
 let done = false;
 export function registerWear() {
   if (done) return; done = true;
@@ -58,6 +85,9 @@ export function registerWear() {
     if (el.open && !el.simple) ctx.bag.add('pottery_dark', sootOver(el));
     return r;
   };
+  const steps0 = E.stone_steps, thr0 = E.entrance_steps;
+  E.stone_steps = function wornSteps(el, ctx) { const r = steps0.call(this, el, ctx); if (!el.simple && el.yAt) ctx.bag.add('granite_grey', wornTreads(el)); return r; };
+  E.entrance_steps = function wornThresh(el, ctx) { const r = thr0.call(this, el, ctx); if (!el.simple) { const [g, e] = wornThreshold(el); ctx.bag.add('granite_grey', g); ctx.bag.add('silt', e); } return r; };
   E.homestead_goods = function trodden(el, ctx) {
     const r = home0.call(this, el, ctx);
     if (!el.simple && el.yAt) {
