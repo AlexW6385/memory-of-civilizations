@@ -4,7 +4,8 @@
 // toward Mecca); the Sheikh Lotfollah Mosque; Ali Qapu with its talar; the Qeysarieh portal and the
 // first stretch of the vaulted bazaar; the royal garden behind Ali Qapu.
 
-import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU, ARCADE_RUNS, ARCADE_OPEN, arcadeBays, openHouses, upWalk, houseWalk, arcadeUpBays, arcadeUpWalk } from './layout.js';
+import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU, ARCADE_RUNS, ARCADE_OPEN, arcadeBays, openHouses, upWalk, houseWalk, arcadeUpBays, arcadeUpWalk, arcadeShopWalk } from './layout.js';
+import { life } from './life.js';
 
 const E = [];
 const [sx0, sz0, sx1, sz1] = SQUARE, H = 12;
@@ -106,6 +107,7 @@ E.push({ t: 'lane', rect: [gx0 + 6, -50, gx1 - 1, -40], y: 0.04, mat: 'brick_pav
 E.push({ t: 'isf_night',
   shops: arcadeBays().map((b) => ({ c: b.c, u: b.u, n: b.n, w: b.w, open: b.open, lit: b.open || ((Math.round(b.c[0] * 7) * 31 + Math.round(b.c[1] * 3) * 17) & 255) < 150 })),
   bazaar: { x: BAZAAR.x, z0: BAZAAR.z0, z1: BAZAAR.z1, w: BAZAAR.w },
+  stalls: life().filter((e) => e.t === 'stall' || e.t === 'goods_mat').map((e) => ({ at: e.at, mat: e.t === 'goods_mat' })).concat([{ at: [11, 181], mat: true }, { at: [-5.2, 176], mat: true }]),
   iwans: [[0, 5], [1, 5], [-1, 5], [0, -5]].map(([k, y], i) => { const [su, sv] = [[0, -1], [1, 0], [-1, 0], [0, 1]][i]; const p = M(su * (ch + 4), sv * (ch + 4)); return [p[0], y + 0.5, p[1]]; }) });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -119,6 +121,8 @@ walks.push([[12, -324], [15.5, -324], [19.5, -324], [21.5, -321.5], [26, -320.8]
 walks.push([[0, -302], [0, -316], [1.2, -330], [0.6, -344], [1.2, -358], [0, -372], [0, -383]]);   // down the covered bazaar from the Qeysarieh's portal to its far end, round the goods and people the generated life stands in it
 walks.push([M(0, 30), M(0, 44), M(0, 52), M(0, 58), M(0, 62)]);   // from the court's qibla iwan through the door into the Shah Mosque's sanctuary (docs/settlements/isfahan.md §17)
 walks.push([[70, -40], [86, -38], [92, -38.3], [96.8, -43.9], [103, -50.1], [107.5, -45.6], [112, -41], [110.4, -39.4], [106.5, -35.5], [103, -32]]);   // through Lotfollah's portal, the vestibule and the winding passage into its chamber
+const LIFE = life();
+walks.push(...arcadeBays().filter((b) => b.open && !arcadeUpBays().includes(b) && !LIFE.some((e) => e.at && e.t !== 'figure' && Math.hypot(e.at[0] - (b.c[0] + b.n[0] * -4), e.at[1] - (b.c[1] + b.n[1] * -4)) < 3.4)).slice(0, 6).map((b) => arcadeShopWalk(b)));   // into six more entered shops, without a room over them
 walks.push(...arcadeUpBays().map((b) => arcadeUpWalk(b)));   // up behind the back wall of each shop with a room over it
 
 export const square = {
