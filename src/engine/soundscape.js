@@ -105,6 +105,7 @@ import './voices-muscovy.js';
 import * as MYCENAE from '../settlements/mycenae/soundmap.js';
 import * as NALANDA from '../settlements/nalanda/soundmap.js';
 import * as NARA from '../settlements/nara/soundmap.js';
+import * as SANCHI from '../settlements/sanchi/soundmap.js';
 import * as FEZ from '../settlements/fez/soundmap.js';
 import * as FLORENCE from '../settlements/florence/soundmap.js';
 import * as GIZA from '../settlements/giza/soundmap.js';
@@ -276,7 +277,7 @@ export const PROFILES = {
   'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, roof: 'tile', bells: 'beijing', animals: withLife({ dog: 0.3, horse: 0.2 }, { market: 1, patrol: 1, eaves: 1, map: BEIJING }) }),
   'rapa-nui': T({ gull: 1, tropic: 0.2 }, { animals: { rooster: 0.4 }, roof: 'thatch' }),
   rome: T(MED, { cicadas: 0.5, frogs: 0.3, animals: withLife({ donkey: 0.4, horse: 0.3, dog: 0.3, rooster: 0.3 }, { canal: 1, market: 1, eaves: 1, map: ROME }) }),
-  sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: { cattle: 0.6, goat: 0.4, rooster: 0.3 }, roof: 'thatch' }),
+  sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: withLife({ cattle: 0.6, goat: 0.4, rooster: 0.3, dog: 0.2 }, { market: 0.5, map: SANCHI }), roof: 'thatch', bells: 'puja' }),
   'song-hangzhou': T(EAS, { cicadas: 0.7, frogs: 0.6, roof: 'tile', bells: null, animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: HANGZHOU }) }),
   'song-kaifeng': T(EAS, { cicadas: 0.6, frogs: 0.4, roof: 'tile', bells: null, animals: withLife({ donkey: 0.4, rooster: 0.3, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: KAIFENG }) }),
   stonehenge: T({ warbler: 1, crow: 0.6 }, { animals: { cattle: 0.4, dog: 0.3 }, roof: 'thatch' }),

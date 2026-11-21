@@ -8,7 +8,7 @@ const WAY = [-4.2, 44, 4.2, 94];
 /** The stalls along the way: [x, z, front, trade]; those on the east look west and the reverse. */
 export const SUMMIT_STALLS = [
   [-11, 49, 'e', 'flowers'], [11, 49, 'w', 'flowers'], [-11, 56, 'e', 'lamps'], [11, 56, 'w', 'incense'],
-  [-11, 63, 'e', 'water'], [11, 63, 'w', 'bowls'], [-11, 70, 'e', 'robes'], [11, 70, 'w', 'flowers'],
+  [-11, 63, 'e', 'water'], [-11, 70, 'e', 'robes'], [11, 70, 'w', 'bowls'],
   [-11, 77, 'e', 'incense'], [11, 77, 'w', 'lamps'], [-11, 84, 'e', 'flowers'], [11, 84, 'w', 'water'],
 ];
 export const BOWL = [27, 25];
@@ -20,6 +20,8 @@ export function summitElements() {
   E.push({ t: 'floor', rect: [-12.5, 44, -4.2, 94], y: TOP + 0.02, mat: 'sandstone_floor', th: 0.04 });
   E.push({ t: 'floor', rect: [4.2, 44, 12.5, 94], y: TOP + 0.02, mat: 'sandstone_floor', th: 0.04 });
   for (const [cx, cz, front, trade] of SUMMIT_STALLS) E.push({ t: 'stall', rect: [cx - 1.3, cz - 1.8, cx + 1.3, cz + 1.8], front, y: TOP, seed: Math.floor(cx * 31 + cz * 17), trade });
+  // (the stall that stood at x = 11, z = 63 is gone: it stood across the foot of Temple 40's west flight, which begins at x = 12.7)
+  E.push({ t: 'block', rect: [9.7, 62.9, 9.9, 63.1], y0: TOP, y1: TOP + 3.2, mat: 'wood_dark' });
   // strings of garlands and pennants across the way, from stall to stall at the awnings' height
   for (const [z, m] of [[49.5, ['cloth_red', 'cloth_ochre']], [63, ['cloth_white', 'cloth_red']], [77, ['cloth_ochre', 'cloth_white']]]) E.push({ t: 'rite', kind: 'garland', a: [-9.6, TOP + 3.1, z], b: [9.6, TOP + 3.1, z], sag: 0.9, mats: m });
   // stone seats along the way between the stalls, facing it
@@ -32,6 +34,7 @@ export function summitElements() {
   E.push({ t: 'great_bowl', c: BOWL, y: TOP, r: 1.3 });
   // lamp pillars at the way's head by the stair
   for (const sx of [-1, 1]) E.push({ t: 'block', rect: [sx * 4.2 - 0.25, 91.5, sx * 4.2 + 0.25, 92], y0: TOP, y1: TOP + 1.7, mat: 'sandstone_dressed' });
+  for (const sx of [-1, 1]) E.push({ t: 'rite', kind: 'lamp', at: [sx * 4.2, 91.75], y: TOP + 1.7, s: 2.2, pool: TOP });
   // Temple 40: an altar at the hall's west end with lamps, an offering and a bell; garlands between the front pillars
   const [cx, cz] = TEMPLE40.c, top = TOP + 3.35, ax = cx - 16.2;
   E.push({ t: 'block', rect: [ax - 0.6, cz - 0.9, ax + 0.6, cz + 0.9], y0: top, y1: top + 0.55, mat: 'sandstone_dressed' });
