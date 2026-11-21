@@ -89,6 +89,8 @@ function litWindows(ctx, el, share) {
             const mx = (b[0] + b[3]) / 2, mz = (b[2] + b[5]) / 2, slit = w < 0.3, up = b[1] > y0 + 2.4;
             if (hashAt(mx, mz, 31 + Math.floor(b[1] / 2.5)) < (slit ? share * 0.6 : share) * (up ? 1 : 0.85)) {
               const f = 0.45 + 0.35 * hashAt(mx, mz, 7), m = 0.03, o = 0.012;
+              const my = (b[1] + b[4]) / 2, sx = dx < dz ? (mx > cx ? 1 : -1) : 0, sz = dx < dz ? 0 : (mz > cz ? 1 : -1);
+              H.ball(mx + sx * 0.35, my, mz + sz * 0.35, 0.8, 0.34);   // the glow of the lamp spilling out of the opening, not a flat pane alone
               if (dx < dz) { const s = mx > cx ? 1 : -1, x = (s > 0 ? b[3] : b[0]) + s * o; H.quad([x, b[1] + m, b[2] + m], [x, b[1] + m, b[5] - m], [x, b[4] - m, b[5] - m], [x, b[4] - m, b[2] + m], [s, 0], f); }
               else { const s = mz > cz ? 1 : -1, z = (s > 0 ? b[5] : b[2]) + s * o; H.quad([b[0] + m, b[1] + m, z], [b[3] - m, b[1] + m, z], [b[3] - m, b[4] - m, z], [b[0] + m, b[4] - m, z], [0, s], f); }
             }
@@ -117,6 +119,8 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     // the door ajar: the lamp's light spilling over the step into the lane
     const F = dwellingFrame(el), [px, pz] = F.P(F.du, -1.1);
     H.floor(px, (el.y ?? 0) + 0.06, pz, 2.2, 1.6, 8, 0.7);
+    const [qx, qz] = F.P(F.du, 0.2);
+    H.ball(qx, (el.y ?? 0) + 1.3, qz, 0.9, 0.5);   // the lamp seen in the doorway
   }
   H.flush(ctx.bag);
   return r;
