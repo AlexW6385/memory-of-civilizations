@@ -159,6 +159,8 @@ for (const [r, open] of SACRED_ROCK.wayronas) E.push({ t: 'inca_temple', rect: r
 // the fires of the night (nightlight.js, docs §14): the torches and braziers, and the whole night's glow in one element (one halo draw)
 for (const f of FIRES) E.push({ t: 'mp_fire', at: f.at, y: f.y ?? ground.height(f.at[0], f.at[1]), kind: f.kind || 'torch' });
 E.push({ t: 'mp_glow' });
+// the polish of the way in (docs §17): two worn tracks down the flagged road, where the feet and the llamas' hooves fall; thin damp-dark slabs 4 mm over the flags (lane's top is y)
+for (const [z0, z1] of [[8.5, TOWN_WALL.z - 0.4], [93.4, 120]]) for (const x of [1.15, 2.85]) E.push({ t: 'lane', rect: [x - 0.25, z0 + 0.3, x + 0.25, z1 - 0.3], y: 0.0295, mat: 'plaster_damp' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('sacred-plaza', [-52, -62, -18, -24], 0.6, 'open'),

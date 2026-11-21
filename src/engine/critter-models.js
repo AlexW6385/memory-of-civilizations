@@ -604,3 +604,56 @@ export function silverGull() {
   return m;
 }
 MODELS.gull_silver = silverGull;
+
+// ═════════════ the llama (Machu Picchu's terraces and plaza) ═════════════
+/** A llama standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs; the shader lies it down and stands it up as the visitor comes): a long slender neck, a small head with long curved banana ears, a woolly body on slim legs, the tail short and held up; brown, white or piebald. Back at 1.1 m, the head at 1.6 m. */
+export function llama(variant) {
+  const m = new Model(), white = variant === 'white', pied = variant === 'pied', base = white ? [0.88, 0.85, 0.78] : [0.45, 0.31, 0.19], patch = pied ? [0.9, 0.87, 0.8] : white ? [0.8, 0.7, 0.55] : [0.3, 0.2, 0.12], pale = white ? [0.93, 0.9, 0.84] : [0.62, 0.5, 0.36];
+  const coat = ({ p, n }) => lerp(lerp(base, patch, sm(0.5, 0.58, hash3([Math.round(p[0] * 3), 0, Math.round(p[2] * 4)], 6)) * (pied ? 1 : 0.5)), shade(base, 0.82), sm(0.0, -0.8, n[1]) * 0.45 + hash3(p, 5) * 0.05);
+  const S = [[0.55, 1.05, 0.12, 0.11], [0.4, 1.1, 0.2, 0.17], [0.15, 1.12, 0.24, 0.2], [-0.15, 1.1, 0.25, 0.2], [-0.4, 1.08, 0.22, 0.18], [-0.58, 1.05, 0.13, 0.11], [-0.62, 1.03, 0.03, 0.03]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 10, col: coat });
+  const NP = [0.5, 1.12, 0], HP = [0.74, 1.6, 0];
+  m.as(1, NP, null, () => m.tube([[0.46, 1.08, 0], [0.56, 1.28, 0], [0.66, 1.46, 0], [0.72, 1.56, 0]], [[0.14, 0.13], [0.1, 0.095], [0.08, 0.075], [0.07, 0.065]], { sides: 8, ref: [1, 0, 0], col: coat }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.76, 1.62, 0], [0.09, 0.075, 0.065], coat, { nu: 6, nv: 7 });
+    m.tube([[0.8, 1.6, 0], [0.87, 1.57, 0], [0.92, 1.55, 0]], [[0.045, 0.045], [0.04, 0.042], [0.034, 0.036]], { sides: 7, col: ({ t }) => lerp(coat({ p: [0.85, 1.6, 0], n: [0, 1, 0] }), pale, t * 0.5) });
+    m.ball([0.925, 1.55, 0], [0.018, 0.015, 0.02], [0.12, 0.08, 0.07], { nu: 3, nv: 5 });
+    for (const s of [-1, 1]) m.tube([[0.74, 1.67, s * 0.04], [0.72, 1.78, s * 0.06], [0.69, 1.86, s * 0.07]], [[0.016, 0.03], [0.015, 0.026], [0.002, 0.004]], { sides: 4, col: coat });   // the banana ears
+    eyes(m, 0.83, 1.64, 0.052, 0.011, [0.12, 0.07, 0.05]);
+  });
+  m.as(3, [-0.6, 1.04, 0], null, () => m.tube([[-0.6, 1.04, 0], [-0.68, 1.1, 0], [-0.7, 1.16, 0]], [0.04, 0.035, 0.012], { sides: 5, col: coat }));
+  const legs = [[4, 1, -1, 0.4], [5, 1, 1, 0.4], [6, 0, -1, -0.42], [7, 0, 1, -0.42]];
+  for (const [part, front, z, x] of legs) {
+    const hip = [x, 0.82, z * 0.12];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [x - (front ? 0 : 0.06), 0.5, z * 0.12], [x - (front ? 0 : 0.04), 0.2, z * 0.12], [x + 0.01, 0.03, z * 0.12]], [[0.09, 0.075], [0.045, 0.04], [0.032, 0.03], [0.034, 0.034]], { sides: 6, col: ({ t }) => lerp(coat({ p: [x, 0.8, z], n: [0, 1, 0] }), pale, sm(0.4, 0.9, t) * 0.6) });
+      m.ball([x + 0.02, 0.018, z * 0.12], [0.05, 0.02, 0.035], [0.22, 0.17, 0.13], { nu: 4, nv: 5 });
+    });
+  }
+  return m;
+}
+MODELS.llama_brown = () => llama('brown');
+MODELS.llama_white = () => llama('white');
+MODELS.llama_pied = () => llama('pied');
+
+// ═════════════ the guinea pig (Machu Picchu's patios) ═════════════
+/** A cuy (the domestic guinea pig) standing, 0.28 m long, on the dog's rig (parts 1 neck, 2 head, 4–7 legs): a rounded tailless body, a blunt head, tiny ears, short legs; brown and white patched. */
+export function cuy() {
+  const m = new Model(), base = [0.5, 0.36, 0.22], white = [0.9, 0.86, 0.78];
+  const coat = ({ p, n }) => lerp(lerp(base, white, sm(0.5, 0.56, hash3([Math.round(p[0] * 20), 0, Math.round(p[2] * 24)], 2))), shade(base, 0.8), sm(0, -0.8, n[1]) * 0.4);
+  const S = [[0.1, 0.07, 0.05, 0.05], [0.04, 0.085, 0.075, 0.07], [-0.04, 0.085, 0.08, 0.075], [-0.12, 0.075, 0.06, 0.06], [-0.16, 0.065, 0.02, 0.02]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 8, col: coat });
+  m.as(1, [0.11, 0.085, 0], null, () => m.tube([[0.09, 0.08, 0], [0.12, 0.09, 0]], [[0.055, 0.05], [0.045, 0.042]], { sides: 6, ref: [1, 0, 0], col: coat }));
+  m.as(2, [0.13, 0.09, 0], [0.11, 0.085, 0], () => {
+    m.ball([0.15, 0.09, 0], [0.04, 0.036, 0.034], coat, { nu: 5, nv: 6 });
+    m.ball([0.19, 0.083, 0], [0.01, 0.009, 0.011], [0.15, 0.1, 0.09], { nu: 3, nv: 4 });
+    for (const s of [-1, 1]) m.ball([0.14, 0.12, s * 0.03], [0.012, 0.014, 0.008], [0.4, 0.28, 0.2], { nu: 3, nv: 4 });
+    eyes(m, 0.18, 0.1, 0.024, 0.006, [0.07, 0.04, 0.03]);
+  });
+  for (const [part, x, z] of [[4, 0.07, -1], [5, 0.07, 1], [6, -0.08, -1], [7, -0.08, 1]]) {
+    const hip = [x, 0.05, z * 0.04];
+    m.as(part, hip, null, () => m.tube([hip, [x, 0.02, z * 0.04], [x + 0.01, 0.006, z * 0.04]], [0.016, 0.01, 0.009], { sides: 4, col: [0.8, 0.7, 0.6] }));
+  }
+  return m;
+}
+MODELS.cuy = cuy;

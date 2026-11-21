@@ -248,3 +248,18 @@ Machu Picchu had no shops: the Inca state had no market and no money, goods went
 - **Voices (14, all `mp`-prefixed):** mpQuena, mpAntara, mpWankar, mpPututu, mpStoneHammer, mpPlough, mpCall, mpLlama, mpCuy, mpLoomBatten, mpSpindle, mpGrind, mpSpout, mpRiver (the last two louder in the rains, Nov–Mar).
 - **Places.** The feast's quena, panpipes and drum on the plaza (14–22 h, not in rain); the conch at the chaski's post by day and at the Intihuatana at sunrise; the quarry's hammers (dry weather, 6.5–17 h); three ploughing strips with calls; llamas on the plaza, the road and the terraces; guinea pigs and looms in the three opened patios; eight fountain spouts; six reaches of river round the rim, day and night; the kallanka's evening drum; owls on the slopes at night. Opened houses and the kallanka are rooms (hearth, spindle, jars, sacks, hammers by use), thatch rain soft.
 - **Checks.** tests/machu-picchu-sound.test.mjs (voices made, map agrees with the layout, scheduler by hour and weather); tools/sound-render.mjs measured the conch (centroid 277 Hz, two onsets), the drum (85 Hz, seven onsets), the quena (611 Hz, breathy), the hammer (1.7 kHz, five onsets), the river, the spout, the llama's hum. Not listened to.
+
+## 16. Reference pass: animals as critters (as built; `fauna.js`, models in `src/engine/critter-models.js`)
+
+- **Models added** (on the dog's rig, so they lie down and stand up as the visitor comes): `llama_brown`, `llama_white`, `llama_pied` (back at 1.1 m, a long slender neck, banana ears, woolly body, slim legs; 786 triangles) and `cuy` (the guinea pig, 0.28 m, brown and white patched; 356 triangles). One line in `src/engine/fauna-critters.js` maps them to the dog's kind.
+- **Placed** (`critters`, 17): six llamas grazing on the Main Plaza's floor and on the fields by the storehouses, three dogs (the chaski's post, the storehouses, the plaza), two guinea pigs loose along the side wall of each of the three opened patios. Llamas were the Andes' beasts of burden and wool, dogs were kept, guinea pigs were kept at the house and ran about its floor [stated: general, Andean domestic animals; inferred: the places]. The life elements' llamas, dogs and herders stay (§5.2).
+- **Left out on purpose:** hens (the domestic fowl came with the Spaniards), cats, goats, donkeys, horses. **Not built (no model):** the mountain viscacha on the terraces' walls (the "rabbit" of the site's walls today [inferred for 1450]), the Andean condor's own form (a crow stands in), hummingbirds and swifts.
+
+## 17. Reference pass: wear and writing (as built; `wear.js`, the road in `plan.js`)
+
+- **Soot.** The stove (q'uncha) burned in a closed room with a smoke-hole in the thatch: the wall above it is blackened [inferred: general]. Built on the houses opened to the visitor: two dark patches on the back wall's face above the stove, 0.95–1.4 and 1.4–1.95 m, 12 mm proud of the leaning face.
+- **The threshold.** On houses with a threshold stone and an opened door, a damp-dark hollow worn into its top by the feet [inferred].
+- **The road.** Two worn tracks down the flagged road from the gate to the plaza and across the fields, 0.5 m wide, 4.5 mm over the flags, where feet and the llamas' hooves fall [inferred].
+- **Lichen and damp** were already done (§4.5; the engine's wall weathering by `damp`).
+- **Writing: none.** The Inca had no script; records were kept on quipus [stated: Wikipedia, "Chasqui"]. No inscription, sign or tablet was made, and none should be added. (Later Spanish crosses and graffiti are after 1530.)
+- **Budget.** Wear on the walk's houses only: the same on every house cost two more draws at the arrival (thin slabs are detail pieces drawn by tile); main draws at the arrival are now 189 (before 187).
