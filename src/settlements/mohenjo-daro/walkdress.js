@@ -65,6 +65,9 @@ function lanework(el, ctx) {
   }
 }
 
+/** md_keepers { list: [figure parameters] }: the workshops' masters and apprentices, built into the near plan of the lots they work in. */
+function keepers(el, ctx) { const fig = STYLES.life?.elements?.figure; if (!fig) return; for (const f of el.list) fig({ ...f }, { bag: ctx.bag, col: ctx.col }); }
+
 let done = false;
-export function registerWalkdress() { if (done) return; done = true; STYLES.indus.elements.md_lanework = lanework; }
+export function registerWalkdress() { if (done) return; done = true; STYLES.indus.elements.md_lanework = lanework; STYLES.indus.elements.md_keepers = keepers; }
 registerWalkdress();
