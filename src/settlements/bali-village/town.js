@@ -68,6 +68,8 @@ function village() {
     let n = 0;
     for (let z = 24; z < 126 && n < 3; z += 1.0) if (!busy(z) && !busy(z - 1.2) && !busy(z + 1.2) && (z - 24) > n * 34) { E.push({ t: 'bali_pancuran', at: [-3.3, z], y: 0, turn: -1 }); n++; }
   }
+  // the crossing by night: a resin torch at each corner of the crossing (nightlight.js)
+  for (const [x, z] of [[-3.0, 5.0], [4.4, 5.0], [-3.0, 14.0], [4.4, 14.0]]) E.push({ t: 'bali_obor', at: [x, z], y: 0, h: 2.2, seed: Math.round(z) });
   // offerings on the ground before the temple's stair and at the crossing
   E.push({ t: 'bali_offerings', list: [[-2.5, 0.01, -70.5], [-1, 0.01, -70.5], [1, 0.01, -70.5], [2.5, 0.01, -70.5], [-1.2, 0.01, 10.5], [1.2, 0.01, 9]] });
   // the pura dalem at the kelod end of the street, its split gate on the street

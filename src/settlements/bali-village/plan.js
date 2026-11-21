@@ -47,6 +47,12 @@ for (const [x, m] of [[-6.4, 'cloth_white'], [6.4, 'cloth_ochre'], [-19.5, 'clot
 for (const [x, z, f] of [[-27.5, -121.7, y2 + 0.7], [-24.0, -121.7, y2 + 0.7], [23.5, -121.7, y2 + 0.7], [27, -121.7, y2 + 0.7], [-27, -98, y1 + 0.6], [-20, -97.5, y1 + 0.6]]) E.push({ t: 'bali_gebogan', at: [x, z], y: f });
 for (let z = -69; z >= -50; z -= 4.5) for (const s of [-1, 1]) E.push({ t: 'bali_umbul', at: [s * 12.2, z], y: 0, h: 8.5 + ((z * 7) % 3), dir: [-s, 0] });
 
+// the festival by night (nightlight.js): resin torches down the forecourt and at the gates, a row of pelita before the merus, a stand at the padmasana
+for (let z = -49; z >= -69; z -= 5) for (const s of [-1, 1]) E.push({ t: 'bali_obor', at: [s * 4.4, z], y: 0, h: 2.2, seed: Math.round(z) });
+for (const s of [-1, 1]) { E.push({ t: 'bali_obor', at: [s * 5.4, zS + 3.3], y: 0, h: 2.4, seed: 5 }); E.push({ t: 'bali_obor', at: [s * 4.7, zM + 1.8], y: y1, h: 2.4, seed: 6 }); }
+E.push({ t: 'bali_pelita_row', list: [-8, -6, -4, 4, 6, 8].map((x) => [x, y2 + 0.01, -136.2]) });
+E.push({ t: 'bali_stand', at: [23.4, -141.5], y: y2, h: 1.4 });
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('forecourt', [-12, zS + 1, 12, -46], 0, 'market'),
