@@ -81,6 +81,9 @@ export const LANE_V = [[22.6, 27.1], [71.1, 74.6]];
 const GATE_PAD = 8;
 const wardWallRect = (w) => w;
 export const wardRect = wardWallRect;
+// the streets that cross the avenue's offices' columns: kept free of them (the offices step aside)
+const CROSS = [[-30, -110, 135, -88], [165, -110, 190, -90], [135, -270, 340, -254], [-274, -272, 135, -254], [-274, 118, 440, 134]];
+const hits = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
 let LOTS = null;
 /** The lots: { rect, front, kind ('court' | 'row' | 'tower' | 'office'), seed, open, ward }. Rows back to back, the doors on the lanes. */
 export function lots() {
@@ -111,7 +114,7 @@ export function lots() {
   for (let z = -405; z < 108; z += 27) {
     for (const side of [-1, 1]) {
       const x0 = side < 0 ? A[0] - 21 : A[2] + 4, rect = [x0, z, x0 + 17, z + 22];
-      if (rand() < 0.1 || (side < 0 && Math.abs(z + 11 - EAST_GATE.z) < 24) || (side > 0 && z > -22 && z < 42 && false)) continue;
+      if (rand() < 0.1 || CROSS.some((c) => hits(rect, c)) || (side < 0 && Math.abs(z + 11 - EAST_GATE.z) < 24) || (side > 0 && z > -22 && z < 42 && false)) continue;
       if (inRect(PALACE, x0 + 9, z + 11, 3) || inRect(CHANGLE, x0 + 9, z + 11, 3) || inRect(WEST_MARKET, x0 + 9, z + 11, 3) || inRect(EAST_MARKET, x0 + 9, z + 11, 3)) continue;
       if (Math.hypot(x0 + 9, z + 11) > RADIUS - 46 || WARDS.some((w) => inRect(w, x0 + 9, z + 11, 12))) continue;
       LOTS.push({ rect, front: 's', kind: 'office', seed: Math.floor(rand() * 1e6), open: false, ward: -1 });
