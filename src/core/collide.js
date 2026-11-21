@@ -116,6 +116,15 @@ export class CollisionWorld {
     return false;
   }
 
+  /** Does a floor or a ramp run at about `top` (within 0.3 m below to 0.05 m above) in the top-field cell (i, j)? Looked for at the cell's centre and
+   *  at its four corners (inset a little): a steep stair rises half a metre or more across one cell, so at the centre alone its tread could lie a
+   *  few centimetres above the cell's top (the stoop of an Amsterdam house: top 1.5027, ramp 1.56 at the centre) and the stair read as a roof's slope. */
+  _floorAtTop(T, i, j, top) {
+    const cx = T.x0 + (i + 0.5) * T.res, cz = T.z0 + (j + 0.5) * T.res, d = T.res * 0.45;
+    for (const [dx, dz] of [[0, 0], [d, d], [-d, d], [d, -d], [-d, -d]]) if (this.groundAt(cx + dx, cz + dz, top + 0.05) >= top - 0.3) return true;
+    return false;
+  }
+
   /** Would a body at (x, z) from y0 to y1 be inside a roof's shell (between a top higher than
    *  `climb` and its underside, with no floor or ramp of its own up there)? Roofs are not
    *  obstacles; this keeps one from walking into a slope. */
@@ -132,7 +141,7 @@ export class CollisionWorld {
         // (not where a floor or a ramp runs at about that height, at the cell's centre where the top
         // was taken: the top is what one walks on there)
         const u = T.under[o];
-        if (top > climb && top > y0 && u < y1 && this.groundAt(T.x0 + (i + 0.5) * T.res, T.z0 + (j + 0.5) * T.res, top + 0.05) < top - 0.3) {
+        if (top > climb && top > y0 && u < y1 && !this._floorAtTop(T, i, j, top)) {
           // (an underside or the top itself at the body's height: a slope, a low eave)
           if (!T.steep || u > y0 + 0.05 || top < y1 + 0.2) return true;
           // (the underside is the floor and the top is over the head: a wall only if something stands
