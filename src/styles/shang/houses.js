@@ -34,7 +34,7 @@ export function pitHouse(F, u, v, w, d, open = false, lod = 0) {
   const fl = R(1.0, 0.9, w - 1.0, d - 1.0);
   F.bag.add('earth_wall', box(fl[0], 0, fl[1], fl[2], 0.03, fl[3]));
   const dw = open ? 0.62 : 0.5, dc = u + w / 2, fh = open ? 2.1 : 1.5;
-  if (open) HOOK.door?.(F, dc, v, 0, dw * 2, 2.0, 0.45);
+  if (open) HOOK.door?.(F, dc, v, 0, dw * 2, 2.0, 0.45, true);
   F.b('mud_plaster', u, 0, v, dc - dw, fh, v + 0.45); F.b('mud_plaster', dc + dw, 0, v, u + w, fh, v + 0.45);
   // an enterable house has a header 2.0 m above the floor (the walker's head is 1.75 m: a lintel lower than that shuts the door), jambs to it, and no plaster over the opening
   if (!open) F.b('mud_plaster', dc - dw, fh - 0.25, v, dc + dw, fh, v + 0.45, false);

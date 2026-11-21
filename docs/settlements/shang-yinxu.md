@@ -143,3 +143,11 @@ Code: `fauna.js` (`critters`), `tests/shang-yinxu-critters.test.mjs`; the engine
 - **Swallows** (§7): mud nests under the eave of the kings' hall's front wall (between the door bays) and on the front walls of up to five great houses; the birds fly out and home.
 - **The Huan:** ducks afloat on two rafts (western and eastern reach), a crane on the north bank, a kingfisher on a pile of a landing [inferred: egrets and carp are in §5b; these are the river's own birds]. No cat or pigeon: not certain for the town.
 - Oxen, pigs and horses keep their older life elements (`town.js`); the engine has no critter model for them.
+
+## 13. Wear and writing (reference pass, step 5)
+
+Code: `src/settlements/shang-yinxu/wear.js` (wraps the style's elements and the doorway hook of `houses.js`). All [inferred]: trampling and hearth smoke follow from use, not from a source.
+
+- **Stairs trodden dark down their middle**: the kings' hall's stair, both flanking halls', the tomb's and the archive's, a patch on every tread (the "steps worn at the middle" §5d listed as missing).
+- **Thresholds:** a dark worn patch on the slab of every opened house's door and on the earth step of the opened pit houses; the **soot of the hearth** above the lintel of the opened houses (the pit houses' open gable has no wall to blacken).
+- **Writing: none.** The oracle-bone script would be the only script of the place, and no graph was verified against a source in this pass (no web access), so no inscription, tablet or sign is drawn. Shang Yinxu had no shop signs; the dossier's lintel boards and bronzes carry pattern, not text (§4b, §4c).
