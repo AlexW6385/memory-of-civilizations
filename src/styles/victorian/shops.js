@@ -436,10 +436,10 @@ export function pub(el, ctx, base) {
     L('lamp_glass', [[0.001, 0], [0.12, 0.05], [0.18, 0.2], [0.14, 0.34], [0.001, 0.38]], 10, a + 0.2, y + g0 + 0.1, 0.14); B('iron', a + 0.16, a + 0.24, y + g0, y + g0 + 0.1, 0.1, 0.18);
     cuts.push(a);
   }
-  // the fascia: a deep dark board with the name in large gilt letters, a cornice over it
+  // the fascia: a deep dark board with the trade's words in large gilt letters, a cornice over it
   const fasc = pick(rand, ['lacquer_black', 'shutter_green', 'wall_red', 'lacquer_black']);
   B(fasc, 0, Wd, y + g0 - 1.0, y + g0 - 0.2, 0, bayD); B('gold', 0, Wd, y + g0 - 1.0, y + g0 - 0.97, bayD - 0.01, bayD + 0.01); B('gold', 0, Wd, y + g0 - 0.23, y + g0 - 0.2, bayD - 0.01, bayD + 0.01);
-  write(F, pubName(el.seed), 0.6, Wd - 0.6, y + g0 - 0.92, y + g0 - 0.32, bayD, bayD + 0.07, 'gold');      // the house's name, standing proud of the consoles (letters.js)
+  write(F, pubName(el.seed), 0.6, Wd - 0.6, y + g0 - 0.92, y + g0 - 0.32, bayD, bayD + 0.07, 'gold');      // the trade's words, standing proud of the consoles (letters.js)
   B('plaster_white', -0.05, Wd + 0.05, y + g0 - 0.2, y + g0, 0, bayD + 0.18); B('plaster_white', -0.08, Wd + 0.08, y + g0, y + g0 + 0.1, 0, bayD + 0.22);
   // the windows between the pilasters: a granite stallriser, mahogany frames, etched glass above clear glass; the double doors at the corner
   const wins = [], edges = [...cuts.map((a) => [a, a + 0.4])];
@@ -471,11 +471,10 @@ export function pub(el, ctx, base) {
     const nm = Math.max(1, Math.round((b - a) / 1.2)); for (let i = 1; i < nm; i++) { const u = a + (b - a) * i / nm; B('wood_dark', u - 0.04, u + 0.04, y + 0.8, y + g0 - 1.0, bayD - 0.1, bayD - 0.03); }
   }
   if (isOpen) { C(0, uDoor - 0.85, y, y + g0, 0, bayD + 0.02); C(uDoor + 0.85, Wd, y, y + g0, 0, bayD + 0.02); } else C(0, Wd, y, y + g0, 0, bayD + 0.02);
-  // the board hanging on an iron bracket from the corner's first floor: a painted sign with gilt lettering
+  // the board hanging on an iron bracket from the corner's first floor: a painted sign-board with no lettering (the house's name is not known)
   const uS = east ? Wd - 0.2 : 0.2, ys = y + g0 + 0.6;
   B('iron', uS - 0.02, uS + 0.02, ys + 1.2, ys + 1.25, 0.0, 1.4); B('iron', uS - 0.02, uS + 0.02, ys - 0.05, ys + 1.25, 1.0, 1.04);
   B(pick(rand, ['wall_red', 'lacquer_black', 'shutter_green', 'wall_red']), uS - 0.03, uS + 0.03, ys, ys + 1.1, 0.5, 1.4); B('gold', uS - 0.05, uS + 0.05, ys - 0.03, ys, 0.5, 1.4); B('gold', uS - 0.05, uS + 0.05, ys + 1.1, ys + 1.13, 0.5, 1.4);
-  for (let i = 0; i < 4; i++) B('gold', uS - 0.05, uS + 0.05, ys + 0.2 + i * 0.22, ys + 0.3 + i * 0.22, 0.65, 1.25 - (i % 2) * 0.3);
   // upper floors: stucco hoods over the first-floor windows, plain sashes above; a string course at each floor
   B('plaster_white', 0, Wd, y + g0 + 0.1, y + g0 + 0.3, 0, 0.06);
   const nw = Math.max(2, Math.round(Wd / 2.6));
