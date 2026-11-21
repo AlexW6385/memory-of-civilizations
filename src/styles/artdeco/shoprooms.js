@@ -10,22 +10,22 @@ import { Quads, shopSign, rng } from './dress.js';
 
 /** The kinds, in the order the lots near the arrival get them: the name, the lining of the walls, the floor, the lamp's colour. */
 export const KINDS = {
-  drug: { name: 'DRUGS', sur: 'RUSSELL', wall: 'stucco_cream', floor: 'tile_white', pane: 'SODA', board: ['car_black', 'gold'] },
+  drug: { name: 'DRUGS', sur: '', wall: 'stucco_cream', floor: 'tile_white', pane: 'SODA', board: ['car_black', 'gold'] },
   deli: { name: 'DELICATESSEN', sur: '', wall: 'tile_white', floor: 'timber', pane: 'LUNCH', board: ['shutter_green', 'paint_white'] },
   barber: { name: 'BARBER SHOP', sur: '', wall: 'stucco_cream', floor: 'tile_dark', pane: 'HAIRCUT', board: ['paint_white', 'car_black'] },
-  cigar: { name: 'CIGARS', sur: 'KING', wall: 'wood_dark', floor: 'timber', pane: 'TOBACCO', board: ['wood_dark', 'gold'] },
-  hat: { name: 'HATTERS', sur: 'WALKER', wall: 'stucco_pale', floor: 'timber', pane: 'HATS', board: ['car_blue', 'gold'] },
-  bakery: { name: 'BAKERY', sur: 'ROMANO', wall: 'tile_white', floor: 'tile_white', pane: 'FRESH BREAD', board: ['stucco_cream', 'car_black'] },
+  cigar: { name: 'CIGARS', sur: '', wall: 'wood_dark', floor: 'timber', pane: 'TOBACCO', board: ['wood_dark', 'gold'] },
+  hat: { name: 'HATTERS', sur: '', wall: 'stucco_pale', floor: 'timber', pane: 'HATS', board: ['car_blue', 'gold'] },
+  bakery: { name: 'BAKERY', sur: '', wall: 'tile_white', floor: 'tile_white', pane: 'FRESH BREAD', board: ['stucco_cream', 'car_black'] },
   shoe: { name: 'SHOE REPAIR', sur: '', wall: 'stucco_pale', floor: 'timber', pane: 'HEELS WHILE U WAIT', board: ['cloth_maroon', 'gold'] },
-  tailor: { name: 'TAILOR', sur: 'COHEN', wall: 'stucco_pale', floor: 'timber', pane: 'ALTERATIONS', board: ['prussian_blue', 'paint_white'] },
-  haber: { name: 'HABERDASHER', sur: 'HARRIS', wall: 'stucco_cream', floor: 'timber', pane: 'SHIRTS', board: ['car_black', 'gold'] },
+  tailor: { name: 'TAILOR', sur: '', wall: 'stucco_pale', floor: 'timber', pane: 'ALTERATIONS', board: ['prussian_blue', 'paint_white'] },
+  haber: { name: 'HABERDASHER', sur: '', wall: 'stucco_cream', floor: 'timber', pane: 'SHIRTS', board: ['car_black', 'gold'] },
   lunch: { name: 'LUNCH', sur: '', wall: 'tile_white', floor: 'tile_dark', pane: 'COFFEE 5 CENTS', board: ['car_black', 'paint_white'], awn: ['car_blue', 'paint_white'] },
   // the farther blocks (docs/settlements/new-york.md §1n): each trade's riser, awning and lining by rule
-  automat: { name: 'AUTOMAT', sur: 'HORN & HARDART', wall: 'marble', floor: 'tile_dark', pane: 'FRESH COFFEE', board: ['car_black', 'gold'], riser: 'marble_dark' },
-  butcher: { name: 'MEATS', sur: 'KRAUSE', wall: 'tile_white', floor: 'timber', pane: 'POULTRY', board: ['cloth_maroon', 'paint_white'], awn: ['car_red', 'paint_white'], riser: 'tile_white' },
+  automat: { name: 'AUTOMAT', sur: '', wall: 'marble', floor: 'tile_dark', pane: 'FRESH COFFEE', board: ['car_black', 'gold'], riser: 'marble_dark' },
+  butcher: { name: 'MEATS', sur: '', wall: 'tile_white', floor: 'timber', pane: 'POULTRY', board: ['cloth_maroon', 'paint_white'], awn: ['car_red', 'paint_white'], riser: 'tile_white' },
   grocer: { name: 'FRUIT AND VEGETABLES', sur: '', wall: 'stucco_cream', floor: 'timber', pane: 'FRESH DAILY', board: ['shutter_green', 'paint_white'], awn: ['shutter_green', 'paint_white'], riser: 'wood_dark' },
-  hardware: { name: 'HARDWARE', sur: 'BRODY', wall: 'stucco_pale', floor: 'timber', pane: 'TOOLS PAINT', board: ['wood_dark', 'gold'], riser: 'iron' },
-  fabric: { name: 'DRY GOODS', sur: 'LEVY', wall: 'stucco_cream', floor: 'timber', pane: 'NOTIONS TRIMMINGS', board: ['prussian_blue', 'gold'], riser: 'marble_dark' },
+  hardware: { name: 'HARDWARE', sur: '', wall: 'stucco_pale', floor: 'timber', pane: 'TOOLS PAINT', board: ['wood_dark', 'gold'], riser: 'iron' },
+  fabric: { name: 'DRY GOODS', sur: '', wall: 'stucco_cream', floor: 'timber', pane: 'NOTIONS TRIMMINGS', board: ['prussian_blue', 'gold'], riser: 'marble_dark' },
 };
 export const KIND_ORDER = ['drug', 'deli', 'barber', 'cigar', 'hat', 'bakery', 'shoe', 'tailor', 'haber', 'lunch'];
 const SHIRT = ['paint_white', 'cloth_blue', 'cloth_ochre', 'cloth_grey', 'cloth_red', 'cloth_indigo'], BOXES = ['paint_white', 'cloth_brown', 'wood_ochre', 'cloth_green', 'cloth_blue', 'cloth_red', 'cloth_grey'];
@@ -71,7 +71,7 @@ export function shopRoom(bag, col, lights, el, r) {
   bag.add('gilt_bronze', R(du0, du1, y, y + 0.05, -0.2, 0.2)); bag.add('rubber', I(du0 + 0.1, du1 - 0.1, fy, fy + 0.012, 0.3, 1.0));
   bag.add('wood_painted', I(doorR ? du1 - 0.05 : du0, doorR ? du1 : du0 + 0.05, y, y + 2.4, 0.15, 0.8));                 // the leaf folded back against the glass
   // the sign across the fascia, the pane's lettering; an awning on a few
-  const shop = { text: `${K.sur ? K.sur + ' ' : ''}${K.name}`.trim(), kind: 'bank', board: K.board, pane: K.pane };
+  const shop = { text: K.name, kind: 'bank', board: K.board, pane: K.pane };
   shopSign(bag, F, T, L - T, y, shop, g0, g1, true, r);
   if (el.room.kind === 'barber') {                                                            // the barber's pole by the door
     const pu = doorR ? du1 + 0.35 : du0 - 0.35, [px, , pz] = F.P(pu, 0.35, 0);

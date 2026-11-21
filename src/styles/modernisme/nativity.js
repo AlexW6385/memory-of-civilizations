@@ -418,6 +418,31 @@ function boat(bag, x, y, z) {
 }
 
 /**
+ * The foot of a portal (docs/settlements/barcelona.md §15.4): three limestone treads up to the doorway's sill, each worn in the lane to the door (the middle 2.4 m 2 cm lower, in the
+ * grey of the porch's stone), and the doors, stood in the doorway as a hoarding of planks in a stepped parabola 4.4 m high — the portals were boarded up while the works went on
+ * [inferred: temporary doors; the dark of the doorway stays above them]. The treads are a ramp to the walker, the doors a wall.
+ */
+function stoop(bag, col, cz, y, { uc, hw, Xw, arch }, kb = 0.6, kv = 0.8) {
+  const hwid = hw * kb + 0.35, xa = Xw + 2.6, T = 0.7, H = 0.16;
+  for (let k = 0; k < 3; k++) {                                                  // the treads, the last the landing to the sill
+    const x1 = xa - k * T, x0 = k === 2 ? Xw : x1 - T, top = y + H * (k + 1);
+    bag.add(S, box(x0, y - 0.05, cz + uc - hwid, x1, top, cz + uc - 1.2)); bag.add(S, box(x0, y - 0.05, cz + uc + 1.2, x1, top, cz + uc + hwid));
+    bag.add(S, box(x0, y - 0.05, cz + uc - 1.2, x1, top - 0.06, cz + uc + 1.2));
+    bag.add(PORCH, box(x0 + 0.04, top - 0.06, cz + uc - 1.2, x1 - 0.04, top - 0.02, cz + uc + 1.2));
+  }
+  col.ramp([Xw, cz + uc - hwid, xa, cz + uc + hwid], y, y + H * 3, 'w');
+  // the doors: the planks in bands, each as wide as the doorway is at its head, a seam down the middle, three battens
+  const dy = y + H * 3, X0 = Xw + 0.02, X1 = Xw + 0.14;
+  for (let v = 0; v < 4.4; v += 0.4) {
+    const a = Math.sqrt(Math.max(0, 1 - (v + 0.4 + H * 3 + 1.2) / (arch(0, kb, kv)[1] + 1.2))), w = Math.min(hwid - 0.35, Math.abs(arch(a, kb, kv)[0] - (uc)) ) - 0.03;
+    bag.add(W, box(X0, dy + v, cz + uc - w, X1, dy + v + 0.4, cz + uc + w));
+  }
+  for (const v of [0.7, 2.0, 3.3]) bag.add('wood_dark', box(X1, dy + v, cz + uc - 2.0, X1 + 0.05, dy + v + 0.16, cz + uc + 2.0));
+  bag.add('wood_dark', box(X1, dy, cz + uc - 0.03, X1 + 0.05, dy + 4.4, cz + uc + 0.03));
+  col.rect([Xw - 0.05, cz + uc - hwid + 0.35, Xw + 0.2, cz + uc + hwid - 0.35], dy, dy + 4.4);
+}
+
+/**
  * nativity(bag, col, fx, y, cz): the façade facing east (+x) on the line x = fx, centred at z = cz.
  */
 export function nativity(bag, col, fx, y, cz) {
@@ -433,6 +458,7 @@ export function nativity(bag, col, fx, y, cz) {
   const faith = portal(bag, col, P, cz, y, { uc: -14.25, hw: 3.4, ht: 17, gt: 34, ft: 28, ho: 3.35, ...X }, rand);
   const charity = portal(bag, col, P, cz, y, { uc: 0, hw: 4.2, ht: 21, gt: 46, ft: 38, ho: 3.3, ...X }, rand);
   const hope = portal(bag, col, P, cz, y, { uc: 14.25, hw: 3.4, ht: 17, gt: 34, ft: 28, ho: 3.35, ...X }, rand);
+  for (const [p, uc, hw] of [[faith, -14.25, 3.4], [charity, 0, 4.2], [hope, 14.25, 3.4]]) stoop(bag, col, cz, y, { uc, hw, Xw: X.Xw, arch: p.arch });
   // Charity: the trumeau and the Nativity on its capital; the adorations of the shepherds and the kings at the sides;
   // child angels with their instruments; over the mouth the star, the Annunciation, the Coronation
   const tx = fx + 2.2, hc = 7.2;

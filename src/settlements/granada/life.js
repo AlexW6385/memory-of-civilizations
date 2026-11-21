@@ -6,7 +6,7 @@ import { darroSlots } from '../../styles/nasrid/streets.js';
 import { isShop, useOf } from '../../styles/nasrid/houses.js';
 import { patioHall } from '../../styles/nasrid/albaicin.js';
 import { albaicinPatios } from './town.js';
-import { RADIUS, lots, gardens, DARRO, DARRO_BRIDGES, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL } from './layout.js';
+import { RADIUS, lots, gardens, DARRO, DARRO_BRIDGES, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL, ALCAZABA } from './layout.js';
 
 export function life() {
   const L = [], T = Object.fromEntries(TERRACES.map((t) => [t.id, t]));
@@ -39,7 +39,8 @@ export function life() {
   gardener([T.orchard1.r[0] + 5.5, 19.0], T.orchard1.y + 0.02, 'n', { carry: 'hoe' });
   gardener([T.orchard1.r[0] + 1.4 + 0.9 * 3, -1.0], T.orchard1.y + 0.02, 'w', { pose: 'squat' });
   P([T.orchard1.r[0] + 11.9, 13.2], T.orchard1.y + 0.02, 'w', { dress: 'robe', cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'veil', hair: 'long', carry: 'basket', h: 1.55 });
-  alhambra(P, man, woman);
+  alhambra(P, man, woman, L);
+  garrison(P, L);
   streets(P, man, woman, L);
   return L;
 }
@@ -49,7 +50,7 @@ export function life() {
  * men walking by the pool of the Myrtles (clear of the arrival at its south end), a gardener at the
  * hedges, two women seated by the Partal's pool.
  */
-function alhambra(P, man, woman) {
+function alhambra(P, man, woman, L) {
   const T = HILL.top + 0.05, [lx0, lz0, lx1, lz1] = LIONS;
   man([lx0 + 6.2, lz0 + 1.3], T, 'e', { pose: 'talk', cloth: 'cloth_white' }); man([lx0 + 7.4, lz0 + 1.25], T, 'w', { pose: 'talk', cloth: 'cloth_red' });
   man([lx1 - 1.0, lz1 - 2.8], T, 'n', { cloth: 'cloth_brown' });
@@ -58,10 +59,28 @@ function alhambra(P, man, woman) {
   man([hx - 0.6, cz0 + 7.6], T, 'n', { cloth: 'cloth_red', hat: 'turban' }); man([hx + 0.6, cz0 + 7.7], T, 'n', { cloth: 'cloth_white', hat: 'turban' });
   man([c0 + 4.2, cz0 + 5.0], T, 'e', { pose: 'cross', cloth: 'cloth_white', hat: 'turban' });
   const [mx0, mz0] = MYRTLES;
-  man([mx0 + 2.6, mz0 + 14.0], T, 's', { pose: 'talk', cloth: 'cloth_white' }); man([mx0 + 2.7, mz0 + 15.2], T, 'n', { pose: 'talk', cloth: 'cloth_brown' });
+  man([mx0 + 4.2, mz0 + 14.0], T, 's', { pose: 'talk', cloth: 'cloth_white' }); man([mx0 + 4.3, mz0 + 15.2], T, 'n', { pose: 'talk', cloth: 'cloth_brown' });
   P([mx0 + 5.7, mz0 + 22.0], T, 'e', { dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_ochre', over: 'belt', hat: 'cap', hatMat: 'cloth_white', hair: 'short', beard: true, legs: 'bare', pose: 'squat' });
+  // the halls carpeted (docs §25): a rug on the floor of the Hall of the Ambassadors, the Two Sisters' and the Abencerrajes', a man seated on each of the first two
+  const rug = (x, z, c, s) => L.push({ t: 'goods_mat', at: [x, z], y: T, rot: 0, mat: c, goods: [], seed: s });
+  const hcx = (c0 + c1) / 2, hcz = (cz0 + cz1) / 2, lcx = (lx0 + lx1) / 2;
+  rug(hcx, hcz, 'cloth_red', 3301); rug(hcx - 4.6, hcz, 'cloth_indigo', 3302); rug(hcx + 4.6, hcz, 'cloth_indigo', 3303);
+  rug(lcx, lz0 - 5.4, 'cloth_red', 3304); rug(lcx, lz1 + 4.6, 'cloth_ochre', 3305);
+  man([hcx - 4.6, hcz - 0.3], T, 'e', { pose: 'cross', cloth: 'cloth_white', hat: 'turban' }); man([lcx, lz0 - 5.4], T, 's', { pose: 'cross', cloth: 'cloth_brown', hat: 'turban' });
   const [, , , pz1] = PARTAL.pool, px = (PARTAL.pool[0] + PARTAL.pool[2]) / 2;
   woman([px - 1.2, pz1 + 1.0], T, 'n', { pose: 'sit_ground' }); woman([px - 0.1, pz1 + 1.05], T, 'n', { pose: 'sit_ground', cloth: 'cloth_ochre' });
+}
+/**
+ * The Alcazaba's garrison (docs §25): the fortress at the hill's west end, guards with staves at the foot of the keep and in the parade ground, a pair talking by the gate wall.
+ * [inferred: the Alcazaba was the garrison's quarter; the numbers and places are ours]
+ */
+function garrison(P, L) {
+  const T = HILL.top + 0.05, [a0, b0, a1, b1] = ALCAZABA, cx = (a0 + a1) / 2;
+  const guard = (x, z, dir, o = {}) => P([x, z], T, dir, { dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_red', over: 'belt', hat: 'turban', hatMat: 'cloth_red', hair: 'short', beard: true, carry: 'staff', ...o });
+  guard(a1 - 9, b0 + 9, 's'); guard(a1 - 12, b0 + 9.5, 's'); guard(a0 + 12, b0 + 10, 'e');
+  guard(cx - 3, 0, 'e', { carry: undefined, pose: 'talk' }); guard(cx - 1.8, 0.1, 'w', { carry: undefined, pose: 'talk', cloth: 'cloth_indigo' });
+  guard(cx + 14, b1 - 8, 'n'); guard(cx - 20, b1 - 8, 'n');
+  L.push({ t: 'animal', kind: 'horse', at: [cx + 8, b1 - 11], y: T, rot: 1.2, seed: 5151 });
 }
 /** At the Albaicín's cisterns (§5.1): women filling jars, now and then a water-carrier with his donkey. */
 export function aljibeLife(list) {
