@@ -188,3 +188,15 @@ export function landings() {
   for (const z of [-20, 76, 160]) { const x = riverX(z); out.push({ a: [x + H + 1.2, z], b: [x + H - 4.2, z], n: [-1, 0], tang: [0, 1], rot: 0 }); }
   return out.filter((q) => Math.hypot(q.a[0], q.a[1]) < RADIUS - 24 && !BRIDGES.some((b) => Math.hypot(b.a[0] - q.a[0], b.a[1] - q.a[1]) < 24 || Math.hypot(b.b[0] - q.a[0], b.b[1] - q.a[1]) < 24));
 }
+
+/** The landings that keep a night fire on the bank (a third of them, by the hash of the place): { at: [x, z] the fire, keeper: [x, z], rot } (nightlight.js shang_watchfire, town.js). [inferred] */
+export function fireLandings() {
+  const out = [];
+  for (const g of landings()) {
+    const h = (((Math.imul(Math.round(g.a[0]) ^ 0x2545f491, 0x9e3779b1) ^ Math.imul(Math.round(g.a[1]) ^ 0x6a09e667, 0x85ebca6b)) >>> 0) / 4294967296);
+    if (h >= 0.34) continue;
+    const P = (s, u) => [g.a[0] - g.n[0] * s + g.tang[0] * u, g.a[1] - g.n[1] * s + g.tang[1] * u];
+    out.push({ at: P(2.2, 2.6), keeper: P(2.6, 0.9), rot: Math.atan2(g.tang[0], g.tang[1]) });
+  }
+  return out;
+}

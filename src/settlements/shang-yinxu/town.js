@@ -1,7 +1,7 @@
 // Round the landmarks (docs/settlements/shang-yinxu.md §2, §5, §6): the Huan with its plank bridges, the bronze foundry, the
 // lineage compounds and workshops, and the people (kings' diviners kneeling at the fire, officials and guards in the court,
 // scribes and diviners at the archive, the casters at the furnaces, the families in their yards), oxen, pigs, dogs, carts.
-import { RADIUS, RIVER, BRIDGES, HALL, FLANKS, AXIS, COURT, TOMB, ARCHIVE, FOUNDRY, FURNACES, lots, streets, inRect, inRiver, inMoat, lotPoint, lotRot, spots, landings, height } from './layout.js';
+import { RADIUS, RIVER, BRIDGES, HALL, FLANKS, AXIS, COURT, TOMB, ARCHIVE, FOUNDRY, FURNACES, lots, streets, inRect, inRiver, inMoat, lotPoint, lotRot, spots, landings, fireLandings, height } from './layout.js';
 import { boatFloat } from '../../objects/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -96,6 +96,8 @@ function people() {
     guard([x - 1.6 * f, z + 0.9], f > 0 ? Math.PI / 2 : -Math.PI / 2, { nightKeep: 1 });
     fig([x + 1.6 * f, z - 0.7], f > 0 ? -Math.PI / 2 : Math.PI / 2, { pose: 'sit_ground', nightKeep: 1 });
   }
+  // a keeper at each fire on the bank of the Huan (nightlight.js, layout.js fireLandings): a fisher sitting up through the night
+  for (const f of fireLandings()) fig(f.keeper, f.rot + Math.PI / 2, { pose: 'sit_ground', carry: 'none', nightKeep: 1 }, Math.max(0.02, height(f.keeper[0], f.keeper[1])));
   return L;
 }
 
@@ -173,7 +175,7 @@ export async function town() {
   if (CACHE) return CACHE;
   const plans = [];
   for (let i = 0; i < RIVER.pts.length - 1; i++) plans.push(base('yinxu-river-' + i, [{ t: 'shang_river', pts: RIVER.pts, seg: i }]));   // one plan per reach, so each one's bounds stay inside the disc
-  plans.push(base('yinxu-banks', [...BRIDGES.map((b) => ({ t: 'shang_bridge', a: b.a, b: b.b })), ...landings().map((g, i) => ({ t: 'shang_landing', ...g, seed: i }))]));
+  plans.push(base('yinxu-banks', [...BRIDGES.map((b) => ({ t: 'shang_bridge', a: b.a, b: b.b })), ...landings().map((g, i) => ({ t: 'shang_landing', ...g, seed: i })), ...fireLandings().map((f) => ({ t: 'shang_watchfire', at: f.at, y: Math.max(0.02, height(f.at[0], f.at[1])) }))]));
   plans.push(base('yinxu-foundry', [{ t: 'shang_foundry' }]));
   plans.push({ ...base('yinxu-people', people()), style: 'life' });
   plans.push({ ...base('yinxu-animals', animals()), style: 'life' });
