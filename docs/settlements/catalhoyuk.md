@@ -123,3 +123,15 @@ All [inferred]: nothing of the town's sound survives; the works are those §4, �
 - **People:** a wordless murmur and calls across the roofs by day (no words are written or spoken in the map); in the evening a hand drum and a bone flute from two roofs [§9 inferred music].
 - **Animals:** sheep, goats and cattle at the two pens [stated: §2 penned animals]; far dogs at night; jackals on the plain and owls in the willows at night [inferred: Anatolian steppe fauna]; cranes over the marsh at morning and evening [inferred: §8]; wind in the reeds at every pool, frogs round the pools in the warm months.
 - **Not here:** bells, hens, horses, donkeys (domestic donkey and horse not yet in Anatolia c. 6500 BC [inferred]), metal, carts. Levels were measured with `tools/sound-render.mjs` (spectrum, onsets); no one has listened.
+
+### 14.4 Animals
+
+All [inferred] from §8 and the site's fauna as generally published (sheep and goats, cattle and dogs kept; ducks, geese and cranes of the marsh): `fauna.js` `critters`.
+
+- Dogs asleep on four roofs of opened houses, two by court fire pits, one in the yard south of the landmark [dog kept at the site: inferred]. Sheep and goats lying and standing in both pens, shown with the goat model (no sheep model yet; the cattle of the pens remain the static figures of `town.js`). Brown ducks as loops on the four nearest pools; grey geese grazing on the bank by each reed landing. Two mud nests of swallows under the eave of the landmark's south wall between the beam ends, birds sweeping out and back [inferred; barn swallows nest in mud on buildings].
+- Left out on purpose: cat, hen, horse, donkey (not kept yet), and the red-crowned crane model (East Asian, wrong species for the plain: the grey cranes stay as the existing heron and egret perches and the sound).
+
+### 14.5 Wear (no writing)
+
+- No inscription, sign or tablet: there is no script at Çatalhöyük [stated: §14 header]. Wear only. Code: `wear.js`.
+- The roof worn by the feet from the ladder's head over the landmark roof to the hatch, and from the middle of each opened house's roof to its hatch's rim, where the rim's top is rubbed pale; soot in tongues on the roofs round every hatch (`pottery_dark`) [inferred: smoke leaves by the hatch, §4; the hatch's inner soot is already stated]. The earth trodden dark at the foot of the landmark's ground ladder, the wall rubbed at hand and shoulder height beside it [inferred: the ladder is climbed daily]. Inside: the plaster floor greyed under each hatch and black round the landmark's hearth [inferred].
