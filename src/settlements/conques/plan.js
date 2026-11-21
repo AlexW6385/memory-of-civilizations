@@ -4,6 +4,7 @@
 
 import { RADIUS, ABBEY, RIVER, BRIDGE, height } from './layout.js';
 import foyPlan from '../../buildings/sainte-foy-conques/plan.js';
+import { churchGlow } from './night.js';
 
 const [tx0, tz0, tx1, tz1] = ABBEY.terrace;
 export const terrace = {
@@ -26,5 +27,5 @@ export const river = {
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [{ t: 'water_cells', rect: [-(RADIUS - 95), RIVER.z - 30, RADIUS - 95, RIVER.z + 30], y: RIVER.level, cell: 1.5, inside: (x, z) => Math.abs(z - (RIVER.z + 14 * Math.sin(x / 90))) < RIVER.w / 2 - 1 && Math.hypot(x, z) < RADIUS - 95 }],
 };
-export const abbey = { ...foyPlan, origin: ABBEY.origin, base: 0, district: undefined, view: [ABBEY.origin[0] - 2, -18, ABBEY.origin[0] + 54, 30] };
+export const abbey = { ...foyPlan, elements: [...foyPlan.elements, ...churchGlow(foyPlan.elements)], origin: ABBEY.origin, base: 0, district: undefined, view: [ABBEY.origin[0] - 2, -18, ABBEY.origin[0] + 54, 30] };
 export default abbey;
