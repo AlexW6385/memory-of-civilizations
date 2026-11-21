@@ -338,9 +338,11 @@ function greatMosque(el, { bag, col }) {
   bag.add('banco_smooth', box(cx - A, -0.4, cz - A, cx + A, py, cz + A));
   col.floor([cx - A, cz - A, cx + A, cz + A], py);
   col.rect([cx - A, cz - A, cx + A, cz + A], -0.4, py - 0.31);
-  for (const [r, dir] of [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e']]) STYLES.qing.elements.stairs({ rect: r, y0: 0, y1: py, dir, mat: 'banco_smooth' }, { bag, col });
+  // six flights of steps (Designing Buildings; wondermondo): north and south at the middle, the west one at the court, a second on the west, two on the market's side
+  const FL = [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e'], [[cx - A - 5, cz + 19, cx - A, cz + 29], 'e'], [[cx + A, cz - 27, cx + A + 5, cz - 17], 'w'], [[cx + A, cz + 17, cx + A + 5, cz + 27], 'w']];
+  for (const [r, dir] of FL) STYLES.qing.elements.stairs({ rect: r, y0: 0, y1: py, dir, mat: 'banco_smooth' }, { bag, col });
   // the mass under each flight, in slices that follow the rising steps, so the flanks are solid where the steps are drawn
-  for (const [r, dir] of [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e']]) {
+  for (const [r, dir] of FL) {
     const SL = 10, alongZ = dir === 'n' || dir === 's', u0 = alongZ ? r[1] : r[0], u1 = alongZ ? r[3] : r[2], up = dir === 'n' || dir === 'w' ? -1 : 1;
     for (let k = 4; k < SL; k++) {
       const a = up > 0 ? u0 + (u1 - u0) * k / SL : u1 - (u1 - u0) * (k + 1) / SL, b = up > 0 ? u0 + (u1 - u0) * (k + 1) / SL : u1 - (u1 - u0) * k / SL;
@@ -348,9 +350,9 @@ function greatMosque(el, { bag, col }) {
     }
   }
   // the cheek walls of each flight, rising with the steps to a pinnacle on the platform's edge, and a small pinnacle at their foot
-  // (Designing Buildings: the stairs are "adorned with pinnacles"; six flights in the original, three here)
-  for (const [r, dir] of [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e']]) {
-    const alongZ = dir === 'n' || dir === 's', uFar = dir === 'n' ? r[3] : dir === 's' ? r[1] : r[0], uPlat = dir === 'n' ? r[1] : dir === 's' ? r[3] : r[2], inward = Math.sign(uPlat - uFar) * (alongZ && dir === 'n' ? 1 : 1);
+  // (Designing Buildings: the stairs are "adorned with pinnacles"; six flights, as here)
+  for (const [r, dir] of FL) {
+    const alongZ = dir === 'n' || dir === 's', uFar = dir === 'n' ? r[3] : dir === 's' ? r[1] : dir === 'e' ? r[0] : r[2], uPlat = dir === 'n' ? r[1] : dir === 's' ? r[3] : dir === 'e' ? r[2] : r[0], inward = Math.sign(uPlat - uFar) * (alongZ && dir === 'n' ? 1 : 1);
     for (const [l0, l1] of alongZ ? [[r[0] - 0.55, r[0]], [r[2], r[2] + 0.55]] : [[r[1] - 0.55, r[1]], [r[3], r[3] + 0.55]]) {
       const V = (l, u, y) => (alongZ ? [l, y, u] : [u, y, l]), yb = -0.4, tf = 0.9, tp = py + 0.9, tris = [];
       const q = (A1, B1, C1, D1) => tris.push(...A1, ...B1, ...C1, ...A1, ...C1, ...D1);
@@ -372,9 +374,10 @@ function greatMosque(el, { bag, col }) {
   // the platform's edge, hand-plastered (docs/settlements/djenne.md §18): a rounded coping roll along the top of its face and a low
   // foot course a hand's breadth proud of it, both broken where the flights of steps reach it
   { const D = 0.3, halves = (g) => [[0, A - g], [A + g, 2 * A]];
+    const cuts = (gs) => { const out = []; let a = 0; for (const [g0, g1] of gs) { out.push([a, A + g0]); a = A + g1; } out.push([a, 2 * A]); return out; };
     const edges = [
       { x: true, c: cz + A, sg: 1, runs: halves(6.6) }, { x: true, c: cz - A, sg: -1, runs: halves(6.6) },
-      { x: false, c: cx - A, sg: -1, runs: halves(5.6) }, { x: false, c: cx + A, sg: 1, runs: [[0, 2 * A]] },
+      { x: false, c: cx - A, sg: -1, runs: cuts([[-5.6, 5.6], [18.4, 29.6]]) }, { x: false, c: cx + A, sg: 1, runs: cuts([[-27.6, -16.4], [16.4, 27.6]]) },
     ];
     edges.forEach((e, i) => {
       for (const [t0, t1] of e.runs) {
@@ -517,6 +520,48 @@ function greatMosque(el, { bag, col }) {
     edge(true, za + T / 2, xa, xb, [[towersX[0] - 2.65, towersX[0] + 2.65], [towersX[1] - 2.65, towersX[1] + 2.65]], scup, 71);
     edge(true, zb - T / 2, xa, xb, [[ST[0] - 0.3, ST[2] + 0.3]], scup, 81);
     edge(false, xa + T / 2, za + 0.6, zb - 0.6, [], [], 91);
+  }
+  // the crier's room (docs/settlements/djenne.md §21.4): "the central mihrab's ceiling has a narrow opening to a small room above the roof, from which a crier once
+  // repeated the imam's words" (Wikiwand; Aramco World 1990). Ours: a small banco room on the hall's roof against the central tower's west face (the tower is its
+  // east wall), a door in its west side with a palm-wood lintel, a reed mat on the floor, a low rounded roof edge; the opening in its floor is the mihrab's, not drawn
+  { const yR = py + 10.5, xr1 = x1 - 2.6, xr0 = xr1 - 2.6, zc = cz, hw = 1.4, t = 0.4, hh = 2.7, d = 0.8, yb = yR;
+    const xe2 = xr1;   // east wall: the tower's west face stands at about x1 - 2.6 over the roof
+    bag.add('banco_smooth', box(xr0, yb, zc - hw, xe2, yb + hh, zc - hw + t)); col.rect([xr0, zc - hw, xe2, zc - hw + t], yb, yb + hh + 0.3);
+    bag.add('banco_smooth', box(xr0, yb, zc + hw - t, xe2, yb + hh, zc + hw)); col.rect([xr0, zc + hw - t, xe2, zc + hw], yb, yb + hh + 0.3);
+    for (const [a, b] of [[zc - hw + t, zc - d], [zc + d, zc + hw - t]]) { bag.add('banco_smooth', box(xr0, yb, a, xr0 + t, yb + hh, b)); col.rect([xr0, a, xr0 + t, b], yb, yb + hh + 0.3); }
+    bag.add('banco_smooth', box(xr0, yb + 2.15, zc - d, xr0 + t, yb + hh, zc + d));                  // over the door
+    bag.add('timber', box(xr0 - 0.12, yb + 2.0, zc - d - 0.1, xr0 + t + 0.1, yb + 2.15, zc + d + 0.1));      // the palm-wood lintel
+    bag.add('banco_smooth', box(xr0 - 0.1, yb + hh, zc - hw - 0.1, xe2, yb + hh + 0.3, zc + hw + 0.1));       // the roof, with its underside
+    roll(bag, 'banco_smooth', [xr0 - 0.1, zc - hw - 0.05], [xr0 - 0.1, zc + hw + 0.05], yb + hh + 0.3, 0.2, 111);
+    bag.add('reed_mat', box(xr0 + t + 0.3, yb, zc - 0.9, xe2 - 0.3, yb + 0.03, zc + 0.9));
+    roundCol(bag, xr0 + 0.15, zc - hw + 0.1, yb + hh + 0.3, 0.1, 0.3, 0.24, 0.9, { egg: 0.5 });
+  }
+  // wear where feet and hands went (docs/settlements/djenne.md §21.5), in the plaster the mosque already holds: the middle of each tread of the six flights rubbed
+  // pale and a little wider or narrower from step to step, the sill of the main door worn smooth, and on the two piers that flank the aisle from the door the pale
+  // smear of the shoulders and hands that brush them in passing
+  { const hs = (a, b, c) => { let h = (Math.round(a * 16) * 73856093) ^ (Math.round(b * 16) * 19349663) ^ Math.imul(c + 1, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+    const flat = (t) => { const o = t.slice(); for (let i = 0; i < t.length; i += 9) o.push(t[i], t[i + 1], t[i + 2], t[i + 6], t[i + 7], t[i + 8], t[i + 3], t[i + 4], t[i + 5]); return o; };
+    const quadUp = (t, x0, z0, x1, z1, y) => t.push(x0, y, z0, x0, y, z1, x1, y, z1, x0, y, z0, x1, y, z1, x1, y, z0);
+    FL.forEach(([r, dir], fi) => {
+      const alongZ = dir === 'n' || dir === 's', len = alongZ ? r[3] - r[1] : r[2] - r[0], n = Math.max(1, Math.round(py / 0.16)), mid = alongZ ? (r[0] + r[2]) / 2 : (r[1] + r[3]) / 2, t = [];
+      for (let k = 0; k < n; k++) {
+        const f0 = k / n, f1 = (k + 1) / n, yy = py * f1 + 0.012;
+        const [a, b] = dir === 'n' ? [r[3] - len * f1, r[3] - len * f0] : dir === 's' ? [r[1] + len * f0, r[1] + len * f1] : dir === 'e' ? [r[0] + len * f0, r[0] + len * f1] : [r[2] - len * f1, r[2] - len * f0];
+        const hw = 0.9 + 0.8 * hs(fi, k, 1), sh = (hs(fi, k, 2) - 0.5) * 0.5, m = mid + sh;
+        if (alongZ) quadUp(t, m - hw, a + 0.03, m + hw, b - 0.03, yy); else quadUp(t, a + 0.03, m - hw, b - 0.03, m + hw, yy);
+      }
+      bag.add('mud_plaster', fromTriangles(flat(t)));
+    });
+    { const t = []; const xd = mainX, zA = z0 - 1.5, zB = z0 + 0.8, y = py + 0.026;
+      t.push(xd - 0.85, y, zA + 0.3, xd - 0.95, y, zB, xd + 0.9, y, zB, xd - 0.85, y, zA + 0.3, xd + 0.9, y, zB, xd + 0.8, y, zA);
+      bag.add('mud_plaster', fromTriangles(flat(t))); }
+    for (const [i, face, out] of [[2, rowX(2) + 0.55, 1], [3, rowX(3) - 0.55, -1]]) for (let j = 1; j < 10; j++) {
+      const pz = z0 + (z1 - z0) * j / 10, zc = pz + (hs(i, j, 3) - 0.5) * 0.4, wz = 0.4 + 0.3 * hs(i, j, 4), yc = 1.2 + 0.5 * hs(i, j, 5), hy = 0.5 + 0.25 * hs(i, j, 6);
+      if (Math.abs(pz - cz) < 0.01) continue;
+      const g = box(out > 0 ? face : face - 0.012, py + yc - hy / 2, zc - wz / 2, out > 0 ? face + 0.012 : face, py + yc + hy / 2, zc + wz / 2);
+      g.translate(0, -(py + yc), -zc); g.rotateX((hs(i, j, 7) - 0.5) * 0.5); g.translate(0, py + yc, zc);
+      bag.add('mud_plaster', g);
+    }
   }
   // ceramic half-pipes along the roof's edge, throwing the rain clear of the north and south walls (between the pilasters)
   { const L = x1 - x0, n = Math.max(1, Math.round(L / 3));

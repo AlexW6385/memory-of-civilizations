@@ -49,7 +49,7 @@ export default function make(H) {
     const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, Dfull = along ? z1 - z0 : x1 - x0;
     const yard = Dfull >= 7 && r() < 0.35 && kind !== 'brick';
     const vo = yard ? 2.0 : 0, D = Dfull - vo;
-    const H0 = { kutcha: 2.75, thatch: 2.85, tiled: 3.15, brick: 3.4 }[kind], T = kind === 'brick' ? 0.5 : kind === 'tiled' ? 0.38 : 0.4;
+    const H0 = { kutcha: 2.75, thatch: open ? 3.3 : 2.85, tiled: 3.15, brick: 3.4 }[kind], T = kind === 'brick' ? 0.5 : kind === 'tiled' ? 0.38 : 0.4;
     const fy = y + 0.45;
     // the house's frame: u along the front from its low corner, v inward from the front line (the yard, if any, lies before it)
     const P = (u, v) => (f === 'n' ? [x0 + u, z0 + v + vo] : f === 's' ? [x1 - u, z1 - v - vo] : f === 'e' ? [x1 - v - vo, z0 + u] : [x0 + v + vo, z1 - u]);
@@ -167,9 +167,10 @@ export default function make(H) {
       const pd = 1.1; Bx(footMat, 0, -pd, L, 0, foot - 0.4, fy, false); col.floor(rect(0, -pd, L, 0), fy);
       ovLeft = pd;
     } else if (kind === 'thatch') {
-      const g = gable(0.3, 'thatch', 'timber', 0.78, 0.55, 1.45, 1.2);
+      const vdT = open ? 1.0 : 1.45;        // (an opened house's eave stands higher and shorter: the walker needs 1.7 m over the platform's edge)
+      const g = gable(0.3, 'thatch', 'timber', 0.78, 0.55, vdT, 1.2);
       void g;
-      verandah(1.45);
+      verandah(vdT);
     } else if (kind === 'tiled') {
       const g = gable(0.14, 'roof_tile', 'timber', 0.4, 0.5, 1.6, 1.45);
       void g;
