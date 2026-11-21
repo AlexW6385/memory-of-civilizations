@@ -3,6 +3,7 @@
 // rows between the streets, and round all the Iya, the rampart and its ditch, broken by the gates. Compressed to this disc.
 // Pure data. +x east, +z south.
 
+import { onWalk, WALK_GOODS } from './walk.js';
 export const RADIUS = 330;
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -133,6 +134,16 @@ export function lots() {
     const cand = LOTS.filter((l) => !l.chief && l.w >= 16 && l.d > 18).map((l) => ({ l, d: Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]) })).filter((q) => q.d > 45 && q.d < 96).sort((a, b) => a.d - b.d);
     for (const q of cand) { if (chosen.length >= 2) break; if (chosen.every((c) => Math.hypot(c.l.rect[0] - q.l.rect[0], c.l.rect[1] - q.l.rect[1]) > 30)) chosen.push(q); }
     for (const { l } of chosen) { l.chief = true; l.kind = 'chief'; l.du = Math.min(l.w - 3.3, 10.2); Object.assign(l, houseRule(l.seed, true, l.w, l.d)); }
+  }
+  // the compounds of the visitor's walk (walk.js): every third (and every chief's house already has its own front) opens as a trading front with the goods
+  // of the street laid on its counter, so that the walk passes shops as well as doors; the order along the street is the order of the goods
+  {
+    const walk = LOTS.filter((l) => onWalk(l)).sort((a, b) => a.rect[0] - b.rect[0] || a.rect[1] - b.rect[1]);
+    walk.forEach((l, i) => {
+      if (l.chief) return;
+      if (i % 3 === 0 && l.w >= 12) l.kind = 'trade';
+      l.goods = WALK_GOODS[i % WALK_GOODS.length]; l.walk = true;
+    });
   }
   return LOTS;
 }

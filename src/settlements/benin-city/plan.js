@@ -3,6 +3,7 @@
 // impluvia and the ancestral altars, the turrets with spires, brass snakes and birds, the red clay wall round all.
 // Authored in world coordinates (origin 0, yaw 0); the front faces south on the king's square.
 import { PALACE, GATE_X, AUD } from './layout.js';
+import { walkRoutes } from './walkroutes.js';
 
 const [X0, Z0, X1, Z1] = PALACE;
 const HALL = [-112, -76, -18, -64], OC = [-130, -64, -6, -2];
@@ -35,6 +36,8 @@ for (const [z0, z1] of [[-118, -90], [-88, -60], [-58, -30], [-26, -10]]) {
   E.push({ t: 'benin_range', rect: [-138.6, z0, -133.0, z1], front: 'e', seed: Math.round(-z0) + 50, kinds: ['sleep', 'store', 'kitchen', 'sleep', 'brass', 'kitchen'] });
 }
 E.push({ t: 'benin_audience', axis: GATE_X, z0: -12, z1: -62, benches: AUD, drumZ: -36, seed: 8 });
+// the standing lamps of the court of audience (nightlight.js: bn_stand), between the way and the benches, at the three pairs of the benches' ends
+for (const s of [-1, 1]) for (const z of [-20, -40, -58]) E.push({ t: 'bn_stand', at: [GATE_X + s * 4.2, z], y: 0.03 });
 // the cast leopards at the gate
 for (const s of [-1, 1]) E.push({ t: 'benin_leopard', at: [GATE_X + s * 3.6, 6.2], y: 0.45, s, plinth: true });
 
@@ -49,6 +52,10 @@ const rooms = [
   room('court of the pages', [-37, -118, -11, -87], 0.03, 'inner'),
 ];
 const walks = [Object.assign([[GATE_X, 12], [GATE_X, -6], [GATE_X, -30], [-64.6, -62], [-64.6, -66], [-80, -68.5], [-95, -70], [-95, -75], [-95, -79], [-68, -79], [-66, -85], [-66, -100]], { y0: 0 })];
+
+// the compounds of the visitor's walk (walk.js, walkroutes.js): in at each street door and through the passage to the court
+for (const r of walkRoutes()) walks.push(r.route);
+for (const w of walks) if (w.y0 === undefined) w.y0 = 0;
 
 export const palace = {
   id: 'benin-palace',

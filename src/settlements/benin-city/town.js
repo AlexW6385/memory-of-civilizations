@@ -285,11 +285,14 @@ export async function town() {
     for (const sh of [...SHEDS, ...BAYS]) st.push({ t: 'benin_shelter', ...sh });
     for (const b of BRAZIERS) st.push({ t: 'benin_brazier', at: b, y: 0.22 });
     for (const a of ALLEYS_X) for (const [z, dz] of [[GREAT[3] - 1.2, 1], [GREAT[1] + 1.2, -1]]) if (ok(a, z) && depth(a, z) > 26) st.push({ t: 'benin_mouth', at: [a + 5.6, z], along: [1, 0], seed: Math.round(a + z) });
+    // the visitor's walk (walk.js, walkwork.js): the wayside shrine at the crossing of the great street and the cross street, the water jars at the mouths of the lanes along the great street
+    st.push({ t: 'benin_shrine', at: [CROSS[0] + 18, GREAT[1] + 7], y: 0 });
+    for (const a of [-160, -62, 22]) for (const [z, dz] of [[GREAT[3] - 1.2, 1], [GREAT[1] + 1.2, -1]]) if (ok(a, z)) st.push({ t: 'benin_waypot', at: [a - 5.4, z], y: 0 });
     plans.push(...lodTiles('benin-street', 'benin', st, { R: RADIUS }));
   }
   plans.push({ ...base('benin-people', [...F.P, ...P2]), style: 'life' });
   plans.push({ ...base('benin-street-life', lifeEls), style: 'life' });
-  const els = lots().map((l) => ({ t: 'benin_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, chief: l.chief, kind: l.kind, du: l.du, fd: l.fd, bd: l.bd, swL: l.swL, swR: l.swR, pitch: l.pitch, dado: l.dado, roof: l.roof }));
+  const els = lots().map((l) => ({ t: 'benin_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, chief: l.chief, kind: l.kind, goods: l.goods, du: l.du, fd: l.fd, bd: l.bd, swL: l.swL, swR: l.swR, pitch: l.pitch, dado: l.dado, roof: l.roof }));
   plans.push(...lodTiles('benin-houses', 'benin', els, { R: RADIUS }));
   return plans;
 }
