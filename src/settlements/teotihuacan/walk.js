@@ -81,3 +81,15 @@ export function marketRoutes() {
 export function templeRoute(z, lv) {
   return [[-8, z + 7], [-13, z + 4], [-17.5, z + 0.5], [-21.4, z], [-26, z], [-29.5, z], [-31.5, z], [-35, z]];
 }
+
+/**
+ * The Ciudadela (§24): from the avenue's last plaza east up the broad stair at z 252 (30 m, to the west bank, 7 m), along the bank to the foot of one of its four
+ * west temples (centres z 210, 238, 282, 310 at x 41) and in by the door of its chamber; and over the bank, down its inner stair into the court and east to the
+ * stair of the Adosada (x 89, z 260, 8 m wide), up to its roof 9 m over the court.
+ */
+export function ciudadelaRoutes() {
+  const pre = [[0, 70], [2, 73], [2, 82], [0, 85], [0, 166], [8, 172], [8, 186], [0, 190], [0, 255], [10, 252], [20, 252], [29, 252], [33, 252]];
+  const temple = (z) => [...pre, [33, z + (z < 252 ? 7 : -7)], [31, z + (z < 252 ? 2 : -2)], [31, z], [34, z], [37, z], [40, z], [41.2, z]];
+  return [temple(238), temple(210), temple(282), temple(310),
+    [[0, 70], [2, 73], [2, 82], [0, 85], [0, 166], [8, 172], [8, 186], [0, 190], [0, 255], [10, 260], [20, 260], [30, 260], [45, 260], [55, 260], [62, 257], [75, 257], [84, 260], [86, 260], [92, 260], [100, 260], [110, 260]]];
+}

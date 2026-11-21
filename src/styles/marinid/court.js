@@ -45,4 +45,10 @@ export function court(el, { bag }) {
   bag.add('plaster_damp', lathe([[2.25, 0], [2.25, 0.004], [1.75, 0.004]], 20, null, bx, y + 0.014, zm)); ring(bag, bx - 1.5, y + 0.016, zm + 1.9, 0.55, 'plaster_damp'); ring(bag, bx + 1.9, y + 0.016, zm - 1.4, 0.45, 'plaster_damp'); ring(bag, bx + 0.4, y + 0.016, zm + 2.2, 0.35, 'plaster_damp');
   // wear: the marble's soft grey path worn from the portal's vestibule to the hall's bridge
   bag.add('plaster_damp', box(cx - 0.6, y + 0.004, cz0, cx + 0.6, y + 0.009, cz0 + 1.6));
+  // on to the hall: the path parts round the basin, a body wide each side, and rejoins at the bridges' feet; the bridge's crown polished where the shoes cross
+  for (const s of [-1, 1]) bag.add('plaster_damp', box(cx + s * 1.9 - 0.4, y + 0.004, cz0 + 1.6, cx + s * 1.9 + 0.4, y + 0.009, cz1));
+  bag.add('plaster_damp', box(cx - 1.2, y + 0.004, cz1 - 1.4, cx + 1.2, y + 0.009, cz1));
+  bag.add('plaster_damp', box(cx - 0.5, y + 0.022, cz1, cx + 0.5, y + 0.026, zH + 0.7));
+  // the gallery's edge where the students step in from the court
+  for (const u of [cx - 7.2, cx + 7.2]) bag.add('plaster_damp', box(u - 0.5, y + 0.004, zN - 0.9, u + 0.5, y + 0.009, zN + 0.1));
 }

@@ -35,5 +35,16 @@ export function openWalks() {
     const P = planOf(h), fr = frame(h.rect, h.door), uc = (P.cu0 + P.cu1) / 2;
     out.push(Object.assign([fr.P(P.ud, 1.8), fr.P(P.ud, 0.3), fr.P(P.ud, -(P.Dc0 - 0.3)), fr.P(uc, -(P.Dc0 + 0.7)), fr.P(uc, -(P.Dc0 + P.Dc1) / 2)], { y0: ground0(...fr.P(P.ud, 1.5)) }));
   }
+  for (const r of CIVIC) out.push(Object.assign(r.map((q) => q.slice()), { y0: ground0(r[0][0], r[0][1]) }));
   return out;
 }
+/** The way into the civic places and down the souks (docs §17), found with tools/door-probe.mjs: each route reaches its last point with the viewer's body. */
+const CIVIC = [
+  [[-50, -20], [-50, -23.5], [-50, -27], [-50, -30.5], [-46, -33.5]],                    // the funduq: portal, passage, the court beside the basin
+  [[7.5, -20], [7.5, -24], [7.5, -28], [11, -29], [11, -31.5], [11, -36]],               // the quarter mosque: door, court, the hall's middle doorway, among the columns
+  [[104, 22.5], [104, 27], [104, 36], [104, 46]],                                          // the Place Seffarine from the Talaa Seghira, down to the last anvils
+  [[111.1, -14], [111.1, -5], [111.1, 5], [111.1, 17]],                                    // the Kissaria's cross lane, end to end
+  [[48, -2.9], [60, -2.9], [75, -2.9]],                                                    // into the cloth souk
+  [[48, -21.8], [60, -21.8], [73, -21.8]],                                                 // into the spice souk, the Attarine
+  [[125, -21], [133, -24], [147, -24], [155, -24], [162, -24]],                            // the Qarawiyyin: west naves and on to the middle of the sahn
+];
