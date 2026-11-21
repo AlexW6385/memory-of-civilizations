@@ -180,6 +180,10 @@ function lightHalo(H, l) {
       H.quad([px - a[0] * hw, y, pz - a[1] * hw], [px + a[0] * hw, y, pz + a[1] * hw], [px + a[0] * hw, y + l.h, pz + a[1] * hw], [px - a[0] * hw, y + l.h, pz - a[1] * hw], l.n, f);
       break;
     }
+    case 'spill': {                                  // lamp-light from the hall's open doors lying over the platform
+      H.floor(x, y + 0.04, z, l.r, l.r * 0.8, 9, 0.5);
+      break;
+    }
     default:
   }
 }
@@ -209,6 +213,8 @@ export function lightsOf({ hall, sengfang, monastery, village, dress }) {
   // the barred paper windows of the monks' rooms (plan.js quarters: seven bays of 3.9 m from x0 = −103, windows in the even bays, the front wall at z = ±35.5,
   // facing the courtyard's axis); the rooms hold bays 0–1, 2–3, 4–5, and the lamp of each burns behind the window of its first bay
   for (const s of [-1, 1]) for (const k of [0, 2, 4]) out.push({ k: 'pane', at: [ox - 103 + (k + 0.5) * 3.9, s * 35.5 - s * 0.22], y: 0.45 + 1.1, h: 1.1, w: 1.8, n: [0, -s] });
+  // the Great East Hall's five open doors (hall plan x −8.83, the bays' middles between the column lines ZS), floor 14.0: the lamps within spill out over the platform
+  for (const z of [-10.08, -5.04, 0, 5.04, 10.08]) out.push({ k: 'spill', at: [ox - 8.83 - 1.9, oz + z], y: 14.0, r: 3.0 });
   return out;
 }
 
