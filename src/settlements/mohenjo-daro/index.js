@@ -2,6 +2,7 @@
 import '../../styles/indus/index.js';
 import './walkdress.js';
 import './nightlight.js';
+import './wear.js';
 import citadel from './plan.js';
 import music from './music.js';
 export { town } from './town.js';
