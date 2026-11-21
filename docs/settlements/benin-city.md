@@ -124,3 +124,63 @@ Built with the repo's sculpting kit (src/styles/nabataean/sculpt.js, read only):
 - **Leopards [stated: Art Institute, "Pair of Leopards", §10]:** the cast leopards at the gate and before the dais are rebuilt as modelled animals (muscular haunch and shoulder, legs with elbow and hock, ruff of tufts, open mouth, ring spots). By the throne stands a pair of **aquamaniles**, small leopard vessels of cast brass (a filling hole with a lid and ring on the back, the open mouth as spout) on carved stands of dark wood on the upper tier of the dais, either side of the Oba's stool [inferred: the brief's "aquamanile pair by the throne"; the dossier's stated choice, a pair either side of the throne, is kept; the aquamanile is the form of vessel, not stated by the fetched pages].
 - **Departures from the dossier:** none of its stated choices. The plaques on the wall frieze now stand 6 cm off the clay (above the ridges) instead of 2 cm, so that the ridges do not cut across them.
 - **Still crude [inferred]:** the figures are frontal and stiff by design, hands are balls, feet are plain, the cloth has no pattern, and the incised leaves are a cut in the plate without the stippling of the originals.
+
+## 15. Match-to-reference pass (the visitor's walk, night, sound, animals, wear)
+
+No source could be fetched in this pass (the shell reaches no websites): everything below is [inferred] from §1–§14 and general knowledge unless a line says [stated] with a source already cited above. Where the pass needed a fact it did not have, the line says so.
+
+### 15.1 The visitor's walk (item 1)
+
+- **The way [inferred]:** from the arrival on the king's square before the palace gate, south across the square to the great street, along the great street east to the cross street (and west to the square's end), up the cross street and east into the aisle between the market's stalls and its open floor, and from the west lane (x 22) across the open strip before the guild to the guild lane between the yards (`src/settlements/benin-city/walk.js`). The palace gate and court have their own route (plan.js).
+- **Compounds on the way (13, all opened):** every compound whose street door lies within 25 m of the great street's centre line is on the walk (`walk.js` `onWalk`); all of them are built in full and enterable (§12: houses within 220 m), each with a route in at the street door, along the front room and through the passage to the court (`walkroutes.js`, followed by walk-check).
+- **Trading fronts [stated: Dapper and This is Africa, the sellers of the streets and the market are women, §10; inferred: the counters]:** every third compound of the walk is a trading front (counter across the street opening, the keeper behind it, shelves behind her). The counter now has a gap of 1.8 m beside the way to the court, the keeper's way and the visitor's (a counter across the whole opening shut the front room). The goods, in order along the street: pots, palm oil (jars and a calabash dipper), cloth, pepper [stated: pepper sold to the Portuguese, §1], kola nuts in a basket [inferred: kola is the Edo gift of welcome; not fetched], yams, brass bracelets (manillas) [stated: brass came as manillas, §4], cloth. Ivory is not on a counter [stated: the Oba monopolized ivory, §4].
+- **Street furniture:** a wayside shrine at the crossing of the great street and the cross street: a low round mound of red earth ringed with chalk, five iron staves of different heights with leaf-shaped heads, a black pot of offerings, a calabash, cowries round the foot [inferred: Esu, the god of crossroads, is honoured at crossings in the Edo-Yoruba world; no source fetched; the staves follow the ancestral altars' staves of §10]. The water jar of the lane's mouth: a great terracotta jar on a clay ring between three palm posts with a crossbar, a calabash dipper hung from it and a cloth lid, at the mouths of the lanes at x -160, -62 and 22 on both sides of the great street where the ground allows [inferred: the houses have their wells (Dapper); the jar at the lane is the passer-by's drink].
+- **Writing [stated by omission]:** the Edo had no script to put on shop boards; nothing is written in this settlement (see 15.5).
+
+### 15.2 Night (item 2)
+
+What burned at Benin about 1600, and where (`src/settlements/benin-city/nightlight.js`): all in the engine's additive `halo` material (a glow round each flame, a pool on the ground or the floor, a pane before a lit window), so it shows at the low preset and the day view does not change.
+
+- **Street lamps [stated, weakly: This is Africa, large metal street lamps on the streets (§5); inferred: palm oil in the bronze bowl on each lamp post, §10]:** every `benin_lamp` of the great and the cross streets has its glow and a pool of 4 m on the red earth.
+- **Hearths [inferred: the three-stone hearth in every house, the fire of the three meals]:** the hearth of each compound lights its room (the style's own light, now with a halo and a pool on the floor); the street door, which has no door (Pinto, §1), shows the firelight as a pool over the step in 6 compounds of 10 (a trading front 9 of 10); the lattice grille of the front room's wall glows in 4 of 10 (a trading front 5.5 of 10), the chief's two upper windows in 6.5 of 10 (by the hash of each opening's own place: oil and wood are not wasted).
+- **Cooking fires of the waiting sheds [inferred, §11]:** the two fires at the sheds before the gate glow with their pools; the two braziers of incense on the gate's porch burn as embers.
+- **The casters' furnaces [stated: the dossier records a glow at the guild's furnaces at night, §8; inferred: the form]:** at each casting yard the furnace's mouth glows large and the forge hearth beside it; the carvers' and weavers' yards have a small lamp in the shed in 6 of 10.
+- **The guards' fires at the gates of the Iya [inferred]:** a fire on the leaf side inside each of the eight gates (the guards stand there, §10).
+- **Standing lamps of the palace [inferred form; stated, weakly, that the city had large metal lamps]:** six bronze stands (a splayed foot, a stem, a dish of oil with its wick) between the way and the benches of the court of audience.
+- **Not lit [inferred]:** the palace's galleries, the great gallery and the towers' lanterns; nothing in the sources says what lit them and nothing is invented.
+
+### 15.3 Sound (item 3)
+
+`src/settlements/benin-city/soundmap.js` with the voices of `src/engine/voices-benin.js` (all prefixed `bn`); the profile now has thatch roofs (§11: thatch and shingle, not flat clay), forest birds, frogs after dark by the Iya's ditch. Nothing was heard: every voice is synthesised and measured with tools/sound-render.mjs (level, spectrum, envelope), [inferred throughout].
+
+- **The log drum** [stated: §7, the log drum of the palace]: a slit drum with two lips (150 and 205 Hz), a short-long call and answer, on the king's square (the drum of §10) by day, and the drum of the court of audience. **The bells** [stated: §7] and the staff of bells: single bright brass strokes at the gate at the opening and closing of the court (6–7.5 and 17–18.5 h). **The ivory horn** at dawn and dusk from the palace, far heard [inferred: the plaques show horn-blowers; not fetched]. **The thumb piano** [stated: §7 music, a lamellophone] in the great gallery in the afternoon and in the court of the queen mother after dark.
+- **The guild yards** [stated: the beat of the hammer and the bellows, §7]: at each of the nine casting yards the pumped bellows and the hammer on brass at the anvil stone (6.5–17.5 h, not in rain: dry), at the three carving yards the mallet on the gouge, at the two weaving yards the loom.
+- **The market and the compounds:** the women's calls, five spots in the Oba market (wordless); a yam mortar in the plain compounds by day and in the kitchens of the palace's ranges in the morning; each trading front is heard by its goods (pots, palm oil, cloth, pepper, kola, yams, brass: clay, pouring, cloth, jar lids, coins, hammer); the chief's compound has its kitchen and, in the evening, the thumb piano; the lane water jars are the engine's wells (4).
+- **The forest and the night:** hornbills (stated, §7) on the rampart ring at dawn and dusk, the owl at night, cicadas by day, frogs by the ditch; goats, fowls and dogs by the engine's life.
+- **Rooms:** every compound within 200 m of the arrival (90) is a room by its use; the great gallery and the gate's vestibule are halls with their own hush.
+- **Test:** `tests/benin-sound.test.mjs` (voices, map, schedule by hour and weather, rooms).
+
+### 15.4 Animals (item 4)
+
+The rigged animals of the engine (`critters`, `src/settlements/benin-city/fauna.js`; about 75, one mesh) beside the flights and perches of §8. Models used as they are: the fowl (hens, rooster), dwarf goats (the goat model, black and white), the dog, the cat, the dove (pigeon). No model was added: the hornbill and the weaverbird have none (the sparrow stands for the weaverbird, §10) and nothing was invented in their place.
+
+- **Fowl and goats at the doors of the compounds of the walk [stated: hens and goats at the doors are in the life pass, §10; inferred: the placing]:** one or two hens at each, a rooster at every third, a goat tethered at every second, on the side of the front with more room, never in the door's lane (tested against the walk's routes).
+- **Dogs and cats [inferred: both are household animals in the forest belt; not fetched]:** a dog lying at every fourth door of the walk, in the market, by the seats of the square and at the first weaving yard; a cat on the step of every third compound.
+- **The king's square and the court [inferred]:** doves on the earth before the gate and on the paving of the court of audience (the dove's cry, §7); hens at the waiting sheds, a goat tethered by each.
+- **The Oba market and the guild lane [stated: goats and fowls were sold, §5]:** six fowl round the mats of the open floor, three goats at its edge, two dogs; hens at the fronts of four casting yards.
+- **Behaviour:** the engine's own (hens walk and peck; the goat, dog and cat lie, stand and lift the head as the visitor comes near; the doves keep to a patch). Test: `tests/benin-critters.test.mjs`.
+
+### 15.5 Wear and writing (item 5)
+
+`src/settlements/benin-city/wear.js` (wraps the style from the folder; thin relief in materials the tiles already hold, near only).
+
+- **Door-steps and thresholds [inferred: red earth polished by bare feet; the climate's own splash and damp are already on the walls, §10]:** at every compound's street door the step has a polished hollow (a darker patch of `scoria_red`, a second smaller one in its middle) and inside the threshold a worn patch where the feet carry the street's dust in; at a trading front the hollow is at the gap of the counter (the way in).
+- **The yards [inferred]:** soot and ash in a ring round each casting furnace's mouth, the trodden path to it from the lane, and the dark earth of the yard's gap on the lane.
+- **The lane water jars [inferred]:** the ground round each jar dark with splashed water (a thin ring of damp plaster).
+- **Moss, lichen, mended clay, rain streaks, splash bands:** already on every wall (§10).
+- **Writing: none, stated plainly.** The Edo had no script [stated by omission in every source cited here: no inscription, tablet or sign is recorded for the city; the plaques are pictures]. No shop board or tablet carries letters: Latin (the Portuguese traders' own) is not guessed. Nothing is written in this settlement.
+
+### 15.6 Landmark gaps found on the way (item 6)
+
+- **Palace by night [inferred]:** the three inner courts have a bronze stand at each south corner of their open floors (six), beside the six of the court of audience (§15.2); the great gallery, the galleries and the turrets stay unlit.
+- **Still short of the reference [inferred, from this pass]:** the great gallery's floor, the dais steps and the audience way carry no wear; the galleries have no lamps (the type of the palace's lighting is not recorded); no hornbill, weaverbird or agama model (§15.4); the market's stalls have goods but no keepers built into their near plans (the keepers are life figures); no source was fetched in this pass, every new line above is [inferred] from §1–§14.
