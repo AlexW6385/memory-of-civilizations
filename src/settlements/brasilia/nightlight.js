@@ -46,7 +46,8 @@ export class Halo {
     for (let j = 0; j < 3; j++) { const a = j * Math.PI / 3, c = Math.cos(a), s = Math.sin(a); this.disc([x, y, z], [c, 0, s], [0, 1, 0], r, r, [-s, c], 6, [k, 0], [0, 1]); }
   }
   /** A flat sheet a b c d of brightness f (0…1) facing n = [x, z] (both faces are seen): a lit window. */
-  quad(a, b, c, d, n, f) {
+  quad(a, b, c, d, n, f0) {
+    const f = 0.6 + 0.39 * f0;                                  // (rendered, the sheets show only above about 0.6: the scale is lifted so that 0 is dim, 1 bright)
     const q = Math.sqrt(1 - f * f), N = [n[0] * q, f, n[1] * q];
     this.tri(a, N, b, N, c, N); this.tri(a, N, c, N, d, N);
   }
