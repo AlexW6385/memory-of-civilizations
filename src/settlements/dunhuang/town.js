@@ -4,6 +4,7 @@
 import { RADIUS, XF, FLOOR, STREET, CROSS, LANE_W, TOWN, SERAI, GATE, CAVES, BEACON, THRESH, rng, inRect, riverX } from './layout.js';
 import '../../styles/dunhuang/index.js';
 import { doorU } from '../../styles/dunhuang/homes.js';
+import { walkRoutes } from './walk.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [14, 0], facing: 'w' } });
 const clash = (r, o, m = 0.5) => !(r[2] + m <= o[0] || r[0] - m >= o[2] || r[3] + m <= o[1] || r[1] - m >= o[3]);
@@ -53,7 +54,14 @@ export async function town() {
     w([x, z], [wx1, z]);
   }
   E.push({ t: 'dh_gate', at: [GATE.x, GATE.z] });
+  // the visitor's walk (walk.js): the lane in front of every opened door and the street's axis are footprints for the street-life pass of src/objects/life.js
+  // (a marked rectangle that is not a house: nothing of its people, animals or things is put in it)
+  for (const r of walkRoutes()) { const [px, pz] = r.route[0], [qx, qz] = r.route[3]; E.push({ t: 'dh_clear_track', rect: [Math.min(px, qx) - 1.0, Math.min(pz, qz) - 1.0, Math.max(px, qx) + 1.0, Math.max(pz, qz) + 1.0] }); }
+  E.push({ t: 'dh_clear_track', rect: [-34, -1.6, GATE.x - 4, 1.6] });
   E.push({ t: 'dh_serai', ...SERAI });
+  // wayside shrines of the road (dossier §14): at the bridge's east foot, off the street's lane, and outside the east gate; the watch's braziers inside the gate
+  E.push({ t: 'dh_wayshrine', at: [157.5, -4.4], face: 's', rect: [156, -5.2, 159, -2.4] });
+  for (const s of [-1, 1]) E.push({ t: 'dh_brazier', at: [GATE.x - 5.4, s * 3.5] });
   E.push({ t: 'dh_spring' }); E.push({ t: 'dh_streetwear', seed: 5 });
   E.push({ t: 'dh_beacon', at: [BEACON.x, BEACON.z], seed: 3 });
   E.push({ t: 'dh_threshing', at: [THRESH.x, THRESH.z], r: THRESH.r, seed: 4 });
@@ -135,8 +143,8 @@ export async function town() {
     for (const [x, z] of [[33, 3.4], [47, -3.2], [60, 3.6], [41, -3.6], [56, -3.1]]) { put({ t: 'goods_mat', at: [x, z], y: 0, rot: z > 0 ? Math.PI : 0, goods: [['basket', 'produce', 'heap'], ['pot', 'basket']][Math.abs(Math.round(x)) % 2], seed: Math.round(x) }); sogdian([x, z + (z > 0 ? -0.9 : 0.9)], 0, z > 0 ? 0 : Math.PI, { pose: 'cross' }); }
     put({ t: 'barrow', at: [72, 3.9], y: 0, rot: 0.2, seed: 3 }); put({ t: 'cart', at: [96, 4.0], y: 0, rot: Math.PI / 2 + 0.1, seed: 9, load: 'hay', beast: 'donkey' });
     // the gate: two guards with staves, a dog in the shade, a flock of sheep and goats driven in, a toll table
-    for (const s of [-1, 1]) man([GATE.x - 3, s * 3.6], 0, s > 0 ? Math.PI : 0, { dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_red', hat: 'cap', over: 'belt', carry: 'staff', pose: 'stand' });
-    put({ t: 'animal', kind: 'dog', at: [GATE.x - 5, 3.9], y: 0, rot: 2, seed: 21 });
+    for (const s of [-1, 1]) man([GATE.x - 6.4, s * 2.4], 0, s > 0 ? Math.PI : 0, { dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_red', hat: 'cap', over: 'belt', carry: 'staff', pose: 'stand' });
+    put({ t: 'animal', kind: 'dog', at: [GATE.x - 9, 4.3], y: 0, rot: 2, seed: 21 });
     for (let k = 0; k < 9; k++) put({ t: 'animal', kind: k % 3 === 0 ? 'goat' : 'sheep', at: [GATE.x + 8 + (k % 3) * 1.4 + rand(), -1.6 + Math.floor(k / 3) * 1.6 + rand() * 0.5], y: 0, rot: Math.PI + (rand() - 0.5), seed: 70 + k });
     man([GATE.x + 15, 0.8], 0, Math.PI, { carry: 'staff', dress: 'tunic', legs: 'hose', hat: 'straw', cloth: 'cloth_white' });
     // the fields east of the town: hay ricks at the field edges, a shaduf at a channel, farmers with hoes, an ox cart on the road

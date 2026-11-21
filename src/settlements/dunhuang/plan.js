@@ -2,6 +2,7 @@
 // hall and the Nine-Storey building at the middle, the apron, the stair and the gallery of the second tier; at the
 // foot the stream with its timber bridge and the monks' halls on the east bank.
 import { LV } from '../../styles/dunhuang/nine.js';
+import { walkRoutes, WALK } from './walk.js';
 import { XF, ROCK, ZEND, FLOOR, CAVES, RIVER, riverX, STAIR, GALLERY } from './layout.js';
 
 const E = [];
@@ -10,6 +11,8 @@ E.push({ t: 'dh_stream' }); E.push({ t: 'dh_talus' });
 E.push({ t: 'dh_bridge', z: 0, w: 4.4 });
 // the stele of 698 on its tortoise and a bronze censer on the apron south of the Great Buddha's hall (dossier §13)
 E.push({ t: 'dh_stele', at: [XF + 3.0, -17.5], y: FLOOR[0] }); E.push({ t: 'dh_censer', at: [XF + 3.4, -26.0], y: FLOOR[0] });
+// the wayside shrine at the bridge's east foot, off the street's lane (dossier §14; the other is outside the east gate, town.js: it is in the landmark plan so that its paint shares the cave's materials)
+E.push({ t: 'dh_wayshrine', at: [-33.5, -4.0], face: 's', rect: [-35, -4.8, -32, -2.0] });
 // the monks' halls and cells at the foot, facing the cliff over the apron: tiled halls and earth cells
 const mk = (rect, tiled, seed, extra = {}) => E.push({ t: 'dh_house', rect, front: 'w', seed, tiled, ...extra });
 mk([-61, 28, -50, 41], true, 71); mk([-61, 50, -50, 62], false, 72); mk([-61, 72, -50, 86], true, 73);
@@ -34,6 +37,9 @@ const rooms = [
 // from the bridge over the apron to the two caves and the great hall, back, then up the stair to the gallery
 const walks = [[[-40, 0], [-56, 0], [-66, 0], [-74, 0], [-66, 0], [-66, -30], [-74, -30], [-76, -26.5], [-81, -26.8], [-81, -30], [-81, -26.8], [-76, -26.5], [-66, -30], [-66, -52], [-74, -52], [-76.5, -52], [-66, -52], [-66, 45], [-73.5, 45], [-74.2, 46.2]]];
 walks[0].y0 = 0;
+// the visitor's walk (walk.js): the street east and west of the arrival, and in at the door of every lot that fronts it
+for (const W of WALK) walks.push([...W]);
+for (const r of walkRoutes()) walks.push(r.route);
 
 export const mogao = {
   id: 'dunhuang-mogao',
