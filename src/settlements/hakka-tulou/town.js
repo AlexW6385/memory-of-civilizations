@@ -108,8 +108,7 @@ export async function town() {
   for (const [x, z, r] of SHRINES) { const at = [x + 1.5 * Math.sin(r), z + 1.5 * Math.cos(r)]; woman(at, ground.height(at[0], at[1]), fo(at, [x, z]), { pose: 'kneel', carry: 'none' }); }
   WASH_STEPS.forEach(([x], k) => { const sz = streamZ(x); for (let q = 0; q < 2; q++) woman([x - 0.35 + q * 0.7, sz - 3.2 + 0.15], -0.58, 0, { pose: 'squat', hat: q ? 'straw' : 'none', carry: 'none' }); P.push({ t: 'basket', at: [x + 1.3, sz - 3.7], y: -0.3, n: 2, seed: k + 20 }); });
   for (const x of [-44, 52]) { const z = streamZ(x) - 3.2; man([x, z], ground.height(x, z), Math.PI, { hat: 'straw', carry: 'rope', pose: 'stand' }); }
-  // ducks on the stream, a farmer with the buffalo by the road, a pedlar with his pole and baskets, children at the bridge
-  for (const x of [-52, -24, 20, 36, 62]) F.push({ t: 'chickens', kind: 'duck', n: 4 + Math.floor(rand() * 3), at: [x, streamZ(x) + (rand() - 0.5) * 2], y: STREAM.water - 0.02, rot: rand() * 6.28, seed: Math.round(x) + 90 });
+  // (the ducks on the stream are the critters' floaters, fauna.js; a farmer with the buffalo by the road, a pedlar with his pole and baskets, children at the bridge)
   man([2.4, 66], 0, Math.PI, { hat: 'straw', carry: 'pole', cloth: 'cloth_indigo' }); woman([-2.2, 74.6], 0, 0.4, { carry: 'basket' });
   for (let k = 0; k < 3; k++) L.push({ t: 'figure', at: [3.2 + k * 0.7, 76.5 + (k % 2)], y: 0, rot: 3.3 + k, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: ['cloth_red', 'cloth_blue', 'cloth_white'][k], cloth2: 'cloth_indigo', over: 'none', skin: 'skin_medium', hat: 'none', hair: 'short', h: 0.62 + k * 0.04, feet: 'shod' });
   // the courts of the neighbouring tulou: trays, washing, hens, a well, the people of the house
