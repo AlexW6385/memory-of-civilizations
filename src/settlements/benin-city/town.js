@@ -3,6 +3,7 @@
 // in rows along the streets.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
+import { walkExcess } from './walk.js';
 import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, BRAZIERS, AUD, crest, height, lots, depth, inRect, onStreet, WAYPOTS } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'benin', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE_X, 12], facing: 'n' }, ...extra });
@@ -236,6 +237,15 @@ function arrivalLife(F, out) {
   out.push({ t: 'animal', kind: 'dog', at: [GATE_X + 7.9, 16.3], y: 0, rot: 2.2, seed: seed() });
 }
 const P2 = [];
+/** The open fires of the king's square at night [inferred], 7–16 m from the arrival, off its line; the keepers sit round them. */
+const NIGHT_FIRES = [{ at: [-56, 14], keep: [[-0.4, -1.5, 'man'], [1.5, 0.3, 'woman'], [-1.6, 0.6, 'man']] }, { at: [-74, 11], keep: [[0.3, 1.6, 'woman'], [-1.5, -0.6, 'man']] }];
+function nightKeepers(F) {
+  const { man, woman } = F;
+  for (const f of NIGHT_FIRES) for (const [dx, dz, k] of f.keep) {
+    const at = [f.at[0] + dx, f.at[1] + dz], o = { pose: 'sit_ground', carry: 'none', nightKeep: 1 };
+    (k === 'man' ? man : woman)(at, 0.02, Math.atan2(-(f.at[0] - at[0]), -(f.at[1] - at[1])), o);
+  }
+}
 /** The gates of the Iya: two guards with staves, travellers with loads waiting to be let in. */
 function gateFolk(F) {
   const { man, woman, pick } = F, rand = rng(881);
@@ -248,7 +258,7 @@ function gateFolk(F) {
 export async function town() {
   P2.length = 0;
   const F = folk(rng(1600));
-  yardPeople(F); marketFolk(F); palaceFolk(F); gateFolk(F);
+  yardPeople(F); nightKeepers(F); marketFolk(F); palaceFolk(F); gateFolk(F);
   const lifeEls = streetLife(F);
   squareFolk(F, lifeEls);
   arrivalLife(F, lifeEls);
@@ -275,6 +285,17 @@ export async function town() {
     st.push({ t: 'benin_stall', rect: [x, z0, x + 3, z0 + 2.4], front, seed: Math.floor(rand() * 1e6) });
   }
   plans.push(...lodTiles('benin-market', 'benin', st, { R: RADIUS }));
+  // the sellers behind their tables, built into near plans (women: the sellers of the market are women, dossier §10), the stalls within 130 m of the walk; they leave at dusk like the other figures
+  {
+    const kr = rng(2600), kel = [];
+    for (const s of st) {
+      const F2 = frame(s.rect, s.front), c = F2.P(F2.L / 2, F2.D / 2);
+      if (walkExcess(c) > 130 || kr() < 0.3) continue;
+      const a = F2.P(F2.L / 2 - 0.75, 1.5), to = F2.P(F2.L / 2 - 0.75, 0);
+      kel.push({ t: 'bn_keepers', at: a, list: [{ t: 'figure', at: a, y: 0, rot: face(a, to), seed: Math.floor(kr() * 1e9), skin: 'skin_dark', hair: 'bun', hairMat: 'hair_dark', feet: 'bare', dress: 'wrap', cloth: F.pick(CL), cloth2: F.pick(CL), hat: 'none', over: 'shawl', pose: 'stand', carry: 'none' }] });
+    }
+    plans.push(...lodTiles('benin-keepers', 'benin', kel, { R: RADIUS, near: 130 }));
+  }
 
   // the street furniture: lamps along the great and the cross streets, the king's square, the firewood and pots at the lane mouths
   {
@@ -282,6 +303,8 @@ export async function town() {
     for (const z of [GREAT[1] + 2.0, GREAT[3] - 2.0]) for (let x = -250; x < 250; x += 36) if (ok(x, z) && !ALLEYS_X.some((a) => Math.abs(x - a) < 6) && Math.abs(x - CROSS[0] - 12) > 14) st.push({ t: 'benin_lamp', at: [x + (z < 57 ? 0 : 18), z], y: 0, seed: Math.round(x) });
     for (const x of [CROSS[0] + 2, CROSS[2] - 2]) for (let z = -230; z < 230; z += 40) if (ok(x, z) && !(z > GREAT[1] - 8 && z < GREAT[3] + 8)) st.push({ t: 'benin_lamp', at: [x, z + 12], y: 0, seed: z });
     st.push({ t: 'benin_square', rect: SQUARE, seed: 5 });
+    // the night fires of the square (nightlight.js: bn_fire) before the visitor, with those who keep them (nightKeep: they stay out all night)
+    for (const f of NIGHT_FIRES) st.push({ t: 'bn_fire', at: f.at, y: 0.02 });
     for (const sh of [...SHEDS, ...BAYS]) st.push({ t: 'benin_shelter', ...sh });
     for (const b of BRAZIERS) st.push({ t: 'benin_brazier', at: b, y: 0.22 });
     for (const a of ALLEYS_X) for (const [z, dz] of [[GREAT[3] - 1.2, 1], [GREAT[1] + 1.2, -1]]) if (ok(a, z) && depth(a, z) > 26) st.push({ t: 'benin_mouth', at: [a + 5.6, z], along: [1, 0], seed: Math.round(a + z) });

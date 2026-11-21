@@ -2,6 +2,7 @@
 // great street and the cross street and the water jars on forked stands at the lane mouths. Registered into the style from here (the style's files stay as they were);
 // each is a function of its own place, built of materials the street tiles already hold (no new draw).
 import '../../styles/benin/index.js';
+import '../../objects/index.js';
 import { STYLES } from '../../core/build.js';
 import { box, lathe, rod } from '../../styles/benin/kit.js';
 
@@ -52,11 +53,19 @@ function waypot({ at, y = 0, simple }, { bag, col }) {
   bag.add('cloth_white', lathe([[0.001, 1.07], [0.22 * s, 1.07], [0.26 * s, 1.03], [0.2 * s, 1.0]], 9, null, x, y, z));
 }
 
+/** bn_keepers { list: [figure parameters] }: the sellers of the market's stalls, built into the near plan of the stalls they stand behind (a life element's figures reach 170 m wherever they stand). */
+function keepers(el, ctx) {
+  const fig = STYLES.life?.elements?.figure;
+  if (!fig || el.simple) return;
+  for (const f of el.list) fig({ ...f }, { bag: ctx.bag, col: ctx.col });
+}
+
 let done = false;
 export function registerWalkwork() {
   if (done) return; done = true;
   STYLES.benin.elements.benin_shrine = shrine;
   STYLES.benin.elements.benin_waypot = waypot;
+  STYLES.benin.elements.bn_keepers = keepers;
   void box;
 }
 registerWalkwork();
