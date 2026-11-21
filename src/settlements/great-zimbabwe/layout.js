@@ -55,8 +55,39 @@ export const inEnclosure = (x, z, m = 0) => Math.hypot((x - ENCLOSURE.c[0]) / (E
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 // the cattle kraals' sites (life.js kraals() reads these; kept here so the homesteads keep clear of them)
 export const KRAAL_AT = [[150, -40, 6.5], [-170, 120, 5.5], [110, 230, 6]];
+import { ARRIVAL, walkDistance, HOMESTEAD_REACH, WALK_MAX } from './walk.js';
+
+/**
+ * The angle at which a homestead's yard goods (the style's `homestead_goods`: hearth, mortar, rack, pots ...) are laid: the seed's own angle, turned to the one
+ * of 24 that keeps the props the walker cannot step over (the mortar: the hearth's pot and the pots are under 0.5 m) as clear as it can of the spokes from the middle of the yard to each house door and
+ * of the way to the gate, so that every door of the ring can be walked up to (docs/settlements/great-zimbabwe.md §19.1).
+ */
+export function yardAngle(seed, gap, huts, c) {
+  const base = ((seed ?? 3) % 628) / 100, avoid = [gap, ...huts.map((h) => Math.atan2(h.c[1] - c[1], h.c[0] - c[0]))];
+  const dist = (p, q) => { let d = Math.abs(p - q) % (Math.PI * 2); return d > Math.PI ? Math.PI * 2 - d : d; };
+  // the one yard prop a walker cannot step over (the mortar: blocked, top 0.66 m), as its angle in the yard's own frame
+  const props = [-0.49];
+  let best = base, bs = -1;
+  for (let j = 0; j < 72; j++) {
+    const a = base + j * Math.PI / 36, sc = Math.min(...props.map((o) => Math.min(...avoid.map((q) => dist(a + o, q)))));
+    if (sc > bs + 1e-9) { bs = sc; best = a; }
+  }
+  return best;
+}
+
+/**
+ * A place in a homestead's yard for a figure or an animal: near the angle `ang0` and the distance `d` from the yard's middle, turned to the nearest angle that leaves 28 degrees
+ * or more to the spokes from the middle to each door and to the way to the gate (the way a visitor walks in), so that nobody stands in a door's lane.
+ */
+export function yardFree(k, ang0, d) {
+  const avoid = [k.gap, ...k.huts.map((h) => Math.atan2(h.c[1] - k.c[1], h.c[0] - k.c[0]))];
+  const dist = (p, q) => { let t = Math.abs(p - q) % (Math.PI * 2); return t > Math.PI ? Math.PI * 2 - t : t; };
+  const clear = (a) => Math.min(...avoid.map((q) => dist(a, q)));
+  let best = ang0, bs = -1;
+  for (let j = 0; j < 36; j++) for (const sg of j ? [1, -1] : [1]) { const a = ang0 + sg * j * Math.PI / 36, c = clear(a); if (c >= 0.49) return [k.c[0] + Math.cos(a) * d, k.c[1] + Math.sin(a) * d]; if (c > bs) { bs = c; best = a; } }
+  return [k.c[0] + Math.cos(best) * d, k.c[1] + Math.sin(best) * d];
+}
 let COMP = null, HUTS = null;
-const ARRIVAL = [46, 60];
 /**
  * The homesteads of the valley: each a walled compound (a low wall of granite rubble round a yard, a gate in
  * it), two to four daga houses on a ring in the yard with their doors to its middle, and a granary raised on
@@ -74,7 +105,8 @@ export function compounds() {
       const a = a0 + (i + 0.5) * Math.PI * 2 / n, hx = x + Math.cos(a) * 5.4, hz = z + Math.sin(a) * 5.4, toC = Math.atan2(z - hz, x - hx);
       huts.push({ c: [hx, hz], r: 2.35 + rand() * 0.6, y: 0, seed: (Math.round(toC * 100) % 628 + 628) % 628, open: open && i < 2 });
     }
-    return { c: [x, z], r: R, gap, y: 0, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed: Math.floor(rand() * 1e6), inner: true };
+    const seed = Math.floor(rand() * 1e6);
+    return { c: [x, z], r: R, gap, y: 0, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed, a: yardAngle(seed, gap, huts, [x, z]), a0, rackAt: n >= 3 ? a0 + 2 * Math.PI * 2 / n : null, sectorAt: n >= 4 ? a0 + 3 * Math.PI * 2 / n : undefined, inner: true };
   };
   const [ex, ez] = ENCLOSURE.c;
   for (const [dx, dz, o] of [[-27, -12, true], [-26, 8, false], [-8, 20, true], [-10, -1, false]]) COMP.push(mk(ex + dx, ez + dz, o));
@@ -97,10 +129,14 @@ export function compounds() {
     const q = rand();
     huts[0].open = q < 0.7;
     if (huts.length > 2) huts[1].open = q < 0.3;
-    COMP.push({ c: [x, z], r: R, gap, y, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed: Math.floor(rand() * 1e6) });
+    const seed = Math.floor(rand() * 1e6);
+    COMP.push({ c: [x, z], r: R, gap, y, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed, a: yardAngle(seed, gap, huts, [x, z]), a0, rackAt: n >= 3 ? a0 + 2 * Math.PI * 2 / n : null, sectorAt: n >= 4 ? a0 + 3 * Math.PI * 2 / n : undefined });
   }
   // the homesteads nearest the arrival are the ones the visitor walks into: all their houses open (furnished inside)
-  [...COMP].sort((p, q) => Math.hypot(p.c[0] - ARRIVAL[0], p.c[1] - ARRIVAL[1]) - Math.hypot(q.c[0] - ARRIVAL[0], q.c[1] - ARRIVAL[1])).slice(0, 9).forEach((k) => k.huts.forEach((h) => { h.open = true; }));
+  // (the nine nearest the arrival, as before; and every homestead within HOMESTEAD_REACH of the visitor's walk, walk.js, up to WALK_MAX of them)
+  const byArr = [...COMP].sort((p, q) => Math.hypot(p.c[0] - ARRIVAL[0], p.c[1] - ARRIVAL[1]) - Math.hypot(q.c[0] - ARRIVAL[0], q.c[1] - ARRIVAL[1]));
+  byArr.slice(0, 9).forEach((k) => k.huts.forEach((h) => { h.open = true; }));
+  byArr.filter((k) => walkDistance(k.c) < HOMESTEAD_REACH).slice(0, WALK_MAX).forEach((k) => k.huts.forEach((h) => { h.open = true; }));
   return COMP;
 }
 /** The houses of the homesteads (flattened), those inside the Great Enclosure included. */

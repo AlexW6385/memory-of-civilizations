@@ -63,6 +63,15 @@ function shelter(el, { bag, col }) {
   bag.add('thatch', frustum([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], h, h + 1.2, 0.7, 0.7, 0.7, 0.7));
   bag.add('planks_grey', box(x0 + 0.3, 0.4, z1 - 0.9, x1 - 0.3, 0.5, z1 - 0.3)); col.rect([x0 + 0.3, z1 - 0.9, x1 - 0.3, z1 - 0.3], 0, 0.5);
   bag.add('earth_wall', box(x0, -0.05, z0, x1, 0.06, z1)); col.floor([x0, z0, x1, z1], 0.06);
+  // what pilgrims left and use (docs/settlements/ajanta.md §16 [inferred]): sleeping mats, cloth bundles with a staff, a water jar on a rack, a lamp on a post
+  bag.add('reed_mat', box(x0 + 0.4, 0.06, z0 + 0.3, x0 + 2.0, 0.075, z0 + 1.1)); bag.add('reed_mat', box(x0 + 2.3, 0.06, z0 + 0.5, x1 - 0.4, 0.075, z0 + 1.3));
+  bag.add('cloth_white', lathe([[0.001, 0], [0.22, 0], [0.28, 0.14], [0.1, 0.24], [0.001, 0.24]], 8, null, x0 + 1.2, 0.075, z0 + 0.7));
+  bag.add('cloth_ochre', lathe([[0.001, 0], [0.2, 0], [0.24, 0.12], [0.001, 0.2]], 8, null, x1 - 1.0, 0.075, z0 + 0.9));
+  bag.add('timber', rod([x0 + 2.0, 0.075, z0 + 0.45], [x0 + 2.2, 1.5, z0 + 0.4], 0.02, 4));
+  for (const [dx, dz] of [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2]]) bag.add('timber', rod([x1 - 0.7 + dx, 0.06, z1 - 0.4 + dz], [x1 - 0.7 + dx * 0.5, 0.5, z1 - 0.4 + dz * 0.5], 0.025, 4));
+  bag.add('terracotta', lathe([[0.001, 0.5], [0.2, 0.52], [0.3, 0.74], [0.24, 0.98], [0.14, 1.05], [0.17, 1.12], [0.001, 1.12]], 10, null, x1 - 0.7, 0, z1 - 0.4)); col.circle(x1 - 0.7, z1 - 0.4, 0.32, 0.06, 1.1);
+  bag.add('timber', box(x1 - 0.42, 1.28, z0 + 0.12, x1 - 0.24, 1.32, z0 + 0.28)); bag.add('terracotta', lathe([[0.001, 0], [0.04, 0], [0.06, 0.02], [0.05, 0.035], [0.001, 0.03]], 6, null, x1 - 0.36, 1.32, z0 + 0.2));
+  bag.add('flame', lathe([[0.008, 0], [0.012, 0.016], [0.001, 0.04]], 5, null, x1 - 0.34, 1.35, z0 + 0.2));
 }
 /** The painters' scaffold against a wall: `at` the wall's foot at the scaffold's left end, w along the wall (axis 'x' or 'z'), standing out to `side` (±1) by 1.3 m: poles, lashed planks on levels, a rail, a ladder; at floor y. */
 function scaffold(el, { bag, col }) {
