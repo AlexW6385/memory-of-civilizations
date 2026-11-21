@@ -130,6 +130,15 @@ All [inferred] (no page could be read in this pass); the hanging lamps of the gr
 - **What lit the place.** Clay lamps with a fibre wick in butter or oil (the highland household's), the embers of the hearth, and at the church doors the braziers of the pilgrims who keep the night's vigil [inferred: the all-night vigil of the Ethiopian church is well known; its being kept at the doors of the rock churches about 1220 is our reading].
 - **Built** (`nightlight.js`; one `halo` mesh per plan, light added at night only, readable at the low preset): halos on every hanging lamp of the churches and on the three lamps of each Aksumite-manner church; a lit niche in each trench wall beside the way down; braziers (`lal_brazier`, an iron bowl on a tripod) flanking the west doors of Giyorgis, Medhane Alem, Golgotha, Amanuel and Gabriel-Rufael; the stalls' lamps; the embers glowing through the low door of each of the opened houses and their spill on the threshold; in about two closed houses in five a glimmer of the hearth at the door, by the hash of the house's place. The whole village's glow is one element of the churches' plan, so it is one mesh.
 
+## 20. The reference pass: sound (item 3)
+
+All [inferred]: no recording of the twelfth century exists and no page could be read in this pass. Instruments are those §11 and §9 name (the kebero, the tsenatsel sistrum, the begena, from Wikipedia and The Met); the rest is the highland household's work and the church's hours as generally known.
+
+- **Placed sounds** (`soundmap.js`, `src/engine/voices-lalibela.js`, voices prefixed `la`): at each of the six great churches' west doors the stone slab (dawal) struck to call the dawn office, the deacons' wordless chant at dawn and at the evening office, the kebero's pattern, the sistrum's runs; the begena in a priest's cell in the evening; at the Jordan's pool the washerwomen's cloth and poured water; wind in juniper and thatch on the slopes; herd boys calling; owls at night.
+- **The opened houses** make the sound of their trade by day: the household's pestle and mortar at the morning meal and the griddle's hiss, the loom, the smith's hammer, the mason's chisel in the rock, the potter's clay, the school's chanting of letters, the scribe's chant, the store's jars.
+- **Rooms.** Inside the churches (below the ground only: the roofs are the open) a hush with the begena or the chant now and then; each opened house its own tone.
+- **Checks.** `tests/lalibela-sound.test.mjs` (voices made against a stand-in context, the map's agreement with the layout, chant at dawn and not at midnight, the loom by day and not at night). `tools/sound-render.mjs` measured: kebero centroid 121 Hz with 9 onsets in 8 s; chant 555 Hz, pitched; sistrum 5.1 kHz; stone gong 749 Hz ringing. I could not listen: how any of it sounds is unjudged.
+
 ## Sources (ninth pass)
 
 - [House of the Saviour of the World — dragontravelmag](https://dragontravelmag.blogspot.com/2010/10/house-of-saviour-of-world.html)
