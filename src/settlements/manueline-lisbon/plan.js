@@ -4,7 +4,8 @@ import { frame } from '../../styles/greek/agora.js';
 import { storeysOf, HEIGHTS } from '../../styles/manueline/houses.js';
 import { sv1Of, SV0 } from '../../styles/manueline/upstairs.js';
 import { openRoutes } from './openwalk.js';
-import { lots, GROUND, CHURCH, CLOISTER, MONASTERY, PLAZA, PORTAL_X, TOWER, CAUSEWAY } from './layout.js';
+import { MAIN_WALK, QUAY_WALK, TERREIRO_WALK, PALACE_WALK, SE_WALK } from './route.js';
+import { lots, height, GROUND, CHURCH, CLOISTER, MONASTERY, PLAZA, PORTAL_X, TOWER, CAUSEWAY } from './layout.js';
 import { churchFrame } from '../../styles/manueline/church.js';
 import { cloisterFrame } from '../../styles/manueline/cloister.js';
 import { towerFrame, FLOORS } from '../../styles/manueline/tower.js';
@@ -14,6 +15,19 @@ const g = GROUND + 0.05;
 function orangeGrove() {
   const [a, b, c, d] = CLOISTER, cx = (a + c) / 2, cz = (b + d) / 2, out = [];
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) for (const [u, v] of [[8, 8], [15, 8], [8, 15], [15, 15], [12, 11.5]]) out.push({ t: 'orange_tree', at: [cx + sx * u, cz + sz * v], y: g, seed: 100 + out.length, h: 3.4 + (out.length % 4) * 0.35 });
+  return out;
+}
+/** The worn flags before the portal: single slabs (1.2 x 0.8 m) of the palette's paler `plaster_damp`, thinning out with the distance, each a hair higher than its neighbour (no two share a plane). */
+function wornFlags() {
+  const out = [], hs = (a, b) => { let k = Math.imul(Math.round(a * 4) * 73856093 ^ Math.round(b * 4) * 19349663, 1274126177); k ^= k >>> 15; return (k >>> 0) / 4294967296; };
+  for (let z = 44.8; z < 64; z += 0.8) {
+    const hw = Math.max(0.6, 2.8 - (z - 44.8) * 0.12), keep = 1 - (z - 44.8) / 26;
+    for (let x = PORTAL_X - hw; x < PORTAL_X + hw - 0.5; x += 1.2) {
+      if (hs(x, z) > keep) continue;
+      const w = 1.0 + hs(x, z + 1) * 0.15;
+      out.push({ t: 'floor', rect: [x + 0.05, z + 0.03, x + w, z + 0.72], y: g + 0.012 + hs(z, x) * 0.012, th: 0.03, mat: 'plaster_damp', walk: false });
+    }
+  }
   return out;
 }
 const CF = churchFrame(CHURCH), KF = cloisterFrame(CLOISTER);
@@ -69,6 +83,8 @@ export const jeronimos = {
   elements: [
     { t: 'floor', rect: PLAZA, y: g, th: 0.3, mat: 'flagstone' },
     { t: 'jeron_church', rect: CHURCH, y: g, portalX: PORTAL_X },
+    // the way the pilgrims' feet have worn to the portal: slightly paler, polished slabs, narrowing from the porch out across the plaza (docs §14.4)
+    ...wornFlags(),
     { t: 'cloister', rect: CLOISTER, y: g },
     ...orangeGrove(),
     { t: 'range', rect: [MONASTERY[0], MONASTERY[1], MONASTERY[2] - 0, CLOISTER[1] - 0.0], y: g, h: 12 },
@@ -91,6 +107,8 @@ export const jeronimos = {
 };
 jeronimos.walks.push(...houseWalks());
 jeronimos.walks.push(...openRoutes());
+// the visitor's way out of the plaza: east by the lane, the quay street, the alley to the Rua Nova and along it; the quay to the palace; the Terreiro and the yard (route.js)
+jeronimos.walks.push(Object.assign([...MAIN_WALK], { y0: g }), Object.assign([...QUAY_WALK], { y0: g }), Object.assign([...TERREIRO_WALK], { y0: height(120, -4.5) }), Object.assign([...PALACE_WALK], { y0: height(120, 60) }), Object.assign([...SE_WALK], { y0: height(22, -4.5) }));
 jeronimos.walks.push(Object.assign([[PORTAL_X, PLAZA[3] - 6], [PORTAL_X, 46], [PORTAL_X + 1.8, 39], [PORTAL_X + 1.8, CF.zc + 3], [CF.bays[3] + 2, CF.zc - 1], [CF.bays[3] + 2, CF.zi0 + 2.1], [CF.bays[1] - 1.5, CF.zi0 + 2.1], [CF.bays[1] - 3, CF.zc]], { y0: g }));
 export const belem = {
   id: 'manueline-belem',

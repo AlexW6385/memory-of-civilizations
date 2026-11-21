@@ -21,6 +21,7 @@ import { assembly } from '../../objects/kit.js';
 import { frame } from '../../styles/greek/agora.js';
 import { churchFrame } from '../../styles/manueline/church.js';
 import '../../styles/manueline/index.js';
+import { WALK_POSTS } from './route.js';
 import { CHURCH, PORTAL_X, GROUND, CASTLE, YARD, ALLEYS, height, lots, onStreet } from './layout.js';
 
 const TAU = Math.PI * 2;
@@ -283,6 +284,14 @@ export function haloElements() {
     if (!onStreet(x + 0.5, z, 0.5)) continue;
     add('shrine', x, z, Math.PI / 2, l.y + 0.04); n++;
   }
+  // the visitor's walk (route.js, docs §14): the neighbours' lamps before the images on the alley's walls, and an inn's lantern at each mouth of the alley
+  for (const l of lots()) {
+    if (l.kind === 'yard' || l.rect[2] - l.rect[0] < 4 || l.plinth >= 1.6 || l.rect[1] < -2 || l.rect[3] > 95) continue;
+    const z = (l.rect[1] + l.rect[3]) / 2;
+    if (l.rect[0] > -92 && l.rect[0] < -79 && l.rect[0] - -95 < 9) add('shrine', l.rect[0] - 0.32, z, -Math.PI / 2, l.y + 0.04);
+    else if (l.rect[2] < -98 && -95 - l.rect[2] < 13) add('shrine', l.rect[2] + 0.32, z, Math.PI / 2, l.y + 0.04);
+  }
+  for (const [x, z] of WALK_POSTS) add('post', x, z);
   add('brazier', 46, 44, 0); add('brazier', 46, 84, 0);
   { const cx = (CASTLE[0] + CASTLE[2]) / 2, cz = CASTLE[3] + 2.6; add('brazier', cx + 4.2, cz); }
   add('brazier', YARD[0] + 4, 38);

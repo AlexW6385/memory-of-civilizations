@@ -141,3 +141,25 @@ Cats at the shop piers and the quay's warehouses (rats on a port), dogs at the d
 
 ### 13.5 Wear and writing
 Not done this round: no worn steps, soot or inscriptions were added. No Latin text was written, because no inscription of this place and date could be checked here (the shell reaches no website); the trades' signs stay pictorial, as they are.
+
+## 14. Second pass, narrow form (night near the visitor, budget, the walk's gaps, the landmark and its wear)
+
+Code: src/settlements/manueline-lisbon/route.js (the walk's lines, the corridor, the door lanes, the lantern posts), nightlight.js, life.js, town.js, plan.js; src/styles/manueline/wear.js. No source was reachable from the shell; everything below is [inferred] unless marked.
+
+### 14.1 Night near the visitor
+Seen: the arrival at night is lit (lanterns on posts, candles at the portal, the tall windows glowing). The alley at x -95 (the walk to the Rua Nova) was dark within 15 m. Added: eight iron lanterns on posts along the walk (`WALK_POSTS`: alley, its two mouths, the Terreiro's mouth, the plaza's east lane), each with its halo ball and pool, and shrine lamps on the alley's walls (the neighbours' lamps before images, as §13.1). The lanterns stand in life.js and are lit in nightlight.js from the one list. Re-rendered (1024x576, low, `--at -95,,40,0,0.1 --night 1`): the lantern and its pool on the paving are plainly visible; the farther shrines show as small glows.
+
+### 14.2 Budget (MAIN pass)
+Arrival: main 308 -> 307 draws, 0.65 M triangles (unchanged). Walk poses (two opposite yaws each): alley (-95, 70) 385 / 204; alley (-95, 10) 329 / 248; Rua Nova (20, -4.5) 285 / 386; Terreiro (120, 50) 314 / 156 draws; worst 1.12 M main triangles. Nothing over 450 / 4.5 M: no splitting needed. geo-one 31.6 MB, 1563 meshes.
+
+### 14.3 The walk's gaps
+- The way out of the plaza was shut: the plaza's east lane (z 86-92) ends on the first lot east of it (x -112). Opened by routing round it: lane -> the quay street (z 94.6) -> the alley at x -95 north to the Rua Nova (z -4.5) -> east. The same walk goes up the alley at x 120 into the Terreiro do Paço and to the yard's edge; along the portico of the Ribeira palace into its guard hall by the third arch; and up the alley at x 22 and the cross street at z -104 to the Sé's west porch and nave. All are plan walks (MAIN_WALK, QUAY_WALK, TERREIRO_WALK, PALACE_WALK, SE_WALK), walked by walk-check (82 routes, 601 legs).
+- The engine's street life (src/objects/life.js) read none of this and put things in the way (a laundry line at 2.15 m across the alley, a barrel in a door lane). Fixed with `door_clear` footprints (no-op element added to the manueline style; strips under 2 m so they are not read as houses): one pair for every opened door's lane, and a corridor along every walk. life.js (settlement) also clears its own stalls, carts, posts and figures from the corridor. Found: the old routes passed only by luck of the random sequence (route 40 failed when the footprints changed).
+- The palace stands on the quay (z 98 against the quay's 96.5-100): no way on along the quay past x -48.
+- Keepers remain street-life figures (they reach 170 m); building them into near plans was not done (the draw count had room, the time did not).
+
+### 14.4 The landmark and wear
+Compared with §3: the south front had no wear. Added (south front, plaza): rising damp and salt along the foot of the wall between the buttresses (a ragged band 0.5-1.1 m, `plaster_damp`), rain streaks below the string course at 6.6 m (`plaster_streak`) (wear.js); and the pilgrims' way to the portal: about 40 single flag slabs of paler worn stone, thinning from the porch out to 20 m across the plaza (plan.js `wornFlags`). Looked at in a day render at the portal. Not done: worn steps (the portal has none; the door is level with the plaza), the cloister's tracery, the loggia's vault, ogee-lobed arches.
+
+### 14.5 Still short
+Worn thresholds on the open houses; keepers in near plans; no way on east of the palace along the quay (shipyard interior unwalked); the Casa da Índia and the castle unwalked; day-by-day wear on the Belém Tower; sound and animals not touched this pass.

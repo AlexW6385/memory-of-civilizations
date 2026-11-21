@@ -4,6 +4,7 @@
 // beach at Belém with its nets and drying fish, the Alfama's lanes. Elements of style `life`, in tiles of 100 m.
 import { frame } from '../../styles/greek/agora.js';
 import { storeysOf, HEIGHTS } from '../../styles/manueline/houses.js';
+import { nearWalk, WALK_POSTS } from './route.js';
 import { SE, SE_Y, CASTLE, RADIUS, GROUND, QUAY, RUA_NOVA, TERREIRO, YARD, PLAZA, SQUARE, ZS, SHIPS, height, lots, onStreet, inRect, wet, shore, inLot } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -103,6 +104,7 @@ export function lifeElements() {
   L.push({ t: 'animal', kind: 'donkey', at: [-249, 56.5], y: g + 0.04, rot: 1.2, seed: seed() }, { t: 'sacks', at: [-246, 55.8], y: g + 0.04, rot: 0.3, n: 3, seed: seed(), mat: 'limewash_white' });
   // iron lanterns on posts before the church's south front and about the plaza (lit at night), a bench against the front for the friars
   for (const [dx, dz] of [[-9, 46], [9, 46], [-24, 47], [24, 47], [-40, 60], [40, 60], [-14, 100], [14, 100]]) L.push({ t: 'lantern', kind: 'iron', at: [px + dx, dz], y: g + 0.04, rot: dx < 0 ? 1.57 : -1.57, h: 3.0, seed: seed() });
+  for (const [x, z] of WALK_POSTS) L.push({ t: 'lantern', kind: 'iron', at: [x, z], y: height(x, z) + 0.04, rot: x < -95 ? 1.57 : -1.57, h: 3.0, seed: seed() });
   for (const dx of [-16, 17]) { L.push({ t: 'bench', at: [px + dx, 44.6], y: g + 0.04, rot: 0, len: 2.4, seed: seed() }); friar([px + dx - 0.5, 44.4], g + 0.04, 0, { pose: 'sit' }); }
   L.push({ t: 'well', at: [px - 30, 96], y: g + 0.04, kind: 'windlass', roof: true, mat: 'limestone', square: false });
   for (const [dx, dz] of [[-8, 100], [12, 98]]) { L.push({ t: 'bench', at: [px + dx, dz], y: g + 0.04, rot: 0, len: 2.2, seed: seed() }); woman([px + dx, dz - 0.2], g + 0.04, 0, { pose: 'sit' }); merchant([px + dx + 0.7, dz - 0.2], g + 0.04, 0.3, { pose: 'sit' }); }
@@ -176,6 +178,8 @@ export function lifeElements() {
   // the doors of the open houses and of those whose upper floors are open: nobody stands, and nothing is set, in the way in (3 m wide, from 4.5 m out to the first metre in)
   { const lanes = lots().filter((l) => l.up || l.open).map((l) => { const F = frame(l.rect, l.front); return [F.R(F.L / 2 - 2.6, -4.5, F.L / 2 + 2.6, 1.0), l]; });
     for (let i = L.length - 1; i >= 0; i--) { const e = L[i]; if (e.t === 'shop_sign') continue; if (lanes.some(([r]) => e.at[0] > r[0] && e.at[0] < r[2] && e.at[1] > r[1] && e.at[1] < r[3])) L.splice(i, 1); } }
+  // the main walk (route.js): a 4.4 m corridor kept clear of stalls, props, figures and posts (signs hang on the walls)
+  for (let i = L.length - 1; i >= 0; i--) { const e = L[i]; if (e.t === 'shop_sign') continue; if (nearWalk(e.at[0], e.at[1], e.t === 'stall' || e.t === 'cart' || e.t === 'handcart' ? 3.4 : 2.2)) L.splice(i, 1); }
   // tile them
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }

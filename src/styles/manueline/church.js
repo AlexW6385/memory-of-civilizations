@@ -2,6 +2,7 @@
 // one height under net vaults, on six slender octagonal columns carved like rope; the choir gallery over a low vault at the west;
 // the raised main chapel with its retable; tall round-headed windows; the south portal with its Navigator on the pier and the arms
 // of Manuel; buttresses with pinnacles; rope courses along the walls. Element `jeron_church` { rect, y, portalX }.
+import { southWear } from './wear.js';
 import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.js';
 import { archWall } from '../gothic/nd-interior.js';
 import { tube } from '../../objects/kit.js';
@@ -131,6 +132,7 @@ export function jeronChurch(el, ctx) {
   for (const dx of [-5.5, 5.5, 0]) pinnacle(bag, CARVED, px + dx, y + 27, pz0 + 1.2, 0.5, dx ? 5 : 7, 8);
   for (const s of [-1, 1]) { ropeColumn({ bag, col: { circle() {} } }, px + s * 6.2, pz0 + 0.8, y, 27, 0.5, { mat: MAT, carved: CARVED, collide: false, turns: 8 }); pinnacle(bag, CARVED, px + s * 6.2, y + 27, pz0 + 0.8, 0.7, 6, 8); col.circle(px + s * 6.2, pz0 + 0.8, 0.6, y, y + 27); }
   southFront(ctx, { x0, x1, z1, y, px, bays, sWin });
+  southWear(bag, { x0, x1, z1, y, px, bxs: [1, 2, 3, 4].map((b) => bays[b]).filter((bx) => Math.abs(bx - px) >= 8) });
   // ── the main chapel: the altar, its retable of gilt niches, the rood arch, lamps
   const ax = xi1 - 1.0, ay = y + 1.2;
   addBox(bag, CARVED, ax - 1.2, ay, zc - 7, ax, ay + 13, zc + 7);                         // the retable
