@@ -5,7 +5,7 @@
 
 import '../../styles/hanlodge/index.js';
 import './nightlight.js';
-import { walkRoutes, mainRoute } from './walkroutes.js';
+import { walkRoutes, mainRoute, wardRoute, westRoute } from './walkroutes.js';
 import { crownNight } from './nightplace.js';
 import { AX, TIERS, CROWN, RAMP, HALL, SIDE_HALLS, EAST_GATE, PALACE, CHANGLE_HALL, PALACE_WALL } from './layout.js';
 
@@ -43,7 +43,7 @@ const rooms = [
 const walks = [[[AX, 60], [AX, -60], [AX, -90], [AX, -110], [AX, -127], [AX, -140], [AX, -160], [AX, -166], [AX, -172], [AX, -184]]];
 walks[0].y0 = 0;
 // the visitor's walk (walk.js): the whole way from the arrival to the East Market's tower, and in at the door of each opened place on it
-walks.push(mainRoute(), ...walkRoutes());
+walks.push(mainRoute(), wardRoute(), westRoute(), ...walkRoutes());
 
 export const weiyang = {
   id: 'han-changan-weiyang',

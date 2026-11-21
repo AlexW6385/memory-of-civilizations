@@ -82,7 +82,7 @@ function crown() {
 }
 
 /** The shops' sellers and customers, the cross lanes' stalls. */
-function market(rect, seedBase) {
+function market(rect, seedBase, keep = null) {
   const rand = rng(seedBase * 7 + 3), L = [], [x0, z0, x1, z1] = rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   let idx = 0;
   for (const row of marketShops(rect, seedBase)) {
@@ -91,7 +91,7 @@ function market(rect, seedBase) {
     for (let i = 0; i < row.n; i++, idx++) {
       const u0 = rx0 + i * sw, mid = u0 + sw / 2;
       const onWalk = walkDistance([mid, zFront]) <= 10.5;                       // every shop on the visitor's walk has its keeper at the counter (walk.js)
-      if (idx % 5 === 0 || onWalk) L.push(figure(rand, [u0 + 0.3 + (sw / 2 - 0.4) / 2 + 0.3, zFront + n * 1.35], faceTo(0, -n), idx % 10 === 0 ? 'woman' : 'seller'));
+      if (idx % 5 === 0 || onWalk) (onWalk && keep ? keep : L).push(figure(rand, [u0 + 0.3 + (sw / 2 - 0.4) / 2 + 0.3, zFront + n * 1.35], faceTo(0, -n), idx % 10 === 0 ? 'woman' : 'seller'));
       else if (idx % 12 === 4) L.push(figure(rand, [mid + (rand() - 0.5) * 2, zFront - n * 1.9], faceTo(0, n), idx % 2 ? 'customer' : 'woman'));
       else if (idx % 23 === 7) L.push(figure(rand, [mid, zFront - n * 2.2], faceTo(0, n), 'hu'));
     }
@@ -144,6 +144,7 @@ function wardLanes() {
     for (const lz of [z0 + WARD_WALL + 24.85, z0 + WARD_WALL + 72.85]) {
       for (let x = x0 + 14; x < x1 - 14; x += 15 + rand() * 9) {
         const t = rand(), z = lz + (rand() - 0.5) * 0.5, sd = Math.floor(rand() * 1e9);
+        if (walkDistance([x, lz]) < 3.4) { L.push({ t: 'bench', at: [x, lz + (sd & 1 ? 1.9 : -1.9)], y: 0, rot: 0, seed: sd, len: 1.8 }); continue; }          // the visitor's lane (walk.js): the middle stays free, a bench at the wall's foot
         if (t < 0.16) L.push({ t: 'well', at: [x, lz], y: 0, rot: 0, seed: sd, kind: 'windlass', mat: 'bluestone' }, figure(rand, [x + 1.5, lz + 0.3], rand() * 6, 'woman'));
         else if (t < 0.34) { L.push({ t: 'bench', at: [x, z], y: 0, rot: 0, seed: sd, len: 1.8 }); L.push(figure(rand, [x - 0.45, z], 0, rand() < 0.5 ? 'official' : 'seller', { pose: 'sit', carry: 'none' })); if (rand() < 0.6) L.push(figure(rand, [x + 0.45, z], 0, 'woman', { pose: 'sit', carry: 'none' })); }
         else if (t < 0.5) { L.push({ t: 'firewood', at: [x, z], y: 0, rot: 0, seed: sd, len: 1.4 }); L.push(figure(rand, [x + 1.3, z], rand() * 6, 'labourer', { pose: 'squat' })); }
@@ -222,6 +223,13 @@ function academy() {
   return L;
 }
 
+/** The keepers of the shops on the walk, built into the near plans of their shops (a life element's figures reach 170 m): { id, center, near, elements: [han_keepers] }. */
+export function keeperCells() {
+  const keep = [], cells = new Map();
+  market(WEST_MARKET, 600, keep); market(EAST_MARKET, 700, keep);
+  for (const f of keep) { const k = `${Math.floor(f.at[0] / 80)},${Math.floor(f.at[1] / 80)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(f); }
+  return [...cells].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { id: `han-keepers-${k}`, center: [i * 80 + 40, j * 80 + 40], list }; });
+}
 export function lifePlans() {
-  return [plan('han-life-court', forecourt()), plan('han-life-crown', crown()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-households', households()), plan('han-life-lanes', wardLanes()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
+  return [plan('han-life-court', forecourt()), plan('han-life-crown', crown()), plan('han-life-west', market(WEST_MARKET, 600, [])), plan('han-life-east', market(EAST_MARKET, 700, [])), plan('han-life-quarters', quarters()), plan('han-life-households', households()), plan('han-life-lanes', wardLanes()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
 }
