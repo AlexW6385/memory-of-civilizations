@@ -206,3 +206,11 @@ The shell reaches no web page, so everything below is worked from this dossier a
 - **Soot [stated: §17, smoke from the open hearth leaves a black layer on the walls and the thatch]:** three small dark quads above each door of the houses (not the stores), where the smoke leaves, and three on the inner thatch over the hearth of the dwelling houses. [inferred] in size and place. Material `pottery_dark`, the dark one the house cell already carries as fine detail, so the arrival's main draws stay at 377.
 - **Worn stair [inferred]:** two small dark slabs on the treads of the long houses' platform stair, where feet go. Dark, not pale: no pale material was free in those cells within the draw budget.
 - **Not done:** a pale worn patch on the house step stones (any visible material cost five draws); no writing at all, because no glyph text of these houses can be verified [stated: nothing in the dossier]; the walls stay plain.
+
+### 19.6 Landmark gaps found on the way (recorded, not built)
+
+Seen while walking the routes and reading the plans; none was fixed here, because each needs new modelling and the budget at the arrival is spent. [inferred] from reading the geometry, not from a close render.
+- **Castillo:** the rattlesnake heads at the foot of the north stair are present; the serpent bodies' tails on the balustrades and the feathered scales are plain stucco at close range.
+- **Frieze of the Temple of the Warriors / Castillo cornice:** the Chac masks are blocks without the long nose and eye rings of the stated type.
+- **Ring of serpent heads (Platform of Venus / ring walls):** the heads are simple boxes with no teeth or tongue.
+- **Thousand Columns:** the farther rows are the same column repeated; no variation in height or capital, and no roof beams beyond the near rows.
