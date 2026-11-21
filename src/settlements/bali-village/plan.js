@@ -18,6 +18,7 @@ wall([x0, zN], [x1, zN], 0, y2 + 2.4);
 // the wall between the courts, the kori agung in it
 { const w = PURA.kori + 2 * 2.6; wall([x0, zM], [x1, zM], y1 - 0.3, y2 - y1 + 2.4, [{ at: 0 - x0, w }]); }
 E.push({ t: 'bali_candi_bentar', c: [0, zS], gap, y: 0, depth: 3.6, rise: y1 });
+E.push({ t: 'bali_treadwear', c: [0, zS], gap, y: 0, depth: 3.6, rise: y1 });
 E.push({ t: 'bali_kori', c: [0, zM], w: PURA.kori, y: y1, h: 3.9, up: y2 - y1 });
 // the middle court: the bale agung (the big pavilion of the village assembly) west, the gong pavilion east with the gamelan, the kulkul at the front corner, the kitchen
 E.push({ t: 'bali_bale', rect: [-31, -103, -15, -92], y: y1, floor: 0.6, h: 3.0, bays: [4, 2], tier2: true, roof: 'palm', furnish: 'mats', stairs: 's', gold: true, seed: 5 });
