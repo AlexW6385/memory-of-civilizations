@@ -12,7 +12,7 @@ E.push({ t: 'mosque_fittings', c: MOSQUE.c, a: MOSQUE.a, py: MOSQUE.py });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('hall', [2, -29.5, 33.5, 29.5], 3, 'hall'), room('platform', [-37.5, -37.5, 37.5, 37.5], 3, 'open'), room('roof', [4, -27, 31, 27], 13.5, 'open')];
-const walks = [[[70, 0], [48, 0], [38, -48], [0, -48], [0, -39]]];
+const walks = [[[70, 0], [48, 0], [44, -6], [43.4, -28], [43.2, -43.2], [38, -48], [0, -48], [0, -39]]];
 walks[0].y0 = 0;
 // the visitor's walk (docs §20.1): from the arrival to the foot of the mosque, and into each of the eight shops by the entry beside its counter and on to the shelf at the back
 walks.push([ARRIVAL, [75, 22], [55, 22], [55, -43.2], [40, -43.2], [38, -48], [0, -48]]);

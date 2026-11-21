@@ -8,7 +8,7 @@ import { lodTiles } from '../lod.js';
 import { WELLS, shopAt, courtAt } from './walk.js';
 import { hashAt } from './furniture.js';
 /** How far from the visitor the houses are built in full (m); the arrival (the market, 95 m from the mosque) sees the simple form only of what lies beyond. */
-const NEAR = 135;
+const NEAR = 120;
 
 const base = (id, elements) => ({ id, style: 'sahel', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [70, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -67,7 +67,7 @@ function market() {
   // buyers in the aisles, in twos and threes; women with loads on the head
   for (let k = 0; k < 44; k++) {
     const x = pick([59, 73, 87, 45]) + (rand() - 0.5) * 2.4, z = MARKET[1] + 5 + rand() * (MARKET[3] - MARKET[1] - 10), at = [x, z];
-    if (inView(x, z) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.1)) continue;
+    if (inView(x, z) || (x < 47.5 && z < 8) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.1)) continue;   // (the strip along the platform's foot stays clear: the way to the mosque's stairs)
     const rot = rand() * 6.28;
     if (rand() < 0.55) woman(at, rot, { carry: rand() < 0.35 ? pick(['pot', 'basket']) : 'none', pose: rand() < 0.3 ? 'talk' : 'stand' });
     else man(at, rot, { pose: rand() < 0.4 ? 'talk' : 'stand' });
@@ -100,7 +100,7 @@ function market() {
   // children running and playing between the aisles (boys in a short tunic, a girl with a small pot), cats under the stalls, dogs at the edge
   for (let k = 0, n = 0; n < 16 && k < 200; k++) {
     const x = pick([45, 52, 66, 80, 94, 101]) + (rand() - 0.5) * 4, z = MARKET[1] + 6 + rand() * (MARKET[3] - MARKET[1] - 12), at = [x, z];
-    if (inView(x, z, 2.5) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.4)) continue;
+    if (inView(x, z, 2.5) || (x < 47.5 && z < 8) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.4)) continue;
     n++;
     P.push({ t: 'figure', at, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: n % 3 ? 'tunic' : 'wrap', legs: 'bare', cloth: pick(W), cloth2: pick(W), skin: 'skin_dark', hat: 'none', feet: 'bare', h: 0.6 + rand() * 0.14, pose: rand() < 0.4 ? 'squat' : 'stand', ...(n % 3 === 0 ? { carry: 'pot' } : {}) });
   }
@@ -108,7 +108,7 @@ function market() {
   // porters crossing the square with sacks and baskets on the head or the shoulder, a salt bearer with the slabs (the trade of the Sahara)
   for (let k = 0, n = 0; n < 12 && k < 200; k++) {
     const x = pick([45, 59, 73, 87, 101]) + (rand() - 0.5) * 1.8, z = MARKET[1] + 6 + rand() * (MARKET[3] - MARKET[1] - 12), at = [x, z];
-    if (inView(x, z, 2.5) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.3)) continue;
+    if (inView(x, z, 2.5) || (x < 47.5 && z < 8) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.3)) continue;
     n++;
     (n % 2 ? man : woman)(at, rand() < 0.5 ? 0 : Math.PI, { carry: n % 3 === 0 ? 'sack' : n % 3 === 1 ? 'basket' : 'pot', pose: 'stand' });
   }
@@ -320,7 +320,8 @@ const pick = (a, r) => a[Math.floor(r() * a.length)];
 function walkLife() {
   const rand = rng(2020), P = [], W = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red'];
   const pk = (a) => a[Math.floor(rand() * a.length)];
-  const fig = (at, y, rot, o) => P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_dark', cloth: pk(W), cloth2: pk(W), hatMat: pk(W), ...o });
+  const fig = (at, y, rot, o) => P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_dark', over: o.dress === 'wrap' ? 'shawl' : 'sash',   // (a sash or shawl on each: shapes of their own, so that they do not push a common figure shape of the market over the instancing threshold)
+     cloth: pk(W), cloth2: pk(W), hatMat: pk(W), ...o });
   // the keepers: behind the counter (its west part; the entry is on the east), facing the market
   for (let i = 0; i < 8; i++) {
     const S = shopAt(i), at = [S.c - 0.85, S.zFront - 1.55], woman = i % 3 === 1, trade = i % 8;
@@ -353,13 +354,13 @@ function mosqueLamps() {
 export async function town() {
   const { E, P, L } = market(), lnd = landing(), cr = crepissage();
   // (the channel's water is the planet's sea: ground.js, sea)
-  const plans = [base('djenne-market', E), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
+  const plans = [base('djenne-market', E), { ...base('djenne-market-people', [...P, ...walkLife()]), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
   // the masons' yards on the open ground round the platform, with their masons and a donkey with clay
   { const Y = [[-48, -48, 0.1], [-30, 48.5, 3.2], [-50, 18, 1.6], [20, -49, 0], [-50, -22, 1.5]].map(([x, z, r], i) => ({ t: 'brick_yard', c: [x, z], rot: r, n: 5, seed: i + 3 }));
     plans.push(base('djenne-yards', Y)); const rr = rng(77); const Pm = [];
     for (const y of Y) { Pm.push({ t: 'figure', at: [y.c[0] + 1, y.c[1] - 2], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), dress: 'tunic', legs: 'bare', top: 'bare', skin: 'skin_dark', hat: 'none', feet: 'bare', carry: 'hoe' }); Pm.push({ t: 'animal', kind: 'donkey', at: [y.c[0] + 4, y.c[1] + 3], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), gear: true }); }
     plans.push({ ...base('djenne-yards-life', Pm), style: 'life' }); }
-  plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }, ...WELLS.map((at, i) => ({ t: 'dj_well', at, rot: i * 1.7 + 0.4 })), ...[[33.0, -13], [33.0, 0], [33.0, 13], [11.2, -28.8], [14.1, -28.8]].map(([x, z]) => ({ t: 'dj_glow', at: [x, z], y: 4.1, r: 0.5, pool: 1.5 })), { t: 'dj_lamps', at: [75, 0], list: [...L, ...mosqueLamps()] }]));   // (the last five: the mosque's lamps)
+  plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }, ...WELLS.map((at, i) => ({ t: 'dj_well', at, rot: i * 1.7 + 0.4 })), ...[[33.0, -13], [33.0, 0], [33.0, 13], [11.2, -28.8], [14.1, -28.8]].map(([x, z]) => ({ t: 'dj_glow', at: [x, z], y: 4.1, r: 0.5, pool: 1.5 })), { t: 'dj_lamps', at: [75, 0], list: [...L, ...mosqueLamps()] }, ]));   // (the last five: the mosque's lamps)
   const all = houses(), homes = enterable(all);
   // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full (interiors, fittings, door work) within NEAR of the visitor, simple (the solid form, the
   // facade's masses, the door) beyond; the arrival at the market sees the far form only of what is far
@@ -371,6 +372,6 @@ export async function town() {
   const lod = lodTiles('djenne-houses', 'sahel', lots.map((l) => ({ t: 'sahel_near_wall', ...l })), { near: NEAR, R: RADIUS, entrance: { at: [70, 0], facing: 'w' } });
   for (const p of lod) if (p.far) p.elements = p.elements.map((e) => ({ ...e, simple: true }));
   plans.push(...lod);
-  plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...laneLife(all), ...mosqueLife(), ...plain(), ...walkLife()]), style: 'life' });
+  plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...laneLife(all), ...mosqueLife(), ...plain()]), style: 'life' });
   return plans;
 }
