@@ -47,7 +47,7 @@ test('Venice: every voice added exists and can be made', () => {
 test('the map: shops, San Marco, wells, waters, tracks', () => {
   const rooms = shopRooms();
   assert.ok(rooms.length >= 30);
-  assert.equal(VN.sites().length, rooms.length + 1, 'every shop and San Marco');
+  assert.equal(VN.sites().length, rooms.length + merceriaRooms().length + 1, 'every shop and San Marco');
   for (const s of VN.sites()) assert.ok(s.at.every(Number.isFinite) && Array.isArray(s.work), s.id);
   const gold = VN.sites().find((s) => s.use === 'gold'), cloth = VN.sites().find((s) => s.use === 'cloth');
   assert.ok(gold.work.some(([v]) => v === 'venGold') && cloth.work.some(([v]) => v === 'scissors'));
