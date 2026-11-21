@@ -5,6 +5,7 @@
 // first stretch of the vaulted bazaar; the royal garden behind Ali Qapu.
 
 import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU, ARCADE_RUNS, ARCADE_OPEN, arcadeBays, openHouses, upWalk, houseWalk, arcadeUpBays, arcadeUpWalk } from './layout.js';
+import { life } from './life.js';
 
 const E = [];
 const [sx0, sz0, sx1, sz1] = SQUARE, H = 12;
@@ -106,6 +107,7 @@ E.push({ t: 'lane', rect: [gx0 + 6, -50, gx1 - 1, -40], y: 0.04, mat: 'brick_pav
 E.push({ t: 'isf_night',
   shops: arcadeBays().map((b) => ({ c: b.c, u: b.u, n: b.n, w: b.w, open: b.open, lit: b.open || ((Math.round(b.c[0] * 7) * 31 + Math.round(b.c[1] * 3) * 17) & 255) < 150 })),
   bazaar: { x: BAZAAR.x, z0: BAZAAR.z0, z1: BAZAAR.z1, w: BAZAAR.w },
+  stalls: life().filter((e) => e.t === 'stall' || e.t === 'goods_mat').map((e) => ({ at: e.at, mat: e.t === 'goods_mat' })).concat([{ at: [11, 181], mat: true }, { at: [-5.2, 176], mat: true }]),
   iwans: [[0, 5], [1, 5], [-1, 5], [0, -5]].map(([k, y], i) => { const [su, sv] = [[0, -1], [1, 0], [-1, 0], [0, 1]][i]; const p = M(su * (ch + 4), sv * (ch + 4)); return [p[0], y + 0.5, p[1]]; }) });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });

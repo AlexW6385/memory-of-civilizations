@@ -173,6 +173,14 @@ function night(el, { bag }) {
       H.floor(z.x + sd * (z.w / 2 - 0.9), 0.1, zc, 2.1, 1.7);
     }
   }
+  // the market's stalls on the square and along the walks, the goods mats and the storyteller's circle: an oil lamp hung under each awning (a glow
+  // and a pool on the ground before it), a small lamp set by a seller's mat [inferred: Isfahan.ir §5 has the square lit by oil lamps at night]
+  for (const s of el.stalls || []) {
+    const [x, zz] = s.at, h = hashAt(x, zz, 61);
+    if (h > (s.mat ? 0.7 : 0.9)) continue;
+    if (s.mat) { H.ball(x, 0.55, zz, 0.55); H.floor(x, 0.07, zz, 2.0, 1.7); }
+    else { H.ball(x, 1.95, zz - 0.2, 0.85 + 0.2 * h); H.floor(x, 0.07, zz - 0.6, 2.9, 2.4); }
+  }
   for (const [x, y, zz] of el.iwans || []) H.ball(x, y, zz, 1.0);
   H.flush(bag);
 }
