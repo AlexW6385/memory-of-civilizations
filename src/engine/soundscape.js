@@ -111,6 +111,7 @@ import * as ISFAHAN from '../settlements/isfahan/soundmap.js';
 import './voices-isfahan.js';
 import * as JERUSALEM from '../settlements/jerusalem/soundmap.js';
 import './voices-jerusalem.js';
+import * as KILWA from '../settlements/kilwa/soundmap.js';
 import * as KNOSSOS from '../settlements/knossos/soundmap.js';
 import * as LALIBELA from '../settlements/lalibela/soundmap.js';
 import * as LHASA from '../settlements/lhasa/soundmap.js';
@@ -239,7 +240,7 @@ export const PROFILES = {
   jerusalem: T(NEAR, { cicadas: 0.6, animals: withLife({ donkey: 0.5, goat: 0.4, rooster: 0.4, dog: 0.3 }, { market: 1, map: JERUSALEM }), roof: 'flat', adhan: 1 }),
   'joseon-seoul': T(EAS, { cicadas: 0.6, frogs: 0.5, animals: withLife({ rooster: 0.6, dog: 0.4, cattle: 0.2 }, { canal: 1, market: 0.7, eaves: 1, map: SEOUL }), roof: 'tile', bells: 'bosingak' }),
   khajuraho: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.6, rooster: 0.4, goat: 0.4, dog: 0.3 }, roof: 'tile', bells: 'puja' }),
-  kilwa: T({ ...TROP, gull: 0.6 }, { cicadas: 0.6, animals: { goat: 0.5, rooster: 0.5, dog: 0.2 }, roof: 'flat', adhan: 1 }),
+  kilwa: T({ ...TROP, gull: 0.6 }, { cicadas: 0.6, animals: withLife({ goat: 0.5, rooster: 0.5, dog: 0.2 }, { market: 0.9, map: KILWA }), roof: 'flat', adhan: 1 }),
   knossos: T(MED, { cicadas: 0.9, animals: withLife({ goat: 0.5, cattle: 0.35, donkey: 0.35, dog: 0.25 }, { market: 0.7, map: KNOSSOS }), roof: 'flat' }),
   lalibela: T({ dove: 0.8, kite: 0.6, tropic: 0.4, crow: 0.4 }, { animals: withLife({ goat: 0.5, cattle: 0.5, rooster: 0.6, dog: 0.4, donkey: 0.3 }, { market: 0.3, map: LALIBELA }), roof: 'thatch' }),
   lhasa: T({ crow: 1, sparrow: 0.7, kite: 0.4 }, { animals: withLife({ dog: 0.5, cattle: 0.3 }, { market: 1, eaves: 1, map: LHASA }), roof: 'flat', bells: null }),

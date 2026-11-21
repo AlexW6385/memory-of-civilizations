@@ -1,5 +1,7 @@
 // Kilwa about 1330 (docs/settlements/kilwa.md §2–§4): the Great Mosque, Husuni Kubwa and its pool, dhows on the beach.
 import { upFacts } from './up.js';
+import { walkRoutes } from './walkroutes.js';
+import { palaceLamps } from './nightplace.js';
 import { lots, STREETS, inRect, MOSQUE, PALACE, POOL, PY, CORE, SOUTH, COURTS, STAIR, BEACH_MOSQUE, GATE_STAIRS, TERRACES, height, inLot } from './layout.js';
 
 const E = [];
@@ -43,6 +45,7 @@ for (let k = 0, x = -170; k < 7 && x < 60; x += 9) {
     k++; x += L; break;
   }
 }
+E.push(...palaceLamps());   // (the bronze stands of the night, nightlight.js)
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 export const kilwa = {
   id: 'kilwa-mosque',
@@ -71,4 +74,6 @@ for (const l of lots()) {
   const a = W(f.A); a.y0 = height(a[0][0], a[0][1]); kilwa.walks.push(a);
   if (f.B) { const b = W(f.B); b.y0 = f.yU - 0.2; kilwa.walks.push(b); }
 }
+// the shops and houses of the visitor's walk (docs/settlements/kilwa.md §22): in at the street door, along the court, into the front room
+for (const w of walkRoutes()) kilwa.walks.push(w.route);
 export default kilwa;
