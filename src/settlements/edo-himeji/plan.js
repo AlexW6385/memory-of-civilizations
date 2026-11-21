@@ -68,6 +68,10 @@ ring(HON.rect, HON.top, [[6, 18]]);
   wall([dx0 + e, dz1 - e], [g0, dz1 - e], DAI.top); wall([g1, dz1 - e], [dx1 - e, dz1 - e], DAI.top);
   wall([dx0 + e, dz0 + e], [dx0 + e, dz1 - e], DAI.top); wall([dx1 - e, dz0 + e], [dx1 - e, dz1 - e], DAI.top); wall([dx0 + e, dz0 + e], [dx1 - e, dz0 + e], DAI.top);
   E.push({ t: 'kabuki_mon', rect: [g0, dz1 - 2.6, g1, dz1 - 0.4], y: DAI.top, w: 3.6, h: 3.5 }); }
+// worn thresholds (wear.js): the Hishi gate, the keep cluster's gate and the keep's own door
+E.push({ t: 'sill', at: [0, NINO.rect[3] - 4.5], y: NINO.top, w: 5, d: 0.8 });
+E.push({ t: 'sill', at: [-31, DAI.rect[3] - 1.5], y: DAI.top, w: 3.6, d: 0.7 });
+E.push({ t: 'sill', at: [KEEP.c[0] - 12 + 2.5 - 0.95, KEEP.c[1] - 7.4], y: DAI.top, w: 1.8, d: 1.0, alongX: true });
 // the four turrets within a short walk of the arrival have their ground rooms opened (stores.js), the door on the bailey side
 const OPEN_TURRET = { [`${NINO.rect[0]},${NINO.rect[3] - 9}`]: 'e', [`${NINO.rect[2] - 9},${NINO.rect[3] - 9}`]: 'w', [`${HON.rect[2] - 8},${HON.rect[3] - 8}`]: 'w', [`${HON.rect[0]},${HON.rect[3] - 8}`]: 'e' };
 const TURRET_ROOMS = [];
