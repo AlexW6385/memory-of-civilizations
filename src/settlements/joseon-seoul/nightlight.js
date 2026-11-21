@@ -284,6 +284,8 @@ export function palaceLamps() {
   for (const s of [-1, 1]) { fires.push({ x: s * 17, z: 247 }); fires.push({ x: s * 10.5, z: 98 }); fires.push({ x: s * 10.5, z: 166 }); }
   // the throne court's own fire baskets (the court's torches, jeongnyo, burned for a ceremony held by night) [inferred]: two by the royal path before the platform, and a pair each side of the files, within 25 m of the arrival
   for (const s of [-1, 1]) { fires.push({ x: s * 6.2, z: 74 }); fires.push({ x: s * 6.2, z: 52 }); fires.push({ x: s * 30, z: 68 }); fires.push({ x: s * 30, z: 34 }); }
+  // the watch's fires on Jongno, at the avenue's foot and along the bell street, where the night watch stood after the gates closed [inferred]
+  for (const s of [-1, 1]) for (const x of [9, 40, 74]) fires.push({ x: s * x, z: 355.5 });
   return { lanterns, fires };
 }
 
