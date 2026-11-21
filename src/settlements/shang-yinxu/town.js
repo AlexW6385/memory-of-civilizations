@@ -91,6 +91,11 @@ function people() {
     if (rand() < 0.5 && free(w2[0], w2[1], 1.0)) { fig(w2, ry, { pose: 'sit_ground', dress: 'tunic', hair: 'topknot', cloth: 'cloth_brown', carry: 'none' }, 0.02); }
     if (rand() < 0.4) { const p = P(-2.6, 2.4); if (free(p[0], p[1], 1.0)) fig(p, ry + 3.14, { carry: 'basket' }, hy(p)); }
   }
+  // the night watch at its fires (nightlight.js shang_watchfire): they stay out all night; placed last so the other figures' seeds are unchanged
+  for (const [x, z, f] of [[13, -41, 1], [27, -41, -1], [15.5, 41, 1], [24.5, 41, -1]]) {
+    guard([x - 1.6 * f, z + 0.9], f > 0 ? Math.PI / 2 : -Math.PI / 2, { nightKeep: 1 });
+    fig([x + 1.6 * f, z - 0.7], f > 0 ? -Math.PI / 2 : Math.PI / 2, { pose: 'sit_ground', nightKeep: 1 });
+  }
   return L;
 }
 

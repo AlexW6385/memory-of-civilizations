@@ -11,7 +11,7 @@
 
 import '../../styles/shang/index.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { lathe } from '../../core/geom.js';
+import { lathe, box } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { HOOK } from '../../styles/shang/houses.js';
 import { TOMB, ARCHIVE, HALL, inRect } from './layout.js';
@@ -148,6 +148,19 @@ function liao({ at, y = 0 }, { bag, lights }) {
   H.flush(bag);
 }
 
+/**
+ * shang_watchfire: { at: [x, z] } — a fire of the night watch in a ring of stones on the rammed court (a small stack of billets, flames at night only, glow, pool, a real light).
+ * The ring stands by day too; the keepers beside it are figures with nightKeep: 1 (town.js). [inferred: no source names a watch fire; fire is the only light of the time]
+ */
+function watchfire({ at }, { bag, lights }) {
+  const [x, z] = at, H = new Halo();
+  for (let k = 0; k < 12; k++) { const a = k / 12 * TAU + hashAt(x, z, 5), r = 0.5, s = 0.08 + 0.04 * hashAt(x + k, z, 6); bag.add('earth_wall', box(x + Math.cos(a) * r - s, 0, z + Math.sin(a) * r - s, x + Math.cos(a) * r + s, 0.2 + 0.1 * hashAt(x, z + k, 8), z + Math.sin(a) * r + s)); }
+  for (let k = 0; k < 3; k++) { const a = k * 2.1 + hashAt(x, z, 2) * 3, s = 0.8 + 0.3 * hashAt(x + k, z, 4); bag.add('flame+night', lathe([[0.001, 0], [0.17 * s, 0.05], [0.16 * s, 0.22 * s], [0.07 * s, 0.4 * s], [0.001, 0.5 * s]], 8, null, x + Math.cos(a) * 0.16, 0.12, z + Math.sin(a) * 0.16)); }
+  lights.push({ at: [x, 1.1, z], color: '#ff8a3c', intensity: 3.2, distance: 13 });
+  H.ball(x, 0.55, z, 1.1, 0.7); H.floor(x, 0.04, z, 3.6, 3.6, 12, 0.8);
+  H.flush(bag);
+}
+
 let done = false;
 /** Wraps the Shang style's fire-making elements (once, after every file of the style has registered its own). */
 export function registerNight() {
@@ -156,6 +169,7 @@ export function registerNight() {
   if (!E) return;
   for (const k of ['shang_hall', 'shang_court', 'shang_tomb', 'shang_archive', 'shang_foundry', 'shang_court_house', 'shang_pit_yard', 'shang_row_house', 'shang_workshop']) if (typeof E[k] === 'function') E[k] = wrap(k, E[k]);
   E.shang_liao = liao;
+  E.shang_watchfire = watchfire;
 }
 registerNight();
 void HALL;

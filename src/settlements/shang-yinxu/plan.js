@@ -14,6 +14,8 @@ const E = [
   { t: 'shang_court' },
   // the burnt offering (liao): the two stacks of billets beside the pits' ends burn at night (court.js, nightlight.js)
   { t: 'shang_liao', at: [-0.6, -57] }, { t: 'shang_liao', at: [40.6, -57] },
+  // the night watch's fires: two before the arrival's court, two at the south gate (nightlight.js; the keepers are in town.js)
+  { t: 'shang_watchfire', at: [13, -41] }, { t: 'shang_watchfire', at: [27, -41] }, { t: 'shang_watchfire', at: [15.5, 41] }, { t: 'shang_watchfire', at: [24.5, 41] },
   { t: 'shang_gate', plat: GATE.plat, axis: GATE.axis, h: GATE.h },
 ];
 const hallRoom = [HALL.plat[0] + 4, HALL.plat[1] + 3, HALL.plat[2] - 4, HALL.plat[3] - 2];
