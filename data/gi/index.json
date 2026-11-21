@@ -935,7 +935,7 @@
  },
  "byodo-in-phoenix-hall": {
   "site": "heian-uji",
-  "hash": "4b775762da95c71e",
+  "hash": "9b965a09fee2cdd1",
   "rays": 128,
   "probes": 5700,
   "boxes": [
@@ -956,9 +956,9 @@
     ]
    }
   ],
-  "bytes": 98770,
-  "seconds": 35,
-  "baked": "2026-11-20"
+  "bytes": 98829,
+  "seconds": 85,
+  "baked": "2026-11-21"
  },
  "cahokia-monks": {
   "site": "cahokia",
@@ -2394,7 +2394,7 @@
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
-  "hash": "a55ebdd2b231fd34",
+  "hash": "9232bbea5721c74d",
   "rays": 128,
   "probes": 22750,
   "boxes": [
@@ -2415,9 +2415,9 @@
     ]
    }
   ],
-  "bytes": 353903,
-  "seconds": 142,
-  "baked": "2026-11-20"
+  "bytes": 354061,
+  "seconds": 199,
+  "baked": "2026-11-21"
  },
  "kakadu-ubirr": {
   "site": "kakadu",
@@ -2826,7 +2826,7 @@
  },
  "london-westminster": {
   "site": "london",
-  "hash": "515fc024b04cc0d7",
+  "hash": "32b876eff2312639",
   "rays": 128,
   "probes": 78390,
   "boxes": [
@@ -2873,8 +2873,8 @@
     ]
    }
   ],
-  "bytes": 1226623,
-  "seconds": 174,
+  "bytes": 1223772,
+  "seconds": 486,
   "baked": "2026-11-21"
  },
  "lu-qufu-temple": {
@@ -3941,7 +3941,7 @@
  },
  "pantheon": {
   "site": "rome",
-  "hash": "01ab77b104702112",
+  "hash": "bf5f56a480a08649",
   "rays": 128,
   "probes": 74480,
   "boxes": [
@@ -3965,8 +3965,8 @@
     ]
    }
   ],
-  "bytes": 1212797,
-  "seconds": 1237,
+  "bytes": 1214993,
+  "seconds": 1394,
   "baked": "2026-11-21"
  },
  "parthenon": {
@@ -4326,7 +4326,7 @@
    }
   ],
   "bytes": 272827,
-  "seconds": 170,
+  "seconds": 298,
   "baked": "2026-11-21"
  },
  "sainte-foy-conques": {
@@ -5252,7 +5252,7 @@
  },
  "venice-san-marco": {
   "site": "venice",
-  "hash": "3eb6dc53d0ad1244",
+  "hash": "116ae0415666ab65",
   "rays": 128,
   "probes": 73554,
   "boxes": [
@@ -5274,8 +5274,8 @@
     ]
    }
   ],
-  "bytes": 1202022,
-  "seconds": 393,
+  "bytes": 1202011,
+  "seconds": 1013,
   "baked": "2026-11-21"
  },
  "versailles-chateau": {

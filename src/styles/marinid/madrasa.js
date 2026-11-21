@@ -41,7 +41,9 @@ export function bouInania(el, { bag, col, lights }) {
   canopy(bag, foN, px[0] - 1.9, px[1] + 1.9, y + ph + 3.0, 1.15);
   for (const s of [-1, 1]) { const a = s < 0 ? px[0] + 0.02 : px[1] - 0.1; bag.add('bronze', box(a, y + 0.05, z0 + 0.1, a + 0.08, y + ph - 1.0, z0 + 0.9)); for (let k = 0; k < 5; k++) bag.add('iron', box(a - 0.02, y + 0.6 + k * 0.6, z0 + 0.2, a + 0.1, y + 0.66 + k * 0.6, z0 + 0.8)); }
   // the steps up from the street
-  { const n = Math.max(2, Math.round((y - yl) / 0.15)); for (let i = 0; i < n; i++) bag.add('limestone', box(px[0] - 0.5, yl - 0.3, z0 - 0.3 - (n - 1 - i) * 0.3, px[1] + 0.5, yl + (y - yl) * (i + 1) / n, z0)); col.ramp([px[0] - 0.5, z0 - 0.3 - (n - 1) * 0.3, px[1] + 0.5, z0], yl, y, 's'); }
+  { const n = Math.max(2, Math.round((y - yl) / 0.15)); for (let i = 0; i < n; i++) bag.add('limestone', box(px[0] - 0.5, yl - 0.3, z0 - 0.3 - (n - 1 - i) * 0.3, px[1] + 0.5, yl + (y - yl) * (i + 1) / n, z0)); col.ramp([px[0] - 0.5, z0 - 0.3 - (n - 1) * 0.3, px[1] + 0.5, z0], yl, y, 's');
+    // wear: each tread dished and polished along the way in, a worn band a body wide, a hand's breadth in from the front
+    for (let i = 0; i < n; i++) { const top = yl + (y - yl) * (i + 1) / n, zf = z0 - 0.3 * (n - i); bag.add('plaster_damp', box((px[0] + px[1]) / 2 - 0.42 + (i % 2) * 0.06, top, zf + 0.06, (px[0] + px[1]) / 2 + 0.42 + (i % 2) * 0.06, top + 0.005, zf + 0.26)); } }
   // the north wall's other openings: small grilled windows high up, the street front blank below
   { const wins = []; for (let x = x0 + 4; x < x1 - 3; x += 4.2) if (Math.abs(x - cx) > 3) wins.push(x); for (const x of wins) { const r = foN.R(0, 0.05, x - 0.35, x + 0.35); bag.add('opening', box(r[0], y + HT - 2.2, r[1], r[2], y + HT - 0.9, r[3])); const g = foN.R(0.05, 0.1, x - 0.4, x + 0.4); bag.add('lattice', box(g[0], y + HT - 2.25, g[1], g[2], y + HT - 0.85, g[3])); } }
   // the east, west and south walls: plain

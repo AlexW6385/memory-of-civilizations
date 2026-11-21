@@ -111,6 +111,21 @@ export function comares(el, ctx) {
       col.rect([lo, z, hi, zb], y, y + 0.9);
     }
   }
+  // ——— the court's marble laid in slabs, and worn where feet went (docs §25): joints on the side walks, and over them the polish of the way the visitors walked, patch by patch
+  {
+    const hx = (a, b) => { let h = Math.imul(Math.round(a * 64) ^ 0x9e3779b9, 0x85ebca6b); h = Math.imul(h ^ (h >>> 13) ^ Math.round(b * 64), 0xc2b2ae35); return ((h ^ (h >>> 15)) >>> 0) / 4294967296; };
+    const lo = cx - (pw + k + 1.35) - 0.05, hi = cx + (pw + k + 1.35) + 0.05, J = 'marble_dark';
+    for (const [xa, xb] of [[x0, lo], [hi, x1]]) {
+      for (let x = xa + 1.15; x < xb - 0.3; x += 1.15) bag.add(J, box(x - 0.006, y + 0.05, z0 + 0.1, x + 0.006, y + 0.0545, z1 - 0.1));
+      for (let z = z0 + 0.9; z < z1 - 0.3; z += 0.9 + 0.12 * hx(xa, z)) bag.add(J, box(xa + 0.1, y + 0.05, z - 0.006, xb - 0.1, y + 0.0545, z + 0.006));
+    }
+    // the way: the visitor's feet came up the west walk and the petitioners' to the Barca's door; patches of polished marble, deeper where the step was shorter
+    for (const xw of [x0 + 2.6, x1 - 2.6]) for (let z = z0 + 1.2; z < z1 - 0.8; z += 1.15) {
+      const a = hx(xw, z), b = hx(z, xw), w = 0.34 + 0.2 * a, d = 0.42 + 0.22 * b, o = (a - 0.5) * 0.3;
+      bag.add(MS, box(xw + o - w / 2, y + 0.05, z - d / 2, xw + o + w / 2, y + 0.0562, z + d / 2));
+    }
+    for (let k2 = 0; k2 < 9; k2++) { const a = hx(k2, 7), u = cx - 1.5 + k2 % 3 * 1.5 + (a - 0.5) * 0.4, v = z0 - 1.1 - Math.floor(k2 / 3) * 0.9; bag.add(MS, box(u - 0.3, y + 0.05, v - 0.2, u + 0.3, y + 0.0585, v + 0.2)); }
+  }
   // ——— the side ranges east and west: rooms behind plain faces (doors, small windows); a passage east to the Court of the Lions
   const zN = z0 - 10.4, zS = z1 + 5.2, pass = [-9.6, -7.4];
   // at the galleries' east and west ends, niches under muqarnas vaults (§4.8)

@@ -60,7 +60,7 @@ for (const h of houseList()) {
   for (const [m, dx, dz, sz] of [['rooster', 0, 0, 1], ['hen_brown', 1.1, -0.7, 1], ['hen_white', -0.9, -0.9, 1], ['hen_brown', 0.5, 0.9, 0.96]]) critters.push({ model: m, at: [cx + dx, yf, cz + dz], rot: hash(cx + dx, cz) * 6.28, range: [3.0, 1.2], size: sz }); }
 // pigeons on the paving: the Place Seffarine, the Qarawiyyin's sahn, the tannery's north walk
 { const sq = SITES.seffarine, q = SITES.qar, t = SITES.tannery;
-  const groups = [[sq[0] + 14, sq[1] + 12, ground0(102, 39) + 0.05, 5], [q[0] + (q[2] - q[0]) / 14 * 7 - 3, q[1] + 15, siteY('qar') + 0.05, 5], [t[0] + 18, t[1] + 5, siteY('tannery'), 4], [t[0] + 44, t[1] + 6, siteY('tannery'), 4]];
+  const groups = [[sq[0] + 20, sq[1] + 12, ground0(102, 39) + 0.05, 5], [q[0] + (q[2] - q[0]) / 14 * 7 - 3, q[1] + 15, siteY('qar') + 0.05, 5], [t[0] + 18, t[1] + 5, siteY('tannery'), 4], [t[0] + 44, t[1] + 6, siteY('tannery'), 4]];
   for (const [x, z, y, n] of groups) for (let k = 0; k < n; k++) { const px = x + (hash(x + k, z) - 0.5) * 4.4, pz = z + (hash(x, z + k) - 0.5) * 3.2; critters.push({ model: ['pigeon_grey', 'pigeon_white', 'pigeon_dark', 'pigeon_grey'][k % 4], at: [px, y, pz], rot: hash(pz, px) * 6.28, range: [2.4, 1.6] }); } }
 // caged songbirds under the awnings of three dukkans of the better trades near the Talaa Kebira, hung from the lintel's front
 { let k = 0;

@@ -30,9 +30,9 @@ export function hashAt(x, z, s = 0) {
   return (h >>> 0) / 4294967296;
 }
 /** The share of the house doors whose lamp burns [inferred: a lamp at the door was a wealth, and a few kept it lit all night]. */
-export const DOOR_LIT = 0.6;
+export const DOOR_LIT = 0.75;
 /** The share of the dukkans with a lamp lit into the evening [inferred: the souks shut at dusk, the lanes' shops kept a lamp for the late buyers]. */
-export const SHOP_LIT = 0.5;
+export const SHOP_LIT = 0.85;
 /** The share of the houses whose lattice windows show a lamp behind them, and of the lattices lit in such a house [inferred]. */
 export const WINDOW_HOUSES = 0.1, WINDOW_LIT = 0.45;
 
@@ -198,15 +198,15 @@ function addLamp(H, l) {
   if (l.k === 'door') {
     // (the lamp itself is the house's; only its light is made here)
     if (!l.lit) return;
-    H.ball(x + l.n[0] * 0.05, y + 0.02, z + l.n[1] * 0.05, 0.6);
-    H.floor(l.fx, l.gy + 0.05, l.fz, 1.5, 1.5, 0, 8, 0.7);
-    H.wall(x - l.n[0] * 0.27 + l.n[0] * 0.04, y - 0.1, z - l.n[1] * 0.27 + l.n[1] * 0.04, l.n, 1.0, 0.9, 8, 0.55);
+    H.ball(x + l.n[0] * 0.05, y + 0.02, z + l.n[1] * 0.05, 0.85);
+    H.floor(l.fx, l.gy + 0.05, l.fz, 2.4, 2.4, 0, 8, 0.95);
+    H.wall(x - l.n[0] * 0.27 + l.n[0] * 0.04, y - 0.1, z - l.n[1] * 0.27 + l.n[1] * 0.04, l.n, 1.5, 1.3, 8, 0.8);
   } else if (l.k === 'shop' || l.k === 'oven') {
     const oven = l.k === 'oven';
     // (the lamp's body is the house's: marinid/house.js hangs it in the cell)
     if (!l.lit) return;
-    H.ball(x, y + (oven ? 0.1 : 0.06), z, oven ? 0.95 : 0.65);
-    H.floor(l.fx, l.gy + 0.05, l.fz, oven ? 2.3 : 1.5, oven ? 2.3 : 1.5, 0, 8, oven ? 0.85 : 0.65);
+    H.ball(x, y + (oven ? 0.1 : 0.06), z, oven ? 1.1 : 0.9);
+    H.floor(l.fx, l.gy + 0.05, l.fz, oven ? 2.6 : 2.2, oven ? 2.6 : 2.2, 0, 8, oven ? 0.9 : 0.85);
   } else if (l.k === 'souk') {
     // (the lantern's body is the souk's: marinid/souk.js hangs it from the beam)
     H.ball(x, y + 0.08, z, 1.0);

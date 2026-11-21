@@ -160,6 +160,11 @@ export function ttPyramid(el, ctx) {
       const sw = (el.stairW ?? 12) / 2, xo = cx - a[0], xi = cx - (a[0] - sx * 0.85);
       if (k > 0) ttStair({ rect: [xo - 0.3, cz - sw, xi - 0.3, cz + sw], y0: ya, y1: yb, dir: 'e', mat: S }, { bag, col });
       if (!last) col.floor([xi - 0.3, cz - sw, cx - b[0] + 0.3, cz + sw], yb);
+      // where feet went (§24): on each landing the plaster trodden grey across the way from one flight's head to the next flight's foot, in two uneven patches; on the
+      // summit the same from the stair's head to the temple's door
+      { const jr = ((k * 7919) % 13) / 13 - 0.5, lx0 = xi - 0.3 + 0.25, lx1 = cx - b[0] + 0.3 - 0.25;
+        if (!last) { bag.add('plaster_grey', box(lx0, yb + 0.004, cz - 2.7 + jr, lx1, yb + 0.010, cz + 2.4 + jr)); bag.add('plaster_grey', box(lx0 + 0.6, yb + 0.004, cz + 2.4 + jr, lx1 - 0.4, yb + 0.012, cz + 4.1 + jr * 2)); }
+        else bag.add('plaster_grey', box(lx0, yb + 0.004, cz - 2.2, cx - 8.4, yb + 0.010, cz + 1.9)); }
     }
     if (tb === 0 && !last) {
       // a plain stage: only the ledge round the next stage's foot

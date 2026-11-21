@@ -56,38 +56,42 @@ export function rowStacks(rect, front, h, seed) {
  * brownstone or brick, three to five storeys on a raised basement; a stoop at the party wall (the doors paired), the areaway
  * railing, windows with lintels and sills, a bracketed cornice, a chimney stack at each pair's party wall.
  */
-export function rowhouses(bag, col, rect, front, y, h, seed) {
+export function rowhouses(bag, col, rect, front, y, h, seed, open = null, lights = null) {
   const F = face(rect, front), { R, L, ext } = F, plan = rowPlan(rect, front, h, seed), W = L / plan.length, B = 1.75;
   for (const st of rowStacks(rect, front, h, seed)) chimney(bag, st.x, y + st.y0 - 0.1, st.z, rng(seed + 7), st.y1 - st.y0 + 0.1);
-  for (const { c0, c1, nf, H, mat, mir } of plan) {
+  for (const [pi, { c0, c1, nf, H, mat, mir }] of plan.entries()) {
+    const op = !!(open && open.includes(pi));
     // (a house-local u written once for the even houses, mirrored for the odd: the doors paired at the party walls)
     const left = (u) => (mir ? c1 - u : c0 + u);
     const Rm = (a, b, y0, y1, d0, d1) => R(Math.min(left(a), left(b)), Math.max(left(a), left(b)), y0, y1, d0, d1);
     // the body: a raised basement of rusticated stone, the storeys in brownstone or brick
-    bag.add(mat, R(c0, c1, y - 0.5, y + H, -ext * 0.9, 0));
+    const dU = 0.35, dW = op ? 1.65 : 1.15;                                          // the door's place from the party wall, its width (an opened house's: 1.65 m clear)
+    if (!op) { bag.add(mat, R(c0, c1, y - 0.5, y + H, -ext * 0.9, 0)); col.rect(F.rc(c0, c1, -ext * 0.9, 0), y - 0.5, y + H); }
+    else parlour(bag, col, lights, F, { c0, c1, mir, y, H, B, mat, ext, dU, dW, left });
     bag.add('granite_grey', R(c0 + 0.0, c1 - 0.0, y - 0.5, y + B, 0, 0.12));
-    col.rect(F.rc(c0, c1, -ext * 0.9, 0), y - 0.5, y + H);
-    for (let k = 1; k <= nf; k++) bag.add(STONE, R(c0, c1, y + B + (k - 1) * 3.4 + 0.02, y + B + (k - 1) * 3.4 + 0.2, 0, 0.1));       // the stringcourses at each floor
+    for (let k = op ? 2 : 1; k <= nf; k++) bag.add(STONE, R(c0, c1, y + B + (k - 1) * 3.4 + 0.02, y + B + (k - 1) * 3.4 + 0.2, 0, 0.1));       // the stringcourses at each floor
     // the stoop (side-run): a landing at the door and seven steps running along the front, a solid stringer down to the pavement
-    const dU = 0.35, dW = 1.15, land = 0.95, sd = 0.85;                              // the door's place from the party wall, its width; the stoop's depth
+    const land = 0.95, sd = 0.85;                                                    // the stoop's depth
     const sU0 = dU + dW + 0.15, steps = 7, run = 2.2, top0 = B - 0.04, rise = top0 / steps;
     bag.add('granite_grey', Rm(dU - 0.05, sU0, y - 0.5, y + top0, 0, land));                                    // the landing
     for (let j = 0; j < steps - 1; j++) bag.add('granite_grey', Rm(sU0, sU0 + (j + 1) * run / steps, y - 0.5, y + top0 - (j + 1) * rise, 0, sd));
-    if (!mir) { col.ramp(F.rc(c0 + sU0, c0 + sU0 + run, 0, sd), y + rise * 0.5, y + top0, F.along ? 'w' : 'n'); col.floor(F.rc(c0 + dU, c0 + sU0, 0, land), y + top0); }
+    if (op) {   // (an opened house: the steps as obstacles to step onto, each nested in the last; the ramp does not carry in the turned frame)
+      for (let j = 0; j < steps - 1; j++) { const a = left(sU0), b = left(sU0 + (j + 1) * run / steps); col.rect(F.rc(Math.min(a, b), Math.max(a, b), 0, sd), y - 0.5, y + top0 - (j + 1) * rise); }
+      const a = left(dU), b = left(sU0); col.rect(F.rc(Math.min(a, b), Math.max(a, b), 0, land), y - 0.5, y + top0);
+    } else if (!mir) { col.ramp(F.rc(c0 + sU0, c0 + sU0 + run, 0, sd), y + rise * 0.5, y + top0, F.along ? 'w' : 'n'); col.floor(F.rc(c0 + dU, c0 + sU0, 0, land), y + top0); }
     else { col.ramp(F.rc(c1 - sU0 - run, c1 - sU0, 0, sd), y + rise * 0.5, y + top0, F.along ? 'e' : 's'); col.floor(F.rc(c1 - sU0, c1 - dU, 0, land), y + top0); }
     // its railing: pickets along the stairs' edge under a sloping rail, and along the landing's front; the newel lamp at the foot
-    for (let k = 0; k <= 12; k++) { const t = run * k / 12, hh = y + top0 * (1 - t / run); bag.add('iron', Rm(sU0 + t - 0.012, sU0 + t + 0.012, hh, hh + 0.9, sd - 0.03, sd - 0.006)); }
-    bag.add('iron', rod(F.P(left(sU0), sd - 0.018, y + top0 + 0.92), F.P(left(sU0 + run), sd - 0.018, y + 0.92), 0.022, 4));
+    if (!op) for (let k = 0; k <= 12; k++) { const t = run * k / 12, hh = y + top0 * (1 - t / run); bag.add('iron', Rm(sU0 + t - 0.012, sU0 + t + 0.012, hh, hh + 0.9, sd - 0.03, sd - 0.006)); }
+    if (!op) bag.add('iron', rod(F.P(left(sU0), sd - 0.018, y + top0 + 0.92), F.P(left(sU0 + run), sd - 0.018, y + 0.92), 0.022, 4));
     bag.add('iron', Rm(dU - 0.03, sU0, y + top0 + 0.88, y + top0 + 0.94, land - 0.03, land - 0.005));
     for (let u = dU + 0.08; u < sU0 - 0.02; u += 0.14) bag.add('iron', Rm(u - 0.012, u + 0.012, y + top0, y + top0 + 0.9, land - 0.03, land - 0.006));
     bag.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.06], [0.12, 0.17], [0.07, 0.25], [0.001, 0.27]], 8, null, ...F.P(left(sU0 + run), sd - 0.02, y + 0.92)));
     // the door: a surround of stone (jambs and a hood on brackets), the dark leaves, a transom
     const dY = y + B;
     bag.add(STONE, Rm(dU - 0.22, dU, dY, dY + 2.95, 0, 0.14)); bag.add(STONE, Rm(dU + dW, dU + dW + 0.22, dY, dY + 2.95, 0, 0.14)); bag.add(STONE, Rm(dU, dU + dW, dY + 2.55, dY + 2.95, 0, 0.14));
-    bag.add('opening', Rm(dU, dU + dW, dY, dY + 2.55, 0, 0.05));
-    bag.add('wood_painted', Rm(dU + 0.06, dU + dW - 0.06, dY, dY + 2.15, 0.05, 0.09));
+    if (!op) { bag.add('opening', Rm(dU, dU + dW, dY, dY + 2.55, 0, 0.05)); bag.add('wood_painted', Rm(dU + 0.06, dU + dW - 0.06, dY, dY + 2.15, 0.05, 0.09)); }
     bag.add('glass_outer', Rm(dU + 0.06, dU + dW - 0.06, dY + 2.25, dY + 2.5, 0.05, 0.08));
-    bag.add('gilt_bronze', Rm(dU + dW - 0.2, dU + dW - 0.14, dY + 1.0, dY + 1.06, 0.09, 0.13));
+    if (!op) bag.add('gilt_bronze', Rm(dU + dW - 0.2, dU + dW - 0.14, dY + 1.0, dY + 1.06, 0.09, 0.13));
     bag.add(STONE, Rm(dU - 0.4, dU + dW + 0.4, dY + 2.95, dY + 3.25, 0, 0.4));
     for (const s of [0, 1]) bag.add(STONE, Rm(s ? dU + dW + 0.1 : dU - 0.22, s ? dU + dW + 0.4 : dU + 0.1, dY + 2.35, dY + 2.95, 0.14, 0.32));   // its brackets
     // windows: the parlor floor's two beside the door, the floors above three, the basement's two small ones with grilles
@@ -119,6 +123,60 @@ export function rowhouses(bag, col, rect, front, y, h, seed) {
   }
 }
 
+/** The parlour of an opened row house (docs/settlements/new-york.md §16): where the house stands, in the frame of its face: { floor y, inner depth, lamp [x, z] }. */
+export function parlourSpot(rect, front, plan, i, y) {
+  const F = face(rect, front), { c0, c1, mir } = plan[i], left = (u) => (mir ? c1 - u : c0 + u), FY = y + 1.75, W = c1 - c0;
+  const p = F.P(left(W / 2 + 0.6), -2.9, FY + 2.7);
+  return { FY, lamp: [p[0], p[2]], rug: F.P(left(W / 2 + 0.9), -3.0, FY), along: F.along, W };
+}
+/**
+ * The front room of a row house with its door ajar: the raised parlour floor behind the stoop, a front wall with the door and two windows
+ * cut through it, party walls, a plaster ceiling, and the furnishing of a New York parlour of 1931 [inferred from period photographs and the
+ * Tenement Museum's rooms]: rug, sofa, armchair, a table with a lamp, an upright piano with its stool, a mantel and grate, a framed picture.
+ * Local u along the house from its door side, dd inward from the front plane.
+ */
+function parlour(bag, col, lights, F, { c0, c1, mir, y, H, B, mat, ext, dU, dW, left }) {
+  const { R } = F, W = c1 - c0, FY = y + B, TOP = FY + 3.4, T = 0.3, RD = 5.7;
+  const Rm = (a, b, y0, y1, d0, d1) => R(Math.min(left(a), left(b)), Math.max(left(a), left(b)), y0, y1, d0, d1);
+  const Cm = (a, b, d0, d1, y0, y1) => col.rect(F.rc(Math.min(left(a), left(b)), Math.max(left(a), left(b)), d0, d1), y0, y1);
+  const wall = (m, a, b, y0, y1, d0, d1) => { if (b - a < 1e-3 || y1 - y0 < 1e-3) return; bag.add(m, Rm(a, b, y0, y1, d0, d1)); };
+  // the solid parts: the basement, the back, the floors above, the party walls
+  bag.add(mat, R(c0, c1, y - 0.5, FY, -ext * 0.9, 0)); col.rect(F.rc(c0, c1, -ext * 0.9, 0), y - 0.5, FY);
+  bag.add(mat, R(c0, c1, FY, TOP, -ext * 0.9, -RD)); col.rect(F.rc(c0, c1, -ext * 0.9, -RD), FY, TOP);
+  bag.add(mat, R(c0, c1, TOP, y + H, -ext * 0.9, 0)); col.rect(F.rc(c0, c1, -ext * 0.9, 0), TOP - 0.12, y + H);
+  for (const [a, b] of [[0, T], [W - T, W]]) { wall(mat, a, b, FY, TOP, -RD, 0); Cm(a, b, -RD, 0, FY, TOP); }
+  // the front wall (0.3 m) with the door and two windows cut through it
+  const wins = []; { const uA = dU + dW + 0.55; for (let k = 0; k < 2; k++) { const ua = uA + k * 1.5; if (ua + 1.0 < W - 0.3) wins.push([ua, ua + 1.0]); } }
+  wall(mat, 0, dU, FY, FY + 3.4, -T, 0); Cm(0, dU, -T, 0, FY, TOP);
+  wall(mat, dU + dW, W, FY, FY + 0.45, -T, 0); Cm(dU + dW, W, -T, 0, FY, FY + 0.45);
+  wall(mat, 0, W, FY + 2.55, TOP, -T, 0); Cm(dU, dU + dW, -T, 0, FY + 2.55, TOP);
+  let u = dU + dW; for (const [a, b] of wins) { wall(mat, u, a, FY + 0.45, FY + 2.55, -T, 0); Cm(u, a, -T, 0, FY + 0.45, FY + 2.55); u = b; }
+  wall(mat, u, W, FY + 0.45, FY + 2.55, -T, 0); Cm(u, W, -T, 0, FY + 0.45, FY + 2.55);
+  for (const [a, b] of wins) Cm(a, b, -T, 0, FY + 0.45, FY + 2.55);              // (the glass: a window is not a way in)
+  // within: the floor boards, plaster on the walls and under the ceiling
+  bag.add('timber', Rm(T, W - T, FY, FY + 0.02, -RD, -T));
+  bag.add('plaster_white', Rm(T, W - T, TOP - 0.12, TOP, -RD, -T));
+  bag.add('plaster_white', Rm(T, W - T, FY + 0.02, TOP - 0.12, -RD, -RD + 0.03));
+  for (const [a, b] of [[T, T + 0.03], [W - T - 0.03, W - T]]) bag.add('plaster_white', Rm(a, b, FY + 0.02, TOP - 0.12, -RD, -T));
+  bag.add('wood_dark', Rm(T, W - T, FY + 0.02, FY + 0.14, -RD + 0.03, -RD + 0.06));            // the skirting at the back
+  // the door ajar: its leaf stands open against the left jamb, inside
+  bag.add('wood_painted', Rm(dU + 0.01, dU + 0.06, FY + 0.02, FY + 2.15, -1.0, -T));
+  const Fm = (m, a, b, y0, y1, d0, d1, hard = y1 - y0 > 0.2) => { bag.add(m, Rm(a, b, y0, y1, -d1, -d0)); if (hard) Cm(a, b, -d1, -d0, y0, y1); };
+  const f0 = FY + 0.02;
+  // the rug, the sofa (the back wall's), the armchair and the mantel (the far party wall's), the table and its lamp, the piano
+  Fm('cloth_red', 2.1, W - 0.7, f0, f0 + 0.015, 1.3, 4.7);
+  Fm('cloth_grey', 2.5, 4.7, f0 + 0.12, f0 + 0.45, RD - 1.15, RD - 0.2); Fm('cloth_grey', 2.5, 4.7, f0 + 0.45, f0 + 0.95, RD - 0.3, RD - 0.2, false); Fm('cloth_grey', 2.5, 2.75, f0 + 0.45, f0 + 0.7, RD - 1.15, RD - 0.2, false); Fm('cloth_grey', 4.45, 4.7, f0 + 0.45, f0 + 0.7, RD - 1.15, RD - 0.2, false);
+  Fm('wood_dark', 2.55, 4.65, f0, f0 + 0.12, RD - 1.1, RD - 0.25, false);
+  Fm('limestone', W - T - 0.4, W - T, f0, f0 + 1.15, 2.0, 3.6); Fm('wood_dark', W - T - 0.5, W - T, f0 + 1.15, f0 + 1.24, 1.9, 3.7, false);
+  Fm('iron', W - T - 0.41, W - T - 0.38, f0 + 0.1, f0 + 0.8, 2.3, 3.3, false);
+  Fm('cloth_ochre', W - 1.6, W - 0.85, f0 + 0.1, f0 + 0.42, 3.9, 4.65); Fm('cloth_ochre', W - 1.6, W - 0.85, f0 + 0.42, f0 + 0.95, 4.5, 4.65, false);
+  Fm('wood_dark', 2.8, 3.5, f0 + 0.58, f0 + 0.63, 2.4, 3.1, false); Fm('wood_dark', 3.1, 3.2, f0, f0 + 0.58, 2.7, 2.8);
+  { const p = F.P(left(3.15), -2.75, f0 + 0.63); bag.add('lamp_glass', lathe([[0.001, 0], [0.09, 0.04], [0.13, 0.16], [0.09, 0.3], [0.001, 0.32]], 8, null, p[0], p[1], p[2])); }
+  Fm('wood_dark', 0.45, 1.85, f0, f0 + 1.25, RD - 0.6, RD - 0.08); Fm('plaster_white', 0.5, 1.8, f0 + 0.74, f0 + 0.78, RD - 0.66, RD - 0.6, false); Fm('wood_dark', 0.95, 1.4, f0, f0 + 0.46, RD - 1.25, RD - 0.85, false);
+  Fm('gold', 3.1, 4.1, f0 + 1.45, f0 + 2.1, RD - 0.07, RD - 0.03, false);
+  // the ceiling's globe and its light
+  { const p = F.P(left(W / 2 + 0.6), -2.9, TOP - 0.12); bag.add('lamp_glass', lathe([[0.001, -0.3], [0.13, -0.22], [0.17, -0.1], [0.1, -0.02], [0.001, 0]], 12, null, p[0], p[1], p[2])); if (lights) lights.push({ at: [p[0], TOP - 0.55, p[2]], color: '#ffe3b4', intensity: 1.8, distance: 7 }); }
+}
 /**
  * castIronFront: { rect, y, front, h (storeys' top), seed } — a loft front of painted cast iron over the shop fronts: from the
  * second floor up, slender columns at each bay, an entablature at each floor, plate glass between, a bracketed cornice.
