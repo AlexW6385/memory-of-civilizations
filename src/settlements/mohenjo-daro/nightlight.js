@@ -86,6 +86,8 @@ const wrap = (name, fn) => function haloed(el, ctx) {
 function bathdressNight(el, ctx) {
   const [cx0, cz0, cx1, cz1] = el.B.court, H = new Halo();
   for (const z of [cz0 + 4, cz1 - 4]) for (let k = 0; k < 3; k++) { const x = cx0 + 4 + k * ((cx1 - cx0 - 8) / 2); H.ball(x, el.y + 2.0, z, 0.32, 0.55); }
+  // two standing oil-lamp bowls on brick stands at the court, ahead of the visitor on arrival: their pools of light on the paving
+  for (const x of [cx0 + (cx1 - cx0) * 0.3, cx0 + (cx1 - cx0) * 0.7]) { const z = cz1 - 9; H.ball(x, el.y + 1.0, z, 0.3, 0.6); H.floor(x, el.y + 0.03, z, 3.4, 3.0, 10, 0.75); }
   H.flush(ctx.bag);
 }
 
