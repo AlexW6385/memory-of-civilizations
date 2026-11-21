@@ -2,8 +2,8 @@
 // campi, a few gardens with fig and pomegranate, the green water of the canals and the lagoon; the
 // soft, hazy, watery light.
 
-import { RADIUS, SEA, RIM, PIAZZA, PIAZZETTA, BASILICA, height, inWater, inRect, inLot, bands, palazzi, bridges, squero } from './layout.js';
-const NOGREEN = () => [...bands().map((b) => [b.x0 - 0.5, -400, b.x1 + 0.5, 200]), ...palazzi().map((p) => p.box), ...bridges().map((b) => b.corridor), squero().clear];
+import { CLOCK, CAMPANILE, MERCERIA, RADIUS, SEA, RIM, PIAZZA, PIAZZETTA, BASILICA, height, inWater, inRect, inLot, bands, palazzi, bridges, squero } from './layout.js';
+const NOGREEN = () => [...bands().map((b) => [b.x0 - 0.5, -400, b.x1 + 0.5, 200]), ...palazzi().map((p) => p.box), ...bridges().map((b) => b.corridor), squero().clear, [PIAZZA[0], PIAZZA[1] - 18, CLOCK[0], PIAZZA[1]], [PIAZZA[0], PIAZZA[3], CAMPANILE[0] - 12, PIAZZA[3] + 16], [MERCERIA[0] - 5, MERCERIA[1] - 4, MERCERIA[2] + 6, MERCERIA[3] + 2]];   // (and under the Procuratie's floors, in the Merceria's street and between its rows)
 let NG = null;
 const CHURCH = [BASILICA.c[0] - BASILICA.s - 13, BASILICA.c[1] - BASILICA.s * 0.85, BASILICA.c[0] + BASILICA.s + 4, BASILICA.c[1] + BASILICA.s * 0.85];
 

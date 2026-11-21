@@ -19,6 +19,16 @@ export function bellTower(el, { bag, col }) {
   col.rect(rect, y, y + h);
   // ── the shaft: brick on a plinth of stone ──
   bag.add(B, box(rect[0], y - 0.5, rect[1], rect[2], y + YS, rect[3]));
+  // the step round the plinth's foot (0.2 m, 0.65 m broad), its treads worn to a dish on the Piazzetta side (south) and toward the basilica (east) [inferred]
+  { const q = 0.3, o = 0.95, t = y + 0.2, d = 0.012, R = rect;
+    const stepBox = (a, b, c, e) => { bag.add(I, box(a, y - 0.5, b, c, t - d, e)); col.floor([a, b, c, e], t); };
+    stepBox(R[0] - o, R[1] - o, R[2] + o, R[1] - q); stepBox(R[0] - o, R[3] + q, R[2] + o, R[3] + o); stepBox(R[0] - o, R[1] - q, R[0] - q, R[3] + q); stepBox(R[2] + q, R[1] - q, R[2] + o, R[3] + q);
+    const rim = (a, b, c, e) => bag.add(I, box(a, t - d, b, c, t, e));
+    rim(R[0] - o, R[1] - o, R[2] + o, R[1] - o + 0.1);                                           // north rim whole
+    rim(R[0] - o, R[3] + o - 0.1, R[0] + 1.2, R[3] + o); rim(R[2] - 1.2, R[3] + o - 0.1, R[2] + o, R[3] + o);   // south: the ends only
+    rim(R[0] - o, R[1] - o + 0.1, R[0] - o + 0.1, R[3] + o - 0.1);                               // west rim whole
+    rim(R[2] + o - 0.1, R[1] - o + 0.1, R[2] + o, R[1] + 1.2); rim(R[2] + o - 0.1, R[3] - 1.2, R[2] + o, R[3] + o - 0.1);  // east: the ends only
+  }
   const faces = ['s', 'e', 'n', 'w'];
   const pil = [0.25, s / 4, s / 2, s * 3 / 4, s - 0.25];                     // the pilaster strips (the corners wider)
   const panelC = [s / 8, s * 3 / 8, s * 5 / 8, s * 7 / 8];
