@@ -90,6 +90,11 @@ export async function town() {
   // children and dogs on the beach
   for (let k = 0; k < 10; k++) { const z = -120 + rand() * 240, x = shoreX(z) - 1 - rand() * 4; if (height(x, z) > -0.5 && !nearArrival([x, z])) P.push({ t: 'animal', kind: 'dog', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: k + 5 }); }
   for (let k = 0; k < 6; k++) { const z = -100 + rand() * 200, x = shoreX(z) - 3 - rand() * 3; person([x, z], height(x, z), rand() * 6.28, { child: true, h: 1.05, hat: 'none' }); }
+  // last of all (no other figure's seed moves): the people at the two beach fires near the arrival; they belong to the night, so they stay
+  for (const f of Y.beach) for (let j = 0; j < 3; j++) {
+    const a = f.seed % 7 + j * 2.1, x = f.c[0] + Math.cos(a) * 1.9, z = f.c[1] + Math.sin(a) * 1.9;
+    person([x, z], height(x, z), face([x, z], f.c), { ...WHO[j === 0 ? 'woman' : j === 1 ? 'man' : 'child'](), pose: 'sit_ground', nightKeep: 1 });
+  }
   plans.push(plan('sgang-people', 'life', P));
   void LANDMARK;
   return plans;

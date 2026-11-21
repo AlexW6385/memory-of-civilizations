@@ -9,6 +9,7 @@ export function lampPosts() {
   for (let z = AVENUE[1] + 12; z < AVENUE[3] - 20; z += 36) L.push({ at: [AVENUE[0] - 1.5, z], y: 0, h: 6.5 }, { at: [AVENUE[2] + 1.5, z], y: 0, h: 6.5 });
   for (let x = PRACA[0] + 12; x < PRACA[2] - 8; x += 40) for (const z of [-132, 132]) L.push({ at: [x, z], y: 0, h: 7 });
   for (const z of [-28, -17, 17, 28]) L.push({ at: [-100.5, z], y: 0, h: 6.5 });
+  for (const [x, z] of [[-128, 11], [-128, -11], [-114, 10], [-114, -10], [-122, 22], [-122, -22]]) L.push({ at: [x, z], y: 0, h: 4.5 });   // low lamps on the apron where the visitor arrives (night, docs §17)
   for (const x of [0, 22, 60]) for (const z of [-104, 104]) L.push({ at: [x, z], y: 6.5, h: 6 });
   return L;
 }

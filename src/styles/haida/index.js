@@ -324,6 +324,7 @@ function houseFront(el, { bag, add, col, W, segL, rectL, rand, hw, hd, g, yTop, 
   // stones about the frontal pole's foot, moss between them
   for (let k = 0; k < 6; k++) {
     const a = k * 1.05 + fr() * 0.4, rr = 0.95 + fr() * 0.2;
+    if (Math.abs(Math.cos(a) * rr * 0.9) < 0.85) continue;      // none in the doorway's lane: the way to the door stays clear for the walker
     add('rock_boulder', lathe([[0.3, 0], [0.26, 0.15], [0.001, 0.26]], 6, null, Math.cos(a) * rr * 0.9, g, pz + Math.sin(a) * rr));
   }
   add('sod', lathe([[1.1, 0], [1.0, 0.05], [0.001, 0.07]], 12, null, 0, g, pz));

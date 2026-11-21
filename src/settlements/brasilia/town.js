@@ -4,6 +4,7 @@
 // plaza. Everything is placed from layout.js.
 import { lampPosts } from './lamps.js';
 import { nightPlan } from './nightlight.js';
+import { nightFigures } from './night-figures.js';
 import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, SCHOOL, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng, doorLane, carKeepClear } from './layout.js';
 
 const LAWN_PICNICS = [];
@@ -168,5 +169,6 @@ export async function town() {
   { const n = Math.floor((SERV[3] - SERV[1] - 0.4) / 4.2); for (let k = 0; k < n; k++) { const z = SERV[1] + 0.4 + k * 4.2; person(SERV[0] + 3.4 + 0.4 + 3.6, z + 3.6, 0, { inside: true, kind: rand() < 0.4 ? 'worker' : undefined, w: rand() < 0.5 }); if (rand() < 0.7) person(SERV[0] + 3.4 + 0.4 + 2.2 + rand() * 2.5, z + 1.9, Math.PI + (rand() - 0.5) * 0.6, { inside: true }); if (rand() < 0.4) person(SERV[0] + 1.5, z + 1.5 + rand() * 2, rand() * 6.28, { inside: true }); } }
   // the vehicles' fronts are not in the way: the people stand clear of the roadways (the carriageways are not walked by the still figures)
   void inRect; void POOLS; void RAMP; void PLATFORM; void TUNNEL; void LAWN;
+  nightFigures(P);     // LAST: the night's own people (their seeds are fixed, no other figure's random draw moves)
   return [base('brasilia-buildings', 'brasilia', B), nightPlan(base), base('brasilia-life', 'life', [...L, ...P])];
 }

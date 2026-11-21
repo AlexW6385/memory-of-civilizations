@@ -16,7 +16,7 @@ const P = (u, v) => toWorld(h, u, v);
 const walks = [[P(0, -hd - 6), P(0, -hd - 1.5), P(0, -hd + 1.0), P(0, -hd + 3.2), P(0, 0), P(0, 3.9), P(0, hd - 2.6)]];
 walks[0].y0 = G;
 // the visitor's walk into nine more of the row's houses: from the street before the frontal pole, through the oval door at its foot, down the tiers to the hearth and on to the back
-for (const k of [2, 3, 5, 6, 10, 11, 4, 7, 9, 12]) {
+for (const k of [2, 3, 5, 6, 10, 11, 4, 7, 9, 12, 13, 14, 15, 1, 16, 0]) {
   const o = houses()[k], Q = (u, v) => toWorld(o, u, v), od = o.d / 2;
   const w = [Q(0, -od - 6), Q(0, -od - 1.5), Q(0, -od + 1.0), Q(0, -od + 3.2), Q(-1.5, -od + 4.4)];
   w.y0 = G; walks.push(w);
