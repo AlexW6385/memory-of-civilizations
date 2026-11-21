@@ -11,6 +11,7 @@ import { lifePlans } from './life.js';
 import { palaceNight, changleNight, cityNight, wardNight, marketNight } from './nightplace.js';
 import '../../styles/hanlodge/index.js';
 import './nightlight.js';
+import './wear.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'han', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [AX, 60], facing: 'n' }, ...o });
 const pick = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
