@@ -128,8 +128,8 @@ export async function town() {
     man([7.8, 70.6], 0.05, Math.PI / 2, { pose: 'stand', hat: 'straw', cloth: 'cloth_indigo' });
     man([5.2, 66.9], 0.05, face([5.2, 66.9], [5.6, 68]), { pose: 'sit_low', hat: 'cap', cloth: 'cloth_black' }); woman([6.2, 69.2], 0.05, face([6.2, 69.2], [5.6, 68]), { pose: 'sit_low', carry: 'none' });
     P.push({ t: 'firewood', at: [-7.4, 66.4], y: 0.05, rot: 1.57, len: 1.8, seed: 8 }, { t: 'haystack', kind: 'pole', at: [-9.6, 69.5], y: 0.05, seed: 9 }, { t: 'sacks', at: [8.6, 60.2], y: 0.05, rot: 0.4, n: 4, seed: 12 });
-    F.push({ t: 'animal', kind: 'buffalo', at: [-9.2, 63.4], y: 0.05, rot: 1.9, seed: 71, graze: true });
-    L.push({ t: 'figure', at: [-7.8, 62.4], y: 0.05, rot: 1.2, seed: 7101, dress: 'trousers', cloth: 'cloth_red', cloth2: 'cloth_indigo', over: 'none', skin: 'skin_medium', hat: 'straw', hair: 'short', child: true, carry: 'staff', feet: 'bare' });
+    // (the grazing buffalo is a critter, fauna.js)
+    L.push({ t: 'figure', at: [-15.0, 67.5], y: 0.05, rot: 1.2, seed: 7101, dress: 'trousers', cloth: 'cloth_red', cloth2: 'cloth_indigo', over: 'none', skin: 'skin_medium', hat: 'straw', hair: 'short', child: true, carry: 'staff', feet: 'bare' });
     for (const [x, z, r] of [[-26, 101, 1.2], [30, 108, -1.8], [-2, 103, 0.4]]) {
       F.push({ t: 'animal', kind: 'buffalo', at: [x, z], y: ground.height(x, z), rot: r, seed: Math.round(x) + 72, gear: true });
       man([x - Math.sin(r) * 2.8, z - Math.cos(r) * 2.8], ground.height(x, z), r, { pose: 'stand', hat: 'straw', carry: 'rope', cloth: 'cloth_indigo' });

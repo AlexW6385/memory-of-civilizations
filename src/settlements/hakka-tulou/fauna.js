@@ -1,6 +1,7 @@
 // The Hakka tulou — the animals (src/engine/fauna.js draws them; docs/settlements/hakka-tulou.md §5): swallows over the
 // paddy and the stream, egrets standing in the stream and over the paddy, crows over the hill, sparrows on the
 // court's cobbles and the roof ridge, small carp in the stream [inferred: a hill stream of the valley].
+import '../../engine/critter-models-hakka.js';
 import { STREAM, streamZ, T, RADIUS, HOUSES } from './layout.js';
 import { ground } from './ground.js';
 import { openedHouses, isShop, frameOfHouse } from './walk.js';
@@ -33,7 +34,7 @@ void T; void RADIUS;
 // ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §11.4) ──
 // [inferred: the animals of a Fujian hill hamlet; no source fetched] Dogs asleep at the doors of two shops, a cat on the step of a house and one on the hall's bench,
 // a rooster and hens at the foot of the great wall and before four houses, ducks afloat on the stream, house swallows' mud nests under the porch eaves of
-// five houses of the walk. (The water buffalo have no rig yet: they stay the life element's still figure.)
+// five houses of the walk. (The water buffalo by the road at the arrival is a rigged critter; the ploughing pairs in the far paddy stay the life element's figure.)
 const critters = [];
 {
   const opened = openedHouses().map((o) => o.h), shops = opened.filter(isShop), homes = opened.filter((h) => !isShop(h));
@@ -47,6 +48,8 @@ const critters = [];
   });
   // at the foot of the great wall, either side of the south gate (off the gate's lane and the stream's road)
   for (const [model, x, z, sz] of [['rooster', -5.5, 33.2, 1], ['hen_brown', -6.3, 33.6, 1], ['hen_white', -4.8, 34.1, 0.96], ['hen_brown', 6.2, 33.4, 1], ['hen_white', 7.0, 34.0, 0.96]]) critters.push({ model, at: [x, ground.height(x, z) + 0.02, z], rot: x, range: [3.4, 1.4], size: sz });
+  // the buffalo grazing by the road at the arrival with its herd boy (town.js), and one at rest by the farm sheds
+  critters.push({ model: 'buffalo_water', at: [-13.2, 0.05, 68.6], rot: 1.9, range: [6, 2.5] });
   critters.push({ model: 'dog', at: [3.4, 0.05, 36], rot: 3.8, range: [9, 3.5] });
   // ducks on the stream, going about its stretches (the still ducks of the life elements are gone)
   for (const x of [-52, -24, 20, 36, 62]) critters.push({ type: 'floaters', models: ['duck_white', 'duck_brown', 'duck_brown', 'duck_white'], area: [x - 8, streamZ(x) - 1.6, x + 8, streamZ(x) + 1.6], dist, a: [6, 1.1], ratio: 0.2, margin: 0.5, y: STREAM.water, speed: 0.22, cycle: [18, 24] });
