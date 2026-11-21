@@ -107,7 +107,7 @@ export function shopRow(el, ctx) {
     // the front: wall pierced by the opening, a pointed-free timber lintel (k.wall adds it)
     k.wall(B, [a, zF, a + W, z1], 0, H, [{ a: c - 1.5, b: c + 1.5, top: 2.3 }]);
     // the counter across the opening, an entry on its east side
-    k.bx(BS, c - 1.5, 0, z1 - 0.9, c + 0.4, 0.9, z1 - 0.1, true); k.bx('timber', c - 1.55, 0.9, z1 - 0.95, c + 0.45, 0.96, z1 - 0.05);
+    k.bx(BS, c - 1.5, 0, z1 - 0.9, c - 0.15, 0.9, z1 - 0.1, true); k.bx('timber', c - 1.55, 0.9, z1 - 0.95, c - 0.1, 0.96, z1 - 0.05);   // (the entry on the east side is 1.65 m clear: the walker's door)
     // the awning: a mat on a pole frame sloping down and out, held by two posts
     const aw = [], zo = z1 + 1.5;
     aw.push(c - 1.7, 2.7, z1, c + 1.7, 2.7, z1, c + 1.7, 2.2, zo, c - 1.7, 2.7, z1, c + 1.7, 2.2, zo, c - 1.7, 2.2, zo);
@@ -156,14 +156,14 @@ export function courtHouse(el, ctx) {
   const G = (a, b, top = 2.15) => ({ a, b, top });
   // the front wall (the door), the north wall of the front block (on the court) and the side and back walls
   k.wall(B, [x0, zf, x1, z1], 0, Hf, [G(xm - dw, xm + dw, 2.05)]);
-  k.wall(B, [x0, zp - 0.5, x1, zp], 0, Hf, [G(xm - 1.0, xm + 1.0, 2.35), G(x0 + 5.6, x0 + 6.8), G(x1 - 6.8, x1 - 5.6), { a: x1 - 3.2, b: x1 - 2.1, top: 5.4, bottom: 3.2 }]);
+  k.wall(B, [x0, zp - 0.5, x1, zp], 0, Hf, [G(xm - 1.0, xm + 1.0, 2.35), G(x0 + 5.6, x0 + 7.2), G(x1 - 7.2, x1 - 5.6), { a: x1 - 3.6, b: x1 - 1.9, top: 5.4, bottom: 3.2 }]);
   k.wall(B, [x0, z0, x0 + 0.5, zp - 0.5], 0, Hs + 0.7); k.wall(B, [x1 - 0.5, z0, x1, zp - 0.5], 0, Hs + 0.7);
   k.wall(B, [x0, zp - 0.5, x0 + 0.5, z1], 0, Hf); k.wall(B, [x1 - 0.5, zp - 0.5, x1, z1], 0, Hf);
   k.wall(B, [x0, z0, x1, z0 + 0.5], 0, Hs + 0.7);
   // the walls on the court: back block (a door), west block, east block (a door each)
-  k.wall(B, [x0 + 0.5, zq - 0.5, x1 - 0.5, zq], 0, Hs, [G(xw + 4.5, xw + 5.7)]);
-  k.wall(B, [xw - 0.5, zq, xw, zp - 0.5], 0, Hs, [G((zq + zp) / 2 - 0.6, (zq + zp) / 2 + 0.6)]);
-  k.wall(B, [xe, zq, xe + 0.5, zp - 0.5], 0, Hs, [G((zq + zp) / 2 - 0.6, (zq + zp) / 2 + 0.6)]);
+  k.wall(B, [x0 + 0.5, zq - 0.5, x1 - 0.5, zq], 0, Hs, [G(xw + 4.3, xw + 6.0)]);
+  k.wall(B, [xw - 0.5, zq, xw, zp - 0.5], 0, Hs, [G((zq + zp) / 2 - 0.85, (zq + zp) / 2 + 0.85)]);
+  k.wall(B, [xe, zq, xe + 0.5, zp - 0.5], 0, Hs, [G((zq + zp) / 2 - 0.85, (zq + zp) / 2 + 0.85)]);
   // the vestibule's side walls (to the workshop and the reading room)
   k.wall(B, [xm - 3.25, zp, xm - 2.75, zf], 0, 2.75); k.wall(B, [xm + 2.75, zp, xm + 3.25, zf], 0, 2.75);
   // the front block's upper floor (3.1), its ceiling roof (6.2), the side blocks' and back block's roofs (3.2)
@@ -205,7 +205,7 @@ export function courtHouse(el, ctx) {
     for (const dx of [-1.8, 0, 1.8]) bag.add('wood_dark', box(rx + dx - 0.25, 0.4, zp + 0.6, rx + dx + 0.25, 1.1, zp + 0.66));
     k.bx(BS, x1 - 1.6, 0, zp + 0.3, x1 - 0.5, 0.55, zf - 0.3, true); }
   // ── the court: hearth, granary, mortar, water jars, firewood, a goat's tether post ──
-  { const hx = xw + 3.0, hz = zp - 1.8;
+  { const hx = xw + 1.2, hz = zp - 2.6;
     for (let i = 0; i < 3; i++) { const a = i * 2.09; bag.add('mud_plaster', L([[0.14, 0], [0.1, 0.18], [0.001, 0.2]], 7, hx + Math.cos(a) * 0.2, 0, hz + Math.sin(a) * 0.2)); }
     k.lathe_('pottery_dark', [[0.001, 0], [0.12, 0.02], [0.21, 0.14], [0.2, 0.3], [0.14, 0.38], [0.16, 0.42], [0.001, 0.4]], 12, hx, 0.2, hz);
     k.bx('bark_pine', hx - 0.5, 0, hz + 0.3, hx - 0.1, 0.1, hz + 0.34); k.bx('bark_pine', hx - 0.5, 0.1, hz + 0.45, hx - 0.1, 0.2, hz + 0.49);
@@ -218,7 +218,7 @@ export function courtHouse(el, ctx) {
     bag.add('timber', L([[0.22, 0], [0.28, 0.4], [0.3, 0.7], [0.001, 0.7]], 10, mx, 0, mz)); bag.add('wood_dark', L([[0.17, 0.68], [0.001, 0.66]], 10, mx, 0, mz));
     for (const s of [-1, 1]) { const t = []; beamTris(t, [mx + s * 0.5, 0, mz + 0.5], [mx + s * 0.46, 1.5, mz + 0.5], 0.04, 0.08); bag.add('timber', fromTriangles(t)); }
     // water jars on a stand (three), a wash basin; the stack of firewood; the goat's post
-    for (let i = 0; i < 3; i++) { k.jar('terracotta', xw + 0.5 + i * 0.6, 0.35, zp - 0.5, 1.5); } k.bx(BS, xw + 0.15, 0, zp - 0.9, xw + 2.3, 0.35, zp - 0.1, true);
+    for (let i = 0; i < 3; i++) { k.jar('terracotta', xw + 0.4 + i * 0.5, 0.35, zp - 0.5, 1.5); } k.bx(BS, xw + 0.1, 0, zp - 0.9, xw + 1.65, 0.35, zp - 0.1, true);
     for (let j = 0; j < 4; j++) for (let i = 0; i < 6 - j; i++) bag.add('bark_pine', L([[0.07, 0], [0.07, 1.4], [0.001, 1.4]], 6, 0, 0, 0).rotateZ(-Math.PI / 2).translate(xw + 0.4 + i * 0.01, 0.1 + j * 0.13, zq + 2.6 + i * 0.15 + j * 0.07));
     bag.add('timber', L([[0.06, 0], [0.05, 1.1]], 6, xm - 1.5, 0, zq + 3.2)); }
   // ── the west block (the sleeping room): the bed of banco under a mat and blanket, a chest, niches with lamps and bowls ──

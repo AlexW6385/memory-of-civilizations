@@ -45,4 +45,6 @@ function talus(el, { bag }) {
   // sand drifted against the foot of the cliff, a pale band
   for (let z = -ZEND + 6; z < ZEND - 6; z += 3 + r() * 5) bag.add('banco_smooth', box(XF + 6.6, 0.0, z, XF + 7.3 + r() * 1.5, 0.1 + r() * 0.1, z + 3 + r() * 5));
 }
-export const WEAR_ELEMENTS = { dh_streetwear: streetwear, dh_talus: talus };
+/** dh_clear_track { rect }: draws nothing; its rectangle is a footprint for the street-life pass (src/objects/life.js), which keeps its figures and things off it (the visitor's walk). */
+const clearTrack = () => {};
+export const WEAR_ELEMENTS = { dh_streetwear: streetwear, dh_talus: talus, dh_clear_track: clearTrack };

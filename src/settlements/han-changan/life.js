@@ -3,6 +3,7 @@
 // of the cross lanes; the palace quarters' lanes with their benches, wells and woodpiles; the keepers at the ward gates; ox-carts on the great
 // avenue. Plans of style 'life' (src/objects/index.js), placed from layout.js.
 import { CROWN, TIERS, HALL, RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, lots, inService, serviceKind, enterable, wardKind, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S, LAKE, LAKE_Y, GARDEN_POND, POND_Y, inLake, ACADEMY } from './layout.js';
+import { walkDistance } from './walk.js';
 import { chariotSpots } from '../../styles/han/court.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -89,7 +90,8 @@ function market(rect, seedBase) {
     const zFront = row.front === 'n' ? rz0 : rz1;
     for (let i = 0; i < row.n; i++, idx++) {
       const u0 = rx0 + i * sw, mid = u0 + sw / 2;
-      if (idx % 5 === 0) L.push(figure(rand, [u0 + 0.3 + (sw / 2 - 0.4) / 2 + 0.3, zFront + n * 1.35], faceTo(0, -n), idx % 10 === 0 ? 'woman' : 'seller'));
+      const onWalk = walkDistance([mid, zFront]) <= 10.5;                       // every shop on the visitor's walk has its keeper at the counter (walk.js)
+      if (idx % 5 === 0 || onWalk) L.push(figure(rand, [u0 + 0.3 + (sw / 2 - 0.4) / 2 + 0.3, zFront + n * 1.35], faceTo(0, -n), idx % 10 === 0 ? 'woman' : 'seller'));
       else if (idx % 12 === 4) L.push(figure(rand, [mid + (rand() - 0.5) * 2, zFront - n * 1.9], faceTo(0, n), idx % 2 ? 'customer' : 'woman'));
       else if (idx % 23 === 7) L.push(figure(rand, [mid, zFront - n * 2.2], faceTo(0, n), 'hu'));
     }
@@ -104,7 +106,7 @@ function market(rect, seedBase) {
   for (let z = z0 + 16; z < z1 - 14; z += 11 + rand() * 3) { if (Math.abs(z - cz) < 13) continue; if (rand() < 0.5) continue; stall(cx - 5.0, z, Math.PI / 2, Math.floor(rand() * 1e9)); if (rand() < 0.7) stall(cx + 5.0, z + 4, -Math.PI / 2, Math.floor(rand() * 1e9)); }
   // goods laid on mats at the lane edges, a barrow and an ox-cart unloading by each gate
   for (const [gx, gz, f] of [[cx, z0 + MARKET_WALL.th + 4, 1], [cx, z1 - MARKET_WALL.th - 4, -1], [x0 + MARKET_WALL.th + 4, cz, 0], [x1 - MARKET_WALL.th - 4, cz, 0]]) {
-    const alongX = f !== 0, ox = alongX ? 2.5 : 0, oz = alongX ? 0 : 2.5;
+    const alongX = f !== 0, ox = alongX ? 6.5 : 0, oz = alongX ? 0 : 6.5;      // (the cart, mat and carter stand beside the gate's passage, never in it)
     L.push({ t: 'cart', at: [gx + ox, gz + oz], y: 0, rot: alongX ? 0 : Math.PI / 2, seed: Math.floor(rand() * 1e9), beast: 'ox' });
     L.push({ t: 'goods_mat', at: [gx - ox * 1.6, gz - oz * 1.6], y: 0, rot: 0, seed: Math.floor(rand() * 1e9), goods: ['pottery', 'baskets'] });
     L.push(figure(rand, [gx + ox * 0.2 - oz * 0.5, gz + oz * 0.2 + ox * 0.5], rand() * 6, 'labourer'));
