@@ -46,7 +46,7 @@ export function nearCore(x, z, m = 0) {
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let LOTS = null, YARDS = null;
 /** A village house must not stand on an annex (the annexes east of the monasteries reach the road to the village). */
-const clashAnnex = (r) => ANNEXES.some((a) => r[0] < a.rect[2] + 2 && r[2] > a.rect[0] - 2 && r[1] < a.rect[3] + 2 && r[3] > a.rect[1] - 2);
+const clashAnnex = (r) => ANNEXES.some((a) => r[0] < a.rect[2] + 0.5 && r[2] > a.rect[0] - 0.5 && r[1] < a.rect[3] + 0.5 && r[3] > a.rect[1] - 0.5);
 /** The village houses: rows in continuous runs, south-east of the south tank and east of the east tank; the gaps are yards (pens, the potter's). */
 export function lots() {
   if (LOTS) return LOTS;
@@ -55,18 +55,20 @@ export function lots() {
   for (let z = 92; z < 152; z += 13) {
     for (let x = 76; x < 176;) {
       const w = 8 + rand() * 3, d = Math.min(6 + rand() * 2, 124 - z > 5 ? 124 - z : 8), cx = x + w / 2, cz = z + d / 2;
-      if (!ok(cx, cz) || (x + w > 121 && x < 131) || clashAnnex([x, z, x + w, z + d])) { x += w + 0.4; continue; }
-      if (rand() < 0.07) YARDS.push({ rect: [x, z, x + w, z + 7], back: 's' });
-      else LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 'n' });
+      if (!ok(cx, cz) || (x + w > 121 && x < 131)) { x += w + 0.4; continue; }
+      const gone = clashAnnex([x, z, x + w, z + d]);                                  // (kept in the lists, with its draws and its index, but not built: the others keep their seeds)
+      if (rand() < 0.07) YARDS.push({ rect: [x, z, x + w, z + 7], back: 's', gone });
+      else LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 'n', gone });
       x += w + 0.4;
     }
   }
   for (let x = 134; x < 180; x += 13) {
     for (let z = -100; z < 88;) {
       const w = 7 + rand() * 3, d = 7 + rand() * 2, cx = x + w / 2, cz = z + d / 2;
-      if (!ok(cx, cz) || clashAnnex([x, z, x + w, z + d])) { z += d + 0.4; continue; }
-      if (rand() < 0.07) YARDS.push({ rect: [x, z, x + w, z + d], back: 'e' });
-      else LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 'w' });
+      if (!ok(cx, cz)) { z += d + 0.4; continue; }
+      const gone = clashAnnex([x, z, x + w, z + d]);
+      if (rand() < 0.07) YARDS.push({ rect: [x, z, x + w, z + d], back: 'e', gone });
+      else LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 'w', gone });
       z += d + 0.4;
     }
   }

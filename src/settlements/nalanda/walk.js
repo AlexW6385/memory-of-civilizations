@@ -25,7 +25,7 @@ export const walkDistance = (p) => Math.min(...WALK.map(([a, b]) => segDist(p, a
 
 /** The village houses that stand open to the visitor (town.js: within 175 m of the arrival, a hall at least 6.5 by 6 m), nearest first. */
 export function openHouses() {
-  return lots().filter((l) => l.rect[2] - l.rect[0] >= 6.5 && l.rect[3] - l.rect[1] >= 6
+  return lots().filter((l) => !l.gone && l.rect[2] - l.rect[0] >= 6.5 && l.rect[3] - l.rect[1] >= 6
     && Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVAL[0], (l.rect[1] + l.rect[3]) / 2 - ARRIVAL[1]) < 175)
     .sort((a, b) => Math.hypot(a.rect[0] - ARRIVAL[0], a.rect[1] - ARRIVAL[1]) - Math.hypot(b.rect[0] - ARRIVAL[0], b.rect[1] - ARRIVAL[1]));
 }
