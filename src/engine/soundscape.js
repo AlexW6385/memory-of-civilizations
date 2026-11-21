@@ -145,6 +145,7 @@ import './voices-vienna.js';
 import * as LONDON from '../settlements/london/soundmap.js';
 import './voices-amsterdam.js';
 import './voices-london.js';
+import * as KAKADU from '../settlements/kakadu/soundmap.js';
 import * as CAIRO from '../settlements/mamluk-cairo/soundmap.js';
 import * as LISBON from '../settlements/manueline-lisbon/soundmap.js';
 import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
@@ -253,7 +254,7 @@ export const PROFILES = {
   'manueline-lisbon': T({ ...MED, gull: 1, kite: 0.3 }, { animals: withLife({ donkey: 0.3, dog: 0.4, rooster: 0.3 }, { market: 1, eaves: 1, map: LISBON }), roof: 'tile', bells: 'angelus' }),
   'bali-village': T(TROP, { cicadas: 0.6, frogs: 0.9, animals: withLife({ rooster: 1, dog: 0.4 }, { market: 0.6, map: BALIVILLAGE }), roof: 'thatch' }),
   bagan: T({ sparrow: 0.8, dove: 0.8, kite: 0.4, crow: 0.6, koel: 0.3 }, { cicadas: 0.5, frogs: 0.4, animals: withLife({ rooster: 0.6, dog: 0.7, cattle: 0.5, goat: 0.4 }, { market: 0.8, canal: 0.6, map: BAGAN }), roof: 'thatch' }),
-  kakadu: T({ tropic: 0.8, warbler: 0.3, crow: 0.4 }, { cicadas: 0.4, frogs: 0.5, animals: { dog: 0.3 }, roof: 'thatch' }),
+  kakadu: T({ tropic: 0.8, warbler: 0.3, crow: 0.4 }, { cicadas: 0.4, frogs: 0.5, animals: withLife({ dog: 0.3 }, { market: 0.3, map: KAKADU }), roof: 'thatch' }),
   'benin-city': T({ tropic: 1, dove: 0.9, sparrow: 0.5, kite: 0.3 }, { animals: withLife({ goat: 0.5, rooster: 0.6, dog: 0.3 }, { market: 0.9, map: BENIN }), cicadas: 0.5, frogs: 0.7, roof: 'thatch' }),
   dogon: T({ dove: 1, kite: 0.3 }, { cicadas: 0.4, animals: withLife({ goat: 0.5, rooster: 0.4, dog: 0.3, cattle: 0.2 }, { market: 0.5, map: DOGON }), roof: 'flat' }),
   'maya-tikal': T(TROP, { cicadas: 1, frogs: 0.7, animals: withLife({ dog: 0.3 }, { market: 0.9, map: MAYATIKAL }), roof: 'thatch' }),

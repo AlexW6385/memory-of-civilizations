@@ -769,6 +769,8 @@ export function pigNeolithic(variant) {
   }
   return m;
 }
+MODELS.pig_dark = () => pigNeolithic('dark');
+MODELS.pig_pale = () => pigNeolithic('pale');
 
 // ═════════════ the Balinese village's pig and cattle (docs/settlements/bali-village.md §13.4) ═════════════
 /** A village pig of Bali, standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs): black, or black with a white belly and white socks; a long back that sags in the middle, a deep belly, short legs, a long snout with its disc, small ears pricked forward, the tail a thin curl. Back at 0.5 m. [inferred: the black, sway-backed village pig of Bali; no measurement sourced] */
@@ -797,8 +799,6 @@ export function pigBali(variant) {
   }
   return m;
 }
-MODELS.pig_dark = () => pigNeolithic('dark');
-MODELS.pig_pale = () => pigNeolithic('pale');
 
 /** A rook on the ground (the fowl's rig: parts 1 neck, 2 head, 3 tail, 4 5 legs, so that it walks and pecks as the fowl do): all black with a purple sheen, a long straight pale bill, a bare grey-white patch at its base, black legs; the fowl's own model recoloured. */
 export function rook() {

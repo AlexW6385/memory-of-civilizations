@@ -1,6 +1,7 @@
 // Ubirr about AD 1000 (docs/settlements/kakadu.md §1–§6): the outlier's blocks, the Main Gallery and the small shelter with their painted
 // walls and ceilings, the rock steps to the lookout, boulders at the foot.
-import { MAIN, SMALL, BLOCKS, FLIGHTS, height, rng, inRect, TRACKS, ROUTE } from './layout.js';
+import { MAIN, SMALL, BLOCKS, FLIGHTS, HOUSES, houseRot, height, rng, inRect, TRACKS, ROUTE } from './layout.js';
+import { HOUSE } from '../../styles/kakadu/house.js';
 import '../../styles/kakadu/index.js';
 import { faceSpots } from '../../styles/kakadu/outcrop.js';
 
@@ -43,7 +44,16 @@ const mx = (MAIN.x0 + MAIN.x1) / 2;
 const WALK = ROUTE.flatMap((p) => (p[0] === 10 && p[1] === -31 ? [[...p], [10, -27]] : [[...p]]));
 // and into three of the walk-in shelters (docs §5c): the brush shade west, the bark house east, the bark house by the west camp
 const into = (pts) => Object.assign(pts, { y0: height(0, -14) });
-const walks = [Object.assign(WALK, { y0: height(mx, -14) }), into([[0, -14], [-8, -10], [-18, -6.5], [-20.4, -6.5], [-22, -6.1]]), into([[0, -14], [10, -11], [18.6, -8.7], [19.9, -8.4], [21.8, -8]]), into([[0, -14], [-20, -12], [-34, -9], [-36.4, -7.7], [-37.8, -8.9]])];
+// every one of the nine walk-in shelters, entered from the arrival by its own door (the door is local +z, towards the point the shelter faces): out to a point three metres before the door on its axis, then in to just inside it
+const enter = (Hs, via = []) => {
+  const r = houseRot(Hs), sn = Math.sin(r), cs = Math.cos(r), B = HOUSE[Hs.kind], at = (d) => [Hs.at[0] + sn * d, Hs.at[1] + cs * d];
+  return into([[0, -14], ...via, at(B.hd + 3.2), at(B.hd + 0.8), at(1.0)]);
+};
+const VIA = { 0: [[-16, -9], [-16.8, -8.1], [-20.9, -10]], 2: [[-0.2, -8.3], [-10.3, 8.1], [-24, 18.9]], 7: [[7.9, -9.1]] };
+const shelterWalks = HOUSES.map((Hs, i) => enter(Hs, VIA[i] ?? []));
+// and under the small rock shelter's overhang (hand stencils), by the way along the foot
+const smallWalk = into([[0, -14], [-30, -20], [-52, -22], [-53, -27], [-53, -33]]);
+const walks = [Object.assign(WALK, { y0: height(mx, -14) }), ...shelterWalks, smallWalk];
 
 export const ubirr = {
   id: 'kakadu-ubirr',
