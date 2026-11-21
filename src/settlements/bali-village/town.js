@@ -4,6 +4,7 @@
 import { compoundParts } from '../../styles/balinese/compound.js';
 import './walkwork.js';
 import './wear.js';
+import { onWalk, shopRoute, houseRoute } from './walkroutes.js';
 import { RADIUS, CORE, WANTILAN, KULKUL, BANYAN, CHANNEL_X, PURA, DALEM_C, lots, lotFrame, outward, height, flooded, TREAD, pancuranAt } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -66,6 +67,17 @@ function village() {
   // penjor and stall's steps on that side (the visitor's lanes)
   for (const z of pancuranAt()) E.push({ t: 'bali_pancuran', at: [-3.3, z], y: 0, turn: -1 });
   E.push({ t: 'bali_wear', damp: pancuranAt().map((z) => [-3.7, z, 0]) });
+  // the ways feet have worn on the walk: from the street through each gate on the walk, and to each stall's steps (the first legs of the visitor's own routes)
+  {
+    const paths = [];
+    for (const l of lots()) {
+      if (!onWalk(l) || l.front === 'e') continue;   // (the west lots' gates are across the channel: their footbridges are the worn way)
+      const r = l.shop ? shopRoute(l) : null, h = houseRoute(l);
+      if (r) paths.push([r[0][0], r[0][1], r[1][0], r[1][1], height((r[0][0] + r[1][0]) / 2, (r[0][1] + r[1][1]) / 2)]);
+      if (h) paths.push([h[0][0], h[0][1], h[1][0], h[1][1], height((h[0][0] + h[1][0]) / 2, (h[0][1] + h[1][1]) / 2)]);
+    }
+    E.push({ t: 'bali_wear', paths });
+  }
   // the crossing by night: a resin torch at each corner of the crossing (nightlight.js)
   for (const [x, z] of [[-3.0, 5.0], [4.4, 5.0], [-3.0, 14.0], [4.4, 14.0]]) E.push({ t: 'bali_obor', at: [x, z], y: 0, h: 2.2, seed: Math.round(z) });
   // offerings on the ground before the temple's stair and at the crossing

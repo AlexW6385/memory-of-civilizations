@@ -11,7 +11,17 @@ import { hashAt } from './nightlight.js';
  * bali_wear: { lane: [[x, z0, z1, y]…] (a worn lane along z at x, from z0 to z1, ground level y), damp: [[x, z, y]…] (a damp patch about a point) } — the lane is
  * pieces 1.1–2.3 m long, 0.6–0.95 m wide, 12 mm proud, with a hand's gap between; a damp patch is a few overlapping slabs of the damp plaster's green-grey.
  */
-function wear({ lane = [], damp = [] }, ctx) {
+function wear({ lane = [], damp = [], paths = [] }, ctx) {
+  // paths: [[xa, za, xb, zb, y]…] — an axis-aligned way worn by feet: dark slabs 0.7–1.0 m wide across it, gapped, 10 mm proud (the gate's foot and the way to a stall's steps)
+  for (const [xa, za, xb, zb, y] of paths) {
+    const alongX = Math.abs(xb - xa) > Math.abs(zb - za), a = alongX ? xa : za, b = alongX ? xb : zb, lo = Math.min(a, b), hi = Math.max(a, b), c0 = alongX ? za : xa;
+    for (let t = lo; t < hi - 0.45;) {
+      const l = 0.55 + 0.4 * hashAt(xa + t, za + t, 61), w = 0.7 + 0.3 * hashAt(xa - t, za, 62), c = c0 + (hashAt(xa, za + t, 63) - 0.5) * 0.25;
+      if (t + l > hi) break;
+      ctx.bag.add('andesite', alongX ? box(t, y, c - w / 2, t + l, y + 0.01, c + w / 2) : box(c - w / 2, y, t, c + w / 2, y + 0.01, t + l));
+      t += l + 0.08 + 0.2 * hashAt(xa + t, za, 64);
+    }
+  }
   for (const [x, za, zb, y] of lane) {
     const lo = Math.min(za, zb), hi = Math.max(za, zb);
     for (let z = lo + 0.3; z < hi - 0.5;) {
