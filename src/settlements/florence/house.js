@@ -286,13 +286,30 @@ export function casaF(el, { bag, col }) {
     }
     // the tower's top floor: windows (shuttered) between the corbels
     if (tow) { for (let i = 0; i < nbU; i++) { const u = bu(i); Lu2.box('wood_dark', u - 0.4, ys[top] + 0.9, -0.03 - TJ, u + 0.4, ys[top] + 2.2, 0.02 - TJ); } }
-    if (quoins && !lite) for (let s = 1; s < top; s++) for (let k = 0, yy = ys[s]; yy < ys[s + 1] - 0.4; k++, yy += 0.5) { const wq = k % 2 ? 0.7 : 0.45; Lu2.box(SER, 0, yy, -0.03, wq, yy + 0.44, 0.07); Lu2.box(SER, Lu - (k % 2 ? 0.45 : 0.7), yy, -0.03, Lu, yy + 0.44, 0.07); }
+    if (quoins && !lite) for (let s = 1; s < top; s++) for (let k = 0, yy = ys[s]; yy < ys[s + 1] - 0.6; k++, yy += 0.75) { const wq = k % 2 ? 0.7 : 0.45; Lu2.box(SER, 0, yy, -0.03, wq, yy + 0.69, 0.07); Lu2.box(SER, Lu - (k % 2 ? 0.45 : 0.7), yy, -0.03, Lu, yy + 0.69, 0.07); }
     if (frieze) { Lu2.box('plaster_ochre', 0, H - 1.05, -0.03, Lu, H - 0.62, 0.03); for (let u = 0.4; u < Lu - 0.3; u += 0.8) Lu2.box(wall, u, H - 1.0, 0.03, u + 0.4, H - 0.67, 0.045); }
     // string courses at the floors, the plinth, the eave
     if (!pal) for (let s = 1; s < top; s++) Lu2.box(SER, -0.05, ys[s] - 0.1, -0.03, Lu + 0.05, ys[s] + 0.06, 0.12);
     if (main && jet) { for (let u = 0.4; u < Lg - 0.2; u += 0.9) { Lc.box(W, u - 0.09, gh - 0.55, -0.02, u + 0.09, gh, 0.5 + 0.0); Lc.box(TM, u - 0.1, gh - 0.55 + 0.45, -0.02, u + 0.1, gh, jet); } }
     if (tow && main) for (let u = 0.3; u < Lu - 0.2; u += 0.8) { Lu2.box(PF, u - 0.12, ys[top] - 0.5, -0.03, u + 0.12, ys[top], TJ); }
 
+    // ground storey of a flank that gives on a street or a square: barred windows high in the wall, a closed side door, the worn step (a flank was not blind)
+    if (!main && !tow && !pal) {
+      const L = Lg, dh = 2.25, doorW = 1.35, hn = deep ? 2 : 4;
+      const hasDoor = L > 5.5 && rand() < 0.55, du = L * (0.3 + rand() * 0.4);
+      if (hasDoor) {
+        Lc.add(O, fl(archOutline(du, 0.15, doorW, dh, 'round', hn), 0.01));
+        Lc.add(SER, xr(archOutline(du, 0.0, doorW + 0.4, dh, 'round', hn), [archOutline(du, 0.15, doorW, dh, 'round', hn)], -0.03, 0.12));
+        Lc.box(W, du - doorW / 2, 0.15, 0.0, du - doorW / 2 + 0.06, dh, 0.7 * doorW); Lc.box(SER, du - doorW / 2 - 0.3, -0.08, 0.1, du + doorW / 2 + 0.3, 0.1, 0.7);
+        if (!simple && !deep) Lc.box('plaster_damp', du - 0.42, 0.1, 0.3, du + 0.42, 0.108, 0.62);
+      }
+      const nwf = Math.max(0, Math.round((L - 2) / 3.6));
+      for (let i = 0; i < nwf; i++) {
+        const u = (i + 0.5) * L / nwf; if (hasDoor && Math.abs(u - du) < 1.7) continue;
+        Lc.add(O, fl([[u - 0.35, 1.7], [u + 0.35, 1.7], [u + 0.35, 2.6], [u - 0.35, 2.6]], 0.01)); Lc.box(SER, u - 0.45, 1.55, -0.03, u + 0.45, 1.7, 0.16);
+        if (!deep) for (let k = -1; k <= 1; k++) Lc.box(IR, u + k * 0.22 - 0.015, 1.7, 0.02, u + k * 0.22 + 0.015, 2.6, 0.05);
+      }
+    }
     // ground storey: only the street front
     if (main) {
       const L = Lg, holes = [];
@@ -389,7 +406,7 @@ export function casaF(el, { bag, col }) {
         if (el.plaster) for (let k = 0, n = 1 + Math.floor(L / 2.5); k < n; k++) { const u = 0.3 + rand() * (L - 0.9), h0 = ys[Math.min(top, 2)] - rand() * 2.5, a = 1.2 + rand() * 1.5, b = 0.2 + rand() * 0.3; if (!lite) Lu2.add('plaster_streak', flr(u, h0 - a, u + b, h0, 0.0265)); }
       }
       if (!pal && !tow && rand() < 0.38) { const u = Math.min(L - 0.5, Math.max(0.5, L / 2 + (rand() < 0.5 ? -1 : 1) * (0.2 + rand()))); Lc.box(SER, u - 0.28, gh - 0.95, 0.0, u + 0.28, gh - 0.35, 0.09); Lc.box(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green'][Math.floor(rand() * 4)], u - 0.2, gh - 0.88, 0.09, u + 0.2, gh - 0.5, 0.11); Lc.box('cloth_white', u - 0.2, gh - 0.73, 0.1, u + 0.2, gh - 0.65, 0.12); }
-      if (!tow && rand() < 0.3) { const u = rand() < 0.5 ? 0.35 : L - 0.35; Lc.box(IR, u - 0.02, 3.3, 0.0, u + 0.02, 3.5, 0.75); Lc.box(IR, u - 0.015, 3.5, 0.7, u + 0.015, 4.0, 0.74); Lc.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.12, 0.2], [0.001, 0.28]], 6, null, u, 3.1, 0.72)); lampLight(Lc, u, 3.24, 0.72, 0, 1); }
+      if (!tow && (pal || rand() < 0.45)) for (const u of pal ? [0.35, L - 0.35] : [rand() < 0.5 ? 0.35 : L - 0.35]) { Lc.box(IR, u - 0.02, 3.3, 0.0, u + 0.02, 3.5, 0.75); Lc.box(IR, u - 0.015, 3.5, 0.7, u + 0.015, 4.0, 0.74); Lc.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.12, 0.2], [0.001, 0.28]], 6, null, u, 3.1, 0.72)); lampLight(Lc, u, 3.24, 0.72, 0, 1); }
       if (!pal && !tow && !shop && rand() < 0.12) {
         // the tabernacolo: a niche with a gabled stone frame, a blue-robed Madonna, a lamp below
         const u = L - 0.9; Lu2.box(PF, u - 0.5, ys[1] + 0.9, 0.0, u + 0.5, ys[1] + 2.6, 0.18); Lu2.box(O, u - 0.3, ys[1] + 1.1, 0.18, u + 0.3, ys[1] + 2.2, 0.2); Lu2.box('cloth_blue', u - 0.12, ys[1] + 1.15, 0.14, u + 0.12, ys[1] + 1.8, 0.2); Lu2.box('gilt_bronze', u - 0.07, ys[1] + 1.8, 0.14, u + 0.07, ys[1] + 1.98, 0.2);
