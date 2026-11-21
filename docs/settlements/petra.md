@@ -212,3 +212,28 @@ Sources added:
 
 Sources added:
 - [Petra — ASCE Historic Landmarks](https://www.asce.org/about-civil-engineering/history-and-heritage/historic-landmarks/petra)
+
+## 23. Match to the reference (round 7, 2026-11-20): the visitor's walk
+
+- **The walk** [inferred from arrivals.js and the layout]: from the arrival at the Siq's mouth (146, −160) across the forecourt to the Khazneh's great door and hall; up the Outer Siq past the Street of Façades, the theatre and the eight houses of its east edge (§19); out into the valley at the colonnaded street's east end by the Nymphaeum; west along the south portico past its shops, the Great Temple's propylaeum and the garden's stair; the triclinium on the north slope; the nearest houses of the valley. Petra's shops, houses, yards and street furniture were opened and furnished in earlier rounds (§15, §16, §18, §19); nothing there is only a closed front.
+- **Routes** (`walkroutes.js`, on the landmark plan's `walks`): into every shop of the street (28), the eight houses of the Outer Siq, four houses of the valley (room houses to the middle of the room, court houses through the gate into the court), the Khazneh's hall and the triclinium: 37 routes walked by `walk-check`. A customer standing in the door's lane of three shops (the figures of shops.js and dressing.js) was moved 1.5–1.7 m to the side of the door [inferred: nothing of history changes].
+- **Not done:** shop signs and tablets carry no letters (§22 of the style's `stele` is plain strokes): Nabataean Aramaic can be written correctly only with a checked glyph list, which the shell could not fetch.
+
+## 24. Night (round 7; `nightlight.js`)
+
+- **What lit Petra at night** [inferred throughout; no source in the shell]: the clay oil lamp (the mould-made Nabataean lamp), set in niches and hung in rooms; hearth fires in houses and tents; bronze lampstands and braziers in the temples (already in §18); the fire on the great altar before Qasr al-Bint; the potter's kiln; a caravan's fire at its halt. Nothing electric, no street lamps (none is attested for the colonnaded street).
+- **Built** (all in the engine's `halo` material, at night only): a glow, floor pool and lit windows and door in 42 % of the valley's houses and all eight of the Outer Siq's (hash of the house's place); the same for 40 % of the street's shops (the rest shuttered); halos for every lamp of the Khazneh, the tomb chambers and the triclinium; lampstands and braziers of the temples; the baetyl shrines' lamps; a votive lamp in a share of the north portico's niches; the tents' hearths with the black cloth lit from within, the kiln's firing mouth; the altar's fire; six open fires (`petra_fire`: stone ring, logs, flame) at the caravan's halt in the forecourt and by the wayfarers in the Siq and the Outer Siq. Day view unchanged.
+
+## 25. Sound (round 7; `soundmap.js`, `src/engine/voices-petra.js`)
+
+- Voices (all synthesised, prefix `pt`) [inferred]: lyre, reed pipe, frame drum (the dossier's §9 instruments; Strabo's two musicians, §14), camel groan and a caravan's wooden bells, wind in the Siq, water in the rock channel and clay pipe (§10), the Nymphaeum's spouts, saddle quern, sellers' cries (incense, spice, water), Tristram's starling, the altar's chant, jackal, eagle-owl.
+- Placed: the channel and wind along the Siq all day; the fountain at the Nymphaeum and three basins; sellers under the colonnade by day; chant and frame drum at the great altar and the Great Temple at dawn and dusk (no bells: none attested); lyre and pipe in the triclinium in the evening; frame drum and pipe at the caravan's fire; camels at the halt and the Nymphaeum; caravans passing on the road Siq - forecourt - Outer Siq - street; trade sounds in 28 shops, houses, potters' and cistern yards and tents; jackals and owls at night. 61 sites, 41 emitters, rooms with their hush; no bells and no call to prayer in the profile.
+
+## 26. Animals as critters (round 7; `fauna.js`)
+
+- Rigged animals with behaviour [inferred: that these species stood at these places in AD 50; the black goat after the black goat-hair tents, §18]: dogs at two Outer Siq houses and at the tents; black and white goats at two tents' yards and three pens; a rooster and three hens before one Outer Siq house; a cat on each of two benches of the south portico; rock doves on the paving by the Nymphaeum, the forecourt's basin and the altar's stair; house swallows' nests under the cornices of four Outer Siq houses, birds sweeping out from them. 28 critters; none enters a house or a walk route (tests/petra-critters.test.mjs). Camels, donkeys and the caravan's dog remain static life figures (no camel rig exists).
+
+## 27. Wear and writing (round 7; `wear.js`)
+
+- **Wear** [inferred]: in a dry stone country the marks of use are polish and wear, not moss or damp: the doorstep of every house, the gate sill and flags of a court house, the way across the floor to the range's door, and each shop's threshold and the way in, laid as a patch of trodden dust and plaster (the style's `mud_plaster`, a material the houses already hold, so that it costs no draw) of a few hundredths of a metre, its width varying by the hash of the place. The style's existing dress (§18: runnels under windows, soot over doors, drifted sand and stones at the foot, mud and lime patches) is kept.
+- **Writing:** none added. The shop signs and the steles' lines remain plain strokes (§22). Nabataean Aramaic could be written only from a checked glyph table (Unicode block 10880), which could not be fetched here; a wrong letter is worse than none.

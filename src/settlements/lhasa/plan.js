@@ -7,7 +7,9 @@
 
 import { SHOL, hill } from './layout.js';
 import { openWalks } from './upstairs.js';
+import { shopWalks, placeWalks } from './openwalk.js';
 import { ground } from './ground.js';
+import './nightlight.js';
 
 const E = [];
 /** The ground under a block's south face (the lowest of its edge), a little below it. */
@@ -191,6 +193,8 @@ const walks = [[[-1, 228], [-1, 140], [-1, 58], [-103, 50], [-103, 44], [-137, 4
 walks[0].y0 = 0;
 // the upper floors of the houses opened (upstairs.js): from the lane through the gate, up the ladder to the main room, into the weaving room, up to the roof and the roof room
 walks.push(...openWalks((x, z) => ground.height(x, z)));
+// the street's shops and tea houses, the printing house and the chapel of the great wheel (openwalk.js)
+walks.push(...shopWalks().map((w) => Object.assign(w, { y0: 0 })), ...placeWalks());
 
 export const potala = {
   id: 'lhasa-potala',

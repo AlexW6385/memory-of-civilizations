@@ -2,6 +2,7 @@
 // mouth, the Street of Façades, the theatre, the Royal Tombs in the east cliff, the colonnaded
 // street, the Great Temple and Qasr al-Bint.
 
+import { allRoutes } from './walkroutes.js';
 import { PLAZA, OUTER, SIQ, STREET, GREAT_TEMPLE, TEMENOS, QASR, GARDEN, TRICLINIUM, floorY, RIM, VALLEY, SIQ_LINE, SIQ_WALL, KHAZNEH_ROCK, THEATRE, height, pathDist, shopUnits } from './layout.js';
 
 const E = [];
@@ -174,6 +175,7 @@ for (const u of shopUnits()) rooms.push(room(`shop ${u.i}`, [u.x0 + 0.4, u.z0, u
 // (the way down the Outer Siq follows its own line, OUTER.path, round the theatre's cliff)
 const walks = [[[180, -152], [150, -161], [132, -160], OUTER.path[1], OUTER.path[2], [86, -72], OUTER.path[3], OUTER.path[4], [63, -6], [63, 12], [48, 12], [0, 12]]];
 walks[0].y0 = 0;
+for (const r of allRoutes()) { walks.push(r.route); walks[walks.length - 1].y0 = r.y0; }
 
 export const khazneh = {
   id: 'petra-khazneh',
