@@ -242,6 +242,17 @@ Measured with tools/sound-render.mjs (spectra and envelopes plausible: the chant
 
 29 rigged critters on the way and at its lodgings, none in a stair's lane, a door or the way: five dogs (two on the forecourt, three before lodgings), two cats on verandas, a cock and three hens each in the yards of three lodgings, six doves (white and grey) at the way's two shrines and on the forecourt, two goats tethered at the verge, swallows' mud nests under the front eaves of three lodgings. The village animals of Java; the swallow's nest under an eave is the bird's habit [inferred: nothing here is sourced; the reliefs' fauna not consulted]. No ducks (no water in this ground). Egrets, swallows, crows and sparrows as before.
 
+### 20.5 Wear and writing (`wear.js`)
+
+| Feature | What is built | Basis |
+|---|---|---|
+| Trodden earth | At the foot of every house's stair a patch of bare earth (the style's `mudbrick`, 1.9 × 1.4 m, edges set by the hash of its place) where the household's feet come down; before each stall's counter a strip of it 1.8 m deep where its buyers stand | wet feet on bare ground make earth; the damp climate (§13) leaves no dust [inferred] |
+| Writing | none | The Old Javanese and Sanskrit scripts of the time (Kawi, Siddham) could not be set down here with every letter verified, so no inscription, board or tablet is shown; stall signs stay cloth |
+
+### 20.6 The landmark
+
+Not done in this pass (time went to items 1–5). Still short of §5 at the landmark: the 2,672 panels each their own subject, the measured profile of the wall mouldings, Mendut and Pawon, the volcanoes, water (§16).
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)
