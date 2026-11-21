@@ -126,7 +126,8 @@ export function camp() {
     }
     // a windbreak of hurdles on the windward side (the wind is from the south-west: ENV wind [0.9, 0.3])
     const wa = Math.PI + 0.3 + (rand() - 0.5) * 0.5, wx = cx + Math.cos(wa) * 3.6, wz = cz + Math.sin(wa) * 3.6, wl = 2.4 + rand() * 1.2;
-    if (ok(wx, wz, 1)) { const p0 = [wx - Math.sin(wa) * wl, wz + Math.cos(wa) * wl], p1 = [wx + Math.sin(wa) * wl, wz - Math.cos(wa) * wl]; N.push({ t: 'hurdle', a: p0, b: p1, y: Math.min(height(...p0), height(...p1)), h: 1.2, seed: 5 }); }
+    const laneHit = (p0, p1) => HUTS.some((h) => { const c = Math.cos(h.yaw), s = Math.sin(h.yaw); for (let d = h.r - 0.5; d <= h.r + 4.5; d += 0.5) { const px = h.c[0] - d * s, pz = h.c[1] + d * c, vx = p1[0] - p0[0], vz = p1[1] - p0[1], t = Math.max(0, Math.min(1, ((px - p0[0]) * vx + (pz - p0[1]) * vz) / (vx * vx + vz * vz))); if (Math.hypot(p0[0] + vx * t - px, p0[1] + vz * t - pz) < 1.5) return true; } return false; });   // a windbreak never shuts a hut's door lane (§11a)
+    if (ok(wx, wz, 1)) { const p0 = [wx - Math.sin(wa) * wl, wz + Math.cos(wa) * wl], p1 = [wx + Math.sin(wa) * wl, wz - Math.cos(wa) * wl]; if (!laneHit(p0, p1)) N.push({ t: 'hurdle', a: p0, b: p1, y: Math.min(height(...p0), height(...p1)), h: 1.2, seed: 5 }); }
     const nP = 4 + Math.floor(rand() * 4);
     for (let k = 0; k < nP; k++) {
       const t = yaw + (k / nP) * 6.28 + rand() * 0.3, r = 1.9 + rand() * 0.5, at = [cx + Math.cos(t) * r, cz + Math.sin(t) * r];
@@ -288,6 +289,8 @@ export function village() {
     const ch = P(28.4, 16.6); person(ch, face(ch, kn), { pose: 'stand', h: 0.6 });
     const wm = P(41, 17); person(wm, face(wm, [0, 0]) + 0.4, { dress: 'wrap', carry: 'pot' });
     const dg = P(30.5, 20.5); L.push({ t: 'animal', kind: 'dog', at: dg, y: height(...dg), rot: 2, seed: 77 });
+    // the dressing gang's night fire (§12a), the people who keep it are added last, below
+    const nf = P(30, 20); C.push({ t: 'feast_fire', c: nf, r: 2.2, y: height(...nf), yaw: 0.9, pig: false, seed: 4243 });
   }
   // a sarsen being hauled up the Avenue on a sledge-ladder over rollers: the team of men and oxen ahead of it hauling toward the circle, the
   // rollers and the lever men behind, children running alongside; a second knot of people at the Heel Stone with their gifts
@@ -301,6 +304,11 @@ export function village() {
     for (const [u, v] of [[118, 4.8], [121, 5.6]]) { const at = P(u, v); person(at, rand() * 6.28, { pose: 'stand', h: 0.6 }); }
     // pilgrim parties and offerings between the entrance and the Heel Stone
     for (const [u, v, n] of [[60, 5.2, 3], [66, -4.4, 2], [88, 5.5, 3], [92, -5.4, 2]]) for (let k = 0; k < n; k++) { const at = P(u + (k - 1) * 1.2, v + (rand() - 0.5) * 1.4); person(at, face(at, [0, 0]) + (rand() - 0.5) * 0.8, { pose: k === 0 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' }); }
+  }
+  // the night fire's company, last of all so no earlier figure's seed moves (§12a)
+  {
+    const r4 = rng(2613), nf = P(30, 20);
+    [0.3, 2.6, 4.4].forEach((t, k) => { const at = [nf[0] + Math.cos(t) * 2.8, nf[1] + Math.sin(t) * 2.8]; L.push({ t: 'figure', at, y: height(...at), rot: face(at, nf), seed: Math.floor(r4() * 1e9), dress: r4() < 0.5 ? 'robe' : 'tunic', cloth: CLOTH[Math.floor(r4() * CLOTH.length)], cloth2: CLOTH[Math.floor(r4() * CLOTH.length)], skin: 'skin_light', hat: 'none', pose: k === 0 ? 'squat' : 'sit_ground', nightKeep: 1 }); });
   }
   const rooms = H.map((h, i) => { const k = h.s / 2 / (Math.abs(Math.cos(h.yaw)) + Math.abs(Math.sin(h.yaw))) - 0.15; return { id: 'house ' + i, rect: [h.c[0] - k, h.c[1] - k, h.c[0] + k, h.c[1] + k], y: h.y, kind: 'hall' }; });
   return [base('stonehenge-yards', Y, 'neolithic', rooms), base('stonehenge-crafts', C, 'neolithic'), base('stonehenge-scrub', S, 'neolithic'), base('stonehenge-village-life', L, 'life')];
@@ -318,8 +326,17 @@ function clearArrival(plans) {
   }
   return plans;
 }
+/** Who stays out at night (§12a): those sitting at a fire and the households of the open houses, whose hearths are lit; set on the elements, no seed moves. */
+function keepAtFires(plans) {
+  const fires = [], open = [];
+  for (const p of plans) for (const e of p.elements) { if (e.t === 'feast_fire') fires.push(e.c); if (e.t === 'camp_hut' && e.fire) open.push([e.c, 2.6]); }
+  for (const h of houses()) if (h.open) open.push([h.c, 3.4]);
+  for (const f of fires) open.push([f, 4.6]);
+  for (const p of plans) for (const e of p.elements) if (e.t === 'figure' && e.nightKeep === undefined && open.some(([c, r]) => Math.hypot(c[0] - e.at[0], c[1] - e.at[1]) < r)) e.nightKeep = 1;
+  return plans;
+}
 export async function town() {
-  return clearArrival([
+  return keepAtFires(clearArrival([
     base('stonehenge-timber-circle', timberCircle(), 'neolithic'),
     // the Avenue's twin banks with their ditches outside, from the entrance out to the edge of the settlement, and the Heel Stone's ring ditch (§1g)
     base('stonehenge-earthworks', [{ t: 'earthwork', grids: [avenueGrid(46, RADIUS - 40, -11.8, -4.6), avenueGrid(46, RADIUS - 40, 4.6, 11.8), ringGrid(avenue2xz(HEEL.d), 2.6, 4.9, 0.4, 48)] }], 'neolithic'),
@@ -328,10 +345,19 @@ export async function town() {
     ...feast(),
     ...camp(),
     ...village(),
-  ]);
+  ]));
 }
 void avenue;
 
+/** The camp huts a visitor can enter (§11a): the walk from 3.5 m before the doorway, through it, to just short of the hearth; huts left empty too. */
+export function campHutWalks() {
+  const fires = camp().flatMap((p) => p.elements.filter((e) => e.t === 'feast_fire').map((e) => e.c)), seen = new Set();
+  return HUTS.filter((h) => { const k = h.c.join(); if (seen.has(k)) return false; seen.add(k); return true; }).map((h) => {
+    const c = Math.cos(h.yaw), s = Math.sin(h.yaw), W = (u, v) => [h.c[0] + u * c - v * s, h.c[1] + u * s + v * c];
+    let a = 3.5; while (a > 1.0 && fires.some((f) => Math.hypot(f[0] - W(0, h.r + a)[0], f[1] - W(0, h.r + a)[1]) < 3.4)) a -= 0.5;       // starts short of the camp's fire when it stands in the way
+    return Object.assign([W(0, h.r + a), W(0, h.r + 0.5), W(0, h.r - 0.8), W(0, 1.2)], { y0: h.y + 0.05 });
+  });
+}
 let SPOTS = null;
 /** Where the sounds of the town are made (soundmap.js): the open fires, the places of work in the open, the animals; from the same plans the town is built from. */
 export function soundSpots() {

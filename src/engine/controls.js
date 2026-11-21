@@ -188,17 +188,18 @@ export class Controls {
     const alt = this.glide ? this.feet.y - this.collide.terrain(this.feet.x, this.feet.z) : 0;
     this.altitude = alt;
     const fs = flightSpeeds(alt);
-    // (a hop is not a flight: within 1.5 m of what one would land on the pace is the walker's, and it
-    // grows into the flying pace over the next few metres of height)
+    // (the pace grows with the height above what one would land on, without a step: a little over
+    // the walker's just off the ground, most of the flying pace by ten metres, all of it by thirty)
     let air = 0;
     if (this.glide) {
       const C = this.collide, F = this.feet;
       const under = Math.max(C.groundAt(F.x, F.z, F.y + 0.01), C.topAt ? C.topAt(F.x, F.z, 0.18, F.y + 0.01) : -Infinity);
-      const k = Math.max(0, Math.min(1, (F.y - under - 1.5) / 4.5));
-      air = k * k * (3 - 2 * k);
+      air = 0.3 + 0.7 * (1 - Math.exp(-Math.max(0, F.y - under) / 8));
     }
     const ground = run ? RUN : WALK;
     const speed = this.glide ? ground + ((run ? fs.fast : fs.fly) - ground) * air : ground;
+    // (rising and falling at the very pace one moves at, Shift and the height's curve included)
+    if (this.glide) fs.vertical = speed;
     this.feet.fs = fs; this.feet.cruise = this.cruise;
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
     let dx = (-sin * f + cos * s) * speed * dt, dz = (-cos * f - sin * s) * speed * dt;

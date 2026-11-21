@@ -137,6 +137,11 @@ function monks() {
   L.push({ t: 'figure', at: at(-7.7, 14.8), y: F + 0.3, rot: faceTo([1, -0.45]), seed: 8572, dress: 'robe', cloth: 'clay_robe', cloth2: 'clay_robe', over: 'sash', skin: 'stucco_warm', hair: 'shaven', hat: 'none', pose: 'cross', arms: 'clasp', h: 1.66, beard: false });
   // in the rooms of the quarters (cells.js)
   L.push(...cellPeople(at, (pt, y, dir, extra = {}) => ({ t: 'figure', at: pt, y, rot: faceTo(dir), seed: seed++ * 7919, dress: 'robe', cloth: seed % 3 ? 'cloth_black' : 'cloth_grey', cloth2: 'cloth_brown', skin: 'skin_light', hat: 'cap', hatMat: 'skin_light', carry: 'none', pose: 'stand', ...extra })));
+  // the night's keepers, added last (their own fixed seeds; nothing above moves): two monks kneeling in prayer before the Maitreya and the Amitabha
+  // in the Great East Hall (off the way from the middle door to the altar), and the watch on the platform before it, a staff in his hand [inferred: a Tang
+  // monastery's night office and watch; no source for 857 Wutai]
+  for (const [z, sd] of [[-5.04, 8573], [5.04, 8574]]) L.push({ t: 'figure', at: at(-5.0, z), y: F, rot: faceTo([1, 0]), seed: sd, dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_brown', skin: 'skin_light', hair: 'shaven', hat: 'none', carry: 'none', pose: 'kneel', arms: 'pray', nightKeep: 1 });
+  L.push({ t: 'figure', at: at(-12.4, -7.0), y: T + 1, rot: faceTo([-1, 0]), seed: 8575, dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_brown', skin: 'skin_light', hair: 'shaven', hat: 'none', carry: 'staff', pose: 'stand' });
   return { id: 'tang-wutai-monks', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-80, 0], facing: 'e' } };
 }
 export const people = monks();
