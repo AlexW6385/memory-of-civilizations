@@ -133,7 +133,7 @@ function nightTown(el, { bag }) {
   { const [x0, z0, x1, z1] = PALISADE, h = 4.5, every = 26, sides = [[[x0, z0], [x1, z0]], [[x1, z0], [x1, z1]], [[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]]];
     for (const [a, b] of sides) {
       const Ls = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / Ls, uz = (b[1] - a[1]) / Ls, n = Math.round(Ls / every);
-      for (let k = 0; k < n; k += 3) { const s1 = (k + 1) * Ls / n, px = a[0] + ux * s1, pz = a[1] + uz * s1, bx = px + uz * 1.8, bz = pz - ux * 1.8, yb = Math.min(height(bx, bz), height(px, pz)); H.ball(bx, yb + h + 0.8, bz, 1.1, 0.55); }
+      for (let k = 0; k < n; k += 3) { const s1 = (k + 1) * Ls / n, px = a[0] + ux * s1, pz = a[1] + uz * s1, bx = px + uz * 1.8, bz = pz - ux * 1.8, yb = Math.min(height(bx, bz), height(px, pz)); H.ball(bx + ux * 1.3, yb + h + 1.5, bz + uz * 1.3, 1.1, 0.6); H.floor(bx + ux * 1.3, yb + h + 0.22, bz + uz * 1.3, 1.6, 1.6, 8, 0.5); }
     } }
   H.flush(bag);
 }
