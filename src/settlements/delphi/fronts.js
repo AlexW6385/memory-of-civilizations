@@ -38,7 +38,7 @@ export function fronts() {
     }
     // the open houses' shop: goods on the front of the counter, a customer in the street
     if (open) {
-      const [px, py] = at((K.so[0] + K.so[1]) / 2, -1.3);
+      const cu = Math.max(0.7, Math.min(L - 0.7, K.du > (K.so[0] + K.so[1]) / 2 ? K.so[0] - 1.0 : K.so[1] + 1.0)), [px, py] = at(cu, -1.4);   // (beside the opening, not in its lane)
       E.push({ t: 'figure', at: px, y: py, rot: F.yaw, seed: sd(), skin: 'skin_medium', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_brown', over: 'cloak', hair: 'short', beard: 1, hat: 'none', pose: 'talk' });
     }
     if (l.tier < 2) { const u = spot(1); if (u > 0 && R() < 0.6) put('firewood', u, -0.35, { len: 1.5 }); continue; }

@@ -2,6 +2,7 @@
 // terraces and the canyon, condors turning high over the peaks (the crow's black form stands in), rufous-collared sparrows
 // on the plaza's paving and the terraces' walls. No water in the disc: no fish.
 import { PLAZA, SITE, HILL, KALLANKA, kanchas } from './layout.js';
+import { openKanchas } from './walkroutes.js';
 import { ground } from './ground.js';
 
 const fish = [];
@@ -27,4 +28,19 @@ for (const [i, K] of kanchas().entries()) {
   perches.push({ kind: 'sparrow', x: g[0], z: g[1], y: ground.height(g[0], g[1]) + 2.4, rot: Math.PI / 2, range: [2.0, 0], alert: 5 });
 }
 void PLAZA; void HILL;
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §16) ──
+// Llamas (the Andes' beast of burden and wool, kept by the herders on the plaza and the fields), dogs (the Inca kept dogs; the runners' and herders' camp dogs lie by the
+// doors) and guinea pigs (cuy, kept at the house and let run in the patio). No hens: the domestic fowl came with the Spaniards. [inferred: the places]
+const critters = [];
+const at3 = (x, z, o = 0) => [x, ground.height(x, z) + o, z];
+// llamas grazing on the Main Plaza's floor and on the fields by the storehouses
+for (const [x, z, m, r] of [[-9, -32, 'llama_brown', 0.6], [-7.4, -33.2, 'llama_white', 2.4], [12, -12, 'llama_pied', 4.0], [-40, 108, 'llama_brown', 1.0], [-38.4, 109.3, 'llama_white', 3.1], [-24, 150, 'llama_pied', 5.0]]) critters.push({ model: m, at: at3(x, z), rot: r, range: [10, 4] });
+// dogs: by the chaski's post, by the storehouses, one in the plaza's feast
+critters.push({ model: 'dog', at: at3(4.4, 124.4), rot: 1.2, range: [9, 3.5] }, { model: 'dog', at: at3(-33, 102.4), rot: 4.0, range: [9, 3.5] }, { model: 'dog', at: at3(2.2, -17.8), rot: 2.2, range: [9, 3.5] });
+// a guinea pig or two loose along the side wall of each opened patio, out of the way of the paths
+for (const i of openKanchas()) {
+  const K = kanchas()[i], a = K.at(1.0, 3.6), b = K.at(1.5, 4.4);
+  critters.push({ model: 'cuy', at: at3(a[0], a[1], 0.03), rot: i * 1.7, range: [4, 1.6] }, { model: 'cuy', at: at3(b[0], b[1], 0.03), rot: i * 1.7 + 2, range: [4, 1.6] });
+}
+export default { fish, flights, perches, critters };
