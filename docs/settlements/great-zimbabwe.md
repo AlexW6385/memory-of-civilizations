@@ -192,3 +192,11 @@ All voices are synthesised (no recordings); names begin `gz` (`src/engine/voices
 - **A dog** sleeps on the forecourt beside the east watch-fire, off the entrance's lane [inferred].
 - **Not made:** no cats (none stated on the plateau), no pigeons or ducks, no swallow nest (the walk's houses have no eave low enough to carry one; the swallows of §15 stay as flights).
 - Checked by `tests/great-zimbabwe-critters.test.mjs`: every model known, none in a house or on a walk route, fowls stay in their yard, the dog and goats answer the visitor. Main draws at the arrival unchanged (191).
+
+### 19.5 Wear and writing
+
+- **Writing: none.** Great Zimbabwe had no script and no inscription, tablet, seal or sign has been found there [stated]: so no letter, mark or sign of writing is made anywhere in this settlement, and none is to be added (`wear.js` makes none). The soapstone birds and the chevron band of the Great Enclosure's wall are carved and patterned, not written.
+- **Soot.** Above the door of each open house a tongue of soot on the daga, widest at the lintel and ragged at the top, where the hearth's smoke finds its way out under the eave (`wear.js sootOver`; `pottery_dark`, 2.5 cm off the wall) [smoke-blackened walls and thatch in Shona houses stated for later practice; the shape inferred].
+- **Trodden ground.** The earth of each homestead is bare and packed (`silt`, 4.5 cm over the ground) along the way from the gate to the yard's middle and for three metres outside the gate, ragged at its edges [inferred]. The hearth's ash disc and the dark wash at the foot of the houses' walls are the style's own (§14).
+- **Not done.** No worn stone thresholds or hollowed steps (those are the landmark's: §19.6); no weathering over time; no repairs.
+- Geometry in existing materials only: no new draw; no collision. Checked by the surface check.
