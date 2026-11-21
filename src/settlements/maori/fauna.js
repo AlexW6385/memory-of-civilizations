@@ -36,6 +36,8 @@ const critters = [];
     if (!inLake(at[0], at[1])) critters.push({ model: 'dog', at: [at[0], height(at[0], at[1]) + 0.02, at[1]], rot: a + 1.2, range: [9, 3.5] });
   });
 }
+// by each of the marae ātea's two night fires (town.js, §4j) a kurī curled up; dogs are out at night on the dog's rig
+for (const [x, z] of [[-12.4, 19.9], [5.3, 18.7]]) critters.push({ model: 'dog', at: [x, height(x, z) + 0.02, z], rot: x + 2, range: [9, 3.5] });
 // grey ducks (parera) on the lake in the shallows, in two flocks off the beach, clear of the canoes out on the water
 for (const x of [-125, 150]) {
   const band = (px, pz) => Math.abs(pz - (shoreZ(px) - 10)) - 4;
