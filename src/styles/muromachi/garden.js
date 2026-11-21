@@ -92,6 +92,9 @@ function stoneBridge(el, { bag, col }) {
     bx(bag, 'granite_grey', x - w / 2 - 0.16, y - 0.28, z - 0.34, x + w / 2 + 0.16, y - 0.2, z + 0.34);       // the cap of the pier
   }
   for (let i = 0; i < n; i++) { const a = za + i * L + 0.12, b = za + (i + 1) * L - 0.12; bx(bag, 'granite_grey', x - w / 2, y - 0.2, a, x + w / 2, y, b); bx(bag, 'granite_block', x - w / 2 + 0.05, y, a + 0.04, x + w / 2 - 0.05, y + 0.004, b - 0.04); }
+  // wear and damp: moss in the joints at the slabs' outer edges, nearest the water (cushions of `sod`, the moss's material)
+  const cushion = (cx, cy, cz, r) => lathe([[0.001, 0], [r, 0], [r * 0.9, 0.02], [r * 0.5, 0.04], [0.001, 0.045]], 6, null, cx, cy, cz).scale(1, 1, 0.8);
+  for (let i = 0; i <= n; i++) for (const sx of [-1, 1]) if (((i * 3 + (sx > 0 ? 1 : 0)) % 4) !== 0) bag.add('sod', cushion(x + sx * (w / 2 - 0.04), y + 0.006, za + i * L + ((i + sx) % 2 ? 0.05 : -0.05), 0.11 + 0.03 * ((i + sx + 3) % 3)));
   col.floor([x - w / 2, za, x + w / 2, zb], y);
   col.rect([x - w / 2 - 0.1, za, x - w / 2, zb], y - 1.9, y); col.rect([x + w / 2, za, x + w / 2 + 0.1, zb], y - 1.9, y);
 }

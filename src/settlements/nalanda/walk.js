@@ -35,9 +35,6 @@ export function houseDoorway(l) {
   return { F, route: [-2.4, 0.3, 1.0, deep].map((v) => F.P(F.du + 0.3, v)), width: DOOR_OPEN };
 }
 
-/** Two houses of the row at z 105 stop the walker 1.2 m short of their doors for a reason not found (nothing in the colliders there): left out of the routes, noted in the dossier. */
-const STUCK = [184687, 335971, 332843, 181140, 874012, 19708];
-
 /** The routes walk-check follows (landmark plan `walks`, world metres): into every monastery by its gate to the court, every annex by its door, the library's three ground halls, and the nearest open houses. */
 export function walkRoutes(nHouses = 6) {
   const R = [];
@@ -54,7 +51,7 @@ export function walkRoutes(nHouses = 6) {
   // (the bazaar's booths stand on the road in front of the south row's doors: those houses are reached from the lanes' ends, not walked)
   const booth = (x) => [0, 1, 2, 3, 4, 5, 6].some((i) => Math.abs(x - (52 + i * 10)) < 3.2);
   const clear = (q) => { const F = houseDoor(q), [px, pz] = F.P(F.du + 0.3, -2.4); return !(pz > 124 && booth(px)) && !(px > 127 && px < 134 && [...Array(11).keys()].some((k) => Math.abs(pz - (-84 + k * 15)) < 3.2)); };
-  for (const h of openHouses().filter((q) => (q.front === 'n' || q.front === 'w') && clear(q) && !STUCK.includes(q.seed)).slice(0, nHouses)) R.push({ id: 'house ' + h.seed, route: houseDoorway(h).route });
+  for (const h of openHouses().filter((q) => (q.front === 'n' || q.front === 'w') && clear(q)).slice(0, nHouses)) R.push({ id: 'house ' + h.seed, route: houseDoorway(h).route });
   return R;
 }
 void inRect; void tankD;

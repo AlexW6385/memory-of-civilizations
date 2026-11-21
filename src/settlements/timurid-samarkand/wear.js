@@ -3,7 +3,7 @@
 // materials the plans already hold as whole pieces (limestone, wood_dark), so that no mesh and no draw is added; a hash of each piece's own place varies it.
 // Dry climate: no moss, no waterline; the dust is the ground's.
 
-import { fromTriangles, box } from '../../core/geom.js';
+import { fromTriangles, box, lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { houseGeom } from './layout.js';
 import { hashAt } from './nightlight.js';
@@ -13,7 +13,7 @@ import { hashAt } from './nightlight.js';
  * floor at the ends and dipped to 3 cm in the middle (the hollow of generations of feet), the arrises rounded by a bevel. Triangles into `out`.
  */
 export function threshold(out, o, ux, uz, u0, u1, dep, y) {
-  const nx = -uz, nz = ux, N = 14, hz = dep / 2;
+  const nx = uz, nz = -ux, N = 14, hz = dep / 2;      // (v runs to the right of u: the faces wind outward, the top faces up)
   const P = (u, v, h) => [o[0] + ux * u + nx * v, y + h, o[1] + uz * u + nz * v];
   const top = (u) => { const m = (u - (u0 + u1) / 2) / ((u1 - u0) / 2); return 0.055 - 0.026 * Math.exp(-m * m * 5); };
   const q = (p0, p1, p2, p3) => out.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);
@@ -53,14 +53,32 @@ function houseWear(el, { bag }) {
   }
 }
 
-/** tim_wear { doors: [{ at: [x, z], axis ('x' | 'z': the way the sill runs), w, dep, y }] } — worn sills at the doors of the great portals' passages. */
-function timWear(el, { bag }) {
+/**
+ * tim_wear { doors: [{ at: [x, z], axis ('x' | 'z': the way the sill runs), w, dep, y }], flags: [{ at, axis, w, dep, y, mat }], rings: [{ c: [x, z], r0, h0 }] } —
+ * worn sills at the doors of the great portals' passages; `flags`: slabs of the way to the door, each hollowed in the middle (the same dish as a sill),
+ * in the material given (default limestone); `rings`: the two stepped courses of stone round the foot of a minaret (docs §21).
+ */
+function timWear(el, { bag, col }) {
   const out = [];
-  for (const d of el.doors) {
+  for (const d of el.doors || []) {
     const ux = d.axis === 'x' ? 1 : 0, uz = d.axis === 'x' ? 0 : 1;
     threshold(out, [d.at[0] - ux * d.w / 2, d.at[1] - uz * d.w / 2], ux, uz, 0, d.w, d.dep ?? 0.5, d.y ?? 0);
   }
   if (out.length) bag.add('limestone', fromTriangles(out));
+  const by = new Map();
+  for (const d of el.flags || []) {
+    const ux = d.axis === 'x' ? 1 : 0, uz = d.axis === 'x' ? 0 : 1, m = d.mat || 'limestone';
+    if (!by.has(m)) by.set(m, []);
+    threshold(by.get(m), [d.at[0] - ux * d.w / 2, d.at[1] - uz * d.w / 2], ux, uz, 0, d.w, d.dep ?? 0.5, d.y ?? 0);
+  }
+  for (const [m, tris] of by) bag.add(m, fromTriangles(tris));
+  for (const r of el.rings || []) {
+    const [x, z] = r.c;
+    // two courses, the lower one wider and lower, the upper's top weathered a hair to the outside
+    bag.add('marble', lathe([[r.r0, 0], [r.r0, r.h0], [r.r0 - 0.06, r.h0 + 0.02], [0.001, r.h0 + 0.02]], 20, null, x, 0, z));
+    bag.add('marble', lathe([[r.r0 - 0.4, r.h0], [r.r0 - 0.4, r.h0 * 2], [r.r0 - 0.46, r.h0 * 2 + 0.02], [0.001, r.h0 * 2 + 0.02]], 20, null, x, 0, z));
+    col?.circle(x, z, r.r0, 0, r.h0 * 2 + 0.05);
+  }
 }
 
 let done = false;

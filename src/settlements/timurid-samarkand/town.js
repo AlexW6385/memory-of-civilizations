@@ -8,7 +8,7 @@ import { lifePlan } from './life.js';
 const base = (id, elements, bounds, rooms = []) => ({ id, style: 'timurid', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds, entrance: { at: [38, 0], facing: 'w' } });
 
 /** How far from the visitor the houses are built in full (m): a house within 69 m of him is always in full (tiles are 100 m); the arrival, in the Registan, sees the far form of every house but the nearest few. */
-const NEAR = 140;
+const NEAR = 105;
 /** The houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full within NEAR of the visitor (rooms and colliders with it), solid and bare beyond (no colliders). */
 function houseTiles(all) {
   const tiles = new Map();
