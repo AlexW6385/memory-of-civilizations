@@ -5,6 +5,7 @@
 
 import { DACI, DACI_AX, PAGODA, DACI_MAIN, wallRuns, gates, DAO_HALLS, GALLERIES } from './layout.js';
 import { interiorRooms } from './interiors.js';
+import { mainRoute, walkRoutes } from './walkroutes.js';
 
 const E = [];
 const [x0, z0, x1, z1] = DACI.rect, ax = DACI_AX;
@@ -62,6 +63,7 @@ const rooms = [
 ];
 const walks = [[[28, 20], [28, 210], [ax, 210], [ax, 172], [ax - 17, 172], [ax - 17, 128], [ax - 2.5, 128], [ax - 1.8, 123.5]]];
 walks[0].y0 = 0;
+walks.push(mainRoute(), ...walkRoutes());
 
 export const temple = {
   id: 'tang-changan-daci-en',

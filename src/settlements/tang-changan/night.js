@@ -235,7 +235,7 @@ export function nightPlans(base, wards, gates, marketId, marketRows) {
     if (w.kind === 'daci\'en') continue;
     const els = gates().filter((g) => g.ward === w.id).map((g) => ({ t: 'tc_night_gate', c: g.c, axis: g.axis, w: g.ward === marketId ? 7.2 : 6.4 }));
     if (w.id === marketId) els.push({ t: 'tc_night_shutters', rows: marketRows() });
-    if (els.length) out.push({ ...base(`tang-changan-night-${w.id}`, els), near: 215, center: w.c });
+    if (els.length) out.push({ ...base(`tang-changan-night-${w.id}`, els), near: 215, center: w.c, nocollide: true });
   }
   return out;
 }

@@ -8,6 +8,7 @@ import {
   wallRuns, gates, lots, marketRows, marketYards, inDitch, inRect, DAO_HALLS, GALLERIES,
 } from './layout.js';
 import { dressLife } from './dress.js';
+import { walkDistance } from './walk.js';
 import { nightPlans } from './night.js';
 import { interiorElements, interiorLife, furnishedLot } from './interiors.js';
 
@@ -85,7 +86,8 @@ function market() {
   const rand = rng(760), kinds = ['fruit', 'cloth', 'pots', 'cakes'], aw = ['reed_mat', 'cloth_ochre', 'cloth_white', 'cloth_indigo', 'cloth_red'];
   for (const lx of MARKET_LANES.x) for (let z = MARKET_INNER[1] + 20; z < MARKET_INNER[3] - 12; z += 8 + rand() * 7) {
     if (Math.abs(z - MARKET_LANES.z[0]) < 8 || Math.abs(z - MARKET_LANES.z[1]) < 8) continue;
-    E.push({ t: 'hawker_stall', at: [lx + (rand() < 0.5 ? -1.2 : 1.2), z], y: 0, rot: rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2, kind: kinds[Math.floor(rand() * 4)], w: 2 + rand() * 0.6, awning: aw[Math.floor(rand() * 5)] });
+    const st = { t: 'hawker_stall', at: [lx + (rand() < 0.5 ? -1.2 : 1.2), z], y: 0, rot: rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2, kind: kinds[Math.floor(rand() * 4)], w: 2 + rand() * 0.6, awning: aw[Math.floor(rand() * 5)] };
+    if (walkDistance(st.at) > 3.4) E.push(st);                // (none on the visitor's way along the lanes: the stream of random draws is kept)
   }
   E.push(...interiorElements());
   return E;
@@ -108,7 +110,7 @@ function life() {
   for (let k = 0; k < 150; k++) {
     const vertical = rand() < 0.5;
     const x = vertical ? pick(MARKET_LANES.x) + (rand() - 0.5) * 5.2 : m0 + 4 + rand() * (m1 - m0 - 8), z = vertical ? mz0 + 4 + rand() * (mz1 - mz0 - 8) : pick(MARKET_LANES.z) + (rand() - 0.5) * 5.2;
-    if (!onMarket(x, z) || L.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.1)) continue;
+    if (!onMarket(x, z) || walkDistance([x, z]) < 1.5 || L.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.1)) continue;
     const r = rand(), at = [x, z], rot = rand() * 6.28;
     if (r < 0.34) sogdian(at, rot, { pose: rand() < 0.4 ? 'talk' : 'stand', carry: rand() < 0.15 ? 'basket' : 'none' });
     else if (r < 0.58) commoner(at, rot, { carry: pick(['basket', 'pole', 'none', 'none']) });
@@ -163,14 +165,15 @@ function life() {
   return L;
 }
 
+const clear = (e) => !e.at || (e.t === 'animal' && e.kind === 'camel') || walkDistance(e.at) > 2.6;          // (nothing stands on the visitor's way, walk.js)
 export async function town() {
   const plans = [base('tang-changan-walls', walls()), base('tang-changan-avenue', avenue()), base('tang-changan-daoist', daoist()), base('tang-changan-market', market())];
   plans.push(...nightPlans(base, WARDS, gates, MARKET.id, marketRows));
   const fl = furnishedLot(), by = new Map();
   for (const l of lots()) { if (!by.has(l.ward)) by.set(l.ward, []); by.get(l.ward).push(l); }
   for (const [ward, ls] of [...by].sort()) for (let i = 0; i < ls.length; i += 40) plans.push(base(`tang-changan-houses-${ward}-${i / 40}`, ls.slice(i, i + 40).map((l) => ({ t: 'tang_house', ...l, furnished: l === fl }))));
-  plans.push(base('tang-changan-life', [...life(), ...LO], 'life'), base('tang-changan-interior-life', interiorLife(), 'life'));
-  const dr = dressLife();
+  plans.push(base('tang-changan-life', [...life(), ...LO].filter(clear), 'life'), base('tang-changan-interior-life', interiorLife(), 'life'));
+  const dr = dressLife().filter(clear);
   for (let i = 0; i < dr.length; i += 500) plans.push(base(`tang-changan-dress-${i / 500}`, dr.slice(i, i + 500), 'life'));
   return plans;
 }
