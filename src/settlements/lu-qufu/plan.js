@@ -5,6 +5,7 @@
 
 import { TEMPLE, INNER_X, WALL_Z, TEMPLE_WALL, GATE_HALLS, GATE_D, LINGXING, TAIHE, POOL, POOL_Y, POOL_BED, BRIDGE, KUIWEN, STELE_PAV, ALTAR, HALL, BASE, MOON, WU, QIN, SAGE, SIDE, SIDE_GATE_Z, OLD, ANCILLARY } from './layout.js';
 import { HOUSE } from '../../styles/qing/index.js';
+import './nightlight.js';
 import { walkRoutes, mainRoute } from './walkroutes.js';
 
 const E = [];

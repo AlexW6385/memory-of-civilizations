@@ -6,6 +6,8 @@ import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, 
 import { detailPlans } from './sculpt.js';
 import { HOUSE } from '../../styles/qing/index.js';
 import { keepOff } from './walkroutes.js';
+import { nightLights } from './nightplace.js';
+import './nightlight.js';
 void [laneZs, LANES_X, STREET_W];
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -206,5 +208,5 @@ let CACHE = null;
 export async function town() {
   if (CACHE) return CACHE;
   void TEMPLE; void MANSION_RANGES;
-  return (CACHE = [...detailPlans, paving(), cityWall(), drumTower(), mansion(), ...houses(), shops(), ...streetLife(), forest(), people()]);
+  return (CACHE = [...detailPlans, paving(), cityWall(), drumTower(), mansion(), ...houses(), shops(), ...streetLife(), base('qufu-night', nightLights()), forest(), people()]);
 }
