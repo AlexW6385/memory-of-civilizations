@@ -40,3 +40,5 @@ export function doorClear(lots, frame) {
   }
   return out;
 }
+/** Iron lanterns on posts along the walk (the neighbours' lamps): [x, z] (nightlight.js lights them, life.js stands them). */
+export const WALK_POSTS = [[-97.8, 72], [-92.2, 50], [-97.8, 33], [-92.2, 14], [-97.5, 91.5], [-92.5, -1.2], [117.5, -1.2], [-119, 86.4]];
