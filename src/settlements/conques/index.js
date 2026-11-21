@@ -10,6 +10,7 @@ import music from './music.js';
 import { houses, works, goods, people } from './town.js';
 import { extras } from './extras.js';
 import { nightPlan } from './night.js';
+import './wear.js';
 import { lots, ABBEY } from './layout.js';
 import { upRoute } from '../../styles/romanesque/upper.js';
 export { music };
