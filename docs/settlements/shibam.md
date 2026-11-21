@@ -174,3 +174,9 @@ Nothing was heard or recorded: everything below is [inferred] from the dossier's
 - **Critters** (rigged, with behaviour; `src/engine/fauna-critters.js`, models of `critter-models.js`, none added): three cats (orange and tabby) on the doorsteps of the shops along the square's south edge, off the door's lane; two dogs lying in the shade, one outside the gate beside its tower and one in the main street; goats (black and white) tethered at the foot of the houses along the main street from the gate and hens with a cock scratching beside the fronts of the ordinary houses there, never before a door; two pigeons on the merchant's roof terrace by the parapet.
 - Already there: swallows and crows in loops over the town and the wadi, sparrows on the mastabas and the parapets, pigeons in the square, the donkeys, camels, goats and sheep of §11 as animal elements.
 - Not built: a donkey and a camel as rigged critters (no model; would need an addition to `critter-models.js`), swifts at the minaret, kites over the wadi.
+
+## 20. Wear and writing (`wear.js`)
+
+[inferred] throughout. Built: the rubble step of every opened ground floor (shops, hall) gets a darker patch trodden in its middle and wider where the feet and sacks cross (`plaster_damp`, a 4 mm layer on the step); a worn flagstone with a trodden middle before the merchant's street door and one in the mosque's doorway (plan.js), none colliding. Rising damp at the foot, patches of fallen plaster and rain streaks were built in §11–§12.
+- **Writing: none.** The shop signs, the lintels and the mihrab of a Hadhrami town would carry Arabic; no glyph of it could be checked in this session (no source reachable, no verified Arabic glyph table in the repo for this style), so every board and band stays plain, as the rule asks.
+- Not built: dust drifts at the foot of the north faces, mud-plaster repairs after the harvest (§1) beyond the existing patches, soot on shop ceilings (no soot material in `palette.js`).
