@@ -34,7 +34,7 @@ export function venFacade(el, { bag }) {
           Lc.add(O, ext(head, [], 0.2, 0.23));
           Lc.add(W, ext([[u - 0.012, y0 + 0.15], [u + 0.012, y0 + 0.15], [u + 0.012, y0 + 1.7], [u - 0.012, y0 + 1.7]], [], 0.23, 0.26));
         }
-        for (const k of [-0.31, 0.31]) Lc.add('proconnesian', lathe([[0.06, 0], [0.045, 0.1], [0.045, 0.95], [0.065, 1.0]], 6, null, c + k, y0 + 0.15, 0.27));   // the colonnettes between the lights
+        for (const k of [-0.31, 0.31]) Lc.add('marble', lathe([[0.06, 0], [0.045, 0.1], [0.045, 0.95], [0.065, 1.0]], 6, null, c + k, y0 + 0.15, 0.27));   // the colonnettes between the lights
         Lc.add(I, ext(headPts(c, y0 + 1.05, 1.9, 'ogee', 8).concat(headPts(c, y0 + 1.05, 1.6, 'ogee', 8).reverse()), [], 0.2, 0.31));                  // the ogee arch over them
         const qy = y0 + 1.05 + 0.5 * 1.9 * 0.55 + 0.45;
         Lc.add(I, ext([[c - 0.22, qy], [c, qy + 0.22], [c + 0.22, qy], [c, qy - 0.22]], [], 0.2, 0.28));                                          // the quatrefoil's lozenge

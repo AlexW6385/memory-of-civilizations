@@ -167,7 +167,17 @@ export function shopFit(el, ctx) {
       if (h(k + 2 + j * 3) < 0.8) Lc.box('plaster_damp', x, 0, -P, x + w, top, -P + 0.006);
       x += w;
     }
-    for (let q = 0; q < 3; q++) Lc.box('plaster_streak', uw - 0.62 + q * 0.5 + 0.1 * h(20 + q), 0.7, -P, uw - 0.62 + q * 0.5 + 0.1 * h(20 + q) + 0.06, 0.93 - 0.06 * h(23 + q), -P + 0.006);
+    for (let q = 0; q < 3; q++) Lc.box('plaster_damp', uw - 0.62 + q * 0.5 + 0.1 * h(20 + q), 0.7, -P, uw - 0.62 + q * 0.5 + 0.1 * h(20 + q) + 0.06, 0.93 - 0.06 * h(23 + q), -P + 0.006);
+    // the portico's own lamp: an iron lantern on a chain from the vault before the door, lit through the night [inferred: lamps hung in the arcades; the decree of 1450 and the capitelli's lamps are the stated lights]
+    const pu = uc, pd = -P * 0.5;
+    rodAt(bag, 'iron', P3, [pu, 4.15, pd], [pu, 3.05, pd], 0.006);
+    Lc.add('iron', lathe([[0.001, 0], [0.07, 0.01], [0.075, 0.03], [0.001, 0.03]], 6, null, pu, 2.82, pd));
+    for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) Lc.box('iron', pu + a * 0.07 - 0.005, 2.85, pd + b * 0.07 - 0.005, pu + a * 0.07 + 0.005, 3.02, pd + b * 0.07 + 0.005);
+    Lc.add('iron', lathe([[0.09, 0.2], [0.001, 0.27]], 6, null, pu, 2.82, pd));
+    Lc.add('flame', lathe([[0.001, 0.06], [0.02, 0.09], [0.001, 0.17]], 6, null, pu, 2.82, pd));
+    const pl = P3(pu, 3.0, pd), pp = P3(pu, 0, pd);
+    H.ball(pl.x, pl.y, pl.z, 1.15); H.floor(pp.x, y + 0.07, pp.z, 3.0, 2.2, 0, 12);
+    H.wall(P3(uc, 0, -P + 0.04).x, pl.y - 0.1, P3(uc, 0, -P + 0.04).z, [nd[0], nd[1]], 1.8, 1.4);
     // the sign over the doorway: a painted board on the wall of the portico with the trade's word in capitals
     sign(Lc, bag, P3, T.word, uc, 3.35, -P + 0.02, seed);
     // the keeper behind the counter, facing the door; a patron now and then in front of it
@@ -191,8 +201,8 @@ export function shopGlow(el, { bag }) {
     const { uc, uw } = s, d = -P + 0.03, q = (u0, y0, u1, y1, f) => { const a = P3(u0, y0, d), b = P3(u1, y0, d), c = P3(u1, y1, d), e = P3(u0, y1, d); H.quad([a.x, a.y, a.z], [b.x, b.y, b.z], [c.x, c.y, c.z], [e.x, e.y, e.z], nd, f); };
     const dd = P3(uc, 0, -P + 0.9);
     H.floor(dd.x, y + 0.07, dd.z, 1.8, 1.4, 0, 10);
-    q(uc - DOOR / 2, 0.1, uc + DOOR / 2, 2.5, 0.26);
-    q(uw - WIN / 2, 0.95, uw + WIN / 2, 2.25, 0.2);
+    q(uc - DOOR / 2, 0.1, uc + DOOR / 2, 2.5, 0.16);
+    q(uw - WIN / 2, 0.95, uw + WIN / 2, 2.25, 0.1);
   }
   H.flush(bag);
 }
