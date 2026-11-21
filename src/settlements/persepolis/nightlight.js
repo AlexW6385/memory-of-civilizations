@@ -61,9 +61,9 @@ const bounds = (g) => {
 
 /** The glow of one flame (its geometry g): the ball round it and, where a floor lies under it, the pool of light on the floor. */
 function flameHalo(H, g, floor) {
-  const b = bounds(g), h = b[4] - b[1], r = Math.max(0.34, Math.min(1.0, h * 3.0)), cx = (b[0] + b[3]) / 2, cz = (b[2] + b[5]) / 2, cy = b[1] + h * 0.45;
-  H.ball(cx, cy, cz, r);
-  if (floor !== undefined && cy - floor > 0.15 && cy - floor < 2.6) H.floor(cx, floor + 0.03, cz, Math.min(3.0, r * 3.2 + 0.6), Math.min(3.0, r * 3.2 + 0.6), 10, 0.75);
+  const b = bounds(g), h = b[4] - b[1], r = Math.max(0.6, Math.min(1.5, h * 4.5)), cx = (b[0] + b[3]) / 2, cz = (b[2] + b[5]) / 2, cy = b[1] + h * 0.45;
+  H.ball(cx, cy, cz, r, 0.72);
+  if (floor !== undefined && cy - floor > 0.15 && cy - floor < 2.6) H.floor(cx, floor + 0.03, cz, Math.min(4.5, r * 3 + 0.8), Math.min(4.5, r * 3 + 0.8), 10, 0.85);
 }
 
 /**
@@ -164,7 +164,7 @@ const incense = (fn) => function nightIncense(el, ctx) {
   const r = fn.call(this, el, ctx);
   if (depth > 0 || el.simple || !ctx?.bag) return r;
   const [x, z] = el.at, y = el.y ?? 0, s = (el.h ?? 1.2) / 1.2, H = new Halo();
-  H.ball(x, y + 1.14 * s, z, 0.3 * s, 0.5); H.floor(x, y + 0.03, z, 0.9, 0.9, 8, 0.28);
+  H.ball(x, y + 1.14 * s, z, 0.75 * s, 0.7); H.floor(x, y + 0.03, z, 2.0, 2.0, 8, 0.5);
   H.flush(ctx.bag);
   return r;
 };
