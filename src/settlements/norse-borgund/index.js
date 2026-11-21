@@ -3,6 +3,8 @@ import '../../styles/norse/index.js';
 import { church } from './plan.js';
 import { farms } from './town.js';
 import music from './music.js';
+import './nightlight.js';
+import './wear.js';
 export { music };
 export const landmarks = [{ plan: church, music }];
 export async function town() { return farms(); }

@@ -12,7 +12,7 @@ const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw
 const CLOTH = ['cloth_brown', 'cloth_grey', 'cloth_brown', 'cloth_white', 'cloth_red', 'cloth_indigo', 'hide_tan'];
 const HAIR = ['hide_tan', 'hide_brown', 'hide_tan', 'hide_black'];
 /** Open, gentle ground away from buildings, the river and the church's yard. */
-const free = (x, z, m = 2) => !inBuilding(x, z, m) && !inRiver(x, z) && Math.abs(z - riverZ(x)) > RIVER.w / 2 + 4 && height(x, z) < 7 && Math.hypot(x, z) < RADIUS - 70
+const free = (x, z, m = 2) => !inBuilding(x, z, m) && !inLane(x, z) && !inRiver(x, z) && Math.abs(z - riverZ(x)) > RIVER.w / 2 + 4 && height(x, z) < 7 && Math.hypot(x, z) < RADIUS - 70
   && !(x > YARD[0] - 3 && x < YARD[2] + 3 && z > YARD[1] - 3 && z < YARD[3] + 3);
 
 export function life() {
@@ -148,12 +148,18 @@ export function shore() {
   return E;
 }
 
+// the lane from each open door out into the yard stays clear of props (the visitor's walk, openwalk.js)
+let LANES = null;
+const inLane = (x, z) => {
+  LANES ??= buildings().filter((b) => b.kind === 'stue' || b.kind === 'barn' || b.kind === 'smithy').map((b) => doorOf(b));
+  return LANES.some(({ at, n }) => { const f = (x - at[0]) * n[0] + (z - at[1]) * n[1], l = Math.abs(-(x - at[0]) * n[1] + (z - at[1]) * n[0]); return f > 0.9 && f < 6.6 && l < 1.15; });
+};
 const nearFarm = (x, z, except = -1) => FARMS.some(([fx, fz], i) => i !== except && Math.hypot(x - fx, z - fz) < 27);
 
 /** The yards' small things: a doorstep at every door, chopping blocks, benches and tubs by the dwellings, racks, troughs, cairns, ladders. */
 export function yardItems() {
   const rand = rng(1260), items = [], B = buildings();
-  const ok = (p, m = 0.9) => !inBuilding(p[0], p[1], m) && !inRiver(p[0], p[1]) && height(p[0], p[1]) < 5;
+  const ok = (p, m = 0.9) => !inBuilding(p[0], p[1], m) && !inRiver(p[0], p[1]) && height(p[0], p[1]) < 5 && !inLane(p[0], p[1]);
   const add = (k, at, o = {}) => { if (ok(at, o.m ?? 0.9)) items.push({ k, at, y: height(at[0], at[1]), rot: o.rot ?? 0, seed: Math.floor(rand() * 1e6), ...o }); };
   for (const b of B) {
     const { at, n } = doorOf(b), [x0, z0, x1, z1] = b.rect, rot = Math.atan2(-n[0], -n[1]);
