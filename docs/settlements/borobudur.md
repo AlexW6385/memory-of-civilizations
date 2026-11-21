@@ -197,6 +197,62 @@ The carved figures near the way up are modelled as volumes (src/styles/javanese/
 Not done: the makaras, the lions of the other three stairs and the other gateways' kalas stay in the old form; the panels' subjects are five compositions in rotation, not the told stories (§1–§4 still record that).
 
 
+## 20. Tenth pass: the visitor's walk, the night, the sound, the animals, the wear (2026-11, bringing the place up to the reference)
+
+### 20.1 The visitor's walk (`walk.js`, `walkroutes.js`, `houseat.js`)
+
+The visitor arrives at x 110 on the paved way, facing west to the monument (src/planet/arrivals.js). The walk: the way west through the precinct's gate (x 98) to the monument's east stair, and east between its stalls, rest halls and lodgings; a second line round the foot of the base. [inferred: the way and what stands on it are §16–§17; nothing here is a source's claim]
+
+| Feature | What is built | Basis |
+|---|---|---|
+| Doors and stairs the walker passes | Every house's door is 1.75 m wide between its jamb posts (1.6 m clear) with its head 2.08 m over the floor; the stair to the veranda is 1.7 m wide and the veranda's rail leaves 1.9 m open at it; no footing stands under the stair's foot; an open hall's stair is 1.8 m wide at least and no post stands in the way up it | ours: the walker's body (tools/walk-check.mjs); the houses' proportions are §14 [inferred] |
+| Props out of the lanes | A bench, pot, basket or figure before a house that would stand in its stair's lane (within 1.55 m of it, a stair-run and a step out) is moved along the front; in the rest halls the benches stand at the back wall and the people on them, the jars by the east stair | ours |
+| Routes into the opened places | 19 routes walked: the eleven lodgings (from the yard up the stair, over the veranda, through the door, into the room), the three rest halls by the way, the three village halls and the monastery's great hall | ours |
+| The way's shrines and well | At x 76 a small stupa shrine with four lamps on either hand of the way, a well with its pulley and three jars at (83, 10.5), a woman at the well, a devotee kneeling | shrines with lamps and flowers (§13), wells in the yards (§14) [inferred] |
+
+Not done: a near/far split of the houses' interiors. Master draws 436 at the arrival and the walk's poses 389 and 394; splitting the houses into near and far plans (per 100 m tile, or per hamlet) raised the arrival to 450–477 (each near or far plan in view costs a draw per material, where the ordinary plans are merged per material), over the assignment's +2. The interiors stay in their plans, drawn as before.
+
+### 20.2 Night (`nightlight.js`)
+
+| Feature | What is built | Basis |
+|---|---|---|
+| Lamp glows | Every flame an element adds (the clay lamps of the offerings, stall counters and shrines, the stone-step lamp rows at the stairs' feet) gets a glow (three crossed discs) and, where the lamp is low, a pool of light; the lamps of one row are clustered | clay oil lamps (dipa) offered at shrines (§13) [inferred] |
+| Torches | 24 resin torches (damar) on bamboo poles: a pair before the gate's pylons, one every 14 m alternating sides along the way (none in the arrival's view), two beside the foot of each ground flight of the monument, two at the monastery's gate; the flame is a glow only | torches as the street light of a village before the lamp-post [inferred] |
+| Houses | Lit windows (by the hash of their place: 85% of the furnished houses' shutters, 30% of the others), the door ajar on a lit room (a sheet in the doorway, its pool over the veranda and at the stair's foot), the hearth fire in the back corner of the hearth, loom and kitchen houses; the forge's and shrine's own flames | the hearth the house's centre, the shutters [inferred] |
+| Stalls, halls | A hearth glow and a bamboo lantern hung over the counter at seven in ten of the food stalls; one lamp on a bamboo stand at the back corner of each rest hall and village hall; a flame on each bronze lamp stand of the great hall | [inferred] |
+
+All of it is geometry in the engine's additive `halo` material (cut away by day, so the day view is unchanged; readable at the low preset: rendered at the arrival, low preset, 22 h: the stalls' glow, the lit shutters and the lamp rows show). One draw is added to the arrival's frame. Seen: one night render at the arrival; not seen: a second pose, the monastery, the monument's stairs at night.
+
+### 20.3 Sound (`soundmap.js`, `src/engine/voices-borobudur.js`, `tests/borobudur-sound.test.mjs`)
+
+Voices (all synthesised, prefix `bor`): bronze metallophone pair with a hung gong (interlocking on a five-note mode), hung gong, bamboo flute, hand drum, monks' chant (wordless), hand bell, conch, rice mortar (lesung), bird-scarer clapper, buffalo's wooden bell, tokay gecko, koel, sellers' cries, trickle over a bund, buffalo cart on the way. The reliefs show drums, bells, gongs, strings, flutes, xylophones and cymbals, which the Sound of Borobudur project rebuilds [stated in outline: injourneydestination.id]; the instruments' playing, the pitches, the ensemble's interlocking and everything else is [inferred].
+
+| Where | What, when |
+|---|---|
+| Monument | conch at the east stair's foot, bell and chant at the summit: dawn (4.8–6.6 h) and dusk (17–19 h) |
+| Monastery | great hall: chant at the offices and at 10–11.5, gong, drum; the gate's bell at dawn |
+| Hamlets 0–2 (village halls) | ensemble, flute, drum from 16 to 21.5 h, not in rain; hamlets 3–5 (stupa shrines): a hand bell at dawn and dusk |
+| Way | sellers' cries at five stalls by day; a buffalo cart passing (a track) |
+| Houses (77 sites) | by variant: hearth (kitchen, rice mortar at dawn), loom, shrine (bell), kitchen (pour), smith (hammer); geckos in the thatch at night; each a room with its own hush |
+| Fields | clappers at the 14 huts, trickles over the bunds, buffalo bells at the 9 ploughs, koels in the groves by day, owls at night, frogs in the paddies |
+
+Measured with tools/sound-render.mjs (spectra and envelopes plausible: the chant's energy under 1 kHz, the lesung's strokes under 300 Hz, the gamelan with strikes at 0.4 s spacing); not heard.
+
+### 20.4 Animals (`fauna.js` critters)
+
+29 rigged critters on the way and at its lodgings, none in a stair's lane, a door or the way: five dogs (two on the forecourt, three before lodgings), two cats on verandas, a cock and three hens each in the yards of three lodgings, six doves (white and grey) at the way's two shrines and on the forecourt, two goats tethered at the verge, swallows' mud nests under the front eaves of three lodgings. The village animals of Java; the swallow's nest under an eave is the bird's habit [inferred: nothing here is sourced; the reliefs' fauna not consulted]. No ducks (no water in this ground). Egrets, swallows, crows and sparrows as before.
+
+### 20.5 Wear and writing (`wear.js`)
+
+| Feature | What is built | Basis |
+|---|---|---|
+| Trodden earth | At the foot of every house's stair a patch of bare earth (the style's `mudbrick`, 1.9 × 1.4 m, edges set by the hash of its place) where the household's feet come down; before each stall's counter a strip of it 1.8 m deep where its buyers stand | wet feet on bare ground make earth; the damp climate (§13) leaves no dust [inferred] |
+| Writing | none | The Old Javanese and Sanskrit scripts of the time (Kawi, Siddham) could not be set down here with every letter verified, so no inscription, board or tablet is shown; stall signs stay cloth |
+
+### 20.6 The landmark
+
+Not done in this pass (time went to items 1–5). Still short of §5 at the landmark: the 2,672 panels each their own subject, the measured profile of the wall mouldings, Mendut and Pawon, the volcanoes, water (§16).
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)
