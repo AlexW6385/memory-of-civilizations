@@ -148,7 +148,7 @@
    }
   ],
   "bytes": 1178513,
-  "seconds": 174,
+  "seconds": 81,
   "baked": "2026-11-21"
  },
  "abu-simbel-small-temple": {
@@ -180,12 +180,12 @@
    }
   ],
   "bytes": 203476,
-  "seconds": 16,
+  "seconds": 13,
   "baked": "2026-11-21"
  },
  "ajanta-caves": {
   "site": "ajanta",
-  "hash": "3775984e69ac9815",
+  "hash": "bed4b80fa3f2deff",
   "rays": 128,
   "probes": 11730,
   "boxes": [
@@ -239,8 +239,8 @@
     ]
    }
   ],
-  "bytes": 213837,
-  "seconds": 55,
+  "bytes": 213909,
+  "seconds": 73,
   "baked": "2026-11-21"
  },
  "alexandria-museion": {
@@ -583,7 +583,7 @@
  },
  "bali-pura": {
   "site": "bali-village",
-  "hash": "87af5aee6d58a1e7",
+  "hash": "117346fdd34e37ff",
   "rays": 128,
   "probes": 7314,
   "boxes": [
@@ -620,8 +620,8 @@
     ]
    }
   ],
-  "bytes": 122019,
-  "seconds": 10,
+  "bytes": 121983,
+  "seconds": 11,
   "baked": "2026-11-21"
  },
  "barcelona-sagrada": {
@@ -681,7 +681,7 @@
  },
  "bauhaus-school": {
   "site": "bauhaus-dessau",
-  "hash": "c7df764779e4f5fc",
+  "hash": "98922ae4176d0860",
   "rays": 128,
   "probes": 69479,
   "boxes": [
@@ -722,13 +722,13 @@
     ]
    }
   ],
-  "bytes": 1107646,
-  "seconds": 100,
+  "bytes": 1107678,
+  "seconds": 96,
   "baked": "2026-11-21"
  },
  "benin-palace": {
   "site": "benin-city",
-  "hash": "4410db159e01725a",
+  "hash": "94fcef58f82a3413",
   "rays": 128,
   "probes": 34311,
   "boxes": [
@@ -781,8 +781,8 @@
     ]
    }
   ],
-  "bytes": 535936,
-  "seconds": 185,
+  "bytes": 536077,
+  "seconds": 127,
   "baked": "2026-11-21"
  },
  "bhaktapur-taumadhi": {
@@ -885,12 +885,12 @@
    }
   ],
   "bytes": 1221650,
-  "seconds": 147,
+  "seconds": 140,
   "baked": "2026-11-21"
  },
  "brasilia-congress": {
   "site": "brasilia",
-  "hash": "5097eafa8ebed49b",
+  "hash": "b32f4a8061d44e1c",
   "rays": 128,
   "probes": 75240,
   "boxes": [
@@ -929,8 +929,8 @@
     ]
    }
   ],
-  "bytes": 1182397,
-  "seconds": 121,
+  "bytes": 1182340,
+  "seconds": 111,
   "baked": "2026-11-21"
  },
  "byodo-in-phoenix-hall": {
@@ -962,7 +962,7 @@
  },
  "cahokia-monks": {
   "site": "cahokia",
-  "hash": "10a665829eb98d3f",
+  "hash": "0245fc938251cf40",
   "rays": 128,
   "probes": 37224,
   "boxes": [
@@ -1015,13 +1015,13 @@
     ]
    }
   ],
-  "bytes": 589940,
+  "bytes": 589953,
   "seconds": 80,
   "baked": "2026-11-21"
  },
  "catalhoyuk-town": {
   "site": "catalhoyuk",
-  "hash": "cc15e559352cdd80",
+  "hash": "2da37cc3cba66a0c",
   "rays": 128,
   "probes": 9792,
   "boxes": [
@@ -1055,8 +1055,8 @@
     ]
    }
   ],
-  "bytes": 169823,
-  "seconds": 57,
+  "bytes": 169843,
+  "seconds": 15,
   "baked": "2026-11-21"
  },
  "delphi-sanctuary": {
@@ -1210,7 +1210,7 @@
  },
  "dogon-village": {
   "site": "dogon",
-  "hash": "ea2c87bd1ec80ba3",
+  "hash": "1c3caf7334719ec9",
   "rays": 128,
   "probes": 27988,
   "boxes": [
@@ -1317,8 +1317,8 @@
     ]
    }
   ],
-  "bytes": 462092,
-  "seconds": 197,
+  "bytes": 462022,
+  "seconds": 44,
   "baked": "2026-11-21"
  },
  "dome-of-the-rock": {
@@ -1932,7 +1932,7 @@
  },
  "hakka-tulou": {
   "site": "hakka-tulou",
-  "hash": "697a3e3505512a91",
+  "hash": "ee6dc6200d2e057c",
   "rays": 128,
   "probes": 57188,
   "boxes": [
@@ -2267,8 +2267,8 @@
     ]
    }
   ],
-  "bytes": 963052,
-  "seconds": 923,
+  "bytes": 963070,
+  "seconds": 172,
   "baked": "2026-11-21"
  },
  "han-changan-weiyang": {
@@ -2458,8 +2458,8 @@
     ]
    }
   ],
-  "bytes": 188933,
-  "seconds": 16,
+  "bytes": 188909,
+  "seconds": 17,
   "baked": "2026-11-21"
  },
  "karakorum-ger-camp": {
@@ -2486,12 +2486,12 @@
    }
   ],
   "bytes": 16015,
-  "seconds": 10,
+  "seconds": 2,
   "baked": "2026-11-21"
  },
  "karakorum-palace": {
   "site": "mongol-karakorum",
-  "hash": "56e5971db80615ed",
+  "hash": "b93de2554222f073",
   "rays": 128,
   "probes": 12186,
   "boxes": [
@@ -2528,13 +2528,13 @@
     ]
    }
   ],
-  "bytes": 209550,
-  "seconds": 112,
+  "bytes": 209527,
+  "seconds": 36,
   "baked": "2026-11-21"
  },
  "khajuraho-temples": {
   "site": "khajuraho",
-  "hash": "61b3b12c1ab964e9",
+  "hash": "f89aee1ab2c667b8",
   "rays": 128,
   "probes": 12852,
   "boxes": [
@@ -2556,8 +2556,8 @@
     ]
    }
   ],
-  "bytes": 226104,
-  "seconds": 55,
+  "bytes": 226058,
+  "seconds": 52,
   "baked": "2026-11-21"
  },
  "kilwa-mosque": {
@@ -2879,7 +2879,7 @@
  },
  "lu-qufu-temple": {
   "site": "lu-qufu",
-  "hash": "caff9f98fdfe612c",
+  "hash": "2b83cb31566e82cf",
   "rays": 128,
   "probes": 75852,
   "boxes": [
@@ -2948,8 +2948,8 @@
     ]
    }
   ],
-  "bytes": 1214542,
-  "seconds": 809,
+  "bytes": 1215337,
+  "seconds": 432,
   "baked": "2026-11-21"
  },
  "madurai-meenakshi": {
@@ -3091,7 +3091,7 @@
  },
  "maori-pa": {
   "site": "maori",
-  "hash": "1495ec21e90d94d0",
+  "hash": "768cc34096b2a4f3",
   "rays": 128,
   "probes": 840,
   "boxes": [
@@ -3112,13 +3112,13 @@
     ]
    }
   ],
-  "bytes": 15602,
+  "bytes": 15600,
   "seconds": 14,
   "baked": "2026-11-21"
  },
  "maya-tikal-plaza": {
   "site": "maya-tikal",
-  "hash": "8e79c0456d548f55",
+  "hash": "5ccc7e724c2adc60",
   "rays": 128,
   "probes": 8278,
   "boxes": [
@@ -3269,8 +3269,8 @@
     ]
    }
   ],
-  "bytes": 153421,
-  "seconds": 96,
+  "bytes": 153535,
+  "seconds": 17,
   "baked": "2026-11-21"
  },
  "ming-suzhou-garden": {
@@ -3335,7 +3335,7 @@
  },
  "mohenjo-daro-citadel": {
   "site": "mohenjo-daro",
-  "hash": "9bdab92bafa6038e",
+  "hash": "2b56be89a2457b58",
   "rays": 128,
   "probes": 19006,
   "boxes": [
@@ -3373,8 +3373,8 @@
     ]
    }
   ],
-  "bytes": 313305,
-  "seconds": 31,
+  "bytes": 313328,
+  "seconds": 53,
   "baked": "2026-11-21"
  },
  "mughal-agra-taj": {
@@ -3787,7 +3787,7 @@
  },
  "nandauwas": {
   "site": "nan-madol",
-  "hash": "2c1d0f11d15bf7cd",
+  "hash": "607240301b857e48",
   "rays": 128,
   "probes": 4760,
   "boxes": [
@@ -3809,7 +3809,7 @@
     ]
    }
   ],
-  "bytes": 86567,
+  "bytes": 86555,
   "seconds": 9,
   "baked": "2026-11-21"
  },
@@ -3869,7 +3869,7 @@
  },
  "norse-borgund-church": {
   "site": "norse-borgund",
-  "hash": "9e1f322d3bb4f2d7",
+  "hash": "ecdae0852f813727",
   "rays": 128,
   "probes": 6422,
   "boxes": [
@@ -3891,8 +3891,8 @@
     ]
    }
   ],
-  "bytes": 100058,
-  "seconds": 63,
+  "bytes": 100032,
+  "seconds": 13,
   "baked": "2026-11-21"
  },
  "ottoman-istanbul-suleymaniye": {
@@ -4203,7 +4203,7 @@
  },
  "qin-palace": {
   "site": "qin-xianyang",
-  "hash": "1d984840c4e97cce",
+  "hash": "e8086abda5c1aad1",
   "rays": 128,
   "probes": 26624,
   "boxes": [
@@ -4224,13 +4224,13 @@
     ]
    }
   ],
-  "bytes": 433973,
-  "seconds": 57,
+  "bytes": 434027,
+  "seconds": 46,
   "baked": "2026-11-21"
  },
  "qin-pit1": {
   "site": "qin-xianyang",
-  "hash": "f8f0517e20c2f7ab",
+  "hash": "be46ab9f765525fb",
   "rays": 128,
   "probes": 75480,
   "boxes": [
@@ -4252,13 +4252,13 @@
     ]
    }
   ],
-  "bytes": 1099386,
-  "seconds": 88,
+  "bytes": 1099411,
+  "seconds": 91,
   "baked": "2026-11-21"
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
-  "hash": "bea00fbba90aae0a",
+  "hash": "9923a4f8e636433a",
   "rays": 128,
   "probes": 78200,
   "boxes": [
@@ -4281,8 +4281,8 @@
     ]
    }
   ],
-  "bytes": 1198343,
-  "seconds": 294,
+  "bytes": 1198334,
+  "seconds": 135,
   "baked": "2026-11-21"
  },
  "sainte-chapelle": {
@@ -4331,7 +4331,7 @@
  },
  "sainte-foy-conques": {
   "site": "conques",
-  "hash": "0c2ed743754e7bdf",
+  "hash": "3d82cd09e7f76c75",
   "rays": 128,
   "probes": 71280,
   "boxes": [
@@ -4360,8 +4360,8 @@
     ]
    }
   ],
-  "bytes": 1128874,
-  "seconds": 121,
+  "bytes": 1129051,
+  "seconds": 317,
   "baked": "2026-11-21"
  },
  "samarkand-registan": {
@@ -4429,7 +4429,7 @@
  },
  "sgang-gwaay-house": {
   "site": "sgang-gwaay",
-  "hash": "19565dbfbc15abe1",
+  "hash": "fb51e8e1200ec417",
   "rays": 128,
   "probes": 3240,
   "boxes": [
@@ -4450,7 +4450,7 @@
     ]
    }
   ],
-  "bytes": 55491,
+  "bytes": 55505,
   "seconds": 7,
   "baked": "2026-11-21"
  },
@@ -5034,7 +5034,7 @@
  },
  "taos-pueblo": {
   "site": "taos",
-  "hash": "e6fd12e1c7a8d700",
+  "hash": "995e71452c5ba393",
   "rays": 128,
   "probes": 10269,
   "boxes": [
@@ -5084,8 +5084,8 @@
     ]
    }
   ],
-  "bytes": 168724,
-  "seconds": 100,
+  "bytes": 168602,
+  "seconds": 42,
   "baked": "2026-11-21"
  },
  "tenochtitlan-precinct": {
@@ -5209,7 +5209,7 @@
  },
  "ur-ziggurat": {
   "site": "ur",
-  "hash": "276adf040ec8ae46",
+  "hash": "80a3b0b2a91bcfbe",
   "rays": 128,
   "probes": 8984,
   "boxes": [
@@ -5246,8 +5246,8 @@
     ]
    }
   ],
-  "bytes": 154551,
-  "seconds": 95,
+  "bytes": 154548,
+  "seconds": 14,
   "baked": "2026-11-21"
  },
  "venice-san-marco": {
@@ -5377,7 +5377,7 @@
  },
  "wei-ye-bronze-sparrow": {
   "site": "wei-ye",
-  "hash": "9e792628d9acf33b",
+  "hash": "4eb1d4af49a57419",
   "rays": 128,
   "probes": 25018,
   "boxes": [
@@ -5430,13 +5430,13 @@
     ]
    }
   ],
-  "bytes": 399315,
-  "seconds": 298,
+  "bytes": 399450,
+  "seconds": 95,
   "baked": "2026-11-21"
  },
  "wei-ye-wenchang": {
   "site": "wei-ye",
-  "hash": "ea1e5084aeeaaad2",
+  "hash": "9b1b0adfe67d1603",
   "rays": 128,
   "probes": 25024,
   "boxes": [
@@ -5457,8 +5457,8 @@
     ]
    }
   ],
-  "bytes": 379301,
-  "seconds": 436,
+  "bytes": 379046,
+  "seconds": 83,
   "baked": "2026-11-21"
  },
  "yinxu-archive": {
@@ -5485,12 +5485,12 @@
    }
   ],
   "bytes": 114145,
-  "seconds": 14,
+  "seconds": 17,
   "baked": "2026-11-21"
  },
  "yinxu-hall": {
   "site": "shang-yinxu",
-  "hash": "3944741300d8b12e",
+  "hash": "85b0a3046c5a7641",
   "rays": 128,
   "probes": 24964,
   "boxes": [
@@ -5543,8 +5543,8 @@
     ]
    }
   ],
-  "bytes": 398064,
-  "seconds": 69,
+  "bytes": 398382,
+  "seconds": 78,
   "baked": "2026-11-21"
  },
  "yinxu-tomb": {
@@ -5571,7 +5571,7 @@
    }
   ],
   "bytes": 22463,
-  "seconds": 4,
+  "seconds": 9,
   "baked": "2026-11-21"
  }
 }

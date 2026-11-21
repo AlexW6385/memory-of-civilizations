@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.75 — worn ground that shows; doors that were blocked (2026-11-21)
+
+Trodden earth and worn stone are new materials, and the worn ways at Dogon, Wutai, SGang Gwaay and Rapa Nui can now be seen (Kakadu's could not be made to read on its coarse ground and are taken out). Cahokia's five houses and Nan Madol's two that the walker could not enter are open: firewood, benches and household pigs stood in their doorways. Light bakes renewed for the thirty-odd settlements of the last passes.
+
 ## v12.74 — the second pass is complete: Cahokia, Kakadu, the pa, Nan Madol, Rapa Nui, SGang Gwaay (2026-11-21)
 
 All ninety-four settlements have now had the second pass. Cahokia: two fires with people before the first stair, nineteen houses on the walk, rubbed bands on the log stairs. Kakadu: firelight spreading round each camp fire, a small fire by the arrival. The pa: two fires on the marae with people and dogs by them, a trodden sill at the chief's house. Nan Madol: twenty-four houses on the walk instead of twelve, people by the lamps and cook fires at night. Rapa Nui: all thirty-nine houses and the long house can be entered, fires at the bark-cloth yard and the shore. SGang Gwaay: two street fires with families by them, six more houses on the walk, paddles leaning on the chief's house.
