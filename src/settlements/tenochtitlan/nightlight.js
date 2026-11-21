@@ -15,6 +15,10 @@ export function lights() {
   for (const s of [-1, 1]) for (const zz of [23, 29, 35, 41]) L.push({ k: 'brazier', x: bx, y: tH + 0.85, z: s * zz, gy: tH, s: 1.05 });
   // the braziers at the stair's foot (town.js precinct)
   for (const [x, z] of [[35, -16.5], [35, 16.5], [35, -10], [35, 10]]) L.push({ k: 'brazier', x, y: 0.95, z, gy: 0.03 });
+  // Ehecatl's temple (c -4, -10, r 9, h 8): a brazier either side of its stair's foot (town.js) and the fire of the round shrine at its serpent-jawed door
+  // [inferred: fire was kept in the temples all night, §21; this temple is 20 m from the arrival]
+  for (const z of [-14.8, -5.2]) L.push({ k: 'brazier', x: 15.6, y: 0.95, z, gy: 0.03 });
+  L.push({ k: 'door', x: 1.2, z: -10, n: [1, 0], gy: 8, w: 1.6, h: 2.2, f: 0.5, s: 1.2 });
   // the stairheads' cauldrons, and the fire at each shrine's door (the huehuetl is beaten beside Huitzilopochtli's)
   const sxw = cx - w1 * 0.55;
   for (const s of [-1, 1]) {
