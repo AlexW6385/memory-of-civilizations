@@ -108,8 +108,8 @@
    }
   ],
   "bytes": 1283103,
-  "seconds": 135,
-  "baked": "2026-11-18"
+  "seconds": 404,
+  "baked": "2026-11-20"
  },
  "abu-simbel-great-temple": {
   "site": "abu-simbel",
@@ -578,8 +578,8 @@
    }
   ],
   "bytes": 809128,
-  "seconds": 161,
-  "baked": "2026-11-19"
+  "seconds": 736,
+  "baked": "2026-11-20"
  },
  "bali-pura": {
   "site": "bali-village",
@@ -2608,7 +2608,7 @@
  },
  "knossos-palace": {
   "site": "knossos",
-  "hash": "1890c25a748133ae",
+  "hash": "0360acd23b35fa2d",
   "rays": 128,
   "probes": 75460,
   "boxes": [
@@ -2637,9 +2637,9 @@
     ]
    }
   ],
-  "bytes": 1271548,
-  "seconds": 127,
-  "baked": "2026-11-19"
+  "bytes": 1271387,
+  "seconds": 555,
+  "baked": "2026-11-21"
  },
  "lalibela-churches": {
   "site": "lalibela",
@@ -3086,8 +3086,8 @@
    }
   ],
   "bytes": 1280885,
-  "seconds": 126,
-  "baked": "2026-11-18"
+  "seconds": 1397,
+  "baked": "2026-11-21"
  },
  "maori-pa": {
   "site": "maori",
@@ -3580,12 +3580,12 @@
    }
   ],
   "bytes": 625124,
-  "seconds": 116,
-  "baked": "2026-11-07"
+  "seconds": 251,
+  "baked": "2026-11-21"
  },
  "muscovy-red-square": {
   "site": "muscovy",
-  "hash": "5ba8afebf61789f2",
+  "hash": "4701019425615b35",
   "rays": 128,
   "probes": 79092,
   "boxes": [
@@ -3610,9 +3610,9 @@
     ]
    }
   ],
-  "bytes": 1216206,
-  "seconds": 123,
-  "baked": "2026-11-18"
+  "bytes": 1216335,
+  "seconds": 702,
+  "baked": "2026-11-21"
  },
  "mycenae-citadel": {
   "site": "mycenae",
@@ -4954,8 +4954,8 @@
    }
   ],
   "bytes": 1268471,
-  "seconds": 265,
-  "baked": "2026-11-18"
+  "seconds": 915,
+  "baked": "2026-11-20"
  },
  "tang-changan-daci-en": {
   "site": "tang-changan",
