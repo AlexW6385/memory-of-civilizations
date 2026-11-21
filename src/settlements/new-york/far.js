@@ -16,6 +16,7 @@ import { nearEntrance, rng as rng2, fitCell } from '../../styles/artdeco/dress.j
 import { narrowRect, stripRect, adsOf } from './upper-plan.js';
 import { withUpstairs } from './upper.js';
 import { withTenement } from './tenement.js';
+import { shopPeople } from './people.js';
 
 const LS = 'facade_limestone', PLAIN = 'limestone';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -231,7 +232,13 @@ registerStyle('artdeco_far', {
   objects: {},
 });
 // the near form: the style's own builders, their materials folded
-registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: lean(withUpstairs(A.skyscraper)), walkup: withTenement(A.walkup) }, FOLD) });
+/** A lot with a shop room: its keeper and customers built in beside the room (people.js). */
+const withPeople = (fn) => (el, ctx) => {
+  fn(el, ctx);
+  const fig = STYLES.life?.elements?.figure;
+  if (fig && el.room && el.front && el.h < 70) for (const p of shopPeople(el)) fig(p, { bag: ctx.bag, col: ctx.col });
+};
+registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: lean(withPeople(withUpstairs(A.skyscraper))), walkup: withTenement(A.walkup) }, FOLD) });
 // the street's things (pavements' furniture, vans, carts, yards, stands): the same folds, so that a lamp's glass or a crate's boards is one mesh a tile, not two
 const FOLD_STREET = { ...FOLD, glass_lamp: 'lamp_glass', timber: 'wood_dark', cloth_green: 'shutter_green', car_black: 'cloth_black', car_red: 'car_red' };
 registerStyle('artdeco_street', { ...STYLES.artdeco, elements: wrapAll({ ...A }, FOLD_STREET) });

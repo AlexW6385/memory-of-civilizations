@@ -5,7 +5,8 @@
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import '../../styles/artdeco/index.js';
-import { lots, toCity, GRID } from './layout.js';
+import { lots, toCity, GRID, frontPoint } from './layout.js';
+import { narrowRect, upOf } from './upper-plan.js';
 import { nearEntrance } from '../../styles/artdeco/dress.js';
 
 const TAU = Math.PI * 2;
@@ -75,13 +76,34 @@ function lotLight(H, l, share) {
     }
   }
 }
+/**
+ * A shop room's own light (shoprooms.js: two tin-ceiling globes, over the counter and at the front): a glow under each fixture, a pool on the
+ * floor under it, and a pool on the counter and its goods, so that the room reads lit through the glass and the door.
+ */
+function roomLight(H, l) {
+  const up = upOf(l), rect = up ? narrowRect({ ...l, up }) : l.rect, L = rect[2] - rect[0], Dr = l.room.depth, dC = Dr - 3.1, y = l.y, HC = y + 4.18, u = L / 2, k = 0.55 + 0.25 * hashAt(rect[0], rect[1], 51);
+  const at = (uu, d) => toCity(...frontPoint(rect, l.front, uu, -d));
+  for (const d of [2.3, Dr - 2.6]) {
+    const [x, z] = at(u, d);
+    H.ball(x, HC - 0.3, z, 0.85);
+    H.floor(x, y + 0.1, z, 3.4, 3.4, 0, 12, 1.0 * k);
+  }
+  // the counter's top (0.7 m deep, 1.0 m high) and the goods on it: a pool along it
+  const c0 = at(u - Math.min(3.5, L / 2 - 0.8), dC + 0.35), c1 = at(u + Math.min(3.5, L / 2 - 0.8), dC + 0.35);
+  H.floor((c0[0] + c1[0]) / 2, y + 1.07, (c0[1] + c1[1]) / 2, Math.hypot(c1[0] - c0[0], c1[1] - c0[1]) / 2 + 0.3, 0.9, Math.atan2(c1[1] - c0[1], c1[0] - c0[0]) * -1, 10, 1.0 * k);
+  // the back shelves' wall: a faint sheet-pool on the floor before it
+  // the back wall's shelves and mirror: a lit sheet before them, facing the room
+  { const w0 = at(u - L / 2 + 0.6, Dr - 0.12), w1 = at(u + L / 2 - 0.6, Dr - 0.12), nIn = toCity(...frontPoint(rect, l.front, 0, 1)).map((v, i) => v - toCity(0, 0)[i]), nn = [-nIn[0], -nIn[1]];
+    H.quad([w0[0], y + 0.9, w0[1]], [w1[0], y + 0.9, w1[1]], [w1[0], HC - 0.5, w1[1]], [w0[0], HC - 0.5, w0[1]], nn, 0.4 * k); }
+  const b = at(u, Dr - 1.0); H.floor(b[0], y + 0.1, b[1], L / 2 - 0.6, 1.4, Math.atan2(c1[1] - c0[1], c1[0] - c0[0]) * -1, 10, 0.5 * k);
+}
 /** The street lamps (grid frame [x, z] of life elements `street_lamp`, 5.5 m): the glow of the globe and the pool under it. */
 function lampLight(H, lamps) { for (const [x, z, y, h] of lamps) { const [cx, cz] = toCity(x, z); H.ball(cx, y + h - 0.35, cz, 1.25); H.floor(cx, y + 0.06, cz, 4.2, 4.2, 0, 10, 0.8); } }
 
 /** ny_night: { lots: [...], lamps: [[x, z, y, h]] } in the grid's frame (inside `turned`: positions here are the city's, so the element is built beside it). */
 function nyNight(el, { bag }) {
   const H = new Halo();
-  for (const l of el.lots) lotLight(H, l, el.share ?? 0.15);
+  for (const l of el.lots) { lotLight(H, l, el.share ?? 0.15); if (l.room) roomLight(H, l); }
   lampLight(H, el.lamps ?? []);
   if (H.pos.length) bag.add('halo', H.geometry());
 }
