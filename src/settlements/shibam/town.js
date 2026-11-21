@@ -204,7 +204,7 @@ export async function town() {
   for (const l of L) { const k = Math.floor((l.rect[0] + l.rect[2]) / 2 / 70) + ',' + Math.floor((l.rect[1] + l.rect[3]) / 2 / 70); (cells.get(k) ?? cells.set(k, []).get(k)).push(l); }
   let i = 0;
   for (const list of cells.values()) plans.push(base(`shibam-towers-${i++}`, list.filter((l) => !l.up).map((l) => ({ t: 'tower_house', rect: l.rect, front: l.front, storeys: l.storeys, seed: l.seed, free: l.free, rich: l.rich, door: doorOf(l), ...(l.shop ? { shop: l.shop } : {}) }))));
-  plans.push(base('shibam-palace', [{ t: 'tower_house', rect: PALACE, front: 's', storeys: 6, seed: 99, white: 3, towers: true, free: { n: 1, s: 1, e: 1, w: 1 }, rich: false, hall: true, door: HALL.door }, ...[-1, 1].map((q) => ({ t: 'shb_cresset', at: [q * 4.9, PALACE[3] + 1.6], y: 0 }))]));
+  plans.push(base('shibam-palace', [{ t: 'tower_house', rect: PALACE, front: 's', storeys: 6, seed: 99, white: 3, towers: true, free: { n: 1, s: 1, e: 1, w: 1 }, rich: false, hall: true, door: HALL.door }, ...[-1, 1].map((q) => ({ t: 'shb_cresset', at: [q * 4.9, PALACE[3] + 1.6], y: 0 })), { t: 'shb_stalllamps', pts: [[-26, -23.3], [-19, -23.3], [-12, -23.8], [-2, -23.3], [6, -23.8], [13, -23.3], [-26, -14.3], [-14, -2.8], [14, -2.8], [21, -2.3], [27, -5.3]] }]));
   plans.push(base('shibam-wall', [...wall(), ...[-1, 1].map((q) => ({ t: 'shb_cresset', at: [GATE.x + q * 3.6, WALL[3] + 3.4], y: h(GATE.x + q * 3.6, WALL[3] + 3.4) }))]));   // (cressets at the gate: nightlight.js, §17)
   // ground kept clear of the generic street life (src/objects/life.js reads these footprints): the shops' doors, the palace's door, the stalls and the arrival
   const res = [];
