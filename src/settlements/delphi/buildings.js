@@ -145,15 +145,16 @@ export function treasury(E, t) {
   const [x0, z0, x1, z1] = t.rect, y = t.y, mat = t.mat, ion = t.kind === 'ionic', sip = t.kind === 'siphnian', ath = t.kind === 'athenian';
   const KR = [x0 + 0.35, z0 + 0.35, x1 - 0.35, z1 - 0.35], yT = y + 0.44;
   E.push({ t: 'krepis', rect: KR, y0: y, steps: 2, rise: 0.22, tread: 0.35, mat });
+  E.push({ t: 'dl_stepwear', rect: KR, y0: y, steps: 2, rise: 0.22, tread: 0.35, at: [(x0 + x1) / 2], w: 1.7 });
   const xl = KR[0] + 0.45, xr = KR[2] - 0.45, zb = KR[1] + 0.45, zf = KR[3] - 0.35, zc = zf - 3.1, W = xr - xl, FLR = yT + 0.1;
   const h = ion || sip ? 3.9 : 4.4, ENT = yT + h, A = ion || sip ? 0.45 : 0.55, F = ion || sip ? 0.4 : 0.55, G = 0.26, FT = ENT + A + F;
-  const cols = [xl + W * 0.34, xl + W * 0.66];
+  const cols = sip ? [xl + W * 0.22, xl + W * 0.78] : [xl + W * 0.34, xl + W * 0.66];   // the maidens stand wide enough apart for a 1.6 m way between them
   E.push({ t: 'floor', rect: [xl - 0.3, zb - 0.3, xr + 0.3, zf + 0.3], y: FLR, th: 0.3, mat: 'flagstone' });
   const wall = (a, b, ops = []) => E.push({ t: 'wall', a, b, th: 0.55, y0: FLR, y1: FT, mat, openings: ops });
   wall([xl, zb - 0.27], [xl, zf]); wall([xr, zb - 0.27], [xr, zf]); wall([xl - 0.27, zb], [xr + 0.27, zb]);
-  wall([xl - 0.27, zc], [xr + 0.27, zc], [{ at: W / 2 + 0.27, w: 1.35, h: 2.9, y0: FLR, frameW: 0.25 }]);
+  wall([xl - 0.27, zc], [xr + 0.27, zc], [{ at: W / 2 + 0.27, w: 1.7, h: 2.9, y0: FLR, frameW: 0.25 }]);
   if (sip) {
-    for (const x of cols) { E.push({ t: 'block', rect: [x - 0.5, zf - 0.5, x + 0.5, zf + 0.5], y0: yT, y1: yT + 0.85, mat: 'marble' }); E.push({ t: 'kore', at: [x, zf], y: yT + 0.85, yaw: 0, h: 2.35, mat: 'marble_smooth' }); }
+    for (const x of cols) { E.push({ t: 'block', rect: [x - 0.38, zf - 0.38, x + 0.38, zf + 0.38], y0: yT, y1: yT + 0.85, mat: 'marble' }); E.push({ t: 'kore', at: [x, zf], y: yT + 0.85, yaw: 0, h: 2.35, mat: 'marble_smooth' }); }
   } else for (const x of cols) E.push({ t: 'column', at: [x, zf], y: yT, h, d: ion ? 0.52 : 0.6, mat: mat === 'marble' ? 'marble_column' : 'limestone', ...(ion ? { order: 'ionic' } : {}) });
   const axes = { x: [xl, ...cols, xr], z: [zb, zf] };
   if (ion || sip) E.push({ t: 'ionic_entablature', axes, y: ENT, face: 0.4, arch: A, frieze: F, geison: G, overhang: 0.35, mat, friezeMat: sip ? 'egyptian_blue' : undefined });
@@ -177,6 +178,7 @@ export function treasury(E, t) {
 export function stoa(E) {
   const [x0, z0, x1, z1] = STOA, y = STOA.y, yF = y + 0.5, h = 3.9, ENT = yF + h;
   E.push({ t: 'krepis', rect: [x0, z0, x1, z1 - 0.9], y0: y - 0.1, steps: 2, rise: 0.25, tread: 0.3, mat: 'marble' });
+  E.push({ t: 'dl_stepwear', rect: [x0, z0, x1, z1 - 0.9], y0: y - 0.1, steps: 2, rise: 0.25, tread: 0.3, at: [x0 + 6, (x0 + x1) / 2, x1 - 5], w: 2.0, wear: 'plaster_damp' });
   const zc = z1 - 1.5, step = (x1 - x0 - 1.6) / 6;
   const xs = Array.from({ length: 7 }, (_, i) => x0 + 0.8 + i * step);
   for (const x of xs) E.push({ t: 'column', at: [x, zc], y: yF, h, d: 0.66, mat: 'marble_column', order: 'ionic' });

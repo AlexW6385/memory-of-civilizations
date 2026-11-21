@@ -20,6 +20,7 @@ terraceDedications(T);
 for (const [x, z] of [[89.4, 24.4], [82.6, 24.4], [56, -4], [56, 3], [67.5, 10.5], [56.5, 21.5], [56.5, 11], [68.5, 21.5], [75, 15]]) T.push({ t: 'dl_torch', at: [x, z], y: TT_Y + 0.03 });
 const rib = (P, o) => ({ t: 'ribbon', pts: P.map((p) => [p[0], p[2]]), ys: P.map((p) => p[1]), ...o });
 T.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] < 30), { w: 3.6, mat: 'flagstone', kerb: false, lift: 0.04 }));
+T.push({ t: 'dl_wayworn', pts: [[88, TT_Y, 26], [66, TT_Y, 8], [54, TT_Y, 6], [40, TT_Y, 4], [32.5, TT_Y, 1]], w: 3.0 });   // the feet's way from the stair's head to the temple's steps, worn lighter
 T.push(...lampHalos(T));
 const terraceRooms = [room('the terrace', [-34, -20, 90, 24], TT_Y, 'open'), room('before the temple', [30, -12, 70, 12], TT_Y, 'open'), ...tr.rooms];
 const twalks = [[[88, 26], [66, 8], [54, 6], [40, 4], [31.5, -1], [26, -1], [20.5, -1], [12, -1], [4, -3.5], [-6, -3.5], [-12, -1], [-15.2, -1], [-17.5, -1], [-20, 2], [-21, -1.5]]];
@@ -46,6 +47,7 @@ terraceWalls(S);
 S.push({ t: 'stair', rect: STAIR, dir: 'n', y0: 13.1, y1: TT_Y, riser: 0.17, base: 11, mat: 'limestone' });
 S.push({ t: 'dl_stairwear', rect: STAIR, dir: 'n', y0: 13.1, y1: TT_Y, riser: 0.17 });
 S.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] >= 24 && !(p[0] > 85.9 && p[0] < 86.1 && p[2] < 43.9)), { w: 3.6, mat: 'flagstone', kerb: true, lift: 0.04 }));
+S.push({ t: 'dl_wayworn', pts: wayPoints(WAY, wayY).filter((p) => p[2] >= 24 && !(p[0] > 85.9 && p[0] < 86.1 && p[2] < 43.9)), w: 3.6 });
 S.push(rib(wayPoints(WAY2, way2Y), { w: 2.4, mat: 'flagstone', kerb: false, lift: 0.04 }));
 wayDedications(S);
 // the torches at the gates and the foot of the stair (nightlight.js)
@@ -127,6 +129,8 @@ swalks[0].y0 = wayY(0);
 S.push(...lampHalos(S));
 // the visitor's walk into the open houses of the lanes (walk.js): the shop's opening and the passage of each, from the lane before it
 for (const r of houseRoutes()) for (const w of [r.shop, r.passage]) { w.y0 = r.y0; swalks.push(w); }
+// into each treasury: from the Way before it up its steps, through the door in the cella's wall to the middle of the treasure room
+for (const t of TREASURIES) { const [x0, z0, x1, z1] = t.rect, xc = (x0 + x1) / 2, w = [[xc, z1 + 1.6], [xc, z1 - 0.2], [xc, z1 - 2.4], [xc, z1 - 3.8], [xc, z1 - 4.9], [xc - 1.4, z1 - 5.6]]; w.y0 = t.y - 0.2; swalks.push(w); }
 // from the Way through the side gate to the village road and along it to the west ends of the four lanes
 [[[96, 62], [104, 62], [108.3, 62], [108.3, 79], [108.3, 95]], [[108.3, 62], [108.3, 46]], [[108.3, 62], [112.5, 62.5]], [[108.3, 79], [113, 78.7]], [[108.3, 96], [113, 96.5]], [[108.3, 46], [112.5, 44.7]]].forEach((w, i) => { w.y0 = [10.2, 10.95, 10.95, 8.3, 5.45, 12.6][i]; swalks.push(w); });
 
