@@ -201,3 +201,12 @@ Placed where made, by hour and weather; all synthesised; none of it heard (measu
 - `rapHen`: hens in the yards by the way up; `rapScurry`: a rat in the thatch at night [inferred: the Polynesian rat came with the settlers; not in the sources read].
 - Rooms: each house to enter and the long house (kind-wise tone, thatch's soft rain, much of the outdoors let through). No trees, so no birdsong from trees (§6); little green; no frogs, no ponds, no wells.
 - Test: tests/rapa-nui-sound.test.mjs (voices made, map agrees with the village, scheduling by hour and rain).
+
+### 10.4 Animals (`fauna.js` `critters`; models `noddy` and `kiore` added to src/engine/critter-models.js)
+- The island had chickens as "the only animals they keep" [stated: Wikipedia "Easter Island"; imaginarapanui.com] and no dog, cat, pig, goat, cow or horse before the Europeans [inferred from that statement]; so the critters are only: fowl, the Polynesian rat, and sea birds.
+- Fowl: at each of the seven chicken houses nearest the arrival a cockerel and two hens scratching at the side of the small openings, on the fowl's rig (they walk and peck, keeping 1.4 m from the visitor) - 21 critters; the yards by the way up keep their static chickens.
+- Kiore (`kiore`, the Polynesian rat, 0.14 m body and a tail of its own length, grey-brown, paler belly, on the dog's rig so that it stands and lies, out at night): five, at the foot of three chicken houses and at the sweet-potato stores of two cooking houses [inferred: the rat came with the settlers; not in the sources read].
+- Noddies (`noddy`, a dark brown sea bird with a pale cap and black bill and legs, the silver gull's build recoloured; walks and pecks): eight on the black stones of the shore, east and west of the ahu [inferred: noddies and terns of the island's sea cliffs; colours the black noddy's]. The flying terns and frigatebirds are the earlier flights (§4e).
+- Not done: sea turtles in the shallows, the rats' night behaviour beyond the rig's lying-down, nesting seabirds on the cliffs (the cliffs are off the disc).
+- Test: tests/rapa-nui-critters.test.mjs (models known, none of the absent animals, never in a house hull, clear of the walks, at an animal's pace).
+- Found broken on master and repaired here: src/engine/critter-models.js had lost the last four lines of `pigNeolithic` in the merge of stonehenge and bali-village (a syntax error that stops every critters test and the in-game renderers); the four lines are restored.

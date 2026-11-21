@@ -765,6 +765,10 @@ export function pigNeolithic(variant) {
     m.as(part, hip, null, () => {
       m.tube([hip, [x - (front ? 0 : 0.03), 0.28, z * 0.09], [x - (front ? 0 : 0.02), 0.1, z * 0.09], [x + 0.005, 0.02, z * 0.09]], [[0.055, 0.05], [0.03, 0.028], [0.022, 0.02], [0.024, 0.024]], { sides: 5, col: ({ t }) => lerp(bristle({ p: [x, 0.4, z], n: [0, 1, 0] }), [0.18, 0.14, 0.12], t * 0.7) });
       m.ball([x + 0.012, 0.012, z * 0.09], [0.03, 0.014, 0.02], [0.12, 0.1, 0.09], { nu: 4, nv: 5 });
+    });
+  }
+  return m;
+}
 // ═════════════ the Balinese village's pig and cattle (docs/settlements/bali-village.md §13.4) ═════════════
 /** A village pig of Bali, standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs): black, or black with a white belly and white socks; a long back that sags in the middle, a deep belly, short legs, a long snout with its disc, small ears pricked forward, the tail a thin curl. Back at 0.5 m. [inferred: the black, sway-backed village pig of Bali; no measurement sourced] */
 export function pigBali(variant) {
@@ -842,3 +846,40 @@ export function cowBali() {
   return m;
 }
 MODELS.cow_bali = cowBali;
+
+// ═════════════ Rapa Nui's sea birds and the Polynesian rat ═════════════
+/** A black noddy standing on rock, on the fowl's rig (parts 1 neck, 2 head, 3 tail, 4 5 legs; walks and pecks): the silver gull's build in sooty chocolate-brown with a pale grey cap, a black bill and black legs. [inferred: the noddies and terns nest on Rapa Nui's sea cliffs and islets; the colours are the black noddy's] */
+export function noddy() {
+  const m = silverGull();
+  for (let i = 0; i < m.col.length; i += 3) {
+    const r = m.col[i], g = m.col[i + 1], b = m.col[i + 2], y = m.pos[i + 1];
+    let c = null;
+    if (r > 0.75 && g < 0.25) c = [0.07, 0.065, 0.07];                         // the red bill and legs: black
+    else if (r > 0.9) c = y > 0.285 && m.pos[i] > 0.12 ? [0.78, 0.8, 0.82] : [0.2, 0.165, 0.14];   // the white head: a pale cap; the breast and tail: dark
+    else if (r > 0.65 && g > 0.65 && b > 0.7) c = [0.19, 0.155, 0.13];       // the grey back: dark brown
+    if (c) { m.col[i] = c[0]; m.col[i + 1] = c[1]; m.col[i + 2] = c[2]; }
+  }
+  return m;
+}
+MODELS.noddy = noddy;
+/** A Polynesian rat (kiore) standing, on the dog's rig: a small grey-brown body 0.14 m long, a pointed snout, round ears, a long bare tail of its own length, a paler belly. [inferred: Rattus exulans came with the settlers; sizes and colours from the species] */
+export function kiore() {
+  const m = new Model(), base = [0.33, 0.26, 0.19], belly = [0.62, 0.55, 0.46];
+  const coat = ({ n }) => lerp(base, belly, sm(-0.1, -0.8, n[1]) * 0.8);
+  const S = [[0.06, 0.05, 0.03, 0.028], [0.025, 0.06, 0.04, 0.038], [-0.03, 0.06, 0.042, 0.04], [-0.07, 0.05, 0.03, 0.028], [-0.09, 0.04, 0.012, 0.012]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 7, col: coat });
+  m.as(1, [0.07, 0.055, 0], null, () => m.tube([[0.055, 0.055, 0], [0.08, 0.06, 0]], [[0.03, 0.028], [0.024, 0.022]], { sides: 6, ref: [1, 0, 0], col: coat }));
+  m.as(2, [0.085, 0.06, 0], [0.07, 0.055, 0], () => {
+    m.ball([0.1, 0.06, 0], [0.026, 0.022, 0.02], coat, { nu: 5, nv: 5 });
+    m.tube([[0.11, 0.058, 0], [0.145, 0.052, 0]], [[0.018, 0.016], [0.004, 0.004]], { sides: 5, ref: [1, 0, 0], col: [0.55, 0.42, 0.38] });
+    for (const s of [-1, 1]) m.ball([0.09, 0.083, s * 0.018], [0.012, 0.014, 0.004], [0.5, 0.38, 0.34], { nu: 3, nv: 4 });
+    eyes(m, 0.118, 0.067, 0.015, 0.004, [0.05, 0.03, 0.03]);
+  });
+  m.as(3, [-0.085, 0.045, 0], null, () => m.tube([[-0.085, 0.045, 0], [-0.14, 0.035, 0], [-0.19, 0.02, 0], [-0.22, 0.008, 0]], [0.007, 0.006, 0.005, 0.003], { sides: 4, col: [0.55, 0.42, 0.38] }));
+  for (const [part, x, z] of [[4, 0.04, -1], [5, 0.04, 1], [6, -0.045, -1], [7, -0.045, 1]]) {
+    const hip = [x, 0.03, z * 0.025];
+    m.as(part, hip, null, () => m.tube([hip, [x, 0.012, z * 0.025], [x + 0.008, 0.003, z * 0.025]], [0.009, 0.006, 0.005], { sides: 4, col: [0.55, 0.42, 0.38] }));
+  }
+  return m;
+}
+MODELS.kiore = kiore;
