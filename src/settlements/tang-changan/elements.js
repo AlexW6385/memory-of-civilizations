@@ -42,5 +42,12 @@ function shopRow(el, ctx) {
   return STYLES.tang.elements.tang_shop_row(el, { ...ctx, bag, col });
 }
 
-registerStyle('tang-changan', { ...STYLES.tang, elements: { ...STYLES.tang.elements, daci_hall: daciHall, tang_shop_row: shopRow } });
+/** tc_keepers { list: [figure parameters] }: the shopkeepers, built into the near plan of the shops they stand in (a life element's figures reach 170 m wherever they stand). */
+function keepers(el, ctx) {
+  const fig = STYLES.life?.elements?.figure;
+  if (!fig) return;
+  for (const f of el.list) fig({ ...f }, { bag: ctx.bag, col: ctx.col });
+}
+
+registerStyle('tang-changan', { ...STYLES.tang, elements: { ...STYLES.tang.elements, daci_hall: daciHall, tang_shop_row: shopRow, tc_keepers: keepers } });
 registerNight();

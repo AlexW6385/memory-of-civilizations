@@ -8,7 +8,7 @@ import {
   wallRuns, gates, lots, marketRows, marketYards, inDitch, inRect, DAO_HALLS, GALLERIES,
 } from './layout.js';
 import { dressLife } from './dress.js';
-import { walkDistance } from './walk.js';
+import { walkDistance, shopUnits } from './walk.js';
 import { nightPlans } from './night.js';
 import { interiorElements, interiorLife, furnishedLot } from './interiors.js';
 
@@ -165,9 +165,23 @@ function life() {
   return L;
 }
 
+/** The shopkeepers of the market's units that have a door, within 110 m of the visitor's walk: built into near plans (60 m cells), standing behind the counter of the unit's first bay, facing the lane, by trade. */
+function keeperPlans() {
+  const CL = ['cloth_brown', 'cloth_indigo', 'cloth_green', 'cloth_ochre', 'cloth_grey', 'cloth_blue'], cells = new Map(), rand = rng(2750);
+  for (const s of shopUnits()) {
+    if (walkDistance(s.door) > 110) continue;
+    const r = rand(), hu = s.trade === 'carpet' || s.trade === 'spice' || s.trade === 'jade' || s.trade === 'wine' || s.trade === 'saddlery', key = `${Math.floor(s.keeper[0] / 60)},${Math.floor(s.keeper[1] / 60)}`;
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push({ at: s.keeper, y: 0.3, rot: s.rot + (r - 0.5) * 0.3, seed: Math.floor(rand() * 1e9), dress: hu ? 'robe' : r < 0.5 ? 'trousers' : 'robe', cloth: CL[Math.floor(rand() * CL.length)], cloth2: 'cloth_white', over: hu ? 'belt' : 'none',
+      skin: hu ? 'skin_medium' : 'skin_light', hat: hu ? 'brim' : r < 0.5 ? 'cap' : 'none', hair: hu ? 'short' : 'topknot', beard: hu || r < 0.3, pose: 'stand', carry: 'none' });
+  }
+  return [...cells].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`tang-changan-keepers-${k}`, [{ t: 'tc_keepers', list }]), center: [i * 60 + 30, j * 60 + 30], near: 80 }; });
+}
+
 const clear = (e) => !e.at || (e.t === 'animal' && e.kind === 'camel') || walkDistance(e.at) > 2.6;          // (nothing stands on the visitor's way, walk.js)
 export async function town() {
   const plans = [base('tang-changan-walls', walls()), base('tang-changan-avenue', avenue()), base('tang-changan-daoist', daoist()), base('tang-changan-market', market())];
+  plans.push(...keeperPlans());
   plans.push(...nightPlans(base, WARDS, gates, MARKET.id, marketRows));
   const fl = furnishedLot(), by = new Map();
   for (const l of lots()) { if (!by.has(l.ward)) by.set(l.ward, []); by.get(l.ward).push(l); }
