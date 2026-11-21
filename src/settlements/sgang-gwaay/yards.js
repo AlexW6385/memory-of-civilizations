@@ -117,6 +117,15 @@ export function yards() {
     if (!inSea(x, z) || !inSea(x + 4, z)) continue;
     boats.push({ c: [x, z], yaw: Math.PI / 2 + (rand() - 0.5) * 0.5, l, seed: 800 + z, crew: 2 + (rand() < 0.5 ? 1 : 0) });
   }
-  return (FIT = { props, sit, folk, boats, racks, runs });
+  // beach fires near the visitor (night job): two open fires on the street's seaward edge, 9-14 m from the arrival, kept off the lanes and the clear ground (added last: no other seed moves)
+  const beach = [];
+  for (const [dx, dz] of [[-6, -11], [-5, -9], [-7, -13], ...[-8, -6, -4, -2, 0].flatMap((a) => [6, 8, 10, 12, 14, 16, 18].map((b) => [a, b]))]) {
+    if (beach.length >= 2) break;
+    const x = ARRIVAL[0] + dx, z = ARRIVAL[1] + dz;
+    if (beach.some((b) => Math.hypot(b.c[0] - x, b.c[1] - z) < 14) || height(x, z) < 0.3) continue;
+    const p = put('fire', x, z, 1 + dz * 0.1, { r: 1.8, minH: 0.3 });
+    if (p) beach.push(p);
+  }
+  return (FIT = { props, sit, folk, boats, racks, runs, beach });
 }
 export const footprintsY = () => yards().props.map((p) => p.c);
