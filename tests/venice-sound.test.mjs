@@ -7,7 +7,7 @@ import { Music } from '../src/engine/audio.js';
 import * as VN from '../src/settlements/venice/soundmap.js';
 import { VENICE_VOICES } from '../src/settlements/venice/voices.js';
 import { wells, BASILICA, PIAZZA, BASIN_Z, MARKET } from '../src/settlements/venice/layout.js';
-import { shopRooms, shopLanes } from '../src/settlements/venice/shops.js';
+import { shopRooms, shopLanes, merceriaRooms } from '../src/settlements/venice/shops.js';
 
 const fake = () => {
   let nodes = 0;
