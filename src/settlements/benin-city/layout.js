@@ -161,3 +161,9 @@ export const YARDS = (() => {
   return out;
 })();
 export const YARD_ROUTE = LANE;
+/** The water jars at the mouths of the lanes along the great street (walkwork.js `benin_waypot`; town.js stands them, soundmap.js pours from them). */
+export const WAYPOTS = (() => {
+  const out = [];
+  for (const a of [-160, -62, 22]) for (const z of [GREAT[3] - 1.2, GREAT[1] + 1.2]) if (depth(a, z) > 20 && !inRect(SQUARE, a, z, 3) && !inRect(MARKET, a, z, 2)) out.push([a - 5.4, z]);
+  return out;
+})();

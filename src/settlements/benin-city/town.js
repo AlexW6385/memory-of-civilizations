@@ -3,7 +3,7 @@
 // in rows along the streets.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
-import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, BRAZIERS, AUD, crest, height, lots, depth, inRect, onStreet } from './layout.js';
+import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, BRAZIERS, AUD, crest, height, lots, depth, inRect, onStreet, WAYPOTS } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'benin', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE_X, 12], facing: 'n' }, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -287,7 +287,7 @@ export async function town() {
     for (const a of ALLEYS_X) for (const [z, dz] of [[GREAT[3] - 1.2, 1], [GREAT[1] + 1.2, -1]]) if (ok(a, z) && depth(a, z) > 26) st.push({ t: 'benin_mouth', at: [a + 5.6, z], along: [1, 0], seed: Math.round(a + z) });
     // the visitor's walk (walk.js, walkwork.js): the wayside shrine at the crossing of the great street and the cross street, the water jars at the mouths of the lanes along the great street
     st.push({ t: 'benin_shrine', at: [CROSS[0] + 18, GREAT[1] + 7], y: 0 });
-    for (const a of [-160, -62, 22]) for (const [z, dz] of [[GREAT[3] - 1.2, 1], [GREAT[1] + 1.2, -1]]) if (ok(a, z)) st.push({ t: 'benin_waypot', at: [a - 5.4, z], y: 0 });
+    for (const at of WAYPOTS) st.push({ t: 'benin_waypot', at, y: 0 });
     plans.push(...lodTiles('benin-street', 'benin', st, { R: RADIUS }));
   }
   plans.push({ ...base('benin-people', [...F.P, ...P2]), style: 'life' });
