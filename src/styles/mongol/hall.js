@@ -36,6 +36,12 @@ export function podium(bag, col, rect, h, stairs = [], opt = {}) {
       const r = ox ? [Math.min(base, base + ox * d), s.c - w / 2, Math.max(base, base + ox * d), s.c + w / 2] : [s.c - w / 2, Math.min(base, base + oz * d), s.c + w / 2, Math.max(base, base + oz * d)];
       bag.add(STONE, box(r[0], -0.1, r[1], r[2], top, r[3]));
     }
+    // the treads worn: on every step a dished patch of trodden dust where feet fall, off-centre by the stair's own place and a little different on each tread [inferred: feet on stone]
+    for (let i = 0; i < n; i++) {
+      const top = h * (i + 1) / n, hh = Math.abs(Math.sin((s.c * 12.9 + i * 78.2 + base * 3.1) * 12.9898) * 43758.5453) % 1, ww = w * (0.28 + 0.1 * hh) , mid = s.c + (hh - 0.5) * w * 0.18, d0 = (n - i - 1) * k + 0.07, d1 = (n - i) * k - 0.05;
+      const r = ox ? [Math.min(base + ox * d0, base + ox * d1), mid - ww, Math.max(base + ox * d0, base + ox * d1), mid + ww] : [mid - ww, Math.min(base + oz * d0, base + oz * d1), mid + ww, Math.max(base + oz * d0, base + oz * d1)];
+      bag.add('earth_wall', box(r[0], top + 0.012, r[1], r[2], top + 0.02, r[3]));
+    }
     const d = n * k, r = ox ? [Math.min(base, base + ox * d), s.c - w / 2, Math.max(base, base + ox * d), s.c + w / 2] : [s.c - w / 2, Math.min(base, base + oz * d), s.c + w / 2, Math.max(base, base + oz * d)];
     col.ramp(r, 0, h, asc);
   }
@@ -156,6 +162,8 @@ export function palaceHall(el, { bag, col, lights }) {
     bag.add(COL, box(u - d.w / 2 - 0.28, F + d.h, zF + T / 2 - 0.02, u + d.w / 2 + 0.28, F + d.h + 0.3, zF + T / 2 + 0.2));
     bag.add('paint_caihua', box(u - d.w / 2 - 0.28, F + d.h + 0.3, zF + T / 2 - 0.02, u + d.w / 2 + 0.28, F + d.h + 0.62, zF + T / 2 + 0.12));
   }
+  // the way in worn bare: the dust trodden in on the boards inside each door, wide at the sill and narrowing inward [inferred]
+  for (const d of doors) { const u = x0 + d.at; bag.add('earth_wall', box(u - d.w * 0.42, F + 0.012, zF - 1.2, u + d.w * 0.42, F + 0.02, zF - 0.1)); bag.add('earth_wall', box(u - d.w * 0.28, F + 0.008, zF - 2.6, u + d.w * 0.28, F + 0.016, zF - 1.2)); }
   // hangings of silk and cloth of gold on the inside of the walls, between the columns
   const hang = ['cloth_red', 'cloth_ochre', 'cloth_blue', 'cloth_red', 'cloth_ochre', 'cloth_blue', 'cloth_red'];
   for (let k = 0; k < 7; k++) {
@@ -355,6 +363,7 @@ export function greatHall(el, { bag, col, lights }) {
   wallRun(bag, col, [x0, z1], [x1, z1], T, F, Y + H, 'timber_red', doorS, 'lattice_red');
   wallRun(bag, col, [x0, z0], [x1, z0], T, F, Y + H, 'timber_red', [{ at: half, w: 2.4, h: 3.6 }, win(S * 1.5), win(S * 5.5)], 'lattice_red');
   for (const X of [x0, x1]) wallRun(bag, col, [X, z0], [X, z1], T, F, Y + H, 'timber_red', [{ at: half, w: 2.4, h: 3.6 }, win(S * 1.5), win(S * 5.5)], 'lattice_red');
+  bag.add('earth_wall', box(cx - 2.0, F + 0.012, z1 - 1.6, cx + 2.0, F + 0.02, z1 - 0.1)); bag.add('earth_wall', box(cx - 1.3, F + 0.008, z1 - 4.0, cx + 1.3, F + 0.016, z1 - 1.6));   // the dust trodden in at the south door
   const xs = Array.from({ length: N + 1 }, (_, i) => x0 + i * S), zs = Array.from({ length: N + 1 }, (_, i) => z0 + i * S);
   for (const x of xs) for (const z of zs) { if (Math.abs(x - cx) < S * 1.1 && Math.abs(z - cz) < S * 1.1) continue; pillar(bag, col, x, z, F, H, 0.6); }
   // the stair to the upper storey [inferred]: up the south aisle between two rows of columns, its well cut in the ceiling where the climber would reach it
