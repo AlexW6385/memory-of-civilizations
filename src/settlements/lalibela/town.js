@@ -1,6 +1,7 @@
 // The village round the churches (docs/settlements/lalibela.md §5): round stone houses with conical thatch;
 // and the people of the churches (§10): pilgrims wrapped in white in the pits, the trenches and on
 // the rims looking down, priests among them holding their hand crosses.
+import { STALLS, keepers } from './walkwork.js';
 import { RADIUS, POOL, PITS, PRECINCT, TERR, KNOLL, riserR, cutDepth, houses, compounds, enterable, HUT, slope, inRect } from './layout.js';
 const base = (id, elements, style = 'zagwe') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-240, 100], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -105,7 +106,7 @@ function village() {
     if (rand() < 0.7) L.push({ t: 'chickens', at: [q.c[0] + v[0] * q.R * 0.3, q.c[1] + v[1] * q.R * 0.3], y: slope(q.c[0] + v[0] * q.R * 0.3, q.c[1] + v[1] * q.R * 0.3), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), n: 3 + Math.floor(rand() * 4), kind: 'hen' });
     if (rand() < 0.3) an('donkey', [q.c[0] + u[0] * q.R * 0.5 + v[0] * q.R * 0.5, q.c[1] + u[1] * q.R * 0.5 + v[1] * q.R * 0.5]);
     if (rand() < 0.3) an('dog', [M.c[0] + mu[0] * (M.r + 1.5) + mv[0] * 2.6, M.c[1] + mu[1] * (M.r + 1.5) + mv[1] * 2.6]);
-    if (rand() < 0.45) fig(L, [M.c[0] + mu[0] * (M.r + 1.2) + mv[0] * 0.2, M.c[1] + mu[1] * (M.r + 1.2) + mv[1] * 0.2], Math.atan2(-mu[0], -mu[1]) + 3.14 * 0 + Math.PI, 'squat', { hat: 'veil', hair: 'bun', over: 'shawl' });
+    if (rand() < 0.45) fig(L, [M.c[0] + mu[0] * (M.r + 1.9) - mv[0] * 0.95, M.c[1] + mu[1] * (M.r + 1.9) - mv[1] * 0.95], Math.atan2(-mu[0], -mu[1]) + 3.14 * 0 + Math.PI, 'squat', { hat: 'veil', hair: 'bun', over: 'shawl' });
     if (rand() < 0.35) fig(L, [M.c[0] + mu[0] * (M.r + 0.55) - mv[0] * 1.9, M.c[1] + mu[1] * (M.r + 0.55) - mv[1] * 1.9], Math.atan2(-mu[0], -mu[1]) + Math.PI, 'sit_low', { hat: rand() < 0.4 ? 'turban' : 'none', hatMat: 'cloth_white', beard: 0.6, hair: 'short', over: 'cape' });
     if (rand() < 0.4) fig(L, [q.c[0] + u[0] * q.R * 0.55 - v[0] * 1.2, q.c[1] + u[1] * q.R * 0.55 - v[1] * 1.2], rand() * 6.28, 'stand', { h: 1.1, over: 'none', hair: 'short', cloth: rand() < 0.5 ? 'cloth_ochre' : 'cloth_white' });
   }
@@ -142,7 +143,7 @@ export async function town() {
     if (h.enter) { Q[quad(...h.c)].push({ t: 'hut', c: h.c, r: h.r, y: slope(h.c[0], h.c[1]), door: h.door, seed: h.seed, kind: h.enter }); continue; }
     Q[quad(...h.c)].push({ t: 'tukul', c: h.c, r: h.r, storeys: h.storeys, seed: h.seed, door: h.door, y: slope(h.c[0], h.c[1]), yard: h.kind === 'lone' && Math.hypot(h.c[0], h.c[1]) < PRECINCT - h.r - 5 });
   }
-  for (const q of compounds()) Y[quad(...q.c)].push({ t: 'yard', c: q.c, R: q.R, gate: q.gate, seed: q.seed, stone: q.stone, main: { c: q.main.c, r: q.main.r, door: q.main.door }, granary: q.granary, pen: q.pen });
+  for (const q of compounds()) Y[quad(...q.c)].push({ t: 'yard', c: q.c, R: q.R, gate: q.gate, seed: q.seed, stone: q.stone, main: { c: q.main.c, r: q.main.r, door: q.main.door, enter: !!q.main.enter }, granary: q.granary, pen: q.pen });
   for (let k = 0; k < 4; k++) plans.push(base(`lalibela-village-${k}`, Q[k]), base(`lalibela-yards-${k}`, Y[k]));
   // the terraces: each riser's wall in four arcs
   for (let k = 0; k < 4; k++) {
@@ -150,5 +151,9 @@ export async function town() {
     for (let n = 0; n < TERR.n; n++) E.push({ t: 'terrace', n, from: -Math.PI + k * Math.PI / 2, to: -Math.PI + (k + 1) * Math.PI / 2 });
     plans.push(base(`lalibela-terraces-${k}`, E));
   }
-  return [...plans, ...village(), ...people()];
+  // the visitor's walk (docs §18): the pilgrims' stalls (in the quadrant plans, whose fine pieces they share) with their keepers (in the hamlet-life plans)
+  const V = village();
+  for (const q of STALLS) Q[quad(...q.at)].push({ t: 'pilgrim_stall', at: q.at, y: q.y, rot: q.rot, kind: q.kind, seed: q.seed });
+  for (const k of keepers()) V.find((p) => p.id === `lalibela-hamlet-life-${quad(...k.at)}`).elements.push({ t: 'figure', at: k.at, y: k.y, rot: k.rot, seed: 9100 + k.seed * 17, dress: 'robe', over: 'shawl', cloth: 'cloth_white', cloth2: k.kind === 'candles' ? 'cloth_ochre' : 'cloth_white', hat: k.kind === 'candles' ? 'turban' : 'veil', hatMat: 'cloth_white', hair: k.kind === 'candles' ? 'short' : 'bun', beard: k.kind === 'candles' ? 0.5 : undefined, skin: 'skin_dark', feet: 'bare', pose: 'sit_low' });
+  return [...plans, ...V, ...people()];
 }

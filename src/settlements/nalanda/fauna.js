@@ -1,6 +1,8 @@
 // Nalanda — the animals (src/engine/fauna.js draws them; docs/settlements/nalanda.md §9–§10): carp in the tanks, swallows over the water and
 // round the temple's top, doves on the library's roofs, crows over the groves, sparrows on the courts and terraces, egrets at the tanks' margins.
-import { TANKS, LEVEL, T3, M1, LIBRARY, tankD, height, WAY_LAMPS, BOOTHS, OTLAS, ANNEXES, GATE, MONASTERIES } from './layout.js';
+import { TANKS, LEVEL, T3, M1, LIBRARY, tankD, height, WAY_LAMPS, BOOTHS, OTLAS, ANNEXES, GATE, MONASTERIES, yards } from './layout.js';
+import { houseDoor } from '../../styles/nalanda/houses.js';
+import { openHouses } from './walk.js';
 
 const tk = TANKS[0], area = [tk.rect[0], tk.rect[1], tk.rect[2], tk.rect[3]];
 const fish = [];
@@ -26,4 +28,32 @@ BOOTHS.filter((_, i) => i % 3 === 1).forEach(([x, z], i) => perches.push({ kind:
 OTLAS.filter((_, i) => i % 2 === 0).forEach(([x, z0, , z1], i) => perches.push({ kind: 'sparrow', x, z: (z0 + z1) / 2, y: 0.52, rot: 1.57, range: [0.2, 4], alert: 5 + i }));
 ANNEXES.forEach((a, i) => perches.push({ kind: 'sparrow', x: (a.rect[0] + a.rect[2]) / 2, z: (a.rect[1] + a.rect[3]) / 2, y: 4.5, rot: i, range: [5, 3] }));
 MONASTERIES.forEach((m, i) => perches.push({ kind: 'sparrow', x: m.rect[0] + 25, z: (m.rect[1] + m.rect[3]) / 2 + 3, y: 0.04, rot: i, range: [2, 2], alert: 4 }));
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §21) ──
+// The animals of a monastery town on the plain of Bihar [inferred: nothing here is sourced to Nalanda itself; the animals are those of any Gangetic village and pilgrim town]:
+// village dogs lying at the gate and at the doors of the way and two houses, a cat on the step of a kitchen and of the refectory (the household cat of India is old), hens and a
+// cock in the village yards (the jungle fowl was domesticated in the Indus valley and the plains), goats in two pens, pigeons on the paving before the great temple's stair and in the
+// courts (doves were fed at shrines), ducks on the east tank and a kingfisher at its steps, swallows' mud nests under the annexes' eaves (the swallows already fly over the tanks).
+// No peafowl and no zebu are rigged (the engine has no model for them): the zebu are the life figures'.
+const critters = [];
+const doorSide = (l) => { const F = houseDoor(l), u = F.du < F.L / 2 ? F.du + 2.1 : F.du - 2.1; return F.P(u, -0.8); };
+critters.push({ model: 'dog', at: [-7.6, 0.02, GATE.c[1] + 3.6], rot: 1.1, range: [9, 3.5] });
+critters.push({ model: 'dog', at: [7.2, 0.02, 71.5], rot: 4.2, range: [9, 3.5] });
+for (const [i, h] of openHouses().slice(0, 4).entries()) {
+  const [x, z] = doorSide(h);
+  if (i === 1) critters.push({ model: 'dog', at: [x, 0.02, z], rot: 2.0, range: [9, 3.5] });
+}
+// cats: on the step of the second monastery's annex (a kitchen) and of the refectory
+for (const [i, a] of [ANNEXES[1], ANNEXES[0]].entries()) { const cx = (a.rect[0] + a.rect[2]) / 2; critters.push({ model: i ? 'cat_tabby' : 'cat_orange', at: [cx + 2.8, 0.05, a.rect[3] + 1.0], rot: 2.4 + i, range: [7, 2.5] }); }
+// hens and a cock in the pens of the village yards nearest the arrival; goats in two others
+const pens = yards().filter((y, i) => i % 4 !== 0 && !y.gone).sort((a, b) => Math.hypot(a.rect[0] - -2, a.rect[1] - 70) - Math.hypot(b.rect[0] - -2, b.rect[1] - 70));
+pens.slice(0, 2).forEach((y, i) => { const cx = (y.rect[0] + y.rect[2]) / 2, cz = (y.rect[1] + y.rect[3]) / 2; critters.push({ model: 'rooster', at: [cx - 1.6, 0.05, cz + 1.2], rot: i, range: [2.0, 1.4], size: 0.95 }, { model: i % 2 ? 'hen_white' : 'hen_brown', at: [cx - 0.4, 0.05, cz + 1.7], rot: i + 2, range: [2.0, 1.4], size: 0.92 }, { model: 'hen_brown', at: [cx + 0.6, 0.05, cz + 0.9], rot: i + 4, range: [2.0, 1.4], size: 0.9 }); });
+pens.slice(2, 4).forEach((y, i) => { const cx = (y.rect[0] + y.rect[2]) / 2, cz = (y.rect[1] + y.rect[3]) / 2; critters.push({ model: i ? 'goat_white' : 'goat_black', at: [cx + 1.8, 0.05, cz - 0.8], rot: 0.6 + i, range: [9, 3.2] }, { model: i ? 'goat_black' : 'goat_white', at: [cx - 0.8, 0.05, cz + 1.4], rot: 3 + i, range: [9, 3.2] }); });
+// pigeons on the paving before the great temple's stair, in Monastery 1's court and in the library's yard
+for (const [x, z, m] of [[-10.6, 10.5, 'pigeon_grey'], [-9.8, 11.8, 'pigeon_white'], [-11.4, 9.2, 'pigeon_grey'], [mx0 + 16, mzc + 12.5, 'pigeon_grey'], [mx0 + 17.1, mzc + 13.4, 'pigeon_white'], [LIBRARY.yard[2] - 8, -80, 'pigeon_grey'], [LIBRARY.yard[2] - 8.9, -79.2, 'pigeon_grey']]) critters.push({ model: m, at: [x, 0.05, z], rot: x * 3, range: [1.4, 1.2] });
+// ducks on the east tank's open water, a kingfisher on the margin by a ghat
+critters.push({ type: 'floaters', models: ['duck_white', 'duck_brown', 'duck_brown'], area: [TANKS[0].rect[0], -62, TANKS[0].rect[2], -38], dist: tankD, a: [8, 6], ratio: 0.5, margin: 2.5, y: LEVEL, speed: 0.25, cycle: [18, 24] });
+critters.push({ model: 'kingfisher', at: [TANKS[0].rect[0] - 0.2, height(TANKS[0].rect[0] - 0.2, 4) + 0.08, 4], rot: -Math.PI / 2, water: [TANKS[0].rect[0] + 3.2, 4, LEVEL], cycle: 36 });
+// swallows' mud nests under the eave of two annexes' south fronts, away from the doors
+for (const [i, a] of [ANNEXES[0], ANNEXES[2]].entries()) critters.push({ model: 'swallow_nest', at: [a.rect[0] + 1.4, 3.2, a.rect[3] + 0.44], rot: Math.PI / 2, cycle: 33 + 4 * i, flight: 9, radius: 10, side: i ? 1 : -1, rise: -0.8 });
+export default { fish, flights, perches, critters };

@@ -5,6 +5,7 @@
 import { lots, height, inRect, STREETS, isOpen, SIMPLE_FROM } from './layout.js';
 import { upFacts } from './up.js';
 import { houseFacts } from '../../styles/swahili/house.js';
+import { walkRoutes } from './walkroutes.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const faceTo = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
@@ -62,6 +63,14 @@ export function fronts() {
       L.push({ t: 'sacks', n: 3, at: [d + pick([-2.6, 2.6]), zf + out * 0.5], y: yl(zf + out * 0.5), rot: 0.3, seed: l.seed + 6 });
       fig([d + 1.1, zf + out * 1.2], yl(zf + out * 1.2), [d, zf], { pose: 'talk', carry: 'none' });
     }
+  }
+  // the shopkeepers of the visitor's walk (docs/settlements/kilwa.md §22): each shop (duka) on the walk has its keeper behind the counter, a man in a white robe and cap
+  // (house.js: the counter across the front room, its far side toward the back door; a house turned about its middle line is mirrored)
+  for (const w of walkRoutes()) {
+    const sh = w.f.shop;
+    if (!sh) continue;
+    const kz = w.f.flip ? 2 * w.f.zc - (sh.cz + 0.72) : sh.cz + 0.72, kx = sh.cx - sh.cw / 2 + 0.55, ky = w.l.y + 0.35;
+    fig([kx, kz], ky, [kx, kz + (w.f.flip ? 5 : -5)], { pose: 'stand', over: 'none', hat: 'cap', cloth: 'cloth_white', carry: 'none' });
   }
   void inRect; void STREETS;
   return (CACHE = L);

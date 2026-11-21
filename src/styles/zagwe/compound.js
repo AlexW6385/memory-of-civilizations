@@ -151,10 +151,12 @@ export function yardEl(el, { bag, col }) {
   pots(bag, col, M.c[0] + mu[0] * (M.r + 0.5) + mv[0] * 1.5, M.c[1] + mu[1] * (M.r + 0.5) + mv[1] * 1.5, rand);
   seat(bag, col, M.c[0] + mu[0] * (M.r + 0.55) - mv[0] * 1.9, M.c[1] + mu[1] * (M.r + 0.55) - mv[1] * 1.9, Math.atan2(mv[1], mv[0]));
   if (rand() < 0.8) firewood(bag, col, M.c[0] + mv[0] * (M.r + 0.3) * 0.0 - mu[0] * (M.r + 0.6), M.c[1] - mu[1] * (M.r + 0.6), Math.atan2(mv[1], mv[0]) + 0, rand);
-  if (rand() < 0.5) quern(bag, col, M.c[0] + mu[0] * dd + mv[0] * 0.2 - mv[0] * 0.5, M.c[1] + mu[1] * dd - mv[1] * 0.5 + mv[1] * 0.2, Math.atan2(mv[1], mv[0]));
-  if (rand() < 0.7) haystack(bag, col, cx - u[0] * (R * 0.3) + v[0] * R * 0.55, cz - u[1] * (R * 0.3) + v[1] * R * 0.55, rand);
+  // (in a yard whose main house is opened to the visitor the way from the gate to the door is kept clear: the grindstone stands to the side, no beehives or haystack on it)
+  const E = !!M.enter;
+  if (rand() < 0.5) quern(bag, col, M.c[0] + mu[0] * dd + mv[0] * (E ? -3.4 : -0.3), M.c[1] + mu[1] * dd + mv[1] * (E ? -3.4 : -0.3), Math.atan2(mv[1], mv[0]));
+  if (rand() < 0.7 && !(E && el.pen)) haystack(bag, col, cx - u[0] * (R * 0.3) + v[0] * R * 0.55, cz - u[1] * (R * 0.3) + v[1] * R * 0.55, rand);
   if (rand() < 0.45) washLine(bag, col, cx + u[0] * R * 0.2 - v[0] * R * 0.5, cz + u[1] * R * 0.2 - v[1] * R * 0.5, Math.atan2(u[1], u[0]) + 0.5, rand);
-  if (rand() < 0.35 && R > 8.4) beehives(bag, col, cx + u[0] * R * 0.1 + v[0] * R * 0.1, cz + u[1] * R * 0.1 + v[1] * R * 0.1, Math.atan2(v[1], v[0]), rand);
+  if (rand() < 0.35 && R > 8.4 && !E) beehives(bag, col, cx + u[0] * R * 0.1 + v[0] * R * 0.1, cz + u[1] * R * 0.1 + v[1] * R * 0.1, Math.atan2(v[1], v[0]), rand);
   if (el.granary) granary(bag, col, el.granary[0], el.granary[1], el.seed + 3, rand() < 0.5);
   if (el.pen) pen(bag, col, el.pen[0], el.pen[1], gate + Math.PI, rand);
   else if (rand() < 0.6) threshing(bag, cx + u[0] * R * 0.38 + v[0] * R * 0.3, cz + u[1] * R * 0.38 + v[1] * R * 0.3, rand);

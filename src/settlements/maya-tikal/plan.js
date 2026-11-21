@@ -5,6 +5,9 @@
 
 import { PLAZA, T1, T2, NA, NA_TEMPLE, NA_SMALL, CA, BALL } from './layout.js';
 import { frame } from '../../styles/tikal/kit.js';
+import { routes as visitorRoutes } from './walk.js';
+import './nightlight.js';
+import './wear.js';
 
 export const WALKS = [
   [[-18, 28], [20, 0], [34, 0], [44, 0], [52, 0], [54.5, 0], [58.3, 0], [62.1, 0], [65.5, 0]],
@@ -82,6 +85,9 @@ for (const z of [-8, 8]) { pushStela({ t: 'k_stela', at: [31.5, z], face: 'w', h
 for (const x of [-26, 8]) pushStela({ t: 'k_stela', at: [x, 38], face: 'n', h: 3.0, seed: x + 90 });
 for (const [x, z] of [[-10, -20], [10, -20], [-10, 20], [10, 20]]) pushStela({ t: 'k_stela', at: [x, z], face: z < 0 ? 's' : 'n', h: 2.8, seed: x + z + 100 });
 
+// the torches of pitch-pine at the feet of the great stairs (docs §17)
+for (const [x, z] of [[33.2, -5.6], [33.2, 5.6], [-33.2, -6.8], [-33.2, 6.8], [-15.5, -40.4], [15.5, -40.4], [-22.5, 38.5], [4.5, 38.5]]) E.push({ t: 'mt_torch', at: [x, z], y: 0.04 });
+
 // rooms: the three chambers of Temple I, the innermost of Temple II, the south range's rooms, the lowest room of the stepped palace
 const room = (id, rect, y, kind = 'hall') => ({ id, rect, y, kind });
 const t1c = frame('w', T1.c[0] - T1.top[0] + 1.8, T1.c[1]);
@@ -103,7 +109,8 @@ const rooms = [
   room('court2-west', cb1.R(1.5, 3.6, -1.3, 1.3), CA.H),
   room('court2-east', cb2.R(1.5, 3.6, -1.3, 1.3), CA.H),
 ];
-const walks = WALKS; for (const w of walks) w.y0 = 0;
+for (const w of WALKS) w.y0 = 0;
+const walks = [...WALKS, ...visitorRoutes(E).map((r) => Object.assign(r.pts, { y0: r.y0, name: r.name }))];
 
 export const plaza = {
   id: 'maya-tikal-plaza',

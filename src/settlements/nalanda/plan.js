@@ -3,6 +3,7 @@
 // row of monasteries and temples, the tanks and the village are the town (town.js).
 import { M1, T3, TEMPLES, LIBRARY, WAY } from './layout.js';
 import '../../styles/nalanda/index.js';
+import { walkRoutes } from './walk.js';
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const [mx0, mz0, mx1, mz1] = M1.rect, mzc = (mz0 + mz1) / 2;
@@ -56,6 +57,7 @@ export const landmark = {
   walks: [
     Object.assign([[0, 40], [0, mzc], [mx0 - 2, mzc], [mx0 + 12, mzc], [cxm, mzc], [mx1 - 14, mzc]], { y0: 0 }),
     Object.assign([[WAY.x1, 0], [T3.c[0] + T3.half + 8, 0]], { y0: 0 }),
+    ...walkRoutes().map((w) => Object.assign(w.route, { y0: 0 })),
   ],
 };
 export default landmark;

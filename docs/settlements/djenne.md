@@ -151,6 +151,33 @@ Sources added: [Wikiwand](https://www.wikiwand.com/en/articles/Great_Mosque_of_D
 - **Walk routes** (`walks` of the mosque plan, `src/settlements/djenne/plan.js`): for each of the 24 houses a route from the street through door, vestibule and court up the stair into the room and on up the roof stair to the terrace; a second to the loggia in the houses that have one; 41 routes in all, walked by `walk-check --sites djenne`.
 - **Still shut:** the houses beyond the 24 keep the one furnished room (§16); no stair to the roof from one-storey houses' upper floor (they have none); the back block's roof is not reached from the upper floor; no lamps upstairs.
 
+## 20. Bringing the town up to the reference (2026-11-20)
+
+### 20.1 The visitor's walk
+- **The walk** (`src/settlements/djenne/walk.js`): from the arrival in the market west across it toward the qibla front, north up the aisle at x 55 to the shop row on the market's north edge, east along the shop fronts to the court house, and west again along the platform's foot to the north stair. [inferred from the plan; the market on Monday after Caillie, section 11]
+- **Shops** (`sahel_shops`): the eight open fronts of section 15 now have an entry 1.65 m clear beside the counter (the counter was shortened), a keeper behind each counter (men and women, standing or talking), and a walked route into each. [inferred: keepers; goods as section 15]
+- **Court house**: door and inner doors widened to 1.7 m, the hearth and the water-jar stand moved clear of the workshop door; the weaver on her stool at the loom of strips, the teacher on the vestibule bench with two pupils on the mat opposite (the vestibule as Qur'anic school: Springer 2021, section 15 [stated]; the people [inferred]). Routes: through the vestibule to the court, into the workshop, and up the court stair to the east roof.
+- **Wells** (`dj_well`, three on the walk): a hand-dug well with a banco curb, forked posts and a pole across with rope and leather bucket, a clay trough and jars; a woman and a boy at each. Wells in the open of Sahel towns are common; their form here [inferred].
+- Houses of the walk were already open (sections 16-19: 513 enterable, 24 with upper floors, routes in 41).
+
+### 20.2 Night
+- What lit Djenne at night: small clay oil lamps (a dish with a cotton wick, shea butter or sesame oil) in niches and on counters, the three-stone hearth in the court and the kitchen, no street lighting; in the mosque lamps in the niches of the qibla wall and by the north door. [inferred; no source for lamps at this place and date]
+- Ours (`nightlight.js`, the additive `halo` material, night only, day unchanged): the lamp and hearth of every enterable house (glow ball and floor pool) and the lamplight spilling over its step; the upper windows of solid houses glow in about a third of cases; a lamp on the counter of about half the shops with a pool in the market before it; the court house's hearth, vestibule and workshop lamps; five lamps of the mosque (three mihrabs, the minbar niche's line, either side of the north door). The market itself is dark at night (it is held by day).
+
+### 20.3 Sound
+- A sound map (`soundmap.js`, voices `src/engine/voices-djenne.js`, prefix `dj`), the call to prayer being the engine's own (`adhan`). Placed: the griot's kora before the shops and the balafon in the market's south (by day, not in rain); sellers' calls in the market; the Qur'anic school's wordless recitation in the court house vestibule and the mosque's west gallery (morning and afternoon: the vestibule as school [stated: Springer 2021]); the smith's hammer and skin bellows in the shop row and some houses; pestles pounding millet in the courts at the morning and evening meals; the pole of pirogues on the channel (a passing track along the ring) and at the landing; sacks and washing at the landing; wells; the masons' yards; owls at night. Rooms: shops by trade, houses, smithies, the school, the weaver's room, the prayer hall (dull banco walls, rain muffled). [inferred throughout; instruments after section 9, kora and balafon being the griots' instruments of the Mande world]
+- Measured with `tools/sound-render.mjs` (cannot be heard here): kora centroid raised by lifting its register; pestles 13 onsets in 8 s at a steady pace; recitation a murmur around 550 Hz; test `tests/djenne-sound.test.mjs`.
+
+### 20.4 Animals
+- Critters (`fauna.js`, 21 rigged animals): dogs lying in the shade at two wells and the market's east edge, a tabby on a shop counter and an orange cat on the court house's facade bench, goats tethered at two wells, hens and a rooster in the court house's yard and at the market's south edge, doves on the mosque platform before the north door and by the south-west tower. They answer the visitor as the engine's critters do. [inferred: the domestic animals of Sahel towns (the profile's goats, donkeys, roosters, cattle); no source for this town and date. No donkey model exists; the donkeys remain the life layer's.] Test `tests/djenne-critters.test.mjs`.
+
+### 20.5 Wear and writing
+- **Wear** (`wear.js`): the threshold of every enterable house trodden bare and darker in its middle (two worn patches of banco mud plaster out from the door), and the same before the entry of each shop. The climate's wear (the rains' erosion and runnels before the crepissage) is already section 13; dust is the harmattan's. [inferred: form of the wear]
+- **Writing: none.** The Qur'anic boards and any inscription would be Arabic; the geometry cannot be checked here glyph by glyph, so the boards stay plain (as sections 15-16). Not written rather than written wrong.
+
+### 20.6 Landmark gaps
+- Still open from section 17: the crier's room over the central mihrab, the three missing platform stairs, carved doors in the open (hollow) houses, indoor lamps by trade beyond the shops' counters, weathering inside the hall, the hall's sound beyond its room tone.
+
 ## Sources
 
 - [Great Mosque of Djenne — Designing Buildings Wiki](https://designingbuildings.co.uk/wiki/Great_Mosque_of_Djenne)
