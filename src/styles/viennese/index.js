@@ -7,6 +7,7 @@ import '../qing/index.js';
 import '../../objects/index.js';
 import { mietshaus } from './mietshaus.js';
 import { secession } from './secession.js';
+import { secWear } from './secwear.js';
 import { cafeHouse } from './cafe.js';
 import { stadtbahnPavilion } from './pavilion.js';
 import { opera, karlskirche } from './landmarks.js';
@@ -21,6 +22,6 @@ import { FURNITURE } from '../modernisme/furniture.js';
 
 registerStyle('viennese', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, vienna_night: viennaNight, tram_stop: tramStop, mietshaus: farWrap(mietshaus), hof_wing: farWrap(hofWing), tram_wire: tramWire, manholes, hydrant, maroni, trough, flowerbed, hedge, monument, fountain, marktamt, stadtbahn_train: stadtbahnTrain, hof_yard: farWrap(hofYard), secession, cafe_house: cafeHouse, stadtbahn_pavilion: stadtbahnPavilion, opera, karlskirche, tram, litfass, fiaker, wien_channel: wienChannel, wien_bridge: wienBridge, tram_rails: tramRails, naschmarkt_stall: naschmarktStall, gaslamp, park_bench: bench, kiosk: FURNITURE.kiosk, terrace_set: FURNITURE.terrace_set },
+  elements: { ...STYLES.qing.elements, vienna_night: viennaNight, tram_stop: tramStop, mietshaus: farWrap(mietshaus), hof_wing: farWrap(hofWing), tram_wire: tramWire, manholes, hydrant, maroni, trough, flowerbed, hedge, monument, fountain, marktamt, stadtbahn_train: stadtbahnTrain, hof_yard: farWrap(hofYard), secession, sec_wear: secWear, cafe_house: cafeHouse, stadtbahn_pavilion: stadtbahnPavilion, opera, karlskirche, tram, litfass, fiaker, wien_channel: wienChannel, wien_bridge: wienBridge, tram_rails: tramRails, naschmarkt_stall: naschmarktStall, gaslamp, park_bench: bench, kiosk: FURNITURE.kiosk, terrace_set: FURNITURE.terrace_set },
   objects: {},
 });

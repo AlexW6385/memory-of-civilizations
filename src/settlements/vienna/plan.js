@@ -19,6 +19,7 @@ export const secession = {
     { t: 'secession', rect: SEC, y: 0 },
     // the forecourt between the building and the street: flagstones, lamps and the advertising column of the exhibition
     { t: 'floor', rect: [SEC_COURT[0], SEC_COURT[1], SEC_COURT[2], SEC[1] - 0.35], y: 0.03, th: 0.2, mat: 'flagstone' },
+    { t: 'sec_wear', box: SEC, court: SEC_COURT, y: 0.03 },
     { t: 'litfass', at: [-22, SEC[1] - 8], y: 0.03, seed: 1 },
     { t: 'kiosk', at: [24, SEC[1] - 9], y: 0.03, rot: 0, seed: 2 },
   ],
