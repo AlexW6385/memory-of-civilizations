@@ -50,8 +50,8 @@ export function terraceLife() {
       const e = { t: g[0], n: g[1], at: at(-side * 2.6, 2.4), y: T, rot: rot + Math.PI / 2, seed: seed() };
       if (g[0] === 'pot') e.kind = 'pithos'; if (g[0] === 'firewood') e.len = 1.6;
       F.push(e);
-      person(at(-0.2 + d.w * 0.25, -1.1), rot, { dy: 0.08, el: { pose: 'talk' } });         // the master inside, at his counter
-      if (k % 2 === 0) person(at(-0.5, 2.2), rot + Math.PI, { woman: k % 4 === 0, el: { pose: 'stand' } });
+      person(at(-0.9, -1.1), rot, { dy: 0.08, el: { pose: 'talk' } });         // the master inside, behind the left end of his counter (the open end, right, is the way in)
+      if (k % 2 === 0) person(at(-1.5, 2.2), rot + Math.PI, { woman: k % 4 === 0, el: { pose: 'stand' } });
     } else {
       F.push({ t: 'stool', at: at(-side * (d.w / 2 + 1.2), 1.0), y: T, rot, seed: seed() });
       person(at(-side * (d.w / 2 + 1.2), 1.0), rot + (rand() - 0.5) * 0.8, { woman: l.kind === 'home', el: { pose: 'sit_low' } });
