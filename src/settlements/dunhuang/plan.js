@@ -13,6 +13,8 @@ E.push({ t: 'dh_bridge', z: 0, w: 4.4 });
 E.push({ t: 'dh_stele', at: [XF + 3.0, -17.5], y: FLOOR[0] }); E.push({ t: 'dh_censer', at: [XF + 3.4, -26.0], y: FLOOR[0] });
 // the wayside shrine at the bridge's east foot, off the street's lane (dossier §14; the other is outside the east gate, town.js: it is in the landmark plan so that its paint shares the cave's materials)
 E.push({ t: 'dh_wayshrine', at: [-33.5, -4.0], face: 's', rect: [-35, -4.8, -32, -2.0] });
+// the lamps lit before the Great Buddha's hall on the apron (night; nightlight.js)
+E.push({ t: 'dh_lamprow', at: [XF + 4.8, 0], y: FLOOR[0], n: 9, dz: 1.5 });
 // the monks' halls and cells at the foot, facing the cliff over the apron: tiled halls and earth cells
 const mk = (rect, tiled, seed, extra = {}) => E.push({ t: 'dh_house', rect, front: 'w', seed, tiled, ...extra });
 mk([-61, 28, -50, 41], true, 71); mk([-61, 50, -50, 62], false, 72); mk([-61, 72, -50, 86], true, 73);
