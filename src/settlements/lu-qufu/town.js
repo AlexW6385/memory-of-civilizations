@@ -8,6 +8,7 @@ import { HOUSE } from '../../styles/qing/index.js';
 import { keepOff } from './walkroutes.js';
 import { nightLights } from './nightplace.js';
 import './nightlight.js';
+import './wear.js';
 void [laneZs, LANES_X, STREET_W];
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }

@@ -143,3 +143,13 @@ All [inferred] from §6–§8 and the trades of a pilgrim town; the Drum Tower's
 - **Work:** each shop by its trade (incense and books: the abacus; paper; rubbings and brush shops: the brush; cakes: the frying; tea: cups and pouring; cloth: scissors; pottery: clay), each furnished house's kitchen with the loom or the mortar by its east house; the wells' buckets; the **stone rollers of the six threshing yards** outside the wall by day in dry weather.
 - **Rooms:** the Dacheng Hall and Kuiwen, the Jinsi Hall, the great hall of the mansion, the Drum Tower's hall have their own tone, and what is heard inside.
 - Measured with `tools/sound-render.mjs` (cannot be heard here): the yayue phrase's centroid 229 Hz, the drum 93 Hz, the barrow's and the roller's level raised ×8 and ×6 to the music's.
+
+## 17. Animals (the Suzhou standard)
+
+All [inferred]: general to a north China town and temple, no Qufu source; the engine's rigged `critters` (`src/settlements/lu-qufu/fauna.js`). Dogs asleep at some shops' doorways (they lift their heads and stand as the visitor nears), cats on or by a few counters, the swallows' mud nests under the eaves of the shops of Queli Street with the birds going out and coming home, a songbird's cage hung at the post of two shops (a custom of Qing towns), a rooster and hens at the gates of the poorer houses in the lanes, pigeons on the paving of the temple's first courts (fed by the pilgrims), black and white goats beside two of the threshing yards. The donkeys of the yards, the hitching posts and the carts stay the street life's; there are no ducks on the Bishui pool (the ritual pool keeps its carp), no cranes (the bronze crane there is a statue). Test: `tests/lu-qufu-critters.test.mjs`.
+
+## 18. Wear and writing (the Suzhou standard)
+
+- **Wear** (`wear.js`, wraps the style's shop row): the dark worn patch of the apron before each shop's doorway with a smaller darker one at its middle, and the polished, darkened ends of the counter at the doorway. [inferred: where feet cross and hands rest]
+- **Writing:** nothing new is written. The characters already drawn (茶 布 书 面 金 吉 同 on the shops' boards; 大成殿, the plaques and 杏坛 of §10 and §12) were checked in earlier passes; no further inscription is added here because no text of Qufu's steles, couplets or shop boards could be fetched, and none is invented. The stele pavilions' steles, the gate couplets and the tablets stay blank.
+- **Not done:** worn temple steps and thresholds (the stair and gate-hall elements belong to the shared `qing` style, which this pass does not edit; a decal laid over them would also have made floors in the walker's raster), moss on the cypress courts' north faces.
