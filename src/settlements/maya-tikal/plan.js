@@ -7,7 +7,7 @@ import { PLAZA, T1, T2, NA, NA_TEMPLE, NA_SMALL, CA, BALL } from './layout.js';
 import { frame } from '../../styles/tikal/kit.js';
 import { routes as visitorRoutes } from './walk.js';
 import './nightlight.js';
-import './wear.js';
+import { pyramidStair, platformStair } from './wear.js';
 
 export const WALKS = [
   [[-18, 28], [20, 0], [34, 0], [44, 0], [52, 0], [54.5, 0], [58.3, 0], [62.1, 0], [65.5, 0]],
@@ -87,6 +87,12 @@ for (const [x, z] of [[-10, -20], [10, -20], [-10, 20], [10, 20]]) pushStela({ t
 
 // the torches of pitch-pine at the feet of the great stairs (docs §17)
 for (const [x, z] of [[33.2, -5.6], [33.2, 5.6], [-33.2, -6.8], [-33.2, 6.8], [-15.5, -40.4], [15.5, -40.4], [-22.5, 38.5], [4.5, 38.5]]) E.push({ t: 'mt_torch', at: [x, z], y: 0.04 });
+
+// the worn middle of the great stairs (docs §21)
+for (const P of [T1, T2]) E.push({ t: 'mt_stairwear', ...pyramidStair(P) });
+E.push({ t: 'mt_stairwear', ...pyramidStair({ ...NA_TEMPLE, y0: NA.H }), spread: 0.8 });
+E.push({ t: 'mt_stairwear', ...platformStair(NA.rect, NA.H, { face: 's', at: 0, w: 30, run: 12 }), spread: 1.6 });
+E.push({ t: 'mt_stairwear', ...platformStair(CA.rect, CA.H, { face: 'n', at: -9, w: 24, run: 8.4 }), spread: 1.5 });
 
 // rooms: the three chambers of Temple I, the innermost of Temple II, the south range's rooms, the lowest room of the stepped palace
 const room = (id, rect, y, kind = 'hall') => ({ id, rect, y, kind });
