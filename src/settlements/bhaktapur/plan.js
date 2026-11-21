@@ -13,6 +13,7 @@ E.push({ t: 'newar_inlay', rect: SQ, rings: KEEP_RINGS, seed: 4 });
 E.push({ t: 'newar_pagoda', ...NYATAPOLA });
 E.push({ t: 'newar_offerings', pagoda: NYATAPOLA, seed: 11 });
 E.push({ t: 'newar_wear', pagoda: NYATAPOLA, seed: 5 });
+E.push({ t: 'newar_wear', pagoda: BHAIRAB, seed: 8 });
 E.push({ t: 'newar_trisul', c: [BHAIRAB.c[0] - 7.4, BHAIRAB.c[1] - 4.2], s: 1 }, { t: 'newar_trisul', c: [BHAIRAB.c[0] - 7.4, BHAIRAB.c[1] + 4.2], s: 1 });
 E.push({ t: 'newar_pagoda', ...BHAIRAB });
 E.push({ t: 'newar_shikhara', c: SHI.c, s: 1 });

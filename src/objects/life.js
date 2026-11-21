@@ -153,6 +153,8 @@ const KIT_OVER = {
   nalanda: { fronts: [['laundry_pole', 0.8, 2]] },
   ajanta: { fronts: [['laundry_pole', 0.8, 2]] },
   khajuraho: { fronts: [['laundry_pole', 0.8, 2]] },
+  // Bhaktapur 1710: no hung paper lanterns on the fronts; oil lamps burned in wall niches and doors
+  bhaktapur: { fronts: [['laundry_pole', 0.8, 2]] },
   // Sanchi dresses its own house fronts (sanchi/village.js: signs, valances, poles); a hung lantern at a lot's middle is in the doorway's lane
   sanchi: { fronts: [] },
   // Amsterdam on its piles drew its goods on sledges, not carts (coaches taxed and few; docs/settlements/amsterdam.md §5.6),
