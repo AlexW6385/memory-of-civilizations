@@ -162,3 +162,12 @@ The walk (`src/settlements/sanchi/walk.js`): from the arrival (0, 55) on the sum
 - **The way and the village.** The Great Bowl's monks' bowls at the meal; the stalls' cloth and jars by day along the summit way; zebu bells (`sanZebuBell`) on the way and the pilgrims' road; the pour of water at the tank's ghat at dawn and dusk and the wells' buckets (the sweeps of the lane ends and yards); the open houses' work by trade (grinders and kitchens in homes; the ivory carvers' saw and chisel `sanIvory`; the smith's forge, the potter's wheel and clay, the oil press's mortar, sacks and jars in stores; a zebu's bell from the sheds); peafowl on the hill and the plain (`sanPeacock`) in the mornings and evenings; owls and a far dog at night.
 - **Rooms.** Each opened house a room of its kind (hush, rain on thatch or tile); Temple 40's platform a hall (chant) [inferred].
 - Measured with `tools/sound-render.mjs` (not heard): gong low (peak 156 Hz, 6 onsets), chant 90–250 Hz fundamentals with formant energy near 600 Hz, ivory 1.7–4 kHz rasp with taps, peacock B4–F5 glide, zebu bell 766 Hz clanks (9 onsets).
+
+## 23. Animals as critters (item 4)
+
+`src/settlements/sanchi/fauna.js` (`critters`), `tests/sanchi-critters.test.mjs`. 19 rigged animals with behaviour (they notice the visitor, move about, come and go) on top of the existing swifts, swallows, crows, sparrows, egrets, heron and carp. All inferred: nothing is sourced to Sanchi itself; they are the animals of a village of the plains of Malwa in the period [inferred].
+- Village dogs lying at the stair's foot, on the summit's way before the stalls, and on the platform of a shop; cats (orange, tabby) on the platforms beside the doors of two homes.
+- Hens and a cock in the nearest yards, two goats each in two other yards.
+- Rock pigeons on the Great Stupa's south paving and in the first monastery's court (they come to the offerings).
+- On the tank: two grey geese (the hamsa, the bar-headed goose, is carved on the abacus of Ashoka's pillar [stated: §4, imp-art]; the goose on the water is ours), two ducks; a kingfisher at the north bank by the ghat.
+- Not rigged: zebu, buffalo and peafowl (no model in the engine; the zebu are the life figures'; peafowl are heard, §22). No model was added.

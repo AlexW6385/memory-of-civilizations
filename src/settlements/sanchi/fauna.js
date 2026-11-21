@@ -1,7 +1,8 @@
 // Sanchi — the animals (src/engine/fauna.js draws them; docs/settlements/sanchi.md §12–13): swifts and swallows circling the dome and
 // the gateways and skimming the tank, crows over the hill and the village, sparrows on the paving, the stalls' awnings and the
 // ridges and parapets along the streets, carp in the tank, egrets and a heron at its margin and in the plain's fields.
-import { TEMPLE40, TANK, tankD, lots } from './layout.js';
+import { TEMPLE40, TANK, TOP, HALL, tankD, lots, yards } from './layout.js';
+import { houseDoor } from '../../styles/indian/village.js';
 import { SUMMIT_STALLS } from './summit.js';
 import { ground } from './ground.js';
 
@@ -39,4 +40,26 @@ for (const [kind, a] of [['egret', -0.6], ['heron', 2.4]]) {
   for (let d = 1; d < 4 && !best; d += 0.5) { const x = TANK.c[0] + Math.cos(a) * (TANK.r[0] + d), z = TANK.c[1] + Math.sin(a) * (TANK.r[1] + d); if (Math.abs(tankD(x, z) - 0.5) < 3.5) best = [x, z]; }
   if (best) { const [x, z] = best; perches.push({ kind, x, z, y: ground.height(x, z), rot: Math.atan2(TANK.c[1] - z, TANK.c[0] - x), stay: [80, 240], gone: [40, 150], alert: 10 }); }
 }
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §23) ──
+// The animals of a pilgrim village on the plain of the Betwa [inferred: nothing here is sourced to Sanchi itself; they are the animals of any village of the Ganges-Malwa plains
+// of the time]: village dogs lying at the stair's foot, on the summit's way and at the door of a shop, cats on the platforms of homes (the household cat is old in India), hens and
+// a cock in the yards (the jungle fowl domesticated in the Indus valley and the plains), goats in two other yards, rock pigeons on the stupa's paving and in the first
+// monastery's court (they come to the offerings), a goose of the grey kind (the bar-headed goose, the hamsa, is carved on Ashoka's pillar's abacus) and ducks on the
+// tank, a kingfisher at the ghat. No peafowl and no zebu are rigged (the engine has no model for them).
+const critters = [];
+const lotOf = (kind, n) => lots().filter((l) => l.open && !l.farm && l.kind === kind).sort((a, b) => Math.hypot(a.rect[0], a.rect[1] - 150) - Math.hypot(b.rect[0], b.rect[1] - 150)).slice(0, n);
+const platform = (l, side, u) => { const F = houseDoor({ rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, fr: l.fr }); return F.Pf(F.du + side * u, -0.7); };
+critters.push({ model: 'dog', at: [-6.4, TOP + 0.04, 90], rot: 1.1, range: [9, 3.5] });
+critters.push({ model: 'dog', at: [-6.8, 0.02, 139], rot: 2.2, range: [9, 3.5] });
+{ const l = lotOf('shop', 4)[1]; if (l) { const [x, z] = platform(l, 1, 1.5); critters.push({ model: 'dog', at: [x, 0.42, z], rot: 2.0, range: [7, 3] }); } }
+lotOf('home', 3).forEach((l, i) => { if (i === 2) return; const [x, z] = platform(l, i ? -1 : 1, 1.5); critters.push({ model: i ? 'cat_tabby' : 'cat_orange', at: [x, 0.42, z], rot: 2.4 + i, range: [6, 2.5] }); });
+const pens = yards().filter((y) => y.rect[2] - y.rect[0] >= 10).sort((a, b) => Math.hypot(a.rect[0], a.rect[1] - 150) - Math.hypot(b.rect[0], b.rect[1] - 150));
+pens.slice(0, 2).forEach((y, i) => { const cx = (y.rect[0] + y.rect[2]) / 2, cz = (y.rect[1] + y.rect[3]) / 2; critters.push({ model: 'rooster', at: [cx - 3.2, 0.05, cz + 1.2], rot: i, range: [2.0, 1.4], size: 0.95 }, { model: i % 2 ? 'hen_white' : 'hen_brown', at: [cx - 2.4, 0.05, cz + 1.9], rot: i + 2, range: [2.0, 1.4], size: 0.92 }, { model: 'hen_brown', at: [cx - 3.8, 0.05, cz + 2.1], rot: i + 4, range: [2.0, 1.4], size: 0.9 }); });
+pens.slice(2, 4).forEach((y, i) => { const cx = (y.rect[0] + y.rect[2]) / 2, cz = (y.rect[1] + y.rect[3]) / 2; critters.push({ model: i ? 'goat_white' : 'goat_black', at: [cx + 0.6, 0.05, cz - 2.6], rot: 0.6 + i, range: [9, 3.2] }, { model: i ? 'goat_black' : 'goat_white', at: [cx - 1.6, 0.05, cz - 2.2], rot: 3 + i, range: [9, 3.2] }); });
+for (const [x, z, m] of [[3.4, 27.5, 'pigeon_grey'], [4.6, 28.4, 'pigeon_white'], [-4.4, 27.0, 'pigeon_grey'], [41, 24.5, 'pigeon_grey'], [42.1, 25.3, 'pigeon_white']]) critters.push({ model: m, at: [x, TOP + 0.04, z], rot: x * 3, range: [1.4, 1.2] });
+const tkArea = [TANK.c[0] - TANK.r[0], TANK.c[1] - TANK.r[1], TANK.c[0] + TANK.r[0], TANK.c[1] + TANK.r[1]];
+critters.push({ type: 'floaters', models: ['goose_grey', 'goose_grey', 'duck_brown', 'duck_white'], area: tkArea, dist: tankD, a: [16, 9], ratio: 0.5, margin: 2.5, y: TANK.level, speed: 0.25, cycle: [18, 24] });
+{ const x = TANK.c[0] + 9, zEdge = TANK.c[1] - TANK.r[1] * Math.sqrt(1 - ((x - TANK.c[0]) / TANK.r[0]) ** 2); critters.push({ model: 'kingfisher', at: [x, ground.height(x, zEdge - 1.2) + 0.08, zEdge - 1.2], rot: Math.PI / 2, water: [x, zEdge + 3, TANK.level], cycle: 36 }); }
+void HALL;
+export default { fish, flights, perches, critters };
