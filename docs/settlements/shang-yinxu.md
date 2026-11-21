@@ -134,3 +134,12 @@ Code: `src/settlements/shang-yinxu/soundmap.js` (the places), `src/engine/voices
 - **The river and the court:** cloth beaten on the landings' stones, the lapping of the Huan at its banks, frogs on the banks by night; two chariots trundling in the court (wheels, a pair's trot, bronze fittings); the court's murmur; owls at night, dogs from the quarters (the engine's).
 - **Rooms:** the hall, the flanking halls, the archive, the tomb's hall, the houses by kind, each with its tone and hush.
 - No market sound: Yinxu is not known to have had market streets (§9).
+
+## 12. Animals with behaviour (reference pass, step 4)
+
+Code: `fauna.js` (`critters`), `tests/shang-yinxu-critters.test.mjs`; the engine's rigged models are used as they are. All from the dossier's own animal lists (§5a, §7), placement [inferred].
+
+- **Dogs** (in the bone record, §5a [stated]) lying beside the gates of six lots on the walk; they lift their heads and stand as the visitor comes. **Hens and a rooster** in the yard fronts of every third near lot (fowl in the yards, §5a). **Goats** in the pens of two lots (sheep or goats in the bone record, §5a [stated]; the model is the engine's hill goat).
+- **Swallows** (§7): mud nests under the eave of the kings' hall's front wall (between the door bays) and on the front walls of up to five great houses; the birds fly out and home.
+- **The Huan:** ducks afloat on two rafts (western and eastern reach), a crane on the north bank, a kingfisher on a pile of a landing [inferred: egrets and carp are in §5b; these are the river's own birds]. No cat or pigeon: not certain for the town.
+- Oxen, pigs and horses keep their older life elements (`town.js`); the engine has no critter model for them.
