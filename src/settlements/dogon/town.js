@@ -3,7 +3,7 @@
 import { TOGUNA, PLACE, PLACE_Y, COMPOUNDS, FORGE, DYE, THRESH, PENS, SHADE, height, inCompound, nearBaobab } from './layout.js';
 import { frontOf, houseOf } from '../../styles/dogon/compound.js';
 import { dressing } from './dressing.js';
-import { WELLS } from './walk.js';
+import { WELLS, FIRE } from './walk.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-90, -90, 90, 90], entrance: { at: [0, 30], facing: 'n' } });
@@ -48,7 +48,7 @@ export async function town() {
   man([cx + 1.75, cz - 1.35], F, Math.PI / 2, { pose: 'sit_low', cloth: 'cloth_white' });
   // the forge: the smith at his anvil, the boy at the bellows
   const [fx, fz] = FORGE.at, fy = height(fx, fz - 1.9) + 0.08;
-  man([fx - 0.7, fz - 1.15], fy, 0, { pose: 'stand', legs: 'bare', dress: 'tunic', over: 'apron', hat: 'none', cloth: 'cloth_brown' });
+  man([fx - 0.7, fz - 1.15], fy, 0, { pose: 'stand', legs: 'bare', dress: 'tunic', over: 'apron', hat: 'none', cloth: 'cloth_brown', nightKeep: 1 });   // the smith stays to bank his furnace
   man([fx + 0.45, fz - 1.2], fy, 0, { pose: 'sit_low', child: true, h: 1.25 });
   man([fx - 1.9, fz + 1.0], height(fx - 1.9, fz + 1.0), 1.0, { pose: 'talk' });
   // the dyers' yard: women at the pits, one with a jar to the next
@@ -121,6 +121,13 @@ export async function town() {
     if (c.landmark || q() < 0.4) woman([kx - 1.1, kz + 0.25], f, -0.73, { pose: 'sit_ground', cloth: 'cloth_ochre' });
   }
   A.push({ t: 'animal', kind: 'donkey', at: [-39, 28.4], y: PLACE_Y, rot: 1.7, seed: 99 }, { t: 'animal', kind: 'donkey', at: [22.5, 22], y: PLACE_Y, rot: 3.5, seed: 98 });
+  // (last, so that the random stream of everything above is unchanged by it)
+  // round the evening fire on the place: an elder and two others sat on the ground, a woman with a child; they stay out all night (`nightKeep: 1`)
+  { const [fx0, fz0] = FIRE, nk = { nightKeep: 1 };
+    man([fx0 + 1.5, fz0 + 0.2], PLACE_Y, -Math.PI / 2 - 0.1, { pose: 'sit_ground', dress: 'robe', cloth: 'cloth_white', over: 'none', ...nk });
+    man([fx0 + 0.3, fz0 - 1.5], PLACE_Y, 0.1, { pose: 'sit_ground', ...nk });
+    woman([fx0 - 0.3, fz0 + 1.5], PLACE_Y, Math.PI + 0.2, { pose: 'sit_ground', cloth: 'cloth_indigo', ...nk });
+    P.push({ t: 'figure', at: [fx0 + 1.2, fz0 + 1.1], y: PLACE_Y, rot: -2.3, seed: 6611, dress: 'tunic', legs: 'bare', cloth: 'cloth_ochre', over: 'none', hat: 'none', feet: 'bare', hair: 'short', beard: false, child: true, h: 0.95, pose: 'sit_ground', nightKeep: 1, ...SK() }); }
   void COMPOUNDS;
   return [plan('dogon-people', 'life', [...P, ...A, ...L]), plan('dogon-dressing', 'life', dressing())];
 }

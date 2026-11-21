@@ -7,6 +7,8 @@ import { houseOf, frontOf } from '../../styles/dogon/compound.js';
 export const ARRIVAL = [4.5, 27.5];
 /** z of the walking line in the lane before each row's fronts (the lane between the row and the one below, or the place). */
 export const LANE_Z = { C: 12.6, B: -3.2, A: -19.5 };
+/** The evening fire on the place (nightlight.js dg_fire): clear of the visitor's lane (x = -1) and of the stalls. */
+export const FIRE = [5.6, 22.4];
 /** The wells of the place: stone-curbed, one at each end of the place's north edge, clear of the stalls and the lanes. */
 export const WELLS = [[17.4, 18.6], [-17.4, 18.4]];
 
@@ -20,7 +22,19 @@ export function routeTo(c, lz) {
 }
 /** The routes of the walk: the landmark's own and into eight more opened ginnas of rows C and B. */
 export function walks() {
-  return PICKS.map(([row, side, k, lz]) => routeTo(COMPOUNDS.find((c) => c.row === row && c.rect[0] * side > 0 && (side > 0 ? c.i === k : c.i === k) && (!c.landmark || row === 'C' && side > 0 && k === 0)), lz));
+  return [...PICKS.map(([row, side, k, lz]) => routeTo(COMPOUNDS.find((c) => c.row === row && c.rect[0] * side > 0 && (side > 0 ? c.i === k : c.i === k) && (!c.landmark || row === 'C' && side > 0 && k === 0)), lz)), ...placeWalks()];
+}
+/** Routes from the arrival to the open trades and sights of the place: the stall, the well, the dyers, the toguna, the threshing floor, the forge (each probed with the walker). */
+export function placeWalks() {
+  const R = (...pts) => Object.assign(pts, { y0: PLACE_Y });
+  return [
+    R([4.5, 27.5], [9.4, 26.4], [9.4, 24.9]),
+    R([4.5, 27.5], [7, 25.5], [7, 21.2], [17.4, 21.2]),
+    R([4.5, 27.5], [14, 28], [19.5, 31.2]),
+    R([4.5, 27.5], [-3, 29], [-7, 28.8], [-7, 26.6]),
+    R([4.5, 27.5], [-8, 30.5], [-19.5, 30.2]),
+    R([4.5, 27.5], [-8, 31.5], [-30, 31.5], [-44.5, 31.6]),
+  ];
 }
 /** Where the visitor's eye rests on the walk, for views and for the sound test: the place, a lane crossing, a door. */
 export const STOPS = [[4.5, 27.5], [-1, 12.6], [-1, -3.2], [frontOf(LANDMARK).doors[0], 12.6]];

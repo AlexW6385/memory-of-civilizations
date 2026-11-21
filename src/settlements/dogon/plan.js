@@ -6,6 +6,8 @@ import { COMPOUNDS, LANDMARK, TOGUNA, PUNULU, ALTARS, LEDGES, BAOBABS, SHADE, FO
 import { houseOf } from '../../styles/dogon/compound.js';
 import { walks as routes, WELLS } from './walk.js';
 import './furniture.js';
+import { FIRE } from './walk.js';
+import { PLACE_Y } from './layout.js';
 
 const E = [];
 for (const c of COMPOUNDS) {
@@ -34,6 +36,9 @@ for (const [i, [x, z]] of [[-47, 38.5], [44, 38]].entries()) E.push({ t: 'field_
 // the wells of the place and the bird-scarers in the millet (furniture.js)
 for (const [i, [x, z]] of WELLS.entries()) E.push({ t: 'dg_well', at: [x, z], y: height(x, z), seed: 80 + i });
 for (const [i, [x, z]] of [[-55, 36], [36, 35.5]].entries()) E.push({ t: 'dg_scare', at: [x, z], y: height(x, z), seed: 90 + i });
+
+// the evening fire on the place, 5 m from the arrival (the keepers are town.js figures; nightlight.js)
+E.push({ t: 'dg_fire', at: [FIRE[0], FIRE[1]], y: PLACE_Y, seed: 7 });
 
 // the opened ginnas (compound.js house(): the pad's west or east part, walls 0.45 m, rooms 6.5 × 4.5 m inside)
 const F = LANDMARK.y + 0.05;
