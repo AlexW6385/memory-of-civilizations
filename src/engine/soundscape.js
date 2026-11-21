@@ -110,6 +110,7 @@ import './voices-jerusalem.js';
 import * as KNOSSOS from '../settlements/knossos/soundmap.js';
 import * as LHASA from '../settlements/lhasa/soundmap.js';
 import * as MACHUPICCHU from '../settlements/machu-picchu/soundmap.js';
+import * as MOHENJO from '../settlements/mohenjo-daro/soundmap.js';
 import * as NEWYORK from '../settlements/new-york/soundmap.js';
 import './voices-ny.js';
 import * as VENICE from '../settlements/venice/soundmap.js';
@@ -209,7 +210,7 @@ export const PROFILES = {
   nalanda: T(IND, { cicadas: 0.6, frogs: 0.6, animals: { cattle: 0.5, goat: 0.3, rooster: 0.3, dog: 0.2 }, roof: 'flat', bells: 'puja' }),
   'hakka-tulou': T(EAS, { cicadas: 0.7, frogs: 0.9, animals: { rooster: 0.7, dog: 0.4, cattle: 0.3 }, roof: 'tile' }),
   ajanta: T(IND, { cicadas: 0.4, frogs: 0.3, animals: { goat: 0.4, cattle: 0.3, dog: 0.3 }, roof: 'thatch', bells: 'monastery' }),
-  'mohenjo-daro': T(NEAR, { cicadas: 0.5, frogs: 0.3, animals: { zebu: 0.5, goat: 0.4, dog: 0.4, rooster: 0.2 }, roof: 'flat' }),
+  'mohenjo-daro': T(NEAR, { cicadas: 0.5, frogs: 0.3, animals: withLife({ zebu: 0.5, goat: 0.4, dog: 0.4, rooster: 0.2 }, { market: 0.8, map: MOHENJO }), roof: 'flat' }),
   ayutthaya: T(TROP, { cicadas: 0.7, frogs: 0.9, animals: withLife({ rooster: 1, dog: 0.5, duck: 0.4 }, { canal: 1, market: 1, eaves: 0.7, map: AYUTTHAYA }), roof: 'thatch' }),
   'lu-qufu': T(EAS, { cicadas: 0.5, frogs: 0.2, animals: { donkey: 0.4, dog: 0.4, rooster: 0.3 }, roof: 'tile' }),
   'shang-yinxu': T(EAS, { cicadas: 0.4, frogs: 0.5, animals: { cattle: 0.5, dog: 0.5, rooster: 0.4, horse: 0.2 }, roof: 'thatch' }),
