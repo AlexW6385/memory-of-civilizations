@@ -21,6 +21,7 @@ function precinct() {
   const E = [
     { t: 'plaza_wear', rect: PRECINCT, seed: 91, skip, n: 320, y: Y },
     { t: 'plaza_marks', rect: PRECINCT, ring: [TM.c[0] - TM.w / 2, -TM.d / 2, TM.c[0] + TM.w / 2, TM.d / 2], noWay: true, ways: [[-146, -1.9, 37, 1.9], [-1.9, -146, 1.9, -24], [-1.9, 24, 1.9, 146]], skip: [[-14, -20, 6, 0], [142, -60, 160, 60]], y: Y },
+    { t: 'tn_wear', c: TM.c, w1: TM.top.w / 2, d1: TM.top.d / 2, h: TM.h },
   ];
   // the sellers of offerings on their mats, a buyer by each
   const sellers = [[8, 22], [17, 28], [26, 22], [11, 37], [22, 40], [32, 32], [3, 31], [29, 44]];
