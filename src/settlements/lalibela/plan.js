@@ -3,8 +3,9 @@
 // Giyorgis alone to the south-west.
 
 import { hutRoute, stallRoutes, houseRoutes } from './walkwork.js';
-import { WALK_REACH } from './walk.js';
+import { WALK_REACH, segDist } from './walk.js';
 import { houses } from './layout.js';
+import { stairWear } from './wear.js';
 import { PITS, TRENCHES, EDGE, OUTER, HUT, POOL, inRect, slope, cutDepth } from './layout.js';
 
 const E = [];
@@ -167,7 +168,7 @@ E.push({ t: 'hut', c: HUT.c, r: HUT.r, y: 0, door: HUT.door, seed: 1220 });
 // ---- steps cut in the floors of the long descents (the masons left treads in the sloping floors: "a descending trench"): 0.9 m runs,
 // each tread level with the ground at its upper end, its riser standing proud of the ramp below it
 for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106], [4, -150, -121], [6, 181, 211]]) {
-  const T = TRENCHES[ti], [x0, z0, x1, z1] = T.rect, ax = T.axis === 'x', a0 = ax ? x0 : z0, a1 = ax ? x1 : z1, run = 0.9;
+  const wearSt = [], T = TRENCHES[ti], [x0, z0, x1, z1] = T.rect, ax = T.axis === 'x', a0 = ax ? x0 : z0, a1 = ax ? x1 : z1, run = 0.9;
   const hAt = (u) => { const c = (ax ? (z0 + z1) : (x0 + x1)) / 2; return ax ? slope(u, c) - cutDepth(u, c) : slope(c, u) - cutDepth(c, u); };
   const w0 = (ax ? z0 : x0) + EDGE - 0.1, w1 = (ax ? z1 : x1) - EDGE + 0.1;
   for (let u = from; u < to - 1e-6; u += run) {
@@ -175,7 +176,16 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
     if (hi > -0.1) continue;
     const r = ax ? [u, w0, ue, w1] : [w0, u, w1, ue];
     E.push({ t: 'block', walk: true, rect: r, y0: lo - 0.4, y1: hi + 0.01, mat: 'tuff_hewn' });
+    // where feet went: the tread's middle worn pale; and, every third tread, the wall polished at a hand's height on both sides (not where a cell or niche opens)
+    const mid = (ax ? z0 + z1 : x0 + x1) / 2, ln = (s, t) => (ax ? [s, t] : [t, s]);
+    wearSt.push([ln(u + 0.1, mid), ln(ue - 0.1, mid), 1.3, hi + 0.025, hi + 0.03]);
+    if (Math.round((u - from) / run) % 3 === 1) for (const [wf, sg] of [[w0 + 0.1, 1], [w1 - 0.1, -1]]) {
+      const m = (u + ue) / 2, pt = ln(m, wf);
+      if (E.some((e) => e.t === 'cave' && e.c && Math.hypot(e.c[0] - pt[0], e.c[1] - pt[1]) < 2.8)) continue;
+      wearSt.push([ln(m - 0.5, wf + sg * 0.04), ln(m + 0.5, wf + sg * 0.04), 0.04, hi + 0.95, hi + 1.27]);
+    }
   }
+  E.push({ t: 'lal_wear', c: [(x0 + x1) / 2, (z0 + z1) / 2], strips: wearSt });
 }
 // ---- the pool of the Jordan: a basin cut in the river-bed's floor (the Jordan is where the baptisms are done; docs §16), its kerb a
 // hand and a half above the floor, water standing in it
@@ -195,6 +205,13 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
   for (const x of [66.2, 72.4]) E.push({ t: 'lamp', at: [x, yP - 2.0, -90] });
 }
 // ---- the courts: sandals at the doors, and at the foot of the rock walls the pilgrims' staffs, bundles, jars and the masons' rock seats
+// routes into the other churches of the two groups (docs §23): down each trench, round to the west door, and in to the middle of the nave; the courts' dressing keeps off them
+const INTO = [
+  [[[-52, -140], [-52, -106], [-52, -100], [-68, -100], [-68, -91], [-64, -91], [-58, -91], [-52, -91]], slope(-52, -140)], // Golgotha
+  [[[40, -14], [40, 42], [40, 50], [27, 50], [27, 60], [30, 60], [34, 60], [40, 60]], slope(40, -14)], // Amanuel
+  [[[120, -14], [120, 24], [120, 32.5], [108, 32.5], [108, 40], [111, 40], [116, 40], [120, 40]], slope(120, -14)], // Gabriel-Rufael
+  [[[37, -90], [44, -90], [56, -90], [62, -90], [70, -90]], -M.depth + 0.15], // Maryam, from Medhane's court by its trench
+];
 {
   const foot = { giyorgis: [gc[0] - 12.8, gc[1] - 12.8, gc[0] + 12.8, gc[1] + 12.8], medhane: [mc[0] - 17.25, mc[1] - 12.25, mc[0] + 17.25, mc[1] + 12.25], maryam: [59.3, -97.2, 78.3, -82.8] };
   for (const [id, a] of Object.entries(AKS)) foot[id] = [a.rect[0] - 0.6, a.rect[1] - 0.6, a.rect[2] + 0.6, a.rect[3] + 0.6];
@@ -212,6 +229,7 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
       for (let t = 4.5 + (k % 3); t < L - 3; t += 7.5 + (k % 2) * 2) {
         const pt = horiz ? [I[0] + t, side === 'n' ? I[1] + 0.05 : I[3] - 0.05] : [side === 'w' ? I[0] + 0.05 : I[2] - 0.05, I[1] + t], nn = horiz ? [0, side === 'n' ? 1 : -1] : [side === 'w' ? 1 : -1, 0];
         if (TRENCHES.some((tr) => inRect(tr.rect, pt[0], pt[1], 1.8)) || inRect([-262, 120, -200, 136], pt[0], pt[1], 1.5)) { k++; continue; }
+        if (INTO.some(([r]) => r.some((q, i) => i && segDist(pt, r[i - 1], q) < 2.6))) { k++; continue; }
         if (id === 'giyorgis' && side === 'n' && pt[0] < gc[0] - 2) { k++; continue; }
         if (id === 'medhane' && side === 'w') { k++; continue; }                  // (the way round to the west door is kept clear)
         walls.push([pt[0], pt[1], nn[0], nn[1], KINDS[k++ % KINDS.length]]);
@@ -223,6 +241,37 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
 // ---- braziers at the church doors, where the pilgrims keep the night's vigil (docs §19)
 for (const [id, x, z] of [['giyorgis', gc[0] - 16.2, gc[1] - 4.2], ['giyorgis', gc[0] - 16.2, gc[1] + 4.2], ['medhane', mc[0] - 20.0, mc[1] - 4.4], ['medhane', mc[0] - 20.0, mc[1] + 4.4],
   ...['golgotha', 'amanuel', 'gabriel'].flatMap((k) => { const r = AKS[k].rect, zc = (r[1] + r[3]) / 2; return [[k, r[0] - 2.6, zc - 3.6], [k, r[0] - 2.6, zc + 3.6]]; })]) E.push({ t: 'lal_brazier', at: [x, z], y: -PITS[id].depth + 0.15 });
+// ---- the churches' windows lit from within (docs §23): the lamps seen through the pierced windows (the same places as the style's windows)
+{
+  const places = (r, y, h, w, step) => { const [x0, z0, x1, z1] = r, out = [];
+    for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
+      const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.floor(L / step)), ux = (bx - ax) / L, uz = (bz - az) / L;
+      for (let i = 0; i < n; i++) { if (n % 2 === 1 && i === (n - 1) / 2) continue; const s = (i + 0.5) * L / n; out.push({ c: [ax + ux * s, az + uz * s], u: [ux, uz], n: [nx, nz], y, w, h }); } }
+    return out; };
+  const GW = [], yfG = -G.depth + 0.15 + 1.8;
+  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) for (const s of [-0.42, 0.42]) { const u = dx ? [0, 1] : [1, 0]; GW.push({ c: [gc[0] + dx * 12 + u[0] * s * 4.6, gc[1] + dz * 12 + u[1] * s * 4.6], u, n: [dx, dz], y: yfG + 2.7, w: 0.9, h: 1.7 }); }
+  E.push({ t: 'lal_winglow', c: gc, box: [gc[0] - 12, gc[1] - 12, gc[0] + 12, gc[1] + 12], wins: GW });
+  const body = [mc[0] - 16.75 + 2.4, mc[1] - 11.75 + 2.4, mc[0] + 16.75 - 2.4, mc[1] + 11.75 - 2.4];
+  E.push({ t: 'lal_winglow', c: mc, box: body, wins: places(body, -M.depth + 0.15 + 3.2, 1.6, 0.9, 2.6) });
+  for (const k of ['golgotha', 'amanuel', 'gabriel']) { const A = AKS[k], zc = (A.rect[1] + A.rect[3]) / 2;
+    E.push({ t: 'lal_winglow', c: [(A.rect[0] + A.rect[2]) / 2, zc], box: A.rect, wins: places(A.rect, A.y + Math.max(2.8, A.h * 0.4), 1.5, 0.85, 3.4).filter((p) => !(p.n[0] === -1 && Math.abs(p.c[1] - zc) < 1.6)) }); }
+}
+// ---- where feet went at the churches (docs §23): the worn middle of every door's steps, and the trodden way across the courts of the three Aksumite-manner churches
+{
+  const yG0 = -G.depth + 0.15, a = 12, put = (c, strips) => E.push({ t: 'lal_wear', c, strips });
+  for (const [side, u] of [['w', gc[1]], ['n', gc[0]], ['s', gc[0]]]) put(side === 'w' ? [gc[0] - 14, gc[1]] : [gc[0], gc[1] + (side === 's' ? 14 : -14)], stairWear(side, [gc[0] - (a + 0.4), gc[1] - (a + 0.4), gc[0] + (a + 0.4), gc[1] + (a + 0.4)], u, 2.4, yG0, yG0 + 1.8));
+  const yM0 = -M.depth + 0.15, mr = [mc[0] - 16.75 - 0.5, mc[1] - 11.75 - 0.5, mc[0] + 16.75 + 0.5, mc[1] + 11.75 + 0.5];
+  for (const [side, u, w] of [['w', mc[1], 2.8], ['n', mc[0], 2.4], ['s', mc[0], 2.4]]) put([side === 'w' ? mr[0] : u, side === 'w' ? u : side === 'n' ? mr[1] : mr[3]], stairWear(side, mr, u, w, yM0, yM0 + 0.8));
+  const way = { golgotha: [[-52, -100], [-68, -100], [-68, -91], [-65.4, -91]], amanuel: [[40, 48], [40, 50], [27, 50], [27, 60], [28.6, 60]], gabriel: [[120, 32.5], [108, 32.5], [108, 40], [109.6, 40]] };
+  for (const [k, pts] of Object.entries(way)) {
+    const A = AKS[k], zc = (A.rect[1] + A.rect[3]) / 2, rr = [A.rect[0] - 0.6, A.rect[1] - 0.6, A.rect[2] + 0.6, A.rect[3] + 0.6];
+    const st = stairWear('w', rr, zc, 2.4, A.y, A.y + 0.9);
+    for (let i = 1; i < pts.length; i++) st.push([pts[i - 1], pts[i], 1.2, A.y + 0.015, A.y + 0.02]);
+    put([A.rect[0] - 3, zc], st);
+  }
+}
+// ---- wayside fires of the pilgrims on the knoll and along the way down (docs §23): a visitor at night has light within a few metres
+for (const [x, z] of [[-235.1, 169.1], [-246.2, 160.8], [-251.5, 141.0], [-253.5, 134.5], [-244.0, 112.0], [-255.0, 60.0]]) E.push({ t: 'lal_brazier', at: [x, z], y: slope(x, z) });
 E.push({ t: 'lal_glow', houses: houses().map((h) => ({ c: h.c, door: h.door, r: h.r, seed: h.seed, y: slope(h.c[0], h.c[1]), enter: !!h.enter })).concat([{ c: HUT.c, door: HUT.door, r: HUT.r, seed: 1220, y: 0, enter: true }]) });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // (the halls first: a position is given to the first room that holds it, and the pits' open rooms hold the halls)
@@ -233,6 +282,7 @@ walks[0].y0 = slope(-280, 128);
 { const r = [[-214, 128], [-210.5, 135], [-203, 135], [-195, 135]]; r.y0 = -G.depth + 0.15 + 0.5; walks.push(r); }
 // into Bete Medhane Alem: down the trench from the north into the court, round to the west door and into the middle nave
 { const r = [[10, -140], [10, -111], [-11.3, -108], [-11.3, -90], [-6, -90], [-3, -90]]; r.y0 = slope(10, -140); walks.push(r); }
+for (const [pts, y0] of INTO) { const r = pts.map((q) => q.slice()); r.y0 = y0; walks.push(r); }
 // the visitor's walk (docs §18): into the house beside the arrival, into every opened house within reach of the walk (in at the door and on to the middle of the room), to the front of each stall
 for (const r of [hutRoute(), ...stallRoutes(), ...houseRoutes((x, z) => (x < 0 ? 0 : 1) + (z < 0 ? 0 : 2)).filter((q) => q.dist <= WALK_REACH)]) walks.push(Object.assign(r.route, { y0: r.y0 }));
 

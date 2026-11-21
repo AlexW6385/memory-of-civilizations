@@ -107,6 +107,19 @@ function glow({ houses }, { bag }) {
   for (const h of houses) (h.enter ? hutGlow : tukulGlow)(h, H);
   H.flush(bag);
 }
+
+/** lal_winglow: { wins: [{ c: [x, z], n: [nx, nz], u: [ux, uz], y (sill), w, h }] } — the lamps and candles within seen through the pierced windows of a church:
+ *  a warm halo in the opening (brightest in the middle), a softer ball just inside, and the spill on the sill's outer ledge. One halo mesh per plan. */
+function winGlow({ wins }, { bag }) {
+  const H = new Halo();
+  for (const q of wins) {
+    const k = 0.75 + 0.25 * hashAt(q.c[0], q.c[1], 31), yc = q.y + q.h / 2, o = 0.32;
+    const c = [q.c[0] + q.n[0] * o, yc, q.c[1] + q.n[1] * o];
+    H.disc(c, [q.u[0], 0, q.u[1]], [0, 1, 0], q.w * 1.5, q.h * 0.95, q.n, 8, [k, 0.55 * k, 0], [0, 0.55, 1]);
+    H.ball(q.c[0] - q.n[0] * 0.5, yc, q.c[1] - q.n[1] * 0.5, Math.min(q.w, q.h) * 0.8, 0.5 * k);
+  }
+  H.flush(bag);
+}
 let done = false;
 export function registerNight() {
   if (done) return; done = true;
@@ -114,7 +127,7 @@ export function registerNight() {
   for (const k of ['lamp', 'aksumite']) E[k] = wrap(E[k]);
   E.pilgrim_stall = wrap(E.pilgrim_stall, stallGlow);
   E.cave = wrap(E.cave, nicheGlow);
-  E.lal_brazier = brazier; E.lal_glow = glow;
+  E.lal_brazier = brazier; E.lal_glow = glow; E.lal_winglow = winGlow;
 }
 registerNight();
 void box;
