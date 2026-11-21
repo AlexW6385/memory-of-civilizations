@@ -151,7 +151,7 @@ export function litWindows(ctx, share = 0.35, seed = 11) {
       return typeof v === 'function' ? v.bind(t) : v;
     },
   });
-  return { ctx: { ...ctx, bag }, finish: () => H.flush(real) };
+  return { ctx: { ...ctx, bag }, finish: () => H.flush(real), halo: H };
 }
 
 /**

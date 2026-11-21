@@ -4,6 +4,7 @@ import '../../styles/qing/index.js';
 import './style.js';
 import './hallwork.js';
 import './terrace.js';
+import './palacewear.js';
 import './roofwork.js';
 import './bronzes.js';
 import './hexirelief.js';

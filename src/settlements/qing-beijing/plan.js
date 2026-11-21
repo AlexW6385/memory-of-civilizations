@@ -33,6 +33,11 @@ const WAY = [[RIVER[3], wz1 - 10], [124, RIVER[1]], [TIERS[0].rect[3], 108]];
   }
 }
 
+// the wear of the palace's stone (palacewear.js, docs §45): the way's slabs polished, the brick paler beside it, the gates' sills hollowed, dust at the walls' feet
+E.push({ t: 'bj_wear_palace', way: WAY, bands: [[42, 106, 21], [120, 137, 22], [148, 163, 23], [-184, -160, 24]],
+  sills: [...[[-27, 5], [-9, 5], [0, 6], [9, 5], [27, 5]].map(([x, w]) => ({ at: [x, wz1 - 3], along: 'x', w })), ...[-74, 74].map((x) => ({ at: [x, 116], along: 'x', w: 5 })), ...[-52, 52].map((x) => ({ at: [x, -172], along: 'x', w: 5 })), ...[wx0, wx1].map((x) => ({ at: [x, 65], along: 'z', w: 5 })), { at: [0, HALLS.taihe.rect[3] + 0.02], along: 'x', w: 4.9, y: HALLS.taihe.y }],
+  passages: [[-27, 5], [-9, 5], [0, 6], [9, 5], [27, 5]].map(([x, w]) => [x - w / 2, x + w / 2]) });
+
 // ── the wall, its corner towers, the Meridian Gate ──
 const gates = (list) => list.map(([at, w, h]) => ({ at, w, h }));
 E.push({ t: 'palace_wall', a: [wx0, wz0], b: [wx1, wz0], y: 0, h: WH, th: WT });
