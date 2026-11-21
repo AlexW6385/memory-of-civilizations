@@ -89,7 +89,7 @@ function haloEl(el, { bag }) {
     for (const a of sp.lamps) lightHalo(H, { at: [X(a.u), a.y + a.h + 0.3, Z(a.v)], distance: 7, intensity: a.i }, a.y);
     for (const w of sp.windows) { H.pane(X(w.u), w.y + w.h / 2, Z(-0.05), w.w + 0.06, w.h + 0.06, -sg); H.spill(X(w.u), w.y + w.h / 2, Z(-0.05), -sg, 0.8 + w.w); }
   }
-  for (const [x, z] of el.braziers) lightHalo(H, { at: [x, 1.25, z], distance: 8, intensity: 3 }, 0);
+  for (const [x, z] of el.braziers) { lightHalo(H, { at: [x, 1.25, z], distance: 8, intensity: 3 }, 0); H.floor(x + (z > 0 ? -1.6 : 1.6), 0.04, z, 5.2, 10); }   // §16: a wide pool across the paving
   for (const [x, z] of el.stands) lightHalo(H, { at: [x, 1.55, z], distance: 9, intensity: 3 }, 0.02);
   H.flush(bag);
 }
