@@ -64,7 +64,6 @@ export function life() {
   if (free(2.8, YARD[3] + 5.5, 1)) fig([2.8, YARD[3] + 5.5], 2.6, { pose: 'stand', h: 1.15, dress: 'tunic', hat: 'cap', beard: 0 });
   if (free(-3.8, YARD[3] + 6.8, 1)) fig([-3.8, YARD[3] + 6.8], 0.4, { pose: 'talk', carry: 'staff', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_grey', cloth2: 'cloth_white' });
   { const c = [-44, -40]; if (free(c[0], c[1], 3)) { for (let k = 0; k < 7; k++) { const p = near(c, 8); if (p) beast('sheep', p, 0.6 + (rand() - 0.5) * 1.6); } const h = near(c, 6); if (h) fig(h, 2.4, { carry: 'pole', dress: 'tunic', pose: 'stand' }); } }
-  if (free(-44, -37, 1)) { fig([-45.4, -36.2], face(1.4, 1.2), { pose: 'sit_ground', carry: 'none', dress: 'tunic', nightKeep: 1 }); fig([-42.6, -36.0], face(-1.4, 1.0), { pose: 'sit_ground', carry: 'none', dress: 'robe', hair: 'long', beard: 0, nightKeep: 1 }); }
   for (const [x, z] of [[-38, -10], [-40, 6]]) if (free(x, z, 2)) fig([x, z], rand() * 6.28, { carry: 'yoke', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_indigo' });
   if (free(-36, -22, 1)) put('haystack', [-36, -22]);
   if (free(-33, -44, 1)) put('firewood', [-33, -44], { rot: 0.3, len: 2.2 });
@@ -125,6 +124,9 @@ export function life() {
   // the churchyard: a woman kneeling at a grave, a man standing by the wall
   fig([-11.5, -17.2], face(1, 0), { pose: 'kneel', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_grey', cloth2: 'cloth_white' });
   fig([14.5, -22], face(-1, 0), { pose: 'stand', dress: 'tunic', hat: 'cap', cloth: 'cloth_brown' });
+  // the herder's fire in the west meadow (nightlight.js FIRES): two keep it all night [inferred]; added last so the earlier draws of the stream are unchanged
+  const figK = (at, rot, o) => L.push({ t: 'figure', at, y: height(at[0], at[1]), rot, seed: 4401 + Math.round(at[0]), dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_grey', skin: 'skin_light', hat: 'cap', hair: 'short', hairMat: 'hide_tan', beard: 0, legs: 'hose', feet: 'shod', ...o });
+  if (free(-44, -37, 1)) { figK([-45.4, -36.2], face(1.4, 1.2), { pose: 'sit_ground', carry: 'none', dress: 'tunic', nightKeep: 1 }); figK([-42.6, -36.0], face(-1.4, 1.0), { pose: 'sit_ground', carry: 'none', dress: 'robe', hair: 'long', beard: 0, nightKeep: 1 }); }
   return L;
 }
 

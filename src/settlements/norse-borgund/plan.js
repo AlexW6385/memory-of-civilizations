@@ -51,7 +51,7 @@ export const church = {
     // in at the west porch, through the nave to the chancel
     Object.assign([[CHURCH[0] - 9, CHURCH[1]], [CHURCH[0] - 3.6, CHURCH[1]], [CHURCH[0], CHURCH[1]], [CHURCH[0] + 6.5, CHURCH[1]]], { y0: cy }),
     // from the yard into the nearest farms' open dwellings, barns and the smithy (openwalk.js)
-    ...openRoutes(12),
+    ...openRoutes(22),
   ],
 };
 export default church;
