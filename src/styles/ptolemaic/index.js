@@ -18,7 +18,8 @@ import { FRONT_EL } from './front.js';
 import { MUSEION_FIT } from './museion-fit.js';
 import { PHAROS_INTERIOR } from './pharos-interior.js';
 import { STREET_EL } from './street.js';
+import { PHAROS_COURT } from './pharos-court.js';
 
 const g = STYLES.greek;
-export const ptolemaic = { ...g, elements: { ...g.elements, ...HARBOUR, ...PHAROS_EL, ...MUSEION_EL, ...HOUSES, ...SERAPEUM, ...QUAY_EL, ...FRONT_EL, ...PHAROS_INTERIOR, ...MUSEION_FIT, ...STREET_EL } };
+export const ptolemaic = { ...g, elements: { ...g.elements, ...HARBOUR, ...PHAROS_EL, ...MUSEION_EL, ...HOUSES, ...SERAPEUM, ...QUAY_EL, ...FRONT_EL, ...PHAROS_INTERIOR, ...MUSEION_FIT, ...STREET_EL, ...PHAROS_COURT } };
 registerStyle('ptolemaic', ptolemaic);
