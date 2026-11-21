@@ -8,6 +8,7 @@ import { concoursePeople } from '../../styles/artdeco/concourse.js';
 import { libraryPeople } from '../../styles/artdeco/library.js';
 import './far.js';
 import { upOf } from './upper-plan.js';
+import { openRowOf, inParlourFront } from './parlours.js';
 import { nightPlan } from './nightlight.js';
 /** The street lamps' places (grid frame [x, z, y, h]), for the night's light. */
 const LAMPS = [];
@@ -187,7 +188,7 @@ function yards() {
  */
 function pavePlans() {
   const rand = rng0(7731), items = [], inside = (x, z) => Math.hypot(x, z) < RADIUS - 50;
-  const clear = (x, z, m = 0.5) => inside(x, z) && !inLot(x, z, m) && !inSpecial(x, z, m) && !onElStair(x, z, m + 0.6) && !onBroadway(x, z, m + 1) && !nearStand(x, z, 2.2) && !items.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 0.9);
+  const clear = (x, z, m = 0.5) => inside(x, z) && !inParlourFront(x, z) && !inLot(x, z, m) && !inSpecial(x, z, m) && !onElStair(x, z, m + 0.6) && !onBroadway(x, z, m + 1) && !nearStand(x, z, 2.2) && !items.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 0.9);
   const put = (k, x, z, rot, extra = {}) => { if (clear(x, z, k === 'manhole' ? 0 : 0.4)) items.push({ k, at: [x, z], y: height(x, z), rot, seed: Math.floor(rand() * 1e6), ...extra }); };
   for (const [ax, w, name] of AVENUES) for (const [sz, sw] of STREETS) for (const sx of [-1, 1]) for (const szs of [-1, 1]) {
     const cx = ax + sx * (w / 2 + 0.7), cz = sz + szs * (sw / 2 + 0.7);
@@ -320,7 +321,7 @@ export async function buildings() {
   const tiles = new Map();
   for (const l of all) { const c = toCity((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2), k = `${Math.floor((c[0] + OFF) / TILE)},${Math.floor((c[1] + OFF) / TILE)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(l); }
   for (const [k, list] of tiles) {
-    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE - OFF, (j + 0.5) * TILE - OFF], els = list.flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l), up: upOf(l) }]);
+    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE - OFF, (j + 0.5) * TILE - OFF], els = list.flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l), up: upOf(l), openRow: openRowOf(l) }]);
     plans.push({ ...base(`new-york-blocks-${k}`, els), style: 'artdeco_near', near: NEAR, center });
     plans.push({ ...base(`new-york-blocks-${k}-far`, els), style: 'artdeco_far', far: NEAR, center, nocollide: true });
   }

@@ -7,6 +7,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import '../../styles/artdeco/index.js';
 import { lots, toCity, GRID, frontPoint } from './layout.js';
 import { narrowRect, upOf } from './upper-plan.js';
+import { openRows, parlourSpot, rowPlan } from './parlours.js';
 import { nearEntrance } from '../../styles/artdeco/dress.js';
 
 const TAU = Math.PI * 2;
@@ -97,6 +98,12 @@ function roomLight(H, l) {
     H.quad([w0[0], y + 0.9, w0[1]], [w1[0], y + 0.9, w1[1]], [w1[0], HC - 0.5, w1[1]], [w0[0], HC - 0.5, w0[1]], nn, 0.4 * k); }
   const b = at(u, Dr - 1.0); H.floor(b[0], y + 0.1, b[1], L / 2 - 0.6, 1.4, Math.atan2(c1[1] - c0[1], c1[0] - c0[0]) * -1, 10, 0.5 * k);
 }
+/** The lamp of an opened row house's parlour: a glow under the ceiling globe and a pool on the rug and floor (a lit window of 1931 over the stoop). */
+function parlourLight(H, l, i) {
+  const sp = parlourSpot(l.rect, l.front, rowPlan(l.rect, l.front, l.h, l.seed), i, l.y), [x, z] = toCity(...sp.lamp);
+  H.ball(x, sp.FY + 2.45, z, 0.8);
+  H.floor(x, sp.FY + 0.08, z, 2.5, 2.5, 0, 12, 0.9);
+}
 /** The street lamps (grid frame [x, z] of life elements `street_lamp`, 5.5 m): the glow of the globe and the pool under it. */
 function lampLight(H, lamps) { for (const [x, z, y, h] of lamps) { const [cx, cz] = toCity(x, z); H.ball(cx, y + h - 0.35, cz, 1.25); H.floor(cx, y + 0.06, cz, 4.2, 4.2, 0, 10, 0.8); } }
 
@@ -105,6 +112,7 @@ function nyNight(el, { bag }) {
   const H = new Halo();
   for (const l of el.lots) { lotLight(H, l, el.share ?? 0.15); if (l.room) roomLight(H, l); }
   lampLight(H, el.lamps ?? []);
+  for (const { l, idx } of openRows()) for (const i of idx) parlourLight(H, l, i);
   if (H.pos.length) bag.add('halo', H.geometry());
 }
 registerStyle('ny_night', { trim: () => {}, opening: () => {}, column: () => {}, elements: { ny_night: nyNight }, objects: {} });

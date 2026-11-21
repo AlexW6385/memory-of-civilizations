@@ -165,7 +165,7 @@ function skyscraper(el, { bag, col, lights }) {
   if (el.row && el.front) {
     // a row of brownstones and brick houses (blocks.js); the corner's side faces keep their shops
     storefronts(bag, r, y, rand, (el.shops ?? '').replace(el.front, ''));
-    rowhouses(bag, col, r, el.front, y, h, el.seed || 1);
+    rowhouses(bag, col, r, el.front, y, h, el.seed || 1, el.openRow, lights);
     return;
   }
   const room = el.room && el.front && h < 70;
