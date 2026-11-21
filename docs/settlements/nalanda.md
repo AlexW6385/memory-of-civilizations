@@ -119,3 +119,12 @@ Sources: the fifth phase of Temple 3 "was decorated with rows of niches containi
 ## Fix pass: the sacred way's margins
 
 Bullock carts with zebu and ox in the shafts, mats of flower- and lamp-sellers, water pots, sacks, firewood and baskets along the margins of the way, pilgrims in files and a family, monks climbing the great temple's lowest stair, grass tufts between the lamp pillars and the votive stupas; the central lane is kept clear for walkers [inferred: the trades and carriers are those of a pilgrimage centre of the region; nothing here is sourced to Nalanda itself].
+
+## 18. The visitor's walk (match-to-reference pass)
+
+What was already open when this pass began: all five monasteries (cells, court, shrine), the annexes, the library's three ground halls, the pilgrims' booths with goods and keepers, the water-sheds, Monastery 1's walk and the village houses within 175 m of the arrival with a use each (§13, §16). This pass defines the walk and checks that a visitor can enter what is open. [inferred throughout: no source records a route; the walk follows the excavated plan's way, gates and lanes]
+
+- The walk (src/settlements/nalanda/walk.js): from the arrival on the sacred way north along it between the lamp pillars, booths and water-sheds to the great temple's stair and the great stupa; east from the way through the gate of each of the five monasteries to its court; east along each monastery's lane to its annex (refectory, kitchens, granary, infirmary); west along the lane to the library's yard and Ratnarañjaka's ground hall; and south to the enclosure's gate and the road to the village, with its bazaar and the open houses on its lanes.
+- Doorways: an opened village house's doorway is now 1.6 m wide (the walker's clear width), the gap in a front-yard wall 2.8 m. A village house must not stand on an annex (one did, at the south-east annex: moved off by a rule in layout.js).
+- Routes for walk-check (landmark plan `walks`): four monasteries by their gates to the court, five annexes by their doors, Ratnarañjaka's ground hall by the yard's gate, six village houses to the hall (eighteen routes with Monastery 1's two).
+- Left out, found broken: three open houses (seeds 184687, 335971, 332843) stop the walker about 1.2 m before the door with no collider within reach (a roof-shell test of the collision raster); the bazaar's booths stand on the road in front of the doors of the south row and of the village street's west row, so those houses are reached from the lane's ends only.

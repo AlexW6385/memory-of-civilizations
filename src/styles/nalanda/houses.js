@@ -23,6 +23,22 @@ export function kindOf(rect, seed) {
   return r() < 0.65 ? 'brick' : 'tiled';
 }
 
+/** An opened house's doorway is 1.6 m wide (the walker needs 1.6 m clear), a shut one's 1.1. */
+export const DOOR_OPEN = 1.6;
+/**
+ * Where the door of a house is, from the house's own numbers (the same draws as the builder below makes: the yard, the wall's material, the door's bay):
+ * { du (along the front from the low corner), P(u, v) (the lot's point u along the front, v inward from the front line, in the world), L, D (the hall's width and depth) }.
+ */
+export function houseDoor(el) {
+  const [x0, z0, x1, z1] = el.rect, f = el.front || 'n', r = rng(el.seed || 1), kind = el.kind || kindOf(el.rect, el.seed);
+  const along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, Dfull = along ? z1 - z0 : x1 - x0;
+  const yard = Dfull >= 7 && r() < 0.35 && kind !== 'brick', vo = yard ? 2.0 : 0, D = Dfull - vo;
+  if (kind !== 'brick') r();
+  const nb = Math.max(2, Math.min(4, Math.floor(L / 3))), kd = nb >= 3 ? 1 + Math.floor(r() * (nb - 2)) : Math.floor(r() * 2), du = (kd + 0.5) * L / nb;
+  const P = (u, v) => (f === 'n' ? [x0 + u, z0 + v + vo] : f === 's' ? [x1 - u, z1 - v - vo] : f === 'e' ? [x1 - v - vo, z0 + u] : [x0 + v + vo, z1 - u]);
+  return { du, P, L, D, kind, f };
+}
+
 export default function make(H) {
   const { votiveStupa } = H;
   void votiveStupa;
@@ -46,7 +62,7 @@ export default function make(H) {
 
     // the walls' materials
     const wallMat = kind === 'brick' ? 'brick' : ['earth_wall', 'mud_plaster', 'plaster'][Math.floor(r() * 3)];
-    const nb = Math.max(2, Math.min(4, Math.floor(L / 3))), kd = nb >= 3 ? 1 + Math.floor(r() * (nb - 2)) : Math.floor(r() * 2), du = (kd + 0.5) * L / nb, dw = 1.1;
+    const nb = Math.max(2, Math.min(4, Math.floor(L / 3))), kd = nb >= 3 ? 1 + Math.floor(r() * (nb - 2)) : Math.floor(r() * 2), du = (kd + 0.5) * L / nb, dw = open ? DOOR_OPEN : 1.1;
     const footMat = kind === 'brick' ? 'brick_baked' : 'mudbrick';
 
     // ── the plinth (the lot's whole footing, the yard's too if it has one)
@@ -191,7 +207,7 @@ export default function make(H) {
 
     // ── the front yard: a low mud wall with a gap before the door, a thatched cap
     if (yard) {
-      const hy = 1.15, w2 = 0.25, g0 = du - 0.8, g1 = du + 0.8, e = 0.0;
+      const hy = 1.15, w2 = 0.25, g0 = du - 1.4, g1 = du + 1.4, e = 0.0;
       const wallP = (u0, v0, u1, v1) => { const q = rect(u0, v0, u1, v1, P0); const q2 = q; bag.add('earth_wall', box(q2[0], y, q2[1], q2[2], y + hy, q2[3])); col.rect(q2, y - 0.2, y + hy); bag.add('thatch', box(q2[0] - (q2[2] - q2[0] > q2[3] - q2[1] ? 0.04 : 0.12), y + hy, q2[1] - (q2[2] - q2[0] > q2[3] - q2[1] ? 0.12 : 0.04), q2[2] + (q2[2] - q2[0] > q2[3] - q2[1] ? 0.04 : 0.12), y + hy + 0.14, q2[3] + (q2[2] - q2[0] > q2[3] - q2[1] ? 0.12 : 0.04))); };
       wallP(0, 0, g0, w2); wallP(g1, 0, L, w2); wallP(0, w2, w2, vo - 0.05); wallP(L - w2, w2, L, vo - 0.05);
       void e;
