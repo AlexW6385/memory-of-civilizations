@@ -26,7 +26,7 @@ const E = [];
 E.push({ t: 'lane', rect: PLAZA, y: 0.04, mat: 'lime_plaster' });
 // the plaza's plaster after two centuries of rains: damp, moss in the joints, worn patches; the censers at the stelae
 E.push({ t: 'k_stains', rect: [PLAZA[0] + 1, PLAZA[1] + 1, PLAZA[2] - 1, PLAZA[3] - 1], y: 0.05, n: 70, seed: 7 });
-for (const [x, z] of [[-24, -34.6], [24, -34.6], [-31, -4], [31, 4], [-31, 4], [31, -4], [-6, 34.6], [6, 34.6]]) E.push({ t: 'k_brazier', at: [x, z], y: 0.04, rot: x });
+for (const [x, z] of [[-24, -34.6], [24, -34.6], [-31, -4], [31, 4], [-31, 4], [31, -4], [-6, 34.6], [6, 34.6], [-27, 25], [-8, 25], [-26, 12], [-5, 12]]) E.push({ t: 'k_brazier', at: [x, z], y: 0.04, rot: x });   // the last four stand about the arrival (night, docs §21)
 // Temple I (east, the stair on its west face): nine tiers, the shrine of three chambers, the roof comb
 E.push({ t: 'k_pyramid', ...T1, shrine: { chambers: 3, len: 7, comb: 13, king: true, lintel: true } });
 // Temple II (west, the stair on its east face): three broad tiers, the shrine and its comb

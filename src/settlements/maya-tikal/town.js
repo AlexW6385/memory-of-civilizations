@@ -32,6 +32,7 @@ function groupElements(g) {
   E.push({ t: 'k_eshrine', at: [sx, sz], seed: g.seed });
   // the court's furnishing: the kitchen shed in the north-east corner, the granary in the south-east, a cistern in the middle, the damp
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  if (!g.ward) E.push({ t: 'k_brazier', at: [cx + 3.0, cz + 2.6], y: 0.1, rot: g.seed });          // the court's fire at night (docs §21)
   E.push({ t: 'k_shed', c: [x1 - 4.4, z0 + 3.4], w: 3.4, d: 2.8, seed: g.seed });
   E.push({ t: 'k_granary', c: [x1 - 3.6, z1 - 3.4], seed: g.seed + 1 });
   if (!lite) { E.push({ t: 'k_chultun', at: [cx + 2, cz - 3.2], y: 0.1, seed: g.seed + 2 }); E.push({ t: 'k_stains', rect: [x0 + 7, z0 + 6, x1 - 7, z1 - 6], y: 0.11, n: 3, seed: g.seed + 3 }); }
@@ -95,6 +96,8 @@ function market() {
     }
   }
   for (let k = 0; k < 30; k++) L.push(person(rand, 86 + rand() * 52, 30.5 + Math.floor(rand() * 4) * 9 + (rand() - 0.5) * 2, Y, rand() * 6.28, { carry: pick(['basket', 'pot', 'none', 'none']), pose: rand() < 0.3 ? 'talk' : 'stand' }));
+  // fires among the stalls for the evening market (docs §21): one brazier in the lane beside every second stall of each row
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c += 2) M.push({ t: 'k_brazier', at: [X0 + c * 8.6 + 4.3, Z0 + r * 9 + 4.4], y: Y, rot: c + r });
   return [{ ...base('maya-tikal-market', L), style: 'life' }, base('maya-tikal-market-mats', M)];
 }
 
@@ -292,6 +295,9 @@ export async function town() {
   plans.push(base('maya-tikal-causeways', [...CAUSEWAYS.map((c) => ({ t: 'k_causeway', pts: c.pts, w: c.w, h: CW_H })),
     { t: 'k_pyramid', ...T4, masks: true, shrine: { chambers: 3, len: 8, comb: 20 } }]));
   plans.push(base('maya-tikal-causeway-wear', [
+    // pitch-pine torches along the Tozzer causeway beside the craftsmen's quarter and the Maler causeway's first stretch (docs §21)
+    ...[-50, -70, -90, -110, -130].map((x, i) => ({ t: 'mt_torch', at: [x, i % 2 ? 37.4 : 28.6], y: CW_H })),
+    ...[-30, -50, -70, -90].map((z, i) => ({ t: 'mt_torch', at: [i % 2 ? 103 : 97, z], y: CW_H })),
     { t: 'k_stains', rect: [-222, 27, -38, 39], y: CW_H + 0.02, n: 34, seed: 11 },
     { t: 'k_stains', rect: [96.5, -298, 103.5, -32], y: CW_H + 0.02, n: 30, seed: 12 },
   ]));
