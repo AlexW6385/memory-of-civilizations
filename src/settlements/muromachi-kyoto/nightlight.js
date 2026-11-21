@@ -90,7 +90,7 @@ function unitOf(kind, v) {
     const H = new Halo();
     if (kind === 'hang') hangLight(H, v);
     else if (kind === 'stone') stoneLight(H, v);
-    else if (kind === 'spill') H.floor(0, 0.06, 1.3, 2.3, 1.8, 0, 10);       // an open shop's lamp-light across its threshold and the gutter
+    else if (kind === 'spill') { H.floor(0, 0.06, 1.3, 2.3, 1.8, 0, 10); H.ball(0, 1.35, -1.7, 0.85); H.floor(0, 0.9, -1.9, 1.5, 1.1, 0, 8); }       // an open shop's lamp-light across its threshold and the gutter, and the small lamp of its room within (a glow over the counter, a pool on the mats)
     else if (kind === 'streak') H.floor(0, 0, 0, 0.62, 2.1, 0, 10, true);
     const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(H.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(H.nor, 3)); a(MAT, g);
   });

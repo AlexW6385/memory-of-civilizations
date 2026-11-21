@@ -266,6 +266,8 @@ for (const z of [-221, -218, -215, -212]) E.push({ t: 'herm', at: [wayX(z) + 7, 
 
 // the summit's smaller sanctuaries and the south slope (docs/settlements/athens.md §4e–§4f)
 E.push(...summitSanctuaries(T + 0.04), ...summitAltar(), ...southSlope());
+// iron braziers kept burning on the summit before the temple's east front and where the visitor arrives (docs §23) [inferred]
+for (const [bx, bz] of [[64, 8], [64, 28], [78, 44], [76, 24], [52, 40]]) E.push({ t: 'athens_brazier', at: [bx, bz], y: T + 0.04 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('acropolis', [-108, -55, 128, 55], T + 0.04, 'open'), room('agora', AGORA, 0, 'open')];
