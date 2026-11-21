@@ -18,7 +18,7 @@ const CLOTHS = ['cloth_red', 'cloth_blue', 'cloth_green', 'cloth_ochre', 'cloth_
 const HOME = ['plaster_white', 'hide_brown', 'wood_painted', 'cloth_white', 'cloth_red'];
 const GOODS = { inn: ['plaster_white'], cloth: CLOTHS, bread: ['hide_tan'], spice: ['wood_painted'], leather: ['hide_brown', 'hide_tan', 'hide_black'], smith: ['cloth_red', 'hide_brown'], goldsmith: ['gilt_bronze', 'cloth_red'], woodwork: ['wood_painted', 'hide_tan'], candles: ['plaster_white'], apothecary: ['plaster_white', 'granite_grey', 'cloth_green', 'cloth_ochre'], weaver: ['cloth_white', 'cloth_indigo'], kitchen: HOME, home: HOME, wine: [] };
 /** Round the arrival (m) the first frame holds its draws (§16): the walk's extra homes and goldsmith's shop are not opened there, and farther out (to FAR_HELD) a house is opened only where the tile's open houses within SEEN m already carry its goods' materials. */
-const HELD_NEAR = 0, FAR_HELD = 450, SEEN = 150;
+const HELD_NEAR = 0, FAR_HELD = 165, SEEN = 150;
 export function enterable(all) {
   const ok = all.filter((l) => l.kind !== 'torre' && l.kind !== 'palazzo' && (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] >= 5.2 && l.rect[3] - l.rect[1] >= 8 : l.rect[3] - l.rect[1] >= 5.2 && l.rect[2] - l.rect[0] >= 8) && l.storeys >= 2);
   const out = new Map(), A = ARRIVALS['florence'];

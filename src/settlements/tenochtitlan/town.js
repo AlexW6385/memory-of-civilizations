@@ -21,6 +21,7 @@ function precinct() {
   const E = [
     { t: 'plaza_wear', rect: PRECINCT, seed: 91, skip, n: 320, y: Y },
     { t: 'plaza_marks', rect: PRECINCT, ring: [TM.c[0] - TM.w / 2, -TM.d / 2, TM.c[0] + TM.w / 2, TM.d / 2], noWay: true, ways: [[-146, -1.9, 37, 1.9], [-1.9, -146, 1.9, -24], [-1.9, 24, 1.9, 146]], skip: [[-14, -20, 6, 0], [142, -60, 160, 60]], y: Y },
+    { t: 'tn_wear', c: TM.c, w1: TM.top.w / 2, d1: TM.top.d / 2, h: TM.h },
   ];
   // the sellers of offerings on their mats, a buyer by each
   const sellers = [[8, 22], [17, 28], [26, 22], [11, 37], [22, 40], [32, 32], [3, 31], [29, 44]];
@@ -58,7 +59,7 @@ function precinct() {
     }
   }
   // the braziers at the stair's foot and the offerings left about them and at the foot of the momoztli
-  const D = [['brazier', 35, -16.5], ['brazier', 35, 16.5], ['brazier', 35, -10], ['brazier', 35, 10]];
+  const D = [['brazier', 35, -16.5], ['brazier', 35, 16.5], ['brazier', 35, -10], ['brazier', 35, 10], ['brazier', 15.6, -14.8], ['brazier', 15.6, -5.2]];   // the last two at the foot of Ehecatl's stair
   for (const [x, z] of [[33, -14], [32.6, -17.5], [33, 14], [32.4, 17.8], [32, 9], [32, -9]]) D.push([rand() < 0.6 ? 'flowers' : 'roses', x, z, rand() * 6.28]);
   for (const [x, z] of [[31, 12], [31, -12], [36.5, -13], [36.5, 13]]) D.push(['paper', x, z, rand() * 6.28]);
   E.push({ t: 'mx_dress', items: D });

@@ -16,7 +16,7 @@ import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { STYLES, registerStyle } from '../../core/build.js';
 import { lathe, rod } from '../../core/geom.js';
 import { HARAM, GATES, SEPULCHRE, SEP_Y, SEP_STAIR, height } from './layout.js';
-import { stairWear, colonnadeWear } from './wear.js';
+import { stairWear, wayWear, colonnadeWear } from './wear.js';
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -166,6 +166,7 @@ function brazier(el, { bag, col }) {
   bag.add('terracotta', lathe([[0.001, 0], [0.28, 0], [0.18, 0.07], [0.001, 0.1]], 10, null, x, y + 0.72, z));
   bag.add('flame', lathe([[0.001, 0], [0.12, 0.01], [0.07, 0.17], [0.001, 0.3]], 7, null, x, y + 0.8, z));
   bag.add('flame', lathe([[0.001, 0], [0.09, 0.01], [0.001, 0.2]], 7, null, x + 0.13, y + 0.78, z - 0.08));
+  { const H = new Halo(); H.floor(x, y + 0.03, z, 2.8, 2.8, 0, 12, 0.5); H.flush(bag); }   // the pool of its light on the paving
   col.circle(x, z, 0.38, y, y + 1.0);
 }
 /** The braziers of the watch: inside each city gate, at the head of the Haram's west stair, in the Holy Sepulchre's atrium before its doors [inferred]. */
@@ -178,6 +179,12 @@ export function braziers() {
   for (const s of [-1, 1]) at(HARAM.rect[0] + 2.2, s * 7.4, HARAM.top);
   const zc = (SEPULCHRE[1] + SEPULCHRE[3]) / 2, xa = SEPULCHRE[2] - SEP_STAIR - 2.6;
   for (const dz of [-5, 5]) at(xa, zc + dz, SEP_Y);
+  return E;
+}
+/** The braziers on the esplanade's paved way from the west stair to the Dome's west porch and before the porch: the watch of the Haram lit them along the way pilgrims walked [inferred]. */
+export function wayBraziers() {
+  const E = [];
+  for (const [x, z] of [[-62, -33], [-62, -47], [-48, -27], [-48, -13], [-76, -33], [-76, -47], [-92, -33], [-92, -47], [-115, -30], [-115, -10]]) E.push({ t: 'jer_brazier', at: [x, z], y: x > -69 ? HARAM.top + 4 : HARAM.top });
   return E;
 }
 
@@ -199,6 +206,7 @@ export function registerNight() {
   ]) wrapElement(I, name, o);
   // the worn stone (wear.js): the stairs' middles and the porticoes' floors
   I.elements.jer_stair_wear = stairWear;
+  I.elements.jer_way_wear = wayWear;
   I.elements.colonnade = colonnadeWear(I.elements.colonnade);
   registerStyle('jerusalem-lit', I);
   // the Dome of the Rock's own style (src/buildings/dome-of-the-rock/style.js): the crown of lamps, the lamps in the arcades, the censers, the cave's lamp

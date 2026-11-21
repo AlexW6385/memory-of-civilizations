@@ -40,6 +40,38 @@ export function stairWear(el, { bag }) {
   bag.add(MAT, fromTriangles(out));
 }
 
+/**
+ * jer_way_wear { a: [x, z], b: [x, z], y, half }: a worn track down the middle of a paved way from a to b at floor height y: pieces 1.5 to 3.2 m long and
+ * 0.5 to 0.9 m wide a hand off the line, with gaps, and, at b (the foot of the porch), the wider patch where the pilgrims gathered and stepped up.
+ */
+export function wayWear(el, { bag }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], n = [-u[1], u[0]], y = el.y + 0.012, half = el.half ?? 0.45, out = [];
+  const P = (s, t) => [ax + u[0] * s + n[0] * t, y, az + u[1] * s + n[1] * t];
+  for (let s = 1.5 + 2 * hash(ax, az, 41); s < L - 4;) {
+    const l = 1.5 + 1.7 * hash(ax + s, az, 42), t = (hash(ax, az + s, 43) - 0.5) * 0.7, w = half * (0.75 + 0.5 * hash(s, ax, 44));
+    if (s + l > L - 3.2) break;
+    quadUp(out, P(s, t - w), P(s + l, t - w * (0.8 + 0.4 * hash(s, az, 45))), P(s + l, t + w * (0.8 + 0.4 * hash(az, s, 46))), P(s, t + w));
+    s += l + 0.4 + 1.2 * hash(s, ax, 47);
+  }
+  // the foot of the porch: a patch two metres deep and wider than the track
+  const w = half * 2.4;
+  quadUp(out, P(L - 2.6, -w * 0.85), P(L - 0.25, -w), P(L - 0.25, w * 0.95), P(L - 2.6, w * 0.8));
+  bag.add(MAT, fromTriangles(out));
+}
+/** The Dome's platform: its four stairs (the arrival's is the west one) and the track of each way from the stair to the porch [inferred: eight years of pilgrims]. */
+export function platformWear() {
+  const PY = HARAM.top + 4, E = [], Z = -20, DX0 = -28.5, DX1 = 28.5, DZ0 = -48.5, DZ1 = 8.5;
+  E.push({ t: 'jer_stair_wear', rect: [-77.5, Z - 6, -70, Z + 6], dir: 'e', y0: HARAM.top, y1: PY, riser: 0.167, half: 1.3 });
+  E.push({ t: 'jer_stair_wear', rect: [70, Z - 6, 77.5, Z + 6], dir: 'w', y0: HARAM.top, y1: PY, riser: 0.167, half: 1.0 });
+  E.push({ t: 'jer_stair_wear', rect: [-6, -87.5, 6, -80], dir: 's', y0: HARAM.top, y1: PY, riser: 0.167, half: 1.0 });
+  E.push({ t: 'jer_stair_wear', rect: [-6, 40, 6, 47.5], dir: 'n', y0: HARAM.top, y1: PY, riser: 0.167, half: 1.0 });
+  E.push({ t: 'jer_way_wear', a: [-68.7, Z], b: [DX0, Z], y: PY + 0.024 });
+  E.push({ t: 'jer_way_wear', a: [68.7, Z], b: [DX1, Z], y: PY + 0.024 });
+  E.push({ t: 'jer_way_wear', a: [0, -78.7], b: [0, DZ0], y: PY + 0.024 });
+  E.push({ t: 'jer_way_wear', a: [0, 38.7], b: [0, DZ1], y: PY + 0.024 });
+  return E;
+}
+
 /** The 17 m stair up from the Cardo to the Holy Sepulchre's terrace (city.js sepulchre()): a wide band, the pilgrims came up it all day [inferred]. */
 export function sepulchreStairWear() {
   const [sx0, sz0, sx1, sz1] = SEPULCHRE, zc = (sz0 + sz1) / 2, xs = sx1 - SEP_STAIR;
