@@ -187,3 +187,8 @@ No recording of the village exists; the map is [inferred] from the places and wo
 - **Geese** on the beach at the north end, a **heron** (the crane's rig) in the shallows there, **cormorants** on the stakes of the fish weirs, **kingfishers** watching the water at the beach edge, **ducks** afloat in the sheltered bay (the brown duck's rig stands in for the harlequins and mergansers of such bays). [inferred: "a sheltered rocky bay"; the weirs of §5a]
 - None of: hen, cat, horse, goat, pig, cattle: not on the island in 1850 [inferred]. Eagles, small birds and fish stay the fauna flights, perches and fish of the existing list.
 - Not rigged: sea lions and seals (no model), bears and deer in the forest, which would not walk the village.
+
+### 11e. Wear and writing
+
+- **Wear** (`src/settlements/sgang-gwaay/wear.js`, wrapping the haida house from outside, in materials the house plan already holds): the earth trodden dark and bare in four overlapping patches along the lane from the street to each door, widest at the frontal pole's foot where the feet turn; the door's sill worn dark in the middle of the threshold; the lips of the two tiers worn dark where the family steps down (at the stair's middle). [inferred: the use of a door that serves thirty people; damp, moss, drips, silvering and the soot over the fire were already in §5a, §5c]
+- **Writing: none.** The Haida of 1850 kept no written language; the formline paintings and carvings are the marks of the place and stay as §5d (generic, no crest copied). No tablet, sign or inscription is built, and no glyph is written. [stated: no writing system existed before the missionaries' syllabary and orthography of the later century; not cited from a source read here]
