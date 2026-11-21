@@ -765,6 +765,29 @@ export function pigNeolithic(variant) {
     m.as(part, hip, null, () => {
       m.tube([hip, [x - (front ? 0 : 0.03), 0.28, z * 0.09], [x - (front ? 0 : 0.02), 0.1, z * 0.09], [x + 0.005, 0.02, z * 0.09]], [[0.055, 0.05], [0.03, 0.028], [0.022, 0.02], [0.024, 0.024]], { sides: 5, col: ({ t }) => lerp(bristle({ p: [x, 0.4, z], n: [0, 1, 0] }), [0.18, 0.14, 0.12], t * 0.7) });
       m.ball([x + 0.012, 0.012, z * 0.09], [0.03, 0.014, 0.02], [0.12, 0.1, 0.09], { nu: 4, nv: 5 });
+// ═════════════ the Balinese village's pig and cattle (docs/settlements/bali-village.md §13.4) ═════════════
+/** A village pig of Bali, standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs): black, or black with a white belly and white socks; a long back that sags in the middle, a deep belly, short legs, a long snout with its disc, small ears pricked forward, the tail a thin curl. Back at 0.5 m. [inferred: the black, sway-backed village pig of Bali; no measurement sourced] */
+export function pigBali(variant) {
+  const m = new Model(), spot = variant === 'spotted', blk = [0.1, 0.085, 0.08], wht = [0.82, 0.78, 0.72], snout = [0.3, 0.2, 0.18];
+  const coat = ({ p, n }) => (spot ? lerp(blk, wht, sm(-0.1, -0.7, n[1]) * 0.9 * sm(0.3, -0.2, p[0] * 0 - 0.1) + sm(0.5, 0.2, p[0]) * sm(0.2, -0.2, n[1]) * 0.6) : shade(blk, 1 + 0.5 * hash3(p, 5) * 0.4 + 0.3 * sm(0.6, 1, n[1])));
+  const S = [[0.36, 0.34, 0.07, 0.07], [0.28, 0.36, 0.13, 0.12], [0.14, 0.37, 0.16, 0.15], [0.0, 0.34, 0.17, 0.16], [-0.14, 0.34, 0.165, 0.155], [-0.28, 0.36, 0.14, 0.12], [-0.38, 0.35, 0.07, 0.06], [-0.4, 0.34, 0.02, 0.02]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 9, col: coat });
+  const NP = [0.34, 0.38, 0], HP = [0.46, 0.4, 0];
+  m.as(1, NP, null, () => m.tube([[0.3, 0.37, 0], [0.38, 0.39, 0], [0.44, 0.4, 0]], [[0.12, 0.11], [0.1, 0.095], [0.085, 0.08]], { sides: 7, ref: [1, 0, 0], col: coat }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.48, 0.4, 0], [0.08, 0.075, 0.065], coat, { nu: 6, nv: 7 });
+    m.tube([[0.52, 0.385, 0], [0.6, 0.355, 0], [0.66, 0.335, 0]], [[0.05, 0.045], [0.04, 0.036], [0.034, 0.032]], { sides: 7, col: ({ t }) => lerp(blk, snout, t * 0.6) });       // the long snout
+    m.ball([0.67, 0.33, 0], [0.012, 0.034, 0.034], snout, { nu: 5, nv: 6 });                                                                                              // its disc
+    for (const s of [-1, 1]) m.tube([[0.46, 0.45, s * 0.04], [0.47, 0.5, s * 0.07], [0.5, 0.52, s * 0.08]], [[0.02, 0.03], [0.018, 0.026], [0.002, 0.004]], { sides: 4, col: blk });  // the ear
+    eyes(m, 0.54, 0.425, 0.046, 0.009, [0.12, 0.07, 0.03]);
+  });
+  m.as(3, [-0.4, 0.34, 0], null, () => m.tube([[-0.4, 0.34, 0], [-0.46, 0.38, 0.01], [-0.48, 0.34, 0.03], [-0.46, 0.31, 0.02]], [0.014, 0.012, 0.01, 0.004], { sides: 4, col: blk }));
+  const legs = [[4, 1, -1, 0.24], [5, 1, 1, 0.24], [6, 0, -1, -0.26], [7, 0, 1, -0.26]];
+  for (const [part, front, z, x] of legs) {
+    const hip = [x, 0.24, z * 0.095];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [x - (front ? 0 : 0.02), 0.13, z * 0.095], [x, 0.05, z * 0.095], [x + 0.01, 0.015, z * 0.095]], [[0.06, 0.055], [0.034, 0.03], [0.026, 0.024], [0.03, 0.03]], { sides: 5, col: ({ t }) => (spot ? lerp(blk, wht, sm(0.3, 0.6, t)) : blk) });
+      m.ball([x + 0.015, 0.012, z * 0.095], [0.03, 0.014, 0.02], [0.14, 0.11, 0.1], { nu: 4, nv: 5 });
     });
   }
   return m;
@@ -786,3 +809,36 @@ export function rook() {
   return m;
 }
 MODELS.rook = rook;
+MODELS.pig_black = () => pigBali('black');
+MODELS.pig_spotted = () => pigBali('spotted');
+
+/** A Bali cow, standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs): cinnamon-red with a dark dorsal stripe, white stockings below the knees and hocks, a white rump patch and a pale belly, a small shoulder hump, short curved horns, no dewlap; (the cows of Bali cattle are red, the old bulls black) the tail ending in a dark switch. Back at 1.05 m. [inferred: the Bali cattle's usual look; no measurement sourced] */
+export function cowBali() {
+  const m = new Model(), red = [0.5, 0.22, 0.1], dark = [0.2, 0.1, 0.07], wht = [0.88, 0.84, 0.76], horn = [0.7, 0.64, 0.5];
+  const coat = ({ p, n }) => lerp(lerp(lerp(red, dark, sm(0.6, 0.95, n[1]) * 0.55), wht, sm(-0.25, -0.75, n[1]) * 0.5), wht, sm(-0.45, -0.62, p[0]) * sm(0.2, 0.55, n[1] * 0.4 + 0.5) * 0.95 + hash3(p, 6) * 0.0);
+  const S = [[0.78, 0.8, 0.14, 0.12], [0.62, 0.9, 0.22, 0.19], [0.42, 1.0, 0.3, 0.26], [0.2, 1.0, 0.33, 0.28], [-0.04, 0.97, 0.33, 0.27], [-0.3, 0.98, 0.3, 0.25], [-0.52, 0.98, 0.25, 0.22], [-0.64, 0.92, 0.12, 0.12], [-0.67, 0.9, 0.03, 0.03]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 10, col: coat });
+  const NP = [0.62, 1.0, 0], HP = [0.92, 1.0, 0];
+  m.as(1, NP, null, () => m.tube([[0.56, 0.99, 0], [0.7, 1.02, 0], [0.84, 1.0, 0]], [[0.2, 0.18], [0.16, 0.14], [0.13, 0.11]], { sides: 8, ref: [1, 0, 0], col: coat }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.96, 0.99, 0], [0.13, 0.12, 0.09], coat, { nu: 7, nv: 8 });
+    m.tube([[1.04, 0.95, 0], [1.14, 0.9, 0], [1.2, 0.87, 0]], [[0.08, 0.07], [0.07, 0.065], [0.06, 0.06]], { sides: 7, col: ({ t }) => lerp(red, [0.55, 0.4, 0.34], t * 0.8) });
+    m.ball([1.21, 0.86, 0], [0.015, 0.03, 0.04], [0.14, 0.09, 0.08], { nu: 4, nv: 6 });
+    for (const s of [-1, 1]) {
+      m.tube([[0.92, 1.1, s * 0.07], [0.9, 1.18, s * 0.17], [0.94, 1.24, s * 0.2], [1.0, 1.26, s * 0.16]], [0.025, 0.02, 0.014, 0.003], { sides: 4, col: horn });     // the short horn
+      m.tube([[0.9, 1.04, s * 0.1], [0.88, 1.06, s * 0.2], [0.9, 1.05, s * 0.26]], [[0.02, 0.05], [0.015, 0.045], [0.002, 0.008]], { sides: 4, col: coat });                      // the ear
+    }
+    eyes(m, 1.06, 1.03, 0.085, 0.017, [0.1, 0.06, 0.03]);
+  });
+  m.as(3, [-0.66, 0.9, 0], null, () => m.tube([[-0.66, 0.9, 0], [-0.72, 0.7, 0], [-0.74, 0.4, 0], [-0.74, 0.14, 0]], [0.03, 0.022, 0.018, 0.014], { sides: 4, col: ({ t }) => (t > 0.75 ? dark : red) }));
+  const legs = [[4, 1, -1, 0.5], [5, 1, 1, 0.5], [6, 0, -1, -0.44], [7, 0, 1, -0.44]];
+  for (const [part, front, z, x] of legs) {
+    const hip = [x, 0.78, z * 0.16];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [x - (front ? 0 : 0.06), 0.46, z * 0.16], [x - (front ? 0 : 0.04), 0.2, z * 0.16], [x + 0.01, 0.045, z * 0.16]], [[0.1, 0.085], [0.052, 0.046], [0.04, 0.038], [0.04, 0.04]], { sides: 6, col: ({ t }) => lerp(coat({ p: [x, 0.5, z], n: [0, 0, 1] }), wht, sm(0.35, 0.55, t)) });     // the white stocking
+      m.ball([x + 0.02, 0.025, z * 0.16], [0.05, 0.026, 0.038], [0.18, 0.15, 0.12], { nu: 4, nv: 5 });
+    });
+  }
+  return m;
+}
+MODELS.cow_bali = cowBali;

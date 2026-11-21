@@ -2,7 +2,9 @@
 // at the crossing, the kulkul and the banyan, the subak channel along the street, the penjors of the temple festival, the flooded paddies of the terraces, the shrine of the
 // water temple; the people — the gamelan's players, the worshippers in the temple, the households in their natah, the farmers in the paddies.
 import { compoundParts } from '../../styles/balinese/compound.js';
-import { RADIUS, CORE, WANTILAN, KULKUL, BANYAN, CHANNEL_X, PURA, DALEM_C, lots, lotFrame, outward, height, flooded, TREAD } from './layout.js';
+import './walkwork.js';
+import './wear.js';
+import { RADIUS, CORE, WANTILAN, KULKUL, BANYAN, CHANNEL_X, PURA, DALEM_C, lots, lotFrame, outward, height, flooded, TREAD, pancuranAt } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements, o = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -30], facing: 'n' }, ...o });
@@ -50,13 +52,22 @@ function village() {
   // the penjors of the temple's festival: arches over the approach, one by each gate on the street
   for (let z = -68; z <= -48; z += 5) for (const s of [-1, 1]) E.push({ t: 'bali_penjor', at: [s * 7.5, z + (s > 0 ? 2 : 0)], dir: [-s, 0], h: 7.5 + rand() * 2.0, y: 0 });
   for (const l of L) {
-    if (rand() < 0.3) continue;
+    const skip = rand() < 0.3;
     const [gx, gz] = l.gate;
+    // (none stands in the way of a stall's steps, where the visitor goes up: docs §13.1)
+    const pj = l.front === 'e' ? [-3.9, gz + 2.0] : l.front === 'w' ? [3.9, gz - 2.0] : l.front === 'n' ? [gx + 2.0, 11.8] : [gx - 2.0, 7.2];
+    if (skip || (l.shop && Math.hypot(pj[0] - lotFrame(l)((l.shop.u0 + l.shop.u1) / 2, -1.0)[0], pj[1] - lotFrame(l)((l.shop.u0 + l.shop.u1) / 2, -1.0)[1]) < 2.2)) continue;
     if (l.front === 'e') E.push({ t: 'bali_penjor', at: [-3.9, gz + 2.0], dir: [1, 0], h: 6 + rand() * 2.5, y: 0 });
     else if (l.front === 'w') E.push({ t: 'bali_penjor', at: [3.9, gz - 2.0], dir: [-1, 0], h: 6 + rand() * 2.5, y: 0 });
     else if (l.front === 'n') E.push({ t: 'bali_penjor', at: [gx + 2.0, 11.8], dir: [0, -1], h: 6 + rand() * 2.5, y: 0 });
     else E.push({ t: 'bali_penjor', at: [gx - 2.0, 7.2], dir: [0, 1], h: 6 + rand() * 2.5, y: 0 });
   }
+  // the pancuran: the bathing and washing place where the channel's water is let out through spouts into a stone trough, at the street's west edge, clear of every gate, footbridge,
+  // penjor and stall's steps on that side (the visitor's lanes)
+  for (const z of pancuranAt()) E.push({ t: 'bali_pancuran', at: [-3.3, z], y: 0, turn: -1 });
+  E.push({ t: 'bali_wear', damp: pancuranAt().map((z) => [-3.7, z, 0]) });
+  // the crossing by night: a resin torch at each corner of the crossing (nightlight.js)
+  for (const [x, z] of [[-3.0, 5.0], [4.4, 5.0], [-3.0, 14.0], [4.4, 14.0]]) E.push({ t: 'bali_obor', at: [x, z], y: 0, h: 2.2, seed: Math.round(z) });
   // offerings on the ground before the temple's stair and at the crossing
   E.push({ t: 'bali_offerings', list: [[-2.5, 0.01, -70.5], [-1, 0.01, -70.5], [1, 0.01, -70.5], [2.5, 0.01, -70.5], [-1.2, 0.01, 10.5], [1.2, 0.01, 9]] });
   // the pura dalem at the kelod end of the street, its split gate on the street
@@ -102,10 +113,13 @@ function people() {
   }
   // the worshippers: kneeling in rows in the inner court facing the merus, in white with the yellow sash; the priest at the front; devotees in the middle court
   const y2 = PURA.y2;
-  for (let r = 0; r < 3; r++) for (let k = -5; k <= 5; k++) if (rand() < 0.7) { const at = [k * 1.5 + (rand() - 0.5) * 0.3, -126 + r * 1.9]; (rand() < 0.5 ? woman : temple)(at, y2, 0, { pose: 'seiza', arms: 'pray', cloth: 'cloth_white', hat: 'none', hair: 'bun' }); }
+  for (let r = 0; r < 3; r++) for (let k = -5; k <= 5; k++) if (k !== 0 && rand() < 0.7) {   // (the middle of the court is the aisle the visitor walks up: no one kneels in it)
+    const at = [k * 1.5 + (rand() - 0.5) * 0.3, -126 + r * 1.9]; (rand() < 0.5 ? woman : temple)(at, y2, 0, { pose: 'seiza', arms: 'pray', cloth: 'cloth_white', hat: 'none', hair: 'bun' }); }
   temple([0, -131], y2, 0, { pose: 'seiza', arms: 'pray', hat: 'turban', beard: true });
-  for (let k = 0; k < 7; k++) woman([-20 + rand() * 40, -100 + rand() * 20], PURA.y1, rand() * 6.28, rand() < 0.5 ? { carry: 'basket' } : { pose: 'talk' });
-  for (let k = 0; k < 4; k++) temple([-3 + rand() * 6, -66 + rand() * 12], 0, rand() * 6.28, { pose: 'talk' });
+  // (none stands in the middle lane of the approach, x within 1.5 m of the axis, where the visitor walks up to the inner court)
+  const aside = (x) => (Math.abs(x) < 1.5 ? (x < 0 ? -1.5 : 1.5) : x);
+  for (let k = 0; k < 7; k++) woman([aside(-20 + rand() * 40), -100 + rand() * 20], PURA.y1, rand() * 6.28, rand() < 0.5 ? { carry: 'basket' } : { pose: 'talk' });
+  for (let k = 0; k < 4; k++) temple([aside(-3 + rand() * 6), -66 + rand() * 12], 0, rand() * 6.28, { pose: 'talk' });
   // the households: a woman, a man or a child in the natah of most compounds, hens, a pig, a dog
   const E = [];
   lots().forEach((l, i) => {
@@ -171,17 +185,17 @@ function people() {
     else if (kind === 'potter') man(at(um, 1.85), fl, out, { pose: 'sit_ground' });
     else if (kind === 'cloth') man(at(um, 1.7), fl, out, { pose: 'talk' });
     else man(at(um, 1.8), fl, out, { pose: 'sit_ground' });
-    if (rand() < 0.65) (rand() < 0.5 ? woman : man)(at(um + (rand() - 0.5) * 1.2, -1.2), 0, out + Math.PI + (rand() - 0.5) * 0.8, { pose: 'talk' });
+    if (rand() < 0.65) (rand() < 0.5 ? woman : man)(at(um + (rand() < 0.5 ? -1 : 1) * (1.7 + rand() * 0.6), -1.2), 0, out + Math.PI + (rand() - 0.5) * 0.8, { pose: 'talk' });
     const wares = { warung: ['baskets'], offerings: ['baskets', 'greens'], cloth: ['bolts'], potter: ['pottery'], basket: ['baskets'], weaver: ['bolts'] }[kind];
     if (wares) { const p = at(um + (u1 - u0) / 2 + 0.2, -1.5); E.push({ t: 'goods_mat', at: p, y: 0, rot: Math.atan2(-ox, -oz), seed: l.seed, goods: wares, mat: 'reed_mat' }); }
   }
   // the street itself: women sweeping before the gates, women washing at the channel with the ducks beside, friends talking at the gate
   for (const l of lots()) {
     const [ox, oz] = outward(l), [gx, gz] = l.gate, tx = -oz, tz = ox, r = rand();
-    if (r < 0.34) woman([gx + ox * 1.6 + tx * 1.2, gz + oz * 1.6 + tz * 1.2], 0, Math.atan2(tx, tz) + rand(), { pose: 'sweep', carry: 'besom' });
-    else if (r < 0.58) { man([gx + ox * 1.9 - tx * 0.5, gz + oz * 1.9 - tz * 0.5], 0, Math.atan2(-tx, -tz) + rand() - 0.5, { pose: 'talk' }); man([gx + ox * 1.9 + tx * 0.5, gz + oz * 1.9 + tz * 0.5], 0, Math.atan2(tx, tz) + rand() - 0.5, { pose: 'talk' }); }
+    if (r < 0.34) woman([gx + ox * 1.6 + tx * 2.0, gz + oz * 1.6 + tz * 2.0], 0, Math.atan2(tx, tz) + rand(), { pose: 'sweep', carry: 'besom' });
+    else if (r < 0.58) { man([gx + ox * 1.9 - tx * 2.0, gz + oz * 1.9 - tz * 2.0], 0, Math.atan2(-tx, -tz) + rand() - 0.5, { pose: 'talk' }); man([gx + ox * 1.9 + tx * 2.0, gz + oz * 1.9 + tz * 2.0], 0, Math.atan2(tx, tz) + rand() - 0.5, { pose: 'talk' }); }
   }
-  for (const z of [20, 44, 66, 92, 118]) {
+  for (const z of [20, 44, 66, 87, 118]) {
     woman([CHANNEL_X + 0.85, z], 0, Math.PI / 2, { pose: 'squat', carry: 'none' });
     E.push({ t: 'basket', at: [CHANNEL_X + 0.8, z + 0.8], y: 0, seed: z, n: 2 });
     E.push({ t: 'chickens', at: [CHANNEL_X + 0.7, z + 3.2], n: 4, kind: 'duck', seed: z + 1, rot: 1.57 });

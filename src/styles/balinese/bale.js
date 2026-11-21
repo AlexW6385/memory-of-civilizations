@@ -218,7 +218,7 @@ export function house(el, ctx) {
   bx(ctx, 'wood_ochre', veranda[0], f - 0.04, veranda[1], veranda[2], f, veranda[3]);
   coping(ctx, veranda[0], veranda[1], veranda[2], veranda[3], f - 0.12, 'tuff_hewn');
   // walls with a door in the chosen face
-  const t = 0.3, dw = 0.5;
+  const t = 0.3, dw = 0.8;
   const wall4 = [['n', x0, z0, x1, z0 + t], ['s', x0, z1 - t, x1, z1], ['w', x0, z0, x0 + t, z1], ['e', x1 - t, z0, x1, z1]];
   for (const [s, a, b, c, e] of wall4) {
     if (s !== d) { bx(ctx, 'brick', a, f, b, c, f + H, e, true); continue; }
