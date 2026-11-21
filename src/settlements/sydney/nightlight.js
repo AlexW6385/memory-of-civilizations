@@ -11,6 +11,7 @@ import { registerStyle } from '../../core/build.js';
 import { MATERIALS } from '../../core/palette.js';
 import { frame } from '../../styles/modern/rooms.js';
 import { KINDS } from '../../styles/modern/shops.js';
+import { shopGeom, layoutRooms } from '../../styles/modern/upper.js';
 import { RADIUS, LEVEL, BRIDGE, QUAY, height, lots } from './layout.js';
 import { streets } from './street.js';
 import { sceneLife } from './scene.js';
@@ -81,16 +82,41 @@ function lamps(H) {
 function shops(H) {
   for (const l of lots()) {
     if ((l.t !== 'shop_room' && l.t !== 'espresso_bar') || l.front == null) continue;
-    const f = l.front, K = KINDS[l.kind] ?? KINDS.newsagent, { L, W } = frame(l.rect, f), F = l.y + 0.12, fy1 = F + 2.7, n = OUT[f];
+    const f = l.front, K = KINDS[l.kind] ?? KINDS.newsagent, { L, Dp, W } = frame(l.rect, f), F = l.y + 0.12, fy1 = F + 2.7, n = OUT[f];
     const dw = 1.2, du = l.t === 'espresso_bar' ? L * 0.62 : L * K.door + (K.door > 0.4 ? 0 : 0.3);
     // (the hotel, the milk bar, the espresso bar and the fish-and-chip shop are open in the evening; the other trades shut at about half past five, their window lights left dim: Thursday night trading to 9 pm began only as a Christmas measure in 1971)
     const k = (OPEN_EVE[l.t === 'espresso_bar' ? 'espresso' : l.kind] ?? 0.26) * (0.85 + 0.3 * hashAt(l.rect[0], l.rect[1], 51));
-    const sheet = (a, b) => { if (b - a < 0.4) return; const A = W(a + 0.05, -0.14, F + 0.65), B = W(b - 0.05, -0.14, F + 0.65), C = W(b - 0.05, -0.14, fy1 - 0.05), D = W(a + 0.05, -0.14, fy1 - 0.05); H.quad(A, B, C, D, n, k); };
+    // the glass in its panes as the shop front's aluminium frames divide it (styles/modern/shops.js `front`): a mullion's gap between them,
+    // the shelves' band below the transom dimmer than the ceiling lamps' band above it
+    const sheet = (a, b) => {
+      if (b - a < 0.3) return;
+      const np = Math.max(1, Math.round((b - a) / 1.4)), pw = (b - a) / np, ft = F + 1.95;
+      for (let i = 0; i < np; i++) {
+        const u0 = a + i * pw + 0.05, u1 = a + (i + 1) * pw - 0.05, q = (y0, y1, kk) => H.quad(W(u0, -0.14, y0), W(u1, -0.14, y0), W(u1, -0.14, y1), W(u0, -0.14, y1), n, Math.min(0.95, kk));
+        q(F + 0.65, ft - 0.04, k * 0.85); q(ft + 0.04, fy1 - 0.05, k * 1.12);
+      }
+    };
     sheet(0.45, du - dw / 2); sheet(du + dw / 2, L - 0.45);
+    // the fascia's board lit from the shop's tubes under the awning, the lettering catching it
+    H.quad(W(0.55, -0.1, fy1 + 0.1), W(L - 0.55, -0.1, fy1 + 0.1), W(L - 0.55, -0.1, F + K.H1 - 0.06), W(0.55, -0.1, F + K.H1 - 0.06), n, Math.min(0.5, 0.18 + k * 0.4));
+    // the flat over the shop (the shops whose upper floor is open): a lit window or two behind the curtains, by the rooms' own places
+    if (l.up) {
+      const G = shopGeom(L, Dp, F, K.H1, 0.3);
+      for (const rm of layoutRooms(G, l.t === 'espresso_bar' ? 'espresso' : l.kind)) {
+        if (rm.zone !== 'front') continue;
+        const w = rm.rect[1] - rm.rect[0], nW = Math.max(1, Math.floor(w / 2.2));
+        for (let j = 0; j < nW; j++) {
+          const uc = rm.rect[0] + w * (j + 0.5) / nW, door = rm.door === j;
+          if (hashAt(uc + l.rect[0], l.rect[1] + l.rect[2], 71) > 0.62) continue;
+          const ya = G.Y + (door ? 0.05 : 0.9), yb = G.Y + (door ? 2.3 : 2.6), kk = 0.34 + 0.3 * hashAt(uc, l.rect[1], 72);
+          H.quad(W(uc - 0.5, 0.2, ya), W(uc + 0.5, 0.2, ya), W(uc + 0.5, 0.2, yb), W(uc - 0.5, 0.2, yb), n, kk);
+        }
+      }
+    }
     // the open door: the room's light on the step and the footpath; the pools of the two windows
     const gy = l.gy ?? l.y, p = W(du, -1.0, 0);
-    H.floor(p[0], gy + 0.1, p[2], 1.5, 1.7, 0, 8, 0.8);
-    for (const [a, b] of [[0.45, du - dw / 2], [du + dw / 2, L - 0.45]]) if (b - a > 1) { const q = W((a + b) / 2, -1.6, 0); H.floor(q[0], gy + 0.1, q[2], Math.min((b - a) * 0.6, 3.2), 1.8, f === 'n' || f === 's' ? 0 : Math.PI / 2, 8, 0.6 * k); }
+    H.floor(p[0], gy + 0.1, p[2], 2.2, 2.6, 0, 8, 0.85);
+    for (const [a, b] of [[0.45, du - dw / 2], [du + dw / 2, L - 0.45]]) if (b - a > 1) { const q = W((a + b) / 2, -1.6, 0); H.floor(q[0], gy + 0.1, q[2], Math.min((b - a) * 0.7, 4.2), 3.0, f === 'n' || f === 's' ? 0 : Math.PI / 2, 8, 0.6 * k); }
   }
 }
 
