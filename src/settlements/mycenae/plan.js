@@ -59,6 +59,8 @@ const NIGHT = [
   { t: 'my_brazier', at: [-72.5, 0.6], y: terrain(-72.5, 0.6) },
   ...[[34, -6.2], [34, 12], [52.5, -6.2], [52.5, 11.6]].map(([x, z]) => ({ t: 'my_brazier', at: [x, z], y: PAL_Y })),
   ...[-1.0, 7.0].map((z) => ({ t: 'my_torch', at: [58.0, z], y: PAL_Y })),
+  // pitch-pine torches on stands along the stepped ramp, 3 m off its middle line, one every 20 m (the guard's lights on the way up)
+  ...[[-62, 1], [-44, -1], [-24, 1], [-4, -1]].map(([x, s]) => { const [a, b] = RAMP[x < -52 ? 1 : x < -30 ? 2 : x < -10 ? 3 : 4], c = RAMP[x < -52 ? 2 : x < -30 ? 3 : x < -10 ? 4 : 5], z = a[1] + (c[1] - a[1]) * (x - a[0]) / (c[0] - a[0]) + 3.1 * s; void b; return { t: 'my_torch', at: [x, z], y: terrain(x, z) }; }),
   { t: 'my_fire', at: [-124.5, -5.4], y: terrain(-124.5, -5.4) },
   { t: 'my_lamp', at: [-129.0, 3.0], y: terrain(-129.0, 3.0) }, { t: 'my_lamp', at: [-120.3, 3.0], y: terrain(-120.3, 3.0) },
 ];

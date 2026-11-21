@@ -67,7 +67,7 @@ function lightHalo(H, l, floor) {
 let depth = 0;
 /** The lit windows of a house: `share` of them glow with the lamp or the hearth behind them (by the hash of the window's own place: oil and fuel are dear), on the outward face only. */
 function windows(ctx, el, H) {
-  const share = el.kind === 'workshop' ? 0.55 : el.kind === 'cult' ? 0.5 : el.kind === 'store' ? 0 : 0.34;
+  const share = el.kind === 'workshop' ? 0.55 : el.kind === 'cult' ? 0.6 : el.kind === 'store' ? 0 : 0.6;
   if (!el.lit || share <= 0) return ctx;
   return {
     ...ctx, onWindow: (w) => {
@@ -94,6 +94,14 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     // the door: the hearth's light spilling over the step into the lane
     const m = mapper(el.rect, el.face ?? 'n'), du = el.du ?? m.W / 2, [px, pz] = m.P(du, -1.2);
     H.floor(px, el.y + 0.11, pz, 2.2, 1.6, 8, 0.7);
+    if (el.open) {
+      // an opened door by night: the front room's hearth seen through the doorway, a lit pane across the opening (a hand inside the wall's face) and a pool on the floor within
+      const nl0 = (v) => v, dw = el.dw ?? 1.8, dh = el.dh ?? 2.45, a = m.P(du - dw / 2 + 0.08, 0.3), b = m.P(du + dw / 2 - 0.08, 0.3), o = m.P(du, -1), c = m.P(du, 0), nn = [nl0(o[0] - c[0]), nl0(o[1] - c[1])], nm = Math.hypot(nn[0], nn[1]) || 1; nn[0] /= nm; nn[1] /= nm;
+      const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2, U = [b[0] - a[0], 0, b[1] - a[1]], ul = Math.hypot(U[0], U[2]) || 1;
+      H.disc([cx, el.y + dh / 2, cz], [U[0] / ul, 0, U[2] / ul], [0, 1, 0], ul / 2, dh / 2 - 0.08, nn, 12, [0.85, 0.5, 0], [0, 0.75, 1]);
+      const [ix, iz] = m.P(du, 1.4);
+      H.floor(ix, el.y + 0.1, iz, 1.3, 1.1, 8, 0.8);
+    }
   }
   H.flush(ctx.bag);
   return r;
