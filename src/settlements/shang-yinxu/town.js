@@ -7,6 +7,11 @@ import { boatFloat } from '../../objects/index.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'shang', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, ...o });
 const pick = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
+/** Keep the door lane of a lot clear (the visitor's walk goes in at the gate or the door; src/settlements/shang-yinxu/walkroutes.js): u shifted off it. */
+function offLane(l, u) {
+  const W = l.rect[2] - l.rect[0], c = l.kind === 'row' ? 15.3 : W / 2;
+  return Math.abs(u - c) < 2.2 ? (u < c ? c - 2.2 : c + 2.2) : u;
+}
 
 /** The people. */
 function people() {
@@ -61,20 +66,20 @@ function people() {
     const P = (u, v, rot, o = {}, f = woman) => { const p = at(u, v); if (free(p[0], p[1], 1.0)) f(p, rot, o); };
     if (l.kind === 'workshop') {
       P(W / 2 - 2.5, D - 7.2, ry, { pose: 'kneel', dress: 'tunic', cloth: 'cloth_brown', over: 'belt', hair: 'topknot' }, fig); P(W / 2 + 3.2, D - 7.2, ry, { pose: 'kneel', dress: 'tunic', cloth: 'cloth_grey', over: 'belt', hair: 'topknot' }, fig);
-      if (n) { P(W - 4, 7, ry + 1, { carry: 'basket' }, fig); P(4, 8, ry - 1, {}, fig); P(W / 2, 4, ry, { pose: 'talk' }, fig); }
+      if (n) { P(W - 4, 7, ry + 1, { carry: 'basket' }, fig); P(4, 8, ry - 1, {}, fig); P(W / 2 + 2.8, 4, ry, { pose: 'talk' }, fig); }
       continue;
     }
     if (!n) { if (rand() < 0.45) P(S.hearth[0] - 0.9, S.hearth[1] + 1.4, ry + 2.6, { pose: 'squat' }); continue; }
     P(S.hearth[0] - 0.9, S.hearth[1] + 1.4, ry + 2.6, { pose: 'squat' }); P(S.hearth[0] + 0.8, S.hearth[1] + 0.2, ry + 1.4, { pose: 'kneel', carry: 'none' });
     { P(S.well[0] + 1.2, S.well[1] + 1.4, ry + 3, { carry: 'pot' }); P(S.yard[0] - 3, S.yard[1] + 2, ry, { child: true, h: 1.1 }); }
-    if (l.kind === 'court') { P(W / 2 - 7.8, 14.0, ry + 0.4, { pose: 'kneel', dress: 'tunic', cloth: 'cloth_brown', over: 'belt', hair: 'topknot' }, fig); P(W / 2 - 1.8, D - 9.6, ry, { pose: 'sit_ground', hair: 'bun' }); if (n) { P(W / 2 + 2, 6, ry + 1, { pose: 'talk' }, noble); P(W / 2, 3.2, ry + 3.14, { pose: 'staff', carry: 'staff', len: 2.0 }, guard); } }
+    if (l.kind === 'court') { P(W / 2 - 7.8, 14.0, ry + 0.4, { pose: 'kneel', dress: 'tunic', cloth: 'cloth_brown', over: 'belt', hair: 'topknot' }, fig); P(W / 2 - 1.8, D - 9.6, ry, { pose: 'sit_ground', hair: 'bun' }); if (n) { P(W / 2 + 2, 6, ry + 1, { pose: 'talk' }, noble); P(W / 2 + 2.4, 3.2, ry + 3.14, { pose: 'staff', carry: 'staff', len: 2.0 }, guard); } }
     else if (l.kind === 'row') { P(W / 2 + 6.4, 8.2, ry, { pose: 'stand', carry: 'hoe' }, fig); if (n) P(20, 3.4, ry, { pose: 'sit_ground', hair: 'bun' }); P(W / 2 - 1, 14.6, ry + 2, { carry: 'basket' }); }
     else { P(S.yard[0] + 3, S.yard[1] + 3.8, ry + 4, { carry: 'sack' }, fig); if (n) P(S.yard[0] - 2, S.yard[1] - 2.6, ry, { pose: 'sit_ground', hair: 'bun' }); }
   }
   // the lane: people before the lots' fronts, by the bench and the doors
   for (const l of lots()) {
     if (l.lod !== 0 || l.kind === 'workshop') continue;
-    const ry = lotRot(l), q = lotPoint(l, 3 + rand() * 20, -1.4);
+    const ry = lotRot(l), q = lotPoint(l, offLane(l, 3 + rand() * 20), -1.4);
     if (free(q[0], q[1], 1.5)) { const r = rand(); (r < 0.4 ? woman : fig)(q, ry + (rand() - 0.5), r < 0.3 ? { pose: 'talk' } : r < 0.55 ? { carry: pick(rand, ['basket', 'pot', 'sack']) } : {}); }
   }
   // the river: women washing at the landings, fishers on the stages, a boy with a rod
@@ -101,7 +106,7 @@ function animals() {
     const hp = at(S.hearth[0] - 2.4, S.hearth[1] + 1.8);
     L.push({ t: 'chickens', at: hp, y: 0, rot: rand() * 6, n: 4 + (i % 3), seed: i + 400 });
     if (i % 3 === 0) L.push({ t: 'animal', kind: 'dog', at: at(S.hearth[0] + 2.4, S.hearth[1] + 1.2), y: 0, rot: rand() * 6.28, seed: i + 9 });
-    if (l.lod === 0 && i % 4 === 1) { const q = lotPoint(l, 8 + rand() * 12, -1.6); L.push({ t: 'animal', kind: 'dog', at: q, y: 0, rot: rand() * 6.28, seed: i + 29 }); }
+    if (l.lod === 0 && i % 4 === 1) { const q = lotPoint(l, offLane(l, 8 + rand() * 12), -1.6); L.push({ t: 'animal', kind: 'dog', at: q, y: 0, rot: rand() * 6.28, seed: i + 29 }); }
   });
   for (const [x, z] of [[-4, -10], [40, 10], [18, 30]]) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(x) + 40 });
   // the beasts led to the sacrifice, tethered at the posts between the pits' rows: oxen, a ram, a pig, a dog
@@ -123,7 +128,7 @@ function fronts() {
     const ry = lotRot(l), W = l.rect[2] - l.rect[0], full = l.lod === 0, P = (u, off = -0.55) => lotPoint(l, u, off);
     const n = full ? 4 : 2;
     for (let k = 0; k < n; k++) {
-      const u = 1.5 + (W - 3) * ((k + rand() * 0.6) / n), r = rand(), at = P(u, -0.7);
+      const u = offLane(l, 1.5 + (W - 3) * ((k + rand() * 0.6) / n)), r = rand(), at = P(u, -0.7);
       if (r < 0.28) L.push({ t: 'firewood', at, y: 0, rot: ry + Math.PI / 2, len: 1.4 + rand() * 0.6, seed: Math.floor(rand() * 99) });
       else if (r < 0.52) L.push({ t: 'pot', kind: pick(rand, ['pithos', 'dark_pot', 'water_pot']), at, y: 0, rot: ry, n: 1 + Math.floor(rand() * 3), seed: Math.floor(rand() * 99) });
       else if (r < 0.7) L.push({ t: 'basket', at, y: 0, rot: ry, n: 2, seed: Math.floor(rand() * 99), goods: pick(rand, ['cloth_ochre', 'hide_tan', 'cloth_brown']) });

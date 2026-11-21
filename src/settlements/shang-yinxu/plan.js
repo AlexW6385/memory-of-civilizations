@@ -2,6 +2,7 @@
 // flanking halls, the court with its sacrificial pits and the gate; Fu Hao's tomb with its small hall and chariot pits; the
 // oracle-bone archive with the diviners' shed. All in the settlement's frame.
 import { HALL, FLANKS, GATE, COURT, AXIS, TOMB, ARCHIVE } from './layout.js';
+import { walkRoutes, mainRoute } from './walkroutes.js';
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const walk = (pts, y0 = 0) => { const w = [pts]; w[0].y0 = y0; return w; };
@@ -11,6 +12,8 @@ const E = [
   ...FLANKS.map((f, i) => ({ t: 'shang_hall', plat: f.plat, h: f.h, rot: 1, flip: i === 1, bays: 5, bw: 4, deep: 2, porch: 3.2, over: 2.2, rise: 3.6, rich: false })),
   { t: 'shang_pits' },
   { t: 'shang_court' },
+  // the burnt offering (liao): the two stacks of billets beside the pits' ends burn at night (court.js, nightlight.js)
+  { t: 'shang_liao', at: [-0.6, -57] }, { t: 'shang_liao', at: [40.6, -57] },
   { t: 'shang_gate', plat: GATE.plat, axis: GATE.axis, h: GATE.h },
 ];
 const hallRoom = [HALL.plat[0] + 4, HALL.plat[1] + 3, HALL.plat[2] - 4, HALL.plat[3] - 2];
@@ -34,6 +37,8 @@ export const hall = {
   walks: walk([[AXIS, 44], [AXIS, 20], [AXIS, -40], [AXIS, -70], [AXIS, -76 + 0.01], [AXIS, -88]]),
 };
 hall.walks[0].y0 = 0;
+// the visitor's walk (walk.js): the way from the arrival to the archive, and in at the door of each opened place on it
+hall.walks.push(mainRoute(), ...walkRoutes());
 
 const TE = [{ t: 'shang_tomb' }];
 export const tomb = {

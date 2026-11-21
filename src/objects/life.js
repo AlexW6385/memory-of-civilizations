@@ -151,6 +151,10 @@ const KIT_OVER = {
   // no hung paper lanterns on Indus or Gupta-age house fronts: oil lamps stood in niches and at doors
   'mohenjo-daro': { fronts: [['laundry_pole', 0.8, 2]] },
   nalanda: { fronts: [['laundry_pole', 0.8, 2]] },
+  ajanta: { fronts: [['laundry_pole', 0.8, 2]] },
+  khajuraho: { fronts: [['laundry_pole', 0.8, 2]] },
+  // Sanchi dresses its own house fronts (sanchi/village.js: signs, valances, poles); a hung lantern at a lot's middle is in the doorway's lane
+  sanchi: { fronts: [] },
   // Amsterdam on its piles drew its goods on sledges, not carts (coaches taxed and few; docs/settlements/amsterdam.md §5.6),
   // and drew its water from rain cisterns and the water boats, not from draw-wells in the street
   // Sumerian Ur: the men bare above a wrapped skirt to the shin (the fleeced kaunakes), heads shaven; the
