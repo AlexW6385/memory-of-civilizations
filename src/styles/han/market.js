@@ -26,11 +26,11 @@ export function shopRow(el, ctx) {
   for (let i = 0; i < n; i++) {
     const u0 = i * sw, kind = GOODS[Math.floor(rand() * GOODS.length)], awn = AWN[Math.floor(rand() * AWN.length)], mid = u0 + sw / 2;
     // the counter, in two pieces about the opening; the goods behind it, the awning shading the front
-    F.b('lacquer_black', u0 + 0.3, 0.2, 0.05, mid - 0.7, 1.05, 0.7, true); F.b('lacquer_black', mid + 0.7, 0.2, 0.05, u0 + sw - 0.3, 1.05, 0.7, true);
-    F.b('lacquer_black', mid - 0.7, 0.9, -0.05, mid - 0.6, 1.05, 0.75, false);                          // the lifted flap's hinge
+    F.b('lacquer_black', u0 + 0.3, 0.2, 0.05, mid - 0.85, 1.05, 0.7, true); F.b('lacquer_black', mid + 0.85, 0.2, 0.05, u0 + sw - 0.3, 1.05, 0.7, true);
+    F.b('lacquer_black', mid - 0.85, 0.9, -0.05, mid - 0.75, 1.05, 0.75, false);                          // the lifted flap's hinge
     addCloth(F.bag, awn, clothBox(...(() => { const a = F.pt(u0 + 0.2, -0.0), b = F.pt(u0 + sw - 0.2, -0.9); return [Math.min(a[0], b[0]), H - 0.9, Math.min(a[1], b[1]), Math.max(a[0], b[0]), H - 0.3, Math.max(a[1], b[1])]; })(), 0.3), H - 0.3);
     const put = (u, v, y, fn) => { const p = F.pt(u, v); fn(p[0], y, p[1]); };
-    const L = [[u0 + 0.5, mid - 0.8], [mid + 0.8, u0 + sw - 0.5]];
+    const L = [[u0 + 0.5, mid - 0.95], [mid + 0.95, u0 + sw - 0.5]];
     for (const [a0, a1] of L) {
       const m = Math.max(2, Math.floor((a1 - a0) / 0.55));
       for (let k = 0; k < m; k++) {
