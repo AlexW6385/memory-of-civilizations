@@ -57,7 +57,8 @@ function lotLight(H, l, share) {
       if (hashAt(A[0] + i * 7, A[1] + i, 33) > 0.8) continue;
       const pa = [a[0] + (b[0] - a[0]) * s0, a[1] + (b[1] - a[1]) * s0], pb = [a[0] + (b[0] - a[0]) * s1, a[1] + (b[1] - a[1]) * s1], d = 0.3;
       const Q = (p, yy) => [p[0] + n[0] * d, yy, p[1] + n[1] * d];
-      H.quad(Q(pa, y + 0.95), Q(pb, y + 0.95), Q(pb, y + 3.1), Q(pa, y + 3.1), n, k);
+      // (a shop with its room built shows the room through its glass: only a lit band under the fascia, over the room's tin ceiling)
+      H.quad(Q(pa, l.room && f === l.front ? y + 2.7 : y + 0.95), Q(pb, l.room && f === l.front ? y + 2.7 : y + 0.95), Q(pb, y + 3.1), Q(pa, y + 3.1), n, k);
       const pm = [(pa[0] + pb[0]) / 2 + n[0] * 1.8, (pa[1] + pb[1]) / 2 + n[1] * 1.8];
       H.floor(pm[0], y + 0.08, pm[1], Math.hypot(pb[0] - pa[0], pb[1] - pa[1]) * 0.55, 1.9, Math.atan2(n[0], n[1]) + Math.PI / 2 * 0, 8, 0.7 * k);
     }
