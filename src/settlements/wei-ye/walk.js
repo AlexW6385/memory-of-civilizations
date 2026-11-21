@@ -12,6 +12,7 @@ export const WALK = [
   [[-100, 25], [0, 25], [182, 25]],                                            // the avenue, along the royal way
   [[0, 25], [0, -8], [0, -37], [0, -50]],                                      // the road north to the palace's south gate and the forecourt
   [[0, 25], [0, 60], [-14, 60], [-14, 74.15], [-30, 74.15], [-90, 74.15]],     // the Zhongyang road south, the first ward's east gate and its lane
+  [[0, 60], [14, 60], [14, 74.15], [30, 74.15], [60, 74.15]],                   // the second ward's lane (east of the road), mirror of the first
   [[182, 25], [182, 50], [182, 88]],                                           // the market's north gate and its lane to the tower
   [[134, 104], [170, 104]], [[194, 104], [230, 104]],                          // the market's cross lane, either side of the tower
 ];

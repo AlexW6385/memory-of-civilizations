@@ -345,6 +345,10 @@ export function house(el, ctx) {
   let bu = W / 2 + (rand() - 0.5) * 2;
   for (let k = 0; k < 2; k++) for (const c of [gateU, du]) if (Math.abs(bu - c) < 1.9) bu = c + (bu >= c ? 1.9 : -1.9);
   bu = Math.max(1.4, Math.min(W - 1.4, bu));
+  if ([gateU, du].some((c) => Math.abs(bu - c) < 1.5)) {    // a narrow lot: the clamp put it back on a line; take the clear spot nearest the middle
+    const cs = [1.4, W - 1.4, ...[gateU, du].flatMap((c) => [c - 1.9, c + 1.9])].filter((u) => u >= 1.4 && u <= W - 1.4 && [gateU, du].every((c) => Math.abs(u - c) >= 1.5));
+    if (cs.length) bu = cs.sort((a, b) => Math.abs(a - W / 2) - Math.abs(b - W / 2))[0];
+  }
   F.b('bluestone', bu - 0.6, 0, hallV0 - 3.4, bu + 0.6, 0.6, hallV0 - 2.2);
 }
 
