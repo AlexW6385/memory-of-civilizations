@@ -10,6 +10,7 @@ import { rowHouse, courtHouse, official, granary, garden } from './houses.js';
 import { qinShop } from './shops.js';
 import { qinTerraceDetail } from './terrace.js';
 import { qinWardGate } from './ward.js';
+import { qinShe } from './she.js';
 import { qinYard, qinHaulRoad, qinSledges } from './yard.js';
 import { qinMarket, qinScale, qinStandards, qinWorkshop, qinRoad, qinPavilion } from './scenery.js';
 
@@ -18,7 +19,7 @@ registerStyle('qin', {
   elements: {
     qin_pit: qinPit, qin_army: qinArmy, qin_terrace: qinTerrace, qin_hall: qinHall, qin_que: qinQue, qin_court: qinCourt,
     qin_row_house: rowHouse, qin_court_house: courtHouse, qin_official: official, qin_granary: granary, qin_garden: garden,
-    qin_market: qinMarket, qin_scale: qinScale, qin_standards: qinStandards, qin_workshop: qinWorkshop, qin_road: qinRoad, qin_pavilion: qinPavilion, qin_yard: qinYard, qin_shop: qinShop, qin_haul: qinHaulRoad, qin_terrace_detail: qinTerraceDetail, qin_ward_gate: qinWardGate, qin_sledges: qinSledges,
+    qin_market: qinMarket, qin_scale: qinScale, qin_standards: qinStandards, qin_workshop: qinWorkshop, qin_road: qinRoad, qin_pavilion: qinPavilion, qin_yard: qinYard, qin_shop: qinShop, qin_haul: qinHaulRoad, qin_terrace_detail: qinTerraceDetail, qin_ward_gate: qinWardGate, qin_she: qinShe, qin_sledges: qinSledges,
   },
   objects: {},
 });

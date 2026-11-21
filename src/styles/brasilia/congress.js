@@ -121,6 +121,10 @@ export function congress(el, { bag, col, lights }) {
     for (let xa = RAMP.x0; xa < RAMP.x1 - 0.01; xa += 3) col.rect([xa, za, Math.min(RAMP.x1, xa + 3), zb], -1, 0.7 + y * (xa - RAMP.x0) / (RAMP.x1 - RAMP.x0));
   }
   bag.add('granite_grey', box(RAMP.x0 - 16, -0.4, RAMP.z0 - 8, RAMP.x0, 0.02, RAMP.z1 + 8)); col.floor([RAMP.x0 - 16, RAMP.z0 - 8, RAMP.x0, RAMP.z1 + 8], 0.02);
+  // wear: two tracks of polished, paler marble worn by the feet up the ramp's middle, and the trodden way across the apron to its foot [inferred]
+  { const xa = RAMP.x0 + 1, xb = RAMP.x1 - 5, h = (x) => (x - RAMP.x0) / (RAMP.x1 - RAMP.x0) * y;
+    for (const zc of [-0.6, 0.6]) bag.add('concrete_light', wedgeX(xa, xb, zc - 0.3, zc + 0.3, h(xa) + 0.012, h(xb) + 0.012));
+    for (const zc of [-0.6, 0.6]) bag.add('concrete_light', box(RAMP.x0 - 15, 0.0, zc - 0.3, RAMP.x0 + 1, 0.032, zc + 0.3)); }
   for (let k = 0; k < 8; k++) bag.add('granite_black', box(RAMP.x0 + 10 + k * 10, 0.0, RAMP.z0, RAMP.x0 + 10.25 + k * 10, 0.0 + 0.05 + (10 + k * 10) / (RAMP.x1 - RAMP.x0) * y, RAMP.z1));
   // ── the pools along the front: low curbs, still water ──
   for (const r of POOLS) {
