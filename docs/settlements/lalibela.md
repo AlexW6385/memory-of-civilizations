@@ -139,6 +139,10 @@ All [inferred]: no recording of the twelfth century exists and no page could be 
 - **Rooms.** Inside the churches (below the ground only: the roofs are the open) a hush with the begena or the chant now and then; each opened house its own tone.
 - **Checks.** `tests/lalibela-sound.test.mjs` (voices made against a stand-in context, the map's agreement with the layout, chant at dawn and not at midnight, the loom by day and not at night). `tools/sound-render.mjs` measured: kebero centroid 121 Hz with 9 onsets in 8 s; chant 555 Hz, pitched; sistrum 5.1 kHz; stone gong 749 Hz ringing. I could not listen: how any of it sounds is unjudged.
 
+## 21. The reference pass: animals (item 4)
+
+All [inferred] (no page read in this pass). Rigged critters (`fauna.js`, `critters`, engine models as they are; none added): dogs lying in the yards of the opened houses nearest the arrival, cats at their doorsteps, hens and a rooster scratching in others' yards, goats tethered at a yard's side (`goat_black`, `goat_white`), rock doves on the floors of the courts of Bete Giyorgis, Medhane Alem and Maryam. Each stands beside the way from gate to door, on whichever side has nothing else within the animal's range (the yard keeps the way itself clear, §18). The highland's own wild-in-town animals are not in the engine's models and none was added: the rock hyrax of the escarpments, the gelada and the hyena at night (the owls of §20 stand for the night). Mules and zebu in the yards remain the older still life (§15).
+
 ## Sources (ninth pass)
 
 - [House of the Saviour of the World — dragontravelmag](https://dragontravelmag.blogspot.com/2010/10/house-of-saviour-of-world.html)
