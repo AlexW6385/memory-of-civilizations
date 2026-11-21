@@ -6,6 +6,7 @@ import '../../styles/balinese/index.js';
 import { STYLES } from '../../core/build.js';
 import { box } from '../../core/geom.js';
 import { hashAt } from './nightlight.js';
+import { canang } from '../../styles/balinese/kit.js';
 
 /**
  * bali_wear: { lane: [[x, z0, z1, y]…] (a worn lane along z at x, from z0 to z1, ground level y), damp: [[x, z, y]…] (a damp patch about a point) } — the lane is
@@ -39,9 +40,28 @@ function wear({ lane = [], damp = [], paths = [] }, ctx) {
   }
 }
 
+/**
+ * bali_treadwear: { c: [x, z], gap, depth, y, rise } — the top of the split gate's stair block (the shared style's `steps` builds it as one solid block at y + rise, see the
+ * dossier §14): the middle of it rubbed smooth by the feet that cross it (pale slabs 8 mm proud, the lane's continuation), and the little offerings (canang sari) set at its
+ * edges by those who pass and at the feet of the two guardians outside the gate.
+ */
+function treadwear({ c: [cx, cz], gap = 5, depth = 3.6, y = 0, rise = 1.2 }, ctx) {
+  const top = y + rise, z0 = cz - depth / 2 + 0.25, z1 = cz + depth / 2 - 0.25;
+  for (let z = z0, k = 0; z < z1 - 0.3; k++) {
+    const l = 0.7 + 0.35 * hashAt(cx, z, 71), w = 1.3 + 0.4 * hashAt(cx, z, 72), c = cx + (hashAt(cx, z, 73) - 0.5) * 0.3;
+    if (z + l > z1) break;
+    ctx.bag.add('tuff_hewn', box(c - w / 2, top, z, c + w / 2, top + 0.008, z + l));
+    z += l + 0.07;
+  }
+  const side = gap / 2 - 0.6;
+  canang(ctx, cx - side, top, cz + depth / 2 - 0.4, 0); canang(ctx, cx + side, top, cz + depth / 2 - 0.9, 1); canang(ctx, cx + side, top, cz - depth / 2 + 0.5, 3);
+  for (const s of [-1, 1]) canang(ctx, cx + s * (gap / 2 + 4.4 + 0.55) - s * 0.6, y, cz + depth / 2 + 0.75, s > 0 ? 1 : 2);
+}
+
 let done = false;
 export function registerWear() {
   if (done) return; done = true;
   STYLES.balinese.elements.bali_wear = wear;
+  STYLES.balinese.elements.bali_treadwear = treadwear;
 }
 registerWear();
