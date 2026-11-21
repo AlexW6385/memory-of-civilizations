@@ -58,9 +58,13 @@ export function thatchHip(ctx, el) {
 export function steps(ctx, rect, y0, y1, dir, mat = 'andesite', riser = 0.17, base = null) {
   const [x0, z0, x1, z1] = rect, rise = y1 - y0, n = Math.max(1, Math.round(Math.abs(rise) / riser)), b0 = (base ?? Math.min(y0, y1)) - 0.02;
   for (let i = 0; i < n; i++) {
-    const f1 = (i + 1) / n, yT = y0 + rise * f1;
+    const f0 = i / n, f1 = (i + 1) / n, yT = y0 + rise * f1;
     let r;
-    if (dir === 'n') r = [x0, z1 - (z1 - z0) * f1, x1, z1]; else if (dir === 's') r = [x0, z0, x1, z0 + (z1 - z0) * f1];
+    // (each block runs from its tread to the stair's high end, so a higher tread never covers a lower one)
+    if (rise > 0) {
+      if (dir === 'n') r = [x0, z0, x1, z1 - (z1 - z0) * f0]; else if (dir === 's') r = [x0, z0 + (z1 - z0) * f0, x1, z1];
+      else if (dir === 'e') r = [x0 + (x1 - x0) * f0, z0, x1, z1]; else r = [x0, z0, x1 - (x1 - x0) * f0, z1];
+    } else if (dir === 'n') r = [x0, z1 - (z1 - z0) * f1, x1, z1]; else if (dir === 's') r = [x0, z0, x1, z0 + (z1 - z0) * f1];
     else if (dir === 'e') r = [x0, z0, x0 + (x1 - x0) * f1, z1]; else r = [x1 - (x1 - x0) * f1, z0, x1, z1];
     ctx.bag.add(mat, box(r[0], b0, r[1], r[2], yT, r[3]));
   }

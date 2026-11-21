@@ -5,6 +5,7 @@
 // Slaughter Stone and its partner at the entrance and the Heel Stone; the four Station Stones.
 // +x east, +z south; the axis runs to the north-east (AXIS).
 
+import { campHutWalks } from './town.js';
 import { height, AXIS, HEEL, STATIONS, DITCH, ringGrid, houses, DURR } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -97,6 +98,20 @@ E.push({ t: 'earthwork', grids: [ringGrid([0, 0], DITCH.r - 9, DITCH.r + 7.5), .
   }
 }
 
+// ── where feet went (§16): the way in along the axis from the entrance to the altar trodden to a scatter of kicked chalk lumps and flints, thickest in the
+// gap between the entrance stones and where the path bends to the Great Trilithon; a second, fainter track round the inside of the sarsen ring. A stream of its own. ──
+{
+  const r5 = rng(2615);
+  for (let u = 50; u > -3.5; u -= 2.6) {
+    const v = (r5() - 0.5) * 2.4 + (u < 12 ? Math.sin(u * 0.9) * 0.5 : 0), at = P(u, v), thick = u > 42 && u < 52 ? 30 : 16;
+    E.push({ t: 'litter', kind: 'path', c: at, y: height(at[0], at[1]), r: 2.0, n: thick, seed: Math.floor(r5() * 1e6) });
+  }
+  for (let k = 0; k < 22; k++) {
+    const a = AXIS + 0.5 + k / 22 * (Math.PI * 2 - 1.0), rr = R - 2.3 + (r5() - 0.5) * 0.8, at = [Math.cos(a) * rr, Math.sin(a) * rr];
+    E.push({ t: 'litter', kind: 'path', c: at, y: height(at[0], at[1]), r: 1.8, n: 7, seed: Math.floor(r5() * 1e6) });
+  }
+}
+
 // ── how the stones were raised (§1e): each upright's foot in its collar of rammed chalk with the packing stones; the earthwork: chalk
 // spoil lying on the bank and the ditch's lips, and at each end of a ditch segment the antler picks, a skull and chalk blocks left on the floor ──
 {
@@ -140,6 +155,6 @@ export const henge = {
   bakeTop: 10,
   elements: E,
   rooms: [{ id: 'circle', rect: [-14, -14, 14, 14], y: Y0, kind: 'open' }],
-  walks: [Object.assign([[40, -40], [18, -18], [0, 0]], { y0: height(40, -40) }), walkToDurrington(), ...houseWalks()],
+  walks: [Object.assign([[40, -40], [18, -18], [0, 0]], { y0: height(40, -40) }), walkToDurrington(), ...houseWalks(), ...campHutWalks()],
 };
 export default henge;

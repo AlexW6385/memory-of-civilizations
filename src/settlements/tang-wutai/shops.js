@@ -110,9 +110,9 @@ function inn(lot) {
   lamp(uc, vb1 - T - 1.4, F + 0.64, 0.25, 1.3); lamp(ub1 - 3.2, kv0 - 0.2, F + 0.9, 0.2, 1.0, 4);
   for (const u of [ub0 + 3.0, uc + 1.0, ub1 - 3.5]) { B('lacquer_red', u - 0.02, kv0 + 0.3, u + 0.02, kv0 + 0.34, top - 1.1, top - 0.32); B('paint_ochre', u + 0.05, kv0 + 0.5, u + 0.12, kv0 + 0.54, top - 0.9, top - 0.32); }
   // people: the keeper behind the counter, two guests at a table, a guest on the kang
-  fig(ub1 - 2.5, vb0 + 1.9, F, 311, 'lane', { cloth: 'cloth_brown', hat: 'cap', cloth2: 'cloth_white' });
+  fig(ub1 - 2.5, vb0 + 1.9, F, 311, 'lane', { cloth: 'cloth_brown', hat: 'cap', cloth2: 'cloth_white', nightKeep: 1 });
   fig(ub0 + 4.1, vb0 + 2.8, F, 312, [1, 0], { pose: 'low', hat: 'brim' }); fig(ub0 + 5.1, vb0 + 2.8, F, 313, [-1, 0], { pose: 'low', cloth: 'cloth_indigo', hat: 'none' });
-  fig(ub0 + 5.4, vb1 - T - 1.3, F + 0.64, 314, 'lane', { pose: 'cross', hat: 'none', cloth: 'cloth_grey' });
+  fig(ub0 + 5.4, vb1 - T - 1.3, F + 0.64, 314, 'lane', { pose: 'cross', hat: 'none', cloth: 'cloth_grey', nightKeep: 1 });
   // the front: hanging lanterns of red paper under the eave, the banner of the wine, a hitching rail with its donkeys and a cart, a bench
   for (const u of [uc - 3.6, uc, uc + 3.6]) { const [x, z] = t.P(u, vb0 - 0.62); Lf.push({ t: 'hang_lantern', kind: 'paper', at: [x, z], y: top - 0.15 }); }
   put({ t: 'shop_sign', seed: 5, h: 3.9 }, ub0 + 0.2, vb0 - 0.2, F, { rot: YAW[lot.front] });
