@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.74 — the second pass is complete: Cahokia, Kakadu, the pa, Nan Madol, Rapa Nui, SGang Gwaay (2026-11-21)
+
+All ninety-four settlements have now had the second pass. Cahokia: two fires with people before the first stair, nineteen houses on the walk, rubbed bands on the log stairs. Kakadu: firelight spreading round each camp fire, a small fire by the arrival. The pa: two fires on the marae with people and dogs by them, a trodden sill at the chief's house. Nan Madol: twenty-four houses on the walk instead of twelve, people by the lamps and cook fires at night. Rapa Nui: all thirty-nine houses and the long house can be entered, fires at the bark-cloth yard and the shore. SGang Gwaay: two street fires with families by them, six more houses on the walk, paddles leaning on the chief's house.
+
 ## v12.73 — second pass: Bauhaus, Stonehenge, Wutai, Bali, Xianyang, Brasilia (2026-11-21)
 
 Dessau: the tenements' lit shop and flat windows, hidden behind their own glass, now show across the town at night; guests before the pubs. Stonehenge: thirteen camp huts can be entered (their doors were too narrow), a night fire at the stone-dressing. Bali: every rising stair showed as one block and now has its treads; a watchman at the kulkul, the gamelan and the priests stay at night. Xianyang: lamp stands before the archers' ranks in the pit gallery, the market's earth altar, patterned brick cheeks on the great stair. Brasilia: low lamps on the apron by the arrival, keepers behind the lit counters, a polished track up the Congress ramp. Wutai: lamp-light spilling from the hall's doors, two monks kneeling inside.
