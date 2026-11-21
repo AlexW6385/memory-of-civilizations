@@ -209,8 +209,13 @@ export function nightSpots() {
   // the iron stands before the pishtaq's apron (a lamp each side of the way in), two more where the aisle meets the shop rows
   for (const z of [-10.5, 10.5]) stands.push([-43.5, z]);
   for (const x of [-30, 30]) for (const z of [-20.5, 20.5]) stands.push([x, z]);
+  // and four along the aisle round the visitor's arrival (14, 0): the square's way in was dark within 15 m (night pass 2)
+  for (const x of [6, 22]) for (const z of [-7, 7]) stands.push([x, z]);
+  // before the mats of wares between the booths and the shop rows, and along the aisle's sides toward the pishtaq
+  for (const x of [-30, -10, 10, 30]) for (const z of [-29.8, 29.8]) stands.push([x, z]);
+  for (const x of [-26, -8]) for (const z of [-12.5, 12.5]) stands.push([x, z]);
   // the watchmen's and cameleers' brazier at the caravan's camp on the east side, and one by the khanqah's portal
-  fire.push([29, -14.5], [29, 5.5], [44.5, 11]);
+  fire.push([29, -14.5], [29, 5.5], [44.5, 11], [14, -9.5], [14, 9.5]);
   // the lamp on each tea-house platform's tray (the tray stands at the platform's middle, 0.66 m up)
   for (const [x, z] of TAPCHANS) tray.push([x, 0.66, z]);
   return { hang, stands, fire, tray };
@@ -228,8 +233,8 @@ function timNight(el, { bag, col }) {
     if (part === 'square') H.floor(x + nx * 2.2, 0.04, z + nz * 2.2, 2.0, 0.45, 8);
   }
   if (part !== 'square') { H.flush(bag); return; }
-  for (const [x, z] of S.stands) { lampStand(bag, x, z); col?.circle(x, z, 0.3, 0, 1.8); H.ball(x, 2.0, z, 1.0, 0.66); H.floor(x, 0.04, z, 3.4, 0.8, 12); }
-  for (const [x, z] of S.fire) { fireBasket(bag, x, z); col?.circle(x, z, 0.45, 0, 0.7); H.ball(x, 0.75, z, 1.1, 0.72); H.floor(x, 0.04, z, 3.0, 0.85, 12); }
+  for (const [x, z] of S.stands) { lampStand(bag, x, z); col?.circle(x, z, 0.3, 0, 1.8); H.ball(x, 2.0, z, 1.1, 0.7); H.floor(x, 0.04, z, 4.6, 0.85, 12); }
+  for (const [x, z] of S.fire) { fireBasket(bag, x, z); col?.circle(x, z, 0.45, 0, 0.7); H.ball(x, 0.75, z, 1.2, 0.74); H.floor(x, 0.04, z, 4.2, 0.9, 12); }
   for (const [x, y, z] of S.tray) { H.ball(x + 0.1, y + 0.3, z + 0.18, 0.6); H.floor(x, 0.69, z, 1.8, 0.7, 10); }
   H.flush(bag);
 }
