@@ -765,6 +765,10 @@ export function pigNeolithic(variant) {
     m.as(part, hip, null, () => {
       m.tube([hip, [x - (front ? 0 : 0.03), 0.28, z * 0.09], [x - (front ? 0 : 0.02), 0.1, z * 0.09], [x + 0.005, 0.02, z * 0.09]], [[0.055, 0.05], [0.03, 0.028], [0.022, 0.02], [0.024, 0.024]], { sides: 5, col: ({ t }) => lerp(bristle({ p: [x, 0.4, z], n: [0, 1, 0] }), [0.18, 0.14, 0.12], t * 0.7) });
       m.ball([x + 0.012, 0.012, z * 0.09], [0.03, 0.014, 0.02], [0.12, 0.1, 0.09], { nu: 4, nv: 5 });
+    });
+  }
+  return m;
+}
 // ═════════════ the Balinese village's pig and cattle (docs/settlements/bali-village.md §13.4) ═════════════
 /** A village pig of Bali, standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs): black, or black with a white belly and white socks; a long back that sags in the middle, a deep belly, short legs, a long snout with its disc, small ears pricked forward, the tail a thin curl. Back at 0.5 m. [inferred: the black, sway-backed village pig of Bali; no measurement sourced] */
 export function pigBali(variant) {
