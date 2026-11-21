@@ -119,6 +119,7 @@ function torch({ at, y = 0, mount = null }, { bag, col, lights }) {
     const [nx, nz] = mount, px = -nz, pz = nx, yy = y + 2.3, w = 0.05;
     const piece = (a0, a1, b0, b1, y0, y1) => box(Math.min(x + nx * a0 + px * b0, x + nx * a1 + px * b1), y0, Math.min(z + nz * a0 + pz * b0, z + nz * a1 + pz * b1), Math.max(x + nx * a0 + px * b0, x + nx * a1 + px * b1), y1, Math.max(z + nz * a0 + pz * b0, z + nz * a1 + pz * b1));
     bag.add('timber', mergeG([piece(0.01, 0.34, -w, w, yy - 0.06, yy), piece(0.28, 0.34, -w, w, yy - 0.5, yy), piece(0.02, 0.3, -w * 0.8, w * 0.8, yy - 0.5, yy - 0.44)]));
+    bag.add('pottery_dark', mergeG([piece(0.0, 0.07, -0.28, 0.28, yy + 0.45, yy + 1.0), piece(0.0, 0.07, -0.15, 0.15, yy + 1.0, yy + 1.6)]));      // the soot of the pine smoke on the wall over it
     const cx = x + nx * 0.31, cz = z + nz * 0.31;
     bag.add('terracotta', lathe([[0.001, 0], [0.07, 0.01], [0.1, 0.1], [0.12, 0.17], [0.09, 0.16], [0.001, 0.04]], 8, null, cx, yy, cz));
     bag.add('flame', flameG(cx, yy + 0.1, cz, 0.3 + 0.08 * q, 0.07, 9));

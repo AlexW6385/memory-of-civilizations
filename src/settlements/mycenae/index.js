@@ -2,6 +2,7 @@
 import '../../styles/mycenaean/index.js';
 import './nightlight.js';
 import './wear.js';
+import './rooms.js';
 import citadel from './plan.js';
 import treasury from './treasury.js';
 import music from './music.js';
