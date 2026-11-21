@@ -59,7 +59,7 @@ function alhambra(P, man, woman, L) {
   man([hx - 0.6, cz0 + 7.6], T, 'n', { cloth: 'cloth_red', hat: 'turban' }); man([hx + 0.6, cz0 + 7.7], T, 'n', { cloth: 'cloth_white', hat: 'turban' });
   man([c0 + 4.2, cz0 + 5.0], T, 'e', { pose: 'cross', cloth: 'cloth_white', hat: 'turban' });
   const [mx0, mz0] = MYRTLES;
-  man([mx0 + 2.6, mz0 + 14.0], T, 's', { pose: 'talk', cloth: 'cloth_white' }); man([mx0 + 2.7, mz0 + 15.2], T, 'n', { pose: 'talk', cloth: 'cloth_brown' });
+  man([mx0 + 4.2, mz0 + 14.0], T, 's', { pose: 'talk', cloth: 'cloth_white' }); man([mx0 + 4.3, mz0 + 15.2], T, 'n', { pose: 'talk', cloth: 'cloth_brown' });
   P([mx0 + 5.7, mz0 + 22.0], T, 'e', { dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_ochre', over: 'belt', hat: 'cap', hatMat: 'cloth_white', hair: 'short', beard: true, legs: 'bare', pose: 'squat' });
   // the halls carpeted (docs §25): a rug on the floor of the Hall of the Ambassadors, the Two Sisters' and the Abencerrajes', a man seated on each of the first two
   const rug = (x, z, c, s) => L.push({ t: 'goods_mat', at: [x, z], y: T, rot: 0, mat: c, goods: [], seed: s });
