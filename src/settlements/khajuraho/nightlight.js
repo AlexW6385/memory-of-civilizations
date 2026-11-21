@@ -109,7 +109,7 @@ function lit(ctx, el, share) {
 // ── what the village's buildings add: the hanging lamp of a shop, the hearth through a door, the spill of a door onto the lane ──────────────────────────────────────
 /** A shop's own lamp: a clay lamp on a hook under the verandah's eave by the keeper (oil is dear: most of the shops of the pilgrims' lane burn one, fewer elsewhere), and the pool of it on the platform and the lane. */
 function shopLamp(H, el) {
-  const { L, P } = frame(el), seed = el.seed || 0, share = el.open ? 0.8 : 0.3;
+  const { L, P } = frame(el), seed = el.seed || 0, share = el.open ? 0.9 : 0.55;
   if (hashAt(el.rect[0], el.rect[1], 3) > share) return;
   const u = L * (0.25 + 0.5 * hashAt(el.rect[0], el.rect[1], 5)), p = P(u, -0.95), y = (el.y ?? 0) + 0.42;
   H.ball(p[0], y + 1.95, p[1], 0.62, 0.6); H.floor(p[0], y + 0.03, p[1], 2.0, 1.5, 10, 0.5);
@@ -127,8 +127,8 @@ function homeGlow(H, el) {
 }
 /** A closed house or hut: the lamp or the hearth through the door ajar, on the step only. */
 function doorGlow(H, el) {
-  if (el.kind === 'hut' || el.kind === 'mud' || el.kind === 'home') {
-    if (hashAt(el.rect[0], el.rect[1], 9) > 0.35) return;
+  if (el.kind === 'hut' || el.kind === 'mud' || el.kind === 'home' || el.kind === 'haveli') {
+    if (hashAt(el.rect[0], el.rect[1], 9) > (el.kind === 'haveli' ? 0.75 : 0.35)) return;
     const { P } = frame(el), d = P(homeDoorU(el), -0.9); H.floor(d[0], (el.y ?? 0) + 0.45, d[1], 1.3, 1.1, 8, 0.5);
   }
 }
