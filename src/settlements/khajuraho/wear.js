@@ -23,23 +23,17 @@ function houseWear(el, bag) {
   const u = shop ? L * (0.35 + 0.3 * hashAt(el.rect[0], el.rect[1], 43)) : homeDoorU(el);
   const w = 0.32 + 0.16 * hashAt(el.rect[0], el.rect[1], 45), d0 = 0.15 + 0.2 * hashAt(el.rect[1], el.rect[0], 47);
   const a = P(u - w, -1.1), b = P(u + w, -d0);
-  bag.add('sandstone_dressed', box(Math.min(a[0], b[0]), fy, Math.min(a[1], b[1]), Math.max(a[0], b[0]), fy + 0.006, Math.max(a[1], b[1])));
+  bag.add('sandstone', box(Math.min(a[0], b[0]), fy, Math.min(a[1], b[1]), Math.max(a[0], b[0]), fy + 0.006, Math.max(a[1], b[1])));
   if (hashAt(el.rect[0], el.rect[1], 49) < 0.5) {                                       // the damp where the household throws its water out at the platform's end
     const ue = hashAt(el.rect[1], el.rect[0], 51) < 0.5 ? 0.25 : L - 0.25, c = P(ue - 0.2, -1.1), e = P(ue + 0.2, -0.6);
     bag.add('plaster_damp', box(Math.min(c[0], e[0]), fy + 0.001, Math.min(c[1], e[1]), Math.max(c[0], e[0]), fy + 0.007, Math.max(c[1], e[1])));
   }
 }
 
-/** The porch of a temple: the threshold before the sanctum's doorway worn dark and smooth by the hands and feet of the pilgrims and by the oil of the lamps, and the stains of spilled oil under each lamp stand (the porch's floor: life.js `porchOf`). */
+/** The porch of a temple: the threshold before the sanctum's doorway worn smooth and pale by the hands and feet of the pilgrims (the porch's floor: life.js `porchOf`). Only a material the temple already holds is used (a new one is a draw at the arrival). */
 function templeWear(el, bag) {
   const t = el, W = t.w, Lh = (t.len - W / 2) / 0.84, J = t.jagati, fl = J + t.h * 0.12 + 0.9, x0 = t.c[0] + W / 2 + Lh * 0.66, cz = t.c[1];
-  const hw = W * 0.36;
-  bag.add('granite_grey', box(x0 + 0.05, fl, cz - 0.75, x0 + 1.15, fl + 0.006, cz + 0.75));
-  for (const sz of [-1, 1]) {
-    const w = 0.34 + 0.1 * hashAt(x0, cz + sz, 5);
-    bag.add('plaster_damp', box(x0 + 0.45 - w, fl + 0.001, cz + sz * 0.9 - w, x0 + 0.45 + w, fl + 0.007, cz + sz * 0.9 + w));
-  }
-  void hw;
+  bag.add('sandstone_dressed', box(x0 + 0.05, fl, cz - 0.75, x0 + 1.15, fl + 0.006, cz + 0.75));
 }
 
 let done = false;
