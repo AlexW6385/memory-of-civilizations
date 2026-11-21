@@ -4,7 +4,7 @@
 import { Vector3 } from '../../core/three.js';
 import { faceFrame } from '../../styles/renaissance/face.js';
 import { shopSlots, TRADE_NAMES, P, FW, RD } from '../../styles/venetian/shops.js';
-import { PIAZZA, CAMPANILE, CLOCK, GROUND, RADIUS } from './layout.js';
+import { PIAZZA, CAMPANILE, CLOCK, GROUND, RADIUS, MERCERIA_ROWS } from './layout.js';
 
 /** The Procuratie's ranges that have shops (plan.js draws them): the north range (front on the piazza, +u east) and the south range (+u west). */
 export const RANGES = [
@@ -67,6 +67,45 @@ export function shopRooms() {
   const out = [];
   for (const R of ranges()) for (const s of shopSlots(R.L, R.n, R.shops)) {
     const a = at(R, s.su0, -P - FW), b = at(R, s.su1, -P - FW - RD), c = at(R, (s.su0 + s.su1) / 2, -P - FW - RD / 2);
+    out.push({ rect: [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], use: s.trade, at: c, id: `shop:${R.id}${s.i}` });
+  }
+  return out;
+}
+
+// ── the Merceria's shops (docs/settlements/venice.md §5h): the rows of houses on both sides of the street, a shop to every pair of bays, the front wall on the street (P = 0) ──
+const MTRADES = ['silk', 'cloth', 'hats', 'gold', 'spice', 'glass', 'silk', 'cloth'];       // [inferred] the mercers' goods: silk, cloth, caps, gold and trimmings, spices, glass
+let MMEMO = null;
+/** [{ id, rect, front, L, n, FM, shops: [{ i, trade, seed }] }] */
+export function merceriaRows() {
+  if (MMEMO) return MMEMO;
+  return (MMEMO = MERCERIA_ROWS.map((r, ri) => {
+    const n = Math.max(2, Math.round((r.front === 'n' || r.front === 's' ? r.rect[2] - r.rect[0] : r.rect[3] - r.rect[1]) / 3.1)), { M, L } = faceFrame(r.rect, r.front, GROUND), shops = [];
+    for (let i = 0, k = 0; i + 1 <= n - 1; i += 2, k++) shops.push({ i, trade: MTRADES[(k * 3 + ri * 5) % MTRADES.length], seed: 1700 + ri * 100 + k });
+    return { ...r, n, L, FM: M, shops };
+  }));
+}
+/** The shell (always near the street: the rows' walls, floors, windows, roofs and the glow of every door) and the one plan with what stands in the shops. */
+export function merceriaPlans() {
+  const rows = merceriaRows(), C = [10.25, -84], base = { style: 'venetian', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], entrance: { at: [-120, -5], facing: 'e' }, center: C, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS] };
+  return [
+    { ...base, id: 'venice-merceria-rows', near: 120, elements: [{ t: 'ven_mercer', y: GROUND, rows: rows.map((r) => ({ rect: r.rect, front: r.front, shops: r.shops })) },
+      ...rows.map((r) => ({ t: 'ven_shopglow', span: r.rect, front: r.front, y: GROUND, P: 0, shops: r.shops }))] },
+    { ...base, id: 'venice-merceria-shops', near: 62, elements: rows.map((r) => ({ t: 'ven_shopfit', span: r.rect, front: r.front, y: GROUND, P: 0, shops: r.shops })) },
+  ];
+}
+const mat = (R, u, d) => { const p = new Vector3(u, 0, d).applyMatrix4(R.FM); return [p.x, p.z]; };
+export function merceriaWalks() {
+  const out = [];
+  for (const R of merceriaRows()) for (const s of shopSlots(R.L, R.n, R.shops)) {
+    out.push(Object.assign([mat(R, s.uc, 2.2), mat(R, s.uc, 0.4), mat(R, s.uc, -FW - 0.4), mat(R, s.uc, -FW - 3.2), mat(R, s.uc, -FW - 4.0)], { y0: GROUND }));
+  }
+  return out;
+}
+/** Rooms of the Merceria's shops for the sound map. */
+export function merceriaRooms() {
+  const out = [];
+  for (const R of merceriaRows()) for (const s of shopSlots(R.L, R.n, R.shops)) {
+    const a = mat(R, s.su0, -FW), b = mat(R, s.su1, -FW - RD), c = mat(R, (s.su0 + s.su1) / 2, -FW - RD / 2);
     out.push({ rect: [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], use: s.trade, at: c, id: `shop:${R.id}${s.i}` });
   }
   return out;

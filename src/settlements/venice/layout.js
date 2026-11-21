@@ -12,6 +12,9 @@ export const BASILICA = { c: [62, -5], s: 34, w: 22 };
 export const CAMPANILE = [12, 22];
 export const CLOCK = [6, -50, 14.5, -40];                      // the Clock Tower (1496–99) over the way into the Merceria
 export const MERCERIA = [4, -120, 17, -48];                    // the first stretch of the Merceria behind it, kept clear
+// the Merceria as a street (docs/settlements/venice.md §5h): 5.4 m between two rows of houses with a shop at the foot of each, in the ground the clear zone above leaves
+export const MERCERIA_ST = [7.55, -120, 12.95, -50.5];
+export const MERCERIA_ROWS = [{ id: 'mw', rect: [0.2, -117, 7.55, -59.5], front: 'e' }, { id: 'me', rect: [12.95, -117, 22.6, -51.5], front: 'w' }];
 export const PALACE = [80, 32, 150, 100];
 export const BASIN_Z = 122;
 // the Rialto (docs/settlements/venice.md §4): the timber bridge across the Grand Canal where it runs north–south, the

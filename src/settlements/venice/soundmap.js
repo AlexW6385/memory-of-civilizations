@@ -3,7 +3,7 @@
 // the rooms one can be inside. Functions of layout.js and shops.js; read by src/engine/soundscape.js (the profile's `LIFE.map`) and played by the voices of
 // src/engine/voices.js and ./voices.js. Coordinates: metres, +x east, +z south, the settlement's own frame.
 import { GRAND, CANALS, BASIN_Z, BASILICA, MERCERIA, MARKET, RADIUS, PIAZZA, lots, bands, bridges, wells, squero, inRect } from './layout.js';
-import { shopRooms } from './shops.js';
+import { shopRooms, merceriaRooms } from './shops.js';
 import './voices.js';
 
 export const HOME = [-60, -5];
@@ -38,7 +38,7 @@ let SITES = null;
 /** The places with sounds of their own: the shops' rooms (their trade's work) and San Marco: { use, rect, at, id, work }. */
 export function sites() {
   if (SITES) return SITES;
-  SITES = shopRooms().map((s) => ({ ...s, work: WORK[s.use] || [] }));
+  SITES = [...shopRooms(), ...merceriaRooms()].map((s) => ({ ...s, work: WORK[s.use] || [] }));
   const { c, s, w } = BASILICA;
   SITES.push({ use: 'basilica', rect: [c[0] - s, c[1] - w / 2, c[0] + s, c[1] + w / 2], arms: [[c[0] - w / 2, c[1] - s, c[0] + w / 2, c[1] + s]], at: c, id: 'basilica', work: [] });
   return SITES;

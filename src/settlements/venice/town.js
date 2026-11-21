@@ -1,14 +1,14 @@
 import { lodTiles, openLots } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The houses of the islands (docs/settlements/venice.md §5).
-import { RADIUS, lots, PIAZZA, PIAZZETTA, GROUND, MERCERIA } from './layout.js';
+import { RADIUS, lots, PIAZZA, PIAZZETTA, GROUND, MERCERIA_ST } from './layout.js';
 import { molo, moloFine, doge, iconostasis, masts, sculptPlans } from './plan.js';
 import { canalPlans } from './rialto.js';
 import { dressPlans } from './dress.js';
 import { roomPlans } from './rooms.js';
 import { frontPlans } from './fronts.js';
 import { upHouses } from './upper.js';
-import { shopPlans, shopGlowPlan } from './shops.js';
+import { shopPlans, shopGlowPlan, merceriaPlans } from './shops.js';
 import { nightPlans } from './nightlight.js';
 import { inLot, wet } from './layout.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-120, -5], facing: 'e' } });
@@ -25,7 +25,7 @@ export async function town() {
   }
   for (const u of upHouses()) open.set(u.lot, u.use);                       // the climbable houses are entered too (upper.js; set after the far rule, so its inns stay where they were)
   const dress = dressPlans();
-  plans.push(...dress, ...shopPlans(), shopGlowPlan(), ...nightPlans(dress));
+  plans.push(...dress, ...merceriaPlans(), ...shopPlans(), shopGlowPlan(), ...nightPlans(dress));
   const up = new Map(upHouses().map((u) => [u.lot, u]));
   plans.push(...frontPlans(open, new Set(up.keys())));
   plans.push(...roomPlans(open, up));
@@ -41,8 +41,8 @@ export async function town() {
     // cross bands (the fields are squares of brick between the bands) and a stone kerb along the edge [inferred: the layout of the fields]
     for (let z = r[1] + 4.5; z < r[3] - 2; z += 9) pave.push({ t: 'floor', rect: [r[0], z - 0.2, r[2], z + 0.2], y: GROUND + 0.04, th: 0.1, mat: 'limestone' });
   }
-  pave.push({ t: 'floor', rect: [MERCERIA[0], MERCERIA[1], MERCERIA[2], MERCERIA[3] - 2.5], y: GROUND + 0.03, th: 0.1, mat: 'cotto_floor' });
-  pave.push({ t: 'floor', rect: [(MERCERIA[0] + MERCERIA[2]) / 2 - 0.25, MERCERIA[1], (MERCERIA[0] + MERCERIA[2]) / 2 + 0.25, MERCERIA[3] - 2.5], y: GROUND + 0.035, th: 0.1, mat: 'bluestone' });
+  pave.push({ t: 'floor', rect: [MERCERIA_ST[0], MERCERIA_ST[1], MERCERIA_ST[2], MERCERIA_ST[3]], y: GROUND + 0.03, th: 0.1, mat: 'cotto_floor' });
+  pave.push({ t: 'floor', rect: [(MERCERIA_ST[0] + MERCERIA_ST[2]) / 2 - 0.25, MERCERIA_ST[1], (MERCERIA_ST[0] + MERCERIA_ST[2]) / 2 + 0.25, MERCERIA_ST[3]], y: GROUND + 0.035, th: 0.1, mat: 'bluestone' });
   plans.push(base('venice-piazza-paving', pave));
   // (the water of the canals, the basin and the lagoon is the planet's sea: ground.js, sea)
   return plans;
