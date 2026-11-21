@@ -70,7 +70,7 @@ export async function town() {
   // the gateway (a small pylon with flagstaffs): its own frame, the axis along −z through the wall
   plans.push({ ...base('thebes-gateway', [{ t: 'nk_pylon', z0: -ENCL_TH, z1: 0, half: 14, h: 15, g: TEMPLE_GATE.w / 2, gateH: 9, flags: true, poleH: 20, y0: 0 }]), origin: [ex0, 0], yaw: 90, bounds: [-16, -10, 16, 6], entrance: { at: [0, 4], facing: 'n' } });
   // the avenue of sphinxes: the paved way and the rams, heads toward the way
-  plans.push(base('thebes-avenue', [{ t: 'floor', rect: [AVENUE.x0 - 4, -8.4, AVENUE.x1 + 1, 8.4], y: 0.02, mat: 'sandstone_floor', th: 0.4 }, ...planters(), ...fires()]));
+  plans.push(base('thebes-avenue', [{ t: 'floor', rect: [AVENUE.x0 - 4, -8.4, AVENUE.x1 + 1, 8.4], y: 0.02, mat: 'sandstone_floor', th: 0.4 }, ...planters(), ...fires(), { t: 'thebes_wear', y: 0.02 }]));
   plans.push(...ramPlans(), ...colossusPlans(), ...pylonReliefPlans('pylon2', PYLON2, 56, 5, 38, true), ...columnPlans());
   // the forecourt before the second pylon: paved, the side colonnades
   {

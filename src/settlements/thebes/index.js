@@ -6,6 +6,8 @@ import { walkRoutes } from './walk.js';
 karnak.walks.push(...walkRoutes());                   // routes into the shops and houses of the first streets (walk.js)
 export { town } from './town.js';
 import { registerNight } from './nightlight.js';
+import { registerWear } from './wear.js';
+registerWear();
 registerNight();                   // (idempotent; the night's halo of every lamp of the plans)
 export { music };
 export const landmarks = [{ plan: karnak, music }];

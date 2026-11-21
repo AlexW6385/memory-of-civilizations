@@ -317,6 +317,11 @@ function safFace(bag, col, a, b, y, h, iw, mat, niches, inside, trim) {
   const vTop = Math.min(iw.h + 0.8, h - bw - 2.4), vLo = 0.7;
   // marble plinth under the whole face except the iwan and the niches' openings
   for (const [s0, s1] of [[0.1, sL - 0.1], [sR + 0.1, L - 0.1]]) slab('marble', s0, s1, 0, 0.55, 0, 0.14);
+  // the vase-like marble pedestals the cable springs from (Archnet, Masjid-i Imam): a foot, a swelling belly, a neck and a flared lip, one at each jamb
+  for (const sv of [sL - 0.32, L - sL + 0.32]) {
+    const q = Pt([sv, 0.55], 0.16);
+    bag.add('marble', lathe([[0.001, 0], [0.15, 0], [0.17, 0.05], [0.14, 0.09], [0.22, 0.22], [0.25, 0.34], [0.2, 0.47], [0.1, 0.56], [0.09, 0.62], [0.15, 0.68], [0.15, 0.7], [0.001, 0.7]], 14, null, q[0], q[1], q[2]));
+  }
   // the cable: a turquoise band between white lines, up the jambs and over the pointed arch (a concentric curve)
   const arc = (rr, dxo) => { const pts = []; for (let j = 0; j <= 20; j++) { const x = (sL - dxo) + (w / 2 + dxo) * j / 20, cL = sL + r; pts.push([x, spring + Math.sqrt(Math.max(0, rr * rr - (x - cL) ** 2))]); } return pts; };
   const half = (dxo) => { const rr = r + dxo, pl = arc(rr, dxo); return pl; };
@@ -690,6 +695,7 @@ function lotfInterior(el, { bag, col, lights }, pt, A, H, y) {
           f.box(-DOOR, DOOR, y + DH, y + H, -0.02, 0.05, T);
           for (const sg of [-1, 1]) f.box(sg * DOOR - (sg > 0 ? 0 : 0.25), sg * DOOR + (sg > 0 ? 0.25 : 0), y, y + DH + 0.25, -0.02, 0.15, 'marble_smooth');
           f.box(-DOOR - 0.25, DOOR + 0.25, y + DH, y + DH + 0.24, -0.02, 0.14, 'marble_smooth');
+          wornSill(bag, (ss, dd) => { const q = f.F(ss, 0, -1.0 + dd); return [q[0], q[2]]; }, DOOR - 0.05, 0.95, y, 'marble_smooth');   // the threshold of the sanctuary's door, dished by the worshippers' feet (wear.js)
         }
       }
       // the spandrels over the arch (cream), the band of letters inside it, the field, the medallion

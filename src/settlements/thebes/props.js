@@ -65,6 +65,7 @@ export function propPlans() {
   {
     const items = [], rams = sphinxes().filter((s) => s.side > 0), step = 4;
     rams.forEach((s, i) => {
+      if (s.x < -190 && i % step === 3) { for (const side of [-1, 1]) items.push({ k: 'brazier', at: [s.x + AVENUE.spacing / 2, side * 7.7], yaw: side > 0 ? Math.PI / 2 : -Math.PI / 2, seed: i }); return; }   // §16: more fires near the quay end, where the visitor stands
       if (i % step !== 1) return;
       for (const side of [-1, 1]) items.push({ k: (i / step) % 2 < 1 ? 'brazier' : 'table', at: [s.x + AVENUE.spacing / 2, side * 7.7], yaw: side > 0 ? Math.PI / 2 : -Math.PI / 2, seed: i });
     });

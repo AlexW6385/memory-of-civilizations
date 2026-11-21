@@ -75,9 +75,13 @@ export function interiorLots() {
   return CHOSEN;
 }
 /** The furnished fronts the visitor's walk goes into (plan.js `walks`): the open ones nearest the Way's core, not those opened upstairs. */
+const WALKED = 26;
+/** Fronts whose doorsteps are blocked for the walker by what the lot's shell leaves in them (found by walk-check): no route is made, and their lanes stay as the street's. */
+const NO_WAY = new Set([719023, 646638, 599383]);
 export function walkLots() {
-  const C = interiorLots(), up = new Set(upLots()), core = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - 28, (l.rect[1] + l.rect[3]) / 2 + 120);
-  return [...C.teahouse, ...C.winehouse, ...C.shop].filter((l) => !up.has(l)).sort((a, b) => core(a) - core(b)).slice(0, 14);
+  const C = interiorLots(), up = new Set(upLots()), AR = [-110, 138], core = (l) => { const q = frontOf(l).P(0.5, 0); return Math.hypot(q[0] - AR[0], q[1] - AR[1]); };
+  // the nearest to the visitor's arrival first (the river road's and the Way's lower end), not the farthest part of the town
+  return [...C.teahouse, ...C.winehouse, ...C.shop].filter((l) => !up.has(l) && !NO_WAY.has(l.seed)).sort((a, b) => core(a) - core(b)).slice(0, WALKED);
 }
 /** The clear lane before each of those fronts (world rectangles, 3 m wide, 4.5 m out from the front): nothing of the street's life stands there. */
 export function walkLanes() {
