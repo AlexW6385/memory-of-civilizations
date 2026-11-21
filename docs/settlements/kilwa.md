@@ -202,3 +202,44 @@ Ten of the furnished houses nearest the arrival and the main walk (the nine near
 - **Walked**: `plan.walks` has a route from the lane to the gallery of each opened house and, where there is a terrace, from the upper room onto it; `tools/walk-check.mjs --sites kilwa` passes (the ramp under the stair, obstacles for the guard wall and the steps, 0.3 m of clear room beside the rail).
 - **Budget**: the roof poles of every house ceiling (instanced, about a million triangles in view at the arrival) are drawn within 90 m only: from farther they are hidden under their roofs.
 - **Still shut**: the other furnished houses' upper rooms; the roof over the upper room (no way up); the outer ring's solid blocks; the inner room's and back room's upper floors.
+
+## 22. Bring-up to the reference (Suzhou standard): the visitor's walk, night, sound, animals, wear (2026-11-20)
+
+**Sources.** Those of §11–§21 (Archnet 3779/3780/3783, Songo Mnara, Wikipedia "Kilwa Kisiwani", Smithsonian, African History Extra). The shell reached no further pages this session; everything below that those pages do not give is [inferred] from the general record of the Swahili coast and says so.
+
+### 22.1 The visitor's walk
+
+- **The route** [inferred from the layout of §17–§18]: from the arrival in the Great Mosque's hall (−9.95, 32.5) up the aisle to the north door, across the forecourt (tank, well, benches) to the mosque street, north along the spine to the market street (soko) and along it, and down the lanes to the beach's landing places (`src/settlements/kilwa/walk.js`: six lines, `WALK_REACH` 9.5 m).
+- **Opened as by day** [inferred, after §12 and §18]: every lot whose front lies within 9.5 m of the walk and which is not an outer-ring block is now furnished and open (`layout.js isOpen`): 36 lots on the walk, 12 more than before. Each is entered by the street door, the sunk court (hearth of three stones, mortar, water jars), the front room (mat, shelves, hanging lamp); a shop (duka) has its counter with scales and coin box, goods heaped at the end, and **its keeper standing behind the counter** (a man in a white robe and cap, `fronts.js`; the counter's place read from the house's own dry run, `house.js houseFront`).
+- **The hearth and the mortar** of every furnished court now stand at the end of the court away from the line the front room's door is walked on (before, only the houses with a stair kept it clear): `front.js furnishCourt`.
+- **Routes** (`walkroutes.js`, `plan.walks`): from the lane through the street door, across the court, into the front room, for every opened lot of the walk without a stair (the houses with one keep their own routes of §21); `tools/walk-check.mjs --sites kilwa` walks all of them.
+- Street furniture on the walk was already there (§17–§18: the baraza benches either side of the carved doors, lamp niches, the tank and well before the mosque, stalls under mat awnings). No shop sign is written: Swahili shops of the 14th century carried none that we know of [inferred].
+
+### 22.2 Night
+
+- **What burned** [inferred; no source gives a lamp of this town]: small oil lamps (coconut or sesame oil, a wick) in the niche over the baraza and hung in the front and upper rooms (the style's own `lamp_glass` and `flame` pieces; Songo Mnara's niches held "imported ceramics, glass and lamps", §12 [stated]), hanging glass lamps in the mosque's bays, bronze lampstands before the sultan's doors, a fire by each landing place, a lantern on each anchored dhow. No candle, chimney lamp or electric light.
+- **How** (`nightlight.js`, `nightplace.js`): the style's elements (house, mosque, Husuni, beach mosque) are wrapped from the settlement folder; each lamp the style makes gets a halo (glow, pool on the floor or lane, additive `halo` material, so it shows at the low preset; day view unchanged) and a real light. 62% of the street niches burn; 30% of furnished houses' windows glow (20% of closed ones); an opened house spills a pool through its street door; the mosque spills a pool outside each doorway. New elements: `kw_stand` (6: audience court west door and pavilion foot, South Court gate), `kw_fire` (3 landing places), `kw_glow` (2 dhow lanterns).
+- Seen: one night render in the market street (rain at the default weather): lit niches and door spill read as small warm points down the street, one lit window at left; faint. Not seen: the mosque hall, Husuni, the beach.
+
+### 22.3 Sound
+
+All [inferred]: no recording or description of Kilwa's sounds of 1330 exists; the instruments are those of §9 and the coast's later record (ngoma drums, the zumari reed oboe, a plucked lute); recitation and work-chant are wordless murmur. The engine's call to prayer (`adhan`, profile) stays. Map: `src/settlements/kilwa/soundmap.js`, voices `src/engine/voices-kilwa.js` (prefix `kw`), test `tests/kilwa-sound.test.mjs`.
+- **Water:** surf over the reef at five reaches along the beach and the headland's foot (`kwSurf`, all hours), and the engine's lapping at the tide line (`shoreSpot`).
+- **Work:** the shipwrights' adze at the hulls on the beach (`kwAdze`, 6:30–17), the boatmen's call-and-answer at the three landing places and out on the harbour (`kwShanty`, 5:30–18), mortars (`kwMortar`) and the trades of the opened houses by their trade (13 trades: cloth, jars, ivory chisel, potter's clay, carpenter's adze, spices, beads, coins), the market street's coins, jars and cloth; wells (the forecourt's, the palace's).
+- **Voices of the town:** Qur'an recited in the hall and by the school at the mosque's corner (`kwRecite`, mornings; wordless), the drum and the reed before the mosque in the evening (`kwNgoma`, `kwZumari`, 17–21:30, not in rain), a lute in the sultan's court after dark (`kwLute`); an owl on the baobab ground at night.
+- **Rooms:** each opened house sounds by its trade inside, quieter by its thick walls; the hall hushed and echoing, its recitation.
+- **Measured** with `tools/sound-render.mjs` (not heard): ngoma 87% of energy under 300 Hz with 7 onsets, mortar 14 onsets, zumari centroid 950 Hz, recitation 570 Hz, surf broadband (centroid 2.4 kHz).
+
+### 22.4 Animals
+
+All [inferred] (no source lists Kilwa's animals of 1330; the species are those of the coast's towns): `fauna.js` `critters` (src/engine/fauna-critters.js; test `tests/kilwa-critters.test.mjs`) — cats on the doorsteps of up to five houses of the walk beside the benches (Swahili towns keep many cats), a cock and hens scratching in three lanes, two goats tethered at the lane mouth by the second landing place, two stray dogs at the fish racks on the beach, five doves on the forecourt's paving, swallows' nests under the coping of up to six houses of the walk (the parent flies out and returns). Together with the existing flights and perches (pied crows, swallows, sparrows, reef egrets) and the life goats and chickens at the doors. Each answers the visitor's approach. No donkeys or camels (not known on the island [inferred]). Not built: fish in the shallows, mangrove crabs, bats at night, the dhows' rats.
+
+### 22.5 Wear and writing
+
+- **Wear** [inferred, after DESIGN §5; the climate is warm and humid, salt air]: `wear.js` wraps the style's house and mosque. In each opened house the door-stone of the street door has a darker hollow worn across it (two patches, the inner one narrower), the baraza benches a pale polished strip where men sit; inside each doorway of the Great Mosque the floor is worn grey in a strip 1.1 m deep. Already there from earlier passes (§10, §15, §18): the damp band at the foot of walls, fallen render showing the rag, rain streaks under copings and spouts, soot above the niche lamps.
+- **Writing: none added.** Archnet records no inscription in the Great Mosque (§20), and Swahili shops of the date carried no signs that we know of (§22.1). Husuni Kubwa's inscription panels (§14) stay as angular pseudo-script: a legible Arabic text could not be drawn and checked glyph by glyph here, so it was left out rather than risk wrong letters.
+- **Not done:** moss or algae (the palette has none beyond `plaster_damp`), salt bloom on the beach-side walls, worn steps on the stairs of the palace.
+
+### 22.6 Landmark gaps and what still falls short
+
+Not done in this pass: the mosque's older northern hall and vaults, the Small Domed Mosque, Husuni Ndogo, the mint, the doors' leaves, a bowl in each niche, a legible inscription anywhere, upper floors of most houses, the outer ring's interiors. Budget: main draws at the arrival 310 → 314 (the halo material 3 draws, the landmark plan 3), +4 against the +2 allowed; main triangles 4.31 → 4.38 M (baseline was already above 4.3); on the soko (-30, -84) 253 draws, 3.57 M.

@@ -119,3 +119,47 @@ Sources: the fifth phase of Temple 3 "was decorated with rows of niches containi
 ## Fix pass: the sacred way's margins
 
 Bullock carts with zebu and ox in the shafts, mats of flower- and lamp-sellers, water pots, sacks, firewood and baskets along the margins of the way, pilgrims in files and a family, monks climbing the great temple's lowest stair, grass tufts between the lamp pillars and the votive stupas; the central lane is kept clear for walkers [inferred: the trades and carriers are those of a pilgrimage centre of the region; nothing here is sourced to Nalanda itself].
+
+## 18. The visitor's walk (match-to-reference pass)
+
+What was already open when this pass began: all five monasteries (cells, court, shrine), the annexes, the library's three ground halls, the pilgrims' booths with goods and keepers, the water-sheds, Monastery 1's walk and the village houses within 175 m of the arrival with a use each (§13, §16). This pass defines the walk and checks that a visitor can enter what is open. [inferred throughout: no source records a route; the walk follows the excavated plan's way, gates and lanes]
+
+- The walk (src/settlements/nalanda/walk.js): from the arrival on the sacred way north along it between the lamp pillars, booths and water-sheds to the great temple's stair and the great stupa; east from the way through the gate of each of the five monasteries to its court; east along each monastery's lane to its annex (refectory, kitchens, granary, infirmary); west along the lane to the library's yard and Ratnarañjaka's ground hall; and south to the enclosure's gate and the road to the village, with its bazaar and the open houses on its lanes.
+- Doorways: an opened village house's doorway is now 1.6 m wide (the walker's clear width), the gap in a front-yard wall 2.8 m. A village house must not stand on an annex (one did, at the south-east annex: moved off by a rule in layout.js).
+- Routes for walk-check (landmark plan `walks`): four monasteries by their gates to the court, five annexes by their doors, Ratnarañjaka's ground hall by the yard's gate, six village houses to the hall (eighteen routes with Monastery 1's two).
+- Left out, found broken: six open houses (seeds 184687, 335971, 332843, 181140, 874012, 19708) stop the walker about 1.2 m before the door with no collider within reach (a roof-shell test of the collision raster); the bazaar's booths stand on the road in front of the doors of the south row and of the village street's west row, so those houses are reached from the lane's ends only.
+
+## 19. Night
+
+What lit Nalanda at night about 640: small clay dishes of oil (ghee or sesame oil) with a cotton wick, set in lamp niches, on stands before the Buddha, on the brick lamp pillars of the way and hung in rooms; the kitchens' fires; no glass, no electric light. Lamp-lighting (dīpa-dāna) is among the ordinary offerings at Buddhist shrines, and a monastery's cells had lamp niches (§4, shunya.net: niches in the room walls). [stated for the offering and the niches; the placing and the share lit are inferred]
+- Built (src/settlements/nalanda/nightlight.js): every `flame` and `lamp_glass` piece of the style (lamp pillars, shrine and temple-top lamps, cell-block lamps in the style's own lamp stands, the annexes' hanging lamps and hearths, the houses' niche lamps and hearths) gets a glow in the additive `halo` material (a ball, and a pool on the floor for those near the ground); in an opened monastery the lamp of about three in ten cells on the ground floor and two in ten above glows through the doorway and in the slit window; a lamp hangs from one booth in six of the way and bazaar (the lamp-sellers' stock glows more); about three in ten of a house's windows are lit; an opened house's door spills light on its step. The choice of lit cells and windows is a hash of the place (oil was dear). Day view unchanged.
+- Seen in a render at the low preset at the arrival (night, hour 22): the booth lamps, a lamp pillar and some cell and window glows read; the temple's own lamps are too small to see at that distance. [could not see the other poses]
+
+## 20. Sound
+
+The sounds of the place, put where they are made (src/settlements/nalanda/soundmap.js, voices in src/engine/voices-nalanda.js, all synthesised, all wordless). [inferred throughout: no recording exists; the sources behind each line are the dossier's §9, §10 and §13]
+- The wooden gong (nalWoodGong) hangs at a corner of each monastery's court and calls the day: strokes that quicken and die away, at dawn, before the noon meal and at the evening recitation (§13: "a wooden gong hangs at a corner (the wooden gong is how the monastic day was called)").
+- The recited chant (nalChant) at the court shrines and stupas of the five monasteries, mornings and evenings, and from the great temple's summit shrine: low voices on a drone, a reciting note falling to the tonic. The engine's hand bell and conch ('puja' bells at 5, 12, 18.3 h) stay as the profile had them.
+- The debate (nalDebateClap): the challenger's clap and call and the low answer, in Monastery 1's court by the well and in the second monastery's, by day; the lecture as a recitation from the podium in the morning (§9: teachers in debate, one standing and clapping).
+- The stylus on the palm leaf and the turning of leaves (nalStylus) in the library's three halls and in a scribe's lodging (§6, §16).
+- The zebu cart's neck bell and axle (nalCartBell) on the way and the road to the village (§Fix pass: bullock carts).
+- Engine voices reused: the loom, the mortar of the oil-presser, the grinder and kitchen, sacks and jars of the grain merchant, the refectory's bowls, cloth of the garland-maker, the pour of water at the east tank's ghats (dawn and evening) and the wheel and clay in the potters' yards; the wells' buckets; owls and far dogs at night.
+- Rooms: every open village house, annex and library hall has its own room tone and work (a hush, the roof's rain, one voice of its trade); the court shrine of Monastery 1 holds the chant.
+- Measured with tools/sound-render.mjs (levels peak 0.01–0.08, bands as intended: the gong under 1 kHz with its peak at 172 Hz, the stylus above 3 kHz); not heard.
+
+## 21. Animals
+
+Rigged critters (src/settlements/nalanda/fauna.js; the engine's fauna-critters.js; models added: none). [inferred throughout: nothing here is sourced to Nalanda itself; they are the animals of any Gangetic village and pilgrim town of the period]
+- Village dogs: one lying at the enclosure's gate, one at the way's margin by the arrival, one at the side of a village house's door (they get up and look when the visitor comes near).
+- Cats on the step of the second monastery's kitchen and of the refectory (the household cat of India is old).
+- Hens and a cock in the two village yards (pens) nearest the arrival (jungle fowl domesticated on the plains); two goats in a third pen.
+- Pigeons on the paving before the great temple's stair, in Monastery 1's court and in the library's yard (doves and pigeons were fed at shrines).
+- Ducks on the east tank's open water and a kingfisher on its margin by a ghat; swallows' mud nests under the eaves of two annexes (swallows already fly over the tanks, §Fix pass).
+- Not rigged: zebu, peafowl, monkeys (no model; the zebu are the life figures'); added a test (tests/nalanda-critters.test.mjs).
+- A village house that stood on an annex (the south-east one: two lots) is no longer built; its place in the lists and its draws are kept, its villager stands at the annex's door.
+
+## 22. Wear and writing
+
+- Wear (src/settlements/nalanda/wear.js; no new material, so no new draw): on the monasteries the outer walls' feet darkened with the monsoon's splash (a hash picks about four cells in ten, with a streak above one in seven); the gate's threshold worn pale across the passage; in the opened monasteries the doorsill of most cells worn pale in its middle; on the village houses a worn hollow in the middle of the door step (the opened houses and one in three of the others). The climate is §7's: hot monsoon plain, brick feet darkened and greened (the green is left out: no spare material that would not cost a draw). [inferred]
+- Writing: none drawn. The script of the place and time is Siddham (the Gupta-derived Brahmi of the sixth and seventh centuries) and the clay seals of Nalanda carry the "ye dharmā" verse; the glyphs cannot be verified here one by one, so tablets and signs stay plain.
+- Not done: worn steps on the great temple's stair, stains under the temple's niches, soot over the lamp niches (the lamps themselves glow at night, §19).
