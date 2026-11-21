@@ -58,5 +58,9 @@ export function churchGlow(elements) {
   for (const dz of [-0.6, 0.6]) out.push({ t: 'conques_halo', at: [cx, ty + 0.46 + 0.23 + 0.03, dz], r: 0.32, k: 0.7 });
   const sx = 40.6 + 1.25;
   for (const [sz, dz] of [[-1.35, 0.24], [1.35, -0.24]]) out.push({ t: 'conques_halo', at: [sx - 0.3, 0.96 + 0.3 + 0.26, sz + dz], r: 0.28, k: 0.7 });
+  // the west front's two windows, lit from the nave's lamps (the vigil), seen from the parvis [inferred]
+  for (const dz of [-1.1, 1.1]) out.push({ t: 'conques_pane', x: -0.03, z: dz, y0: 12.26, y1: 14.3, w: 0.95, k: 0.5 });
+  // where feet went: the way from the terrace to the door, a darkened polish on the paving that narrows toward the threshold (each slab a hair higher than the last)
+  [[-14, -10, 2.6], [-10, -6, 2.1], [-6, -2.6, 1.7], [-2.6, -0.02, 1.45]].forEach(([a, b, hw], i) => out.push({ t: 'block', rect: [a, -hw, b, hw], y0: 0, y1: 0.006 + i * 0.002, mat: 'plaster_damp', collide: false }));
   return out;
 }
