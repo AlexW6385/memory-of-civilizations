@@ -143,3 +143,14 @@ A map of its own (`soundmap.js`), the profile's `LIFE.map`, played by `src/engin
 - **The school's rooms by floor**: the saw, plane and hammer in the carpentry workshop; the loom on the first floor; the anvil and hammer in the metal workshop; the murmur and brush of the wall-painting workshop; a lecture in the lecture room; typewriters in the office; the library's pages; the Aula's piano in the evening (the school's parties and the Bauhaus band's jazz **[stated: §9, Bauhaus Kapelle 1926–29]**; the tune is ours); the canteen at noon and six; gramophones in the studios in the evening **[inferred]**.
 - Hubbub (`townNear`): loudest on the streets by day, half in the evening, a fifth at night, quieter in the grove and the Törten gardens.
 - Measured with `tools/sound-render.mjs`: every voice renders with a peak under 0.06 and its energy where its dossier line puts it (siren 500–700 Hz, bell 1 kHz, saw 1–5 kHz); nothing was listened to.
+
+### 15.4 Animals
+
+Critters (`fauna.js`, rigged, one draw in the engine's single mesh, 33 animals) added to the flights and perches of §7; models only from the engine's existing set. All **[inferred]** from §7's list (sparrows, swifts, jackdaws and crows, a dog or two) and the habits of a central-German town:
+
+- **Dogs** lying at the step of each pub and each butcher's door in the middle of the town (the scraps), and the porter's dog at the school's entrance court (5 in all); they lift their heads and stand as the visitor comes near.
+- **Cats** on the doorsteps of every fourth flat, and one on the steps of the last Masters' House (the masters kept cats; Paul Klee's are known, whether one sat out in 1927 is **[inferred]**).
+- **Pigeons** (grey, dark, white) in threes before the bakeries and the grocers (crumbs, spilt grain) and in pairs on the school's forecourt; they walk and peck within a few metres of where they stand.
+- **Rooks** (the engine's black walking bird; jackdaws and crows of §7 on the ground, the nearest model) on the school garden's lawn.
+- The sparrows, swifts (the `swallow` model) and crows of §7 stay as flights and perches. Hens stay as the Törten gardens' life elements (§11). No horses as critters: the carts' horses are part of their carts.
+- `tests/bauhaus-critters.test.mjs` steps the behaviours in Node. NOTE: on the master this branch started from, `src/engine/critter-models.js` does not parse (a bad merge of the Stonehenge and Bali pig models: `pigNeolithic` is cut off and its tail stands after `pigBali`), so every critters test (and `tools/showroom.mjs --site`) fails there; the test passed here against the Stonehenge branch's copy of that file, which was put back afterwards.
