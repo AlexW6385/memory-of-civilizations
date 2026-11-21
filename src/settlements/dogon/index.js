@@ -2,6 +2,7 @@
 import '../../styles/dogon/index.js';
 import './furniture.js';
 import './nightlight.js';
+import './wear.js';
 import dogon from './plan.js';
 import music from './music.js';
 export { town } from './town.js';
