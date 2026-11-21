@@ -146,7 +146,7 @@ const KITS = {
     figures: F(['trousers', 'robe'], ['cloth_black', 'cloth_grey', 'cloth_indigo', 'cloth_brown', 'cloth_red'], ['skin_light', 'skin_medium'], ['brim', 'none', 'none'], { hair: ['short', 'short', 'long'], beard: 0.1, over: ['none'], hairs: [['hide_black', 0.7], ['hide_brown', 0.75], ['hide_tan', 0.9], ['hide_grey', 1.1]] }),
   },
 };
-// a settlement's own departures from its kit
+// a settlement's own departures from its kit (`nightKeep`: the fraction of its still figures that stay out all night, default 0.25)
 const KIT_OVER = {
   // no hung paper lanterns on Indus or Gupta-age house fronts: oil lamps stood in niches and at doors
   'mohenjo-daro': { fronts: [['laundry_pole', 0.8, 2]] },
@@ -429,6 +429,7 @@ export function lifePlans(id, R, landmarks, town, G) {
     if (t === 'figure') {
       Object.assign(el, dressed(kit, rand, rng((el.seed ^ 0x9e3779b9) >>> 0))); if (extra.pose) el.carry = 'none'; if (extra.carry) el.carry = extra.carry; if (extra.y !== undefined) el.y = extra.y;
       if (el.carry === 'yoke' && kit.figures.bucket) el.bucketMat = kit.figures.bucket;
+      if (kit.nightKeep !== undefined) el.nightKeep = kit.nightKeep;      // the fraction that stays out all night (src/objects/kit.js nightDusk); a settlement may set it in KIT_OVER
       if (el.child && extra.pose && extra.pose !== 'squat') delete el.child;          // no child on a bench built for grown-ups, at a craft, at work
     }
     els.push(el);

@@ -146,3 +146,4 @@ The record of decisions behind `DESIGN.md` (its §11 points here). **Agents do n
 
 - Conques: the PAX plaque by the hostel door (v12.54) is switched off — it was invented, and nothing is written on a building without a source for that inscription there.
 - Baroque Rome: the frieze and the dome band were removed as unverified, then restored after their wording was checked against sources (dossier §8); the obelisk's tablets stay plain until checked. Rule: a text goes on a building when its wording is checked, and trade words on shop boards are not inscriptions.
+- Street-life figures thin by night in the life instances' own distance choice (a per-copy `dusk` level from a position hash, `nightKeep` per kit), not by a vertex-stage collapse: it covers both the instanced and the merged-by-material life shapes, costs no draw and no shader variant, and takes the shadow with the figure.

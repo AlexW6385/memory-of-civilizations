@@ -36,7 +36,7 @@ export function houseDoorway(l) {
 }
 
 /** The routes walk-check follows (landmark plan `walks`, world metres): into every monastery by its gate to the court, every annex by its door, the library's three ground halls, and the nearest open houses. */
-export function walkRoutes(nHouses = 6) {
+export function walkRoutes(nHouses = 30) {
   const R = [];
   for (const m of MONASTERIES) {
     if (m.rect === MONASTERIES[2].rect) continue;                                    // Monastery 1's own routes are the landmark plan's
@@ -48,10 +48,16 @@ export function walkRoutes(nHouses = 6) {
   const hc = [LIBRARY.c[0] + 21, LIBRARY.c[1]], hh = [9, 7];                        // Ratnarañjaka (plan.js TOWERS[2]): its door on the east face
   R.push({ id: 'library: Ratnarañjaka', route: [[-10, gz], [yx1 - 4, gz], [hc[0] + hh[0] + 2.5, hc[1]], [hc[0] + hh[0] - 3, hc[1]]] });
   void yx0; void yz0;
-  // (the bazaar's booths stand on the road in front of the south row's doors: those houses are reached from the lanes' ends, not walked)
-  const booth = (x) => [0, 1, 2, 3, 4, 5, 6].some((i) => Math.abs(x - (52 + i * 10)) < 3.2);
-  const clear = (q) => { const F = houseDoor(q), [px, pz] = F.P(F.du + 0.3, -2.4); return !(pz > 124 && booth(px)) && !(px > 127 && px < 134 && [...Array(11).keys()].some((k) => Math.abs(pz - (-84 + k * 15)) < 3.2)); };
-  for (const h of openHouses().filter((q) => (q.front === 'n' || q.front === 'w') && clear(q)).slice(0, nHouses)) R.push({ id: 'house ' + h.seed, route: houseDoorway(h).route });
+  // the other two halls: Ratnodadhi (door east at x -89) by the gap between the towers; Ratnasagara (door east at x -113) from the south
+  const T = LIBRARY.c;
+  R.push({ id: 'library: Ratnodadhi', route: [[-10, gz], [yx1 - 1.5, gz], [yx1 - 1.5, -76], [-86.5, -76], [-86.5, -96], [-90.5, -96], [-94, -96]] });
+  R.push({ id: 'library: Ratnasagara', route: [[-86.5, -76], [-108, -76], [-108, -95], [-114.5, -95], [-117, -95]] });
+  void T;
+
+  // the six whose brick bench was cut at the door (houses.js `gable`): all must be walked
+  const CUT = [184687, 335971, 332843, 181140, 874012, 19708], seen = new Set();
+  const pick = [...openHouses().filter((q) => CUT.includes(q.seed)), ...openHouses().filter((q) => q.front === 'n' || q.front === 'w').slice(0, nHouses)].filter((q) => !seen.has(q.seed) && seen.add(q.seed));
+  for (const h of pick) R.push({ id: 'house ' + h.seed, route: houseDoorway(h).route });
   return R;
 }
 void inRect; void tankD;

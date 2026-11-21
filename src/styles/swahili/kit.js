@@ -202,7 +202,7 @@ export function poleCeiling(ctx, r, yc, along, { step = 0.32, rad = 0.065, bear 
     const m = new Matrix4();
     if (along === 'x') m.makeTranslation(x0 - bear, yc - rad, s);
     else m.makeRotationY(-Math.PI / 2).setPosition(s, yc - rad, z0 - bear);
-    ctx.bag.addInstance(POLE, g, m, { reach: 90 });
+    ctx.bag.addInstance(POLE, g, m, { reach: 36 });
   }
   ctx.bag.add(soffit, box(x0, yc - 0.01, z0, x1, yc + th, z1));
   if (top) ctx.bag.add(top, box(x0, yc + th, z0, x1, yc + th + 0.02, z1));
