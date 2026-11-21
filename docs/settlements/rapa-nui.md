@@ -210,3 +210,9 @@ Placed where made, by hour and weather; all synthesised; none of it heard (measu
 - Not done: sea turtles in the shallows, the rats' night behaviour beyond the rig's lying-down, nesting seabirds on the cliffs (the cliffs are off the disc).
 - Test: tests/rapa-nui-critters.test.mjs (models known, none of the absent animals, never in a house hull, clear of the walks, at an animal's pace).
 - Found broken on master and repaired here: src/engine/critter-models.js had lost the last four lines of `pigNeolithic` in the merge of stonehenge and bali-village (a syntax error that stops every critters test and the in-game renderers); the four lines are restored.
+
+### 10.5 Wear and writing (`wear.js`)
+- Wear [inferred: what daily use of earth, ash and fire leaves; materials the plan already holds, no new draw]: ragged patches of trodden dark earth along the way over each entered house's doorsill, out across the pavement and in across the mat floor, wider at the chief's long house; the mat floor darkened with soot in a ring round each hearth inside; a ragged annulus of grey ash and a rim of charcoal thrown out round every earth oven (every house's, the plaza's three feast ovens, the yard's hearth by the way up). The house being thatched anew has none (it is not lived in).
+- Already in the style and unchanged: weathering of the tuff, thatch wear (§4c, §4f).
+- Writing: none. The island's script, rongorongo, is undeciphered and the tablets in the long house are pieces of furnishing (§4d); no glyph is written anywhere, and there are no shop signs, tablets or inscriptions in a script about 1500 here to write [stated: rongorongo undeciphered, Wikipedia "Rongorongo"; not read here, known]. Petroglyphs are in §4d.
+- Not done: moss, lichen (the dossier puts none on the statues in 1500, §4c), worn steps on the ahu's ramp, salt stains on the seaward wall.

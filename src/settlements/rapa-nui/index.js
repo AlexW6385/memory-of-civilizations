@@ -4,6 +4,7 @@ import '../../styles/ming/index.js';
 import tongariki from './plan.js';
 import music from './music.js';
 import './nightlight.js';
+import './wear.js';
 export { town } from './town.js';
 export { music };
 export const landmarks = [{ plan: tongariki, music }];
