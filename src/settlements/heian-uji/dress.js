@@ -95,7 +95,10 @@ export function dressHouse(el, { bag, col }, g) {
       break;
     }
     case 'brewer': {                                            // big jars with lids in a row, a pole with a bundle of cedar as the sign
-      { const bu = lane(0.0, 2.8); for (let k = 0; k < 4; k++) pot(bu + 0.4 + k * 0.7, -0.8, k % 2 ? 'pottery_dark' : 'terracotta', 0.4, 0.95); }
+      { // the row of jars on the roomier side of the door's lane, as many as fit (a narrow front keeps fewer, never one in the lane)
+        const a = door - dw / 2 - 0.4, b = door + dw / 2 + 0.4, left = a - 0.15, right = L - 0.15 - b, from = left >= right ? 0.15 : b, room = Math.max(left, right);
+        for (let k = 0; k < Math.min(4, Math.floor((room - 0.4) / 0.7) + 1); k++) pot(from + 0.4 + k * 0.7 * (left >= right ? 1 : 1), -0.8, k % 2 ? 'pottery_dark' : 'terracotta', 0.4, 0.95);
+      }
       { const p = P(lane(L - 0.6, 0.4) + 0.2, -1.0); bag.add('bamboo_culm', rod([p[0], y, p[1]], [p[0], y + 3.0, p[1]], 0.04, 5)); bundle(bag, 'bark_pine', p[0], y + 2.5, p[1], 0.6); }
       break;
     }

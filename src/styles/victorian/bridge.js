@@ -71,6 +71,16 @@ export function ironBridge(el, { bag, col }) {
   bag.add('granite_block', box(x0, y - 0.1, z - w / 2 + 3.2, x1, y, z + w / 2 - 3.2));
   for (const s of [-1, 1]) { const q = s < 0 ? [za, z - w / 2 + 3.2] : [z + w / 2 - 3.2, zb]; bag.add('flagstone', box(x0, y - 0.1, q[0], x1, y + 0.15, q[1])); bag.add(G, box(x0, y - 0.1, s < 0 ? q[1] - 0.25 : q[0], x1, y + 0.17, s < 0 ? q[1] : q[0] + 0.25)); }
   col.floor([x0, za, x1, zb], y + 0.15);
+  // the footways' wear (dossier §12): where the crowd of a busy crossing kept to the middle of each footway the flags are ground to a dull grey lane,
+  // in patches of three to nine metres with gaps, their length and side from the place alone
+  for (const s of [-1, 1]) {
+    const q = s < 0 ? [za, z - w / 2 + 3.2] : [z + w / 2 - 3.2, zb], zm = (q[0] + q[1]) / 2 - s * 0.1;
+    for (let t = x0 + ab + 1.0, k = 0; t < x1 - ab - 4; k++) {
+      const h = Math.sin(t * 12.9898 + s * 78.233) * 43758.5453, r = h - Math.floor(h), len = 3 + r * 6, o = (r - 0.5) * 0.5;
+      bag.add(G, box(t, y + 0.15, zm + o - 0.55, t + len, y + 0.153, zm + o + 0.55));
+      t += len + 1.5 + r * 4;
+    }
+  }
   // the cast-iron parapets: posts, rails, balusters and a pointed arcade between the rails
   for (const s of [-1, 1]) {
     const zp = s < 0 ? za + 0.12 : zb - 0.12, F = { at: (uu, d) => [uu, zp + d] };

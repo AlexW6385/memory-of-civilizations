@@ -9,7 +9,7 @@
 
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { STYLES } from '../../core/build.js';
-import { GROUND, BRIDGE, RADIUS } from './layout.js';
+import { GROUND, BRIDGE, RADIUS, streetsZ } from './layout.js';
 import { nightSites } from './town.js';
 import { nightLots } from './open.js';
 import { westminster, bridge } from './plan.js';
@@ -159,15 +159,21 @@ export function halos() {
   const H = new Halo();
   const { lamps, stalls } = nightSites(), { all, open, ups } = nightLots(), R2 = (RADIUS - 40) ** 2;
   // the gas lamps of the streets: the lantern's glow and the pool on the paving
-  for (const [x, z, y] of lamps) { H.ball(x, y + 3.65, z, 1.35); H.floor(x, y + 0.17, z, 3.4, 3.0, 0, 8); }
+  const axes = streetsZ();
+  for (const [x, z, y] of lamps) {
+    H.ball(x, y + 3.65, z, 1.35);
+    // the pool lies mostly on the roadway: its centre is drawn toward the axis of the street the lamp stands in
+    const zc = axes.reduce((m, c) => (Math.abs(c - z) < Math.abs(m - z) ? c : m), axes[0]), d = zc - z, main = Math.abs(zc - BRIDGE.z) < 1;
+    H.floor(x, y + 0.17, Math.abs(d) < 9 ? z + Math.sign(d) * (main ? 3.2 : 2.2) : z, 7.2, main ? 7.0 : 6.0, 0, 12, [1, 0.62, 0]);
+  }
   // the costers' stalls by their flares
-  for (const [x, z, y] of stalls) { H.ball(x, y + 1.75, z, 1.0); H.floor(x, y + 0.15, z, 2.3, 1.9, 0, 6); }
+  for (const [x, z, y] of stalls) { H.ball(x, y + 1.75, z, 1.0); H.floor(x, y + 0.15, z, 3.8, 3.2, 0, 8, [1, 0.55, 0]); }
   // the lamp standards of the bridge (three lanterns each) and the embankments' dolphins
   const RL = riverLamps();
   for (const b of RL.bridge) {
     const [cx, cy, cz] = b.c;
     for (const dx of [-b.hw * 0.78, 0, b.hw * 0.78]) H.ball(cx + dx, cy, cz, 1.15);
-    H.floor(cx, GROUND + 0.4 + 0.12, cz + b.side * 2.6, 4.2, 3.4, 0, 8);
+    H.floor(cx, GROUND + 0.4 + 0.12, cz + b.side * 2.6, 7.0, 5.6, 0, 12, [1, 0.6, 0]);
   }
   for (const [x, y, z] of RL.dolphins) H.ball(x, y, z, 1.35);
   // the Commons' windows and the palace's other river ranges
@@ -187,13 +193,13 @@ export function halos() {
       if (!lit(l, w, i)) return;
       const f = bright(l, w, i);
       H.quad(P(w.u - w.w, w.y0, w.d), P(w.u + w.w, w.y0, w.d), P(w.u + w.w, w.y1, w.d), P(w.u - w.w, w.y1, w.d), [0, sg], f);
-      if (w.k === 'shop') H.floor(x0 + w.u, y + 0.15, zf + sg * 1.0, w.w + 0.5, 0.95, 0, 6);          // the shop window's light on the pavement
+      if (w.k === 'shop') H.floor(x0 + w.u, y + 0.15, zf + sg * 1.6, w.w + 1.4, 1.9, 0, 8, [0.9, 0.5, 0]);          // the shop window's light on the pavement
     });
     if (l.pub) {
       // the great gas lamp over the door on its bracket and the pools before the front, brightest of the street
       const east = l.corner === 'e', uDoor = east ? Wd - 1.3 : 1.3, g0 = 4.0, c = P(uDoor, y + g0 + 0.65, 1.0);
-      H.ball(c[0], c[1], c[2], 1.7); H.floor(c[0], y + 0.15, zf + sg * 1.5, 2.8, 2.0, 0, 8);
-      H.floor(x0 + Wd / 2, y + 0.15, zf + sg * 0.95, Wd * 0.55, 0.95, 0, 8);
+      H.ball(c[0], c[1], c[2], 1.7); H.floor(c[0], y + 0.15, zf + sg * 2.6, 5.0, 3.8, 0, 12, [1, 0.62, 0]);
+      H.floor(x0 + Wd / 2, y + 0.15, zf + sg * 1.8, Wd * 0.6, 1.9, 0, 10, [0.95, 0.5, 0]);
       // the side along the cross street: a few of its rooms lit
       const sx = east ? x1 : x0, so = east ? 1 : -1, D = z1 - z0;
       for (let s = 1; s < 3; s++) for (let v = 1.0, k = 0; v < D - 0.8; v += 3.1, k++) {

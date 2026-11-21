@@ -93,6 +93,12 @@ export function abbey(el, ctx) {
   for (const s of [-1, 1]) towerH(bag, col, x0 + td / 2, s < 0 ? cz - nw / 2 - aw + td / 2 - 1.5 : cz + nw / 2 + aw - td / 2 + 1.5, td, 69, y, s < 0);
   const wf = [x0 + 1, cz - 4.7, x0 + td, cz + 4.7];
   { const F = faceFrame(wf, 'w'); archWindow(bag, F, y, 4.7, 12, 6.2, H - 15, true, 4, L); for (const q of arch(4.7, 0, 3.0, 7.4, true, 0.7)) bag.add(L, prism(F, y, q, 0, 0.7)); bag.add(L, prism(F, y, [[-0.3, H + 2], [9.7, H + 2], [4.7, H + 5.5]], -0.6, 0.1)); }
+  // the west door's three shallow steps and threshold (dossier §12): flags laid before the portal, the middle of each tread and the sill ground
+  // down by the feet that came through (a darker hollow of flagstone in the limestone), the flight 0.02 m higher at each step so the walker's feet
+  // go up to the sill and down to the porch's floor (y + 0.05)
+  { const sl = (m, a0, a1, h, hw) => { bag.add(m, box(x0 + a0, y - 0.1, cz - hw, x0 + a1, y + h, cz + hw)); col.floor([x0 + a0, cz - hw, x0 + a1, cz + hw], y + h); };
+    sl('limestone', -3.2, 0.3, 0.02, 3.4); sl('limestone', -1.8, 0.3, 0.04, 2.6); sl('limestone', -0.5, 2.2, 0.06, 1.7);
+    bag.add('flagstone', box(x0 - 3.0, y + 0.02, cz - 0.9, x0 - 1.8, y + 0.027, cz + 0.9)); bag.add('flagstone', box(x0 - 1.8, y + 0.04, cz - 0.8, x0 - 0.5, y + 0.047, cz + 0.8)); bag.add('flagstone', box(x0 - 0.5, y + 0.06, cz - 0.7, x0 + 2.2, y + 0.067, cz + 0.7)); }
   abbeyInterior(ctx, { y, cz, H, Ha, x0, x1, z0, z1, td, xc, tw, xe, edgesW, edgesE, lc });
 }
 
