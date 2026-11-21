@@ -44,24 +44,26 @@ E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 // the Apadana on its 2.6 m plinth: 6 × 6 columns in the hall, porticoes north, west and east
 E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe', dress: true,
   stairs: [{ face: 'w', W: 26, flight: 9, D: 6, wings: ['nobles', 'nobles'], c: -60, walk: WALK }] });   // the west porch's stair (the visitor's side) [inferred]
-E.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
+// (what stands inside the great rooms is built in near plans, `roomPlans()`: a visitor sees it only from within reach)
+const R = { apadana: [], hundred: [], tachara: [], hadish: [] };
+R.apadana.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
 // the throne in the Hundred-Column Hall, at the south end of its middle aisle between two rows of columns (the aisle's 4.7 m, the dais 4.6 m)
 const HY = T + 0.95;
-E.push({ t: 'audience', c: [75, -67], y: HY, dir: [0, -1], aisle: 56, half: 2.3, depth: 2.2, burners: false });
-for (const x of [73.1, 76.9]) E.push({ t: 'incense_stand', at: [x, -73.2], y: HY });
+R.hundred.push({ t: 'audience', c: [75, -67], y: HY, dir: [0, -1], aisle: 56, half: 2.3, depth: 2.2, burners: false });
+for (const x of [73.1, 76.9]) R.hundred.push({ t: 'incense_stand', at: [x, -73.2], y: HY });
 // lamp stands along the aisle, each beside a column's plinth
 const HS = [];
 for (const z of [-119.5, -105.5, -91.5]) for (const x of [72.95, 77.05]) HS.push(['stand', x, z, 0, { light: z === -91.5 }]);
-E.push({ t: 'furnish', y: HY, items: HS });
+R.hundred.push({ t: 'furnish', y: HY, items: HS });
 // the Tachara's and the Hadish's rooms: couches facing across a low table on carpets, chests and lamps along the walls, braziers
 const banquet = (x, z, _y, wide = 4.6) => [['carpet', x, z, 0, { l: wide, w: 3.4 }], ['couch', x - 1.1, z, Math.PI / 2, {}], ['couch', x + 1.15, z, -Math.PI / 2, { cloth: 'cloth_indigo', cloth2: 'cloth_red' }], ['table', x, z, Math.PI / 2, {}], ['stool', x - 1.1, z - 1.6, 0, {}], ['stool', x + 1.15, z + 1.6, 0, {}]];
-E.push({ t: 'furnish', y: T + 3.15, items: [
+R.tachara.push({ t: 'furnish', y: T + 3.15, items: [
   ...banquet(-58.5, 17.3), ...banquet(-49.5, 17.3),
   ['carpet', -54, 20, Math.PI / 2, { l: 13.2, w: 1.4, border: 'cloth_red', field: 'cloth_indigo' }],
   ['chest', -61.5, 22.4, Math.PI / 2], ['chest', -61.5, 23.8, Math.PI / 2, { l: 0.9 }], ['chest', -46.5, 22.4, Math.PI / 2], ['chest', -46.5, 23.8, Math.PI / 2, { l: 0.9 }],
   ['stand', -60.5, 21.6, 0, {}], ['stand', -47.5, 21.6, 0, {}], ['brazier', -58.5, 22.7, 0, { light: true }], ['brazier', -49.5, 22.7, 0, { light: true }],
 ] });
-E.push({ t: 'furnish', y: T + 3.65, items: [
+R.hadish.push({ t: 'furnish', y: T + 3.65, items: [
   ...[[-20, 81.67], [0, 81.67], [-20, 108.33], [0, 108.33]].flatMap(([x, z]) => banquet(x, z, 0, 5.6)),
   ['carpet', -10, 95, Math.PI / 2, { l: 39, w: 2, border: 'cloth_red', field: 'cloth_indigo' }],
   ['carpet', -20.5, 95, 0, { l: 18, w: 2, border: 'cloth_red', field: 'cloth_indigo' }], ['carpet', 0.5, 95, 0, { l: 18, w: 2, border: 'cloth_red', field: 'cloth_indigo' }],
@@ -121,6 +123,12 @@ walks[0].y0 = 0;
 for (const r of walkRoutes()) { const route = r.route.map((p) => [p[0], p[1]]); route.y0 = r.where === 'terrace' ? T : 0; walks.push(route); }
 // the royal way from the arrival toward the Apadana's west stair
 walks.push(Object.assign([[-122, -60], [-96, -60]], { y0: T }));
+
+/** The furnished great rooms as near plans: [{ id, center, near, bounds, elements }] (shown within `near` m of `center`). */
+export function roomPlans() {
+  const at = { apadana: [[-30, -60], 78, [-62, -92, 2, -28]], hundred: [[75, -95], 85, [38, -132, 112, -58]], tachara: [[-54, 20], 48, [-64, 10, -44, 30]], hadish: [[-10, 95], 66, [-32, 73, 12, 117]] };
+  return Object.entries(R).map(([k, elements]) => ({ id: `persepolis-rooms-${k}`, style: 'achaemenid', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], center: at[k][0], near: at[k][1], bounds: at[k][2], entrance: { at: [-220, STAIR.z], facing: 'e' } }));
+}
 
 export const terrace = {
   id: 'persepolis-terrace',

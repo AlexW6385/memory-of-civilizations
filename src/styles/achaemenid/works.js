@@ -28,7 +28,7 @@ export function terraceWorks(el, { bag, col }) {
   }
   // a sledge with its rollers under a squared block, the block on its deck
   B('timber', 6, 0, 12, 11, 0.12, 12.15); B('timber', 6, 0, 13.35, 11, 0.12, 13.5);
-  B('wood_dark', 6, 0.12, 12, 11, 0.2, 13.5); B(S, 6.4, 0.2, 12.15, 10.2, 0.9, 13.35);
+  B('timber', 6, 0.12, 12, 11, 0.2, 13.5); B(S, 6.4, 0.2, 12.15, 10.2, 0.9, 13.35);
   for (const x of [11.6, 12.5, 13.4]) { const [px, pz] = at(x, 11.85), [qx, qz] = at(x, 13.65); bag.add('timber', rod([px, y + 0.12, pz], [qx, y + 0.12, qz], 0.12, 8)); }
   solid(6, 12, 11, 13.5, 0.9);
   // the shear-legs hoist: three poles lashed at the apex, a rope and a block hanging from it above the block it will lift

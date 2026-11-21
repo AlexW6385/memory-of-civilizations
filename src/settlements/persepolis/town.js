@@ -3,6 +3,7 @@
 import { RADIUS, MARKET, WORKSHOPS, ROAD, STREETS, lots, gardens } from './layout.js';
 import { people } from './people.js';
 import { street } from './street.js';
+import { roomPlans } from './plan.js';
 import { terraceHouses, terraceLife } from './terrace-houses.js';
 import { houseRoom } from '../../styles/achaemenid/town.js';
 const base = (id, elements) => ({ id, style: 'achaemenid', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-200, -140], facing: 'e' } });
@@ -29,8 +30,8 @@ function channels() {
 
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) {
-    const part = all.slice(i, i + 160), p = base(`persepolis-houses-${i / 160}`, part.map((l) => ({ t: 'persian_house', ...l })));
+  for (let i = 0; i < all.length; i += 400) {
+    const part = all.slice(i, i + 400), p = base(`persepolis-houses-${i / 400}`, part.map((l) => ({ t: 'persian_house', ...l })));
     p.rooms = part.map((l, k) => { const r = houseRoom(l); return r && { id: `house-${i + k}`, rect: r, y: 0.08, kind: 'hall' }; }).filter(Boolean);
     plans.push(p);
   }
@@ -38,7 +39,7 @@ export async function town() {
   plans.push({ ...base('persepolis-workshops', [{ t: 'royal_workshops', rect: WORKSHOPS, y: 0 }]), rooms: [{ id: 'workshops', rect: [WORKSHOPS[0] + 2.2, WORKSHOPS[3] - 23.1, WORKSHOPS[2] - 2.2, WORKSHOPS[3] - 1.1], y: 0.12, kind: 'hall' }] });
   plans.push({ ...base('persepolis-people', people().figures), style: 'life', center: [-60, -125], near: 320 });
   plans.push({ ...base('persepolis-street-life', street().figures), style: 'life', center: [-230, -60], near: 260 });
-  plans.push(terraceHouses(), terraceLife());
+  plans.push(terraceHouses(), terraceLife(), ...roomPlans());
   plans.push(base('persepolis-market', []));
   plans[plans.length - 1].rooms = [{ id: 'market', rect: MARKET, y: 0, kind: 'open', market: true }];
   return plans;

@@ -96,7 +96,7 @@ export function furnish(el, { bag, col, lights }) {
     if (kind === 'couch') {
       const f = o.cloth ?? 'cloth_red', g = o.cloth2 ?? 'cloth_ochre';
       for (const [a, b] of [[-0.92, -0.34], [-0.92, 0.34], [0.92, -0.34], [0.92, 0.34]]) { const p = P(a, b); bag.add('gilt_bronze', lathe(LEG, 10, null, p[0], y, p[1])); }
-      Bx('wood_dark', -1.05, 1.05, -0.425, 0.425, y + 0.4, y + 0.5);
+      Bx('timber', -1.05, 1.05, -0.425, 0.425, y + 0.4, y + 0.5);
       Bx('gilt_bronze', -1.07, 1.07, -0.445, -0.425, y + 0.4, y + 0.52); Bx('gilt_bronze', -1.07, 1.07, 0.425, 0.445, y + 0.4, y + 0.52);
       Bx(f, -1.0, 0.7, -0.4, 0.4, y + 0.5, y + 0.62);
       Bx(g, 0.7, 1.0, -0.38, 0.38, y + 0.5, y + 0.78);                                         // the bolster at the head
@@ -105,7 +105,7 @@ export function furnish(el, { bag, col, lights }) {
       solid(-1.07, 1.07, -0.445, 0.445, y, y + 0.65);
     } else if (kind === 'table') {
       for (const [a, b] of [[-0.42, -0.27], [-0.42, 0.27], [0.42, -0.27], [0.42, 0.27]]) { const p = P(a, b); bag.add('gilt_bronze', lathe(PAW, 10, null, p[0], y, p[1])); }
-      Bx('wood_dark', -0.52, 0.52, -0.36, 0.36, y + 0.4, y + 0.46);
+      Bx('timber', -0.52, 0.52, -0.36, 0.36, y + 0.4, y + 0.46);
       Bx('gilt_bronze', -0.54, 0.54, -0.38, 0.38, y + 0.46, y + 0.49);
       const bw = P(-0.15, 0.05), jg = P(0.25, -0.1);
       bag.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.16, 0.06], [0.17, 0.09], [0.15, 0.09], [0.001, 0.03]], 12, null, bw[0], y + 0.49, bw[1]));
@@ -119,16 +119,16 @@ export function furnish(el, { bag, col, lights }) {
     } else if (kind === 'chair') {
       // the seat turned toward +a: lion-paw legs, a cushioned seat, a tall back at −a, the footstool before it
       for (const [a, b] of [[-0.3, -0.3], [-0.3, 0.3], [0.3, -0.3], [0.3, 0.3]]) { const p = P(a, b); bag.add('gilt_bronze', lathe(PAW, 10, null, p[0], y, p[1])); }
-      Bx('wood_dark', -0.36, 0.36, -0.36, 0.36, y + 0.4, y + 0.47);
+      Bx('timber', -0.36, 0.36, -0.36, 0.36, y + 0.4, y + 0.47);
       Bx(o.cloth ?? 'cloth_red', -0.34, 0.34, -0.34, 0.34, y + 0.47, y + 0.56);
-      Bx('wood_dark', -0.36, -0.28, -0.36, 0.36, y + 0.47, y + 1.4);
+      Bx('timber', -0.36, -0.28, -0.36, 0.36, y + 0.47, y + 1.4);
       Bx('gilt_bronze', -0.38, -0.26, -0.38, 0.38, y + 1.32, y + 1.4);
       Bx('gilt_bronze', 0.5, 0.95, -0.2, 0.2, y, y + 0.2);
       Bx(o.cloth2 ?? 'cloth_ochre', 0.52, 0.93, -0.18, 0.18, y + 0.2, y + 0.25);
       solid(-0.38, 0.38, -0.38, 0.38, y, y + 1.4); solid(0.5, 0.95, -0.2, 0.2, y, y + 0.25);
     } else if (kind === 'chest') {
       const l = (o.l ?? 1.0) / 2, d = (o.d ?? 0.5) / 2, hh = o.h ?? 0.6;
-      Bx('wood_dark', -l, l, -d, d, y, y + hh);
+      Bx('timber', -l, l, -d, d, y, y + hh);
       for (const a of [-l + 0.18, l - 0.18]) Bx('bronze', a - 0.025, a + 0.025, -d - 0.012, d + 0.012, y, y + hh + 0.01);
       Bx('bronze', -0.05, 0.05, -d - 0.02, -d, y + hh * 0.6, y + hh * 0.8);
       solid(-l, l, -d, d, y, y + hh);

@@ -33,7 +33,7 @@ export function courtAwning(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 2.9, cloth = el.cloth ?? 'cloth_white', trim = el.trim ?? 'cloth_red', r = 0.055;
   const P = [[x0, z0], [x1, z0], [x1, z1], [x0, z1]];
   for (const [px, pz] of P) {
-    bag.add('wood_dark', rod([px, y, pz], [px, y + h + 0.25, pz], r, 8)); col.circle(px, pz, 0.12, y, y + h);
+    bag.add('timber', rod([px, y, pz], [px, y + h + 0.25, pz], r, 8)); col.circle(px, pz, 0.12, y, y + h);
     bag.add('gilt_bronze', lathe([[0.001, 0], [0.05, 0.04], [0.04, 0.09], [0.001, 0.13]], 8, null, px, y + h + 0.25, pz));
   }
   // the sheet, sagging toward its middle by a hand: two sloped halves
@@ -54,7 +54,7 @@ export function courtAwning(el, { bag, col }) {
   for (const [px, pz] of P) {
     const dx = Math.sign(px - m) * 1.3, dz = Math.sign(pz - (z0 + z1) / 2) * 1.3;
     bag.add('rope_fibre', rod([px, y + h + 0.1, pz], [px + dx, y + 0.05, pz + dz], 0.012, 4));
-    bag.add('wood_dark', box(px + dx - 0.03, y, pz + dz - 0.03, px + dx + 0.03, y + 0.16, pz + dz + 0.03));
+    bag.add('timber', box(px + dx - 0.03, y, pz + dz - 0.03, px + dx + 0.03, y + 0.16, pz + dz + 0.03));
   }
 }
 
@@ -84,7 +84,7 @@ export function courtWear(el, { bag }) {
 /** parasol: { at: [x, z], y, h, cloth } — the parasol a servant holds over a great man (the reliefs show it over the king): a pole, a ribbed disc, a fringe. */
 export function parasol(el, { bag }) {
   const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 2.35, cloth = el.cloth ?? 'cloth_red';
-  bag.add('wood_dark', rod([x, y + 0.9, z], [x, y + h + 0.2, z], 0.022, 6));
+  bag.add('timber', rod([x, y + 0.9, z], [x, y + h + 0.2, z], 0.022, 6));
   bag.add(cloth, lathe([[0.001, 0.2], [0.35, 0.14], [0.7, 0.04], [0.82, -0.02], [0.8, -0.05], [0.001, 0.12]], 16, null, x, y + h, z));
   bag.add('cloth_white', lathe([[0.82, -0.02], [0.83, -0.18], [0.78, -0.18], [0.77, -0.04]], 16, null, x, y + h, z));
   bag.add('gilt_bronze', lathe([[0.001, 0], [0.04, 0.03], [0.001, 0.1]], 8, null, x, y + h + 0.2, z));

@@ -84,7 +84,7 @@ export function workshops(el, { bag, col, lights }) {
   B('mud_plaster', hx0, hz0, hx1, hz0 + 0.3, y + hh + 0.8, y + hh + 1.2);
   // the posts in the bays: two in a row down the middle of each, on stone bases, with a beam along the bay
   const post = (px, pz) => {
-    B(C, px - 0.4, pz - 0.4, px + 0.4, pz + 0.4, y + 0.12, y + 0.4); bag.add('wood_dark', lathe([[0.22, 0], [0.2, hh - 0.6]], 10, null, px, y + 0.4, pz)); B('cedar', px - 0.34, pz - 0.34, px + 0.34, pz + 0.34, y + hh - 0.7, y + hh);
+    B(C, px - 0.4, pz - 0.4, px + 0.4, pz + 0.4, y + 0.12, y + 0.4); bag.add('timber', lathe([[0.22, 0], [0.2, hh - 0.6]], 10, null, px, y + 0.4, pz)); B('cedar', px - 0.34, pz - 0.34, px + 0.34, pz + 0.34, y + hh - 0.7, y + hh);
     col.circle(px, pz, 0.35, y, y + hh);
   };
   const hzm = (hz0 + hz1) / 2 + 2;
@@ -95,7 +95,7 @@ export function workshops(el, { bag, col, lights }) {
   {
     const bx = hx0 + HT;
     for (const [dx, dz] of [[2.4, 6.2], [2.4, 11]]) {            // benches with their vises
-      const a = bx + dx, b = hz0 + dz; B('wood_dark', a - 1.2, b - 0.45, a + 1.2, b + 0.45, fl + 0.78, fl + 0.88, true);
+      const a = bx + dx, b = hz0 + dz; B('timber', a - 1.2, b - 0.45, a + 1.2, b + 0.45, fl + 0.78, fl + 0.88, true);
       for (const sx of [-1, 1]) for (const sz of [-1, 1]) B('timber', a + sx * 1.1 - 0.06, b + sz * 0.36 - 0.06, a + sx * 1.1 + 0.06, b + sz * 0.36 + 0.06, fl, fl + 0.78);
       B('iron', a - 1.0, b + 0.45, a - 0.8, b + 0.6, fl + 0.88, fl + 1.0);
       bag.add('timber', rod([a + 0.3, fl + 0.9, b - 0.1], [a + 0.55, fl + 0.9, b + 0.1], 0.025, 5));
@@ -108,9 +108,9 @@ export function workshops(el, { bag, col, lights }) {
     B('cedar', bx + 9, hz1 - 1.3, bx + 10.8, hz1 - 1.1, fl, fl + 2.6);
     for (let k = 0; k < 8; k++) B('bronze', bx + 9.15 + (k % 2) * 1.4, hz1 - 1.1, bx + 9.35 + (k % 2) * 1.4, hz1 - 1.06, fl + 0.4 + Math.floor(k / 2) * 0.55, fl + 0.6 + Math.floor(k / 2) * 0.55);
     col.rect([bx + 9, hz1 - 1.4, bx + 10.8, hz1 - 1.0], fl, fl + 2.6);
-    for (let k = 0; k < 7; k++) { const a = bx + 1.3 + k * 2.1; bag.add('wood_dark', rod([a, fl + 1.55, hz1 - 0.34], [a + 0.1, fl + 2.15, hz1 - 0.34], 0.03, 5)); B('iron', a + 0.02, hz1 - 0.38, a + 0.28, hz1 - 0.34, fl + 2.1, fl + 2.2); }
+    for (let k = 0; k < 7; k++) { const a = bx + 1.3 + k * 2.1; bag.add('timber', rod([a, fl + 1.55, hz1 - 0.34], [a + 0.1, fl + 2.15, hz1 - 0.34], 0.03, 5)); B('iron', a + 0.02, hz1 - 0.38, a + 0.28, hz1 - 0.34, fl + 2.1, fl + 2.2); }
     // shavings on the floor
-    for (let k = 0; k < 22; k++) B('wood_dark', bx + 2 + rand() * 7, hz0 + 3 + rand() * 12, bx + 2.15 + rand() * 7, hz0 + 3.12 + rand() * 12, fl, fl + 0.02);
+    for (let k = 0; k < 22; k++) B('timber', bx + 2 + rand() * 7, hz0 + 3 + rand() * 12, bx + 2.15 + rand() * 7, hz0 + 3.12 + rand() * 12, fl, fl + 0.02);
   }
   // ── bay 2: the metalworkers
   {
@@ -128,26 +128,26 @@ export function workshops(el, { bag, col, lights }) {
     }
     // the anvil stone and a quench trough, the bench with moulds and the gilded work
     B('marble_dark', bx + 7.6, fz - 2.0, bx + 8.4, fz - 1.3, fl, fl + 0.7, true); B('iron', bx + 7.5, fz - 1.9, bx + 8.5, fz - 1.4, fl + 0.7, fl + 0.78);
-    bag.add('pottery_dark', lathe([[0.001, 0], [0.4, 0.1], [0.5, 0.6], [0.001, 0.62]], 12, null, bx + 6.4, fl, fz - 2.3)); col.circle(bx + 6.4, fz - 2.3, 0.5, fl, fl + 0.6);
-    B('wood_dark', bx + 1.0, fz - 8.5, bx + 3.4, fz - 7.5, fl + 0.8, fl + 0.9, true);
+    bag.add('terracotta', lathe([[0.001, 0], [0.4, 0.1], [0.5, 0.6], [0.001, 0.62]], 12, null, bx + 6.4, fl, fz - 2.3)); col.circle(bx + 6.4, fz - 2.3, 0.5, fl, fl + 0.6);
+    B('timber', bx + 1.0, fz - 8.5, bx + 3.4, fz - 7.5, fl + 0.8, fl + 0.9, true);
     for (const s of [[-0.9, 0.1], [0.9, 0.1], [-0.9, 0.9], [0.9, 0.9]]) B('timber', bx + 2.2 + s[0] - 0.06, fz - 8.5 + s[1] - 0.06, bx + 2.2 + s[0] + 0.06, fz - 8.5 + s[1] + 0.06, fl, fl + 0.8);
     for (let k = 0; k < 5; k++) { const a = bx + 1.35 + k * 0.45; bag.add('gilt_bronze', lathe([[0.001, 0], [0.16, 0], [0.16, 0.04], [0.06, 0.07], [0.001, 0.09]], 12, null, a, fl + 0.9, fz - 8.0)); }
     for (let k = 0; k < 2; k++) { bag.add('gold', lathe([[0.001, 0], [0.12, 0], [0.12, 0.05], [0.001, 0.05]], 10, null, bx + 2.4 + k * 0.5, fl + 0.9, fz - 8.3)); }
-    for (let k = 0; k < 3; k++) bag.add('pottery_dark', lathe([[0.001, 0], [0.07, 0], [0.09, 0.1], [0.05, 0.12], [0.001, 0.11]], 8, null, bx + 1.2 + k * 0.4, fl + 0.9, fz - 7.7));   // crucibles
+    for (let k = 0; k < 3; k++) bag.add('terracotta', lathe([[0.001, 0], [0.07, 0], [0.09, 0.1], [0.05, 0.12], [0.001, 0.11]], 8, null, bx + 1.2 + k * 0.4, fl + 0.9, fz - 7.7));   // crucibles
     // a heap of charcoal and a rack of bronze ingots
-    B('wood_dark', bx + 0.6, fz + 1.8, bx + 2.7, fz + 3.1, fl, fl + 0.75, true);
+    B('timber', bx + 0.6, fz + 1.8, bx + 2.7, fz + 3.1, fl, fl + 0.75, true);
     for (let k = 0; k < 6; k++) B('bronze', bx + 12.3, fz - 5.2 + k * 0.5, bx + 13.4, fz - 4.85 + k * 0.5, fl + 0.55, fl + 0.7);
-    B('wood_dark', bx + 12.1, fz - 5.4, bx + 13.6, fz - 2.2, fl + 0.4, fl + 0.55, true);
+    B('timber', bx + 12.1, fz - 5.4, bx + 13.6, fz - 2.2, fl + 0.4, fl + 0.55, true);
     for (const z of [-5.3, -2.5]) for (const x of [12.2, 13.5]) B('timber', bx + x - 0.05, fz + z - 0.05, bx + x + 0.05, fz + z + 0.05, fl, fl + 0.4);
   }
   // ── bay 3: the painters and polishers
   {
     const bx = hx0 + 2 * bay + 0.3, bw = bay - 0.6;
     // the long table of pigments in bowls: Egyptian blue, red ochre, green, white
-    const tz = hz0 + 5.5; B('wood_dark', bx + 1.2, tz - 0.5, bx + 8.8, tz + 0.5, fl + 0.78, fl + 0.88, true);
+    const tz = hz0 + 5.5; B('timber', bx + 1.2, tz - 0.5, bx + 8.8, tz + 0.5, fl + 0.78, fl + 0.88, true);
     for (const sx of [0, 1]) for (const sz of [-1, 1]) B('timber', bx + 1.35 + sx * 7.3, tz + sz * 0.38 - 0.06, bx + 1.5 + sx * 7.3, tz + sz * 0.38 + 0.06, fl, fl + 0.78);
     ['egyptian_blue', 'stucco_red', 'cloth_green', 'plaster_white', 'cloth_ochre', 'egyptian_blue', 'stucco_red'].forEach((mat, k) => {
-      const a = bx + 1.7 + k * 1.05; bag.add('pottery_dark', lathe([[0.001, 0], [0.1, 0], [0.16, 0.08], [0.15, 0.1], [0.12, 0.1], [0.001, 0.03]], 10, null, a, fl + 0.88, tz));
+      const a = bx + 1.7 + k * 1.05; bag.add('terracotta', lathe([[0.001, 0], [0.1, 0], [0.16, 0.08], [0.15, 0.1], [0.12, 0.1], [0.001, 0.03]], 10, null, a, fl + 0.88, tz));
       bag.add(mat, lathe([[0.001, 0.07], [0.12, 0.07], [0.11, 0.09], [0.001, 0.12]], 10, null, a, fl + 0.88, tz));
     });
     // the panels leaning against the back wall: slabs of the grey stone with figures of the guard raised on them, some painted, some bare
@@ -197,7 +197,7 @@ export function workshops(el, { bag, col, lights }) {
     bag.add(S, box(bx + 1.7, y + 2.2, bz - 0.28, bx + 2.45, y + 2.75, bz + 0.28));                             // the head, a block not yet carved
     col.rect([bx - 1.7, bz - 1.0, bx + 2.5, bz + 1.0], y, y + 2.8);
     B(S, bx - 1.7, bz + 1.0, bx - 0.3, bz + 1.5, y, y + 0.5, true);
-    bag.add('iron', rod([bx - 1.0, y + 0.55, bz + 1.25], [bx - 0.7, y + 0.62, bz + 1.3], 0.02, 5)); bag.add('wood_dark', rod([bx - 0.5, y + 0.52, bz + 1.25], [bx - 0.1, y + 0.6, bz + 1.3], 0.05, 6));
+    bag.add('iron', rod([bx - 1.0, y + 0.55, bz + 1.25], [bx - 0.7, y + 0.62, bz + 1.3], 0.02, 5)); bag.add('timber', rod([bx - 0.5, y + 0.52, bz + 1.25], [bx - 0.1, y + 0.6, bz + 1.3], 0.05, 6));
     for (let k = 0; k < 12; k++) B(S, bx - 1.9 + rand() * 4.4, bz + 1.1 + rand() * 1.5, bx - 1.8 + rand() * 4.4, bz + 1.2 + rand() * 1.5, y, y + 0.05 + rand() * 0.08);
   }
   // the shear-legs hoist: three poles, a rope over the head and a stone hanging from it
@@ -234,9 +234,9 @@ export function workshops(el, { bag, col, lights }) {
     lights.push({ at: [kx, y + 1.2, kz + 2.6], color: '#ff8a3c', intensity: 3.5, distance: 10 });
     // glazed bricks laid out to dry before it: blue, yellow and white in a row (after the glazed bricks of the Tol-e Ajori)
     ['glaze_lapis', 'plaster_white', 'glaze_red', 'glaze_lapis', 'plaster_white'].forEach((mat, k) => B(mat, kx - 2.4 + k * 1.0, kz + 3.3, kx - 1.5 + k * 1.0, kz + 3.75, y + 0.05, y + 0.14));
-    for (let k = 0; k < 3; k++) B('wood_dark', kx + 2.6 + k * 0.1, kz - 1.0 + k * 0.5, kx + 3.4 + k * 0.1, kz - 0.7 + k * 0.5, y, y + 0.3 + k * 0.1);
+    for (let k = 0; k < 3; k++) B('timber', kx + 2.6 + k * 0.1, kz - 1.0 + k * 0.5, kx + 3.4 + k * 0.1, kz - 0.7 + k * 0.5, y, y + 0.3 + k * 0.1);
   }
   // the gate's door leaves standing open against the inside wall
-  for (const s of [-1, 1]) B('wood_dark', xc + s * (gw / 2 - 0.1) - 0.05, z0 + th, xc + s * (gw / 2 - 0.1) + 0.05, z0 + th + 2.6, y, y + 3.0);
+  for (const s of [-1, 1]) B('timber', xc + s * (gw / 2 - 0.1) - 0.05, z0 + th, xc + s * (gw / 2 - 0.1) + 0.05, z0 + th + 2.6, y, y + 3.0);
   strip(bag, 'gilt_bronze', (u, v, w) => [u, y + v, z0 - 0.15 - w], xc - 2.4, 3.2, xc + 2.4, 3.2, 0.06, 0.03);
 }

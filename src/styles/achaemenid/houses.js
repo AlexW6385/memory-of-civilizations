@@ -38,7 +38,7 @@ export function house(el, { bag, col, lights }) {
     B('opening', a - w / 2, a + w / 2, b0 + 0.04, b1 - 0.04, 0, dh);
     for (const s of [-1, 1]) B('timber', a + s * (w / 2 + 0.07) - 0.07, a + s * (w / 2 + 0.07) + 0.07, b0 - 0.05, b1 + 0.05, 0, dh);
     B('timber', a - w / 2 - 0.3, a + w / 2 + 0.3, b0 - 0.1, b1 + 0.1, dh, dh + 0.22);
-    if (leaf) B('wood_dark', a - w / 2 + 0.02, a + w / 2 - 0.02, b0 + 0.06, b0 + 0.16, 0.02, dh - 0.04);
+    if (leaf) B('timber', a - w / 2 + 0.02, a + w / 2 - 0.02, b0 + 0.06, b0 + 0.16, 0.02, dh - 0.04);
   };
   const beams = (a0, a1, b, y) => { for (let a = a0 + 0.5; a < a1 - 0.3; a += 0.8) B('timber', a - 0.07, a + 0.07, b - 0.14, b, y, y + 0.14); };
   const slit = (a, b, y) => { B('opening', a - 0.17, a + 0.17, b - 0.02, b + 0.03, y, y + 0.55); B('timber', a - 0.22, a + 0.22, b - 0.03, b + 0.03, y + 0.55, y + 0.66); };
@@ -72,7 +72,7 @@ export function house(el, { bag, col, lights }) {
     if (k === 0) for (let i = 0; i < 4; i++) bag.add('thatch', rod([p[0] - 0.4, y + 0.14 + (i % 2) * 0.2, p[1] + i * 0.18 - 0.3], [p[0] + 0.7, y + 0.14 + (i % 2) * 0.2, p[1] + i * 0.18 - 0.3], 0.09, 6));
     else if (k === 1) { jar(p[0], p[1], 0.26, y + 0.12); jar(p[0] + 0.7, p[1] + 0.2, 0.2, y + 0.12); }
     else if (k === 2) { const r = R(a - 0.7, a + 0.7, b - 0.5, b + 0.5); bag.add('reed_mat', box(r[0], y + 0.12, r[1], r[2], y + 0.17, r[3])); for (let i = 0; i < 6; i++) bag.add('cloth_ochre', box(r[0] + 0.1 + (i % 3) * 0.4, y + 0.17, r[1] + 0.1 + Math.floor(i / 3) * 0.45, r[0] + 0.34 + (i % 3) * 0.4, y + 0.22, r[1] + 0.4 + Math.floor(i / 3) * 0.45)); }
-    else { const r = R(a - 0.4, a + 0.4, b - 0.3, b + 0.3); bag.add('wood_dark', box(r[0], y + 0.12, r[1], r[2], y + 0.5, r[3])); }
+    else { const r = R(a - 0.4, a + 0.4, b - 0.3, b + 0.3); bag.add('timber', box(r[0], y + 0.12, r[1], r[2], y + 0.5, r[3])); }
   };
   // a reed sunshade on four posts over part of the roof (the sleeping place of the summer nights)
   const sunshade = (a0, a1, b0, b1, y) => {
@@ -98,7 +98,7 @@ export function house(el, { bag, col, lights }) {
       for (const s of [-1, 1]) {
         const [px, pz] = P(a + s * (ow / 2 + 0.85), -1.35);
         bag.add('limestone_persian', lathe([[0.26, 0], [0.24, 0.1], [0.2, 0.2], [0.001, 0.2]], 10, null, px, 0, pz));
-        bag.add('wood_dark', rod([px, 0.2, pz], [px, 2.58, pz], 0.1, 8));
+        bag.add('timber', rod([px, 0.2, pz], [px, 2.58, pz], 0.1, 8));
         bag.add('gilt_bronze', lathe([[0.1, 0], [0.15, 0.05], [0.15, 0.1], [0.001, 0.1]], 8, null, px, 2.5, pz));
         col.circle(px, pz, 0.14, 0, 2.6);
       }
@@ -122,7 +122,7 @@ export function house(el, { bag, col, lights }) {
     B('timber', a0, a1, -1.55, -1.35, yr, yr + 0.1);
     B('reed_mat', a0 - 0.1, a1 + 0.1, -1.6, -0.02, yr + 0.1, yr + 0.16);
     const hk = rt();
-    if (hk < 0.5) { solid('wood_dark', a0 + 0.3, a0 + 1.5, -1.0, -0.3, 0, 0.55); for (let i = 0; i < 5; i++) { const p = P(a0 + 0.5 + i * 0.22, -1.1), q = P(a0 + 0.5 + i * 0.22, -0.2); bag.add('thatch', rod([p[0], 0.62, p[1]], [q[0], 0.62, q[1]], 0.05, 5)); } }
+    if (hk < 0.5) { solid('timber', a0 + 0.3, a0 + 1.5, -1.0, -0.3, 0, 0.55); for (let i = 0; i < 5; i++) { const p = P(a0 + 0.5 + i * 0.22, -1.1), q = P(a0 + 0.5 + i * 0.22, -0.2); bag.add('thatch', rod([p[0], 0.62, p[1]], [q[0], 0.62, q[1]], 0.05, 5)); } }
     else { B('reed_mat', a0 + 0.3, a1 - 0.3, -1.3, -0.4, 0.0, 0.04); B(['cloth_brown', 'cloth_ochre'][m.seed % 2], a0 + 0.5, a0 + 1.2, -1.15, -0.55, 0.04, 0.12); jarAt(a1 - 0.5, -0.7, 0.3); col.circle(...P(a1 - 0.5, -0.7), 0.3, 0, 0.8); }
   };
   const vent = houseVent(el);
@@ -134,11 +134,11 @@ export function house(el, { bag, col, lights }) {
   const mat = (a, b, w, d, c1, c2) => { B('reed_mat', a - w / 2, a + w / 2, b - d / 2, b + d / 2, 0.08, 0.11); B(c1, a - w / 2 + 0.1, a - w / 2 + 0.55, b - d / 2 + 0.2, b - d / 2 + 0.7, 0.11, 0.2); B(c2, a + w / 2 - 0.6, a + w / 2 - 0.1, b + d / 2 - 0.7, b + d / 2 - 0.2, 0.11, 0.19); };
   const hearth = (a, b) => {
     solid('mudbrick', a - 0.6, a + 0.6, b - 0.45, b + 0.45, 0.08, 0.32);
-    const [x, z] = P(a, b); bag.add('pottery_dark', lathe([[0.001, 0], [0.2, 0], [0.27, 0.12], [0.22, 0.26], [0.17, 0.3], [0.2, 0.32], [0.001, 0.3]], 10, null, x - 0.15, 0.32, z));
-    bag.add('flame', lathe([[0.16, 0], [0.08, 0.1], [0.001, 0.2]], 8, null, x + 0.3, 0.32, z)); bag.add('wood_dark', box(x + 0.15, 0.32, z - 0.08, x + 0.45, 0.36, z + 0.08));
+    const [x, z] = P(a, b); bag.add('terracotta', lathe([[0.001, 0], [0.2, 0], [0.27, 0.12], [0.22, 0.26], [0.17, 0.3], [0.2, 0.32], [0.001, 0.3]], 10, null, x - 0.15, 0.32, z));
+    bag.add('flame', lathe([[0.16, 0], [0.08, 0.1], [0.001, 0.2]], 8, null, x + 0.3, 0.32, z)); bag.add('timber', box(x + 0.15, 0.32, z - 0.08, x + 0.45, 0.36, z + 0.08));
     lamp(a, b, 1.2);
   };
-  const chest = (a, b, w = 1.0, d = 0.5, hh = 0.55) => { solid('wood_dark', a - w / 2, a + w / 2, b - d / 2, b + d / 2, 0.08, 0.08 + hh); B('bronze', a - w / 2 - 0.01, a + w / 2 + 0.01, b - 0.03, b + 0.03, 0.08 + hh * 0.62, 0.08 + hh * 0.7); };
+  const chest = (a, b, w = 1.0, d = 0.5, hh = 0.55) => { solid('timber', a - w / 2, a + w / 2, b - d / 2, b + d / 2, 0.08, 0.08 + hh); B('bronze', a - w / 2 - 0.01, a + w / 2 + 0.01, b - 0.03, b + 0.03, 0.08 + hh * 0.62, 0.08 + hh * 0.7); };
   const bed = (a, b, w = 2.2, d = 1.4) => { solid('mudbrick', a - w / 2, a + w / 2, b - d / 2, b + d / 2, 0.08, 0.38); B('reed_mat', a - w / 2, a + w / 2, b - d / 2, b + d / 2, 0.38, 0.41); B('cloth_ochre', a - w / 2 + 0.1, a + w / 2 - 0.5, b - d / 2 + 0.1, b + d / 2 - 0.1, 0.41, 0.52); B('cloth_white', a + w / 2 - 0.5, a + w / 2 - 0.15, b - d / 2 + 0.15, b + d / 2 - 0.15, 0.41, 0.58); };
   const loom = (a, b) => {
     for (const s of [-1, 1]) { const p = P(a + s * 0.8, b); bag.add('timber', rod([p[0], 0.08, p[1]], [p[0], 1.9, p[1]], 0.05, 6)); col.circle(p[0], p[1], 0.08, 0.08, 1.9); }
@@ -148,7 +148,7 @@ export function house(el, { bag, col, lights }) {
   };
   const shelf = (a0, a1, b, y, n, along) => {
     B('timber', a0, a1, b - 0.16, b + 0.16, y, y + 0.05);
-    for (let i = 0; i < n; i++) { const a = a0 + 0.3 + (a1 - a0 - 0.6) * (i / Math.max(1, n - 1)); jarAt(a, b, 0.12 + (i % 3) * 0.02, y + 0.05, i % 4 === 3 ? 'pottery_dark' : 'terracotta'); }
+    for (let i = 0; i < n; i++) { const a = a0 + 0.3 + (a1 - a0 - 0.6) * (i / Math.max(1, n - 1)); jarAt(a, b, 0.12 + (i % 3) * 0.02, y + 0.05, i % 4 === 3 ? 'terracotta' : 'terracotta'); }
     void along;
   };
   const stores = (a0, a1, b) => { let a = a0 + 0.5; for (let i = 0; a < a1 - 0.5; i++) { const r = 0.34 + (i % 2) * 0.08; const [x, z] = P(a, b); jar(x, z, r, 0.08); col.circle(x, z, r, 0.08, 1.0); a += r * 2 + 0.25; } };
@@ -201,7 +201,7 @@ export function house(el, { bag, col, lights }) {
         for (let i = 0; i < 3; i++) B('sacking', a0 + 0.2 + i * 0.8, a0 + 0.8 + i * 0.8, -1.2, -0.7, 0, 0.65); break;
       case 'fruit': row(5, (aa, i) => { const [x, z] = at(aa, b); bag.add('wicker', lathe([[0.001, 0], [0.24, 0], [0.28, 0.14], [0.001, 0.14]], 10, null, x, y, z)); bag.add(['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_red', 'cloth_ochre'][i], lathe([[0.26, 0], [0.16, 0.1], [0.001, 0.14]], 10, null, x, y + 0.1, z)); }); break;
       case 'butcher': for (let i = 0; i < 3; i++) { const aa = a0 + 0.6 + i * 0.9, p = P(aa, -1.5); bag.add('iron', rod([p[0], 2.5, p[1]], [p[0], 2.0, p[1]], 0.015, 5)); bag.add(i === 1 ? 'hide_tan' : 'cloth_red', lathe([[0.001, 0], [0.12, 0.1], [0.16, 0.4], [0.1, 0.62], [0.001, 0.7]], 8, null, p[0], 1.35, p[1])); }
-        { const [x, z] = at(x0 + 0.4, b); bag.add('wood_dark', lathe([[0.2, 0], [0.2, 0.18], [0.001, 0.18]], 10, null, x, y, z)); } break;
+        { const [x, z] = at(x0 + 0.4, b); bag.add('timber', lathe([[0.2, 0], [0.2, 0.18], [0.001, 0.18]], 10, null, x, y, z)); } break;
       case 'carpenter': for (let i = 0; i < 6; i++) B('cedar', a0 - 0.3 + i * 0.12, a0 - 0.2 + i * 0.12, -1.4, -1.3, 0, 1.8 - i * 0.03);
         row(3, (aa, i) => B(i % 2 ? 'timber' : 'cedar', aa - 0.3, aa + 0.3, b - 0.12, b + 0.12, y, y + 0.1 + i * 0.05)); break;
       case 'wine': for (let i = 0; i < 3; i++) { const [x, z] = at(i < 2 ? a0 + 0.4 + i * 0.85 : a1 + 1.0, -1.1); jar(x, z, 0.4, 0, 'terracotta'); bag.add('wicker', lathe([[0.001, 0], [0.2, 0], [0.18, 0.06], [0.001, 0.06]], 8, null, x, 1.08, z)); col.circle(x, z, 0.4, 0, 1.1); }
@@ -232,7 +232,7 @@ export function house(el, { bag, col, lights }) {
     B('timber', g - gw / 2 - 0.3, g + gw / 2 + 0.3, -0.1, t + 0.1, cw - 0.55, cw - 0.33);
     B(upMat, 0, L, 0, t, cw, cw + 0.1);
     // a gate leaf standing half open in the walkable ones
-    if (m.enter) { const p = P(g - gw / 2 + 0.08, 0.2), q = P(g - gw / 2 + 0.08, 1.4); void p; void q; B('wood_dark', g - gw / 2, g - gw / 2 + 0.1, t, t + 1.0, 0.04, cw - 0.6); }
+    if (m.enter) { const p = P(g - gw / 2 + 0.08, 0.2), q = P(g - gw / 2 + 0.08, 1.4); void p; void q; B('timber', g - gw / 2, g - gw / 2 + 0.1, t, t + 1.0, 0.04, cw - 0.6); }
     // the court: the oven, jars along the wall, a mat, a bed of herbs, the stair up to the roof
     const [ox, oz] = P(L - 1.7, b0 - 1.6);
     bag.add('terracotta', lathe([[0.5, 0], [0.5, 0.35], [0.38, 0.75], [0.14, 0.95], [0.001, 0.95]], 12, null, ox, 0, oz)); col.circle(ox, oz, 0.5, 0, 1);
@@ -262,7 +262,7 @@ export function house(el, { bag, col, lights }) {
       shopFront(da, bd);
     } else {
       if (!m.enter) doorway(da, 1.1, 0, t, 2.2);
-      else { B('timber', da - 0.92, da - 0.8, -0.05, t + 0.05, 0, 2.15); B('timber', da + 0.8, da + 0.92, -0.05, t + 0.05, 0, 2.15); B('timber', da - 1.05, da + 1.05, -0.1, t + 0.1, 2.15, 2.37); B('wood_dark', da - 0.8, da - 0.7, t, t + 0.8, 0.04, 2.1); }
+      else { B('timber', da - 0.92, da - 0.8, -0.05, t + 0.05, 0, 2.15); B('timber', da + 0.8, da + 0.92, -0.05, t + 0.05, 0, 2.15); B('timber', da - 1.05, da + 1.05, -0.1, t + 0.1, 2.15, 2.37); B('timber', da - 0.8, da - 0.7, t, t + 0.8, 0.04, 2.1); }
       for (const q of [L * 0.12, L * 0.88]) if (Math.abs(q - da) > 1.4) slit(q, 0, 2.2);
       doorFurniture(da, m.enter ? 1.6 : 1.1);
     }
@@ -280,7 +280,7 @@ export function house(el, { bag, col, lights }) {
     const yb = bd;
     wall(0, t, yb, D, 2.4); wall(L - t, L, yb, D, 2.4); wall(0, L, D - t, D, 2.4);
     B(upMat, 0, L, D - t, D, 2.4, 2.5);
-    const [fx, fz] = P(L * 0.55, D - 1.2); bag.add('wood_dark', box(fx - 0.9, 0, fz - 0.4, fx + 0.9, 0.7, fz + 0.4)); col.rect([fx - 0.9, fz - 0.4, fx + 0.9, fz + 0.4], 0, 0.7);
+    const [fx, fz] = P(L * 0.55, D - 1.2); bag.add('timber', box(fx - 0.9, 0, fz - 0.4, fx + 0.9, 0.7, fz + 0.4)); col.rect([fx - 0.9, fz - 0.4, fx + 0.9, fz + 0.4], 0, 0.7);
     const [jx, jz] = P(1.1, yb + 1.0); jar(jx, jz, 0.34); col.circle(jx, jz, 0.34, 0, 1);
     if (rand() < 0.45) { const [bx, bz] = P(L * 0.3, D - 1.6); bag.add('terracotta', lathe([[0.45, 0], [0.42, 0.3], [0.3, 0.6], [0.001, 0.7]], 10, null, bx, 0, bz)); col.circle(bx, bz, 0.45, 0, 0.7); }
     roofGoods(0, L, 0, bd, h);
