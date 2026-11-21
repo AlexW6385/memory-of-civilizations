@@ -18,13 +18,13 @@ const NEAR_OPEN = 110;
 export async function town() {
   const all = lots(), plans = [];
   const closed = all.filter((l) => !l.open), opened = all.filter((l) => l.open);
-  for (let i = 0; i < closed.length; i += 30) plans.push(base(`delphi-houses-${i / 30}`, 'delphi', closed.slice(i, i + 30).map((l) => ({ t: 'athens_house', rect: l.rect, front: 's', seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }))));
+  for (let i = 0; i < closed.length; i += 30) plans.push(base(`delphi-houses-${i / 30}`, 'delphi', closed.slice(i, i + 30).map((l) => ({ t: 'dl_closed_house', rect: l.rect, front: 's', seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }))));
   // the walk-in houses: each a plan of its own with its rooms
   // (interiors only near the visitor: each is built in full within NEAR_OPEN m, and from farther off stands as the same lot's closed house, the form the closed lots have)
   opened.forEach((l, k) => {
     const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
-    plans.push({ ...base(`delphi-open-${k}`, 'delphi', [{ t: 'delphi_house', rect: l.rect, seed: l.seed, y: l.y, trade: l.trade, variant: l.variant, fall: l.fall, tier: l.tier }]), rooms: houseRooms(l.rect, l.seed, l.y, l.trade), near: NEAR_OPEN, center: c });
-    plans.push({ ...base(`delphi-open-${k}-far`, 'delphi', [{ t: 'athens_house', rect: l.rect, front: 's', seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }]), far: NEAR_OPEN, center: c, nocollide: true });
+    plans.push({ ...base(`delphi-open-${k}`, 'delphi', [{ t: 'delphi_house', lite: true, rect: l.rect, seed: l.seed, y: l.y, trade: l.trade, variant: l.variant, fall: l.fall, tier: l.tier }]), rooms: houseRooms(l.rect, l.seed, l.y, l.trade), near: NEAR_OPEN, center: c });
+    plans.push({ ...base(`delphi-open-${k}-far`, 'delphi', [{ t: 'dl_closed_house', rect: l.rect, front: 's', seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }]), far: NEAR_OPEN, center: c, nocollide: true });
   });
   // the lanes: paved ribbons along each terrace with the parapet on the downhill side, the stairs in the alleys
   { const E = [];
