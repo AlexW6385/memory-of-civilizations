@@ -3,6 +3,8 @@
 // the people — the court in the Wenchang Hall, the poets on the terrace, the guards, the merchants.
 import { forecourtElements, forecourtLife } from './forecourt.js';
 import { streetElements, marketElements, wallElements, compoundElements, riverElements, farmElements, lifeElements } from './dressing.js';
+import '../../objects/index.js';
+import { shopDoors } from '../../styles/wei/houses.js';
 import { RADIUS, PALACE, PALACE_WALL, WENCHANG, W_TERRACE, MARKET, MARKET_WALL, WARDS, WARD_WALL, POND, POND_Y, CITY_WALL, WALL, GATES_S, GATES_N, GATE_W, AVENUE_Z, TOWER, SPARROW, ICE, TIGER,
   cityWalls, lots, riverZ, RIVER, stairRect, zOf, LODGES } from './layout.js';
 
@@ -80,7 +82,7 @@ function lodgeLife() {
   return L;
 }
 
-function marketRows(rect, seedBase) {
+export function marketRows(rect, seedBase) {
   const [x0, z0, x1, z1] = rect, th = MARKET_WALL.th, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, lane = 8, E = [];
   const quads = [[x0 + th + 3, z0 + th + 3, cx - lane, cz - lane], [cx + lane, z0 + th + 3, x1 - th - 3, cz - lane], [x0 + th + 3, cz + lane, cx - lane, z1 - th - 3], [cx + lane, cz + lane, x1 - th - 3, z1 - th - 3]];
   let seed = seedBase;
@@ -89,6 +91,44 @@ function marketRows(rect, seedBase) {
     for (let zz = qz0; zz + 12 <= qz1 + 0.01; zz += 16) E.push({ t: 'wei_shop_row', rect: [qx0, zz, qx0 + nShops * 5.2, zz + 6], front: 'n', n: nShops, seed: seed++ }, { t: 'wei_shop_row', rect: [qx0, zz + 6, qx0 + nShops * 5.2, zz + 12], front: 's', n: nShops, seed: seed++ });
   }
   return E;
+}
+
+const WALK_CELL = 36, WALK_NEAR = 58;                  // m: the cells the walk's lots are planned in; the interiors exist within this of a cell's middle
+const lotEl = (l, open) => (l.kind === 'office' ? { t: 'wei_office', rect: l.rect, seed: l.seed, open } : { t: 'wei_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open });
+function walkPlans() {
+  const cells = new Map();
+  for (const l of lots()) {
+    if (!l.walk) continue;
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, k = `${Math.floor(cx / WALK_CELL)},${Math.floor(cz / WALK_CELL)}`;
+    if (!cells.has(k)) cells.set(k, []);
+    cells.get(k).push(l);
+  }
+  const plans = [];
+  for (const [k, list] of cells) {
+    const [i, j] = k.split(',').map(Number), center = [i * WALK_CELL + WALK_CELL / 2, j * WALK_CELL + WALK_CELL / 2];
+    plans.push({ ...base(`wei-walk-${k}`, list.map((l) => lotEl(l, true))), near: WALK_NEAR, center });
+    plans.push({ ...base(`wei-walk-${k}-far`, list.map((l) => lotEl(l, false))), far: WALK_NEAR, center, nocollide: true });
+  }
+  return plans;
+}
+
+/** The keepers of the market's shops (built where the shops are near; the street life's figures are drawn within 170 m wherever they stand): behind the counter, facing the lane. */
+function keeperPlans() {
+  const [x0, z0, x1, z1] = MARKET, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, rand = rng(2150), cells = new Map();
+  const CL = ['cloth_brown', 'cloth_indigo', 'cloth_green', 'cloth_ochre', 'cloth_grey', 'cloth_blue'];
+  for (const row of marketRows(MARKET, 600)) {
+    const ds = shopDoors(row), ax = row.front === 'n' ? [0, 1] : [0, -1], rot = Math.atan2(ax[0], ax[1]);
+    const u0x = row.rect[0], zf = row.front === 'n' ? row.rect[1] : row.rect[3];
+    ds.forEach((d, i) => {
+      const x = u0x + d.keeper, z = zf + ax[1] * 1.1;
+      if (Math.abs(x - cx) > 56 || Math.abs(z - cz) > 56) return;
+      const r = rand(), k = `${Math.floor(x / WALK_CELL)},${Math.floor(z / WALK_CELL)}`;
+      if (!cells.has(k)) cells.set(k, []);
+      cells.get(k).push({ at: [x, z], y: 0.2, rot: rot + (r - 0.5) * 0.3, seed: Math.floor(rand() * 1e9), dress: r < 0.75 ? 'robe' : 'tunic', top: '', cloth: CL[Math.floor(rand() * CL.length)], cloth2: 'cloth_white', skin: 'skin_light', hat: r < 0.5 ? 'cap' : 'none', hair: 'topknot', hairMat: 'hair_dark', feet: 'shod', carry: 'none', over: 'sash', pose: r < 0.3 ? 'talk' : 'stand', ...(r < 0.75 ? {} : { legs: 'hose' }) });
+      void i;
+    });
+  }
+  return [...cells].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`wei-keepers-${k}`, [{ t: 'wei_keepers', list }]), center: [i * WALK_CELL + WALK_CELL / 2, j * WALK_CELL + WALK_CELL / 2], near: 70 }; });
 }
 
 let CACHE = null;
@@ -166,7 +206,7 @@ export async function town() {
   // ── the offices along the avenue ──
   {
     const E = [];
-    for (const l of lots()) if (l.kind === 'office') E.push({ t: 'wei_office', rect: l.rect, seed: l.seed, open: l.seed % 2 === 0 });
+    for (const l of lots()) if (l.kind === 'office' && !l.walk) E.push({ t: 'wei_office', rect: l.rect, seed: l.seed, open: l.seed % 2 === 0 });
     if (E.length) plans.push(base('wei-offices', E));
   }
   // ── wards: walls and gates, the houses ──
@@ -177,9 +217,14 @@ export async function town() {
       E.push({ t: 'han_ward', rect: w, gates: [{ side: 'w', c: lc[0], w: 4.5 }, { side: 'e', c: lc[0], w: 4.5 }, { side: 'w', c: lc[1], w: 3.5 }, { side: 'e', c: lc[1], w: 3.5 }] });
     }
     plans.push(base('wei-wards', E));
-    const H = lots().filter((l) => l.kind !== 'office');
-    for (let i = 0; i < H.length; i += 40) plans.push(base(`wei-houses-${i / 40}`, H.slice(i, i + 40).map((l) => ({ t: 'wei_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open }))));
+    const H = lots().filter((l) => l.kind !== 'office' && !l.walk);
+    for (let wi = 0; wi < WARDS.length; wi++) {
+      const list = H.filter((l) => l.ward === wi);
+      if (list.length) plans.push(base(`wei-houses-${wi}`, list.map((l) => ({ t: 'wei_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open }))));
+    }
   }
+  // ── the lots of the visitor's walk (walk.js): the near plan has the open front, the rooms and the fittings; the far plan the closed house; per cell ──
+  plans.push(...walkPlans());
   // ── the market ──
   {
     const cx = (MARKET[0] + MARKET[2]) / 2, cz = (MARKET[1] + MARKET[3]) / 2;
@@ -205,6 +250,7 @@ export async function town() {
     plans.push(base('wei-farms', farmElements()));
     plans.push({ ...base('wei-life', lifeElements()), style: 'life' });
   }
+  plans.push(...keeperPlans());
   plans.push({ ...base('wei-people', people()), style: 'life' });
   plans.push({ ...base('wei-forecourt', forecourtLife()), style: 'life' });
   return (CACHE = plans);

@@ -4,6 +4,8 @@
 // north-west, the Qili ward and the offices, the walled wards and the market south of the avenue, the Zhang River north of the wall. Pure data.
 // Coordinates: metres, +x east, +z south, y up.
 
+import { walkDistance, frontPoint, WALK_REACH, OFFICE_REACH } from './walk.js';
+
 export const RADIUS = 330;
 export const CITY_WALL = { th: 10, h: 10 };
 export const WALL = { w: -245, e: 245, n: -175, s: 175 };       // the wall's centre lines
@@ -95,6 +97,8 @@ export function lots() {
         const kind = ri === 0 || ri === 3 ? (r < 0.62 ? 'court' : r < 0.82 ? 'tower' : 'row') : (r < 0.45 ? 'court' : r < 0.6 ? 'tower' : 'row');
         const lot = { rect, front, kind, seed: Math.floor(rand() * 1e6), open: false, ward: wi };
         if (xe - x > 9 && furnished++ % 4 !== 3) lot.open = true;
+        lot.walk = xe - x > 9 && walkDistance(frontPoint(lot)) <= WALK_REACH;         // on the visitor's walk (walk.js): opened and furnished, near plans only (town.js)
+        if (lot.walk) lot.open = true;
         LOTS.push(lot);
         x = xe + 0.6;
       }
@@ -105,7 +109,10 @@ export function lots() {
     if (x + 17 > PALACE[0] - 6 && x < PALACE[2] + 6) continue;
     const rect = [x, -13, x + 17, 9];
     if (rand() < 0.1) continue;
-    LOTS.push({ rect, front: 's', kind: 'office', seed: Math.floor(rand() * 1e6), open: false, ward: -1 });
+    const office = { rect, front: 's', kind: 'office', seed: Math.floor(rand() * 1e6), open: false, ward: -1 };
+    office.walk = walkDistance(frontPoint(office)) <= OFFICE_REACH;
+    if (office.walk) office.open = true;
+    LOTS.push(office);
   }
   return LOTS;
 }
