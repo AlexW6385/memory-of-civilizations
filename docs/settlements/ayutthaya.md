@@ -129,6 +129,17 @@ Tropical monsoon: hot and humid, the sky hazy; rainy season May–October, flood
 - The royal wihan's main roof is two stacked tiers (lower over the walls, upper set back on a red step-board with gilt tabs, its own gable board and chofa), over the aisles' lean-tos and the porch gable [inferred from the stepped roofs of Siamese halls; §4.2 gives a three-tiered roof].
 - The seated images of the cloister have crossed legs and shoulders as separate forms.
 
+## 13. Bringing the place up to the reference (the visitor's walk, night, sound, animals, wear)
+
+The shell could not reach the web for this pass: every line below is [inferred] from the sections above, from what is generally known of Siam in Narai's reign, or from the Thai tradition, unless it carries a source already cited in §1–§12. Nothing here contradicts a stated choice of §1–§12.
+
+### 13.1 The visitor's walk
+- The way: from the arrival inside the wat's wall, out through the south gate on the axis of the chedis, over the brick bridge on that axis (§2, layout BRIDGES) to the bank road on the far side of the canal (§5.2: "the ways on foot run along the banks as raised earth paths"), then east and west along it, where the south row of lots fronts the water (`walk.js`).
+- The shops: the nearest twelve lots on that row deep enough for a counter and a stair become shophouses of the Chinese kind of §11.1, each with a trade of its own, nearest the gate first: candles, incense and gold leaf for the images; lotus buds and garlands for the offering; rice; clay water jars and pots; betel and areca; cloth; dried and salted fish; a Chinese general store. [inferred: a great wat's gate drew the sellers of offerings, as at Thai temples now; betel was chewed by everyone (La Loubère describes its offering as a courtesy; not re-read here); rice and fish are the Siamese staples, the pots of the Mon potters came by boat; Coromandel painted cloth was the great import of the trade the court lived on (§1).] The stock stands on the lane's step before the counter, on a bamboo table or the ground, the entry gap beside the counter kept clear. The shops are enterable to the front room (the style's counter, shelves and stair).
+- The houses on the walk are the timber stilt houses of §11.1: stair, terrace, door, the room with its mats, hearth, altar and lamp. [Found broken and fixed: the lean-to over the terrace is a sheet with no underside, which the collision world takes for a slab from the floor up, so no stilt house could be entered by its stair; each such sheet now has a second sheet 0.08 m below it as its underside, added from `walkwork.js` without changing the style.]
+- Street furniture [inferred]: the water jar on a stand of three posts with a coconut-shell dipper, set out by the road for the traveller (the Thai custom of the ang nam: its antiquity in the 17th century is not documented in the sources read); mats on the bank with a seller's baskets of fruit and a pole laid beside them; the spirit house on its post at the bridge's head by the wat's road.
+- Routes: walk-check follows twelve shops and four houses of the walk from the lane to the room; the two long walks run out of the gate, over the bridge and along the bank both ways (plan.js `walks`).
+
 ## Sources
 - Wikipedia, "Wat Phra Si Sanphet": https://en.wikipedia.org/wiki/Wat_Phra_Si_Sanphet
 - Ayutthaya Historical Research, "The architecture of Wat Phra Sri Sanphet": https://ayutthaya-history.com/Temples_Ruins_PhraSisanphet_Architecture.html

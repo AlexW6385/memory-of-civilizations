@@ -2,6 +2,8 @@
 // them and the river; the floating houses moored on the river and the floating market on its reach below the palace (boats with fruit,
 // pots, rice and fish, the vendors sitting in them); sugar palms and the granaries; the monks and the people of the banks.
 import { lodTiles } from '../lod.js';
+import './walkwork.js';
+import { gearElements } from './walkroutes.js';
 import { frame } from '../../styles/khmer/village.js';
 import { RADIUS, WATER, CANALS, BRIDGES, MARKET, RIVER_W, ISLAND, inRect, wet, lots, kitchenOf, onBridge, onPath, paths, inLot, WAT, PALACE, UBOSOT, wetRiver, VOC, VOC_MAIN } from './layout.js';
 
@@ -178,7 +180,8 @@ function people() {
 }
 export async function town() {
   const plans = [water(), garden(), people(), voc()];
-  const els = lots().map((l) => ({ t: 'thai_house', rect: l.rect, front: l.front, seed: l.seed, kind: l.kind, row: l.row, kitchen: kitchenOf(l) }));
+  const els = lots().map((l) => ({ t: 'thai_house', rect: l.rect, front: l.front, seed: l.seed, kind: l.kind, row: l.row, kitchen: kitchenOf(l), ...(l.trade ? { trade: l.trade } : {}) }));
+  els.push(...gearElements());
   plans.push(...lodTiles('ayutthaya-houses', 'siamese', els, { R: RADIUS, near: 150 }));
   void UBOSOT;
   return plans;
