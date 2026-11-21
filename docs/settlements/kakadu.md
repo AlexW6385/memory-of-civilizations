@@ -141,3 +141,11 @@ Built (all by rule from seeded lists, none colliding):
 - **Rock face** (`outcrop.js`): plan outlines are lobed by slow noise (swellings and flats, not rounded boxes); hard slices have crisper arrises (rounding 0.12–0.26 m instead of up to 0.45 m); laminae, thin beds weathering back a few centimetres unevenly, step the face every ~0.45 m on the blocks nearest the arrival; the iron, grey and black stains are now narrow vertical drip streaks (the stain noise is stretched along y), fewer and thinner, so they no longer read as square patches [inferred: forms from general knowledge of Kombolgie Sandstone, §3, §10].
 - **Budget:** main triangles 0.72 M to 0.73 M, main draws 100 to 100 at the arrival (`tools/draw-count.mjs`).
 - **Still below the standard:** the soffit and the shelters' interiors are dark in the simple light and could not be judged for shade; the stains still have the quad grid's edges.
+
+## 15. Match pass (the Suzhou standard): walk, night, sound, animals, wear
+
+Ubirr has no shops; its "shops and houses" are the nine walk-in shelters (§12), the two rock shelters, the camps' hearths and the work places on the floors (§13). Nothing here is written or ceremonial: the dossier's §0 stands (no named being, nothing restricted), and nothing is lettered (§15.5).
+
+### 15.1 The visitor's walk
+- From the arrival (floor at x = -1, z = -13) the walk runs along the foot of the outlier to the Main Gallery, the apron's camps, the small shelter and the steps to the lookout (§6; `ROUTE`). Every one of the nine walk-in shelters (bark houses, paperbark domes, brush shades) is now entered by its own route from the arrival: out to a point on the door's axis 3.2 m before the door, to the doorway, to a point just inside (`plan.js`, `walks`); the small rock shelter's overhang has one too; the Main Gallery is walked through by the main route. 11 routes in all, 52 legs, walked by tools/walk-check.mjs [inferred: the routes are ours; the shelters' forms are §12].
+- Interiors are fully built for every shelter (they are few and small: the town's plans hold 9 shelters and 7 camps in all); there are no far/near forms because a shelter is some hundreds of triangles, and the budget at the arrival and at three poses on the walk is in the report.
