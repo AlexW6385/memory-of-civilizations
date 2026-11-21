@@ -6,7 +6,8 @@ import { TOP, STUPA2, TEMPLE40, VOTIVE, VIHARA2, height } from './layout.js';
 import stupaPlan from '../../buildings/sanchi-great-stupa/plan.js';
 import './style.js';
 import { summitElements, SUMMIT_STALLS, HALL2, BOWL } from './summit.js';
-export const stupa = { ...stupaPlan, origin: [0, 0], base: TOP, district: undefined, view: [-32, -32, 32, 32], viewY: TOP };
+import { walkRoutes } from './walk.js';
+export const stupa = { ...stupaPlan, origin: [0, 0], base: TOP, district: undefined, view: [-32, -32, 32, 32], viewY: TOP, walks: [...stupaPlan.walks, ...walkRoutes().map((w) => w.route)] };
 
 // Stupa 2: turned so that its double stairway faces east, toward the hill [stated: the stairway faces east]
 export const stupa2 = {

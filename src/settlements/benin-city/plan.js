@@ -3,6 +3,7 @@
 // impluvia and the ancestral altars, the turrets with spires, brass snakes and birds, the red clay wall round all.
 // Authored in world coordinates (origin 0, yaw 0); the front faces south on the king's square.
 import { PALACE, GATE_X, AUD } from './layout.js';
+import { walkRoutes } from './walkroutes.js';
 
 const [X0, Z0, X1, Z1] = PALACE;
 const HALL = [-112, -76, -18, -64], OC = [-130, -64, -6, -2];
@@ -49,6 +50,10 @@ const rooms = [
   room('court of the pages', [-37, -118, -11, -87], 0.03, 'inner'),
 ];
 const walks = [Object.assign([[GATE_X, 12], [GATE_X, -6], [GATE_X, -30], [-64.6, -62], [-64.6, -66], [-80, -68.5], [-95, -70], [-95, -75], [-95, -79], [-68, -79], [-66, -85], [-66, -100]], { y0: 0 })];
+
+// the compounds of the visitor's walk (walk.js, walkroutes.js): in at each street door and through the passage to the court
+for (const r of walkRoutes()) walks.push(r.route);
+for (const w of walks) if (w.y0 === undefined) w.y0 = 0;
 
 export const palace = {
   id: 'benin-palace',
