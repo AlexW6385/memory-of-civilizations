@@ -2,6 +2,7 @@
 // and the kulkul tower, the roofed gate (kori agung) up a stair to the inner court (jeroan) with the three merus, the padmasana, the gedong, the pawedan and
 // piasan pavilions. Authored in world coordinates (origin 0, yaw 0); the temple faces south, the holiest court at kaja (north).
 import { PURA } from './layout.js';
+import { walkRoutes } from './walkroutes.js';
 
 const { x0, x1, zS, zM, zN, y1, y2, gap } = PURA;
 const E = [];
@@ -54,8 +55,9 @@ const rooms = [
   room('gong-pavilion', [15, -103, 27, -94.5], y1 + 0.5, 'hall'),
   room('bale-agung', [-29.5, -101.5, -16.5, -93.5], y1 + 0.6, 'hall'),
 ];
-const walks = [[[0, -30], [0, -60], [0, -80], [0, -100], [0, -112], [0, -125], [0, -133]]];
+const walks = [[[0, -30], [0, -60], [0, -80], [0, -100], [0, -112], [0, -125], [0, -129]]];
 walks[0].y0 = 0;
+for (const r of walkRoutes()) { r.y0 = 0; walks.push(r); }       // into the stalls, houses, the wantilan and the dalem along the street and the lane (walkroutes.js)
 
 export const pura = {
   id: 'bali-pura',

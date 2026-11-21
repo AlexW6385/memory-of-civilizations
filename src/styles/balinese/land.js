@@ -24,8 +24,8 @@ export function channel(el, ctx) {
 /** bali_planks: footbridges over the channel: { at: [x, z], axis, len, y } — a pair of split palm logs. */
 export function footbridge(el, ctx) {
   const [x, z] = el.at, L = el.len ?? 1.6, y = el.y ?? 0;
-  if (el.axis === 'x') { bx(ctx, 'timber', x - L / 2, y + 0.18, z - 0.4, x + L / 2, y + 0.26, z + 0.4); ctx.col.floor([x - L / 2, z - 0.4, x + L / 2, z + 0.4], y + 0.26); }
-  else { bx(ctx, 'timber', x - 0.4, y + 0.18, z - L / 2, x + 0.4, y + 0.26, z + L / 2); ctx.col.floor([x - 0.4, z - L / 2, x + 0.4, z + L / 2], y + 0.26); }
+  if (el.axis === 'x') { bx(ctx, 'timber', x - L / 2, y + 0.18, z - 0.9, x + L / 2, y + 0.26, z + 0.9); ctx.col.floor([x - L / 2, z - 0.9, x + L / 2, z + 0.9], y + 0.26); }
+  else { bx(ctx, 'timber', x - 0.9, y + 0.18, z - L / 2, x + 0.9, y + 0.26, z + L / 2); ctx.col.floor([x - 0.9, z - L / 2, x + 0.9, z + L / 2], y + 0.26); }
 }
 /** bali_subak_shrine: { at: [x, z], y } — the unwalled shrine of the water temple, its stone seat and a tray of offerings, a shade tree's trunk close by is planted by the ground. */
 export function subakShrine(el, ctx) {
