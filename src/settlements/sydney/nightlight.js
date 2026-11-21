@@ -11,6 +11,8 @@ import { registerStyle } from '../../core/build.js';
 import { MATERIALS } from '../../core/palette.js';
 import { frame } from '../../styles/modern/rooms.js';
 import { KINDS } from '../../styles/modern/shops.js';
+import { operaLight } from '../../styles/modern/index.js';
+import { opera } from './plan.js';
 import { shopGeom, layoutRooms } from '../../styles/modern/upper.js';
 import { RADIUS, LEVEL, BRIDGE, QUAY, height, lots } from './layout.js';
 import { streets } from './street.js';
@@ -190,10 +192,23 @@ function harbour(H) {
   for (const x of [-36, -18, 0, 18]) for (const z of [-15, -26, -40]) { H.ball(x, 1.2 + 3.1, z, 0.9, 0.58); H.floor(x, 1.3, z, 3.6, 3.6, 0, 8, 0.62); }
 }
 
+/** The Opera House floodlit, its glass walls lit from within (§16): the sails' tiled skin lit from the foot, brighter low, and the glazing of each mouth glowing with the foyers' lamps; the glazed bands of the podium's sides and north front lit; the pools of the floods on the podium's top and the broadwalk. */
+function operaHouse(H) {
+  const el = opera.elements[0], { skin, glass } = operaLight(el), [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h, yf = y + h;
+  const put = (t) => { const f = [t[1], t[3], t[5]].map((v) => Math.min(0.9, v)), N = f.map((v) => [Math.sqrt(1 - v * v), v, 0]); H.tri(t[0], N[0], t[2], N[1], t[4], N[2]); };
+  for (const t of skin) put(t);
+  for (const t of glass) put(t);
+  // the podium's glazed bands (styles/modern/index.js: panes 5.4 m wide every 7 m from 6 m in, 1.2 m to h/2 − 0.4 m up) on both sides and the north front, the foyers beyond them lit
+  for (const [xa, sg] of [[x0 - 0.1, -1], [x1 + 0.1, 1]]) for (let zz = z0 + 6; zz < z1 - 6; zz += 7) H.quad([xa, y + 1.3, zz + 0.1], [xa, y + 1.3, zz + 5.3], [xa, yf / 2 + y / 2 + h / 2 - 1.0 - h / 2 + 0.2, zz + 5.3], [xa, yf / 2 + y / 2 + h / 2 - 1.0 - h / 2 + 0.2, zz + 0.1], [sg, 0], 0.5);
+  for (let xx = x0 + 6; xx < x1 - 6; xx += 7) H.quad([xx + 0.1, y + 1.3, z0 - 0.1], [xx + 5.3, y + 1.3, z0 - 0.1], [xx + 5.3, y + h / 2 - 0.6, z0 - 0.1], [xx + 0.1, y + h / 2 - 0.6, z0 - 0.1], [0, -1], 0.5);
+  // the floods at the sails' feet (pools on the podium's top along both halls' south and north bases) and the stair's lamps' wash on the treads
+  for (const hall of el.halls) for (const [a, b] of [[hall.shells[0][0], 0], [hall.shells[hall.shells.length - 1][1], 0]]) { void b; for (let k = -1; k <= 1; k++) H.floor(hall.x + k * hall.hw * 0.7, yf + 0.1, a + (a === hall.shells[0][0] ? 5 : -2), 7, 5, 0, 8, 0.5); }
+  for (let k = 0; k < 3; k++) H.floor(100, y + h * (0.3 + 0.3 * k), z1 + 22 * (1 - (0.3 + 0.3 * k)), 14, 6, 0, 8, 0.45);
+}
 /** sydney_night: nothing but the plan's style hook; the light is made here from the places. */
 function sydneyNight(el, { bag }) {
   const H = new Halo();
-  lamps(H); shops(H); terraces(H); harbour(H);
+  lamps(H); shops(H); terraces(H); harbour(H); operaHouse(H);
   windows(H, 62000);
   if (H.pos.length) bag.add('halo', H.geometry());
 }
