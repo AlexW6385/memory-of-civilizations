@@ -4,6 +4,8 @@ import { terraceRoute, shopRoute, pubRoute } from '../../styles/victorian/upstai
 import { RADIUS, GROUND, PALACE, CLOCK, VICTORIA, ABBEY, BRIDGE, RIVER, HALL, PORCH, STEPHEN, LOBBY, bank } from './layout.js';
 
 const g = GROUND, L = g + 2.4, P = g + 4.4;     // the porch at the landing of the hall's steps; the principal floor
+/** The same five elements, the pieces in the inside materials only (victorian/split.js), shown within `near` m of their centre. */
+export const insidePlans = () => westminster.elements.filter((e) => e.pass).map((e) => ({ id: `london-in-${e.t}`, style: 'victorian', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -180], facing: 'e' }, center: e.t === 'abbey' ? [(ABBEY[0] + ABBEY[2]) / 2, (ABBEY[1] + ABBEY[3]) / 2] : LOBBY, near: e.t === 'abbey' ? 105 : 120, nocollide: true, elements: [{ ...e, pass: 'inside' }] }));
 export const westminster = {
   id: 'london-westminster',
   name: { en: 'The Palace of Westminster', zh: '威斯敏斯特宫' },
@@ -26,12 +28,12 @@ export const westminster = {
     { t: 'victoria_tower', c: VICTORIA, s: 22, h: 98.5, y: g },
     // the principal floor (§1.5): St Stephen's Porch and Hall, the Central Lobby under the Central Tower, the Commons to
     // the north and the Lords to the south along the axis
-    { t: 'st_stephens', porch: PORCH, hall: STEPHEN, y: g, L, P },
-    { t: 'central_lobby', c: LOBBY, a: 9, T: 1.5, y: g, P, top: g + 91 },
-    { t: 'commons', x: LOBBY[0], z0: LOBBY[1] - 10.5, y: g, P },
-    { t: 'lords', x: LOBBY[0], z0: LOBBY[1] + 10.5, y: g, P },
+    { t: 'st_stephens', porch: PORCH, hall: STEPHEN, y: g, L, P, pass: 'shell' },
+    { t: 'central_lobby', c: LOBBY, a: 9, T: 1.5, y: g, P, top: g + 91, pass: 'shell' },
+    { t: 'commons', x: LOBBY[0], z0: LOBBY[1] - 10.5, y: g, P, pass: 'shell' },
+    { t: 'lords', x: LOBBY[0], z0: LOBBY[1] + 10.5, y: g, P, pass: 'shell' },
     // Westminster Abbey: the high nave and its flyers, the transepts, the lantern, Hawksmoor's towers, Henry VII's chapel
-    { t: 'abbey', rect: ABBEY, y: g },
+    { t: 'abbey', rect: ABBEY, y: g, pass: 'shell' },
   ],
   rooms: [{ id: 'parliament square', rect: [-60, -215, 40, -150], y: g, kind: 'open' }, { id: 'westminster hall', rect: [HALL[0] + 2, HALL[1] + 3, HALL[2] - 2, HALL[3] - 13], y: g + 0.05, kind: 'hall' },
     { id: "st stephen's porch", rect: PORCH, y: L, kind: 'hall' }, { id: "st stephen's hall", rect: STEPHEN, y: P, kind: 'hall' },
