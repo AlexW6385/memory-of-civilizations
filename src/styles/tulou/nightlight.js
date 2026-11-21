@@ -91,6 +91,9 @@ function wrapHall(fn) {
     for (const x of [-1.6, -1.2, 1.2, 1.6]) H.ball(cx + x, 1.62, cz + zb + 0.9, 0.5, 0.7, sides(cx + x, cz, 17));
     H.floor(cx, 0.37, cz + zb + 2.4, 3.6, 2.2, 12, 0.7);
     H.wall(cx, 2.2, cz + zb + 0.8, [0, 1], 2.4, 1.1, 10, 0.5);
+    // the court before the hall: a lamp hung on each front post of the porch, its pool on the paving, and two pools of the hall's own light spilling down the steps [inferred]
+    for (const x of [-4.6, 4.6]) { H.ball(cx + x, 2.5, cz + 6.4, 0.7, 0.6, sides(cx + x, cz, 22)); H.floor(cx + x, 0.04, cz + 7.6, 2.6, 2.2, 10, 0.55); }
+    H.floor(cx, 0.04, cz + 8.4, 4.2, 1.6, 12, 0.4);
     H.flush(ctx.bag); return r;
   };
 }
