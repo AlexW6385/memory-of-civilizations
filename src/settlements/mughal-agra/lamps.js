@@ -31,7 +31,13 @@ unit('brazier', (a) => {
   for (let i = 0; i < 3; i++) { const t = i / 3 * Math.PI * 2; a('b', rod([Math.cos(t) * 0.14, 0.13, Math.sin(t) * 0.14], [Math.cos(t) * 0.22, 0, Math.sin(t) * 0.22], 0.014, 4)); }
   a('c', lathe([[0.001, 0.25], [0.22, 0.26], [0.18, 0.31], [0.001, 0.33]], 10));
 });
-const MAT = { hang: { i: 'iron', b: 'bronze', l: 'lamp_white' }, stand: { i: 'iron', l: 'lamp_white' }, brazier: { b: 'bronze', c: 'lamp_paper' } };
+// the chirag: a small clay oil lamp, a shallow bowl pinched at one lip for the wick, the flame in it (0.09 m across)
+unit('chirag', (a) => {
+  a('c', lathe([[0.001, 0], [0.03, 0], [0.045, 0.018], [0.05, 0.03], [0.04, 0.032], [0.03, 0.02], [0.001, 0.014]], 10));
+  a('c', lathe([[0.01, 0.022], [0.03, 0.03], [0.02, 0.034], [0.01, 0.03]], 6, null, 0.055, 0, 0));
+  a('l', lathe([[0.006, 0.03], [0.009, 0.045], [0.005, 0.07], [0.001, 0.085]], 6, null, 0.055, 0, 0));
+});
+const MAT = { chirag: { c: 'terracotta', l: 'lamp_white' }, hang: { i: 'iron', b: 'bronze', l: 'lamp_white' }, stand: { i: 'iron', l: 'lamp_white' }, brazier: { b: 'bronze', c: 'lamp_paper' } };
 /** agra_lamp: { at, y, rot, kind ('hang' | 'stand' | 'brazier') }; for 'hang' y is the hook. */
 function agraLamp(el, { bag, col }) {
   const put = placer(el, bag);

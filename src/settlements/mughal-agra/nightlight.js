@@ -10,7 +10,7 @@ import { BufferGeometry, Float32BufferAttribute, Matrix4, Quaternion, Vector3 } 
 import { placeHanging } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { assembly } from '../../objects/kit.js';
-import { houses, KATRAS, STREETS, FORECOURT, GATE, RADIUS } from './layout.js';
+import { houses, KATRAS, STREETS, FORECOURT, GATE, RADIUS, PLINTH, GARDEN } from './layout.js';
 import { layoutOf, FH } from '../../styles/mughal/townhouse.js';
 import { rows, cells, BZ } from './cells.js';
 
@@ -76,6 +76,7 @@ function unitOf(kind) {
     const H = new Halo();
     if (kind === 'ball') { H.ball(0, 0, 0, 0.9 * 0.95); H.floor(0, -2.47, 0, 2.5 * 0.9 * 0.55, 2.5 * 0.9 * 0.55, 0, 8, 0.8); }
     else if (kind === 'torch') { H.ball(0, 2.25, 0, 1.2); H.floor(0, 0.05, 0, 2.3, 2.3, 0, 8, 0.85); }
+    else if (kind === 'chirag') { H.ball(0.05, 0.07, 0, 0.32); H.floor(0.05, 0.02, 0, 0.9, 0.9, 0, 8, 0.7); }
     else if (kind === 'low') { H.ball(0, 0.42, 0, 0.8); H.floor(0, 0.04, 0, 2.0, 2.0, 0, 8, 0.8); }
     else H.floor(0, 0.06, 1.2, 1.7, 1.3, 0, 10, 0.85);
     const g = new BufferGeometry(); g.setAttribute('position', new Float32BufferAttribute(H.pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(H.nor, 3)); a(MAT, g);
@@ -131,6 +132,19 @@ export function mashals() {
 /** The braziers of the caravanserais' courts: coals under the merchants' pots, one in each court, by the north verandah. */
 export function braziers() { return KATRAS.map((k) => { const cx = (k.rect[0] + k.rect[2]) / 2, zc = (k.rect[1] + k.rect[3]) / 2; return { at: [cx - (k.gate === 'e' ? 1 : -1) * 1.2, zc - 4.6] }; }); }
 
+/**
+ * The chirags (clay oil lamps) of the garden: a row along the coping of each arm of the central channel's long arm (the marble kerb, 0.55 m up), and a row on the
+ * plinth's south edge either side of the stairs. [inferred: Mughal gardens were lit with rows of clay lamps on the channels' kerbs and in niches on festival nights, the
+ * Taj's own yearly urs of Mumtaz Mahal among them; no 1653 account of the Taj's lamps was found, and the tomb's chamber and the mosque keep their own lighting.]
+ */
+export function chirags() {
+  const out = [], z0 = GARDEN[1] + 6, z1 = -16;
+  for (let z = z0; z <= z1; z += 5) for (const s of [-1, 1]) out.push({ at: [s * 3.3, z], y: 0.55 });
+  const pz = PLINTH.c[1] + PLINTH.a - 0.7;
+  for (let x = 9; x <= 44; x += 5) for (const s of [-1, 1]) out.push({ at: [s * x, pz], y: PLINTH.y });
+  return out;
+}
+
 /** The street life's elements for the night: the lamps themselves (agra_lamp, lamps.js) and their halos. `inDisc` keeps them within the settlement. */
 export function nightElements(inDisc = () => true) {
   const out = [];
@@ -140,11 +154,22 @@ export function nightElements(inDisc = () => true) {
   }
   for (const d of doorGlows()) if (inDisc(d.at)) out.push({ t: 'agra_halo', kind: 'spill', at: d.at, y: 0.04, rot: d.rot });
   for (const m of mashals()) if (inDisc(m.at)) { out.push({ t: 'agra_lamp', kind: 'stand', at: m.at, y: 0, rot: m.rot }); out.push({ t: 'agra_halo', kind: 'torch', at: m.at, y: 0, rot: m.rot }); }
+  for (const c of chirags()) { out.push({ t: 'agra_lamp', kind: 'chirag', at: c.at, y: c.y, rot: 0 }); out.push({ t: 'agra_halo', kind: 'chirag', at: c.at, y: c.y, rot: 0 }); }
   for (const b of braziers()) { out.push({ t: 'agra_lamp', kind: 'brazier', at: b.at, y: 0.04, rot: 0 }); out.push({ t: 'agra_halo', kind: 'low', at: b.at, y: 0.04, rot: 0 }); }
   // the opened cells of the forecourt: the lamp on its chain inside (cells.js hangs it 1.75 m below the beam) and the light across the verandah
   for (const r of rows()) for (const c of cells(r)) {
     out.push({ t: 'agra_halo', kind: 'ball', at: [c.xc, c.zc - r.s * 1.85], y: 0.35 + 2.48, rot: 0 });
     out.push({ t: 'agra_halo', kind: 'spill', at: [c.xc, r.z + r.s * 0.2], y: 0.4, rot: r.s > 0 ? 0 : Math.PI });
+  }
+  // the shut cells of the forecourt's bazaar rows: the keeper's clay lamp (a chirag) set on the verandah beside the door, and its light across the step
+  // [inferred: the bazaar's cells "were used to sell goods" (Wikipedia, Origins and architecture of the Taj Mahal) and stayed open into the evening]
+  for (const r of rows()) for (let k = 0; k < r.n; k++) {
+    if (k >= r.open[0] && k < r.open[1]) continue;
+    const xc = r.x0 + (k + 0.5) * r.bw;
+    if (hashAt(xc, r.z, 31) >= 0.75) continue;
+    const side = hashAt(xc, r.z, 33) < 0.5 ? -1 : 1, at = [xc + side * 0.95, r.z - r.s * 1.6];
+    out.push({ t: 'agra_lamp', kind: 'chirag', at, y: 0.35, rot: 0 }); out.push({ t: 'agra_halo', kind: 'chirag', at, y: 0.35, rot: 0 });
+    out.push({ t: 'agra_halo', kind: 'spill', at: [xc, r.z + r.s * 0.2], y: 0.4, rot: r.s > 0 ? 0 : Math.PI });
   }
   return out;
 }
