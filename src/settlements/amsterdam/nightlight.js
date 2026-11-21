@@ -9,7 +9,7 @@ import { STYLES } from '../../core/build.js';
 import '../../styles/dutch/index.js';
 import { faceFrame } from '../../styles/dutch/facade.js';
 import { profile } from '../../styles/dutch/upper.js';
-import { GROUND, RADIUS, WAAG, lots } from './layout.js';
+import { GROUND, RADIUS, WAAG, HALL, lots } from './layout.js';
 import { quayLife } from './quay.js';
 import { shopLots } from './shops.js';
 import { shopBay } from './shopfront.js';
@@ -86,6 +86,32 @@ export function panesOf(l) {
 }
 const lit = (l, w) => hash(l.seed, w.fl * 5 + w.i, 41) < (w.fl === 0 ? 0.55 : w.fl === 1 ? 0.5 : w.fl === 2 ? 0.34 : 0.16);
 
+
+/** The Town Hall's east front on the Dam (landmarks.js townHall): its bays, the four window rows and the seven arches, as the builder lays them. */
+function hallLights(H) {
+  const F = faceFrame(HALL, 'e'), L = F.w, y = GROUND;
+  let n = Math.round(L / 3.6); if ((n - 7) % 2) n += n * 3.6 > L ? -1 : 1;
+  const bw = L / n, c0 = (n - 7) / 2, e1 = 15.4, rows = [[2.4, 7.4, 0.85], [9.6, 12.4, 0.6], [e1 + 1.9, e1 + 7.6, 0.85], [e1 + 9.6, e1 + 12.2, 0.6]];
+  const pav = 3;
+  for (let i = 0; i < n; i++) {
+    const p = i >= c0 && i < c0 + 7 ? 1.4 : i < pav || i >= n - pav ? 0.7 : 0, um = (i + 0.5) * bw;
+    for (const [k, [v0, v1, ww]] of rows.entries()) {
+      const entry = i >= c0 && i < c0 + 7;
+      if (entry && k === 0) continue;
+      // the clerks' and the burgomasters' rooms keep a candle late; the upper rows and the pavilions more rarely
+      const q = k === 0 ? 0.42 : k === 1 ? 0.5 : k === 2 ? 0.3 : 0.18;
+      if (hash(i, k, 77) >= q) continue;
+      const a = F.at(um - ww * 0.8, p + 0.1), b = F.at(um + ww * 0.8, p + 0.1);
+      H.quad([a[0], y + v0 + 0.1, a[1]], [b[0], y + v0 + 0.1, b[1]], [b[0], y + v1 - 0.1, b[1]], [a[0], y + v1 - 0.1, a[1]], [1, 0], 0.35 + 0.3 * hash(i, k, 79));
+    }
+    // the seven arches: a lantern hung in each vestibule opening and its pool on the paving
+    if (entry(i, c0)) { const c = F.at(um, 1.9); H.ball(c[0], y + 4.2, c[1], 1.1); H.floor(c[0] + 1.2, y + 0.17, c[1], 2.6, 2.0, 0, 8, [0.8, 0.34, 0]); }
+  }
+  // the watch's brazier before the middle arch (the burgher guard kept the Dam at night: [inferred])
+  const m = F.at((c0 + 3.5) * bw, 5.5); H.ball(m[0], y + 0.9, m[1], 0.9); H.floor(m[0], y + 0.17, m[1], 3.4, 3.4, 0, 8);
+}
+const entry = (i, c0) => i >= c0 && i < c0 + 7;
+
 export function halos() {
   const H = new Halo(), R2 = (RADIUS - 40) ** 2;
   // the oil lamps: the lantern's glow and a pool on the paving
@@ -108,6 +134,7 @@ export function halos() {
   }
   // the Weigh House's lantern at its door (the south front, toward the Dam) and the Dam's corner lamps
   H.ball((WAAG[0] + WAAG[2]) / 2, GROUND + 4.4, WAAG[3] + 0.9, 1.5); H.floor((WAAG[0] + WAAG[2]) / 2, GROUND + 0.17, WAAG[3] + 1.5, 3.4, 2.6, 0, 8);
+  hallLights(H);
   return H;
 }
 
