@@ -12,7 +12,9 @@ import { rowFurnElement } from './upper-rows.js';
 import { cauponaFurn, fullonicaFurn } from './upper-inns.js';
 import './nightlight.js';
 import './writing.js';
+import './ruts.js';
 import { shopKeepers } from './keepers.js';
+import { forecourtLife } from './forecourt.js';
 /** lodTiles of src/settlements/lod.js with a wider tile (the geometry budget counts plan x material buckets). */
 function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
   const tiles = new Map();
@@ -115,7 +117,7 @@ export async function town() {
     { id: 'rome-street', style: 'rome-town', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' },
       elements: [{ t: 'pistrinum', rect: PISTRINUM, front: 's', y: 0 }, { t: 'latrine', rect: LATRINE, front: 's', y: 0 }],
       rooms: [{ id: 'pistrinum', rect: [PISTRINUM[0] + 0.5, PISTRINUM[1] + 0.5, PISTRINUM[2] - 0.5, PISTRINUM[3] - 0.5], y: 0, kind: 'hall', market: false }, { id: 'latrine', rect: [LATRINE[0] + 0.5, LATRINE[1] + 0.5, LATRINE[2] - 0.5, LATRINE[3] - 0.5], y: 0, kind: 'hall', market: false }] },
-    site('rome-flats', openLots), nightLife(ways), awningPlan(), ...shopKeepers(),
+    site('rome-flats', openLots), nightLife(ways), awningPlan(), ...shopKeepers(), ...forecourtLife(),
     ...upLots.map((e, i) => furnPlan(`rome-up-flat-${i}`, { t: 'up_cells_flat', rect: e.rect, front: e.front, seed: e.seed })),
     furnPlan('rome-up-inn', { ...cauponaFurn({ rect: inn.rect, front: 's' }), seed: inn.seed }), furnPlan('rome-up-fuller', { ...fullonicaFurn({ rect: full.rect, front: 's' }), seed: full.seed }),
     ...(inn2() ? [furnPlan('rome-up-inn2', { ...cauponaFurn({ rect: inn2().rect, front: 's' }), seed: inn2().seed })] : []),
