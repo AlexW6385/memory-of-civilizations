@@ -67,6 +67,19 @@ export function qinTerrace(el, { bag, col }) {
     const y = (i + 1) * (TOP / n);
     bag.add('brick_grey', box(sx + s * (sw + 0.2) - 0.2, 0, zs - (i + 1) * run, sx + s * (sw + 0.2) + 0.2, y + 0.45, zs - i * run));
   }
+  // the stamped pattern of the hollow bricks on the cheeks (inner and outer faces): a cord ridge along each step and a square boss over it [inferred: Qin hollow bricks carry
+  // stamped geometric and cord patterns; no glyph or figure is drawn]; and the way the feet went: each tread darkened across its middle, narrowing toward the top (decals as thin boxes over the tread)
+  for (let i = 0; i < n; i++) {
+    const y = (i + 1) * (TOP / n), za = zs - (i + 1) * run + 0.06, zb = zs - i * run - 0.06, zm = (za + zb) / 2;
+    for (const s of [-1, 1]) for (const f of [0, 0.4]) {
+      const xf = sx + s * (sw + f), o = f === 0 ? -s : s;                              // the face's outward side
+      const xa = Math.min(xf, xf + o * 0.025), xb = Math.max(xf, xf + o * 0.025);
+      bag.add('brick_grey', box(xa, y + 0.14, za, xb, y + 0.18, zb));
+      bag.add('brick_grey', box(Math.min(xf, xf + o * 0.03), y + 0.26, zm - 0.07, Math.max(xf, xf + o * 0.03), y + 0.34, zm + 0.07));
+    }
+    const hw = 2.3 - 1.0 * (i / n);
+    bag.add('tile_dark', box(sx - hw, y + 0.004, za, sx + hw, y + 0.012, zb));
+  }
   void cp;
 }
 

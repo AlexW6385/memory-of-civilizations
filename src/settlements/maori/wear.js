@@ -17,6 +17,18 @@ export function registerWear() {
   E.whare = function worn(el, ctx) {
     const r = baseWhare.call(this, el, ctx);
     const { bag } = ctx;
+    if (bag && el.w >= 3 && (el.rank ?? 0) === 2) {
+      // the chief's house: the way to the door trodden bare across the marae ātea (docs/settlements/maori.md §4j), a lane from the visitors' end narrowing to the sill, the sill's earth worn dark
+      const [cx, cz] = el.c, w = el.w, l = el.l, h = el.h, y0 = el.y ?? 0, zf = -l / 2 + (el.porch ?? 1.6), dx = -w * 0.18 - 0.32 + 0.475;
+      const M = new Matrix4().makeRotationY(el.yaw ?? 0).setPosition(cx, y0, cz), put = (g) => { g.applyMatrix4(M); bag.add('bark_dark', g); };
+      for (let k = 0; k < 4; k++) {
+        const z1 = zf - 0.04 - k * 1.5 - hashAt(cx, cz, 40 + k) * 0.3, z0 = z1 - 0.9 - hashAt(cx, cz, 50 + k) * 0.3, hw = 0.3 + k * 0.05, j = (hashAt(cx, cz, 30 + k) - 0.5) * 0.4;
+        put(box(dx - hw + j, 0.012, z0, dx + hw + j, 0.017, z1));
+      }
+      put(box(dx - 0.7, 0.012, zf - 0.8, dx + 0.7, 0.014, zf - 0.04));      // the sill, where all who enter stand to be called
+      const dh = Math.min(1.15, h - 0.45);
+      if (h - dh > 0.12) put(box(dx - 0.45, dh + 0.005, zf - 0.012, dx + 0.45, Math.min(dh + 0.12, h - 0.02), zf - 0.004));
+    }
     if (!bag || el.w < 3 || (el.rank ?? 0) > 1) return r;
     const [cx, cz] = el.c, w = el.w ?? 4, l = el.l ?? 6, h = el.h ?? 1.2, y0 = el.y ?? 0, zf = -l / 2 + (el.porch ?? 1.6);
     const dl = -w * 0.18 - 0.32, dr = dl + 0.95, dh = Math.min(1.15, h - 0.08), dx = (dl + dr) / 2;

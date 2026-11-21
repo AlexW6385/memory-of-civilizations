@@ -62,7 +62,7 @@ function people() {
     // lamp-tenders with oil jars, an inspecting officer with his clerk, a messenger, an armourer with spare bolts
     const FL = PIT.floor + 0.02, gx = 122;
     for (const [dx, dz, rot, carry] of [[gx - 1, 4.6, 0.4, 'pot'], [gx + 2.5, -5.4, -0.5, 'pot'], [gx - 3.4, -7.2, Math.PI, 'basket']])
-      fig([dx, zc + dz], -Math.PI / 2 + rot, { cloth: 'cloth_brown', hair: 'topknot', carry, over: 'belt' }, FL);
+      fig([dx, zc + dz], -Math.PI / 2 + rot, { cloth: 'cloth_brown', hair: 'topknot', carry, over: 'belt', nightKeep: 1 }, FL);   // (the lamp-tenders stay the night)
     official([gx - 2.2, zc - 4.4], -Math.PI / 2 - 0.6, { pose: 'talk', hat: 'cap' }, FL); official([gx - 2.9, zc - 5.6], -Math.PI / 2 + 0.7, { pose: 'talk' }, FL);
     guard([gx + 3.6, zc + 5.2], -Math.PI / 2 + 0.3, {}, FL);
     for (const k of [0, 2]) { const z = rampZ(k); guard([PIT.x1 - 0.9, z - 2.1], -Math.PI / 2, {}, FL); guard([PIT.x1 - 0.9, z + 2.1], -Math.PI / 2, {}, FL); }
@@ -206,7 +206,7 @@ function trades() {
     if (!l.trade || !onWalk(l)) continue;
     const [x0, z0, x1, z1] = l.rect, Wd = x1 - x0, D = z1 - z0, s = l.front === 's', ro = s ? Math.PI : 0, Z = (v) => (s ? z1 - v : z0 + v);
     const person = (u, v, o = {}) => L.push({ t: 'figure', at: [x0 + u, Z(v)], y: 0, rot: ro + Math.PI + (rand() - 0.5) * 1.2, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'hose', cloth: ['cloth_brown', 'cloth_grey', 'cloth_ochre', 'cloth_white'][Math.floor(rand() * 4)], cloth2: 'cloth_brown', over: 'belt', skin: rand() < 0.5 ? 'skin_medium' : 'skin_light', hat: 'none', feet: 'shod', hair: 'topknot', beard: rand() < 0.3, ...o });
-    for (const [u, v, pose] of SPOT[l.trade](Wd, D)) person(Math.max(1.5, Math.min(Wd - 1.5, u)), v, { pose, carry: 'none' });
+    for (const [u, v, pose] of SPOT[l.trade](Wd, D)) person(Math.max(1.5, Math.min(Wd - 1.5, u)), v, { pose, carry: 'none', ...(l.trade === 'kiln' ? { nightKeep: 1 } : {}) });   // (the kiln is tended through the night)
     // the overseer inside the gate, off the way in, with his tablet
     if (l.seed % 2) L.push({ t: 'figure', at: [x0 + Wd * 0.25 - 1.3, Z(1.8)], y: 0, rot: ro, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_red', over: 'sash', skin: 'skin_light', hat: 'cap', feet: 'shod', hair: 'topknot', beard: true, pose: 'stand' });
   }
@@ -218,6 +218,20 @@ function trades() {
   return tiled('qin-trades', L);
 }
 
+/**
+ * The people who belong to the night (round 8; each `nightKeep: 1`, so they stay when the rest of the street goes home): the keepers on the ward gates' benches (the lane closed
+ * at dusk), the tenders of the gallery's lamp stands with their oil jars, the men warming themselves at the ramps' braziers. Built last: its own rng, so no other figure's seed moves.
+ */
+function nightFolk() {
+  const rand = rng(220), L = [], FL = PIT.floor + 0.02;
+  const fig = (at, rot, y, o = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'hose', cloth: pick(rand, ['cloth_brown', 'cloth_grey', 'cloth_ochre']), cloth2: 'cloth_brown', over: 'belt', skin: pick(rand, ['skin_medium', 'skin_light']), hat: 'none', feet: 'shod', hair: 'topknot', beard: rand() < 0.4, nightKeep: 1, ...o });
+  for (const [x, z] of wardGates()) fig([x - 1.1, z + 1.2], -Math.PI / 2, 0, { pose: 'sit', dress: 'robe', legs: undefined, over: 'sash', hat: 'cap', cloth: 'cloth_black' });   // on the keeper's bench, facing the lane
+  const zc = rampZ(1);
+  for (const [x, dz] of [[122.7, -8.4], [119.3, 11.5]]) fig([x, zc + dz], Math.PI / 2, FL, { carry: 'pot', hair: 'topknot' });
+  for (let i = 0; i < 3; i++) for (const s of [-1, 1]) { const w = RAMP.w / 2 + 0.55 + 1.6; fig([PIT.x1 + RAMP.len + 3.5, rampZ(i) + s * w], Math.PI / 2, 0, { pose: 'squat', cloth: 'cloth_grey' }); }
+  return tiled('qin-night', L);
+}
+
 let CACHE = null;
 export async function town() {
   if (CACHE) return CACHE;
@@ -225,7 +239,7 @@ export async function town() {
   plans.push(base('qin-road', [{ t: 'qin_road', x0: -RADIUS + 14, x1: RADIUS - 14 }, { t: 'qin_pavilion', at: [-150, ROAD.z0 - 6] }, { t: 'qin_pavilion', at: [170, ROAD.z1 + 6] }]));
   plans.push(base('qin-yard', [{ t: 'qin_yard' }, { t: 'qin_haul' }, { t: 'qin_sledges' }]));
   plans.push(base('qin-shops', shopLots().map((l) => ({ t: 'qin_shop', ...l }))));
-  plans.push(base('qin-market', [{ t: 'qin_market' }, ...Q]));
+  plans.push(base('qin-market', [{ t: 'qin_market' }, { t: 'qin_she', at: [14, 63] }, ...Q]));
   plans.push({ ...base('qin-stalls', S), style: 'life' });
   plans.push({ ...base('qin-army', [{ t: 'qin_army' }]), style: 'life', nocollide: true });          // Pit 1's soldiers: drawn each within its own reach
   plans.push({ ...base('qin-people', people().map(offWalk)), style: 'life' });
@@ -235,7 +249,7 @@ export async function town() {
   plans.push(base('qin-workshops', ws.map((l) => ({ t: K.workshop, tier: l.tier, rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l), trade: l.trade }))));
   for (let i = 0; i < houses.length; i += 70) plans.push(base(`qin-town-${i / 70}`, houses.slice(i, i + 70).map((l) => ({ t: K[l.kind], tier: l.tier, rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l) }))));
   plans.push(base('qin-wards', wardGates().map((at) => ({ t: 'qin_ward_gate', at }))));
-  plans.push(...frontLife(), ...insideLife(), ...trades());
+  plans.push(...frontLife(), ...insideLife(), ...trades(), ...nightFolk());
   void MWALL;
   return (CACHE = plans);
 }

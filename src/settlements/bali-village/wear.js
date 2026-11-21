@@ -6,12 +6,23 @@ import '../../styles/balinese/index.js';
 import { STYLES } from '../../core/build.js';
 import { box } from '../../core/geom.js';
 import { hashAt } from './nightlight.js';
+import { canang } from '../../styles/balinese/kit.js';
 
 /**
  * bali_wear: { lane: [[x, z0, z1, y]…] (a worn lane along z at x, from z0 to z1, ground level y), damp: [[x, z, y]…] (a damp patch about a point) } — the lane is
  * pieces 1.1–2.3 m long, 0.6–0.95 m wide, 12 mm proud, with a hand's gap between; a damp patch is a few overlapping slabs of the damp plaster's green-grey.
  */
-function wear({ lane = [], damp = [] }, ctx) {
+function wear({ lane = [], damp = [], paths = [] }, ctx) {
+  // paths: [[xa, za, xb, zb, y]…] — an axis-aligned way worn by feet: dark slabs 0.7–1.0 m wide across it, gapped, 10 mm proud (the gate's foot and the way to a stall's steps)
+  for (const [xa, za, xb, zb, y] of paths) {
+    const alongX = Math.abs(xb - xa) > Math.abs(zb - za), a = alongX ? xa : za, b = alongX ? xb : zb, lo = Math.min(a, b), hi = Math.max(a, b), c0 = alongX ? za : xa;
+    for (let t = lo; t < hi - 0.45;) {
+      const l = 0.55 + 0.4 * hashAt(xa + t, za + t, 61), w = 0.7 + 0.3 * hashAt(xa - t, za, 62), c = c0 + (hashAt(xa, za + t, 63) - 0.5) * 0.25;
+      if (t + l > hi) break;
+      ctx.bag.add('andesite', alongX ? box(t, y, c - w / 2, t + l, y + 0.01, c + w / 2) : box(c - w / 2, y, t, c + w / 2, y + 0.01, t + l));
+      t += l + 0.08 + 0.2 * hashAt(xa + t, za, 64);
+    }
+  }
   for (const [x, za, zb, y] of lane) {
     const lo = Math.min(za, zb), hi = Math.max(za, zb);
     for (let z = lo + 0.3; z < hi - 0.5;) {
@@ -29,9 +40,26 @@ function wear({ lane = [], damp = [] }, ctx) {
   }
 }
 
+/**
+ * bali_treadwear: { c: [x, z], gap, depth, y, rise } — the split gate's stair: the middle of each tread rubbed smooth by the feet that cross it (pale slabs 8 mm proud, the lane's continuation), and the little offerings (canang sari) set at its
+ * edges by those who pass and at the feet of the two guardians outside the gate.
+ */
+function treadwear({ c: [cx, cz], gap = 5, depth = 3.6, y = 0, rise = 1.2 }, ctx) {
+  // (one worn slab on each tread: the stair rises to the north, its treads as the style's `steps` cuts them)
+  const top = y + rise, n = Math.max(1, Math.round(rise / 0.17)), zs = cz + depth / 2, td = depth / n;
+  for (let i = 0; i < n; i++) {
+    const zn = zs - td * (i + 1), yt = y + rise * (i + 1) / n, w = 1.3 + 0.4 * hashAt(cx, zn, 72), c = cx + (hashAt(cx, zn, 73) - 0.5) * 0.3;
+    ctx.bag.add('tuff_hewn', box(c - w / 2, yt, zn + 0.04, c + w / 2, yt + 0.008, zn + td - 0.03));
+  }
+  const side = gap / 2 - 0.6;
+  canang(ctx, cx + side, top, cz - depth / 2 + 0.25, 3);
+  for (const s of [-1, 1]) canang(ctx, cx + s * (gap / 2 + 4.4 + 0.55) - s * 0.6, y, cz + depth / 2 + 0.75, s > 0 ? 1 : 2);
+}
+
 let done = false;
 export function registerWear() {
   if (done) return; done = true;
   STYLES.balinese.elements.bali_wear = wear;
+  STYLES.balinese.elements.bali_treadwear = treadwear;
 }
 registerWear();
