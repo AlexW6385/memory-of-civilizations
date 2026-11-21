@@ -49,8 +49,8 @@ export function shopWalks() {
     const side = du > w / 2 ? 1.1 : -1.1, ue = Math.max(1.4, Math.min(w - 1.4, du + side * 1.8));
     const P = (u, d) => F.at(u + off, d);
     if (l.open === 'fleischhauer' && l.front === 'w') continue;   // its pavement is blocked 1.4 m before the door (not found why): no route there
-    const dd = 2.6;
-    const route = l.open === 'weinstube' ? [P(du, 3.0), P(du, 0.6), P(du, -T - 1.2), P(du, 0.6), P(du, 3.0)]   // a table stands in the aisle of the Weinstube
+    const dd = 2.6, uo = Math.max(1.4, Math.min(w - 1.4, du - side * 1.8));
+    const route = l.open === 'weinstube' ? [P(du, 3.0), P(du, 0.6), P(du, -T - 1.2), P(uo, -T - 1.8), P(uo, -T - 3.6)]   // a table stands in the aisle of the Weinstube: the way bends round it
       : [P(du, 3.0), P(du, 0.6), P(du, -T - 1.2), P(du, -T - dd), P(ue, -T - dd - 0.4), P(du, -T - dd), P(du, -T - 1.2), P(du, 0.6), P(du, 3.0)];
     route.y0 = 0;
     out.push(route);

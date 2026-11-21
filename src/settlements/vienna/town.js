@@ -184,7 +184,7 @@ function night(furn, houses) {
   const lamps = [...furn.filter((e) => e.t === 'gaslamp').map((e) => [e.at[0], e.at[1], e.y ?? 0, Math.abs(e.at[1] + 230) < 26])];
   const lotsLit = houses.filter((e) => e.lod <= 1 && Math.hypot((e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2) < LIT_R);
   const trams = furn.filter((e) => e.t === 'tram').map((e) => ({ at: e.at, rot: e.rot, y: e.y }));
-  return base('vienna-night', [{ t: 'vienna_night', lamps, lots: lotsLit, cafe: CAFE, trams }], { nocollide: true });
+  return base('vienna-night', [{ t: 'vienna_night', lamps, lots: lotsLit, cafe: CAFE, sec: SEC, trams }], { nocollide: true });
 }
 const LIT_R = 250;
 

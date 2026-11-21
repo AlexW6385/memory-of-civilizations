@@ -133,11 +133,25 @@ function tramLight(H, { at: [cx, cz], rot = 0, y = 0 }) {
   }
 }
 
+/** The Secession at night (secession.js: portal 3.4 m wide at 2.7 m inside the front, the transom over the doors, the two tripod bowls of flame on the wall tops at +-8.8 m, 3.2 m in). The vestibule's lamp shows through the glazed transom and the door's gaps, the steps and the forecourt take its spill and the flames' glow. [inferred] */
+function secessionLight(H, [x0, z0, x1]) {
+  const cx = (x0 + x1) / 2, zf = z0 + 2.7 + 0.04, FL = 0.35, WH = 8.4;
+  H.quad([cx - 1.65, FL + 4.3, zf], [cx + 1.65, FL + 4.3, zf], [cx + 1.65, FL + 4.75, zf], [cx - 1.65, FL + 4.75, zf], [0, -1], 0.78);
+  // a hair of light down the meeting of the leaves
+  H.quad([cx - 0.06, FL + 0.2, zf], [cx + 0.06, FL + 0.2, zf], [cx + 0.06, FL + 3.6, zf], [cx - 0.06, FL + 3.6, zf], [0, -1], 0.5);
+  H.floor(cx, 0.1, z0 - 0.4, 3.6, 2.6, [1, 0], 12, 0.6);
+  for (const s of [-1, 1]) {
+    H.ball(cx + s * 8.8, WH + 2.3, z0 + 3.2, 1.7, 0.72);
+    H.floor(cx + s * 8.8, WH + 0.02, z0 + 3.2, 2.6, 2.6, [1, 0], 10, 0.45);
+  }
+}
+
 /** vienna_night: { lamps: [[x, z, y, ring]…], lots: [mietshaus elements], cafe: rect } — all the town's halo, one mesh. */
 export function viennaNight(el, { bag }) {
   const H = new Halo();
   for (const [x, z, y, ring] of el.lamps || []) lampLight(H, x, y ?? 0, z, !!ring);
   if (el.cafe) cafeLight(H, el.cafe);
+  if (el.sec) secessionLight(H, el.sec);
   for (const t of el.trams || []) tramLight(H, t);
   for (const lot of el.lots || []) mietshaus({ ...lot, night: true, simple: false }, { bag: recorder(H, lot), col: NO_COL, lights: [] });
   H.flush(bag);
