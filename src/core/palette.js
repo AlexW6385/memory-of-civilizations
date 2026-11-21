@@ -170,6 +170,9 @@ const SPECS = {
   limestone_core:   { color: '#b59a6e', roughness: 0.92, kind: 'ashlar', course: 0.75, block: 1.2 },
   basalt:           { color: '#3b3a38', roughness: 0.6, kind: 'paving', course: 1.0, block: 1.3 },
   mud_plaster:      { color: '#a68a66', roughness: 0.95, kind: 'smooth' },
+  // worn ground: earth beaten hard by feet (a little darker and greyer than loose earth, smooth) and stone worn pale and smooth, for wear patches (src/core/wearpatch.js)
+  earth_trodden:    { color: '#917150', roughness: 0.92, kind: 'smooth' },
+  stone_worn:       { color: '#b9a688', roughness: 0.72, kind: 'smooth' },
   // the Sahel (Djenné): banco — mud plaster renewed every year, warm brown, its surface smoothed
   // by hand; palm-wood beams (toron) standing out of the walls
   banco:            { color: '#9c7451', roughness: 0.97, kind: 'rock' },

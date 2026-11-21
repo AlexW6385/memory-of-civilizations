@@ -5,6 +5,8 @@ import '../../styles/haida/index.js';
 import './nightlight.js';
 import { box, rod, placer, frame } from '../../styles/haida/util.js';
 import { STYLES } from '../../core/build.js';
+import { wearPatches } from '../../core/wearpatch.js';
+import { houses, toWorld, height, LANDMARK } from './layout.js';
 
 let done = false;
 export function registerWear() {
@@ -20,6 +22,15 @@ export function registerWear() {
     const T = el.tiers, yL = g - 0.4, yLo = g - 0.8, fr = 1.4;
     add('wood_dark', box(-0.65, yL + 0.07, -T.hd + fr - 0.12, 0.65, yL + 0.074, -T.hd + fr + 0.02));
     add('wood_dark', box(-0.65, yLo + 0.07, -T.hd + fr + 1.4 - 0.12, 0.65, yLo + 0.074, -T.hd + fr + 1.4 + 0.02));
+    // the way to the chief's door: the earth of the terrace beaten bare from the shore up to the foot of the frontal pole, in ragged patches that thin out toward the beach
+    if (el.landmark) {
+      const H = houses()[LANDMARK], P = [];
+      for (let k = 0; k < 11; k++) {
+        const v = -hd - 0.9 - k * 0.8, u = (k % 2 ? 0.25 : -0.2) * (k / 10), [x, z] = toWorld(H, u, v);
+        P.push([x, z, 0.95 - 0.06 * k, 0.8 - 0.03 * k, el.yaw + 0.5 * (k % 3 - 1), { layers: k < 4 ? 4 : 3, flecks: 3 }]);
+      }
+      ctx.bag.add('earth_trodden', wearPatches(P, { ground: height, lift: 0.006 }));
+    }
     // paddles leaned against the front wall at the corners (blade down on the ground, the shaft against the planks), clear of the door's lane
     if (el.landmark) for (const [u, lean] of [[-el.w / 2 + 1.1, 0.0], [-el.w / 2 + 1.45, 0.1], [el.w / 2 - 1.2, -0.05], [el.w / 2 - 1.55, 0.08]]) {
       add('timber', rod([u, g + 0.5, -hd - 0.22], [u + lean, g + 2.0, -hd - 0.12], 0.028, 5));

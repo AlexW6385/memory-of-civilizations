@@ -5,6 +5,7 @@
 import '../../styles/rapanui/index.js';
 import './nightlight.js';
 import { lathe } from '../../core/geom.js';
+import { wearPatches } from '../../core/wearpatch.js';
 import { STYLES } from '../../core/build.js';
 import { hashAt } from './nightlight.js';
 import { ROAD, height } from './layout.js';
@@ -51,14 +52,20 @@ export function registerWear() {
   });
   E.plaza_dress = wrap(E.plaza_dress, (el, bag) => {
     const y0 = el.y ?? 0.12; for (const [x, z] of [[-34, 71], [37, 69], [-16, 94]]) ash(bag, x, y0 - 0.02, z, 1.4, 2.1);
-    // the statue road's last stretch: the earth beaten dark by the hauling teams and the sledge-less drag, along the way into the village [inferred]
+    // the statue road's last stretches: the earth beaten hard by the hauling teams, along the way into the village, in ragged overlapping patches on the ground under them [inferred]
+    const P = [];
     for (let i = ROAD.length - 3; i < ROAD.length - 1; i++) {
-      const [ax, az] = ROAD[i], [bx, bz] = ROAD[i + 1], L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / 1.6);
+      const [ax, az] = ROAD[i], [bx, bz] = ROAD[i + 1], L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / 1.5), ang = Math.atan2(bz - az, bx - ax);
       for (let k = 0; k < n; k++) {
-        const t0 = k / n, t1 = (k + 1) / n, a = [ax + (bx - ax) * t0, az + (bz - az) * t0], b = [ax + (bx - ax) * t1, az + (bz - az) * t1];
-        tread(bag, a, b, height((a[0] + b[0]) / 2, (a[1] + b[1]) / 2) + 0.02, 3.4, 40 + i * 50 + k, 'hide_brown', 0.8);
+        const t = (k + 0.5) / n, off = (hashAt(ax, az, 90 + k) - 0.5) * 1.6, x = ax + (bx - ax) * t - (bz - az) / L * off, z = az + (bz - az) * t + (bx - ax) / L * off;
+        P.push([x, z, 1.1 + 0.5 * hashAt(x, z, 91), 0.85 + 0.3 * hashAt(x, z, 92), ang + (hashAt(x, z, 93) - 0.5) * 0.6, { layers: 3, flecks: 3 }]);
       }
     }
+    bag.add('earth_trodden', wearPatches(P, { ground: height, lift: 0.012 }));
+    // the plaza's middle walk: from the road's end straight across the pebbles toward the ahu, the pebbles scuffed bare in a ragged strip
+    const W = [];
+    for (let z = 61; z < 97; z += 1.3) { const x = -4 + (z - 61) * 0.11 + (hashAt(z, 5, 94) - 0.5) * 1.1; W.push([x, z, 0.95 + 0.3 * hashAt(x, z, 95), 0.8 + 0.2 * hashAt(x, z, 96), Math.PI / 2 + (hashAt(x, z, 97) - 0.5) * 0.5, { y: y0, layers: 3, flecks: 3 }]); }
+    bag.add('earth_trodden', wearPatches(W, { lift: 0.006 }));
   });
   E.approach_dress = wrap(E.approach_dress, (el, bag) => ash(bag, 8, el.ground(8, 60) - 0.02, 60, 0.9, 1.5));
 }
