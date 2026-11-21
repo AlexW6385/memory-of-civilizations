@@ -3,7 +3,7 @@
 // besides the merged tiles' batch — one draw more for every material of every tile. `unshare` wraps a bag so that no two pieces are the same shape:
 // the normals of each piece lean by a hair (so that it is no longer taken for an axis-aligned box) and its size varies by a few millimetres from a hash
 // of its own place (never a counter or Math.random). The pieces then merge into the tiles' batches, which are one draw for the whole settlement.
-// The picture is the same to the millimetre; the memory is not (the copies are no longer shared: Versailles has the room, geo-one).
+// The picture is the same to the millimetre. Only the far (simple) houses and the stables are varied: the near houses stay instanced (geo-one 106 → 72 MB, arrival 374 → 380 draws).
 import { STYLES } from '../../core/build.js';
 import '../../styles/classical_fr/index.js';
 import { townHouse } from '../../styles/classical_fr/townhouse.js';
@@ -38,7 +38,7 @@ export function unshare(bag, amp = 0.006, rel = 0.03) {
 }
 
 /** { t: 'vs_house' }: the classical_fr town house, its pieces varied (far tiles by up to 6 cm, near ones by 6 mm). */
-function vsHouse(el, ctx) { townHouse(el, { ...ctx, bag: unshare(ctx.bag, el.simple ? 0.06 : 0.006, el.simple ? 0.08 : 0.03) }); }
+function vsHouse(el, ctx) { townHouse(el, el.simple ? { ...ctx, bag: unshare(ctx.bag, 0.06, 0.08) } : ctx); }
 /** { t: 'vs_ecurie' }: the royal stables, their pieces varied. */
 function vsEcurie(el, ctx) { ecurie(el, { ...ctx, bag: unshare(ctx.bag, 0.006, 0.03) }); }
 Object.assign(STYLES.classical_fr.elements, { vs_house: vsHouse, vs_ecurie: vsEcurie });
