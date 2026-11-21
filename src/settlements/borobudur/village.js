@@ -27,7 +27,7 @@ function person(rand, at, y, rot, o = {}) {
 
 /** The pilgrims' way: the gate, the stalls and halls, and what stands and is sold along it. */
 function way() {
-  const E = [], L = [], rand = rng(5150), stalls = wayStalls();
+  const E = [], L = [], K = [[], []], rand = rng(5150), stalls = wayStalls();
   E.push({ t: 'gapura', at: [WAY.gate, 0], half: 2.6, h: 5.6 });
   for (const s of stalls) {
     const [x, z] = s.at, face = s.side < 0 ? 's' : 'n', toward = [0, -s.side];
@@ -47,7 +47,8 @@ function way() {
     }
     E.push({ t: 'warung', at: s.at, face, w: s.w, kind: s.kind, seed: s.seed });
     // the seller behind the counter (the floor is 0.4 up), buyers and the hens before it
-    L.push(person(rand, [x, z - s.side * 0.55], 0.4, faceTo(toward), { pose: 'stand', man: rand() < 0.4, hair: 'bun' }));
+    const keeper = person(rand, [x, z - s.side * 0.55], 0.4, faceTo(toward), { pose: 'stand', man: rand() < 0.4, hair: 'bun' });
+    if (x > 95 && x < 190 && !nearArrival(x, z - s.side * 0.55)) K[x < 142 ? 0 : 1].push(keeper); else L.push(keeper);   // the sellers of the first stretch are built into near plans (§21), the rest stay life figures
     const nb = 1 + (rand() < 0.6 ? 1 : 0) + (rand() < 0.3 ? 1 : 0);
     for (let k = 0; k < nb; k++) L.push(person(rand, [x - 1.2 + k * 1.3 + rand() * 0.4, z + toward[1] * (1.6 + rand() * 0.8)], 0, faceTo([0, s.side]) + (rand() - 0.5) * 0.6, { pose: rand() < 0.4 ? 'talk' : 'stand', carry: rand() < 0.4 ? 'basket' : 'none' }));
     if (rand() < 0.5) L.push({ t: 'chickens', kind: 'hen', n: 3, at: [x + 1.8 * (rand() < 0.5 ? 1 : -1), z + toward[1] * 2.6], y: 0, seed: s.seed + 1 });
@@ -85,7 +86,7 @@ function way() {
   }
   E.push({ t: 'umbul', at: [WAY.gate - 4, 2.8], y: 0, h: 5.6, seed: 91 }, { t: 'umbul', at: [WAY.gate - 4, -2.8], y: 0, h: 5.6, seed: 92 });
   // resin torches on bamboo poles along the way (§20.2): a pair before the gate's pylons, then one every 14 m, alternating sides, none in the visitor's view at the arrival
-  for (const sd of [-1, 1]) E.push({ t: 'bb_torch', at: [WAY.gate - 3.0, sd * 3.6], y: 0, seed: sd });
+  for (const sd of [-1, 1]) E.push({ t: 'bb_torch', at: [WAY.gate - 3.0, sd * 3.6], y: 0, seed: sd }, { t: 'bb_torch', at: [WAY.gate + 4.2, sd * 3.9], y: 0, seed: sd + 5 });   // and a pair on the gate's outer face, which the visitor at the arrival sees
   for (let x = 70, k = 0; x < WAY.x1 - 30; x += 14, k++) {
     const side = k % 2 ? 1 : -1;
     if (nearArrival(x, side * 3.3, 1.8) || Math.abs(x - WAY.gate) < 8) continue;
@@ -116,7 +117,8 @@ function way() {
   // nothing in the visitor's view at the arrival
   const clear = L.filter((e) => !(e.at && nearArrival(e.at[0], e.at[1])));
   L.length = 0; L.push(...clear);
-  return [base('borobudur-way', E), life('borobudur-way-life', L, [170, 0], 230)];
+  const keepers = K.map((list, i) => ({ ...base(`borobudur-keepers-${i}`, [{ t: 'bb_keepers', list }]), center: [i ? 166 : 118, 0], near: 70 })).filter((pl) => pl.elements[0].list.length);
+  return [base('borobudur-way', E), ...keepers, life('borobudur-way-life', L, [170, 0], 230)];
 }
 
 /** The pilgrims' lodgings (layout.js WAYHOUSES): the household's things before each door, someone on the veranda step, a bench, hens, a pot of water. */

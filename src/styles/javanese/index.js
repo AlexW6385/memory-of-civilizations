@@ -528,6 +528,9 @@ const SCENES = [
   (lite) => [...pavilion(-0.22, 1, lite), ...seated(-0.22, 0.85, 0.08, lite), ...stand(0.08, 0.8, -1, 'whisk', lite), ...stand(0.22, 0.8, 1, 'lotus', lite), ...kneel(0.38, 0.85), ...(lite ? [] : [...apsara(0.18, 0.9), ...apsara(0.34, 0.8, 0.7)])],
   (lite) => [...stand(-0.4, 1, 1, 'lotus', lite), ...stand(-0.24, 1, -1, 'none', lite), ...stand(-0.08, 0.96, 1, 'whisk', lite), ...stand(0.08, 1, -1, 'lotus', lite), ...tree(0.34, 1.05, lite)],
   (lite) => [...tree(-0.34, 1, lite), ...seated(-0.1, 1.1, 0, lite), ...deer(0.12, 1), ...stand(0.3, 0.9, -1, 'lotus', lite), ...tree(0.45, 0.8, lite)],
+  // two more from the same figures: worshippers kneeling to a seated teacher with apsaras above; a grove with deer and a pilgrim
+  (lite) => [...kneel(-0.38, 0.85), ...seated(-0.04, 1.05, 0, lite), ...kneel(0.34, 0.8), ...(lite ? [] : [...apsara(-0.24, 0.8, 0.72), ...apsara(0.26, 0.9, 0.78)]), ...stand(0.46, 0.8, 1, 'whisk', lite)],
+  (lite) => [...tree(-0.42, 1.05, lite), ...deer(-0.1, 1.1), ...deer(0.14, 0.8), ...stand(0.34, 0.95, -1, 'lotus', lite), ...tree(0.5, 0.75, lite)],
 ];
 /**
  * A relief panel on a face at c looking along N (its plane at c), w wide and h high from y0: a field with a raised frame of two
@@ -551,9 +554,14 @@ function panel(bag, c, N, y0, w, h, scene, lite = false, lod = 0, seq = 0) {
     bag.add(A, fromTriangles(t)); bag.add(A, S.geometry());
     return;
   }
+  // each panel's own place chooses its composition among the five, whether it is mirrored, a little scale and a shift along the field: no two neighbours alike, and the panels merge into the monument's mesh
+  const hq = jit(c[0] * 0.71 + y0 * 1.9, c[1] * 0.53 + y0 * 0.7), hr = jit(c[1] * 1.13 + 7.1, c[0] * 0.37 + y0), hs = jit(c[0] * 0.29 + 3.3, c[1] * 1.41 + y0 * 0.3);
   for (let i = 0; i < nC; i++) {
-    const du = -iw / 2 + (i + 0.5) * su;
-    for (const p of (one ? scene() : SCENES[(scene + i) % SCENES.length](lite))) rel(p.o.map(([u, v]) => [du + u * ku, b1 + b2 + 0.02 + v * sv]), p.a, p.b);
+    const du = -iw / 2 + (i + 0.5) * su + (one ? 0 : (hr - 0.5) * 0.08 * su), kk = one ? ku : ku * (0.94 + 0.1 * hs), flip = !one && hq < 0.5;
+    for (const p of (one ? scene() : SCENES[(scene + i + Math.floor(hq * 7)) % SCENES.length](lite))) {
+      const pts = p.o.map(([u, v]) => [du + (flip ? -u : u) * kk, b1 + b2 + 0.02 + v * sv]);
+      rel(flip ? pts.reverse() : pts, p.a, p.b);
+    }
   }
   bag.add(A, fromTriangles(t));
 }

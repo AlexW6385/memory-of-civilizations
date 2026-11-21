@@ -132,9 +132,12 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     if (hashAt(cx, cz, 11) < (el.interior ? 0.95 : 0.4)) {
       // the door ajar on a lit room: a sheet of light in the doorway, its pool over the veranda and, fainter, at the stair's foot
       const k = el.interior ? 0.42 : 0.3, a = P(u0 - 0.8, vw - 0.05), b = P(u0 + 0.8, vw - 0.05);
-      H.quad([a[0], fl + 0.05, a[1]], [b[0], fl + 0.05, b[1]], [b[0], fl + 2.0, b[1]], [a[0], fl + 2.0, a[1]], o, k);
-      const v = P(u0, vw + 0.7); H.floor(v[0], fl + 0.04, v[1], 1.5, 1.1, 8, k + 0.15);
-      const g = P(su, D / 2 + run + 0.7); H.floor(g[0], 0.04, g[1], 1.9, 1.9, 8, k * 0.75);
+      // lit unevenly: brightest low where the fire is, fading up the door; a dark leaf of the door ajar down one jamb; a wider, stronger spill over the veranda and the stair's foot
+      const nn = (f) => { const q = Math.sqrt(1 - f * f); return [o[0] * q, f, o[1] * q]; }, lo = nn(Math.min(0.9, k + 0.3)), hi = nn(Math.max(0.12, k - 0.22)), la = P(u0 - 0.8 + 0.5, vw - 0.05), lb = P(u0 + 0.8, vw - 0.05);
+      const A0 = [la[0], fl + 0.05, la[1]], B0 = [lb[0], fl + 0.05, lb[1]], B1 = [lb[0], fl + 2.0, lb[1]], A1 = [la[0], fl + 2.0, la[1]];
+      H.tri(A0, lo, B0, lo, B1, hi); H.tri(A0, lo, B1, hi, A1, hi);
+      const v = P(u0, vw + 0.9); H.floor(v[0], fl + 0.05, v[1], 2.0, 1.5, 10, k + 0.3);
+      const g = P(su, D / 2 + run + 0.8); H.floor(g[0], 0.05, g[1], 2.4, 2.4, 10, k + 0.1);
     }
     if (el.interior && el.variant !== 2 && el.variant !== 4) {
       // the hearth fire in the back corner (the corner of `houseFit`'s hearth)
@@ -186,12 +189,39 @@ function torch({ at, y = 0, h = 2.3, seed = 0 }, { bag, col }) {
   H.flush(bag);
 }
 
+/**
+ * bb_gallerylamps { c, base, squares }: the lamps of the monument's galleries (§21): a small stone lamp at the foot of each gallery's main wall every 6-12 m along the pilgrims' way round it
+ * (skipping the stairs' lanes and the redents' corners), a clay flame in it as a glow, and its pool on the paving. The gallery lies between the wall (half-width s.a, +p over the middle third)
+ * and the balustrade below; its floor is the height of the terrace before. [inferred: oil lamps at a pilgrim's circuit; no source for c. 825]
+ */
+function galleryLamps({ c: [cx, cz], base, squares }, { bag, col }) {
+  const H = new Halo(), p = base.p;
+  let prevA = base.a + 0.2, prevY = base.h;
+  for (const s of squares) {
+    const mid = (s.a + prevA) / 2, t = s.a / 3;
+    for (const [sx, sz, nx, nz] of [[1, 0, 0, -1], [1, 0, 0, 1], [0, 1, -1, 0], [0, 1, 1, 0]]) {
+      for (let u = -s.a + 4 + 3 * hashAt(cx + s.a, nx * 5 + sx, 41); u < s.a - 3; u += 6 + 6 * hashAt(u + sx * 3, s.a + nz * 7, 42)) {
+        if (Math.abs(u) < 5.5 || Math.abs(Math.abs(u) - t) < 2.2) continue;
+        const wall = Math.abs(u) < t ? s.a + p : s.a, lx = cx + sx * u + nx * (wall + 0.5), lz = cz + sz * u + nz * (wall + 0.5);
+        const q = hashAt(lx, lz, 43), hh = 0.46 + 0.14 * q, w = 0.15 + 0.03 * hashAt(lx, lz, 44), y = prevY;
+        bag.add('andesite', joined([box(lx - w, y, lz - w, lx + w, y + hh, lz + w), box(lx - w - 0.04, y + hh, lz - w - 0.04, lx + w + 0.04, y + hh + 0.07, lz + w + 0.04)]));
+        col.circle(lx, lz, w + 0.05, y, y + hh + 0.07);
+        H.ball(lx, y + hh + 0.16, lz, 0.13, 1.0);
+        H.ball(lx, y + hh + 0.2, lz, 0.85 + 0.2 * q, 0.7);
+        H.floor(lx - nx * 0.9, y + 0.05, lz - nz * 0.9, 3.0 + 0.5 * q, 3.0 + 0.5 * q, 10, 0.6);
+      }
+    }
+    prevA = s.a; prevY = s.y;
+  }
+  H.flush(bag);
+}
+
 let done = false;
 /** Wraps the javanese style's elements that carry flames or windows (once, after the style has registered), and adds bb_torch. */
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.javanese.elements;
   for (const k of ['rite', 'rumah', 'warung', 'pendopo', 'hallfit', 'cetiya']) if (typeof E[k] === 'function') E[k] = wrap(k, E[k]);
-  E.bb_torch = torch;
+  E.bb_torch = torch; E.bb_gallerylamps = galleryLamps;
 }
 registerNight();
