@@ -4,6 +4,7 @@
 // from layout.js (the chapel's footprint and the hall's come from plan.js's numbers, written here as the court's skips).
 
 import { RIVER, CHAPEL, PALACE, inRect } from './layout.js';
+import { folk } from './court-folk.js';
 
 function lrng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const faceTo = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
@@ -101,6 +102,6 @@ export function courtLife() {
   L.push({ t: 'animal', kind: 'dog', at: [-281.6, 26.4], y: y0, rot: 2.6, seed: 67, pose: 'lie' });
   for (const z of [-34.6, -29.6]) L.push({ t: 'barrel', at: [-273.4, z], y: y0, rot: 0, n: 1, seed: z | 0 });
   // (no lantern in the court: none is attested for 1248)
-  return { id: 'paris-court-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-250, -10], facing: 'e' }, bounds: [PALACE[0], PALACE[1], PALACE[2] + 4, PALACE[3]], rooms: [], elements: L };
+  return { id: 'paris-court-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-250, -10], facing: 'e' }, bounds: [PALACE[0], PALACE[1], PALACE[2] + 4, PALACE[3]], rooms: [], elements: [...L, ...folk(SKIP)] };
 }
 void inRect;
