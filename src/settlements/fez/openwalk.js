@@ -47,5 +47,4 @@ const CIVIC = [
   [[48, -2.9], [60, -2.9], [75, -2.9]],                                                    // into the cloth souk
   [[48, -21.8], [60, -21.8], [73, -21.8]],                                                 // into the spice souk, the Attarine
   [[125, -21], [133, -24], [147, -24], [155, -24], [162, -24]],                            // the Qarawiyyin: west naves and on to the middle of the sahn
-  [[208, 76], [216, 76], [222, 76]],                                                       // the Chouara: from the west gap to the edge of the vats
 ];
