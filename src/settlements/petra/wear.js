@@ -9,7 +9,7 @@ import { STYLES } from '../../core/build.js';
 import { houseLayout } from '../../styles/nabataean/house.js';
 import { hashAt } from './nightlight.js';
 
-const WORN = 'sandstone_dressed';
+const WORN = 'mud_plaster';
 
 function houseWear(el, bag) {
   const L = houseLayout(el), { P, y } = L, put = (u0, v0, u1, v1, y0, y1) => { const a = P(u0, v0), b = P(u1, v1); bag.add(WORN, box(Math.min(a[0], b[0]), y0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y1, Math.max(a[1], b[1]))); };
