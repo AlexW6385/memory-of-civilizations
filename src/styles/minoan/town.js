@@ -128,7 +128,7 @@ function dwelling(el, ctx) {
       const jar = (u, v, h, r, yy) => { const [x, z] = FR.P(u, -v); bag.add('terracotta', lathe([[0.001, 0], [r * 0.55, 0], [r, h * 0.45], [r * 0.7, h * 0.85], [r * 0.75, h], [0.001, h]], 8).translate(x, yy, z)); };
       for (let i = 0; i < 4; i++) jar(uC + 0.2 + i * (DW - 0.9 - 0.3) / 3, 0.2 + (i % 2) * 0.22, 0.28 + 0.06 * rand(), 0.09 + 0.03 * rand(), y + 1.04);
       F.at('wood_dark', uD - 0.35, uD - 0.31, y + 1.04, y + 1.4, 0.3, 0.34); F.at('bronze', uD - 0.65, uD - 0.01, y + 1.38, y + 1.4, 0.29, 0.35);
-      F.at('cloth_red', uA + 0.1, uA + 0.55, y + 1.04, y + 1.14, 0.12, 0.5); F.at('linen', uA + 0.1, uA + 0.55, y + 1.14, y + 1.24, 0.14, 0.48); F.at('cloth_indigo', uA + 0.6, uA + 0.95, y + 1.04, y + 1.12, 0.12, 0.5);
+      F.at('cloth_red', uA + 0.1, uA + 0.55, y + 1.04, y + 1.14, 0.12, 0.5); F.at('cloth_white', uA + 0.1, uA + 0.55, y + 1.14, y + 1.24, 0.14, 0.48); F.at('cloth_red', uA + 0.6, uA + 0.95, y + 1.04, y + 1.12, 0.12, 0.5);
       { const [x, z] = FR.P(uB - 0.18, -0.3); bag.add('wicker', lathe([[0.001, 0], [0.13, 0], [0.16, 0.2], [0.001, 0.2]], 8).translate(x, y + 1.04, z)); }
     }
     F.at(G, du - DW - 0.15, du + DW + 0.15, y - 0.4, y + 0.2, -0.05, 0.4);
