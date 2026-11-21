@@ -1,11 +1,10 @@
-// Nan Madol c. 1300 — wear on what is used and weathering by the climate (docs/settlements/nan-madol.md §14.5): the stone step of each nah worn dark in the
-// middle by bare feet, the matting at its threshold trodden dark, a patch of packed damp earth before it, the green of moss at the foot of the platform's
-// corners (the air is wet, damp 0.92, and the rain frequent), the dark stain of sakau on the slab where the stones strike. Added from here to the style's
+// Nan Madol c. 1300 — wear on what is used and weathering by the climate (docs/settlements/nan-madol.md §14.5): the matting at each nah's threshold trodden dark by bare
+// feet, the dark stain of sakau on the slab where the stones strike. Added from here to the style's
 // `nah` and `sakau` (the style files stay as they were), in materials the plan already holds (no new draw); pure functions of each element's own numbers.
 // Nothing is written anywhere: the Pohnpeians of c. 1300 had no script (§14.5), so no sign, tablet or inscription is made. [inferred throughout]
 import '../../styles/nanmadol/index.js';
 import './nightlight.js';
-import { box, lathe } from '../../core/geom.js';
+import { box } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
 import { STYLES } from '../../core/build.js';
 import { hashAt } from './nightlight.js';
@@ -20,17 +19,8 @@ export function registerWear() {
     const { bag } = ctx, { w, l } = el, ph = el.rank ? 0.7 : 0.45, yaw = el.yaw ?? 0, M = new Matrix4().makeRotationY(yaw).setPosition(el.c[0], 0, el.c[1]);
     const put = (mat, g) => { g.applyMatrix4(M); bag.add(mat, g); };
     const h = (s) => hashAt(el.c[0], el.c[1], s);
-    // the packed earth before the step, darker and damper (the foot-trodden lane), a little off the middle by the house's own hash
-    put('silt', box(-0.55 + 0.2 * (h(1) - 0.5), 0.012, -l / 2 - 1.5, 0.5 + 0.2 * (h(2) - 0.5), 0.016, -l / 2 - 0.55));
     // the step of a commoner's house worn dark in its middle by feet; the matting at the threshold trodden dark
-    if (!el.rank) put('bark_dark', box(-0.3, 0.226, -l / 2 - 0.42, 0.28, 0.236, -l / 2 - 0.2));
     put('bark_dark', box(-0.4 + 0.15 * (h(3) - 0.5), ph + 0.03, -l / 2 + 0.2, 0.4 + 0.15 * (h(4) - 0.5), ph + 0.04, -l / 2 + 0.95));
-    // moss and algae at the foot of the platform's corners where the rain runs off the thatch (the foot stays damp), some corners only
-    for (const [sx, sz, s] of [[-1, -1, 5], [1, -1, 6], [-1, 1, 7], [1, 1, 8]]) {
-      if (h(s) > 0.55) continue;
-      put('palm_leaf', lathe([[0.001, 0], [0.2, 0.01], [0.16, 0.045], [0.001, 0.06]], 7, null, sx * (w / 2 + 0.26), 0, sz * (l / 2 + 0.26)));
-      put('palm_leaf', lathe([[0.001, 0], [0.13, 0.01], [0.1, 0.035], [0.001, 0.045]], 6, null, sx * (w / 2 + 0.42), 0, sz * (l / 2 + 0.1)));
-    }
     return r;
   };
   E.sakau = function stained(el, ctx) {
