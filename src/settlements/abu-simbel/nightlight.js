@@ -65,6 +65,8 @@ export function sites() {
   // the lamp-stands at the Small Temple's door (the south gate is lit by the shops' lamps, the Great Temple's door is lit by the terrace's braziers)
   for (const [x, z, fy] of [[FXS + 4, ZS - 3.2, T], [FXS + 4, ZS + 3.2, T]])
     S.push({ k: 'stand', x, y: fy + 1.5, z, fy, r: 0.55, pool: 1.9 });
+  // the visitor's end of the terrace: four stone lamp-stands where the way from the south meets the forecourt (docs §23)
+  for (const [x, z] of [[-9, 10], [-9, 24], [3, 11], [3, 23]]) S.push({ k: 'stand', x, y: T + 1.5, z, fy: T, r: 0.65, pool: 3.2 });
   // the watch-fires: on the quay, in the masons' yard
   for (const [x, z] of [[QUAY[0] + 9, -10.5], [QUAY[0] + 9, 10.5], [-13, 152]]) { const fy = x > 40 ? QUAY_Y : g(x, z); S.push({ k: 'fire', x, y: fy + 0.6, z, fy, r: 0.95, pool: 2.8 }); }
   // the camp's chapel: the lamps flanking the shrine (the forecourt's by a pedestal)
