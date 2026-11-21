@@ -88,6 +88,7 @@ import * as BOROBUDUR from '../settlements/borobudur/soundmap.js';
 import * as CHICHEN from '../settlements/chichen-itza/soundmap.js';
 import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
 import * as DELPHI from '../settlements/delphi/soundmap.js';
+import * as DUNHUANG from '../settlements/dunhuang/soundmap.js';
 import * as HIMEJI from '../settlements/edo-himeji/soundmap.js';
 import * as SEOUL from '../settlements/joseon-seoul/soundmap.js';
 import * as KYOTO from '../settlements/muromachi-kyoto/soundmap.js';
@@ -129,6 +130,7 @@ import * as ROME from '../settlements/rome/soundmap.js';
 import * as HANCHANGAN from '../settlements/han-changan/soundmap.js';
 import * as HANGZHOU from '../settlements/song-hangzhou/soundmap.js';
 import * as KAIFENG from '../settlements/song-kaifeng/soundmap.js';
+import * as SHAOLIN from '../settlements/shaolin/soundmap.js';
 import * as SYDNEY from '../settlements/sydney/soundmap.js';
 import './voices-sydney.js';
 import * as TANGCA from '../settlements/tang-changan/soundmap.js';
@@ -185,9 +187,9 @@ export const PROFILES = {
   djenne: T({ dove: 1, sparrow: 0.6, kite: 0.5, tropic: 0.3 }, { frogs: 0.6, animals: { goat: 0.6, donkey: 0.5, rooster: 0.6, cattle: 0.4 }, roof: 'flat', adhan: 1 }),
   'edo-himeji': T(EAS, { cicadas: 0.6, frogs: 0.6, animals: withLife({ rooster: 0.4, dog: 0.3, horse: 0.2 }, { canal: 1, market: 0.8, eaves: 1, map: HIMEJI }), roof: 'tile', bells: 'toki' }),
   florence: T(MED, { cicadas: 0.3, animals: withLife({ horse: 0.4, donkey: 0.3, dog: 0.3 }, { market: 1, eaves: 1, map: FLORENCE }), bells: 'angelus-hours' }),
-  shaolin: T({ warbler: 0.5, crow: 0.6 }, { cicadas: 0.4, animals: { dog: 0.2 }, roof: 'tile', bells: 'monastery' }),
+  shaolin: T({ warbler: 0.5, crow: 0.6 }, { cicadas: 0.4, animals: withLife({ dog: 0.3, donkey: 0.3, rooster: 0.4 }, { market: 0.6, map: SHAOLIN }), roof: 'tile', bells: 'shaolin' }),
   'timurid-samarkand': T(NEAR, { animals: withLife({ donkey: 0.5, horse: 0.3, dog: 0.2 }, { market: 1, map: TIMURID }), roof: 'flat', adhan: 1 }),
-  dunhuang: T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: { dog: 0.3, donkey: 0.3, camel: 0.2 }, roof: 'flat', bells: 'monastery' }),
+  dunhuang: T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: withLife({ dog: 0.3, donkey: 0.3, camel: 0.2 }, { market: 0.8, map: DUNHUANG }), roof: 'flat', bells: 'monastery' }),
   'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, roof: 'shingle', bells: null, animals: withLife({ dog: 0.2, crow: 0.2, rooster: 0.25 }, { canal: 1, market: 0.8, eaves: 1, map: KYOTO }) }),
   'abu-simbel': T(NEAR, { animals: { donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
   'qin-xianyang': T(NEAR, { animals: { cattle: 0.5, dog: 0.3, horse: 0.3 }, roof: 'tile' }),
@@ -300,6 +302,8 @@ const HOURS = {
   // Paris 1248: the canonical hours from Notre-Dame's north tower and the parish churches, the curfew bell at 7:30 (the equinox between seven in winter and eight in summer)
   paris: [[2, 'paris:matins'], [5, 'paris:lauds'], [6, 'paris:prime'], [9, 'paris:terce'], [12, 'paris:sext'], [15, 'paris:none'], [17.5, 'paris:vespers'], [19.5, 'paris:curfew']],
   monastery: [[5, 'zhong'], [18.5, 'gu']],
+  // Shaolin: the bell then the drum and the recitation before dawn, the drum then the bell and the evening service at dusk (placed in the towers and the hall: soundmap TEMPLE)
+  shaolin: [[4.2, 'temple-am'], [18.4, 'temple-pm']],
   // Tang Chang'an: Daci'en's bell and drum at dawn and dusk (the street drums sound from the map), the city's drum far off (docs/settlements/tang-changan.md §19)
   'tang-changan': [[4.6, 'temple-am'], [5.1, 'tower:am'], [18.4, 'temple-pm'], [18.7, 'tower:pm']],
   bonsho: [[5.5, 'bonsho'], [18.2, 'bonsho']],
