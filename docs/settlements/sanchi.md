@@ -171,3 +171,8 @@ The walk (`src/settlements/sanchi/walk.js`): from the arrival (0, 55) on the sum
 - Rock pigeons on the Great Stupa's south paving and in the first monastery's court (they come to the offerings).
 - On the tank: two grey geese (the hamsa, the bar-headed goose, is carved on the abacus of Ashoka's pillar [stated: §4, imp-art]; the goose on the water is ours), two ducks; a kingfisher at the north bank by the ghat.
 - Not rigged: zebu, buffalo and peafowl (no model in the engine; the zebu are the life figures'; peafowl are heard, §22). No model was added.
+
+## 24. Wear and writing (item 5)
+
+`src/settlements/sanchi/wear.js` wraps the village house from the settlement's folder [inferred throughout]: the platform's step polished pale and hollowed before the door by bare feet (on every opened house and one in three of the others; the shape varies by the hash of the lot's place), and the damp of the monsoon's splash and rising damp as a dark band at the front wall's foot on some wall bays (a streak above it on a few), clear of the door's lane. Pilgrim-worn steps on the stair, the stupa's thresholds and the monasteries' cell sills are not done.
+- **Writing: none added.** The donors' records are Brahmi; no sign was drawn that could not be checked glyph by glyph here, and §17's railing signs stay signs, not text. No shop signs are lettered (the village's cloth banners carry no script).
