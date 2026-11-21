@@ -265,3 +265,8 @@ Code: `src/styles/modernisme/signs.js` (text and writing), `shops.js` (the board
 - **Worn steps** [inferred: a century of feet is how granite steps wear]: the shops' granite step and the portals' stoop keep their cheeks at full height and are dished 1 cm in the lane to the door with a rounded lip. One centimetre is the most that does not read as coplanar with the pavement (surface-check); a deeper dish would need the pavement lowered. The grime and damp on the lower stone is §5c's.
 - **Not done:** moss (the climate is dry), stains on the pavements, worn tread in the upstairs stairs.
 - Budget: main draws at the arrival 346 (baseline 347), main triangles 3.17 M (baseline 3.07 M, +3.3 %).
+
+## 15. Second pass, narrow form (2026-11-21)
+
+### 15.0 Names off the fascias
+The first pass put invented house names (a Catalan surname after "CASA": PUIG, SERRA, ...) on the longer boards [inferred, no source]. All are removed (`src/styles/modernisme/signs.js`: `HOUSES` gone): every fascia reads the trade word alone, in Catalan or Castilian (FORN, BODEGA, FARMACIA ...), as London's did. No board carries the name of a person, shop or brand.
