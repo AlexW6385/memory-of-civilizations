@@ -30,9 +30,9 @@ export function shopPlans() {
  * [x, z], y0 the street. The door's bay and the partition's depth are the house's own (profile(): the same dice as house.js draws); the stair stands in
  * the first 1.07 m beside the door side's party wall, so inside the door the way bends out of its strip.
  */
-// Open and shopped, but no route is claimed: the walker stops at the stoop foot of the first (a roof shell of the house's own top field reaches it),
-// the stair block fills half the door of the second (3 bays, no upper floor). Both are known gaps, listed in the report.
-const NOT_WALKED = [[49.09, -210.39], [-0.76, -273]];
+// Open and shopped, but no route is claimed: the stair block fills half the door of this one (3 bays, no upper floor), a known gap, listed in the report.
+// (The other that stood here, at 49.09 -210.39, was stopped at its stoop by the top field's shell test, which is now fixed: collide.js, _floorAtTop.)
+const NOT_WALKED = [[-0.76, -273]];
 export function hallWalks(max = 40) {
   const out = [];
   for (const l of [...walkSet()].filter(isOpen).filter((q) => !(q.rect[0] <= HALL[2] + 0.5 && q.rect[1] - HALL[3] < 3))) {

@@ -290,7 +290,7 @@
  },
  "amsterdam-dam": {
   "site": "amsterdam",
-  "hash": "dadfb38b4ae2be2e",
+  "hash": "7bbcdd4bf96c3188",
   "rays": 128,
   "probes": 75905,
   "boxes": [
@@ -348,9 +348,9 @@
     ]
    }
   ],
-  "bytes": 1245922,
-  "seconds": 218,
-  "baked": "2026-11-20"
+  "bytes": 1245869,
+  "seconds": 1115,
+  "baked": "2026-11-21"
  },
  "ananda-temple": {
   "site": "bagan",
@@ -1895,7 +1895,7 @@
  },
  "hagia-sophia": {
   "site": "constantinople",
-  "hash": "dace6c94735add9a",
+  "hash": "07c6539482ac6e43",
   "rays": 128,
   "probes": 77760,
   "boxes": [
@@ -1926,9 +1926,9 @@
     ]
    }
   ],
-  "bytes": 1290289,
-  "seconds": 199,
-  "baked": "2026-11-20"
+  "bytes": 1290258,
+  "seconds": 749,
+  "baked": "2026-11-21"
  },
  "hakka-tulou": {
   "site": "hakka-tulou",
@@ -2318,7 +2318,7 @@
  },
  "isfahan-maidan": {
   "site": "isfahan",
-  "hash": "65dfa5ce1a34a549",
+  "hash": "550f233c62bf2f0e",
   "rays": 128,
   "probes": 60467,
   "boxes": [
@@ -2388,9 +2388,9 @@
     ]
    }
   ],
-  "bytes": 1034626,
-  "seconds": 438,
-  "baked": "2026-11-20"
+  "bytes": 1034874,
+  "seconds": 744,
+  "baked": "2026-11-21"
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
@@ -2997,7 +2997,7 @@
  },
  "mamluk-cairo-hasan": {
   "site": "mamluk-cairo",
-  "hash": "7d00129855888f6d",
+  "hash": "6e55766c0e6e2520",
   "rays": 128,
   "probes": 64925,
   "boxes": [
@@ -3019,9 +3019,9 @@
     ]
    }
   ],
-  "bytes": 1045438,
-  "seconds": 463,
-  "baked": "2026-11-20"
+  "bytes": 1045485,
+  "seconds": 674,
+  "baked": "2026-11-21"
  },
  "manueline-belem": {
   "site": "manueline-lisbon",
@@ -4792,7 +4792,7 @@
  },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
-  "hash": "8f8950fbf7b2ed2b",
+  "hash": "03244fd5dfe5869f",
   "rays": 128,
   "probes": 28237,
   "boxes": [
@@ -4835,9 +4835,9 @@
     ]
    }
   ],
-  "bytes": 436961,
-  "seconds": 51,
-  "baked": "2026-11-20"
+  "bytes": 437064,
+  "seconds": 240,
+  "baked": "2026-11-21"
  },
  "song-kaifeng-iron-pagoda": {
   "site": "song-kaifeng",
@@ -5204,8 +5204,8 @@
    }
   ],
   "bytes": 1128167,
-  "seconds": 173,
-  "baked": "2026-11-20"
+  "seconds": 747,
+  "baked": "2026-11-21"
  },
  "ur-ziggurat": {
   "site": "ur",
@@ -5340,12 +5340,12 @@
    }
   ],
   "bytes": 177247,
-  "seconds": 24,
-  "baked": "2026-11-20"
+  "seconds": 135,
+  "baked": "2026-11-21"
  },
  "vienna-secession": {
   "site": "vienna",
-  "hash": "cce1a42222d9653d",
+  "hash": "14d6ebbd629bb59f",
   "rays": 128,
   "probes": 23088,
   "boxes": [
@@ -5371,9 +5371,9 @@
     ]
    }
   ],
-  "bytes": 380596,
-  "seconds": 102,
-  "baked": "2026-11-20"
+  "bytes": 380661,
+  "seconds": 372,
+  "baked": "2026-11-21"
  },
  "wei-ye-bronze-sparrow": {
   "site": "wei-ye",
