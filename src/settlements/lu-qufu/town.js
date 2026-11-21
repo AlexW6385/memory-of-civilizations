@@ -5,6 +5,7 @@
 import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, WANREN, JINSHENG, QUELI, SQUARE, HALL, GATE_HALLS, ALTAR, KONG_FOREST, DRUM, OLD, streets, lots, shopRuns, streetItems, laneZs, LANES_X, STREET_W, ANCILLARY, STELE_PAV } from './layout.js';
 import { detailPlans } from './sculpt.js';
 import { HOUSE } from '../../styles/qing/index.js';
+import { keepOff } from './walkroutes.js';
 void [laneZs, LANES_X, STREET_W];
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -79,6 +80,7 @@ function streetLife() {
   for (const a of S.wells) E.push({ t: 'lu_well', ...a });
   for (const a of S.lamps) E.push({ t: 'lu_lamp', ...a });
   for (const a of S.hitches) E.push({ t: 'lu_hitch', ...a });
+  for (const a of S.tudis) E.push({ t: 'lu_tudi', ...a });
   for (const a of S.carts) E.push({ t: 'lu_handcart', ...a });
   for (const [px, pz] of OLD) if (Math.abs(px) < 90 && pz > -232 && pz < 118) E.push({ t: 'lu_treeguard', at: [px, pz], w: 1.4, bench: pz > -60 });
   // the single-wheel barrows of the carriers resting in Queli Street, the threshing yards on the road outside the south wall, each with its beast at the roller
@@ -120,7 +122,7 @@ function forest() {
 /** The people (docs/settlements/lu-qufu.md §7). */
 function people() {
   const rand = rng(1730), L = [];
-  const fig = (at, rot, o = {}) => L.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_black', skin: 'skin_light', hat: 'cap', hair: 'shaven', hairMat: 'hair_dark', feet: 'shod', carry: 'none', pose: 'stand', over: 'collar', ...o });
+  const fig = (at, rot, o = {}) => L.push({ t: 'figure', at: keepOff(at), y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_black', skin: 'skin_light', hat: 'cap', hair: 'shaven', hairMat: 'hair_dark', feet: 'shod', carry: 'none', pose: 'stand', over: 'collar', ...o });
   const pick = (a) => a[Math.floor(rand() * a.length) % a.length];
   const face = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
   // the sacrifice in the Dacheng Hall: officials in blue and red robes before the table, two kneeling, the master of ceremonies

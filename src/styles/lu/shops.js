@@ -103,7 +103,7 @@ export function shopRow(el, ctx) {
     }
     // out in the street: a trestle with the day's goods and a stool (a third of the shops)
     if (rand() < 0.35) {
-      const tu = u0 + sw * 0.5;
+      const tu = u0 + sw * (i % 2 ? 0.72 : 0.28);      // on the side away from the doorway, which stays free for the walker
       F.b('wood_dark', tu - 0.7, 0.0, -2.2, tu + 0.7, 0.82, -1.5, true);
       F.b('wood_ochre', tu - 0.75, 0.82, -2.25, tu + 0.75, 0.86, -1.45, false);
       for (let k = 0; k < 4; k++) F.b(AWN[(k + i) % AWN.length], tu - 0.6 + k * 0.32, 0.86, -2.1, tu - 0.35 + k * 0.32, 0.86 + 0.1 + 0.05 * (k % 2), -1.6, false);

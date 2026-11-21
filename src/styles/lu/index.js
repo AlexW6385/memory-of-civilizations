@@ -10,10 +10,11 @@ import { shopRow } from './shops.js';
 import { inside } from './inside.js';
 import { luHouse } from './house.js';
 import { dragonColumnEl, luRamp, luRampFine, luStatue, luBurner, luLion, luBlock, luBixi } from './sculpt-elements.js';
+import { tudi } from './walkwork.js';
 import { stall, well, hitch, lamp, treeGuard, handcart, barrow, yard } from './dress.js';
 
 const base = STYLES.qing;
 registerStyle('lu', {
   ...base,
-  elements: { ...base.elements, lu_dacheng: dacheng, lu_dragon_column: dragonColumnEl, lu_ramp: luRamp, lu_ramp_fine: luRampFine, lu_statue: luStatue, lu_burner: luBurner, lu_lion: luLion, lu_block: luBlock, lu_bixi: luBixi, lu_pailou: pailou, lu_stele: stele, lu_stele_pavilion: stelePavilion, lu_altar: altar, lu_tomb: tomb, lu_shop_row: shopRow, lu_house: luHouse, lu_inside: inside, lu_stall: stall, lu_well: well, lu_hitch: hitch, lu_lamp: lamp, lu_treeguard: treeGuard, lu_handcart: handcart, lu_barrow: barrow, lu_yard: yard },
+  elements: { ...base.elements, lu_dacheng: dacheng, lu_dragon_column: dragonColumnEl, lu_ramp: luRamp, lu_ramp_fine: luRampFine, lu_statue: luStatue, lu_burner: luBurner, lu_lion: luLion, lu_block: luBlock, lu_bixi: luBixi, lu_pailou: pailou, lu_stele: stele, lu_stele_pavilion: stelePavilion, lu_altar: altar, lu_tomb: tomb, lu_shop_row: shopRow, lu_house: luHouse, lu_inside: inside, lu_stall: stall, lu_well: well, lu_hitch: hitch, lu_lamp: lamp, lu_treeguard: treeGuard, lu_handcart: handcart, lu_barrow: barrow, lu_yard: yard, lu_tudi: tudi },
 });

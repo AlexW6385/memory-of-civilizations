@@ -167,14 +167,26 @@ export function shopRuns() {
   }
   return out;
 }
+/** The z of each shop's doorway along Queli Street, by side (-1 west, 1 east): the style's rule (styles/lu/shops.js: the gap at 0.34 or 0.66 of the shop's width, the row's z running on the south side the other way on the west). */
+export function shopGapZs() {
+  const out = { '-1': [], '1': [] };
+  for (const s of shopRuns()) {
+    const side = s.front === 'e' ? -1 : 1, sw = (s.rect[3] - s.rect[1]) / s.n;
+    if (s.rect[1] < 168) continue;
+    for (let i = 0; i < s.n; i++) { const u = i * sw + sw * (i % 2 ? 0.34 : 0.66); out[side].push(s.front === 'w' ? s.rect[3] - u : s.rect[1] + u); }
+  }
+  return out;
+}
 export const SHOP_RECTS = () => shopRuns().map((s) => s.rect);
 
 /** The furniture of the streets, from the layout: stalls (kind, rot toward the street's axis), wells, stone lamps, hitching posts, handcarts. Pure data. */
 export function streetItems() {
-  const r = rng(33), out = { stalls: [], wells: [], lamps: [], hitches: [], carts: [] };
+  const r = rng(33), out = { stalls: [], wells: [], lamps: [], hitches: [], carts: [], tudis: [] };
   const KINDS = ['fruit', 'buns', 'noodle', 'cloth', 'books', 'pots'];
   // Queli Street: a stall every 14 m on each side near the shop fronts, a lamp every 22 m, hitching posts at the cross lanes
-  for (let z = 176; z < 256; z += 14) for (const s of [-1, 1]) if (r() < 0.8) out.stalls.push({ at: [s * (5.4 + r() * 1.2), z + r() * 4], rot: s < 0 ? Math.PI / 2 : -Math.PI / 2, kind: KINDS[Math.floor(r() * KINDS.length)], seed: Math.floor(r() * 1e6) });
+  // (a stall is moved along the street if it would stand before a shop's doorway: the doorways stay free for the visitor)
+  const gaps = shopGapZs(), clear = (side, z) => { for (let t = 0; t < 8; t++) { const g = gaps[side].find((q) => Math.abs(q - z) < 2.4); if (g === undefined) return z; z = g + (z >= g ? 2.5 : -2.5); } return z; };
+  for (let z = 176; z < 256; z += 14) for (const s of [-1, 1]) if (r() < 0.8) out.stalls.push({ at: [s * (5.4 + r() * 1.2), clear(s, z + r() * 4)], rot: s < 0 ? Math.PI / 2 : -Math.PI / 2, kind: KINDS[Math.floor(r() * KINDS.length)], seed: Math.floor(r() * 1e6) });
   for (let z = 125; z < 258; z += 22) for (const s of [-1, 1]) out.lamps.push({ at: [s * 7.6, z] });
   // the square before the Lingxing Gate: the pilgrims' stalls in two rows either side of the axis
   for (let z = 126; z < 152; z += 8) for (const s of [-1, 1]) { out.stalls.push({ at: [s * 17, z + r() * 2], rot: s < 0 ? Math.PI / 2 : -Math.PI / 2, kind: ['buns', 'noodle', 'books', 'fruit'][Math.floor(r() * 4)], seed: Math.floor(r() * 1e6) }); }
@@ -182,6 +194,9 @@ export function streetItems() {
   // the wells at some crossings of the north–south streets and the lanes
   const zs = laneZs();
   LANES_X.forEach((x, xi) => zs.forEach((z, zi) => { if ((xi + zi) % 3 === 0 && Math.hypot(x, z) < RADIUS - 50) { const hw = (STREET_W[x] ?? 8) / 2; out.wells.push({ at: [x + hw - 1.5, z + 1.6] }); } }));
+  // the earth-god's shrines: at every second well, on the lane's edge a little south of it facing the lane, and at the square's south corners facing north
+  out.wells.forEach((w, i) => { if (i % 2 === 0) out.tudis.push({ at: [w.at[0] + 0.7, w.at[1] + 4.6], rot: -Math.PI / 2, seed: 7 + i }); });
+  for (const s of [-1, 1]) out.tudis.push({ at: [s * 36.5, 168.6], rot: Math.PI, seed: 90 + s });
   for (let i = 0; i < zs.length; i += 2) for (const x of LANES_X) if (Math.hypot(x, zs[i]) < RADIUS - 60 && r() < 0.5) out.carts.push({ at: [x - ((STREET_W[x] ?? 8) / 2 - 1.2), zs[i] + 12 + r() * 6], rot: 0, seed: Math.floor(r() * 1e6) });
   return out;
 }

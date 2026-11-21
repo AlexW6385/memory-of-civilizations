@@ -5,6 +5,7 @@
 
 import { TEMPLE, INNER_X, WALL_Z, TEMPLE_WALL, GATE_HALLS, GATE_D, LINGXING, TAIHE, POOL, POOL_Y, POOL_BED, BRIDGE, KUIWEN, STELE_PAV, ALTAR, HALL, BASE, MOON, WU, QIN, SAGE, SIDE, SIDE_GATE_Z, OLD, ANCILLARY } from './layout.js';
 import { HOUSE } from '../../styles/qing/index.js';
+import { walkRoutes, mainRoute } from './walkroutes.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TEMPLE, W = TEMPLE_WALL;
@@ -136,6 +137,8 @@ const rooms = [
 ];
 const walks = [[[0, 150], [0, 100], [0, 60], [0, 20], [0, -20], [0, -60], [1.2, -96], [1.2, -112], [1.2, -130]]];
 walks[0].y0 = 0;
+// the visitor's walk (walk.js): the whole way from the arrival to the south gate, and in at the doorway of each opened shop on it
+walks.push(mainRoute(), ...walkRoutes());
 
 export const qufu = {
   id: 'lu-qufu-temple',

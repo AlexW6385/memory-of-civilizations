@@ -6,7 +6,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { rng } from './kit.js';
 import { jar, stoneBench, lantern, firewood } from './house.js';
 
-function frame(ctx, at, rot) {
+export function frame(ctx, at, rot) {
   const { bag, col } = ctx, c = Math.cos(rot), s = Math.sin(rot);
   const P = (u, w) => [at[0] + u * c + w * s, at[1] - u * s + w * c];      // u across (x), w in front (z)
   const B = (mat, u0, y0, w0, u1, y1, w1, solid = false) => {
@@ -31,7 +31,7 @@ function frame(ctx, at, rot) {
   };
   return { P, B, L, Wh, bag, col, T: null };
 }
-const quant = (r) => Math.round(r / (Math.PI / 2)) * (Math.PI / 2);
+export const quant = (r) => Math.round(r / (Math.PI / 2)) * (Math.PI / 2);
 
 const UMB = ['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_white'];
 export function stall(el, ctx) {
