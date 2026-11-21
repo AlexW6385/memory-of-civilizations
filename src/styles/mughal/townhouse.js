@@ -67,9 +67,14 @@ function slope(B, mat, x, w, y0, z0, y1, z1) {
 export function townHouse(el, { bag, col }) {
   const L = layoutOf(el), { f, W, D, hw, shop, st, H, mat, accent, variant, dx, enter } = L, rand = L.r;
   const up = !!el.up && st > 1 && enter;                              // an open upper floor (styles/mughal/upper.js)
-  const B = { add: (m, g) => bag.add(m, place(g, f.ox, 0, f.oz, f.yaw)) };
-  const C = { rect: (r, y0, y1) => col.rect(f.rect(r), y0, y1), floor: (r, y) => col.floor(f.rect(r), y), circle: (x, z, r, y0, y1) => { const [wx, wz] = f.pt(x, z); col.circle(wx, wz, r, y0, y1); },
+  // el.part: 'shell' (walls, front, roof: always shown) or 'inside' (the furnished rooms: a near plan of the settlement, shown within reach of the visitor);
+  // both run the whole builder so that the walls' chance draws fall as ever, and each keeps its own share of the pieces and colliders
+  const part = el.part ?? 'all', nopB = { add: () => {} }, nopC = { rect: () => {}, floor: () => {}, circle: () => {}, ramp: () => {} };
+  const Bw = { add: (m, g) => bag.add(m, place(g, f.ox, 0, f.oz, f.yaw)) };
+  const B = part === 'inside' ? nopB : Bw, Bi = part === 'shell' ? nopB : Bw;
+  const Cw = { rect: (r, y0, y1) => col.rect(f.rect(r), y0, y1), floor: (r, y) => col.floor(f.rect(r), y), circle: (x, z, r, y0, y1) => { const [wx, wz] = f.pt(x, z); col.circle(wx, wz, r, y0, y1); },
     ramp: (r, y0, y1, ax, az) => col.ramp(f.rect(r), y0, y1, f.compass(ax, az)) };
+  const C = part === 'inside' ? nopC : Cw, Ci = part === 'shell' ? nopC : Cw;
   const none = [];                                                   // lamps in the rooms carry no lights (a light for each house is too many)
   const ZF = 2.4;                                                    // the verandah's depth
   const lining = 'lime_plaster';
@@ -138,9 +143,9 @@ export function townHouse(el, { bag, col }) {
       B.add(mat, box(-hw + T, HL - 0.25, -D + T, hw - T, HL, -0.5)); C.floor([-hw + T, -D + T, hw - T, -0.5], HL);
       for (let z = -D + T + 0.9; z < -1.0; z += 1.1) B.add('wood_dark', box(-hw + T, HL - 0.4, z - 0.07, hw - T, HL - 0.25, z + 0.07));
       }
-      houseStairs(B, C, L, ground); if (!up) houseUpper(B, C, L, el, FH);
+      houseStairs(B, C, L, ground); if (!up) houseUpper(Bi, Ci, L, el, FH);   // (the stair stays with the walls: its ramp cuts what its own plan built round it)
     }
-    houseRoom(B, C, L, el, ground, L.kind);
+    houseRoom(Bi, Ci, L, el, ground, L.kind);
   } else {
     B.add(mat, box(-hw, 0, -D, hw, H, 0));
     C.rect([-hw, -D, hw, 0], 0, H);
@@ -203,7 +208,7 @@ export function townHouse(el, { bag, col }) {
       }
       B.add('wood_dark', box(x - 0.3, FH - 0.6, -0.4, x + 0.3, FH - 0.38, -0.02));
     }
-    shopRoom(B, C, L, el);
+    shopRoom(Bi, Ci, L, el, B, C);
     // the cloth awning: stripes sloping from the beam out over the street
     if (rand() < 0.65) {
       const cs = [['cloth_red', 'cloth_white'], ['cloth_indigo', 'cloth_ochre'], ['cloth_green', 'cloth_white'], ['cloth_ochre', 'cloth_red']][Math.floor(rand() * 4)];
@@ -286,7 +291,7 @@ export function townHouse(el, { bag, col }) {
 }
 
 // ── the shop's room and the room over it ──────────────────────────────────────────────────────────────────────────────
-function shopRoom(B, C, L, el) {
+function shopRoom(B, C, L, el, Bs = B, Cs = C) {   // (Bs, Cs: the shell's, for the stair)
   const { hw, D, st, trade } = L, rand = L.r, none = [], FY = 0.34;
   const lining = 'lime_plaster';
   const sd = el.seed | 0;
@@ -330,9 +335,9 @@ function shopRoom(B, C, L, el) {
   if (st > 1) {
     // the stair up the left-hand wall: seventeen treads of timber from the floor to the slab, a rail on the room's side
     const hole = { x0: -hw + T, x1: -hw + T + 1.05, z0: -D + T, z1: -D + T + 2.1 }, n = 17, rise = (FH - FY) / n, run = 0.27, zb = -D + T + n * run;
-    for (let i = 0; i < n; i++) { B.add('wood_dark', box(hole.x0, FY, zb - (i + 1) * run, hole.x1, FY + rise * (i + 1), zb - i * run)); }
-    C.ramp([hole.x0, -D + T, hole.x1, zb], FY, FH, 0, -1);
-    B.add('wood_dark', box(hole.x1 - 0.04, FY + 0.9, -D + T, hole.x1, FY + 1.0, zb)); void hole;
+    for (let i = 0; i < n; i++) { Bs.add('wood_dark', box(hole.x0, FY, zb - (i + 1) * run, hole.x1, FY + rise * (i + 1), zb - i * run)); }
+    Cs.ramp([hole.x0, -D + T, hole.x1, zb], FY, FH, 0, -1);
+    Bs.add('wood_dark', box(hole.x1 - 0.04, FY + 0.9, -D + T, hole.x1, FY + 1.0, zb)); void hole;
     // the room over the shop: lined, a dhurrie, charpoy with its quilt, chest, jars, a niche with a lamp, a hookah
     const UY = FH, HL = FH + UH;
     B.add(lining, box(-hw + T, UY, -D + T, -hw + T + 0.03, HL - 0.25, -0.5)); B.add(lining, box(hw - T - 0.03, UY, -D + T, hw - T, HL - 0.25, -0.5)); B.add(lining, box(-hw + T + 0.03, UY, -D + T, hw - T - 0.03, HL - 0.25, -D + T + 0.03));
@@ -342,6 +347,6 @@ function shopRoom(B, C, L, el) {
     F.chest(B, hw - T - 0.4, UY, -D + T + 1.0, 0.8, 0.5, 0.55, Math.PI / 2); C.rect([hw - T - 0.7, -D + T + 0.7, hw - T, -D + T + 1.3], UY, UY + 0.55);
     F.waterJar(B, hw - T - 0.35, UY, -2.5, 0.8, 'terracotta'); F.hookah(B, 0.2, UY + 0.012, -D + T + 1.4, 0.3);
     F.bale(B, -hw + T + 3.0, UY, -D + T + 0.5, 0.9, 0.5, 0.6, 0, 'cloth_white');
-    B.add(R, box(-hw + T + 1.3, UY + 1.3, -D + T + 0.03, -hw + T + 1.55, UY + 1.7, -D + T + 0.3)); F.oilLamp(B, none, -hw + T + 1.42, UY + 1.7, -D + T + 0.15, 'terracotta', 0);
+    B.add(R, box(-hw + T + 3.5, UY + 1.3, -D + T + 0.03, -hw + T + 3.75, UY + 1.7, -D + T + 0.3)); F.oilLamp(B, none, -hw + T + 3.62, UY + 1.7, -D + T + 0.15, 'terracotta', 0);   // (the niche clear of the stair's landing lane)
   }
 }
