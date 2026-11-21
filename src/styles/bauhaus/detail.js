@@ -112,6 +112,19 @@ export function entrance(sk, z1, y0) {
   sk.rod('iron', [9.2, 3.3, z1 + 0.3], [9.2, 3.22, z1 + 0.3], 0.01, 4);
   sk.lathe('lamp_white', [[0.001, 0], [0.1, 0.05], [0.12, 0.16], [0.001, 0.2]], 9.2, 3.05, z1 + 0.3, 10);
   sk.light(9.2, 3.0, z1 + 0.3, '#fff0d0', 1.5, 7);
+  entranceWear(sk, z1, y0);
+}
+
+/** Where feet went at the main door [inferred]: a darker hollow in each tread under each leaf of the double door, the sill rubbed, and a trodden strip across the forecourt
+ *  from the street to the steps, narrowing toward the door (trodden earth, a shade darker than the ground). Thin patches (3-4 mm) of materials the plan already draws. */
+function entranceWear(sk, z1, y0) {
+  const n = Math.max(2, Math.round(y0 / 0.2)), L = 0.9, rect0 = z1;     // the steps of school.js: rect [7.7, z1, 10.7, z1 + 0.9], climbing toward -z
+  for (let i = 0; i < n; i++) {
+    const f0 = i / n, f1 = (i + 1) / n, t = y0 * f1, za = rect0 + L * (1 - f1), zb = rect0 + L * (1 - f0);
+    for (const c of [8.55, 9.85]) sk.b('plaster_grey', c - 0.4, t, za + 0.06 + 0.02 * i, c + 0.4, t + 0.004, zb - 0.06);
+  }
+  sk.b('plaster_grey', 8.1, y0, z1 + 0.02, 10.3, y0 + 0.004, z1 + 0.2);                                 // the sill, where the doors' foot-plates are scraped by shoes
+  for (let k = 0; k < 12; k++) { const z = z1 + L + 0.05 + k * 0.4, w = 1.7 - k * 0.07 + 0.12 * Math.sin(k * 2.3), o = 0.07 * Math.sin(k * 1.7); sk.b('mud_plaster', 9.2 - w / 2 + o, 0.012 + 0.001 * (k % 3), z, 9.2 + w / 2 + o, 0.017 + 0.001 * (k % 3), z + 0.46); }
 }
 
 // ── the bridge ───────────────────────────────────────────────────────────────────────────────────

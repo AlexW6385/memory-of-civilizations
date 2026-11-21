@@ -11,6 +11,7 @@ import { Fr } from '../../styles/bauhaus/frame.js';
 import { frontOf } from '../../styles/bauhaus/tenement.js';
 import { LV, PL, B, MASTERS, TORTEN, TORTEN_FRONT, KONSUM, TRAM_TRACKS, TRAM_STOP, lots } from './layout.js';
 import { lampSites, LAMP_H } from './lamps.js';
+import { ARRIVALS } from '../../planet/arrivals.js';
 
 const TAU = Math.PI * 2;
 /** A number in [0, 1) from numbers alone. */
@@ -76,21 +77,23 @@ function tenements(H) {
     const f = frontOf(l), F = new Fr(null, l.rect, l.front), { spec, W } = f, FL = 0.12;
     if (l.shop) {
       const k = EVE[f.kind] * (0.85 + 0.3 * hashAt(l.rect[0], l.rect[1], 51)), a = 0.6, b = W - 0.6, y0 = FL + 0.7, y1 = spec.yc - 1.2;
-      for (const [s0, s1] of [[a, f.du - 0.9], [f.du + 0.9, b]]) if (s1 - s0 > 1.0) { win(H, F, s0 + 0.05, s1 - 0.05, y0, y1, 0.27, k); pool(H, F, (s0 + s1) / 2, 1.4, Math.min((s1 - s0) * 0.6, 2.6), 0.55 * k); }
+      for (const [s0, s1] of [[a, f.du - 0.9], [f.du + 0.9, b]]) if (s1 - s0 > 1.0) { win(H, F, s0 + 0.05, s1 - 0.05, y0, y1, 0.07, k); pool(H, F, (s0 + s1) / 2, 1.4, Math.min((s1 - s0) * 0.6, 2.6), 0.55 * k); }
       pool(H, F, f.du, 1.1, 1.3, 0.7 * k);
     } else if (hashAt(l.rect[0], l.rect[1], 52) < 0.35) {
       // a flat's front room lit behind its ground-floor window
       const c = (hashAt(l.rect[0], l.rect[1], 53) * f.cols) | 0, u = f.cu(c);
-      if (Math.abs(u - f.du) > 1.4) win(H, F, u - 0.5, u + 0.5, FL + 0.95, FL + 2.6, 0.27, 0.45);
+      if (Math.abs(u - f.du) > 1.4) win(H, F, u - 0.5, u + 0.5, FL + 0.95, FL + 2.6, 0.07, 0.45);
     }
     // the upper storeys: the windows' columns, each lit by chance
-    const share = 0.3, w = spec.modern ? 0.8 : 0.52;
+    // near the visitor's arrival the street is lived in later: more of the flats' windows burn (inferred), within 45 m
+    const A = ARRIVALS['bauhaus-dessau'], dA = Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]);
+    const share = dA < 45 ? 0.62 : 0.3, w = spec.modern ? 0.8 : 0.52;
     for (let s = 1; s < spec.n; s++) {
       const sb = spec.yb + (s - 1) * spec.SH, y0 = sb + 0.85, y1 = sb + spec.SH - (spec.modern ? 0.55 : 0.5);
       for (let c = 0; c < f.cols; c++) {
         const u = f.cu(c);
         if (hashAt(l.rect[0] + u, l.rect[1] + s * 7, 54) > share) continue;
-        win(H, F, u - w + 0.05, u + w - 0.05, y0 + 0.05, y1 - 0.05, 0.27, 0.34 + 0.4 * hashAt(u, sb, l.seed % 97));
+        win(H, F, u - w + 0.05, u + w - 0.05, y0 + 0.05, y1 - 0.05, 0.07, 0.34 + 0.4 * hashAt(u, sb, l.seed % 97));
       }
     }
   }
@@ -145,7 +148,7 @@ function school(H) {
       H.quad([X, y0, z], [X, y0, z + 2.4], [X, y1, z + 2.4], [X, y1, z], [-1, 0], 0.55 + 0.3 * hashAt(z, y0, 32));
     }
   }
-  for (let z = wz0 + 3; z < wz1 - 2; z += 5.5) if (hashAt(z, 0, 33) < 0.8) H.floor(wx0 - 2.4, 0.1, z, 2.6, 3.2, 0, 8, 0.42);
+  for (let z = wz0 + 3; z < wz1 - 2; z += 5.5) if (hashAt(z, 0, 33) < 0.8) { H.floor(wx0 - 2.4, 0.1, z, 2.6, 3.2, 0, 8, 0.42); H.floor(wx0 - 6.5, 0.07, z + 1.2, 3.6, 4.2, 0, 8, 0.24); }   // the glass wall's light spilling across the pavement and the roadway
   // the Aula's south glazing (festBlock: ribbon 1.6…40.4, sill 0.7, head 0.45, 3.2 wide, 0.7 piers), lit for an evening in the hall
   {
     const u0 = 1.6, u1 = 40.4, w = 3.2, pier = 0.7, n = Math.max(1, Math.floor((u1 - u0 - pier) / (w + pier))), step = (u1 - u0 - pier) / n, z = B.fest[3] - 0.7;

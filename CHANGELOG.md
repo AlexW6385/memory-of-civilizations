@@ -2,6 +2,14 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.72 — rising and moving at one pace (2026-11-21)
+
+Aloft one now rises at the same pace one moves at (falling a little slower, as before); rising used to be about half again as fast as moving.
+
+## v12.71 — flying pace grows smoothly with height (2026-11-21)
+
+The pace aloft no longer jumps a few metres off the ground: it is a little over walking pace at take-off (about 4 m/s), 6.5 at four metres, 9.4 at ten, and goes on growing with the height as before.
+
 ## v12.70 — second pass: the tulou, Dogon, Catalhoyuk, Borgund, Abu Simbel (2026-11-21)
 
 Hakka tulou: the great gate's board reads 承啟樓, lamps on the hall porch light the court, every opened house can be walked through to its kitchen and back room, a water buffalo grazes by the road. Dogon: an evening fire on the place by the arrival with four people round it, ways to the well, the dyers' yard, the toguna and the forge. Catalhoyuk: cooking fires on one roof in five, a shelf niche and grave goods in each opened house, a trodden way to the ladder. Borgund: cressets at the churchyard gate, a herders' fire in the meadow, ten more buildings on the walk, proper little columns on the church's gallery. Abu Simbel: lamp stands at the terrace's end, watchmen at the fires, tracked-in sand on the way to the door.
