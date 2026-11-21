@@ -222,7 +222,8 @@ function incaWall(bag, col, F, o) {
     if (S.length) bag.add(mat, fromTriangles(S));
   }
   // collision: the wall but its doorways, which keep only their lintels
-  const doors = ops.filter((d) => d.kind === 'door').map((d) => trap(d, false)).sort((p, q) => p.c - q.c);
+  // colW: the collision gap may be wider than the visible trapezoid (the walker is 0.6 m across and the raster needs ~1.6 m)
+  const doors = ops.filter((d) => d.kind === 'door').map((d) => { const t = trap(d, false); return d.colW ? { ...t, wb: Math.max(t.wb, d.colW / 2) } : t; }).sort((p, q) => p.c - q.c);
   const solid = (s0, s1, y0, y1) => { const k = F.curved ? Math.max(1, Math.ceil((s1 - s0) / 1)) : 1; for (let j = 0; j < k; j++) col.segment(F.at(s0 + (s1 - s0) * j / k), F.at(s0 + (s1 - s0) * (j + 1) / k), th, y0, y1); };
   let s = 0;
   for (const d of doors) { if (d.c - d.wb - s > 0.05) solid(s, d.c - d.wb, y, y + h); solid(d.c - d.wb, d.c + d.wb, y + d.v1, y + h); s = d.c + d.wb; }
@@ -266,7 +267,7 @@ function incaHouse(el, { bag, col, lights }) {
     const L = k === 'n' || k === 's' ? x1 - x0 : z1 - z0, list = (ops[k] = []);
     // a kallanka (el.doors: n): "the entrance normally on one of the long sides, with equally spaced doors; the opposite side niches or windows but no doors" [stated: Wikipedia, "Kallanka"]
     const doors = k === f && el.doors > 1 ? Array.from({ length: el.doors }, (_, i) => (i + 0.5) * L / el.doors) : k === f ? [L / 2] : [];
-    for (const d of doors) list.push({ kind: 'door', at: d, w: el.doorW ?? (el.humble ? 0.9 : 1.0), h: el.doorH ?? (el.humble ? 1.8 : 1.95), jamb: !!el.jamb });
+    for (const d of doors) list.push({ kind: 'door', at: d, w: el.doorW ?? (el.humble ? 0.9 : 1.0), h: el.doorH ?? (el.humble ? 1.8 : 1.95), jamb: !!el.jamb, colW: el.doorColW });
     // a row of niches inside, at chest height; a small window now and then on a long wall
     const n = Math.floor((L - 1.2) / 1.35), gable = along ? k === 'e' || k === 'w' : k === 'n' || k === 's';
     for (let i = 0; i < n; i++) {

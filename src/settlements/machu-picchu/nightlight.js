@@ -16,7 +16,7 @@ import { houses, houseKind, KALLANKA, KNOLL } from './layout.js';
 import { ground } from './ground.js';
 import { FIRES, litHouse, FEAST, GUARD_BRAZIER } from './walk.js';
 import { openHouse } from './walkroutes.js';
-import { OPEN_DOOR } from './walk.js';
+import { OPEN_DOOR, KALLANKA_DOOR } from './walk.js';
 import { STYLES } from '../../core/build.js';
 
 /** A number in [0, 1) from a position alone. */
@@ -116,13 +116,16 @@ function glow(el, { bag }) {
     const open = openHouse(i), e = { rect: h.rect, y, th: 0.7, humble: rank === 2, ...(open ? { doorW: OPEN_DOOR.w, doorH: OPEN_DOOR.h } : {}) };
     H.ball((x0 + x1) / 2, y + 1.15, (z0 + z1) / 2, 0.62);
     doorGlow(H, e, h.front);
+    // the smoke-hole: the hearth's glow shows through the thatch at the ridge, so a lit house reads from behind and from above [inferred]
+    { const B = Math.min(x1 - x0, z1 - z0) / 2, hh = open ? 2.8 : 2.6, ry = y + hh + B * 1.45, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+      H.ball(cx, ry + 0.15, cz, 0.7, 0.55); H.floor(cx, ry + 0.1, cz, 0.55, 0.55, 8, 0.5); }
   });
   // the chaski's hut (lit, its door to the road) and the kallanka's hall
   { const r = [6.5, 118.6, 10.9, 123.2], y = ground.height(8.7, 120.9);
     H.ball(8.7, y + 1.15, 120.9, 0.62); doorGlow(H, { rect: r, y, th: 0.55, doorW: OPEN_DOOR.w, doorH: OPEN_DOOR.h }, 'w'); }
   { const [x0, z0, x1, z1] = KALLANKA, m = 0.48, hx = (x0 + x1) / 2 + 0.1, hz = (z0 + z1) / 2 - (z1 - z0 - 2 * m) / 14, y = 0;
     H.ball(hx, y + 0.5, hz, 1.1); H.flame(hx, y + 0.08, hz, 0.12, 0.34); H.floor(hx, y + 0.07, hz, 2.0, 3.4, 10, 0.8);   // (the pool kept inside the walls: the hall is 4.9 m wide)
-    for (let i = 0; i < 7; i++) doorGlow(H, { rect: KALLANKA, y, th: 0.8, doorW: OPEN_DOOR.w, doorH: 2.3 }, 'w', [x0, z1 - (i + 0.5) * (z1 - z0) / 7], 0.2, 0.9); }
+    for (let i = 0; i < 7; i++) doorGlow(H, { rect: KALLANKA, y, th: 0.8, doorW: KALLANKA_DOOR.w, doorH: KALLANKA_DOOR.h }, 'w', [x0, z1 - (i + 0.5) * (z1 - z0) / 7], 0.2, 0.9); }
   { const fy = ground.height(FEAST[0], FEAST[1]); fireHalo(H, [FEAST[0] + 1.3, fy + 0.55, FEAST[1] + 1.18], 0.95, 3.4, fy, fy + 0.06); }
   fireHalo(H, [GUARD_BRAZIER[0], GUARD_BRAZIER[2] + 0.8, GUARD_BRAZIER[1]], 0.8, 3.0, GUARD_BRAZIER[2], GUARD_BRAZIER[2] + 0.5);
   for (const f of FIRES) {

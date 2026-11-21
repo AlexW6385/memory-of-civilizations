@@ -18,8 +18,10 @@ export function segDist(p, a, b) {
 }
 /** The distance of a point from the walk. */
 export function walkDistance(p) { let best = Infinity; for (const W of WALK) for (let i = 0; i + 1 < W.length; i++) best = Math.min(best, segDist(p, W[i], W[i + 1])); return best; }
-/** The measures of a door opened for the visitor: 1.7 m wide, 2.2 m to the lintel's underside (the walker is 1.6 m clear and a head's height under it). */
-export const OPEN_DOOR = { w: 1.7, h: 2.2 };
+/** The measures of a door opened for the visitor: the visible trapezoid 1.1 m at the foot (the Inca door was about 1.0 m), 2.1 m to the lintel; colW is the collision gap, 1.7 m, because the walker needs ~1.6 m in the raster. */
+export const OPEN_DOOR = { w: 1.1, h: 2.1, colW: 1.6 };
+/** The kallanka's doors: wide, as built for a hall (docs §13). */
+export const KALLANKA_DOOR = { w: 1.7, h: 2.3 };
 /** Open houses stand at least this high, so the lintel stone fits over the taller door. */
 export const OPEN_WALL_H = 2.8;
 

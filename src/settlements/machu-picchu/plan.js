@@ -5,11 +5,11 @@
 
 import { SITE, NECK, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, KALLANKA, SACRED_ROCK, PLAZA_STAIRS, waterworks } from './layout.js';
 import { walkRoutes } from './walkroutes.js';
-import { OPEN_DOOR, OPEN_WALL_H, FIRES } from './walk.js';
+import { OPEN_DOOR, KALLANKA_DOOR, OPEN_WALL_H, FIRES } from './walk.js';
 import { ground } from './ground.js';
 
 const E = [];
-const OPEN = { doorW: OPEN_DOOR.w, doorH: OPEN_DOOR.h };
+const OPEN = { doorW: OPEN_DOOR.w, doorH: OPEN_DOOR.h, doorColW: OPEN_DOOR.colW };
 // the terraces' retaining walls: rings round the saddle, broken by stairs to the east, west and south
 const rings = [];
 for (let k = 0; k < TERRACE.n; k++) {
@@ -119,7 +119,7 @@ E.push({ t: 'stair', rect: [-32.2, -53, -31, -45], y0: 0, y1: 0.6, dir: 'e', ris
 E.push({ t: 'inca_house', rect: [-46, -34, -36, -26], y: 0.2, h: 2.8, front: 'n', mat: 'granite_inca', roof: 'thatch', seed: 11, ...OPEN });
 // the kallanka on the plaza's east side: a long undivided hall of rough granite, seven equally spaced doors on the long side
 // to the plaza, windows and niches on the back wall, gables with their pegs, a steep ichu roof [stated: Wikipedia, "Kallanka"]
-E.push({ t: 'inca_house', rect: KALLANKA, y: 0, h: 3.3, th: 0.8, front: 'w', doors: 7, doorW: OPEN_DOOR.w, doorH: 2.3, roof: 'thatch', mat: 'granite_rough', seed: 61 });
+E.push({ t: 'inca_house', rect: KALLANKA, y: 0, h: 3.3, th: 0.8, front: 'w', doors: 7, doorW: KALLANKA_DOOR.w, doorH: KALLANKA_DOOR.h, roof: 'thatch', mat: 'granite_rough', seed: 61 });
 // the Main Plaza sunk in two tiers of 1.5 m, each tier's edge a wall of rough stones, stairs down at the road, at the west and at the kallanka's middle door
 {
   const [X0, Z0, X1, Z1] = PLAZA, gaps = { s: [0.9, 3.1], w: [-25.1, -22.9], e: [-26.1, -23.9] };

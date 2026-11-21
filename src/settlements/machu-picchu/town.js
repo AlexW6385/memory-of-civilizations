@@ -19,7 +19,7 @@ export async function town() {
       : { humble: true, ...(s % 4 === 1 ? { roofMat: 'ichu' } : {}) };
     // the houses of the kanchas on the visitor's walk are opened: a door 1.7 m wide, its lintel 2.2 m up, the wall high enough for the stone over it (walk.js, docs §13)
     const open = openHouse(i + j), hh = (rank === 2 ? 2.15 : 2.45) + (s % 9) * 0.07 + (v.tall ? 0.55 : 0);
-    return { t: 'inca_house', ...h, y, h: open ? Math.max(hh, OPEN_WALL_H) : hh, ...v, use, ...(near ? { lit: true } : {}), ...(open ? { doorW: OPEN_DOOR.w, doorH: OPEN_DOOR.h, lintel: true } : {}) };
+    return { t: 'inca_house', ...h, y, h: open ? Math.max(hh, OPEN_WALL_H) : hh, ...v, use, ...(near ? { lit: true } : {}), ...(open ? { doorW: OPEN_DOOR.w, doorH: OPEN_DOOR.h, doorColW: OPEN_DOOR.colW, lintel: true } : {}) };
   })));
   // the strings of maize cobs under the eaves, either side of the door, on about half the houses
   { const items = [];
