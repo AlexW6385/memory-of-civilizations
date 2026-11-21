@@ -2,6 +2,7 @@
 // on the paving and the wall copings, crows and a few doves high over the pagodas and the slopes of Mount Song. No water, so no fish.
 import { WALL, HOUSES, rng } from './layout.js';
 import { ground } from './ground.js';
+import { openedHouses, frontOf } from './walk.js';
 
 const fish = [];
 const flights = [
@@ -26,4 +27,29 @@ for (const [x, z, rot] of [[WALL[0], 20, Math.PI / 2], [WALL[2], -30, Math.PI / 
   for (const [x, z] of [[-30, 155], [-12, 153], [22, 157], [48, 155], [-60, 156], [70, 154], [3, 170], [-3, 182], [8, 141], [-9, 136]]) sp(x, z, ground.height(x, z) + 0.06);
 }
 flights.push({ kind: 'swallow', n: 5, loop: { c: [0, 158], a: [80, 12], rot: 0 }, y: [3, 9], speed: 9 }, { kind: 'crow', n: 4, loop: { c: [60, 90], a: [30, 30], rot: 0 }, y: [18, 40], speed: 8 });
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §11.4) ──
+// [inferred: the animals of a Ming north-Henan village and monastery; no source fetched] Dogs asleep at the doors of two shops on the walk, off the door's lane;
+// a cat on the step of a home and one at the kitchen range's door in the monastery; a rooster and hens at the foot of a farmhouse front; two goats at the forecourt's
+// corner; doves (the temple dove, a bird of the courts) on the paving of two courts; house swallows' mud nests under the eaves of the open houses of the walk.
+const critters = [];
+{
+  const opened = openedHouses().map((o) => o.h), shops = opened.filter((h) => h.kind === 'shop'), homes = opened.filter((h) => h.kind !== 'shop');
+  const at = (h, a, d) => { const F = frontOf(h); return F.P(0.5 + a / F.L, d); };       // a metres along the front from the door's middle, d out from the posts
+  shops.slice(0, 2).forEach((h, i) => { const [x, z] = at(h, i ? -2.4 : 2.4, 1.1); critters.push({ model: 'dog', at: [x, ground.height(x, z) + 0.03, z], rot: 1.2 + i * 2, range: [9, 3.5] }); });
+  { const h = homes[1]; if (h) { const [x, z] = at(h, 2.3, 0.3); critters.push({ model: 'cat_tabby', at: [x, 0.27, z], rot: 2.4, range: [7, 2.5] }); } }
+  critters.push({ model: 'cat_orange', at: [40.6, 0.39, -13], rot: 3.0, range: [7, 2.5] });
+  { const h = homes[0]; if (h) for (const [model, a, d, sz] of [['rooster', -2.3, 1.6, 1], ['hen_brown', -2.9, 1.9, 1], ['hen_white', -1.9, 2.1, 0.96]]) { const [x, z] = at(h, a, d); critters.push({ model, at: [x, ground.height(x, z) + 0.02, z], rot: 0.5 + a, range: [3.4, 1.4], size: sz }); } }
+  critters.push({ model: 'goat_black', at: [-13.8, 0.03, 130.2], rot: 0.6, range: [9, 3.2] }, { model: 'goat_white', at: [-12.5, 0.03, 131.4], rot: 3.0, range: [9, 3.2] });
+  for (const [x, z, m] of [[6.2, 101, 'pigeon_grey'], [7.1, 102.2, 'pigeon_white'], [5.4, 102.9, 'pigeon_grey'], [-7.0, 61, 'pigeon_white'], [-7.9, 62.1, 'pigeon_grey']]) critters.push({ model: m, at: [x, 0.05, z], rot: x * 3, range: [1.4, 1.2] });
+  // swallows' nests under the eaves of up to six open houses of the walk (north or south fronts), away from the doors and from one another
+  let k = 0;
+  for (const h of opened) {
+    if (k > 5 || (h.front !== 'n' && h.front !== 's') || h.w < 6.4) continue;
+    const F = frontOf(h), [x, z] = F.P(0.5 + (h.seed % 2 ? 2.4 : -2.4) / F.L, 0.14), sg = h.front === 's' ? 1 : -1;
+    if (critters.some((c) => c.model === 'swallow_nest' && Math.abs(c.at[0] - x) < 9 && Math.abs(c.at[2] - z) < 9)) continue;
+    critters.push({ model: 'swallow_nest', at: [x, 0.25 + h.H - 0.6, z], rot: h.front === 's' ? Math.PI / 2 : -Math.PI / 2, cycle: 33 + (h.seed % 5), flight: 9, radius: 10, side: k % 2 ? 1 : -1, rise: -0.8 }); k++;
+    void sg;
+  }
+}
+export default { fish, flights, perches, critters };

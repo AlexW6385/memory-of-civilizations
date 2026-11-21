@@ -115,3 +115,49 @@ No new sources; forms follow §13's and the usual Tang timber vocabulary [inferr
 - **Balustrades.** The rail at each deck (formerly one floating bar) is a Tang-style balustrade: posts every 1.5 m with gilt lotus-bud caps, a top rail, a lower rail, turned balusters and a painted ochre panel in each span, standing on the eave deck.
 - **Owl-tail ridge ends (chiwen).** The crowning roof's ridge ends are the Tang owl-tail form (a body leaning out, its tip curled back over the ridge, a row of gilt knobs) instead of lathe finials. [inferred: the Tang form, as at the Foguang hall and in the murals.] The storey count stays as in §4.
 - Budget: every new small piece is gathered into one geometry per material (no instanced prototypes, no new materials in the plan), so the arrival's main draws are unchanged.
+
+## 15. Round 7: brought toward the reference (Suzhou) — the visitor's walk, night, sound, animals, wear and writing
+
+Written from the dossier and general knowledge only (the shell reaches no sources); every line is [inferred] unless it names a source. Sources already in §1 and §13 stand.
+
+### 15.1 The visitor's walk (src/settlements/dunhuang/walk.js)
+
+- **The walk** [inferred: ours]: from the arrival on the main street (x 14) west along the axis to the bridge and the apron (the landmark plan's first route goes on to the Great Buddha's hall and the stair), and east through the market and the caravanserai's gate to the east gate. Every lot whose door is on this stretch is opened: 23 lots (17 shops of the nine trades with their keepers and goods, 6 homes with kang, stove and household) are walked into by routes of the landmark plan (`walks`), which `tools/walk-check.mjs` follows from the street through the door into the front room. The houses of the style were already hollow and furnished (§12, Round 5); no far form is needed because the town is one plan of 38 MB.
+- **Footprints** [inferred]: the lane before each opened door and the street's axis are marked (`dh_clear_track`, no geometry) so that the street-life pass of src/objects/life.js keeps its people, animals and things off the walker's lane (a lane-mouth figure had stopped the first east walk at x 47).
+- **The wayside shrine** (龛, `dh_wayshrine`) [inferred: travellers of the Silk Road asked for a safe road at shrines; the Mogao shrines of §13 are the model of the niche]: rammed-earth piers and lintel round a niche with a Buddha painted in the cave colours and two apsaras, a red frame, a small tiled roof with rafter heads, a stone lamp stand with an oil lamp, a bronze bowl with joss sticks, a jar, a strip of red cloth tied to the pier. Two: at the bridge's east foot (x −33.5) and outside the east gate (x 157.5).
+- **The watch's braziers** (`dh_brazier`) [inferred]: an iron bowl of charcoal on three legs at each side of the road inside the east gate; the two guards stand beside them (they were standing inside the gate tower's masonry: moved out to the road, x 146.6, z ±2.4; the dog moved off the brazier).
+
+### 15.2 Night (src/settlements/dunhuang/nightlight.js)
+
+All in the engine's additive `halo` material (visible at the low preset, night only; the day view is unchanged). [inferred throughout: no source describes the night of Shazhou in 850.]
+- **What lit it**: oil lamps of bronze and clay (seed oil, tallow), the hearth and the kang's stove, paper lanterns at the shop fronts, charcoal braziers, the signal hearth of the watch. Every light the style's builders already make (houses, the serai's rooms, the caves, the Great Buddha's hall, the Nine-Storey building, the shrines, the beacon yard) gets a glow, and a pool on the floor where it stands low.
+- **Windows and doors**: the lattice windows of houses glow by the hash of their own place (35 % of the plain houses, 55 % of the tiled: oil is dear); the paper lantern at a shop front glows; a lamp's spill lies over the step before 55 % of the shops' and 30 % of the homes' doors.
+- **The caves**: every enterable cave's doorway glows (halls and pillar caves brighter than the monks' cells), with a pool on the apron or the gallery before the lower two tiers.
+- **The gate and the serai**: a lantern in the gate passage and one in the serai's gate with their pools; a glow in the serai's yard; the watch's two braziers inside the gate.
+- **The beacon**: a glow of the signal hearth on the tower's top [inferred: a watch fire kept in the hearth; the beacon's smoke by day and fire by night is stated in §13, China Highlights].
+- **Lamp offerings** (`dh_lamprow`): nine small clay lamp dishes in a row on the apron before the Great Buddha's hall [inferred: lighting lamps before the Buddha is a lay rite; a lamp-lighting rite on the fifteenth of the first month is recorded in the Dunhuang manuscripts as far as I recall: not checked].
+
+### 15.3 Sound (src/settlements/dunhuang/soundmap.js, src/engine/voices-dunhuang.js, tests/dunhuang-sound.test.mjs)
+
+[inferred throughout: nothing of the sound of 9th-century Shazhou is recorded.] The map places 18 emitters and the sounds of 21 sites (17 shop lots and homes of the main street, the Great Buddha's hall, a hall cave, a pillar cave and a cell), with the rooms one can be inside (a flat roof of earth: dull rain; cut in the rock: no rain, little of the world).
+- **Eave bells** (`dhFengling`, the dossier's §9): at the Nine-Storey building, two cave porches and the gate's tower, by day and night, in the wind.
+- **The sutra** (`dhMurmur`): a low wordless murmur on one note in the Great Buddha's hall, a hall cave, a pillar cave and a monk's cell, and from the scribe's shop; the sculptor's mallet and the painters (`dhMallet`) at the scaffold, also at the saddler's.
+- **The trades**: the smith's hammer (engine) and bellows (`dhBellows`); flatbread slapped on the oven's wall (`dhOvenSlap`) in the early morning; the potter's wheel and clay, the wine-seller's pouring, cloth, jars (engine); kitchens in the homes.
+- **The caravanserai**: the camels' bells and a donkey (engine voices), the pipa (`dhPipa`) from the merchants' room in the evening; the flute qiang di (`dhQiangdi`) at the market.
+- **Water**: the Daquan's bed in four reaches (`dhStream`), the sweep wells of the fields (`dhShaduf`), the women washing, wells at the lane mouths.
+- **Night**: the little owl on the cliff and at the beacon; the dogs beyond the roofs are the engine's.
+- Measured with tools/sound-render.mjs (not heard): the bells' centroid 4.0 kHz; the pipa 0.6 kHz with 7 onsets; the flute 0.6 kHz in long notes; the murmur 0.6 kHz (formants over a 110 Hz note); the stream 3 kHz broadband.
+
+### 15.4 Animals (src/settlements/dunhuang/fauna.js `critters`, src/engine/critter-models.js `camel`)
+
+[inferred throughout: no source describes the pets and flocks of Shazhou.] 26 rigged animals (one mesh, drawn by src/engine/fauna-critters.js; not counted by tools/draw-count.mjs):
+- **Bactrian camels** (new models `camel_dun`, `camel_dark`: two humps, shaggy mane and beard, on the dog's rig, so they kneel and stand as the visitor comes): the four in the caravanserai's stalls (they replace the life element's one-humped stand-ins there; the dossier §6 asked for the two-humped beast) and one on the apron's south.
+- **Dogs** at two shop doors of the walk, **cats** on two home steps, **goats** tethered at the first and third lane mouths, **doves** (the Buddhist bird of the shrines [inferred]) on the apron before the Great Buddha's hall and at the wayside shrine, **swallows' nests** under the front eaves of six lots of the walk (the birds fly out and come home). No fowl are added (the town already has `chickens`).
+
+### 15.5 Wear and writing (src/settlements/dunhuang/wear.js)
+
+- **Worn thresholds** [inferred: feet wear a hollow in earth and mud brick]: a worn hollow on the threshold of every house (all are entered).
+- **The stair's treads** [inferred]: the treads of the stair up to the second tier are polished pale in their middles (every second tread, a stone patch 4 mm proud).
+- **Shop signs** [inferred]: a pale board beside the door of four trades, one character in black: 酒 (wine; the wine-shop banner 酒旗 is the Tang custom of its poetry), 藥 (apothecary), 布 (cloth), 書 (the scribe). Only characters that Suzhou's script table holds, each verified there stroke by stroke (the generic brush engine of ming-suzhou/script.js is used; no Suzhou data). Written in traditional forms, as the Tang would have.
+- **Left plain, on purpose**: the stele's inscription stays broken strokes (its text, 李君莫高窟佛龛碑 as the manuscript P.2551 names it, needs characters the table does not hold: 莫 高 窟 佛 龛 碑 君 李); no board over the cave doors or the Nine-Storey building (no source for the text); the other five trades have no sign (no verified glyph that fits).
+- Looked at: tools/showroom.mjs at two metres before the wine shop at x 67, by day and at night (shots/dh-wine-day.png, dh-wine-night.png): the sign reads, the lantern glows warm. Not looked at: other poses, the caves' doorways and the lamp row at night, the camels, the stair.
