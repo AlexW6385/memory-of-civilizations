@@ -111,7 +111,8 @@ async function buildOne(plan) {
     if (hang) transfer.push(hang.buffer);
     if (p.colors) transfer.push(p.colors.buffer);
     if (p.reach) transfer.push(p.reach.buffer);
-    return { mat: p.mat, key: p.key, detail: p.detail, big: p.big, first: p.first, lod, pos, nor, hang, index, matrices: p.matrices, colors: p.colors, reach: p.reach, reals: p.reals };
+    if (p.dusk) transfer.push(p.dusk.buffer);
+    return { mat: p.mat, key: p.key, detail: p.detail, big: p.big, first: p.first, lod, pos, nor, hang, index, matrices: p.matrices, colors: p.colors, reach: p.reach, dusk: p.dusk, reals: p.reals };
   });
   b.colliders.tops = tops;
   return { built: { parts, instanced, lights: b.lights, colliders: b.colliders }, transfer: [...new Set(transfer)] };
