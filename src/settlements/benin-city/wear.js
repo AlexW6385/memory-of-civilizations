@@ -36,11 +36,35 @@ const wrapYard = (fn) => function worn(el, ctx) {
   return r;
 };
 
+// the palace (landmark plan: only materials it already holds). Red earth wears smooth and dark where feet go: on the chalked way of the court of audience the red
+// clay is trodden to the tuff beneath, in the great gallery the way from the court to the dais is polished and the dais's two treads are hollowed at their middle [inferred].
+const wrapAudience = (fn) => function worn(el, ctx) {
+  const r = fn.call(this, el, ctx);
+  if (el.simple || depth > 0) return r;
+  const { bag } = ctx, ax = el.axis, z0 = el.z0, z1 = el.z1;
+  bag.add('tuff_red', box(ax - 0.75, 0.07, z1, ax + 0.75, 0.0725, z0));                  // the trodden middle of the way, its whole length
+  bag.add('tuff_red', box(ax - 1.7, 0.07, z1, ax + 1.7, 0.0715, z1 + 5.5)); // wider where the way turns toward the great gallery
+  bag.add('tuff_red', box(ax - 1.7, 0.07, z0 - 5.5, ax + 1.7, 0.0712, z0));                // and wider at the gate end, where those who come in gather and wait
+  return r;
+};
+const wrapHall = (fn) => function worn(el, ctx) {
+  const r = fn.call(this, el, ctx);
+  if (el.simple || el.near === false || depth > 0) return r;
+  const { bag } = ctx, [x0, z0, x1, z1] = el.rect, cx = (x0 + x1) / 2, Y = 0.35, dz1 = z0 + 5.4;
+  bag.add('stucco_red', box(cx - 1.0, Y, dz1, cx + 1.0, Y + 0.006, z1 - 0.8));            // the way from the court to the dais, between the two rows of pillars
+  bag.add('stucco_red', box(cx - 1.4, Y, dz1, cx + 1.4, Y + 0.004, dz1 + 1.5));           // widened before the dais, where those called forward stand
+  bag.add('stucco_red', box(cx - 0.9, Y + 0.45, dz1 - 0.4, cx + 0.9, Y + 0.456, dz1));    // the lower tread, hollowed at its middle
+  bag.add('stucco_red', box(cx - 0.8, Y + 0.9, dz1 - 1.2, cx + 0.8, Y + 0.906, dz1 - 0.4)); // the upper tread
+  return r;
+};
+
 let done = false;
 export function registerWear() {
   if (done) return; done = true;
   const E = STYLES.benin.elements;
   if (typeof E.benin_house === 'function') E.benin_house = wrapHouse(E.benin_house);
+  if (typeof E.benin_audience === 'function') E.benin_audience = wrapAudience(E.benin_audience);
+  if (typeof E.benin_hall === 'function') E.benin_hall = wrapHall(E.benin_hall);
   if (typeof E.caster_yard === 'function') E.caster_yard = wrapYard(E.caster_yard);
 }
 registerWear();
