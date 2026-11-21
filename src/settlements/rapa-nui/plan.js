@@ -40,15 +40,17 @@ for (const h of village().houses) {
 const walks = [[[0, 20], [0, 60], [0, 84]]];
 walks[0].y0 = height(0, 20);
 // the visitor's walk into the houses (docs/settlements/rapa-nui.md §10.1): from the forecourt over the sill and along the floor of each house to enter,
-// the nearest ten; and in at the chief's long house's door
+// every one of the 39 to enter; and in at the chief's long house's door
 {
-  const near = village().houses.filter((h) => h.inside).sort((p, q) => Math.hypot(p.c[0], p.c[1] - 50) - Math.hypot(q.c[0], q.c[1] - 50)).slice(0, 10);
+  const near = village().houses.filter((h) => h.inside).sort((p, q) => Math.hypot(p.c[0], p.c[1] - 50) - Math.hypot(q.c[0], q.c[1] - 50)).slice(0, 39);
   const L2W = (h, u, v) => [h.c[0] + u * Math.cos(h.yaw) + v * Math.sin(h.yaw), h.c[1] - u * Math.sin(h.yaw) + v * Math.cos(h.yaw)];
-  for (const h of [...near, CHIEF]) {
-    const r = [L2W(h, 0, -h.w / 2 - 2.4), L2W(h, 0, -h.w / 2 - 0.5), L2W(h, 0, 0.1), L2W(h, 0.9, 0.1)];
+  // three doors (the 25th, 28th and 33rd houses) sit a little off the house's axis in the collision raster: the way in is shifted 0.3 m to where walk-check found it clear
+  const SHIFT = { 24: 0.3, 27: -0.3, 32: 0.3 };
+  [...near, CHIEF].forEach((h, i) => {
+    const o = SHIFT[i] ?? 0, r = [L2W(h, o, -h.w / 2 - 2.4), L2W(h, o, -h.w / 2 - 0.5), L2W(h, o, 0.1), L2W(h, o + 0.9, 0.1)];
     r.y0 = height(h.c[0], h.c[1]);
     walks.push(r);
-  }
+  });
 }
 
 export const tongariki = {
