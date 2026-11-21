@@ -3,6 +3,7 @@
 import '../../styles/hadhrami/index.js';
 import './nightlight.js';
 import './wear.js';
+import './palace.js';
 import { house, mosque } from './plan.js';
 import music from './music.js';
 export { town } from './town.js';
