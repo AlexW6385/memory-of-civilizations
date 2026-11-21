@@ -37,7 +37,7 @@ export function arastaNearPlans(R) {
     const shops = all.filter((s) => s.sg === row);
     for (let i = 0; i < shops.length; i += 4) {
       const grp = shops.slice(i, i + 4), cx = grp.reduce((a, s) => a + (s.xb + s.sg * 2), 0) / grp.length, cz = grp.reduce((a, s) => a + s.zc, 0) / grp.length;
-      plans.push({ id: `ottoman-istanbul-arasta-${row > 0 ? 'w' : 'e'}${i / 4}`, style: 'ottoman', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-R, -R, R, R], entrance: { at: [0, -100], facing: 's' }, near: 42, center: [cx, cz], elements: [{ t: 'shop_keepers', list: keeperSpecs(grp) }] });
+      plans.push({ id: `ottoman-istanbul-arasta-${row > 0 ? 'w' : 'e'}${i / 4}`, style: 'ottoman', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-R, -R, R, R], entrance: { at: [0, -100], facing: 's' }, near: 42, center: [cx, cz], elements: [{ t: 'shop_keepers', list: keeperSpecs(grp) }, { t: 'shop_lamps', list: grp.map((s) => ({ xb: s.xb, zc: s.zc, sg: s.sg, d: s.d, y: TOP })) }] });
     }
   }
   return plans;
