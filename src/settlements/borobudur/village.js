@@ -6,6 +6,7 @@
 
 import { RADIUS, MONASTERY, HAMLETS, WAY, WAYHOUSES, houses, floorOf, inRect, frontVec, coreOf, wellAt, wayStalls, fieldSpots, CELLS, cellRect, nearArrival } from './layout.js';
 import { ground } from './ground.js';
+import { atOf } from './houseat.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'javanese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [90, 0], facing: 'w' } });
@@ -33,15 +34,15 @@ function way() {
     if (s.kind === 'rest') {
       const hw = s.w / 2, hd = 2.2;
       E.push({ t: 'pendopo', rect: [x - hw, z - hd, x + hw, z + hd], steps: [face, 'e'], h: 3.0 });
-      // benches along the back, water jars by the stair, pilgrims resting
-      for (const k of [-1, 0, 1]) L.push({ t: 'bench', at: [x + k * 2.0, z - s.side * (hd - 0.5)], y: 0.8, rot: s.side > 0 ? 0 : Math.PI, len: 1.7, mat: 'bamboo_culm', seed: s.seed + k });
-      L.push({ t: 'pot', kind: 'water_pot', n: 3, at: [x + hw + 0.6, z + toward[1] * 0.9], y: 0.8, seed: s.seed + 3 });
-      L.push({ t: 'basket', n: 2, at: [x - 1, z + toward[1] * 1.0], y: 0.8, seed: s.seed + 4, goods: 'cloth_ochre' });
-      for (const k of [-1, 0, 1]) if (rand() < 0.8) {
-        const bx = x + k * 2.0, bz = z - s.side * (hd - 0.5);
-        L.push(person(rand, [bx + (rand() - 0.5) * 0.6, bz + s.side * 0.15], 0.8, faceTo(toward), { pose: 'sit', carry: rand() < 0.5 ? 'basket' : 'none' }));
+      // benches along the back wall (the stair's lane stays free), water jars by the east stair, pilgrims resting
+      for (const k of [-1, 1]) L.push({ t: 'bench', at: [x + k * 2.3, z + s.side * (hd - 0.5)], y: 0.8, rot: s.side > 0 ? Math.PI : 0, len: 1.7, mat: 'bamboo_culm', seed: s.seed + k });
+      L.push({ t: 'pot', kind: 'water_pot', n: 3, at: [x + hw + 0.6, z + s.side * 1.5], y: 0.8, seed: s.seed + 3 });
+      L.push({ t: 'basket', n: 2, at: [x - 2.8, z + toward[1] * 0.5], y: 0.8, seed: s.seed + 4, goods: 'cloth_ochre' });
+      for (const k of [-1, 1]) if (rand() < 0.85) {
+        const bx = x + k * 2.3, bz = z + s.side * (hd - 0.5);
+        L.push(person(rand, [bx + (rand() - 0.5) * 0.6, bz - s.side * 0.15], 0.8, faceTo(toward), { pose: 'sit', carry: rand() < 0.5 ? 'basket' : 'none' }));
       }
-      L.push(person(rand, [x + 2.2, z + toward[1] * 0.2], 0.8, faceTo([-1, 0]), { pose: 'talk', man: false }), person(rand, [x + 1.2, z + toward[1] * 0.3], 0.8, faceTo([1, 0]), { pose: 'talk', man: true }));
+      L.push(person(rand, [x + 2.9, z + toward[1] * 0.2], 0.8, faceTo([-1, 0]), { pose: 'talk', man: false }), person(rand, [x + 2.0, z + s.side * 0.9], 0.8, faceTo([1, 0]), { pose: 'talk', man: true }));
       continue;
     }
     E.push({ t: 'warung', at: s.at, face, w: s.w, kind: s.kind, seed: s.seed });
@@ -83,6 +84,13 @@ function way() {
     E.push({ t: 'umbul', at: [x, side * 2.8], y: 0, h: 4.6 + rand() * 1.4, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
   }
   E.push({ t: 'umbul', at: [WAY.gate - 4, 2.8], y: 0, h: 5.6, seed: 91 }, { t: 'umbul', at: [WAY.gate - 4, -2.8], y: 0, h: 5.6, seed: 92 });
+  // resin torches on bamboo poles along the way (§20.2): a pair before the gate's pylons, then one every 14 m, alternating sides, none in the visitor's view at the arrival
+  for (const sd of [-1, 1]) E.push({ t: 'bb_torch', at: [WAY.gate - 3.0, sd * 3.6], y: 0, seed: sd });
+  for (let x = 70, k = 0; x < WAY.x1 - 30; x += 14, k++) {
+    const side = k % 2 ? 1 : -1;
+    if (nearArrival(x, side * 3.3, 1.8) || Math.abs(x - WAY.gate) < 8) continue;
+    E.push({ t: 'bb_torch', at: [x + 1.5, side * 3.4], y: 0, seed: k });
+  }
   // what each stall has about it: firewood at the food stalls' hearths, rice in sacks, fruit in heaps, trays drying, a child at the counter
   for (const s of stalls) {
     if (s.kind === 'rest') continue;
@@ -101,6 +109,10 @@ function way() {
   }
   for (const [x, z, a] of [[88, 3.8, 1], [84, -3.9, -1]]) L.push({ t: 'figure', at: [x, z], y: 0, rot: faceTo([0, -a]), seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_ochre', skin: pick(rand, SK), hat: 'none', hair: 'shaven', pose: 'stand', arms: 'clasp' });
   for (const [x, z] of [[92, -3.2], [80, 3.4]]) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+  // the way's own shrines and well (§20.1): a small stupa shrine with its lamps on either hand where the way leaves the monument's precinct, a well with its pulley and jars for the pilgrims between them
+  E.push({ t: 'cetiya', at: [76, -9.5], y: 0, r: 0.9 }, { t: 'cetiya', at: [76, 9.5], y: 0, r: 0.9 });
+  L.push({ t: 'well', at: [83, 10.5], y: 0, kind: 'pulley', mat: 'brick', seed: 21 }, { t: 'pot', kind: 'water_pot', n: 3, at: [84.8, 11.6], y: 0, seed: 22 });
+  L.push(person(rand, [76, -5.8], 0, faceTo([0, -1]), { pose: 'kneel', arms: 'pray', man: false }), person(rand, [79.6, 12.2], 0, faceTo([-1, 0]), { pose: 'stand', man: false, carry: 'pot' }));
   // nothing in the visitor's view at the arrival
   const clear = L.filter((e) => !(e.at && nearArrival(e.at[0], e.at[1])));
   L.length = 0; L.push(...clear);
@@ -113,7 +125,7 @@ function lodgings() {
   for (const [i, [, , front]] of WAYHOUSES.entries()) {
     const h = hs.find((q) => q.hamlet === -1 && q.seed === 7000 + i * 131);
     const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, [fx, fz] = frontVec(front), tx = -fz, tz = fx, half = (front === 'e' || front === 'w' ? x1 - x0 : z1 - z0) / 2;
-    const at = (d, u) => [cx + fx * (half + d) + tx * u, cz + fz * (half + d) + tz * u], rot = Math.atan2(fx, fz), sd = h.seed;
+    const at = atOf(h), rot = Math.atan2(fx, fz), sd = h.seed;
     L.push({ t: 'pot', kind: 'water_pot', n: 3, at: at(0.6, 2.2), y: 0, seed: sd }, { t: 'basket', n: 2, at: at(1.2, -2.2), y: 0, seed: sd + 1, goods: 'cloth_ochre', rot: rand() * 6.28 });
     L.push({ t: 'bench', at: at(1.9, -0.9), y: 0, rot: rot + Math.PI / 2, len: 1.6, mat: 'bamboo_culm', seed: sd + 2 });
     L.push(person(rand, at(1.9, -0.9), 0, rot + Math.PI / 2 * (rand() < 0.5 ? 1 : -1), { pose: 'sit', man: i % 2 === 0 }));
@@ -190,7 +202,7 @@ function households() {
     for (const h of hs) {
       if (h.hamlet !== hi) continue;
       const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, [fx, fz] = frontVec(h.front), tx = -fz, tz = fx, half = (h.front === 'e' || h.front === 'w' ? x1 - x0 : z1 - z0) / 2;
-      const at = (d, u) => [cx + fx * (half + d) + tx * u, cz + fz * (half + d) + tz * u], rot = Math.atan2(fx, fz);
+      const at = atOf(h), rot = Math.atan2(fx, fz);
       const free = ([x, z], m = 0.9) => !hs.some((q) => q !== h && inRect(q.rect, x, z, m)) && !hs.some((q) => q === h && inRect(q.rect, x, z, 0.3));
       const put = (el, p, m) => { if (free(p, m)) L.push({ ...el, at: p, y: 0 }); };
       if (h.kind === 'lumbung') { if (rand() < 0.6) put({ t: 'haystack', seed: h.seed + 8 }, at(2.2, -2.6), 1.6); continue; }
@@ -241,7 +253,7 @@ function fields() {
 /** The monastery's gate, its shrines, the paved ways between the gate, the hall and the monks' houses, the water jars before the cells. */
 function monasteryExtras() {
   const E = [], L = [], rand = rng(912), [mx0, mz0, mx1, mz1] = MONASTERY, gz = (mz0 + mz1) / 2;
-  E.push({ t: 'gapura', at: [mx1, gz], half: 3.0, h: 4.8 });
+  E.push({ t: 'gapura', at: [mx1, gz], half: 3.0, h: 4.8 }, { t: 'bb_torch', at: [mx1 + 2.2, gz - 4.6], y: 0 }, { t: 'bb_torch', at: [mx1 + 2.2, gz + 4.6], y: 0 });
   for (const [x, z] of [[-190, -142], [-150, -145], [-172, -124]]) E.push({ t: 'cetiya', at: [x, z], y: 0, r: 0.9 });
   E.push({ t: 'lane', rect: [-181.5, gz - 1.6, mx1 - 0.5, gz + 1.6], y: 0.03, mat: 'andesite' });
   E.push({ t: 'lane', rect: [-170, mz0 + 8, -166, gz - 1.6], y: 0.03, mat: 'andesite' });
