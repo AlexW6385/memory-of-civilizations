@@ -108,7 +108,7 @@ function litBag(ctx, el, scale = 1) {
           if (th < 0.02 && dy > 0.6 && dy < 1.4 && w > 0.4 && w < 0.95 && b[1] > GH + 0.5) {
             const mx = (b[0] + b[3]) / 2, mz = (b[2] + b[5]) / 2;
             if (hashAt(mx, mz, 33 + Math.floor(b[1] / 2.5)) < 0.26 * scale) {
-              const f = 0.4 + 0.34 * hashAt(mx, mz, 9), m0 = 0.04, o = 0.2 + 0.02;
+              const f = 0.4 + 0.34 * hashAt(mx, mz, 9), m0 = 0.04, o = 0.2 + 0.06;
               if (dx < dz) { const s = mx > cx ? 1 : -1, x = (s > 0 ? b[3] : b[0]) + s * o; H.quad([x, b[1] + m0, b[2] + m0], [x, b[1] + m0, b[5] - m0], [x, b[4] - m0, b[5] - m0], [x, b[4] - m0, b[2] + m0], [s, 0], f); }
               else { const s = mz > cz ? 1 : -1, z = (s > 0 ? b[5] : b[2]) + s * o; H.quad([b[0] + m0, b[1] + m0, z], [b[3] - m0, b[1] + m0, z], [b[3] - m0, b[4] - m0, z], [b[0] + m0, b[4] - m0, z], [0, s], f); }
             }
@@ -128,7 +128,7 @@ let depth = 0;
 const wrap = (name, fn) => function haloed(el, ctx) {
   const lights = ctx?.lights, n = lights ? lights.length : 0;
   if (depth > 0 || !lights || el.simple || !el.rect) { depth++; try { return fn.call(this, el, ctx); } finally { depth--; } }
-  const L = litBag(ctx, el, el.hall ? 0.8 : 1);
+  const L = litBag(ctx, el, el.hall ? 1.7 : name === 'tower_up' ? 1.6 : 1);
   depth++;
   try { var r = fn.call(this, el, L.ctx); } finally { depth--; }
   const H = L.H, [x0, z0, x1, z1] = el.rect;
@@ -168,12 +168,38 @@ function minaretLamp({ c, y }, { bag }) {
   H.flush(bag);
 }
 
+/**
+ * shb_stalllamps: { pts: [[x, z], ...], y?, h? } — the oil lamp hung from the front pole of a stall for the evening market [inferred]: a clay saucer's
+ * flame under the awning's edge, its glow and a pool of light on the ground and the goods.
+ */
+function stallLamps({ pts, y = 0, h = 1.95 }, { bag }) {
+  const H = new Halo();
+  for (const [x, z] of pts) {
+    const q = hashAt(x, z, 8), yy = y + h + 0.1 * q;
+    bag.add('flame', lathe([[0.001, 0], [0.03, 0.02], [0.02, 0.07], [0.001, 0.13]], 6, null, x, yy, z));
+    H.ball(x, yy + 0.06, z, 0.5 + 0.1 * q, 0.6); H.floor(x, y + 0.05, z, 2.1, 1.7, 10, 0.55);
+  }
+  H.flush(bag);
+}
+
+/**
+ * shb_walllamps: { pts: [[x, z, s]], y? } — a clay lamp on an iron bracket from a street wall (s = +1: the wall lies to the east of the point, -1: west), lit at
+ * night; the lamps that light the main street between the gate and the square [inferred].
+ */
+function wallLamps({ pts, y = 2.3 }, { bag }) {
+  const H = new Halo();
+  for (const [x, z, s] of pts) {
+    H.ball(x, y + 0.06, z, 0.55, 0.6); H.floor(x - s * 0.9, 0.05, z, 2.4, 2.4, 10, 0.5);
+  }
+  H.flush(bag);
+}
+
 let done = false;
 /** Wraps the hadhrami style's house builders (once, after the style has registered itself). */
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.hadhrami.elements;
   for (const k of ['tower_house', 'tower_open', 'tower_up']) if (typeof E[k] === 'function') E[k] = wrap(k, E[k]);
-  E.shb_cresset = cresset; E.shb_minaretlamp = minaretLamp;
+  E.shb_cresset = cresset; E.shb_stalllamps = stallLamps; E.shb_walllamps = wallLamps; E.shb_minaretlamp = minaretLamp;
 }
 registerNight();

@@ -95,6 +95,45 @@ function wayshrine(P, s = 1) {
   for (const [k, w, y] of [[0, 0.78, 1.31], [1, 0.56, 1.43], [2, 0.32, 1.55]]) P.add('tile_grey', box(-w * s, y * s, -0.62 * s, w * s, (y + 0.12) * s, 0.62 * s));
   P.add('granite_grey', box(-0.12 * s, 1.67 * s, -0.62 * s, 0.12 * s, 1.75 * s, 0.62 * s));
 }
+/** A stone mill (shi mo) of the village: a round bed, the runner stone with its feed hole, the wooden sweep to harness a donkey to, and a heap of husks. */
+function millstone(P, s = 1) {
+  P.add('granite_grey', lathe([[0.001, 0], [0.82 * s, 0], [0.82 * s, 0.42 * s], [0.001, 0.42 * s]], 14, null, 0, 0, 0));
+  P.add('limestone', lathe([[0.001, 0.42 * s], [0.7 * s, 0.42 * s], [0.7 * s, 0.62 * s], [0.12 * s, 0.62 * s], [0.12 * s, 0.6 * s], [0.001, 0.6 * s]], 14, null, 0, 0, 0));
+  P.add('granite_grey', lathe([[0.001, 0.62 * s], [0.12 * s, 0.62 * s], [0.12 * s, 0.7 * s], [0.001, 0.7 * s]], 8, null, 0, 0, 0));
+  P.add('timber', box(-0.06 * s, 0.7 * s, -0.06 * s, 0.06 * s, 1.35 * s, 0.06 * s));
+  P.add('timber', box(0.06 * s, 1.0 * s, -0.05 * s, 1.9 * s, 1.1 * s, 0.05 * s));
+  P.add('timber', box(-0.9 * s, 1.0 * s, -0.04 * s, -0.06 * s, 1.07 * s, 0.04 * s));
+  P.add('hide_tan', box(0.78 * s, 0.1 * s, 0.9 * s, 1.15 * s, 0.2 * s, 1.2 * s));                        // a sack of grain on the ground beside it
+}
+/**
+ * The worn doorstep of a village house, local +z out from the platform's edge: one granite step from the street to the platform, its middle dished
+ * (a darker, polished patch where every foot lands) and a pale polished patch on the platform's lip over the threshold. The step's top is 0.13 over the
+ * ground, the platform's 0.23 (town.js FRONT_Y 0.25 over a ground at 0.02).
+ */
+function doorstep(P, w = 1.5, seed = 0) {
+  const j = ((seed * 2654435761) >>> 0) / 4294967296;
+  P.add('granite_grey', box(-w / 2, 0, 0.0, w / 2, 0.13, 0.52));
+  P.add('bluestone', box(-w * 0.27, 0.13, 0.12 + j * 0.06, w * 0.27, 0.136, 0.4));
+  P.add('limestone', box(-w * 0.3 + (j - 0.5) * 0.1, 0.23, -0.42, w * 0.3, 0.2362, -0.02));
+}
+/**
+ * The wear of a stair's treads (el.stair = the plan's `stair` element): on each tread the middle is where the feet land, a darker polished patch a hair
+ * over the stone. Each tread's patch has its own width and length by the hash of its place (twelve like boxes would be
+ * an instanced draw of their own). Heights as build.js `stair` makes them: tread i tops at y0 + rise (i + 1) / n.
+ */
+function treadwear(P, st) {
+  const [ax, az, bx, bz] = st.rect, x0 = Math.min(ax, bx), x1 = Math.max(ax, bx), z0 = Math.min(az, bz), z1 = Math.max(az, bz);
+  const rise = st.y1 - st.y0, n = Math.max(1, Math.round(Math.abs(rise) / (st.riser || 0.17)));
+  const NS = st.dir === 'n' || st.dir === 's', W = NS ? x1 - x0 : z1 - z0, L = NS ? z1 - z0 : x1 - x0, mid = (NS ? x0 + x1 : z0 + z1) / 2;
+  for (let i = 0; i < n; i++) {
+    const f0 = i / n, f1 = (i + 1) / n, top = st.y0 + rise * f1, h = (((Math.round(mid * 8) * 73856093) ^ (i * 19349663) ^ Math.round((NS ? z0 : x0) * 8)) >>> 0) / 4294967296;
+    // along the ascent: the tread's own span (f0..f1) measured from the low end
+    const a0 = NS ? (st.dir === 'n' ? z1 - L * f1 : z0 + L * f0) : (st.dir === 'e' ? x0 + L * f0 : x1 - L * f1), a1 = a0 + L / n;
+    const pw = W * (0.3 + 0.16 * h), pc = mid + (h - 0.5) * W * 0.1, d0 = a0 + (a1 - a0) * (0.18 + 0.1 * h), d1 = a1 - (a1 - a0) * 0.08;
+    const bx0 = NS ? pc - pw / 2 : d0, bx1 = NS ? pc + pw / 2 : d1, bz0 = NS ? d0 : pc - pw / 2, bz1 = NS ? d1 : pc + pw / 2;
+    P.add('bluestone', box(bx0, top, bz0, bx1, top + 0.007, bz1));
+  }
+}
 /**
  * shaolin_steps { pts, w, from (z where the treads begin), ground }: the stone treads of a mountain path laid on a slope along a polyline running
  * mostly north–south; each tread a slab 0.55 deep, its top 0.16 above the ground at its middle, its foot sunk 0.3 below the lowest ground under it.
@@ -130,6 +169,9 @@ export function shaolinGear(el, { bag, col }) {
     case 'robes': robes(P, el.n ?? 4, seed); break;
     case 'wayshrine': wayshrine(P, s); { const c = Math.cos(rot), sn = Math.sin(rot), ex = Math.abs(0.75 * s * c) + Math.abs(0.6 * s * sn), ez = Math.abs(0.75 * s * sn) + Math.abs(0.6 * s * c); col.rect([x - ex, z - ez, x + ex, z + ez], y - 0.9, y + 1.75 * s); } break;
     case 'offering': offering(P, s); col.rect([x - 0.65 * s, z - 0.3 * s, x + 0.65 * s, z + 0.3 * s], y, y + 0.7 * s); break;
+    case 'millstone': millstone(P, s); col.circle(x, z, 0.85 * s, y, y + 0.7 * s); break;
+    case 'doorstep': doorstep(P, el.w ?? 1.5, seed); { const c = Math.cos(rot), sn = Math.sin(rot), hw = (el.w ?? 1.5) / 2, ex = Math.abs(hw * c) + Math.abs(0.26 * sn), ez = Math.abs(hw * sn) + Math.abs(0.26 * c); col.rect([x + sn * 0.26 - ex, z + c * 0.26 - ez, x + sn * 0.26 + ex, z + c * 0.26 + ez], y, y + 0.13); } break;
+    case 'treadwear': treadwear(P, el.stair); break;
     case 'brooms': brooms(P); break;
     default: throw new Error('shaolin_gear: ' + el.kind);
   }
