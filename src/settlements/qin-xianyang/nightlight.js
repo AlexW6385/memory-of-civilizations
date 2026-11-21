@@ -12,7 +12,7 @@ import '../../styles/qin/index.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { lathe, box } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
-import { TOWER } from './layout.js';
+import { TOWER, PIT, rampZ } from './layout.js';
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -76,6 +76,7 @@ const DROP = {
   qin_row_house: (b) => (b[3] - b[0] > 0.3 ? 0.86 : null),
   qin_shop: (b) => (b[3] - b[0] > 0.3 ? 0.86 : null),
   qin_ward_gate: () => null, qin_market: () => null,
+  qin_pit: (b) => (b[1] + b[4]) / 2 + 4.96,                                                 // the pit's hung lamps: a pool on the floor 5 m down, over the reed runners (their tops -4.946)
 };
 /** Where the floor lies for the pool of a plain lamp (the room's floor): an official's hall floor, else the ground. */
 const FLOOR = { qin_official: 0.9, qin_court_house: 0.01, qin_row_house: 0.01, qin_workshop: 0.01 };
@@ -178,11 +179,22 @@ function stand(bag, x, y, z) {
 /** Elements that gain a lamp of their own: [name]: (el, bag) => void. The ward gate keeps a lamp at its lintel (the keeper closed the lane at dusk [inferred]); the market tower a lamp at each end of its stair head. */
 const NEW = {
   qin_ward_gate: (el, bag) => { const [x, z] = el.at; hangLamp(bag, x, 3.05, z - 0.45); },
+  qin_pit: (el, bag) => galleryStands(bag),
   qin_market: (el, bag) => { const { x, z, w } = TOWER, hw = w / 2, uy = 4.28; for (const s of [-1, 1]) stand(bag, x + s * (hw - 0.55), uy, z + hw - 0.4); },
 };
+/** The gallery's lamp stands before the archers' ranks (round 8): bronze stands on the floor, each with a flame (its glow comes from wrap) and a wide pool, so the visitor sees ranks lit and not only two lamps. */
+const GALLERY_STANDS = [[118.2, 3.4], [118.2, -3.4], [121.6, 8.4], [121.6, -8.4], [118.2, 11.5], [118.2, -11.5]];
+function galleryStands(bag) {
+  const zc = rampZ(1), H = new Halo(), FLH = PIT.floor + 0.02;
+  for (const [x, dz] of GALLERY_STANDS) {
+    stand(bag, x, FLH, zc + dz);
+    H.floor(x, FLH + 0.05, zc + dz, 3.6, 3.6, 12, 0.85);
+  }
+  H.flush(bag);
+}
 const wrapNew = (name, fn) => function lamped(el, ctx) {
   const r = fn.call(this, el, ctx);
-  if (depth > 0 || !ctx?.lights || el.simple) return r;
+  if (!ctx?.lights || el.simple) return r;                       // (wrap() has raised `depth` by now: it must not be tested here)
   NEW[name](el, ctx.bag);
   return r;
 };
