@@ -74,6 +74,13 @@ function stairSerpent(el, { bag }) {
       k.seg(L, a, b, 0.2 * taper, 0.06 * taper, 0.2 * taper, 0.06 * taper);
       if (i % 2 === 0) { const e = [a[0] + (b[0] - a[0]) * 0.2, a[1] + (b[1] - a[1]) * 0.2, a[2] + (b[2] - a[2]) * 0.2]; k.seg(i % 4 ? 'maya_blue' : 'stucco_red', a, e, 0.212 * taper, 0.072 * taper, 0.212 * taper, 0.072 * taper); }
     }
+    // the rattle at the tail's end: six rings tapering, each a little higher than the last, alternate red, lying along the balustrade's end over the platform's edge (§20.4)
+    const e = pt(N), o0 = (e[0] - cx - dx * d1) * nx + (e[2] - cz - dz * d1) * nz;
+    for (let r = 0; r < 6; r++) {
+      const dd = d1 - 0.08 - r * 0.15, w = 0.17 - r * 0.018, yy = e[1] + 0.02 + r * 0.012, off = o0 * 1;
+      const p0 = [cx + dx * dd + nx * off, yy, cz + dz * dd + nz * off], p1 = [cx + dx * (dd - 0.12) + nx * off, yy + 0.01, cz + dz * (dd - 0.12) + nz * off];
+      k.seg(r % 2 ? 'stucco_red' : L, p0, p1, w, w * 0.8, w * 0.92, w * 0.74);
+    }
   }
   k.emit(bag, 0, 0, 0, 0, 1);
 }

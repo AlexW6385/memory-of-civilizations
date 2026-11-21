@@ -67,7 +67,7 @@ function lightHalo(H, l, floor) {
 let depth = 0;
 /** The lit windows of a house: `share` of them glow with the lamp or the hearth behind them (by the hash of the window's own place: oil and fuel are dear), on the outward face only. */
 function windows(ctx, el, H) {
-  const share = el.kind === 'workshop' ? 0.55 : el.kind === 'cult' ? 0.5 : el.kind === 'store' ? 0 : 0.34;
+  const share = el.kind === 'workshop' ? 0.55 : el.kind === 'cult' ? 0.6 : el.kind === 'store' ? 0 : 0.6;
   if (!el.lit || share <= 0) return ctx;
   return {
     ...ctx, onWindow: (w) => {
@@ -94,6 +94,14 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     // the door: the hearth's light spilling over the step into the lane
     const m = mapper(el.rect, el.face ?? 'n'), du = el.du ?? m.W / 2, [px, pz] = m.P(du, -1.2);
     H.floor(px, el.y + 0.11, pz, 2.2, 1.6, 8, 0.7);
+    if (el.open) {
+      // an opened door by night: the front room's hearth seen through the doorway, a lit pane across the opening (a hand inside the wall's face) and a pool on the floor within
+      const nl0 = (v) => v, dw = el.dw ?? 1.8, dh = el.dh ?? 2.45, a = m.P(du - dw / 2 + 0.08, 0.3), b = m.P(du + dw / 2 - 0.08, 0.3), o = m.P(du, -1), c = m.P(du, 0), nn = [nl0(o[0] - c[0]), nl0(o[1] - c[1])], nm = Math.hypot(nn[0], nn[1]) || 1; nn[0] /= nm; nn[1] /= nm;
+      const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2, U = [b[0] - a[0], 0, b[1] - a[1]], ul = Math.hypot(U[0], U[2]) || 1;
+      H.disc([cx, el.y + dh / 2, cz], [U[0] / ul, 0, U[2] / ul], [0, 1, 0], ul / 2, dh / 2 - 0.08, nn, 12, [0.85, 0.5, 0], [0, 0.75, 1]);
+      const [ix, iz] = m.P(du, 1.4);
+      H.floor(ix, el.y + 0.1, iz, 1.3, 1.1, 8, 0.8);
+    }
   }
   H.flush(ctx.bag);
   return r;
@@ -111,6 +119,7 @@ function torch({ at, y = 0, mount = null }, { bag, col, lights }) {
     const [nx, nz] = mount, px = -nz, pz = nx, yy = y + 2.3, w = 0.05;
     const piece = (a0, a1, b0, b1, y0, y1) => box(Math.min(x + nx * a0 + px * b0, x + nx * a1 + px * b1), y0, Math.min(z + nz * a0 + pz * b0, z + nz * a1 + pz * b1), Math.max(x + nx * a0 + px * b0, x + nx * a1 + px * b1), y1, Math.max(z + nz * a0 + pz * b0, z + nz * a1 + pz * b1));
     bag.add('timber', mergeG([piece(0.01, 0.34, -w, w, yy - 0.06, yy), piece(0.28, 0.34, -w, w, yy - 0.5, yy), piece(0.02, 0.3, -w * 0.8, w * 0.8, yy - 0.5, yy - 0.44)]));
+    bag.add('pottery_dark', mergeG([piece(0.0, 0.07, -0.28, 0.28, yy + 0.45, yy + 1.0), piece(0.0, 0.07, -0.15, 0.15, yy + 1.0, yy + 1.6)]));      // the soot of the pine smoke on the wall over it
     const cx = x + nx * 0.31, cz = z + nz * 0.31;
     bag.add('terracotta', lathe([[0.001, 0], [0.07, 0.01], [0.1, 0.1], [0.12, 0.17], [0.09, 0.16], [0.001, 0.04]], 8, null, cx, yy, cz));
     bag.add('flame', flameG(cx, yy + 0.1, cz, 0.3 + 0.08 * q, 0.07, 9));

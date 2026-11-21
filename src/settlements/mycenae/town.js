@@ -47,7 +47,7 @@ function dress() {
     if (rand() < 0.5) { const uu = side > 0 ? W - 1.1 : 1.1; if (near(uu)) put('firewood', at(uu, v0 + 0.1), fr.rot, { len: 1.2 }); }
     if (rand() < 0.5) { const uu = du + side * (dw / 2 + 2.0); if (near(uu)) put(rand() < 0.5 ? 'basket' : 'sacks', at(uu, v0), fr.rot, { n: 2 }); }
     { const cu = W / 2 + (rand() - 0.5); if (W > 7 && rand() < 0.3 && !porch && Math.abs(cu - du) >= dw / 2 + 1.5 + 0.4) put('laundry', at(cu, -1.25), fr.rot, { len: 3 }); }
-    if (rand() < 0.28) { const uu = du + side * (dw / 2 + 3.0); if (near(uu)) put('chickens', at(uu, -1.0), rand() * 6, { kind: 'hen' }); }
+    rand();     // (the roll that put hens before the doors is kept so the other dressing stays as it was; no hens: docs §16.4, §17)
     if (rand() < 0.2) { const uu = du - side * (dw / 2 + 2.9); if (near(uu)) put('drying_tray', at(uu, -0.9), rand() * 6); }
     // the trade's goods before the shop
     if (l.open && (l.kind === 'workshop' || l.kind === 'store')) continue;       // the open shops' goods are on their counters (house.js) and beside the door (below)

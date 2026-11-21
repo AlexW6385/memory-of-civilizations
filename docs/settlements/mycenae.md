@@ -162,3 +162,24 @@ Nothing below is read from a page that was reachable from the shell; where a lin
 ### 16.5 Wear and writing (wear.js)
 - A darker, polished patch in the middle of each house's threshold stone and a second by the jamb; the soot of each hearth, forge or lamp on the beams over it; two dark wheel ruts in the paving of the Lion Gate's passage [inferred].
 - **Not written:** Linear B signs exist (clay tablets of the palace archive, Pylos and Knossos) but no sign was set on any wall or board: no glyph could be verified from this shell, so none is shown. The tally boards are plain.
+
+## 17. Second pass, narrow form (2026-11-21)
+
+All [inferred] unless marked; nothing here was read from a page reachable from the shell. Code: nightlight.js, plan.js, wear.js, rooms.js (new), town.js, and one `mycenae` line in src/objects/life.js.
+
+### 17.1 Night near the visitor
+- Seen (low preset, 1024x576, radius 70): the arrival is lit within 15 m (halt fire, four court torches, wayside lamps); on the ramp at a house front it was dark: the door spill was a faint pool, no window lit, the lit room invisible.
+- Added: every opened door (`el.open`) now carries an upright glow disc across its opening (the hearth seen through the doorway) and a pool on the floor inside; the share of houses' and shrines' windows that glow rose from one in three to three in five; four pitch-pine stand torches along the stepped ramp, 3 m off its middle, 20 m apart; soot (pottery_dark) on the wall over every bracket torch. All in materials the citadel plan already holds. Re-rendered at the ramp: the torches, glowing doors and lit windows show. Not seen: the inside of a furnished room at night, and the Great Court's braziers (no frame was aimed there).
+
+### 17.2 Budget (MAIN pass, master -> now)
+Arrival 144 -> 143 draws, 0.84 -> 0.84 M triangles. Walk poses x,z,yaw: (-60,-6) east 123->124, west 112->111; (-20,-8) east 117->116, west 119->119; (40,3) east 99->97, west 135->135. All far under 450 / 4.5 M; nothing split.
+
+### 17.3 The walk's gaps
+- The lower town's houses all had the same main room (hearth in the middle, jars at the door wall, table at the back). rooms.js keeps that plan for one house in three (by the hash of its place) and gives the rest one of two others: the hearth set back with the store jars along the back wall, the table on the side wall and a loom by the door wall; or the one-room house with bed and chest in the back corner and a bench down the side wall. The door's lane stays free in each. Same materials, built in near plans only.
+- Hens: the street-life layer's kit (mediterranean) put hens and cats in the lanes and town.js dressed fronts with hens, against §16.4. The `mycenae` KIT_OVER line drops hens and cats (doves stay); the dress roll is kept so the rest of the dressing is unchanged.
+
+### 17.4 The landmark's wear
+- Cyclopean runs (not the dressed ones): a talus bank of rubble sloping from the wall's foot a metre out with a moss/lichen cap (plaster_damp) on its shoulder, in lumps of 1.6-3.4 m with gaps, by the hash of each run's place; the Lion Gate's wall face: thin damp and lichen patches along its foot either side of the opening and a few higher where rain runs from the lintel. No new material, no new draw. Seen at the wall: the banks read as low mounds, the moss caps hardly show at the low preset; the first version (boxes) looked like loose blocks and was replaced.
+
+### Still short
+Interiors at night and the Great Court's braziers not rendered; lichen is faint; Linear B still unwritten (no verified glyph table); the upper floors' rooms of the lower town have one plan; sleeping rooms and shops' interiors were not varied.

@@ -20,6 +20,8 @@ E.push({ t: 'borobudur', c: MONUMENT.c, base: MONUMENT.base, squares: SQUARES, c
     y0 = c.y;
   }
 }
+E.push({ t: 'bb_wear', c: MONUMENT.c, base: MONUMENT.base, squares: SQUARES });   // trodden earth along the galleries and at the flights' feet (§21)
+E.push({ t: 'bb_gallerylamps', c: MONUMENT.c, base: MONUMENT.base, squares: SQUARES });   // the lamps of the galleries (§21)
 E.push({ t: 'lane', rect: [64, -2, 300, 2], y: 0.03, mat: 'andesite' });
 // offerings (docs/settlements/borobudur.md §13): flowers on leaves and clay lamps at the foot of each ground
 // flight between its lions, and round the crowning stupa on the four axes
