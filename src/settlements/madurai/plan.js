@@ -90,6 +90,9 @@ const rooms = [
 ];
 const walks = [[[GATES.s[0], 200], [GATES.s[0], 126], [GATES.s[0], 100], [GATES.s[0], 75]]];
 walks[0].y0 = 0;
+// on past the gate: the axis to the foot of the Sundareswarar enclosure, and across the court to the Golden Lotus tank's east steps
+walks.push([[GATES.s[0], 75], [GATES.s[0], 55], [GATES.s[0], 38]], [[GATES.s[0], 70], [-30, 60], [-37, 55]]);
+walks[1].y0 = 0; walks[2].y0 = 0;
 for (const r of visitorRoutes()) { r.y0 = 0; walks.push(r); }
 
 export const temple = {
