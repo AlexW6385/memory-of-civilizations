@@ -45,7 +45,7 @@ export function ledge(el, { bag, col }) {
       bag.add('bronze', lathe([[0.001, 0], [0.06, 0.04], [0.04, 0.12], [0.001, 0.22]], 6, null, px, y + 5.2, z));
       addCloth(bag, CL[i++ % 4], clothBox(px + 0.05, y + 3.9, z - 0.02, px + 1.7, y + 4.9, z + 0.02), y + 4.9);
     } }
-  // marigold garlands and offerings of rice laid on the benches' ends
+  // garlands of jasmine and lotus (red and ochre pieces) and offerings of rice laid on the benches' ends
   for (const z of [-45, 7.5, 31]) for (let k = 0; k < 6; k++) bag.add(k % 2 ? 'paint_ochre' : 'cloth_red', lathe([[0.001, 0], [0.09, 0.01], [0.07, 0.06], [0.001, 0.08]], 6, null, x0 + 0.28 + (k % 3) * 0.08, y + 0.42, z - 0.35 + k * 0.14));
 }
 /** aj_workyard: the masons' and painters' yard at the foot of the north wing: blocks, an unfinished pillar on rollers, a lime pit, the colour shed. */

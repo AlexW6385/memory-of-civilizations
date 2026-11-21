@@ -1,6 +1,8 @@
 // Shang Yinxu, Anyang, c. 1200 BC: the ancestral hall of the kings with its court, Fu Hao's tomb, the oracle-bone archive, the foundry, the lineage quarters, the Huan.
 import '../../styles/shang/index.js';
 import { hall, tomb, archive } from './plan.js';
+import './nightlight.js';
+import './wear.js';
 import music from './music.js';
 export { town } from './town.js';
 export { music };

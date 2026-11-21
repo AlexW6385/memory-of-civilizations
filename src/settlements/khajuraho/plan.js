@@ -3,6 +3,7 @@
 
 import { RADIUS, TEMPLES, TANK, VARAHA, inTankWater } from './layout.js';
 import { rites, people, porchOf } from './life.js';
+import { walkRoutes } from './walk.js';
 
 const E = [];
 for (const t of TEMPLES) {
@@ -36,6 +37,7 @@ export const temples = {
   walks: Object.assign([[[K.c[0] + K.len + 30, K.c[1]], [K.c[0] + K.len + 15, K.c[1]]]], {}),
 };
 temples.walks[0].y0 = 0;
+for (const w of walkRoutes()) temples.walks.push(Object.assign(w.route, { y0: 0 }));
 export const tank = {
   id: 'khajuraho-tank', style: 'ming', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
