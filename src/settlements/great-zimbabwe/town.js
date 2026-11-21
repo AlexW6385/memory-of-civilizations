@@ -1,7 +1,7 @@
 // The daga houses and homesteads (docs/settlements/great-zimbabwe.md §5, §15): walled compounds, each with its
 // houses round a yard, a granary raised on stones, firewood and seats; a few houses stand free in the Great Enclosure.
 import { RADIUS, compounds, huts, daras, firings, height, inWalled, inEnclosure, onAscent, KRAAL_AT } from './layout.js';
-import { people, mounds } from './life.js';
+import { people, mounds, kraals, courtAt } from './life.js';
 export async function town() {
   const E = [];
   for (const k of compounds()) {
@@ -26,6 +26,10 @@ export async function town() {
   for (const dd of daras()) E.push({ t: 'dara_house', ...dd });
   for (const f of firings()) E.push({ t: 'pottery_firing', ...f });
   for (const m of mounds()) E.push({ t: 'termite_mound', ...m });
+  // the fires of the night (nightlight.js; docs §19.2): the watch-fires on the forecourt of the Great Enclosure's entrance, the herders' fire at each kraal's gate, the fire by the trader's mat in the first Valley court
+  for (const [x, z] of [[38.5, 88.5], [50.5, 88.5]]) E.push({ t: 'gz_nightfire', at: [x, z], y: 0.04, seed: 1 });
+  for (const K of kraals()) { const x = K.c[0] + Math.cos(K.gap) * (K.r + 2.4), z = K.c[1] + Math.sin(K.gap) * (K.r + 2.4); E.push({ t: 'gz_nightfire', at: [x, z], y: height(x, z), seed: 2 }); }
+  { const w = courtAt(0), x = w.at[0] + Math.cos(w.gm + Math.PI / 2) * 3.4, z = w.at[1] + Math.sin(w.gm + Math.PI / 2) * 3.4; E.push({ t: 'gz_nightfire', at: [x, z], y: w.y, seed: 3 }); }
   const frame = { origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 's' } };
   return [{ id: 'great-zimbabwe-huts', style: 'zimbabwe', ...frame, elements: E },
     { id: 'great-zimbabwe-life', style: 'life', ...frame, elements: people() }];
