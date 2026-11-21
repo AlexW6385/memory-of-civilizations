@@ -4000,7 +4000,7 @@
  },
  "persepolis-terrace": {
   "site": "persepolis",
-  "hash": "8216c53cef5969c0",
+  "hash": "7f9909f031796960",
   "rays": 128,
   "probes": 75069,
   "boxes": [
@@ -4085,8 +4085,8 @@
     ]
    }
   ],
-  "bytes": 1259867,
-  "seconds": 455,
+  "bytes": 1259104,
+  "seconds": 595,
   "baked": "2026-11-21"
  },
  "petra-khazneh": {

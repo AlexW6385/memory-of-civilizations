@@ -17,7 +17,7 @@ test('the six characters are drawn with the standard stroke counts, inside the c
 test('what is written on the boards and the curtains can be written', () => {
   for (const t of ['慈照寺', '龍安寺', '東求堂']) assert.ok(canWrite(t), t);
   for (const c of '酒茶米布當瓷漆') assert.ok(glyphOf(c), c);
-  assert.ok(!canWrite('銀閣'), 'a character that is not drawn is refused');
+  assert.ok(!canWrite('鑫閣'), 'a character that is not drawn is refused');
 });
 test('the geometry of a mark and of an inscription is finite and lies where it is put', () => {
   for (const mirror of [false, true]) for (const c of '茶酒米布當瓷漆') {

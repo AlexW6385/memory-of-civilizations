@@ -13,6 +13,9 @@ export function palaceLamps() {
 export function shoreLamps() {
   const E = [];
   for (const x of [-140, -75, -45]) { const fx = x + 6.8, fz = shoreAt(x) + 14.4; if (height(fx, fz) > 0.3) E.push({ t: 'kw_fire', at: [fx, fz], y: height(fx, fz) }); }
+  // the watch fires and lamp stands along the visitor's walk (docs/settlements/kilwa.md §23): at the spine's edge, the forecourt, the mosque street and the soko
+  for (const [x, z] of [[-12.4, -38], [-12.4, -58], [-17.2, -74], [-12.4, -86.6]]) E.push({ t: 'kw_fire', at: [x, z], y: height(x, z) });
+  for (const [x, z] of [[-19.5, -18], [-10.5, -18], [-26, -26], [-4, -26], [-30, -81], [8, -81], [-42.6, -96], [-72.6, -96]]) E.push({ t: 'kw_stand', at: [x, z], y: height(x, z) });
   for (const x of [-110, -20]) { let z = shoreAt(x) - 22; while (!inSea(x, z) && z > -300) z -= 4; E.push({ t: 'kw_glow', at: [x, z - 14], y: SEA + 2.7, r: 0.8 }); }
   return E;
 }

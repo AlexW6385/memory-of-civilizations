@@ -6,6 +6,7 @@ import './nightlight.js';
 import { box } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { houseDoor } from '../../styles/nalanda/houses.js';
+import { niches, burns, treads, SW } from './templework.js';
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -57,6 +58,27 @@ function houseWear(el, bag) {
   bag.add('lime_plaster', box(Math.min(a[0], b[0]), y, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y + 0.006, Math.max(a[1], b[1])));
 }
 
+/** The great temples' wear (§23): the pilgrims' feet have hollowed and polished the stair's treads (a pale strip of lime plaster down the middle of each, wider on the lowest flight, no two alike);
+ *  rainwater has run down the stepped panel under some niches (a dark streak on its face); and over the niches that hold a lamp the flame has blacked the plaster ring's crown. */
+function templeWear(el, bag) {
+  if (el.simple) return;
+  const T = treads(el), big = el.tierH >= 4.5;
+  for (const t of T) {
+    const h = hashAt(t.x0, t.i, 71 + t.k), half = (big ? 0.9 : 0.7) * (1.3 - 0.18 * t.k) * (0.7 + 0.6 * h), off = (hashAt(t.x0, t.k, 73) - 0.5) * 0.5;
+    if (t.k > 1 && h < 0.3) continue;
+    bag.add('lime_plaster', box(t.x0 + 0.03, t.top, t.z + off - half, t.x1 - 0.03 - 0.04 * h, t.top + 0.006, t.z + off + half));
+  }
+  for (const q of niches(el)) {
+    const { p, o, tg, by, ah } = q, e = (d0, d1, t0, t1, ya, yb, m) => {
+      const a = [p[0] + o[0] * d0 + tg[0] * t0, p[1] + o[1] * d0 + tg[1] * t0], b = [p[0] + o[0] * d1 + tg[0] * t1, p[1] + o[1] * d1 + tg[1] * t1];
+      bag.add(m, box(Math.min(a[0], b[0]), ya, Math.min(a[1], b[1]), Math.max(a[0], b[0]), yb, Math.max(a[1], b[1])));
+    };
+    const h = hashAt(p[0], p[1], 75);
+    if (h < 0.4) { const w = 0.08 + 0.2 * hashAt(p[0], p[1], 77), c = (hashAt(p[0], p[1], 79) - 0.5) * 0.4, ht = 0.16 + 0.2 * hashAt(p[0], p[1], 81); e(0.1, 0.112, c - w, c + w, by - 0.03 - ht, by - 0.03, 'brick_baked'); }
+    if (burns(q)) { const w = 0.09 + 0.07 * hashAt(p[0], p[1], 83); e(0.46, 0.472, -w, w, by + ah - 0.2, by + ah - 0.01, 'opening'); }
+  }
+}
+
 let done = false;
 export function registerWear() {
   if (done) return; done = true;
@@ -65,5 +87,6 @@ export function registerWear() {
   };
   wrap('monastery', E.monastery, monasteryWear);
   wrap('house_bihar', E.house_bihar, houseWear);
+  wrap('temple', E.temple, templeWear);
 }
 registerWear();
