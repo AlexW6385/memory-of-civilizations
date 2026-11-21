@@ -8,11 +8,17 @@ import { frame, steps, vessel } from './geo.js';
 import { JAR, jars, heap, skirt, streaks, ridge, fence, fenceRun, rack, pitStore, granary, well, garden, shock, woodpile, pen, hearth, grind, loom, bench, stool, washline, grainMat, dogHouse, tree } from './dress.js';
 
 export { JAR };
+
+/** Hooks for the settlement's night light (src/settlements/shang-yinxu/nightlight.js): called where a house has a window, a doorway or a kiln mouth, with the frame's local coordinates. */
+export const HOOK = { win: null, door: null };
+/** A window or a dark opening: the 'opening' box, and the hook (the lit window of a household at night). Local a along the wall, y, b into the house; the box lies at b0..b1. */
+function win(F, a0, y0, b0, a1, y1, b1, solid) { F.b('opening', a0, y0, b0, a1, y1, b1, solid); HOOK.win?.(F, a0, y0, b0, a1, y1, b1); }
 const WALLS = ['mud_plaster', 'mud_plaster', 'earth_wall', 'mud_plaster'];
 
 /** The doorway of a house: jambs, a lintel, a leaf of planks (shut, or swung open against the wall inside), a threshold slab. */
 function doorway(F, dc, b, y0, wid, ht, th, open) {
   const a0 = dc - wid / 2, a1 = dc + wid / 2;
+  if (open) HOOK.door?.(F, dc, b, y0, wid, ht, th);
   F.b('timber', a0 - 0.1, y0, b - 0.06, a0 + 0.03, y0 + ht + 0.05, b + th + 0.05, false); F.b('timber', a1 - 0.03, y0, b - 0.06, a1 + 0.1, y0 + ht + 0.05, b + th + 0.05, false);
   F.b('timber', a0 - 0.12, y0 + ht, b - 0.07, a1 + 0.12, y0 + ht + 0.16, b + th + 0.06, false);
   if (!open) F.b('planks_grey', a0 + 0.03, y0, b + 0.12, a1 - 0.03, y0 + ht, b + 0.2, false);
@@ -28,12 +34,13 @@ export function pitHouse(F, u, v, w, d, open = false, lod = 0) {
   const fl = R(1.0, 0.9, w - 1.0, d - 1.0);
   F.bag.add('earth_wall', box(fl[0], 0, fl[1], fl[2], 0.03, fl[3]));
   const dw = open ? 0.62 : 0.5, dc = u + w / 2, fh = open ? 2.1 : 1.5;
+  if (open) HOOK.door?.(F, dc, v, 0, dw * 2, 2.0, 0.45);
   F.b('mud_plaster', u, 0, v, dc - dw, fh, v + 0.45); F.b('mud_plaster', dc + dw, 0, v, u + w, fh, v + 0.45);
   // an enterable house has a header 2.0 m above the floor (the walker's head is 1.75 m: a lintel lower than that shuts the door), jambs to it, and no plaster over the opening
   if (!open) F.b('mud_plaster', dc - dw, fh - 0.25, v, dc + dw, fh, v + 0.45, false);
   else F.b('timber', dc - dw - 0.12, 2.0, v - 0.06, dc + dw + 0.12, 2.22, v + 0.5, false);
   F.b('timber', dc - dw - 0.08, 0, v - 0.04, dc - dw + 0.04, open ? 2.0 : fh - 0.2, v + 0.5, false); F.b('timber', dc + dw - 0.04, 0, v - 0.04, dc + dw + 0.08, open ? 2.0 : fh - 0.2, v + 0.5, false);
-  if (!open) F.b('opening', dc - dw + 0.04, 0, v + 0.3, dc + dw - 0.04, 1.2, v + 0.34, false);
+  if (!open) win(F, dc - dw + 0.04, 0, v + 0.3, dc + dw - 0.04, 1.2, v + 0.34, false);
   F.b('earth_wall', dc - dw - 0.2, 0, v - 0.45, dc + dw + 0.2, 0.12, v, false);
   F.b('earth_wall', u - 0.02, 0, v - 0.02, dc - dw, 0.5, v + 0.5, false);                    // the splashed foot
   // an enterable house stands on its banks with daub walls above them to an eave 2.1 m over the floor (the thatch's end plane must not cross the walker's head);
@@ -88,7 +95,7 @@ function mainHouse(F, u, v, w, d, open, rand, lod, vr = 0) {
   F.b(wm, u, P, v, dc - dw / 2, P + H, v + th); F.b(wm, dc + dw / 2, P, v, u + w, P + H, v + th); F.b(wm, dc - dw / 2, P + 1.9, v, dc + dw / 2, P + H, v + th, false);
   F.b(wm, u, P, v + th, u + th, P + H, v + d); F.b(wm, u + w - th, P, v + th, u + w, P + H, v + d); F.b(wm, u + th, P, v + d - th, u + w - th, P + H, v + d);
   doorway(F, dc, v - 0.0, P, dw, 1.95, th, open);
-  for (const k of (vr === 1 ? [-2, 2] : [-2, -1, 1, 2])) { const c = dc + k * w * 0.2; if (Math.abs(c - dc) > dw) F.b('opening', c - 0.28, P + 1.6, v - 0.01, c + 0.28, P + 2.2, v + 0.03, false), F.b('timber', c - 0.34, P + 1.55, v - 0.03, c + 0.34, P + 1.6, v + 0.05, false); }
+  for (const k of (vr === 1 ? [-2, 2] : [-2, -1, 1, 2])) { const c = dc + k * w * 0.2; if (Math.abs(c - dc) > dw) win(F, c - 0.28, P + 1.6, v - 0.01, c + 0.28, P + 2.2, v + 0.03, false), F.b('timber', c - 0.34, P + 1.55, v - 0.03, c + 0.34, P + 1.6, v + 0.05, false); }
   // the three fronts of the great houses, by the lot's seed (docs §5d): 0 the red dado; 1 a frieze of red and white squares under the eave and two wide
   // windows; 2 bare rammed earth with the posts of the wall-frame standing proud at every 2 m and a footing of beaten earth under each
   if (vr === 0) F.b('kokowai', u - 0.02, P, v - 0.03, u + w + 0.02, P + 0.3, v, false);                                           // the red dado
@@ -114,7 +121,7 @@ function smallHouse(F, w, d, open, rand, lod, H = 2.3) {
   F.b(wm, 0, 0.3, 0, dc - dw / 2, 0.3 + H, th); F.b(wm, dc + dw / 2, 0.3, 0, w, 0.3 + H, th); F.b(wm, dc - dw / 2, 2.0, 0, dc + dw / 2, 0.3 + H, th, false);
   F.b(wm, 0, 0.3, th, th, 0.3 + H, d); F.b(wm, w - th, 0.3, th, w, 0.3 + H, d); F.b(wm, th, 0.3, d - th, w - th, 0.3 + H, d);
   doorway(F, dc, 0, 0.3, dw, 1.8, th, open);
-  F.b('opening', 0.8, 1.6, -0.01, 1.4, 2.1, 0.03, false); F.b('opening', w - 1.4, 1.6, -0.01, w - 0.8, 2.1, 0.03, false);
+  win(F, 0.8, 1.6, -0.01, 1.4, 2.1, 0.03, false); win(F, w - 1.4, 1.6, -0.01, w - 0.8, 2.1, 0.03, false);
   skirt(F, 0, 0, w, d, 0.3, [dc - dw / 2 - 0.1, dc + dw / 2 + 0.1], 0.5); if (!lod) streaks(F, 0, 0, w, 0.3 + H, rand, 3, [dc - dw / 2, dc + dw / 2]);
   F.roof(0, 0, w, d, 0.3 + H, 2.0, 0.7, false); ridge(F, 0, 0, w, d, 0.3 + H, 2.0, 0.7, false);
   if (open) {
@@ -172,7 +179,7 @@ export function rowHouse(el, ctx) {
     F.b(wm, a0, 0, v, dc - 0.5, H, v + th); F.b(wm, dc + 0.5, 0, v, a1, H, v + th); F.b(wm, dc - 0.5, 1.85, v, dc + 0.5, H, v + th, false);
     F.b(wm, a0, 0, v + th, a0 + th, H, v + d); F.b(wm, a1 - th, 0, v + th, a1, H, v + d); F.b(wm, a0 + th, 0, v + d - th, a1 - th, H, v + d);
     doorway(F, dc, v, 0, 1.0, 1.85, th, open);
-    for (const s of [-1, 1]) { const c = dc + s * w * 0.3; F.b('opening', c - 0.3, 1.45, v - 0.01, c + 0.3, 1.95, v + 0.03, false); F.b('timber', c - 0.36, 1.4, v - 0.03, c + 0.36, 1.45, v + 0.05, false); }
+    for (const s of [-1, 1]) { const c = dc + s * w * 0.3; win(F, c - 0.3, 1.45, v - 0.01, c + 0.3, 1.95, v + 0.03, false); F.b('timber', c - 0.36, 1.4, v - 0.03, c + 0.36, 1.45, v + 0.05, false); }
     skirt(F, a0, v, w, d, 0, [dc - 0.6, dc + 0.6], 0.5); if (!lod) streaks(F, a0, v, w, H, rand, 3, [dc - 0.5, dc + 0.5]);
     // the fronts of the row, by rule: 0 plain; 1 wall-frame posts proud of the plaster at 2 m; 2 a red band under the eave with a row of hung millet bundles on a pole
     if (fv === 1) for (let a = a0; a <= a1 + 0.01; a += w / Math.round(w / 2)) { if (Math.abs(a - dc) < 0.75) continue; F.b('timber', a - 0.09, 0.1, v - 0.06, a + 0.09, H, v, false); }
@@ -225,7 +232,7 @@ export function workshop(el, ctx) {
     heap(F, 'granite_grey', W / 2 + 4, 6.5, 1.0); heap(F, 'serpentine', W / 2 - 4.5, 7, 0.7); jars(F, 2, 6, 3, 0.2);
   } else if (T === 'pottery') {
     const kb = F.P(W / 2, 6); F.bag.add('mud_plaster', frustum([kb[0] - 2.2, kb[1] - 2.0, kb[0] + 2.2, kb[1] + 2.0], 0, 1.7, 0.9, 0.9, 0.8, 0.8, { noBottom: true })); F.col.rect(F.R(W / 2 - 2.2, 4, W / 2 + 2.2, 8), 0, 1.7);
-    F.b('opening', W / 2 - 0.5, 0.1, 4.05, W / 2 + 0.5, 0.9, 4.1, false); F.lathe('granite_black', [[0.001, 1.7], [0.3, 1.7], [0.3, 1.82], [0.001, 1.82]], W / 2, 0, 6, 8);
+    win(F, W / 2 - 0.5, 0.1, 4.05, W / 2 + 0.5, 0.9, 4.1, false); F.lathe('granite_black', [[0.001, 1.7], [0.3, 1.7], [0.3, 1.82], [0.001, 1.82]], W / 2, 0, 6, 8);
     for (let r = 0; r < 4; r++) jars(F, 2 + r * 0.1, 9.2 + r * 0.9, 6, 0.2 + 0.03 * r);
     F.lathe('timber', [[0.35, 0.3], [0.35, 0.36], [0.001, 0.36]], su1 - 1.5, 0, sv0 + 2.3, 12); F.b('timber', su1 - 1.6, 0, sv0 + 2.2, su1 - 1.4, 0.3, sv0 + 2.4, false);
     heap(F, 'mud_plaster', W - 3, 5, 1.2); heap(F, 'mud_plaster', 3.5, 5, 1.0); woodpile(F, W - 7.5, 3.2, 2.4, 5); F.b('reed_mat', 2, 0.01, 3.0, 6, 0.04, 5, false); for (let k = 0; k < 7; k++) F.lathe('terracotta', [[0.001, 0], [0.18, 0.01], [0.2, 0.2], [0.001, 0.24]], 2.4 + k * 0.55, 0.04, 4, 7);
