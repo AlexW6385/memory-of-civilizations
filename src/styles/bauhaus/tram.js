@@ -2,7 +2,7 @@
 // at its stop, the stop's enamel plate in the block capitals. Dessau had an electric tram from 1894 [stated by memory of the town's history, no page read];
 // its line along Kothener Strasse, the metre gauge, the car's size and colours are [inferred].
 import { box, rod } from '../../core/geom.js';
-import { lettering } from '../viennese/lettering.js';
+import { letters } from './letters.js';
 import { faceFrame } from '../dutch/facade.js';
 
 /** dessau_rails: { x0, x1, tracks: [z...] } — pairs of grooved rails flush with the paving (metre gauge), sleepers' heads as dark strips every 1.2 m. */
@@ -47,7 +47,7 @@ export function dessauTramStop(el, { bag, col }) {
   bag.add('paint_white', box(px0, y + v0, z - 0.03, px1, y + v0 + 0.36, z + 0.03));
   for (const f of ['s', 'n']) {
     const F = faceFrame(f === 's' ? [px0, z - 0.01, px1, z + 0.03] : [px0, z - 0.03, px1, z + 0.01], f);
-    lettering(bag, F, y, F.w / 2, v0 + 0.07, 'HALTESTELLE', 0.2, 'iron', 1.5, 0.0);
+    letters(bag, F, y, F.w / 2, v0 + 0.07, 'HALTESTELLE', 0.2, 'iron', 1.5, -0.004);
   }
   col.circle(x, z, 0.06, y, y + 3.3);
 }

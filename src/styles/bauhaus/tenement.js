@@ -5,7 +5,7 @@
 import { Fr, hip } from './frame.js';
 import { S, rng } from './kit.js';
 import { flatSpec, buildFlat } from './flat.js';
-import { lettering } from '../viennese/lettering.js';
+import { letters } from './letters.js';
 import { faceFrame } from '../dutch/facade.js';
 
 const WALLS = ['stucco_pale', 'stucco_cream', 'stucco_warm', 'facade_buff', 'stucco_ochre', 'plaster_grey'];
@@ -173,7 +173,7 @@ function shopFront(F, kind, y, yc, r, du, ux0, ux1) {
   const letter = sign === 'paint_ochre' || sign === 'paint_blue' ? 'car_black' : 'car_cream';
   {
     const word = TRADE_WORD[kind], Ff = faceFrame(F.rect, F.f), cmat = F.sk.m(letter), v = yc - 0.82;
-    lettering(F.sk.bag, Ff, 0, W / 2, v, word, 0.5, cmat, W - 2.0, 0.12);
+    letters(F.sk.bag, Ff, 0, W / 2, v, word, 0.5, cmat, W - 2.0, 0.115);
   }
   // the awning, striped, over the window part (two lengths either side of the door)
   for (const [a, b] of [[ux0, du - 0.9], [du + 0.9, ux1]]) {
@@ -248,6 +248,8 @@ function houseIn(F, l, spec, r) {
   for (let u = 0.3; u < W - 0.6; u += 0.5 + r() * 2.5) if (r() < 0.45) F.b('brick', u, u + 0.35 + r() * 0.3, 1.02, 1.35 + r() * 0.4, -0.03, -0.01);    // bare brick where the render fell
   // the door: a stoop, a frame, a transom, the bell and number plate (a shop's door glazed)
   F.b('sandstone_white', du - 0.8, du + 0.8, 0, 0.12, -0.7, -0.06); F.b('sandstone_white', du - 0.7, du + 0.7, 0, 0.24, -0.4, -0.06); F.k(du - 0.8, du + 0.8, 0, 0.12, -0.7, -0.06);
+  // the steps worn by feet: a darker hollow in the middle of each tread, the sill's wear
+  { const wr = 0.7 + 0.2 * r(); F.b('plaster_grey', du - 0.42, du + 0.42, 0.12, 0.123, -0.64 - 0.1 * wr, -0.46); F.b('plaster_grey', du - 0.38, du + 0.38, 0.24, 0.243, -0.34, -0.14 - 0.05 * wr); }
   const dm = shopKind ? 'wood_dark' : modern ? 'car_blue' : ['wood_dark', 'shutter_green', 'wood_painted', 'car_red'][Math.floor(r() * 4)];
   F.b(dm, du - 0.7, du - 0.62, y + 0.02, y + 2.55, -0.06, 0.12); F.b(dm, du + 0.62, du + 0.7, y + 0.02, y + 2.55, -0.06, 0.12); F.b(dm, du - 0.7, du + 0.7, y + 2.55, y + 2.65, -0.06, 0.12);
   F.b(dm, du - 0.6, du + 0.6, y + 2.0, y + 2.5, 0.0, 0.04);

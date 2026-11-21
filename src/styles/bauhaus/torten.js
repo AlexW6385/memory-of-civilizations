@@ -5,6 +5,8 @@ import { Fr } from './frame.js';
 import { S, rng } from './kit.js';
 import { fitShop, pend, tbl, chr, stove, sack, rug } from './tenement.js';
 import { buildRowUp } from './flat.js';
+import { letters } from './letters.js';
+import { faceFrame } from '../dutch/facade.js';
 
 const Y = 0.15, H0 = 2.75, YC = Y + H0, YB = YC + 0.3, TOP = YB + 2.9;
 const DOORS = ['car_blue', 'car_red', 'paint_cab_yellow', 'car_cream', 'paint_ferry_green', 'car_blue'];
@@ -78,6 +80,7 @@ export function konsum(el, ctx) {
   F.b('concrete_light', -0.05, W + 0.05, 0, y, -0.05, D + 0.05);
   F.wall({ u0: 0, u1: W, v: 0, th: T, y0: y, y1: h, mat: 'plaster_white', ops: [{ u0: 0.5, u1: 5.2, y0: y + 0.5, y1: h - 0.9, glass: 'glass_outer', frame: 'steel_grey' }, { u0: 5.2, u1: 6.4, y1: y + 2.5 }, { u0: 6.9, u1: W - 0.5, y0: y + 0.6, y1: y + 2.6, glass: 'glass_outer', frame: 'steel_grey' }] });
   F.s('plaster_white', 0, T, y, h, T, D); F.s('plaster_white', W - T, W, y, h, T, D);
+  { const Ff = faceFrame(lowR, 's'); letters(sk.bag, Ff, 0, Math.min(W - 3, 4.4), 3.42, 'KONSUM', 0.6, 'steel_grey', 4.2, -0.004); }   // the cooperative's name over its windows (docs §15.5)
   F.wall({ u0: T, u1: W - T, v: D - T, th: T, y0: y, y1: h, mat: 'plaster_white', ops: [{ u0: 1, u1: 2.5, y0: y + 1.2, y1: y + 2.5, glass: 'glass_outer', frame: 'steel_grey' }, { u0: W - 3, u1: W - 2, y1: y + 2.2 }] });
   F.b('wood_ochre', T, W - T, y - 0.02, y + 0.012, T, D - T); F.floor(T, W - T, T, D - T, y);
   F.b('plaster_white', T, W - T, h - 0.04, h, T, D - T); F.b('concrete_light', -0.05, W + 0.05, h, h + 0.12, -0.05, D + 0.05); F.b('plaster_white', 0, W, h + 0.12, h + 0.6, 0, 0.2); F.b('asphalt', 0, W, h + 0.12, h + 0.15, 0.2, D);

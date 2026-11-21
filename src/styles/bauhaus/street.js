@@ -2,6 +2,8 @@
 // (Litfasssäulen) pasted with posters, newspaper kiosks, the yellow Reichspost letter boxes, hydrants, benches, litter bins, bicycle racks, street-name
 // plates, the cast-iron street pump with its trough, and the sports field's goals and markings. One element carries the lists computed from layout.js.
 import { S, rng } from './kit.js';
+import { letters } from './letters.js';
+import { faceFrame } from '../dutch/facade.js';
 
 const POSTER = ['car_red', 'cloth_ochre', 'paint_white', 'cloth_blue', 'paint_cab_yellow', 'cloth_green', 'car_cream'];
 
@@ -43,11 +45,16 @@ function bench(sk, [x, z], rot) {
 }
 function bin(sk, [x, z]) { sk.lathe('iron_galv', [[0.2, 0], [0.24, 0.85], [0.001, 0.85]], x, 0, z, 8); sk.rod('iron', [x, 0.85, z], [x, 0.95, z], 0.03, 4); sk.k(x - 0.22, 0, z - 0.22, x + 0.22, 0.9, z + 0.22); }
 function rack(sk, [x, z], rot) { const c = Math.cos(rot), s = Math.sin(rot); for (let k = 0; k < 6; k++) { const u = -1.2 + k * 0.48, a = [x + u * c, z - u * s]; sk.rod('steel_grey', [a[0], 0, a[1]], [a[0], 0.75, a[1]], 0.015, 4); } sk.rod('steel_grey', [x - 1.2 * c, 0.75, z + 1.2 * s], [x + 1.4 * c, 0.75, z - 1.4 * s], 0.015, 4); }
-function sign(sk, [x, z], rot, r) {
+function sign(sk, [x, z], rot, r, name) {
   sk.rod('iron', [x, 0, z], [x, 2.6, z], 0.03, 5);
-  const c = Math.cos(rot), s = Math.sin(rot);
-  for (const d of [1, -1]) { const a = [x + d * 0.34 * c, z - d * 0.34 * s]; sk.b('paint_blue', Math.min(x, a[0]) - 0.02 * Math.abs(s), 2.4, Math.min(z, a[1]) - 0.02 * Math.abs(c), Math.max(x, a[0]) + 0.02 * Math.abs(s), 2.6, Math.max(z, a[1]) + 0.02 * Math.abs(c)); }
-  void r;
+  // the enamel street-name plate on the post, lettered on both faces (the plate faces ±z, as a plate on a street running east-west reads); the name is the street's own (docs §15.5)
+  const hw = 0.6, y0 = 2.38, y1 = 2.62;
+  sk.b('paint_blue', x - hw, y0, z - 0.017, x + hw, y1, z + 0.017);
+  if (name) for (const f of ['s', 'n']) {
+    const F = faceFrame(f === 's' ? [x - hw, z - 0.02, x + hw, z + 0.017] : [x - hw, z - 0.017, x + hw, z + 0.02], f);
+    letters(sk.bag, F, 0, F.w / 2, 2.455, name, 0.11, 'stucco_cream', F.w - 0.14, -0.004);
+  }
+  void rot; void r;
 }
 function pump(sk, [x, z]) { sk.lathe('iron', [[0.16, 0], [0.18, 0.1], [0.1, 0.2], [0.09, 1.0], [0.14, 1.1], [0.001, 1.2]], x, 0, z, 8); sk.rod('iron', [x, 1.0, z], [x + 0.35, 0.85, z], 0.018, 4); sk.s('timber', x - 0.5, 0, z + 0.25, x + 0.5, 0.45, z + 0.7); sk.b('water', x - 0.46, 0.4, z + 0.29, x + 0.46, 0.42, z + 0.66); }
 function goal(sk, [x, z], dir) { for (const dz of [-3.66, 3.66]) sk.rod('paint_white', [x, 0, z + dz], [x, 2.44, z + dz], 0.06, 5); sk.rod('paint_white', [x, 2.44, z - 3.66], [x, 2.44, z + 3.66], 0.06, 5); for (const dz of [-3.66, 3.66]) sk.rod('cloth_grey', [x, 2.44, z + dz], [x + dir * 1.6, 0, z + dz], 0.01, 3); }
@@ -62,7 +69,7 @@ export function dessauStreet(el, ctx) {
     switch (it.k) {
       case 'pillar': pillar(sk, it.at, r); break; case 'kiosk': kiosk(sk, it.at, it.rot || 0, r); break; case 'postbox': postbox(sk, it.at); break;
       case 'hydrant': hydrant(sk, it.at); break; case 'bench': bench(sk, it.at, it.rot || 0); break; case 'bin': bin(sk, it.at); break;
-      case 'rack': rack(sk, it.at, it.rot || 0); break; case 'sign': sign(sk, it.at, it.rot || 0, r); break; case 'pump': pump(sk, it.at); break;
+      case 'rack': rack(sk, it.at, it.rot || 0); break; case 'sign': sign(sk, it.at, it.rot || 0, r, it.name); break; case 'pump': pump(sk, it.at); break;
       case 'goal': goal(sk, it.at, it.dir || 1); break; default: break;
     }
   }

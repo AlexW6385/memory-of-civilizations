@@ -58,7 +58,7 @@ function streetStuff() {
     }
     for (let s = -R + 20; s < R; s += 46) { const x = alongX ? s : (r[0] + r[2]) / 2, z = alongX ? (r[1] + r[3]) / 2 : s; if (inD(x, z) && !ROADS.some((q) => q !== r && inRect(q, x, z, 1))) manholes.push([x, z]); }
   }
-  const at = (k, x, z, rot = 0) => { if (inD(x, z) && !inSchool(x, z, 2) && !inLot(x, z, 0.3)) items.push({ k, at: [x, z], rot }); };
+  const at = (k, x, z, rot = 0, name) => { if (inD(x, z) && !inSchool(x, z, 2) && !inLot(x, z, 0.3)) items.push({ k, at: [x, z], rot, name }); };
   const Mw = ROAD_M[0] - FOOT / 2, Me = ROAD_M[2] + FOOT / 2, Kn = ROAD_K[1] - FOOT / 2, Ks = ROAD_K[3] + FOOT / 2, Vw = ROAD_KV[0] - FOOT / 2, Ve = ROAD_KV[2] + FOOT / 2, En = ROAD_E[1] - FOOT / 2, Es = ROAD_E[3] + FOOT / 2;
   for (const [x, z] of [[Mw, Kn - 0.2], [Ve, Kn - 0.2], [Mw, En], [Ve, En], [100, Kn]]) at('pillar', x, z);
   for (const [x, z] of [[Mw, Ks], [Ve, Ks], [60, En]]) at('kiosk', x, z);
@@ -68,7 +68,7 @@ function streetStuff() {
   for (const z of [30, 70, 110, 150]) at('bench', Mw, z, Math.PI / 2);
   for (const x of [90, 130, 170]) at('bench', x, Ks, 0);
   for (const [x, z, a] of [[Me, -45, 0], [Mw, 33, 0], [Kn - 0.2, 100, 0], [Ks, 90, 0]]) at('bin', x, z, a);
-  for (const [x, z] of [[Mw, Ks + 0.3], [Mw, Kn - 0.4], [Ve, Ks + 0.3], [Ve, En], [Vw, Kn - 0.4]]) at('sign', x + 0.9, z, 0);
+  for (const [x, z, n] of [[Mw, Ks + 0.3, 'KOTHENER STRASSE'], [Mw, Kn - 0.4, 'KOTHENER STRASSE'], [Ve, Ks + 0.3, 'KOTHENER STRASSE'], [Ve, En, 'EBERTALLEE'], [Vw, Kn - 0.4, 'KOTHENER STRASSE']]) at('sign', x + 0.9, z, 0, n);
   for (const [x, z] of [[Me, -100], [Ve + 0.3, 20], [100, Ks + 0.5]]) at('pump', x, z);
   for (const [x, z] of [[Mw + 0.8, 8], [Ve - 0.8, 8], [60, En + 0.6]]) at('rack', x, z, Math.PI / 2);
   items.push({ k: 'goal', at: [56, 22], dir: -1 }, { k: 'goal', at: [136, 22], dir: 1 });
