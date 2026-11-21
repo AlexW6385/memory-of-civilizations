@@ -72,7 +72,7 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     if (el.furn && el.lit !== false) for (const room of rangeRooms(el)) litDoor(H, room.F, room.vc, y + 0.1, y + 2.3, 0.62, 0.34 + 0.3 * hashAt(room.vc, el.c[0], 2), true, y);
   } else if (name === 'k_house') {
     for (const l of lights.slice(n)) lightHalo(H, l, PLATFORM);
-    if (!el.lite) { const { F } = houseFrame(el), q = F.P(-0.3, 0); litDoor(H, F, 0, PLATFORM + 0.05, PLATFORM + 2.05, 0.75, el.kitchen ? 0.62 : 0.4, true, PLATFORM); void q; }
+    { const { F } = houseFrame(el); litDoor(H, F, 0, PLATFORM + 0.05, PLATFORM + 2.05, 0.75, el.kitchen ? 0.62 : 0.4, !el.lite, PLATFORM); }   // beyond 150 m too, a pane without its pool
   } else if (name === 'k_brazier') {
     const [x, z] = el.at, k = el.r ?? 1;
     H.ball(x, y + 0.98 * k, z, 0.8 * k, 0.7); H.floor(x, y + 0.07, z, 2.1 * k, 2.1 * k, 10, 0.75);

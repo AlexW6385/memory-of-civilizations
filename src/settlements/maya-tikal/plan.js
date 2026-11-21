@@ -7,7 +7,7 @@ import { PLAZA, T1, T2, NA, NA_TEMPLE, NA_SMALL, CA, BALL } from './layout.js';
 import { frame } from '../../styles/tikal/kit.js';
 import { routes as visitorRoutes } from './walk.js';
 import './nightlight.js';
-import './wear.js';
+import { pyramidStair, platformStair } from './wear.js';
 
 export const WALKS = [
   [[-18, 28], [20, 0], [34, 0], [44, 0], [52, 0], [54.5, 0], [58.3, 0], [62.1, 0], [65.5, 0]],
@@ -26,7 +26,7 @@ const E = [];
 E.push({ t: 'lane', rect: PLAZA, y: 0.04, mat: 'lime_plaster' });
 // the plaza's plaster after two centuries of rains: damp, moss in the joints, worn patches; the censers at the stelae
 E.push({ t: 'k_stains', rect: [PLAZA[0] + 1, PLAZA[1] + 1, PLAZA[2] - 1, PLAZA[3] - 1], y: 0.05, n: 70, seed: 7 });
-for (const [x, z] of [[-24, -34.6], [24, -34.6], [-31, -4], [31, 4], [-31, 4], [31, -4], [-6, 34.6], [6, 34.6]]) E.push({ t: 'k_brazier', at: [x, z], y: 0.04, rot: x });
+for (const [x, z] of [[-24, -34.6], [24, -34.6], [-31, -4], [31, 4], [-31, 4], [31, -4], [-6, 34.6], [6, 34.6], [-27, 25], [-8, 25], [-26, 12], [-5, 12]]) E.push({ t: 'k_brazier', at: [x, z], y: 0.04, rot: x });   // the last four stand about the arrival (night, docs §21)
 // Temple I (east, the stair on its west face): nine tiers, the shrine of three chambers, the roof comb
 E.push({ t: 'k_pyramid', ...T1, shrine: { chambers: 3, len: 7, comb: 13, king: true, lintel: true } });
 // Temple II (west, the stair on its east face): three broad tiers, the shrine and its comb
@@ -87,6 +87,12 @@ for (const [x, z] of [[-10, -20], [10, -20], [-10, 20], [10, 20]]) pushStela({ t
 
 // the torches of pitch-pine at the feet of the great stairs (docs §17)
 for (const [x, z] of [[33.2, -5.6], [33.2, 5.6], [-33.2, -6.8], [-33.2, 6.8], [-15.5, -40.4], [15.5, -40.4], [-22.5, 38.5], [4.5, 38.5]]) E.push({ t: 'mt_torch', at: [x, z], y: 0.04 });
+
+// the worn middle of the great stairs (docs §21)
+for (const P of [T1, T2]) E.push({ t: 'mt_stairwear', ...pyramidStair(P) });
+E.push({ t: 'mt_stairwear', ...pyramidStair({ ...NA_TEMPLE, y0: NA.H }), spread: 0.8 });
+E.push({ t: 'mt_stairwear', ...platformStair(NA.rect, NA.H, { face: 's', at: 0, w: 30, run: 12 }), spread: 1.6 });
+E.push({ t: 'mt_stairwear', ...platformStair(CA.rect, CA.H, { face: 'n', at: -9, w: 24, run: 8.4 }), spread: 1.5 });
 
 // rooms: the three chambers of Temple I, the innermost of Temple II, the south range's rooms, the lowest room of the stepped palace
 const room = (id, rect, y, kind = 'hall') => ({ id, rect, y, kind });

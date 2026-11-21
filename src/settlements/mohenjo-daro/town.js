@@ -18,7 +18,9 @@ const base = (id, elements, o = {}) => ({ id, style: 'indus', origin: [0, 0], ba
 const P = (l, u, v) => { const [x0, z0, x1, z1] = l.rect; return l.front === 'w' ? [x0 + v, z0 + u] : l.front === 'e' ? [x1 - v, z0 + u] : l.front === 'n' ? [x0 + u, z0 + v] : [x0 + u, z1 - v]; };
 const facing = (l) => ({ w: -Math.PI / 2, e: Math.PI / 2, n: Math.PI, s: 0 })[l.front] ?? 0;   // (a figure faces −z at rot 0; sin(rot) is its x)
 
+const KEEP = [];
 function people() {
+  KEEP.length = 0;
   const rand = rng(2500), L = [];
   let k0 = 0;
   const fig = (at, rot, o = {}) => L.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', top: 'bare', over: 'none', cloth: 'cloth_white', cloth2: 'cloth_white', skin: pick(rand, ['skin_medium', 'skin_dark', 'skin_medium']), hat: 'none', hair: pick(rand, ['bun', 'short']), hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
@@ -69,7 +71,10 @@ function people() {
   }
   woman([WELL_BIG[0] + 3.3, WELL_BIG[1] + 0.5], Math.PI / 2, { carry: 'pot', arms: 'head' });
   // the workshops: the master at his bench in the court, seated on the ground
-  for (const l of lots()) if (!['house', 'small'].includes(l.kind)) { const p = P(l, l.rect[3] - l.rect[1] > 0 ? Math.min(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 99) / 2 : 6, 6.0); man(p, facing(l) + Math.PI, { y: l.y, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); }
+  // (those of the walk's opened workshops are built into near plans, with an apprentice: keeperPlans below; a life element's figures reach 170 m)
+  const mark = () => L.length;
+  const toKeepers = (n) => { for (const f of L.splice(n)) KEEP.push(f); };
+  for (const l of lots()) if (!['house', 'small'].includes(l.kind)) { const n = mark(), p = P(l, l.rect[3] - l.rect[1] > 0 ? Math.min(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 99) / 2 : 6, 6.0); man(p, facing(l) + Math.PI, { y: l.y, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); if (l.walk) { toKeepers(n); const n2 = mark(); man(P(l, 3.5, 6.0), facing(l) + Math.PI + 0.6, { y: l.y, pose: 'stand', hair: 'short', cloth: 'cloth_white', beard: 0 }); toKeepers(n2); } }
   // an apprentice at each workshop, the mistress of each furnished house at her hearth in the court
   for (const l of lots()) {
     if (l.walk) continue;   // (the walk's lots keep their master only: more figure kinds near the arrival cost draws)
@@ -169,6 +174,11 @@ export async function town() {
   for (let i = 0; i < LT.length; i += 60) plans.push(base(`md-houses-${i / 60}`, LT.slice(i, i + 60).map(houseEl)));
   plans.push({ ...base('md-life', life()), style: 'life' });
   plans.push({ ...base('md-people', people()), style: 'life' });
+  { // the walk's workshop keepers, built into near plans of 60 m cells
+    const cells = new Map();
+    for (const f of KEEP) { const k = `${Math.floor(f.at[0] / 60)},${Math.floor(f.at[1] / 60)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(f); }
+    for (const [k, list] of cells) { const [i, j] = k.split(',').map(Number); plans.push({ ...base(`md-keepers-${k}`, [{ t: 'md_keepers', list }]), center: [i * 60 + 30, j * 60 + 30], near: 80 }); }
+  }
   return (CACHE = plans);
 }
 void STREET_W;

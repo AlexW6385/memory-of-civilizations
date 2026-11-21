@@ -18,7 +18,15 @@ export class Fr {
     if (solid) this.col.rect(r, this.y + y0, this.y + y1);
   }
   floor(u0, v0, u1, v1, y) { this.col.floor(this.R(u0, v0, u1, v1), this.y + y); }
-  lathe(mat, prof, u, y, v, seg = 10) { const p = this.pt(u, v); this.bag.add(mat, lathe(prof, seg, null, p[0], this.y + y, p[1])); }
+  // (small vessels differ a little, from their own place alone: potters' pots are never twins, and no shape repeats often enough to cost an instanced draw of its own)
+  lathe(mat, prof, u, y, v, seg = 10) {
+    const p = this.pt(u, v);
+    let h = (Math.round(p[0] * 16) * 73856093) ^ (Math.round(p[1] * 16) * 19349663) ^ Math.imul(Math.round((this.y + y) * 16) + 7, 83492791);
+    h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16;
+    const a = (h >>> 0) / 4294967296, b = ((h >>> 11) & 1023) / 1024;
+    const small = prof.every((q) => q[0] < 0.45), k = small ? 1 + (a - 0.5) * 0.12 : 1, kh = small ? 1 + (b - 0.5) * 0.1 : 1;
+    this.bag.add(mat, lathe(small ? prof.map((q) => [q[0] * k, q[1] * kh]) : prof, seg, null, p[0], this.y + y, p[1]));
+  }
   circ(u, v, r, y0, y1) { const p = this.pt(u, v); this.col.circle(p[0], p[1], r, this.y + y0, this.y + y1); }
   /** Steps rising along +v (dv = 1) or −v from (u0..u1) between v0 and v1, from y0 to y1. */
   stairs(u0, v0, u1, v1, y0, y1, dv = 1, mat = 'brick', riser = 0.22) {

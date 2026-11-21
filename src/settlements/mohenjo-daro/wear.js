@@ -24,6 +24,17 @@ export function registerWear() {
   if (done) return; done = true;
   const E = STYLES.indus.elements, base = E.indus_house;
   E.md_stairwear = stairwear;
+  const bath = E.indus_bathdress;
+  E.indus_bathdress = function wornCourt(el, ctx) {
+    const r = bath.call(this, el, ctx), { bag } = ctx, y = el.y, [cx0, cz0, cx1, cz1] = el.B.court, [px0, pz0, px1, pz1] = el.B.pool, T = 0.004;
+    const strip = (x0, z0, x1, z1, mat = 'brick_buff') => bag.add(mat, box(x0, y + T, z0, x1, y + 0.002 + T * 2, z1), false);
+    // the way the bathers took from the south doors to the steps: a pale, rubbed track over the paving, a little uneven, widening where it comes to the stair's head
+    const dx = -147.8;
+    strip(dx - 0.9, cz1 - 3.6, dx + 0.9, cz1 - 0.1); strip(dx - 1.1, cz1 - 7.2, dx + 0.8, cz1 - 3.4);
+    strip(px0 + 0.9, cz1 - 7.7, dx + 0.9, cz1 - 5.6);
+    strip((px0 + px1) / 2 - 1.7, pz1 + 0.6, (px0 + px1) / 2 + 1.5, cz1 - 5.4);
+    return r;
+  };
   E.indus_house = function worn(el, ctx) {
     const r = base.call(this, el, ctx);
     if (!el.open || el.simple) return r;

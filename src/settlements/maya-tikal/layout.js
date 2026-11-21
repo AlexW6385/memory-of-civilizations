@@ -50,7 +50,7 @@ export const inCore = (x, z, m = 0) => inRect(CORE, x, z, m) || Math.hypot(x + 2
 export const CRAFTS = ['obsidian', 'potter', 'cloth', 'cook', 'painter'];
 function craftGroups() {
   const out = [], rand = rng(751), hw = 5.4, hd = 3.4;
-  [[-107, -31, 22], [-107, 5, 18], [-107, 45, 22]].forEach(([x0, z0, d], gi) => {
+  [[-107, -31, 22], [-107, 1, 22], [-107, 45, 22]].forEach(([x0, z0, d], gi) => {
     const w = 24, cx = x0 + w / 2, cz = z0 + d / 2, houses = [];
     const mk = (c, ww, dd, dir, door, kitchen, k) => houses.push({ c, w: ww, d: dd, dir, seed: Math.floor(rand() * 1e6), kitchen, door, craft: CRAFTS[(gi * 2 + k) % 5] });
     mk([x0 + hd / 2 + 1.6, cz], hd, hw, 'z', 'e', false, 0);
