@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.72 — rising and moving at one pace (2026-11-21)
+
+Aloft one now rises at the same pace one moves at (falling a little slower, as before); rising used to be about half again as fast as moving.
+
 ## v12.71 — flying pace grows smoothly with height (2026-11-21)
 
 The pace aloft no longer jumps a few metres off the ground: it is a little over walking pace at take-off (about 4 m/s), 6.5 at four metres, 9.4 at ten, and goes on growing with the height as before.

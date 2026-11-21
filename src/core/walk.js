@@ -16,7 +16,7 @@ export const CRUISE_SETTLE = 4.5;
  *  vertical speed, rising (falling is SINK of it) { vertical }. */
 export function flightSpeeds(alt) {
   const a = Math.max(0, alt);
-  return { fly: Math.min(120, FLY * 0.75 + a * 0.22), fast: Math.min(240, FLY_FAST * 0.75 + a * 0.45), vertical: Math.min(250, 6 + a * 0.4) };
+  return { fly: Math.min(120, FLY * 0.75 + a * 0.22), fast: Math.min(240, FLY_FAST * 0.75 + a * 0.45), vertical: Math.min(120, FLY * 0.75 + a * 0.22) };   // rising at the pace one flies at
 }
 
 /** The vertical speed aloft after dt (P: vy, lift, cruise; fs from flightSpeeds). */

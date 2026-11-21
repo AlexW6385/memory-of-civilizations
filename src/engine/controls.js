@@ -198,6 +198,8 @@ export class Controls {
     }
     const ground = run ? RUN : WALK;
     const speed = this.glide ? ground + ((run ? fs.fast : fs.fly) - ground) * air : ground;
+    // (rising and falling at the very pace one moves at, Shift and the height's curve included)
+    if (this.glide) fs.vertical = speed;
     this.feet.fs = fs; this.feet.cruise = this.cruise;
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
     let dx = (-sin * f + cos * s) * speed * dt, dz = (-cos * f - sin * s) * speed * dt;
