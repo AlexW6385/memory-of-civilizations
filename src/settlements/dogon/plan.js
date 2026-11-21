@@ -4,6 +4,7 @@
 
 import { COMPOUNDS, LANDMARK, TOGUNA, PUNULU, ALTARS, LEDGES, BAOBABS, SHADE, FORGE, DYE, THRESH, PENS, WALL_DX, WALL_DY, WALL_X, wallFace, wallZ, wallBase, wallTop, inCompound, height, RADIUS } from './layout.js';
 import { houseOf } from '../../styles/dogon/compound.js';
+import { walks as routes } from './walk.js';
 
 const E = [];
 for (const c of COMPOUNDS) {
@@ -44,9 +45,9 @@ const houseRooms = (c, tag) => {
 const rooms = [room('place', [-24, 22, 22, 32], 1.2, 'open'), ...houseRooms(LANDMARK, '')];
 let nOpen = 1;
 for (const c of COMPOUNDS) if (c.open && !c.landmark) rooms.push(...houseRooms(c, `house ${++nOpen}: `));
-const [lx0] = houseOf(LANDMARK).rect, hz1L = houseOf(LANDMARK).rect[3], hz0L = hz1L - 5.4, iz0L = hz0L + 0.45;
+const [lx0] = houseOf(LANDMARK).rect, hz1L = houseOf(LANDMARK).rect[3];
 const doorX = lx0 + 0.45 + 1.5;
-const walks = [Object.assign([[-1.0, 36], [-1.0, 26], [-1.0, 14], [-1.0, 12.6], [doorX - 4, 12.6], [doorX, 12.6], [doorX, hz1L - 1.2], [doorX, iz0L + 1.2]], { y0: 1.2 })];
+const walks = routes();
 void F;
 
 export const dogon = {
