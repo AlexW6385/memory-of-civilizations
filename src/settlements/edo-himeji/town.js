@@ -63,6 +63,11 @@ function life() {
     const nr = yashikiParts(l).nagaya;
     for (const q of nagayaPeople({ rect: nr, face: yardFace(nr, l.rect) })) fig(q.at, q.rot, { y: q.y, pose: q.pose, cloth: 'cloth_brown', cloth2: 'cloth_grey', hair: 'topknot' });
   }
+  // the ways in: the strip before every open shop's passage and every open compound's gate is kept clear of the street life (docs §10.4: the walk's routes go in there)
+  for (const l of lots()) {
+    if (l.t === 'machiya' && isOpen(l)) { const s = l.front === 's' ? 1 : -1, fz = s > 0 ? l.rect[3] : l.rect[1], px = l.rect[0] + 0.95; E.push({ t: 'passage_mark', rect: [px - 0.9, Math.min(fz - s * 2, fz + s * 3.5), px + 0.9, Math.max(fz - s * 2, fz + s * 3.5)] }); }
+    else if (l.t === 'yashiki' && isOpen(l)) { const [a, b, c, d] = yashikiParts(l).gate, mx = (a + c) / 2, mz = (b + d) / 2, v = l.gate === 'n' ? [0, -1] : l.gate === 's' ? [0, 1] : l.gate === 'e' ? [1, 0] : [-1, 0], p = [mx + v[0] * 3.5, mz + v[1] * 3.5], q = [mx - v[0] * 5, mz - v[1] * 5]; E.push({ t: 'passage_mark', rect: [Math.min(p[0], q[0]) - 1, Math.min(p[1], q[1]) - 1, Math.max(p[0], q[0]) + 1, Math.max(p[1], q[1]) + 1] }); }
+  }
   castleLife(fig, samurai, rand);
   // inside the opened storehouses and turrets (styles/edo/stores.js): the clerk kneeling at his desk before the rice, the watch on its raised mat and at the spear rack
   for (const k of OPENED.kura) for (const q of insidePeople('kura', k)) fig(q.at, q.rot, { y: q.y, pose: q.pose, dress: 'robe', cloth: 'cloth_brown', over: 'apron', cloth2: 'cloth_indigo', hair: 'topknot' });
@@ -72,9 +77,25 @@ function life() {
   return [base('edo-himeji-street', E), base('edo-himeji-people', P, 'life')];
 }
 
+/**
+ * The lots cut into 100 m tiles, each built twice (as src/settlements/lod.js lodTiles): in full while the visitor is within NEAR of the tile's
+ * middle, and from beyond it as a far form (massing only, no collision, elements `<type>_floor_far`, styles/edo/index.js yashikiFar and machiyaFar), so that the
+ * whole town costs a handful of draws beyond the street the visitor is on (the avenue pose was 481 main draws, docs §11).
+ */
+const TILE = 100, NEAR = 260;
 export async function town() {
-  const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 60) plans.push(base(`edo-himeji-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ ...l, simple: true, open: isOpen(l), up: upperHouses().get(l) }))));
+  const all = lots(), plans = [], tiles = new Map();
+  for (const l of all) {
+    const k = `${Math.floor((l.rect[0] + l.rect[2]) / 2 / TILE)},${Math.floor((l.rect[1] + l.rect[3]) / 2 / TILE)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push({ ...l, simple: true, open: isOpen(l), up: upperHouses().get(l) });
+  }
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), b = base(`edo-himeji-town-${k}`, list);
+    b.center = [(i + 0.5) * TILE, (j + 0.5) * TILE];
+    plans.push({ ...b, near: NEAR });
+    plans.push({ ...b, id: `${b.id}-far`, far: NEAR, nocollide: true, elements: list.map((e) => ({ ...e, t: `${e.t}_floor_far`, open: false, up: undefined })) });
+  }
   plans.push(base('edo-himeji-furniture', furniture().flatMap((f) => (f.t === 'landing'
     ? [{ t: 'stairs', rect: [f.x - 1.5, f.z0, f.x + 1.5, f.z0 + 1.7], y0: LEVEL.bed, y1: 0.3, dir: 'n', mat: 'ishigaki' }]
     : f.t === 'moat_boat' ? [{ ...f, y: LEVEL.water - 0.08 }] : [f]))));

@@ -847,15 +847,42 @@ function machiya(el, { bag, col }) {
   if (z1 - z0 > 22 && rand() < 0.6) { const kz = f === 's' ? z0 + 2 : z1 - 9; kura(bag, col, [x0 + 0.6, kz, Math.min(x1 - 0.6, x0 + 6), kz + 7]); }
 }
 
+/** The far form of a samurai compound (the town seen from beyond a tile's reach, src/settlements/lod.js): its walls, gate-house, main house, storehouse and retainers' row as plastered masses under tiled roofs, no fittings (a handful of shapes, merged with every other tile's). */
+function yashikiFar(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, P = yashikiParts(el), t = 0.5;
+  for (const [a, b, c, d] of [[x0, z0, x1, z0 + t], [x0, z1 - t, x1, z1], [x0, z0 + t, x0 + t, z1 - t], [x1 - t, z0 + t, x1, z1 - t]]) bag.add(PL, box(a, 0, b, c, 2.3, d));
+  bag.add(PL, box(P.gate[0], 0, P.gate[1], P.gate[2], 3.6, P.gate[3]));
+  roof(bag, P.gate, 3.5, 0.7, 'gable', Math.min(P.gate[2] - P.gate[0], P.gate[3] - P.gate[1]) * 0.4, { sweep: 0 });
+  bag.add(PL, box(P.house[0], 0, P.house[1], P.house[2], 3.8, P.house[3]));
+  roof(bag, P.house, 3.2, 1.8, P.roof, undefined, { sweep: 0 });
+  if (P.kura) { bag.add(PL, box(P.kura[0], 0, P.kura[1], P.kura[2], 5.4, P.kura[3])); roof(bag, P.kura, 5.3, 0.5, 'gable', Math.min(P.kura[2] - P.kura[0], P.kura[3] - P.kura[1]) * 0.35, { sweep: 0 }); }
+  const n = P.nagaya;
+  bag.add(PL, box(n[0], 0, n[1], n[2], 2.8, n[3]));
+  roof(bag, n, 2.7, 0.5, 'gable', Math.min(n[2] - n[0], n[3] - n[1]) * 0.3, { sweep: 0 });
+}
+/** The far form of a merchant's house: the plastered mass of its front part under the street gable, and the wing behind. */
+function machiyaFar(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, f = el.front || 's', dep = Math.min(11, z1 - z0), H1 = 3.2, H2 = 2.8;
+  const r = f === 's' ? [x0, z1 - dep, x1, z1] : [x0, z0, x1, z0 + dep];
+  bag.add(PL, box(r[0], 0, r[1], r[2], H1 + H2, r[3]));
+  roof(bag, r, H1 + H2 - 0.1, 0.6, 'gable', dep * 0.3, { alongZ: false, sweep: 0 });
+  const rem = (z1 - z0) - dep;
+  if (rem >= 4) { const wd = rem >= 16 ? 6.5 : Math.min(3.8, rem - 1.2), gap = rem >= 16 ? 2.2 : 1.0, wz0 = f === 's' ? r[1] - gap - wd : r[3] + gap, wr = [x0 + 0.6, wz0, x1 - 0.6, wz0 + wd]; bag.add(PL, box(wr[0], 0, wr[1], wr[2], 3.0, wr[3])); roof(bag, wr, 2.9, 0.4, 'gable', wd * 0.38, { alongZ: false, sweep: 0 }); }
+}
+
 registerStyle('edo', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), kabuki_mon: J(kabukiMon), goten: J(goten), yashiki: J((el, ctx) => withEave(0.5, () => yashiki(el, ctx))), machiya: J((el, ctx) => withEave(0, () => machiya(el, ctx))), kago, daisho,
+    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), kabuki_mon: J(kabukiMon), goten: J(goten), yashiki: J((el, ctx) => withEave(0.5, () => yashiki(el, ctx))), machiya: J((el, ctx) => withEave(0, () => machiya(el, ctx))),
+    // (the far forms are named "floor" so that the street life, src/objects/life.js, does not read them as houses of their own: the near tiles' stand)
+    yashiki_floor_far: J((el, ctx) => withEave(0, () => yashikiFar(el, ctx))), machiya_floor_far: J((el, ctx) => withEave(0, () => machiyaFar(el, ctx))), kago, daisho,
     ido: (el, ctx) => ido(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.rot ?? 0),
     ishidoro: (el, ctx) => ishidoro(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.s ?? 1),
     niwaki: (el, ctx) => niwaki(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.h ?? 5, el.seed),
     taru: (el, ctx) => { for (let r = 0; r < (el.rows ?? 3); r++) for (let k = 0; k < (el.rows ?? 3) - r; k++) barrel(ctx.bag, 'timber', el.at[0] + (k + r * 0.5) * 0.56, (el.y ?? 0) + r * 0.55, el.at[1], 0.27, 0.62, 'thatch'); ctx.col.circle(el.at[0] + 0.6, el.at[1], 1.0, el.y ?? 0, (el.y ?? 0) + 1.5); },
+    // (a strip kept clear of the street life's tubs, pots and people: the way into a shop's passage or a compound's gate, src/objects/life.js marks its footprint; builds nothing)
+    passage_mark: () => {},
     kido, hinomi_yagura: hinomiYagura, kosatsu, jizo, inari,
     kura: J((el, ctx) => kura(ctx.bag, ctx.col, el.rect, el.y ?? 0)),
     kura_in: J((el, ctx) => { kuraIn(el, ctx); roofKura(ctx.bag, el.rect, el.y ?? 0); }),
