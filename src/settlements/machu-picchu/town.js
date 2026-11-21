@@ -32,9 +32,10 @@ export async function town() {
     }
     plans.push(base('machu-picchu-cobs', [{ t: 'inca_cobs', items }])); }
   // the patios' things
+  const doorFronts = (i) => [0, 1, 2].map((k) => { const h = all[i * 3 + k]; if (!h) return null; const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, o = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[h.front], e = h.front === 'e' ? [x1, cz] : h.front === 'w' ? [x0, cz] : h.front === 'n' ? [cx, z0] : [cx, z1]; return [e[0] + o[0] * 1.2, e[1] + o[1] * 1.2, 1.7]; }).filter(Boolean);
   plans.push(base('machu-picchu-patios', kanchas().map((K, i) => {
     const r = K.rect, gateE = K.inward[0] < 0, gx = gateE ? r[2] : r[0], gz = r[1] + K.A / 2;
-    return { t: 'inca_patio', o: [gx, gz], d: [K.inward[0], 0], A: K.A, D: K.D, sd: K.sd, sv0: K.sv0, sv1: K.sv1, bd: K.bd, weaver: i % 5 !== 0, y: ground.height(gx + K.inward[0] * 4, gz), seed: 500 + i };
+    return { t: 'inca_patio', o: [gx, gz], d: [K.inward[0], 0], A: K.A, D: K.D, sd: K.sd, sv0: K.sv0, sv1: K.sv1, bd: K.bd, weaver: i % 5 !== 0, avoid: doorFronts(i), y: ground.height(gx + K.inward[0] * 4, gz), seed: 500 + i };
   })));
   // the lane before each kancha's gate: a water jar in its ring of stones, a seat, firewood, the patio's gutter (§12.4), where the ground is level and nothing stands
   { const items = [], flat = (x, z, ox, len) => Math.abs(ground.height(x, z) - ground.height(x + ox * len, z)) < 0.05 && Math.abs(ground.height(x, z) - ground.height(x, z + 0.5)) < 0.05;
@@ -81,6 +82,8 @@ export async function town() {
     E.push({ t: 'inca_offerings', at: [-42, -55.1], y: 0.6 + 0.95, yaw: 0, w: 4.2, seed: 8 });
     E.push({ t: 'inca_feast', c: [4, -24], y: ground.height(4, -24), seed: 12 });
     plans.push(base('machu-picchu-goods', E)); }
+  // the storekeepers with their quipus, built into a near plan (docs §18)
+  plans.push({ ...base('machu-picchu-keepers', [{ t: 'inca_keeper', list: STORES.map((r, i) => ({ rect: r, y: 0, front: 'n', seed: 300 + i })) }]), center: [-40, 98], near: 26 });
   // the flagged road in from the gate to the plaza and the paved gates of the kanchas
   { const E = STAIRS.map((S) => ({ t: 'stairs', rect: S.rect, y0: S.y0, y1: S.y1, dir: S.dir, mat: 'granite_rough' }));
     E.push({ t: 'lane', rect: [0.4, 8.5, 3.6, TOWN_WALL.z - 0.4], y: 0.025, mat: 'granite_rough' }, { t: 'lane', rect: [0.4, 93.4, 3.6, 120], y: 0.025, mat: 'granite_rough' });

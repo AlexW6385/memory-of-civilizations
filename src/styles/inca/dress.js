@@ -6,6 +6,7 @@
 
 import { box, lathe, frustum, rod, fromTriangles, orientOutward } from '../../core/geom.js';
 import { urpu } from './life.js';
+import { STYLES } from '../../core/build.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const CLOTH = ['cloth_red', 'cloth_ochre', 'cloth_brown', 'cloth_black', 'cloth_white'];
@@ -50,6 +51,7 @@ function patio(el, { bag, col }) {
     if (v < 0.8 + r || v > D - bd - 0.7 - r || Math.abs(u) > A / 2 - 0.7 - r) return false;
     if (v > sv0 - 0.6 - r && v < sv1 + 0.6 + r && Math.abs(u) > A / 2 - sd - 0.6 - r) return false;
     if (el.weaver && Math.abs(u) < 1.4 + r && v > 3.6 - r && v < 9.4 + r) return false;
+    if (el.avoid) { const [wx, wz] = W(v, u); if (el.avoid.some(([ax, az, ar]) => Math.hypot(wx - ax, wz - az) < ar + r)) return false; }   // (the fronts of the houses' doors: the visitor's way in)
     return true;
   };
   const placed = [];
@@ -288,4 +290,35 @@ function guardpost(el, { bag, col }) {
   if (el.seat) { const [sx, sz, yaw] = el.seat; blk(bag, 'granite_inca', sx, y, sz, 0.55, 0.22, 0.42, yaw, col); }
 }
 
-export const INCA_DRESS = { inca_guardpost: guardpost, condor_temple: condorTemple, inca_patio: patio, inca_cobs: cobs, inca_goods: goods, inca_offerings: offerings, inca_feast: feast };
+
+/**
+ * inca_keeper: the storekeeper of each qollqa { list: [{ rect, y, front, seed }] }, built into the near plan (a life element's figures reach 170 m): a man in his tunic
+ * standing by the right-hand wall, a low slab of cut stone before him with the quipu laid out on it, its main cord and the knotted pendants - the state's accounts
+ * of what the house held [stated: quipus recorded the Inca state's stores and tribute, Wikipedia, "Quipu"; inferred: the keeper, the slab, the place in the room].
+ */
+function keeper(el, ctx) {
+  const { bag, col } = ctx, fig = STYLES.life?.elements?.figure;
+  for (const q of el.list) {
+    const rand = rng((q.seed || 1) * 7 + 3), [x0, z0, x1, z1] = q.rect, y = (q.y ?? 0) + 0.04, m = 0.5, f = q.front ?? 'n';
+    const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, alongX = x1 - x0 >= z1 - z0, inV = { n: [0, 1], s: [0, -1], e: [-1, 0], w: [1, 0] }[f];
+    const L = alongX ? x1 - x0 - 2 * m : z1 - z0 - 2 * m;
+    const at = (u, v) => alongX ? [cx + u, cz + inV[1] * v] : [cx + inV[0] * v, cz + u];
+    const u0 = L / 2 - 0.5, [tx, tz] = at(u0, -0.25), [kx, kz] = at(u0, 0.3);
+    const bx = (a, b, c, d, yy0, yy1) => { const P = alongX ? [tx + a, tz + c, tx + b, tz + d] : [tx + c, tz + a, tx + d, tz + b]; bag.add('granite_inca', box(Math.min(P[0], P[2]), yy0, Math.min(P[1], P[3]), Math.max(P[0], P[2]), yy1, Math.max(P[1], P[3]))); };
+    for (const sx of [-0.28, 0.28]) bx(sx - 0.07, sx + 0.07, -0.18, 0.18, y, y + 0.55);        // two stone feet
+    bx(-0.4, 0.4, -0.24, 0.24, y + 0.55, y + 0.65);                                              // the slab
+    const [sx0, sz0, sx1, sz1] = alongX ? [tx - 0.4, tz - 0.24, tx + 0.4, tz + 0.24] : [tx - 0.24, tz - 0.4, tx + 0.24, tz + 0.4];
+    col.rect([sx0, sz0, sx1, sz1], y, y + 0.65);
+    // the quipu on the slab: the main cord along it, pendant cords across, knots
+    const top = y + 0.655, cords = ['cloth_white', 'cloth_brown', 'cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_black'];
+    const P = (u, w) => alongX ? [tx + u, tz + w] : [tx + w, tz + u];
+    const a0 = P(-0.34, -0.1), a1 = P(0.34, -0.1), v3 = (p) => [p[0], top + 0.007, p[1]];
+    bag.add('cloth_brown', rod(v3(a0), v3(a1), 0.008, 4));
+    for (let i = 0; i < 11; i++) { const u = -0.3 + i * 0.06, c = cords[Math.floor(rand() * 6)], p = P(u, -0.1), e = P(u + 0.01, 0.17);
+      bag.add(c, rod(v3(p), v3(e), 0.005, 3));
+      for (let k = 0; k < 1 + Math.floor(rand() * 3); k++) { const kp = P(u + 0.003 * k, -0.04 + k * 0.07); bag.add(c, lathe([[0.001, -0.008], [0.011, 0], [0.001, 0.008]], 6, null, kp[0], top + 0.009, kp[1])); } }
+    if (fig) fig({ t: 'figure', at: [kx, kz], y, rot: Math.atan2(inV[0], inV[1]), h: 1.58 + rand() * 0.1, dress: 'tunic', legs: 'bare', cloth: 'cloth_brown', cloth2: 'cloth_red', over: 'belt', hair: 'short', beard: false, skin: 'skin_medium', hat: 'none', feet: 'shod', arms: 'talk', pose: 'stand', carry: 'none', seed: Math.floor(rand() * 1e9) }, { bag, col });
+  }
+}
+
+export const INCA_DRESS = { inca_keeper: keeper, inca_guardpost: guardpost, condor_temple: condorTemple, inca_patio: patio, inca_cobs: cobs, inca_goods: goods, inca_offerings: offerings, inca_feast: feast };

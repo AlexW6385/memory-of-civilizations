@@ -315,7 +315,7 @@ function incaHouse(el, { bag, col, lights }) {
   if (!el.doors && f && el.roof !== 'none' && !el.humble) {
     const r2 = rng((el.seed || 1) * 7 + 3), k = r2(), out = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[f], tg = [-out[1], out[0]], sgn = r2() < 0.5 ? -1 : 1;
     const cxh = (x0 + x1) / 2, czh = (z0 + z1) / 2, edge = f === 'e' ? [x1, czh] : f === 'w' ? [x0, czh] : f === 'n' ? [cxh, z0] : [cxh, z1], Lf = f === 'n' || f === 's' ? x1 - x0 : z1 - z0;
-    if (Lf > 4.2 && k < 0.7) {
+    if (Lf > 4.2 && k < 0.7 && !(el.doorW && k < 0.4)) {   // (no bench at an opened door: it stands in the walker's way)
       const o = th / 2 + 0.3, px = edge[0] + out[0] * o + tg[0] * 1.35 * sgn, pz = edge[1] + out[1] * o + tg[1] * 1.35 * sgn, hu = 0.5, hw = 0.16, rot = Math.atan2(tg[1], tg[0]);
       const c0 = Math.cos(rot), s0 = Math.sin(rot);
       if (k < 0.4) {

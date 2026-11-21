@@ -19,12 +19,14 @@ export function doorOf(rect, front) {
   const edge = front === 'e' ? [x1, cz] : front === 'w' ? [x0, cz] : front === 'n' ? [cx, z0] : [cx, z1];
   return { edge, out: o };
 }
+/** Kanchas left closed: the third house of kancha 27 has a rising surface (top 1.16-1.28 over a floor at 0.5) inside its doorway that door-probe could not trace to a piece; left for the next pass (docs §18). */
+const NOT_OPENED = new Set([27]);
 /** The kanchas whose gate lies within WALK_REACH of the walk: index → true. */
 export function openKanchas() {
   const out = new Set();
   kanchas().forEach((K, i) => {
     const r = K.rect, gateE = K.inward[0] < 0, gx = gateE ? r[2] : r[0], gz = (r[1] + r[3]) / 2;
-    if (walkDistance([gx, gz]) < WALK_REACH) out.add(i);
+    if (walkDistance([gx, gz]) < WALK_REACH && !NOT_OPENED.has(i)) out.add(i);
   });
   return out;
 }
