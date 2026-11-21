@@ -5,6 +5,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import '../../styles/sumerian/index.js';
 import '../../styles/sumerian-ur/index.js';
 import { lit, NIGHT_ELEMENTS } from './nightlight.js';
+import { WEAR_ELEMENTS } from './wear.js';
 
 const SMALL = 0.4, M = new Matrix4();
 const hash = (x, y, z) => {
@@ -47,6 +48,7 @@ registerStyle('ur-g', {
     ...Object.fromEntries(Object.entries(STYLES['sumerian-ur'].elements).map(([k, fn]) => [k, varied(fn)])),
     door_clear: () => {},
     ...NIGHT_ELEMENTS,
+    ...WEAR_ELEMENTS,
   },
 });
 /** The landmark's style: the Sumerian style with the glow of every light its elements push (the court's altar fire and braziers, the shrine, the Giparu's and the palace's rooms). */

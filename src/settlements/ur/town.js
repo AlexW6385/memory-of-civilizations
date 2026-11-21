@@ -31,6 +31,8 @@ export async function town() {
   }
   plans.push(base('ur-lots', lots));
   // the night: the lamp over the door of each house that can be entered and the pool it throws on the lane (nightlight.js)
+  // the wear of use and weather: the stair's polished lane, the thresholds, the dust at the doors, the quay's damp band (wear.js)
+  plans.push(base('ur-wear', [{ t: 'ur_wear', doors: all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door })) }]));
   plans.push(base('ur-night', [{ t: 'ur_night', doors: all.filter((h) => h.open).map((h) => ({ rect: h.rect, door: h.door })) }]));
   plans.push(base('ur-lane-palms', trees));
   // the city rampart with its three gates (§5.10), the brickyard at the north-east edge (§5.9), the royal mausoleum outside the temenos (§5.11)
