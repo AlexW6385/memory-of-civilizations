@@ -108,7 +108,7 @@ function litBag(ctx, el, scale = 1) {
           if (th < 0.02 && dy > 0.6 && dy < 1.4 && w > 0.4 && w < 0.95 && b[1] > GH + 0.5) {
             const mx = (b[0] + b[3]) / 2, mz = (b[2] + b[5]) / 2;
             if (hashAt(mx, mz, 33 + Math.floor(b[1] / 2.5)) < 0.26 * scale) {
-              const f = 0.4 + 0.34 * hashAt(mx, mz, 9), m0 = 0.04, o = 0.2 + 0.02;
+              const f = 0.4 + 0.34 * hashAt(mx, mz, 9), m0 = 0.04, o = 0.2 + 0.06;
               if (dx < dz) { const s = mx > cx ? 1 : -1, x = (s > 0 ? b[3] : b[0]) + s * o; H.quad([x, b[1] + m0, b[2] + m0], [x, b[1] + m0, b[5] - m0], [x, b[4] - m0, b[5] - m0], [x, b[4] - m0, b[2] + m0], [s, 0], f); }
               else { const s = mz > cz ? 1 : -1, z = (s > 0 ? b[5] : b[2]) + s * o; H.quad([b[0] + m0, b[1] + m0, z], [b[3] - m0, b[1] + m0, z], [b[3] - m0, b[4] - m0, z], [b[0] + m0, b[4] - m0, z], [0, s], f); }
             }
@@ -128,7 +128,7 @@ let depth = 0;
 const wrap = (name, fn) => function haloed(el, ctx) {
   const lights = ctx?.lights, n = lights ? lights.length : 0;
   if (depth > 0 || !lights || el.simple || !el.rect) { depth++; try { return fn.call(this, el, ctx); } finally { depth--; } }
-  const L = litBag(ctx, el, el.hall ? 0.8 : 1);
+  const L = litBag(ctx, el, el.hall ? 1.7 : name === 'tower_up' ? 1.6 : 1);
   depth++;
   try { var r = fn.call(this, el, L.ctx); } finally { depth--; }
   const H = L.H, [x0, z0, x1, z1] = el.rect;
