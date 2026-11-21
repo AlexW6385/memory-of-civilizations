@@ -223,6 +223,21 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
 // ---- braziers at the church doors, where the pilgrims keep the night's vigil (docs §19)
 for (const [id, x, z] of [['giyorgis', gc[0] - 16.2, gc[1] - 4.2], ['giyorgis', gc[0] - 16.2, gc[1] + 4.2], ['medhane', mc[0] - 20.0, mc[1] - 4.4], ['medhane', mc[0] - 20.0, mc[1] + 4.4],
   ...['golgotha', 'amanuel', 'gabriel'].flatMap((k) => { const r = AKS[k].rect, zc = (r[1] + r[3]) / 2; return [[k, r[0] - 2.6, zc - 3.6], [k, r[0] - 2.6, zc + 3.6]]; })]) E.push({ t: 'lal_brazier', at: [x, z], y: -PITS[id].depth + 0.15 });
+// ---- the churches' windows lit from within (docs §23): the lamps seen through the pierced windows (the same places as the style's windows)
+{
+  const places = (r, y, h, w, step) => { const [x0, z0, x1, z1] = r, out = [];
+    for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
+      const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.floor(L / step)), ux = (bx - ax) / L, uz = (bz - az) / L;
+      for (let i = 0; i < n; i++) { if (n % 2 === 1 && i === (n - 1) / 2) continue; const s = (i + 0.5) * L / n; out.push({ c: [ax + ux * s, az + uz * s], u: [ux, uz], n: [nx, nz], y, w, h }); } }
+    return out; };
+  const GW = [], yfG = -G.depth + 0.15 + 1.8;
+  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) for (const s of [-0.42, 0.42]) { const u = dx ? [0, 1] : [1, 0]; GW.push({ c: [gc[0] + dx * 12 + u[0] * s * 4.6, gc[1] + dz * 12 + u[1] * s * 4.6], u, n: [dx, dz], y: yfG + 2.7, w: 0.9, h: 1.7 }); }
+  E.push({ t: 'lal_winglow', c: gc, box: [gc[0] - 12, gc[1] - 12, gc[0] + 12, gc[1] + 12], wins: GW });
+  const body = [mc[0] - 16.75 + 2.4, mc[1] - 11.75 + 2.4, mc[0] + 16.75 - 2.4, mc[1] + 11.75 - 2.4];
+  E.push({ t: 'lal_winglow', c: mc, box: body, wins: places(body, -M.depth + 0.15 + 3.2, 1.6, 0.9, 2.6) });
+  for (const k of ['golgotha', 'amanuel', 'gabriel']) { const A = AKS[k], zc = (A.rect[1] + A.rect[3]) / 2;
+    E.push({ t: 'lal_winglow', c: [(A.rect[0] + A.rect[2]) / 2, zc], box: A.rect, wins: places(A.rect, A.y + Math.max(2.8, A.h * 0.4), 1.5, 0.85, 3.4).filter((p) => !(p.n[0] === -1 && Math.abs(p.c[1] - zc) < 1.6)) }); }
+}
 // ---- wayside fires of the pilgrims on the knoll and along the way down (docs §23): a visitor at night has light within a few metres
 for (const [x, z] of [[-235.1, 169.1], [-246.2, 160.8], [-251.5, 141.0], [-253.5, 134.5], [-244.0, 112.0], [-255.0, 60.0]]) E.push({ t: 'lal_brazier', at: [x, z], y: slope(x, z) });
 E.push({ t: 'lal_glow', houses: houses().map((h) => ({ c: h.c, door: h.door, r: h.r, seed: h.seed, y: slope(h.c[0], h.c[1]), enter: !!h.enter })).concat([{ c: HUT.c, door: HUT.door, r: HUT.r, seed: 1220, y: 0, enter: true }]) });
