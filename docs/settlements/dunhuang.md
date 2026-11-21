@@ -136,3 +136,14 @@ All in the engine's additive `halo` material (visible at the low preset, night o
 - **The gate and the serai**: a lantern in the gate passage and one in the serai's gate with their pools; a glow in the serai's yard; the watch's two braziers inside the gate.
 - **The beacon**: a glow of the signal hearth on the tower's top [inferred: a watch fire kept in the hearth; the beacon's smoke by day and fire by night is stated in §13, China Highlights].
 - **Lamp offerings** (`dh_lamprow`): nine small clay lamp dishes in a row on the apron before the Great Buddha's hall [inferred: lighting lamps before the Buddha is a lay rite; a lamp-lighting rite on the fifteenth of the first month is recorded in the Dunhuang manuscripts as far as I recall: not checked].
+
+### 15.3 Sound (src/settlements/dunhuang/soundmap.js, src/engine/voices-dunhuang.js, tests/dunhuang-sound.test.mjs)
+
+[inferred throughout: nothing of the sound of 9th-century Shazhou is recorded.] The map places 18 emitters and the sounds of 21 sites (17 shop lots and homes of the main street, the Great Buddha's hall, a hall cave, a pillar cave and a cell), with the rooms one can be inside (a flat roof of earth: dull rain; cut in the rock: no rain, little of the world).
+- **Eave bells** (`dhFengling`, the dossier's §9): at the Nine-Storey building, two cave porches and the gate's tower, by day and night, in the wind.
+- **The sutra** (`dhMurmur`): a low wordless murmur on one note in the Great Buddha's hall, a hall cave, a pillar cave and a monk's cell, and from the scribe's shop; the sculptor's mallet and the painters (`dhMallet`) at the scaffold, also at the saddler's.
+- **The trades**: the smith's hammer (engine) and bellows (`dhBellows`); flatbread slapped on the oven's wall (`dhOvenSlap`) in the early morning; the potter's wheel and clay, the wine-seller's pouring, cloth, jars (engine); kitchens in the homes.
+- **The caravanserai**: the camels' bells and a donkey (engine voices), the pipa (`dhPipa`) from the merchants' room in the evening; the flute qiang di (`dhQiangdi`) at the market.
+- **Water**: the Daquan's bed in four reaches (`dhStream`), the sweep wells of the fields (`dhShaduf`), the women washing, wells at the lane mouths.
+- **Night**: the little owl on the cliff and at the beacon; the dogs beyond the roofs are the engine's.
+- Measured with tools/sound-render.mjs (not heard): the bells' centroid 4.0 kHz; the pipa 0.6 kHz with 7 onsets; the flute 0.6 kHz in long notes; the murmur 0.6 kHz (formants over a 110 Hz note); the stream 3 kHz broadband.
