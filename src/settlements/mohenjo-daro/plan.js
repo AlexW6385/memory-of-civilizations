@@ -4,6 +4,7 @@
 
 import { PLAT, MOUND, MOUND_BATTER, EAST_STAIR, SOUTH_RAMP, BATH, GRANARY, PILLARED, COLLEGE, TOP, lanes, lots, houseEl, inRect } from './layout.js';
 import { house } from '../../styles/indus/house.js';
+import { walkRoutes } from './walkroutes.js';
 
 const E = [];
 E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EAST_STAIR.rect, SOUTH_RAMP.rect], hole: BATH.pool });
@@ -59,6 +60,8 @@ walks[0].y0 = 0;
     if (ctx.route) { const w = ctx.route.map(([x, z]) => [+x.toFixed(2), +z.toFixed(2)]); w.y0 = l.y; walks.push(w); }
   }
 }
+// into each other opened lot of the visitor's walk: from the lane through the door into the court
+for (const r of walkRoutes()) { const w = r.route; w.y0 = r.y0; walks.push(w); }
 const [bx0, bz0, bx1, bz1] = BATH.outer;
 
 export const citadel = {

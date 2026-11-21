@@ -1,9 +1,10 @@
 // Round the Citadel (docs/settlements/mohenjo-daro.md §2, §6, §7): the Lower Town's houses in their grid with the drains along the streets and
 // lanes, the workshops, the market place with its great well, the town wall on the south, the landing on the Indus with its boats and the
 // harbour office, and the people — priests at the Bath, craftsmen, merchants, porters, carts with zebu.
-import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, MOUND, riverX, streets, lanes, lots, houseEl, inRect } from './layout.js';
+import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, MOUND, riverX, streets, lanes, lots, houseEl, inRect, doorU } from './layout.js';
 import { boatFloat } from '../../objects/index.js';
 import { stallSpots } from '../../styles/indus/town.js';
+import { SPOTS } from './walkdress.js';
 
 /** The quay's apron: sheds along its back (west), net frames and washing on its front. */
 export const SHEDS = [-98, -50, -8, 22].map((z) => [QUAY.x0 + 1.4, z - 6, QUAY.x0 + 8.4, z + 6]);
@@ -126,7 +127,10 @@ function life() {
   // at the house doors: jars, baskets, firewood, a hearth's pots
   for (const l of lots()) {
     if (rand() > 0.55) continue;
-    const du = P(l, 1.2 + rand() * (Math.max(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 3) - 2.4), -0.5);
+    const Wl = Math.max(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 3), dU = doorU(l);
+    let u = 1.2 + rand() * (Wl - 2.4);
+    if (Math.abs(u - dU) < 1.5) u = dU + (dU < Wl / 2 ? 1.6 : -1.6) * (1 + 0.3 * rand());   // (never in the doorway's lane)
+    const du = P(l, Math.max(0.6, Math.min(Wl - 0.6, u)), -0.5);
     L.push({ t: pick(rand, ['pot', 'basket', 'firewood']), kind: pick(rand, ['water_pot', 'dark_pot', 'matka']), at: du, y: l.y, rot: rand() * 6.28, n: 2, seed: Math.floor(rand() * 1e9) });
   }
   return L;
@@ -148,6 +152,7 @@ export async function town() {
     });
     for (let i = 0; i < W.length; i += 6) plans.push(base(`md-wells-${i / 6}`, W.slice(i, i + 6)));
   }
+  plans.push(base('md-walkwork', SPOTS.map((spot) => ({ t: 'md_lanework', spot, at: [spot[1], spot[2]] }))));
   plans.push(base('md-market', [{ t: 'indus_market', rect: PLAZA, well: WELL_BIG }, ...[[12, 12], [36, 12], [12, 36], [36, 36]].map(([a, b]) => ({ t: 'indus_shade', c: [PLAZA[0] + a, PLAZA[1] + b] }))], { rooms: [{ id: 'market place', rect: PLAZA, y: 0, kind: 'open', market: true }] }));
   // the river in strips of 30 m, each its own plan, so that each one's bounds stay inside the disc
   for (let x = QUAY.x1, k = 0; x < 439; x += 30, k++) plans.push(base('md-river-' + k, [{ t: 'indus_river', x0: x, x1: x + 30, level: RIVER.level }]));
