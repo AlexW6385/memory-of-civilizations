@@ -187,3 +187,31 @@ Sources added:
 - **West towers (`tower_dress`, corbel table):** corner buttress strips to the top on their stepped feet, two string courses with billets, a blind arcade, the belfry pairs with hoods and shafts, a corbel table under each pyramid.
 - **Chevet (`chevet_dress`):** pilaster strips between the bays of the ambulatory, the drum and the radiating chapels, string courses with billets round them, hoods and shafts at their windows. Hoods and shafts are in yellow limestone against the red wall (dressed-stone surrounds; also keeps the draw count unchanged).
 - **Not done this round:** the village's half-timbered fronts; the nave capitals were already carved (§1c).
+
+## 20. Matching the reference (2026-11): the walk, night, sound, animals, wear
+
+Nothing in this section is sourced to a Conques text on its night, its sounds or its beasts; [inferred] throughout unless a source is named.
+
+### 20.1 The visitor's walk
+- From the arrival on the abbey's terrace (−47, 12) the walk runs west along the terrace to the pilgrims' way, down the Rue Charlemagne's stair (x = −80) to the lanes of the shelves, east along the lane at z ≈ 10 under the hostel, and down to the bridge [inferred: §1f]. On it stand the hostel, 12–14 open shops of eight trades and the ten opened homes of §1i, thirty with their upper floors (§1m); `plan.walks` carries 37 routes in at the doors and up the stairs, all walked by `tools/walk-check.mjs --sites conques`. Nothing was added to the walk's furniture this round: it already had the lanterns, stalls, cross, Plò, benches and the kept fronts of §1i.
+
+### 20.2 Night (`nightlight.js`, `night.js`)
+- Light was fire: the hearth, the rushlight (a rush dipped in fat in an iron clip), tallow and oil lamps; wax candles were the church's [inferred; wax was dear: the candle-seller at the church door sold it to pilgrims, §1j]. The abbey's hanging lamps burned before the shrine of the saint [inferred: the plan's `lamp` elements].
+- Built, in the engine's additive `halo` material (visible at the low preset): the glow and floor pool of every lamp the church plan already has (nave, transept, choir, chapels, refectory, chapter house), of the two candlesticks on the high altar and the two candles by the treasure's stands; in the houses, the lit windows by the hash of their own place (30 % of the richer houses' windows, 20 % of the poor, 12 % of shops: fat is dear), the rushlight's halo inside each open house, the spill of the open door or shop arch over the lane, the forge's glow in the smith's shop and the oven mouth in the baker's; outdoors, the iron lantern by each shop's door, the lamp at the hostel's door, the candle-seller's trestle, a lamp in a niche over the Plò (23 lights).
+- Not done: the church's windows do not glow from within; no torches on the lanes (pilgrims arriving after dark carried their own).
+
+### 20.3 Sound (`soundmap.js`, `src/engine/voices-conques.js`)
+- The Office sung in the choir at the bell's eight hours (matins in the small hours, lauds, prime, terce, sext, none, vespers, compline): a recitation on one tone with an intonation and the cadence of the third mode, a boys' octave above, answered across the choir [inferred: the sung Office of a Benedictine house; the dossier's music has the Phrygian mode]. After compline nothing: the Great Silence lay on the abbey's night [stated in the Rule of Saint Benedict, ch. 42].
+- Water: the three fountains' spouts (Plò, Fumouze, Barry; also the places of the women's buckets), the Dourdou in five reaches (heard at night too), the mill's wheel and stones, the tanner's yard (scraping), the washerwomen's beetles at the bridge. Trades in the open shops by hour: the smith's hammer, the baker's peel before dawn, the loom, the plane on staffs, jar lids, the inn's murmur and tankards from the noon meal to night; homes by kind (hearth, kitchen, a little loom, sacks, the herder's flock-bells).
+- Animals and birds placed: cocks at first light over three quarters, dogs, the hostel's donkeys, the flock's bells on the slope, swallows by day, crows about the church's ridge toward dusk, sparrows on the cobbles, owls in the gorge at night. Pilgrims in company (iron-shod staves, a wordless refrain) and mules with panniers pass along the lanes by day.
+- Rooms: home, shop, hostel, smith, baker, tavern, weaver, church, upper floors; rain on a roof of schist slabs from inside is louder than the church's vault.
+- Measured with `tools/sound-render.mjs`, not heard: the chant sits on E3–F3 with the tenor near C3–E3 and a centroid of 526 Hz; the loom beats every 1.0–1.35 s (18 onsets in 14 s); the river is broadband (centroid 2.3 kHz). Test: `tests/conques-sound.test.mjs`.
+
+### 20.4 Animals (`fauna.js` critters)
+- 58 rigged animals: five dogs lying at doors of the way and one at the hostel; cats at doors and on the copings of the retaining walls; a cock and two hens in nine kitchen yards; pigeons on the terrace; geese on the Dourdou's bank at the washing-place; eight swallows' nests under the eaves of the open houses, away from the doors. The earlier perches, flights and fish stay.
+
+### 20.5 Wear and writing (`wear.js`)
+- Each open house's door-stone shows a worn hollow and a damp band where cloaks drip; the hostel's door has a plaque of dressed stone with PAX in incised Roman capitals, left of the door [inferred: Pax is the Benedictine word of peace; its use at Conques about 1120 is not sourced]. The letters are P, A and X from strokes (checked in `LETTERS`: P stem, top bar, bowl, middle bar; A two diagonals and a bar; X two diagonals). No other lettering was added: Latin words with curved letters (S, O) were left out rather than risk wrong forms.
+
+### 20.6 What still falls short of the reference
+- Shop goods are boxes and pots, not modelled singly; no shop boards or signs in script; the church windows do not glow; no moss on the lauze beyond the renderer's damp; the south tribune and the transept arms stay shut; the rampart is not built.
