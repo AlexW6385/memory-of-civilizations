@@ -5,6 +5,7 @@ import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { streetPlans } from './streets.js';
+import { addSoma } from './soma.js';
 import { fires } from './nightlight.js';
 import { houseRooms, egyptianRooms } from '../../styles/ptolemaic/house.js';
 import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, PHAROS, ISLAND, inRect, wet, height, lots, isle, shopRuns } from './layout.js';
@@ -115,6 +116,7 @@ function isleTown() {
 }
 export async function town() {
   const plans = [harbour(), ...isleTown(), ...shopStoas(), civic(), serapeum(), ...houses(), ...streetPlans()];
+  addSoma(plans);
   void HILL; void JEWISH; void ISLAND; void PHAROS;
   return plans;
 }

@@ -161,7 +161,7 @@ export function shopRuns() {
       for (let i = 0; i < n; i++) {
         const x = a + i * len, x1 = x + len, cx = x + len / 2;
         if (wet(x + 3, z0) < 3 || wet(x1 - 3, z0) < 3 || Math.hypot(cx, z0) > RADIUS - 70) continue;
-        RUNS.push({ rect: [x, z0, x1, z1], front, full: Math.abs(cx - 60) < 190, cx });
+        RUNS.push({ rect: [x, z0, x1, z1], front, full: Math.abs(cx - 60) < 70, cx });
       }
     }
   }

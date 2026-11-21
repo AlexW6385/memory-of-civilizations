@@ -114,6 +114,9 @@ const EXTRA = {
   shrine: (el, H) => { const [x, z] = el.at, y = el.y ?? 0, rot = el.rot ?? 0; fire(H, x - 0.7 * Math.sin(rot), y + 0.85, z - 0.7 * Math.cos(rot), 0.9, y, 2.0); },
   // the lamp on its bracket at the customs post's front corner, and the clerk's lamp on the table
   customs_post: (el, H) => { const [x, z] = el.at, y = el.y ?? 0; fire(H, x + 2.4, y + 2.34, z - 1.7 - 0.3, 0.8, y, 2.4); fire(H, x - 0.3, y + 1.2, z, 0.6, y, 1.6); },
+  // the lamp on a hawker's counter (street.js stall: its corner, 1.1 m along the front and 0.55 m out) and the lamp on the fountain-house's wall
+  alx_stall: (el, H) => { const y = el.y ?? 0, al = [-el.out[1], el.out[0]], x = el.at[0] + al[0] * 1.1 + el.out[0] * 0.55, z = el.at[1] + al[1] * 1.1 + el.out[1] * 0.55; fire(H, x, y + 1.05, z, 0.8, y, 2.6); },
+  alx_fountain: (el, H) => { const y = el.y ?? 0, al = [-el.out[1], el.out[0]], x = el.at[0] + al[0] * 1.8 + el.out[0] * 0.46, z = el.at[1] + al[1] * 1.8 + el.out[1] * 0.46; fire(H, x, y + 2.5, z, 0.9, y, 3.4); H.wall(el.at[0] + al[0] * 1.8 + el.out[0] * 0.08, y + 2.4, el.at[1] + al[1] * 1.8 + el.out[1] * 0.08, el.out, 1.4, 1.1, 8, 0.6); },
   // the torches in the harbour gate's passage (the towers' inner faces, on the quay's side)
   harbour_gate: (el, H) => { const [cx, cz] = el.c, y = el.y ?? 0, gw = el.gw ?? 12; for (const s of [-1, 1]) fire(H, cx + s * (gw / 2 - 0.5), y + 3.0, cz - 2.5, 1.1, y, 3.0); },
   // a stern lantern on the merchantmen and the galleys at their moorings (shipParts: the bow at −z, the stern at +z, yawed by rot)
