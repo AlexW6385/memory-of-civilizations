@@ -4,6 +4,7 @@
 import { TRADES } from '../../styles/qin/shops.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 import { doorOf } from '../../styles/qin/houses.js';
+import { onWalk, walkDistance } from './walk.js';
 import { RADIUS, YARD, HAUL, rampZ, RAMP, ROAD, MARKET, TOWER, MWALL, TERRACE, STAIR, HALL, ROOF, PIT, WS_Z, lots, wardGates } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -85,29 +86,29 @@ function frontLife() {
     const person = (u, v, o = {}) => L.push({ t: 'figure', ...at(u, v), rot: ro, seed: sd(), dress: 'tunic', legs: 'hose', cloth: cl[Math.floor(rand() * cl.length)], cloth2: 'cloth_brown', over: 'belt', skin: rand() < 0.5 ? 'skin_medium' : 'skin_light', hat: 'none', feet: 'shod', hair: 'topknot', beard: rand() < 0.3, ...o });
     const fem = (u, v, o = {}) => person(u, v, { dress: 'robe', legs: undefined, cloth: ['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_white'][Math.floor(rand() * 4)], cloth2: 'cloth_black', over: 'sash', hair: 'bun', beard: false, ...o });
     if (l.kind === 'granary') { L.push({ t: 'sacks', ...at(d.u + 2.6, 0.5), rot: ro, seed: sd(), n: 3 }); continue; }
-    const ub = d.u + side * (1.8 + rand() * 1.0);
+    const ub = d.u + side * (2.3 + rand() * 1.0);                                  // (the door's lane, 1.6 m and the walker beside it, is kept clear of every piece below)
     if (rand() < 0.3 && away(ub, 1.2)) { L.push({ t: 'bench', ...at(ub, 0.45), rot: ro, seed: sd(), len: 1.6 }); for (const q of [-0.4, 0.4]) if (rand() < 0.6) (rand() < 0.4 ? fem : person)(ub + q, 0.45, { pose: 'sit', dress: 'robe', cloth: cl[Math.floor(rand() * cl.length)] }); }
-    if (rand() < 0.5) L.push({ t: 'pot', kind: 'vat', ...at(d.u - side * 0.9, 0.4), rot: 0, seed: sd() });
-    const uf = d.u - side * (2.0 + rand() * 1.2);
+    if (rand() < 0.5) L.push({ t: 'pot', kind: 'vat', ...at(d.u - side * 1.5, 0.4), rot: 0, seed: sd() });
+    const uf = d.u - side * (2.2 + rand() * 1.2);
     if (rand() < 0.4 && away(uf, 1.0)) L.push({ t: 'firewood', ...at(uf, 0.5), rot: 0, seed: sd(), len: 1.6 });
-    if (rand() < 0.35) { const u = 0.8 + rand() * (W - 1.6); if (away(u, 1.0)) L.push({ t: 'basket', ...at(u, 0.5), rot: 0, seed: sd(), n: 1 + Math.floor(rand() * 3) }); }
+    if (rand() < 0.35) { const u = 0.8 + rand() * (W - 1.6); if (away(u, 1.5)) L.push({ t: 'basket', ...at(u, 0.5), rot: 0, seed: sd(), n: 1 + Math.floor(rand() * 3) }); }
     if (rand() < 0.2) { const u = 1.5 + rand() * (W - 3); if (away(u, 1.4)) L.push({ t: 'drying_tray', ...at(u, 0.8), rot: ro, seed: sd() }); }
     if (rand() < 0.18 && W > 8) { const u = W * 0.5 + side * W * 0.2; if (away(u, 2.2)) L.push({ t: 'laundry', ...at(u, 0.5), rot: 0, seed: sd(), len: 3 }); }
     if (rand() < 0.22) L.push({ t: 'chickens', ...at(d.u + side * 2.6, 1.3), rot: rand() * 6.28, seed: sd(), n: 3 + Math.floor(rand() * 3) });
-    if (rand() < 0.1) L.push({ t: 'animal', kind: 'dog', ...at(d.u + side * 0.9, 1.2), rot: rand() * 6.28, seed: sd() });
-    if (rand() < 0.08 && l.kind === 'row') L.push({ t: 'barrow', ...at(0.9 + rand() * (W - 1.8), 1.0), rot: Math.PI / 2, seed: sd() });
-    if (rand() < 0.28) (rand() < 0.45 ? fem : person)(d.u, 0.9, rand() < 0.4 ? { pose: 'talk' } : {});
+    if (rand() < 0.1) L.push({ t: 'animal', kind: 'dog', ...at(d.u + side * 1.9, 1.2), rot: rand() * 6.28, seed: sd() });
+    if (rand() < 0.08 && l.kind === 'row') { let bu = 0.9 + rand() * (W - 1.8); if (Math.abs(bu - d.u) < 1.7) bu = Math.min(W - 0.9, Math.max(0.9, d.u + side * 2.2)); L.push({ t: 'barrow', ...at(bu, 1.0), rot: Math.PI / 2, seed: sd() }); }
+    if (rand() < 0.28) (rand() < 0.45 ? fem : person)(d.u + side * 1.5, 0.9, rand() < 0.4 ? { pose: 'talk' } : {});
   }
   // shopkeepers behind their counters, a customer or two before them
   for (const sh of shopLots()) {
     const [x0, z0, x1, z1] = sh.rect, s = sh.front === 's', cx = x0 + (x1 - x0) / 2, zf = s ? z1 : z0, f = s ? -1 : 1, ro = s ? Math.PI : 0;
-    const keep = { t: 'figure', at: [cx + (rand() - 0.5) * 3, zf + f * 1.6], y: 0, rot: ro, seed: sd(), dress: 'robe', cloth: cl[Math.floor(rand() * cl.length)], cloth2: 'cloth_brown', over: 'sash', skin: 'skin_light', hat: rand() < 0.4 ? 'cap' : 'none', feet: 'shod', hair: 'topknot', beard: rand() < 0.5 };
+    const ks = rand() < 0.5 ? -1 : 1, keep = { t: 'figure', at: [cx + ks * (1.9 + rand() * 0.5), zf + f * 1.6], y: 0, rot: ro, seed: sd(), dress: 'robe', cloth: cl[Math.floor(rand() * cl.length)], cloth2: 'cloth_brown', over: 'sash', skin: 'skin_light', hat: rand() < 0.4 ? 'cap' : 'none', feet: 'shod', hair: 'topknot', beard: rand() < 0.5 };
     L.push(keep);
-    if (rand() < 0.6) L.push({ ...keep, at: [cx + (rand() - 0.5) * 4, zf - f * 1.0], rot: ro + Math.PI, seed: sd(), dress: 'tunic', legs: 'hose', over: 'belt', carry: rand() < 0.5 ? 'basket' : 'none', cloth: cl[Math.floor(rand() * cl.length)] });
+    if (rand() < 0.6) L.push({ ...keep, at: [cx - ks * (2.3 + rand() * 0.9), zf - f * 1.0], rot: ro + Math.PI, seed: sd(), dress: 'tunic', legs: 'hose', over: 'belt', carry: rand() < 0.5 ? 'basket' : 'none', cloth: cl[Math.floor(rand() * cl.length)] });
   }
   // the yard before the ramps: gangs with baskets and poles, scribes at the pavilion, guards at the portals, carts of logs on the haul road
   const yx = YARD[0], base = rampZ(0);
-  for (let k = 0; k < 26; k++) { const x = yx + 4 + rand() * 40, z = base - 24 + rand() * 62; L.push({ t: 'figure', at: [x, z], y: 0, rot: rand() * 6.28, seed: sd(), dress: 'tunic', legs: 'hose', cloth: rand() < 0.5 ? 'cloth_grey' : 'cloth_brown', cloth2: 'cloth_brown', over: 'belt', skin: 'skin_medium', hat: 'none', feet: rand() < 0.5 ? 'bare' : 'shod', hair: rand() < 0.4 ? 'shaven' : 'topknot', beard: false, carry: ['sack', 'pole', 'basket', 'none'][Math.floor(rand() * 4)] }); }
+  for (let k = 0; k < 26; k++) { const x = yx + 4 + rand() * 40; const z = base - 24 + rand() * 62; L.push({ t: 'figure', at: [x, z], y: 0, rot: rand() * 6.28, seed: sd(), dress: 'tunic', legs: 'hose', cloth: rand() < 0.5 ? 'cloth_grey' : 'cloth_brown', cloth2: 'cloth_brown', over: 'belt', skin: 'skin_medium', hat: 'none', feet: rand() < 0.5 ? 'bare' : 'shod', hair: rand() < 0.4 ? 'shaven' : 'topknot', beard: false, carry: ['sack', 'pole', 'basket', 'none'][Math.floor(rand() * 4)] }); }
   for (let i = 0; i < 3; i++) for (const q of [-1, 1]) L.push({ t: 'figure', at: [yx - 1.5, rampZ(i) + q * (RAMP.w / 2 + 0.2)], y: 0, rot: -Math.PI / 2, seed: sd(), dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_brown', over: 'belt', skin: 'skin_light', hat: 'cap', feet: 'shod', hair: 'topknot', beard: true, pose: 'staff', carry: 'staff', len: 2.2 });
   L.push({ t: 'figure', at: [yx + 19, rampZ(2) + 9.5], y: 0, rot: Math.PI, seed: sd(), dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_red', over: 'sash', skin: 'skin_light', hat: 'cap', feet: 'shod', hair: 'topknot', beard: true, pose: 'seiza' });
   L.push({ t: 'figure', at: [yx + 20.5, rampZ(2) + 9.5], y: 0, rot: Math.PI * 1.5, seed: sd(), dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_brown', over: 'sash', skin: 'skin_light', hat: 'cap', feet: 'shod', hair: 'topknot', beard: false, pose: 'seiza' });
@@ -119,7 +120,7 @@ function frontLife() {
   L.push({ t: 'sledge', at: [yx + 14, base - 8], y: 0, rot: 0, seed: sd(), beast: 'ox', load: 'empty' });
   for (const [x, z] of [[yx + 30, base - 1], [yx + 34, base + 22]]) L.push({ t: 'animal', kind: 'ox', at: [x, z], y: 0, rot: rand() * 6.28, seed: sd() });
   const tiles = new Map();
-  for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  for (const e0 of L) { const e = offWalk(e0), k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base0(`qin-frontlife-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
 }
 
@@ -150,8 +151,8 @@ export function shopLots() {
   return out;
 }
 
-/** An open house near the arrival has its lamp lit (one light a room, never beyond 130 m). */
-const lit = (l) => l.open && Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVALS['qin-xianyang'][0], (l.rect[1] + l.rect[3]) / 2 - ARRIVALS['qin-xianyang'][2]) < 130;
+/** An open house near the arrival or on the visitor's walk has its lamp lit (one light a room; the night's halo and the dark houses: nightlight.js). */
+const lit = (l) => l.open && (Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVALS['qin-xianyang'][0], (l.rect[1] + l.rect[3]) / 2 - ARRIVALS['qin-xianyang'][2]) < 130 || onWalk(l));
 /** The people inside the lit houses: the householder in the room of a row house, someone in the court of a court house. */
 function insideLife() {
   const rand = rng(218), L = [], cl = ['cloth_brown', 'cloth_ochre', 'cloth_grey', 'cloth_white', 'cloth_indigo'];
@@ -159,11 +160,62 @@ function insideLife() {
   for (const l of lots()) {
     if (!lit(l) || (l.kind !== 'row' && l.kind !== 'court') || n++ % 3 === 2) continue;
     const [x0, z0, x1, z1] = l.rect, W = x1 - x0, s = l.front === 's', Z = (v) => (s ? z1 - v : z0 + v), d = doorOf({ kind: l.kind, seed: l.seed, rect: l.rect });
-    const u = l.kind === 'row' ? Math.min(W - 1.4, Math.max(1.4, W * 0.55 + (d.u > W / 2 ? -1 : 1))) : Math.min(W - 1.2, Math.max(1.2, d.u + (d.u > W / 2 ? -2.2 : 2.2))), v = l.kind === 'row' ? 1.5 : 3.0;
+    const u = l.kind === 'row' ? Math.min(W - 1.4, Math.max(1.4, d.u + (d.u > W / 2 ? -2.4 : 2.4))) : Math.min(W - 1.2, Math.max(1.2, d.u + (d.u > W / 2 ? -2.2 : 2.2))), v = l.kind === 'row' ? 1.5 : 3.0;
     const f = rand() < 0.5;
     L.push({ t: 'figure', at: [x0 + u, Z(v)], y: 0.06, rot: s ? Math.PI : 0, seed: Math.floor(rand() * 1e9), dress: f ? 'robe' : 'tunic', legs: f ? undefined : 'hose', cloth: f ? ['cloth_red', 'cloth_ochre', 'cloth_green'][n % 3] : cl[n % cl.length], cloth2: 'cloth_brown', over: f ? 'sash' : 'belt', skin: 'skin_light', hat: 'none', hair: f ? 'bun' : 'topknot', beard: !f && rand() < 0.4, pose: n % 2 ? 'talk' : 'stand', feet: 'shod' });
   }
-  return { ...base0('qin-insidelife', L), style: 'life', center: [ARRIVALS['qin-xianyang'][0], ARRIVALS['qin-xianyang'][2]], near: 260 };
+  return tiled('qin-insidelife', L);
+}
+
+/** A free-standing person, beast or cart is moved off the visitor's walk (the way itself is kept clear: walk.js; 2 m, to the nearest free place). */
+const OFFS = [[2.6, 0], [-2.6, 0], [0, 2.6], [0, -2.6], [4, 0], [-4, 0], [0, 4], [0, -4], [5.5, 0], [-5.5, 0], [0, 5.5], [0, -5.5]];
+const FREE = new Set(['figure', 'animal', 'cart', 'sledge', 'chickens']);
+function offWalk(e) {
+  if (!FREE.has(e.t) || e.pose === 'sit' || e.pose === 'seiza') return e;
+  const [x, z] = e.at;
+  if (walkDistance([x, z]) >= 2.0) return e;
+  for (const [dx, dz] of OFFS) if (walkDistance([x + dx, z + dz]) >= 2.0) return { ...e, at: [x + dx, z + dz] };
+  return e;
+}
+
+/** The life elements in tiles of 100 m (each a plan of the street life, drawn within 230 m of its middle). */
+function tiled(id, L) {
+  L = L.map(offWalk);
+  const tiles = new Map();
+  for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base0(`${id}-${k}`, list), style: 'life', center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
+}
+
+/**
+ * The figure-makers at their trades (the workshops' yards on the walk) and the street furniture of the road: a worker or two in each yard, at the place the
+ * trade's things leave free (the treading ring of the clay yard, the turntable of the body yard, the bench of the head yard, the kiln's mouth, the painters'
+ * low table, the sledge gang), an overseer with a tablet at the gate; wells with a sweep (jiegao) and troughs along the imperial road's edges.
+ */
+function trades() {
+  const rand = rng(219), L = [];
+  // where a trade's yard leaves room for its worker (the yard's frame: u along the street, v into the lot; styles/qin/scenery.js qinWorkshop)
+  const SPOT = {
+    clay: (Wd) => [[Wd / 2 + 1.0, 14.2, 'stand'], [Wd / 2 - 1.6, 16.4, 'stand']],           // inside the treading ring (r 3 at v 15)
+    body: (Wd, D) => [[5.3, D - 5.3, 'squat'], [12.3, D - 5.3, 'squat']],                     // 1.3 m beside each turntable (u 4 and 11, v D − 5)
+    head: () => [[5.2, 7.2, 'squat'], [6.6, 7.4, 'squat']],                                   // before the finishing bench (u 3…7.5, v 8…9.2)
+    kiln: (Wd) => [[Wd / 2 - 2.8, 8.0, 'stand'], [Wd / 2 + 2.8, 8.4, 'stand']],              // either side of the way to the firing mouth (v 9.25)
+    paint: (Wd, D) => [[6, D - 5.6, 'squat'], [8.4, D - 5.8, 'squat']],                       // before the painters' low table (u 3…9, v D − 4…D − 2.8)
+    ship: (Wd) => [[Wd / 2 - 2.6, 11, 'stand'], [Wd / 2 + 2.6, 11.5, 'stand']],
+  };
+  for (const l of lots()) {
+    if (!l.trade || !onWalk(l)) continue;
+    const [x0, z0, x1, z1] = l.rect, Wd = x1 - x0, D = z1 - z0, s = l.front === 's', ro = s ? Math.PI : 0, Z = (v) => (s ? z1 - v : z0 + v);
+    const person = (u, v, o = {}) => L.push({ t: 'figure', at: [x0 + u, Z(v)], y: 0, rot: ro + Math.PI + (rand() - 0.5) * 1.2, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'hose', cloth: ['cloth_brown', 'cloth_grey', 'cloth_ochre', 'cloth_white'][Math.floor(rand() * 4)], cloth2: 'cloth_brown', over: 'belt', skin: rand() < 0.5 ? 'skin_medium' : 'skin_light', hat: 'none', feet: 'shod', hair: 'topknot', beard: rand() < 0.3, ...o });
+    for (const [u, v, pose] of SPOT[l.trade](Wd, D)) person(Math.max(1.5, Math.min(Wd - 1.5, u)), v, { pose, carry: 'none' });
+    // the overseer inside the gate, off the way in, with his tablet
+    if (l.seed % 2) L.push({ t: 'figure', at: [x0 + Wd * 0.25 - 1.3, Z(1.8)], y: 0, rot: ro, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_red', over: 'sash', skin: 'skin_light', hat: 'cap', feet: 'shod', hair: 'topknot', beard: true, pose: 'stand' });
+  }
+  // the imperial road's wells and troughs, off the emperor's lane and the walk
+  for (const [x, z, rot] of [[30, -16.2, 0], [-95, 16.2, Math.PI], [-175, -16.2, 0], [105, 16.2, Math.PI]]) {
+    L.push({ t: 'well', kind: 'shaduf', mat: 'terracotta', at: [x, z], y: 0, rot, seed: Math.floor(x * 7 + z) });
+    L.push({ t: 'trough', at: [x + 2.6, z + (z > 0 ? -0.4 : 0.4)], y: 0, rot: 0, seed: Math.floor(x * 3 + z), mat: 'granite_grey' });
+  }
+  return tiled('qin-trades', L);
 }
 
 let CACHE = null;
@@ -176,14 +228,14 @@ export async function town() {
   plans.push(base('qin-market', [{ t: 'qin_market' }, ...Q]));
   plans.push({ ...base('qin-stalls', S), style: 'life' });
   plans.push({ ...base('qin-army', [{ t: 'qin_army' }]), style: 'life', nocollide: true });          // Pit 1's soldiers: drawn each within its own reach
-  plans.push({ ...base('qin-people', people()), style: 'life' });
-  plans.push({ ...base('qin-carts', carts()), style: 'life' });
+  plans.push({ ...base('qin-people', people().map(offWalk)), style: 'life' });
+  plans.push({ ...base('qin-carts', carts().map(offWalk)), style: 'life' });
   const LOTS = lots(), K = { row: 'qin_row_house', court: 'qin_court_house', official: 'qin_official', granary: 'qin_granary', garden: 'qin_garden', workshop: 'qin_workshop' };
   const ws = LOTS.filter((l) => l.trade), houses = LOTS.filter((l) => !l.trade);
   plans.push(base('qin-workshops', ws.map((l) => ({ t: K.workshop, tier: l.tier, rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l), trade: l.trade }))));
   for (let i = 0; i < houses.length; i += 70) plans.push(base(`qin-town-${i / 70}`, houses.slice(i, i + 70).map((l) => ({ t: K[l.kind], tier: l.tier, rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l) }))));
   plans.push(base('qin-wards', wardGates().map((at) => ({ t: 'qin_ward_gate', at }))));
-  plans.push(...frontLife(), insideLife());
+  plans.push(...frontLife(), ...insideLife(), ...trades());
   void MWALL;
   return (CACHE = plans);
 }

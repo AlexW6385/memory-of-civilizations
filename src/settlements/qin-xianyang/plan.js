@@ -1,5 +1,6 @@
 // The two landmarks (docs/settlements/qin-xianyang.md §2, §4): Pit 1 of the terracotta army as it was when new, and the Xianyang
 // palace hall on its rammed-earth terrace with the great stair and the twin que. Both are authored in the settlement's frame.
+import { mainRoute, branchRoutes, walkRoutes } from './walkroutes.js';
 import { PIT, RAMP, GALLERY, CORR, ROOF, TERRACE, STAIR, HALL, QUE, FORECOURT, corrZ, rampZ } from './layout.js';
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -27,7 +28,7 @@ export const pit = {
     room('pit-corridors', [CORR.x0, PIT.z0 + PIT.wall, CORR.x1, PIT.z1 - PIT.wall], PIT.floor, 'hall'),
     room('pit-deck', [ROOF.bareX + 20, PIT.z0, PIT.x1 - 2, PIT.z1], ROOF.top, 'open'),
   ],
-  walks: pitWalks,
+  walks: [...pitWalks, mainRoute(), ...branchRoutes(), ...walkRoutes()],            // (the visitor's walk and the places opened on it: walkroutes.js)
 };
 
 // ── the palace ──
