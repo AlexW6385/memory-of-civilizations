@@ -238,6 +238,10 @@ Voices (all synthesised, prefix `bor`): bronze metallophone pair with a hung gon
 
 Measured with tools/sound-render.mjs (spectra and envelopes plausible: the chant's energy under 1 kHz, the lesung's strokes under 300 Hz, the gamelan with strikes at 0.4 s spacing); not heard.
 
+### 20.4 Animals (`fauna.js` critters)
+
+29 rigged critters on the way and at its lodgings, none in a stair's lane, a door or the way: five dogs (two on the forecourt, three before lodgings), two cats on verandas, a cock and three hens each in the yards of three lodgings, six doves (white and grey) at the way's two shrines and on the forecourt, two goats tethered at the verge, swallows' mud nests under the front eaves of three lodgings. The village animals of Java; the swallow's nest under an eave is the bird's habit [inferred: nothing here is sourced; the reliefs' fauna not consulted]. No ducks (no water in this ground). Egrets, swallows, crows and sparrows as before.
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)
