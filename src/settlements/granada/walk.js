@@ -1,7 +1,7 @@
 // The visitor's walk through Nasrid Granada (docs/settlements/granada.md §20): the way from the arrival in the Court of the Myrtles through the
 // Comares palace and the Court of the Lions, out past the Rauda and the Partal into the medina's lanes, and the houses and shops opened along it.
 // Pure data and functions of layout.js and the house builder's own rules (no three.js): the routes `tools/walk-check.mjs` follows (plan.walks).
-import { lots, HILL, MYRTLES, LIONS, RAUDA, PARTAL } from './layout.js';
+import { lots, HILL, MYRTLES, LIONS, RAUDA, PARTAL, SOUK, GREAT_MOSQUE, SITES, siteY } from './layout.js';
 import { isShop, tradeOf, useOf, TRADES, HOUSE_USES } from '../../styles/nasrid/houses.js';
 
 const T = HILL.top;
@@ -63,10 +63,24 @@ export const PALACE_ROUTES = [
   ['rauda', [[(RAUDA.rect[0] + RAUDA.rect[2]) / 2, RAUDA.rect[1] - 3], [(RAUDA.rect[0] + RAUDA.rect[2]) / 2, RAUDA.rect[1] + 1.5], [(RAUDA.rect[0] + RAUDA.rect[2]) / 2, RAUDA.rect[1] + 4]]],
   ['partal', [[cx(PARTAL.tower), PARTAL.pool[1] - 3.6], [cx(PARTAL.tower), PARTAL.tower[3] + 1.2], [cx(PARTAL.tower), (PARTAL.tower[1] + PARTAL.tower[3]) / 2]]],
 ];
+/**
+ * The town's great places, entered by their gates (docs §25; gates 2.2 m wide, probed with tools/door-probe.mjs): the Great Mosque by the gate in its north wall across
+ * the sahn into the prayer hall, the Albaicín's mosque the same, the Alcaicería by its west and its east gate down the lane between the rows of booths.
+ */
+export function siteRoutes() {
+  const mx = (GREAT_MOSQUE[0] + GREAT_MOSQUE[2]) / 2, a = SITES.albaicinMosque.rect, ax = (a[0] + a[2]) / 2, g = (z, y0) => Object.assign(z, y0 === undefined ? {} : { y0 });
+  return [
+    g([[mx, GREAT_MOSQUE[1] - 4], [mx, GREAT_MOSQUE[1] + 2], [mx, GREAT_MOSQUE[1] + 12], [mx, GREAT_MOSQUE[3] - 14]], 0),
+    g([[ax, a[1] - 1.2], [ax, a[1] + 2], [ax, a[1] + 12], [ax, a[3] - 12]], siteY('albaicinMosque')),
+    g([[SOUK[0] - 3, 133.36], [SOUK[0] + 2, 133.36], [SOUK[0] + 12, 133.36], [SOUK[0] + 18, 133.36]], 0),
+    g([[SOUK[2] + 3, 140.64], [SOUK[2] - 2, 140.64], [SOUK[2] - 12, 140.64], [SOUK[2] - 18, 140.64]], 0),
+  ];
+}
 export function routes() {
   const out = [];
   for (const [, w] of PALACE_ROUTES) { const r = w.map((p) => [...p]); r.y0 = T; out.push(r); }
   for (const h of openedHouses()) out.push(houseRoute(h));
+  out.push(...siteRoutes());
   return out;
 }
 void TRADES; void HOUSE_USES;
