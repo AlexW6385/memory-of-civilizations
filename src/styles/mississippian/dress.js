@@ -33,6 +33,8 @@ export function dressHouse({ bag, col }, el, g) {
   const { x0, z0, x1, z1, y, f, sg, mx, wh } = g, dz = g.skin ? 0.04 : 0.012, d0 = g.skin ? 0.025 : 0, rand = rng((g.seed | 0) + 4141), lod = g.lod ?? 0, G = y - 0.18;
   const side = rand() < 0.5 ? 1 : -1, pick = (p) => rand() < p;
   const P = (u, v) => [mx + u, f + sg * v];
+  // an opened house's doorway is walked: nothing of the dressing stands within DOOR m (the door's half-width and the walker's body, and a 0.5 m cell of the collision raster) of its middle; what would is moved out along u
+  const DOOR = el.open ? 1.35 : 0, clear = (a, b, dir) => (!DOOR || b <= -DOOR || a >= DOOR ? 0 : (dir || ((a + b) / 2 < 0 ? -1 : 1)) > 0 ? DOOR - a : -DOOR - b);
   const yb = (u, v) => Math.min(y, gy(el, ...P(u, v))) - 0.08;
   // the soot over the door and the marks of the roof's drip: dark and pale clay patches on the walls
   bag.add('bark_dark', box(mx - 0.55, y + (el.open ? 2.4 : 1.78), Math.min(f + sg * d0, f + sg * dz), mx + 0.55, y + wh - 0.04, Math.max(f + sg * d0, f + sg * dz)));
@@ -40,8 +42,10 @@ export function dressHouse({ bag, col }, el, g) {
     for (let k = 0; k < 3; k++) {
       const w = 0.5 + rand() * 0.7, h = 0.4 + rand() * 0.5, u = (rand() - 0.5) * (x1 - x0 - 1.4) - (Math.abs(rand() - 0.5) < 0.1 ? 1 : 0), yy = y + 0.3 + rand() * (wh - 1.1);
       if (Math.abs(u) < 1.0) continue;
+      const du = clear(u - w / 2, u + w / 2);
+      if (du && Math.abs(u + du) + w / 2 > (x1 - x0) / 2) continue;
       const q = f + sg * dz, p0 = f + sg * d0, z = Math.min(p0, q), zz = Math.max(p0, q);
-      bag.add(k % 2 ? 'earth_wall' : 'silt', box(mx + u - w / 2, yy, z, mx + u + w / 2, yy + h, zz));
+      bag.add(k % 2 ? 'earth_wall' : 'silt', box(mx + u + du - w / 2, yy, z, mx + u + du + w / 2, yy + h, zz));
     }
     // the back wall: a long damp stain along its foot
     const bz = f - sg * (z1 - z0);
@@ -66,13 +70,13 @@ export function dressHouse({ bag, col }, el, g) {
   for (let k = 0; k < nj; k++) { const u = side * (0.95 + (el.open ? 0.5 : 0) + k * 0.42 + rand() * 0.15), v = 0.3 + rand() * 0.6, p = P(u, v); jar(bag, p[0], yb(u, v), p[1], 0.9 + rand() * 0.9, k === 2 ? 'terracotta' : 'pottery_dark'); }
   // firewood stacked against a corner of the wall
   if (pick(0.5)) {
-    const e = pick(0.5) ? 1 : -1, ex = e > 0 ? x1 - 1.0 : x0 + 1.0, ln = 1.1 + rand() * 0.5;
+    const e = pick(0.5) ? 1 : -1, ln = 1.1 + rand() * 0.5, ex0 = e > 0 ? x1 - 1.0 : x0 + 1.0, ex = ex0 + clear(ex0 - mx - ln / 2 - 0.1, ex0 - mx + ln / 2 + 0.1, e);
     for (let r = 0; r < 4; r++) for (let k = 0; k < 5 - r; k++) { const v = 0.18 + (k + r * 0.5) * 0.17; bag.add('log_pine', rod([ex - ln / 2, y - 0.06 + r * 0.14 + 0.07, f + sg * v], [ex + ln / 2, y - 0.06 + r * 0.14 + 0.07, f + sg * v], 0.07, 6)); }
     col.rect([ex - ln / 2, Math.min(f, f + sg * 1.0), ex + ln / 2, Math.max(f, f + sg * 1.0)], y - 0.1, y + 0.6);
   }
   // a hide stretched on its frame of poles, leaning against the wall at the side
   if (pick(0.3)) {
-    const e = -side, ex = e > 0 ? x1 - 0.9 : x0 + 0.9, v = 0.95, ym = y + 1.0;
+    const e = -side, ex0 = e > 0 ? x1 - 0.9 : x0 + 0.9, ex = ex0 + clear(ex0 - mx - 0.6, ex0 - mx + 0.6, e), v = 0.95, ym = y + 1.0;
     for (const dx of [-0.5, 0.5]) bag.add('timber', rod([ex + dx, y - 0.2, f + sg * (v + 0.05)], [ex + dx, y + 1.75, f + sg * (v + 0.05)], 0.03, 5));
     for (const hh of [0.15, 1.7]) bag.add('timber', rod([ex - 0.55, y + hh, f + sg * (v + 0.05)], [ex + 0.55, y + hh, f + sg * (v + 0.05)], 0.028, 5));
     bag.add(pick(0.5) ? 'hide_tan' : 'hide_brown', box(ex - 0.46, y + 0.22, Math.min(f + sg * v, f + sg * (v + 0.025)), ex + 0.46, y + 1.62, Math.max(f + sg * v, f + sg * (v + 0.025))));
@@ -81,7 +85,7 @@ export function dressHouse({ bag, col }, el, g) {
   }
   // the mortar of a log, its pestle in it
   if (pick(0.28)) {
-    const u = -side * (1.3 + rand() * 0.4), v = 0.8, p = P(u, v), yy = yb(u, v);
+    const u0 = -side * (1.3 + rand() * 0.4), u = u0 + clear(u0 - 0.35, u0 + 0.35), v = 0.8, p = P(u, v), yy = yb(u, v);
     bag.add('timber', lathe([[0.001, 0], [0.2, 0], [0.19, 0.55], [0.15, 0.58], [0.12, 0.34], [0.001, 0.34]], 8, null, p[0], yy, p[1]));
     bag.add('timber', rod([p[0], yy + 0.36, p[1]], [p[0] + 0.06, yy + 1.3, p[1] - 0.03], 0.035, 6));
     col.circle(p[0], p[1], 0.2, yy, yy + 0.55);
@@ -100,7 +104,7 @@ export function dressHouse({ bag, col }, el, g) {
   }
   // a log bench by the wall, a sleeping mat laid out
   if (pick(0.3)) {
-    const u = -side * (1.8 + rand() * 0.5), p = P(u, 0.55), q = P(u + 1.4, 0.55), yy = yb(u, 0.55);
+    const u0 = -side * (1.8 + rand() * 0.5), u = u0 + clear(u0 - 0.3, u0 + 1.7, -side), p = P(u, 0.55), q = P(u + 1.4, 0.55), yy = yb(u, 0.55);
     bag.add('log_pine', rod([p[0], yy + 0.26, p[1]], [q[0], yy + 0.26, q[1]], 0.15, 7));
     for (const s of [p, q]) bag.add('timber', rod([s[0], yy - 0.1, s[1]], [s[0], yy + 0.2, s[1]], 0.05, 5));
     col.segment([p[0], p[1]], [q[0], q[1]], 0.3, yy, yy + 0.42);

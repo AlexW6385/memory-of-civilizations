@@ -164,9 +164,11 @@ export async function town() {
     if (r > 0.65 && r < 0.85) { const at = F(-0.8, -h.l / 2 - 2.0); man(at, 0, hrand() * 6.28, { carry: 'basket' }); }
     if (hrand() < 0.5) P.push({ t: 'basket', n: 2, at: F(-h.w / 2 - 0.2, -h.l / 2 - 0.5), y: 0, seed: k, goods: 'cloth_ochre' });
     if (hrand() < 0.35) P.push({ t: 'firewood', at: F(h.w / 2 + 0.5, h.l / 2 - 0.8), y: 0, rot: h.yaw + Math.PI / 2, len: 1.4, seed: k });
-    if (hrand() < 0.3) P.push({ t: 'animal', kind: 'pig', at: F(hrand() * 4 - 2, -h.l / 2 - 2.8), y: 0, rot: hrand() * 6.28, seed: 300 + k });
-    else if (hrand() < 0.3) P.push({ t: 'chickens', n: 3, at: F(hrand() * 3 - 1.5, -h.l / 2 - 2.6), y: 0, rot: hrand() * 6.28, seed: 500 + k });
-    else if (hrand() < 0.12) P.push({ t: 'animal', kind: 'dog', at: F(hrand() * 4 - 2, -h.l / 2 - 2.2), y: 0, rot: hrand() * 6.28, seed: 700 + k });
+    // (the walk comes in down the lane before the platform, from a path whose lane is 2.4 m either side of its middle, and the nah's own front may be 2 m from that middle: a pig's back is 0.5 m, the walker's step, so the animals stand beside the platform, at its front corner, off every lane)
+    const beside = (r, w) => F((r < 0.5 ? -1 : 1) * (h.w / 2 + 0.95 + w), -h.l / 2 + 0.8);
+    if (hrand() < 0.3) P.push({ t: 'animal', kind: 'pig', at: beside(hrand(), 0), y: 0, rot: hrand() * 6.28, seed: 300 + k });
+    else if (hrand() < 0.3) P.push({ t: 'chickens', n: 3, at: beside(hrand(), 0.2), y: 0, rot: hrand() * 6.28, seed: 500 + k });
+    else if (hrand() < 0.12) P.push({ t: 'animal', kind: 'dog', at: beside(hrand(), 0.1), y: 0, rot: hrand() * 6.28, seed: 700 + k });
   });
   // the earth ovens: a woman kneeling at each, another bringing leaves
   cooks().forEach((k, i) => {
