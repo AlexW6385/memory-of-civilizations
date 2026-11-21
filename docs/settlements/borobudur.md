@@ -197,6 +197,21 @@ The carved figures near the way up are modelled as volumes (src/styles/javanese/
 Not done: the makaras, the lions of the other three stairs and the other gateways' kalas stay in the old form; the panels' subjects are five compositions in rotation, not the told stories (§1–§4 still record that).
 
 
+## 20. Tenth pass: the visitor's walk, the night, the sound, the animals, the wear (2026-11, bringing the place up to the reference)
+
+### 20.1 The visitor's walk (`walk.js`, `walkroutes.js`, `houseat.js`)
+
+The visitor arrives at x 110 on the paved way, facing west to the monument (src/planet/arrivals.js). The walk: the way west through the precinct's gate (x 98) to the monument's east stair, and east between its stalls, rest halls and lodgings; a second line round the foot of the base. [inferred: the way and what stands on it are §16–§17; nothing here is a source's claim]
+
+| Feature | What is built | Basis |
+|---|---|---|
+| Doors and stairs the walker passes | Every house's door is 1.75 m wide between its jamb posts (1.6 m clear) with its head 2.08 m over the floor; the stair to the veranda is 1.7 m wide and the veranda's rail leaves 1.9 m open at it; no footing stands under the stair's foot; an open hall's stair is 1.8 m wide at least and no post stands in the way up it | ours: the walker's body (tools/walk-check.mjs); the houses' proportions are §14 [inferred] |
+| Props out of the lanes | A bench, pot, basket or figure before a house that would stand in its stair's lane (within 1.55 m of it, a stair-run and a step out) is moved along the front; in the rest halls the benches stand at the back wall and the people on them, the jars by the east stair | ours |
+| Routes into the opened places | 19 routes walked: the eleven lodgings (from the yard up the stair, over the veranda, through the door, into the room), the three rest halls by the way, the three village halls and the monastery's great hall | ours |
+| The way's shrines and well | At x 76 a small stupa shrine with four lamps on either hand of the way, a well with its pulley and three jars at (83, 10.5), a woman at the well, a devotee kneeling | shrines with lamps and flowers (§13), wells in the yards (§14) [inferred] |
+
+Not done: a near/far split of the houses' interiors. Master draws 436 at the arrival and the walk's poses 389 and 394; splitting the houses into near and far plans (per 100 m tile, or per hamlet) raised the arrival to 450–477 (each near or far plan in view costs a draw per material, where the ordinary plans are merged per material), over the assignment's +2. The interiors stay in their plans, drawn as before.
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)

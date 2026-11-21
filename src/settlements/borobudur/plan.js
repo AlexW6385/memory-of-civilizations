@@ -3,6 +3,7 @@
 // the four sides, three circular terraces of 72 latticed stupas, the crowning stupa 35 m above the
 // ground; the monastery to the north-west.
 
+import { walkRoutes } from './walkroutes.js';
 import { MONUMENT, SQUARES, CIRCLES, MONASTERY, CELLS, cellRect, cellRoom, houses, floorOf } from './layout.js';
 
 const E = [];
@@ -60,6 +61,7 @@ const rooms = [
 ];
 const walks = [[[150, 0], [66, 0], [40, 0], [8, 0]]];
 walks[0].y0 = 0;
+for (const r of walkRoutes()) { r.y0 = 0; walks.push(r); }
 
 export const monument = {
   id: 'borobudur-temple',
