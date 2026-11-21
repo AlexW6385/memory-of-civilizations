@@ -154,6 +154,7 @@ import * as NORSEBORGUND from '../settlements/norse-borgund/soundmap.js';
 import * as PERSEPOLIS from '../settlements/persepolis/soundmap.js';
 import * as PETRA from '../settlements/petra/soundmap.js';
 import * as QINXIANYANG from '../settlements/qin-xianyang/soundmap.js';
+import * as RAPANUI from '../settlements/rapa-nui/soundmap.js';
 import * as ROME from '../settlements/rome/soundmap.js';
 import * as HANCHANGAN from '../settlements/han-changan/soundmap.js';
 import * as HANGZHOU from '../settlements/song-hangzhou/soundmap.js';
@@ -292,7 +293,7 @@ export const PROFILES = {
   persepolis: T(NEAR, { animals: withLife({ horse: 0.5, donkey: 0.4, dog: 0.3 }, { market: 0.7, map: PERSEPOLIS }), roof: 'flat' }),
   petra: T({ dove: 1, kite: 0.4, sparrow: 0.5 }, { animals: withLife({ goat: 0.6, donkey: 0.4 }, { market: 0.8, map: PETRA }), roof: 'flat' }),
   'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, roof: 'tile', bells: 'beijing', animals: withLife({ dog: 0.3, horse: 0.2 }, { market: 1, patrol: 1, eaves: 1, map: BEIJING }) }),
-  'rapa-nui': T({ gull: 1, tropic: 0.2 }, { animals: { rooster: 0.4 }, roof: 'thatch' }),
+  'rapa-nui': T({ gull: 1, tropic: 0.2 }, { animals: withLife({ rooster: 0.4 }, { market: 0.35, map: RAPANUI }), roof: 'thatch' }),
   rome: T(MED, { cicadas: 0.5, frogs: 0.3, animals: withLife({ donkey: 0.4, horse: 0.3, dog: 0.3, rooster: 0.3 }, { canal: 1, market: 1, eaves: 1, map: ROME }) }),
   sanchi: T(IND, { cicadas: 0.6, frogs: 0.4, animals: withLife({ cattle: 0.6, goat: 0.4, rooster: 0.3, dog: 0.2 }, { market: 0.5, map: SANCHI }), roof: 'thatch', bells: 'puja' }),
   'song-hangzhou': T(EAS, { cicadas: 0.7, frogs: 0.6, roof: 'tile', bells: null, animals: withLife({ rooster: 0.4, dog: 0.3 }, { canal: 1, oar: 1, hawkers: 1, market: 1, teahouse: 1, patrol: 1, eaves: 1, map: HANGZHOU }) }),

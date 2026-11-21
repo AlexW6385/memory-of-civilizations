@@ -175,3 +175,48 @@ Chant (riu) with hand-clapping and a stamping stone; voices and a drone stand in
 - **Terns** (drawn as the small perching bird) resting on the heads of some of the ahu's statues, along the platform's back, on the shore's stones and the canoes' sterns.
 - **The turf:** patches of drier, yellower and redder grass with the soil showing and stones in the thin places, in a broad low-frequency pattern, instead of an even cover.
 - **A hamlet east of the plaza:** six more boat-shaped houses with their yards, three chicken houses and four garden walls on the plain east of the plaza (x 78–127), so that the plain to the right of the arrival is not bare [inferred: the villages lay along the coast between the ahu].
+
+## 10. Match pass: the visitor's walk, night, sound, animals, wear (Suzhou as the reference)
+
+Rapa Nui had no shops, streets or markets about 1500; "shops and houses" here are the houses, earth ovens, gardens and work places of §4c-§4g. No script is written anywhere: rongorongo is undeciphered and is not imitated (§10.5).
+
+### 10.1 The visitor's walk
+- The walk (`walks` in plan.js): from the arrival up the paved way to the plaza and the ramp (the existing route); then in at the door of each of the ten nearest houses to enter, over the sill, along the floor to the hearth's side, and in at the chief's long house's door. Eleven places opened, all walked by `walk-check`. [inferred: the route follows the furnished houses of §4f]
+- Fixes found by walking: the long house's wall collider left no gap at its door (its ring was too coarse for 26 m: 88 points now, as the common houses' spacing) and no floor lay over its sill (a floor now covers the sill and the first of the pavement). The doorway stays 1.2 m in the carving [inferred, §4d] and about 2 m clear to the walker.
+- Already in place from §4f-§4g and unchanged: houses with their yards, ovens and keepers (a woman at the oven, people on the forecourts, a worker in each furnished house), the yards by the way up (`approach_dress`), the plaza's feast ovens and offerings, the shore. There are no wells (the island has no springs near Tongariki; water was kept in gourds [inferred]) and no signs or shrines other than the ahu and the poles with bark cloth on the plaza (§4g).
+
+### 10.2 Night (`nightlight.js`)
+- What lit the island about 1500 was fire and nothing else: no lamp, candle, glass or lantern [inferred; wood was dear on a nearly treeless island (§6), so the fires were small]. Light is the engine's additive `halo` material, night only, shown at the low preset; the day view is unchanged.
+- Houses to enter (`hare_house`): the hearth's pool on the mat floor and its glow in the room (cooking hearths brightest, sleeping ones banked), the thatch lit through over it, the glow in the doorway, the door's spill on the forecourt, the umu's embers (always at the cooks' houses, at half of the others). Shut houses (`hare_paenga`): 55% with a faint fire within, 45% with oven embers; the house being thatched stays dark. The chief's long house: the great hearth, the ridge lit, a wide spill at its door, its oven. The plaza's three feast ovens banked with embers; the cooking hearth of the yards by the way up; a driftwood fire in a ring of beach stones by the canoe builders' shed (the only new solid geometry: eight stones and an ash disc). [inferred throughout]
+- Looked at: one night render of three houses at 2 m (door side): the thatch glow, the door's spill, the oven's embers and the shore-type fire read clearly. Not seen: the full-town night view (the in-game `--site` renderer fails to start in this environment).
+
+### 10.3 Sound (`soundmap.js`, src/engine/voices-rapa-nui.js)
+Placed where made, by hour and weather; all synthesised; none of it heard (measured with `tools/sound-render.mjs`: envelope, spectrum, pitches). No bell, dog, horse, pig or donkey: the island had none [stated: "Fowls are the only animals they keep", Wikipedia "Easter Island", §4c]; the profile keeps the cockerel and the sea birds.
+- `rapSurf`: surf on the black rock along the whole shore, eight reaches, day and night, loud in weather [inferred: the sea on an exposed volcanic coast]; the shore's washes (`shoreSpot`) near the water.
+- `rapToki`: basalt toki ticking on tuff at the quarry camps (§4d: toki, 30-50 cm workspace [stated: eisp.org]) 7-16 h, and inside carvers' houses.
+- `rapTapa`: bark cloth beaten on a basalt anvil with a beater, in the yard by the way up, at the chief's house and in the tapa houses, 7-16 h [stated: mahute made on the island, §4f; the beater's knock inferred].
+- `rapHaul`: the statue walked down the road: a leader's call, the teams' answer, rope groan, the stone's thud, 7-16 h [stated: walked with ropes from two sides, Wikipedia "Moai", HeritageDaily 2012, §4b; the call inferred].
+- `rapStones`: hot stones laid in the umu, in the plaza's feast ovens in the afternoon and at the cooks' houses [stated: pit-oven, easterisland.travel; sound inferred].
+- `rapRiu`: the evening chant with hand-clapping and a stamping stone on the plaza, 17-21.5 h, silent in rain [stated: dossier §9 "chant (riu) with hand-clapping and a stamping stone"; the melody inferred]. `rapPu`: a conch trumpet at dawn and dusk from the ahu [inferred: not in the sources read].
+- `rapHen`: hens in the yards by the way up; `rapScurry`: a rat in the thatch at night [inferred: the Polynesian rat came with the settlers; not in the sources read].
+- Rooms: each house to enter and the long house (kind-wise tone, thatch's soft rain, much of the outdoors let through). No trees, so no birdsong from trees (§6); little green; no frogs, no ponds, no wells.
+- Test: tests/rapa-nui-sound.test.mjs (voices made, map agrees with the village, scheduling by hour and rain).
+
+### 10.4 Animals (`fauna.js` `critters`; models `noddy` and `kiore` added to src/engine/critter-models.js)
+- The island had chickens as "the only animals they keep" [stated: Wikipedia "Easter Island"; imaginarapanui.com] and no dog, cat, pig, goat, cow or horse before the Europeans [inferred from that statement]; so the critters are only: fowl, the Polynesian rat, and sea birds.
+- Fowl: at each of the seven chicken houses nearest the arrival a cockerel and two hens scratching at the side of the small openings, on the fowl's rig (they walk and peck, keeping 1.4 m from the visitor) - 21 critters; the yards by the way up keep their static chickens.
+- Kiore (`kiore`, the Polynesian rat, 0.14 m body and a tail of its own length, grey-brown, paler belly, on the dog's rig so that it stands and lies, out at night): five, at the foot of three chicken houses and at the sweet-potato stores of two cooking houses [inferred: the rat came with the settlers; not in the sources read].
+- Noddies (`noddy`, a dark brown sea bird with a pale cap and black bill and legs, the silver gull's build recoloured; walks and pecks): eight on the black stones of the shore, east and west of the ahu [inferred: noddies and terns of the island's sea cliffs; colours the black noddy's]. The flying terns and frigatebirds are the earlier flights (§4e).
+- Not done: sea turtles in the shallows, the rats' night behaviour beyond the rig's lying-down, nesting seabirds on the cliffs (the cliffs are off the disc).
+- Test: tests/rapa-nui-critters.test.mjs (models known, none of the absent animals, never in a house hull, clear of the walks, at an animal's pace).
+- Found broken on master and repaired here: src/engine/critter-models.js had lost the last four lines of `pigNeolithic` in the merge of stonehenge and bali-village (a syntax error that stops every critters test and the in-game renderers); the four lines are restored.
+
+### 10.5 Wear and writing (`wear.js`)
+- Wear [inferred: what daily use of earth, ash and fire leaves; materials the plan already holds, no new draw]: ragged patches of trodden dark earth along the way over each entered house's doorsill, out across the pavement and in across the mat floor, wider at the chief's long house; the mat floor darkened with soot in a ring round each hearth inside; a ragged annulus of ash-darkened earth thrown out round every earth oven (one dark material, the grey of ash being left out to save a draw) (every house's, the plaza's three feast ovens, the yard's hearth by the way up). The house being thatched anew has none (it is not lived in).
+- Already in the style and unchanged: weathering of the tuff, thatch wear (§4c, §4f).
+- Writing: none. The island's script, rongorongo, is undeciphered and the tablets in the long house are pieces of furnishing (§4d); no glyph is written anywhere, and there are no shop signs, tablets or inscriptions in a script about 1500 here to write [stated: rongorongo undeciphered, Wikipedia "Rongorongo"; not read here, known]. Petroglyphs are in §4d.
+- Not done: moss, lichen (the dossier puts none on the statues in 1500, §4c), worn steps on the ahu's ramp, salt stains on the seaward wall.
+
+### 10.6 Budget and what falls short (state at the end of this pass)
+- Arrival, main pass: 94 -> 96 draws, 2.03 -> 2.06 M triangles; at the chief's house (-52, 50): 98 -> 100 draws, 2.79 -> 2.82 M; geometry 28.9 MB, 148 meshes. Critters add one mesh (not counted by draw-count).
+- Falls short of the reference: the full-town night and day views were not rendered (the in-game `--site` renderer was not run after the critter-models repair); no interiors exist for houses beyond the forty nearest and none for the ahu's surroundings at night; moai are unlit; no weather-wet ground, no wear on the ahu's ramp or the quarry's tracks; critters not seen in motion; sounds measured but not heard; no ambience difference by season (the island's seabird season is not modelled).

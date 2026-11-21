@@ -316,7 +316,7 @@ function longHouse(el, { bag, col }) {
   for (let r = 0; r < 6; r++) for (let q = 0; q < 12; q++) if (rand() < 0.8) add('bark_dark', box(9.14 + q * 0.055, FL + 0.065, 0.29 + r * 0.04, 9.14 + q * 0.055 + 0.03, FL + 0.071, 0.29 + r * 0.04 + 0.012));
   // colliders: a loop at the height where the roof is a head's height, open at the door; a floor
   const ring = [];
-  for (let i = 0; i < 44; i++) { const t = i / 44 * Math.PI * 2, u = -Math.cos(t) * (L / 2 - 0.4), sg = Math.sin(t) >= 0 ? 1 : -1; ring.push([u, sg * half(u) * 0.74]); }
+  for (let i = 0; i < 88; i++) { const t = i / 88 * Math.PI * 2, u = -Math.cos(t) * (L / 2 - 0.4), sg = Math.sin(t) >= 0 ? 1 : -1; ring.push([u, sg * half(u) * 0.74]); }
   for (let i = 0; i < ring.length; i++) {
     const a = ring[i], b = ring[(i + 1) % ring.length];
     if (a[1] < 0 && b[1] < 0 && Math.abs(a[0]) < 1.4 && Math.abs(b[0]) < 1.4) continue;
@@ -325,6 +325,7 @@ function longHouse(el, { bag, col }) {
   col.circle(...P(-3, 0), 0.5, y0, y0 + 0.3);
   const fx = x - L / 2 + 0.9, fz = z - W * 0.3;
   col.floor([fx, fz, x + L / 2 - 0.9, z + W * 0.3], y0 + FL);
+  { const [ax, az] = P(-1.0, -half(0) + 1.0), [bx, bz] = P(1.0, -half(0) - 1.0); col.floor([Math.min(ax, bx), Math.min(az, bz), Math.max(ax, bx), Math.max(az, bz)], y0 + FL); }        // before the door: a floor over the sill and the first of the pavement (as the common houses')
   void H;
 }
 
