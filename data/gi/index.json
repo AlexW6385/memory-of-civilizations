@@ -455,8 +455,8 @@
    }
   ],
   "bytes": 165807,
-  "seconds": 44,
-  "baked": "2026-11-20"
+  "seconds": 112,
+  "baked": "2026-11-21"
  },
  "ayutthaya-wat": {
   "site": "ayutthaya",
@@ -1647,9 +1647,9 @@
     ]
    }
   ],
-  "bytes": 1216855,
-  "seconds": 208,
-  "baked": "2026-11-19"
+  "bytes": 1216210,
+  "seconds": 345,
+  "baked": "2026-11-21"
  },
  "foguang-east-hall": {
   "site": "tang-wutai",
@@ -2873,9 +2873,9 @@
     ]
    }
   ],
-  "bytes": 1227085,
-  "seconds": 216,
-  "baked": "2026-11-20"
+  "bytes": 1226623,
+  "seconds": 174,
+  "baked": "2026-11-21"
  },
  "lu-qufu-temple": {
   "site": "lu-qufu",
@@ -3487,7 +3487,7 @@
  },
  "muromachi-ginkaku": {
   "site": "muromachi-kyoto",
-  "hash": "9acd442b291d035b",
+  "hash": "1e2940f4920e148f",
   "rays": 128,
   "probes": 3882,
   "boxes": [
@@ -3525,9 +3525,9 @@
     ]
    }
   ],
-  "bytes": 66747,
-  "seconds": 5,
-  "baked": "2026-11-19"
+  "bytes": 66735,
+  "seconds": 16,
+  "baked": "2026-11-21"
  },
  "muromachi-ryoanji": {
   "site": "muromachi-kyoto",
@@ -3553,8 +3553,8 @@
    }
   ],
   "bytes": 78354,
-  "seconds": 6,
-  "baked": "2026-11-19"
+  "seconds": 26,
+  "baked": "2026-11-21"
  },
  "muscovy-dormition": {
   "site": "muscovy",
@@ -3864,8 +3864,8 @@
    }
   ],
   "bytes": 685975,
-  "seconds": 245,
-  "baked": "2026-11-20"
+  "seconds": 1018,
+  "baked": "2026-11-21"
  },
  "norse-borgund-church": {
   "site": "norse-borgund",
@@ -3936,12 +3936,12 @@
    }
   ],
   "bytes": 1209767,
-  "seconds": 204,
-  "baked": "2026-11-19"
+  "seconds": 692,
+  "baked": "2026-11-21"
  },
  "pantheon": {
   "site": "rome",
-  "hash": "f2fb8bf31918f129",
+  "hash": "01ab77b104702112",
   "rays": 128,
   "probes": 74480,
   "boxes": [
@@ -3965,9 +3965,9 @@
     ]
    }
   ],
-  "bytes": 1212795,
-  "seconds": 715,
-  "baked": "2026-11-19"
+  "bytes": 1212797,
+  "seconds": 1237,
+  "baked": "2026-11-21"
  },
  "parthenon": {
   "site": "athens",
@@ -3995,8 +3995,8 @@
    }
   ],
   "bytes": 371275,
-  "seconds": 42,
-  "baked": "2026-11-19"
+  "seconds": 126,
+  "baked": "2026-11-21"
  },
  "persepolis-terrace": {
   "site": "persepolis",
@@ -4282,8 +4282,8 @@
    }
   ],
   "bytes": 1198078,
-  "seconds": 161,
-  "baked": "2026-11-19"
+  "seconds": 673,
+  "baked": "2026-11-21"
  },
  "sainte-chapelle": {
   "site": "paris",
@@ -4326,8 +4326,8 @@
    }
   ],
   "bytes": 272827,
-  "seconds": 248,
-  "baked": "2026-11-19"
+  "seconds": 170,
+  "baked": "2026-11-21"
  },
  "sainte-foy-conques": {
   "site": "conques",
@@ -4911,8 +4911,8 @@
    }
   ],
   "bytes": 630722,
-  "seconds": 53,
-  "baked": "2026-11-20"
+  "seconds": 232,
+  "baked": "2026-11-21"
  },
  "sydney-opera": {
   "site": "sydney",
@@ -4959,7 +4959,7 @@
  },
  "tang-changan-daci-en": {
   "site": "tang-changan",
-  "hash": "aefe52cb89558de3",
+  "hash": "e76e2f30768b0d52",
   "rays": 128,
   "probes": 22929,
   "boxes": [
@@ -5028,9 +5028,9 @@
     ]
    }
   ],
-  "bytes": 382933,
-  "seconds": 138,
-  "baked": "2026-11-20"
+  "bytes": 382906,
+  "seconds": 213,
+  "baked": "2026-11-21"
  },
  "taos-pueblo": {
   "site": "taos",
@@ -5252,7 +5252,7 @@
  },
  "venice-san-marco": {
   "site": "venice",
-  "hash": "779af4d7cbd30467",
+  "hash": "3eb6dc53d0ad1244",
   "rays": 128,
   "probes": 73554,
   "boxes": [
@@ -5274,9 +5274,9 @@
     ]
    }
   ],
-  "bytes": 1202054,
-  "seconds": 227,
-  "baked": "2026-11-19"
+  "bytes": 1202022,
+  "seconds": 393,
+  "baked": "2026-11-21"
  },
  "versailles-chateau": {
   "site": "versailles",
@@ -5313,8 +5313,8 @@
    }
   ],
   "bytes": 1255722,
-  "seconds": 1244,
-  "baked": "2026-11-20"
+  "seconds": 397,
+  "baked": "2026-11-21"
  },
  "vienna-cafe-museum": {
   "site": "vienna",
