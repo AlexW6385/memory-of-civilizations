@@ -14,6 +14,7 @@ import { hut } from './hut.js';
 import { umbrella, procCross } from './liturgy.js';
 import { rod } from './hut.js';
 import { yardEl, terraceEl, courtEl, clothPile, lampEl } from './compound.js';
+import { stallEl } from './stall.js';
 import { faceFrame, rockCross, horsemen, shackles, ridgeCross } from './relief.js';
 
 const TU = 'tuff_red', TH = 'tuff_hewn';
@@ -781,6 +782,6 @@ function curtain(el, { bag, col }) {
 
 registerStyle('zagwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, rock_cross: rockCross, shackles, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl, court: courtEl, cloth_pile: clothPile, lamp: lampEl },
+  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, rock_cross: rockCross, shackles, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl, court: courtEl, cloth_pile: clothPile, lamp: lampEl, pilgrim_stall: stallEl },
   objects: {},
 });

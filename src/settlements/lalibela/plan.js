@@ -2,6 +2,8 @@
 // on the floor of its pit, the pits' and trenches' rock walls (open where a trench joins), Bete
 // Giyorgis alone to the south-west.
 
+import { hutRoute, stallRoutes, houseRoutes } from './walkwork.js';
+import { WALK_REACH } from './walk.js';
 import { PITS, TRENCHES, EDGE, OUTER, HUT, POOL, inRect, slope, cutDepth } from './layout.js';
 
 const E = [];
@@ -221,6 +223,8 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('hut', [HUT.c[0] - 3.3, HUT.c[1] - 3.3, HUT.c[0] + 3.3, HUT.c[1] + 3.3], 0, 'hut'), room('giyorgis-in-x', [gc[0] - 10.4, gc[1] - 3, gc[0] + 10.4, gc[1] + 3], GY, 'hall'), room('giyorgis-in-z', [gc[0] - 3, gc[1] - 10.4, gc[0] + 3, gc[1] + 10.4], GY, 'hall'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall'), ...Object.entries(AKS).map(([id, a]) => room(id + '-in', [a.rect[0] + 1.3, a.rect[1] + 1.3, a.rect[2] - 1.3, a.rect[3] - 1.3], a.y + 0.9, 'hall')), room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];
 const walks = [[[-280, 128], [-262, 128], [-216, 128], [-211, 128]]];
 walks[0].y0 = slope(-280, 128);
+// the visitor's walk (docs §18): into the house beside the arrival, into every opened house within reach of the walk (in at the door and on to the middle of the room), to the front of each stall
+for (const r of [hutRoute(), ...stallRoutes(), ...houseRoutes((x, z) => (x < 0 ? 0 : 1) + (z < 0 ? 0 : 2)).filter((q) => q.dist <= WALK_REACH)]) walks.push(Object.assign(r.route, { y0: r.y0 }));
 
 export const churches = {
   id: 'lalibela-churches',

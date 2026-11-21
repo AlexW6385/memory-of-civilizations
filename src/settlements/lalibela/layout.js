@@ -158,6 +158,9 @@ function build() {
     if (Math.hypot(h.c[0] - ARRIVAL[0], h.c[1] - ARRIVAL[1]) < 22 || dA(h) > 330) continue;
     if (ENTER.some((e) => Math.hypot(e.c[0] - h.c[0], e.c[1] - h.c[1]) < 16)) continue;
     h.enter = KINDS[ENTER.length]; h.storeys = 1; h.r = 3.8; ENTER.push(h);
+    // the way from the gate to the door is kept clear (zagwe/compound.js): a pen, if there is one, stands well to the side of it
+    const q = CMP.find((c) => c.main === h);
+    if (q && q.pen) { const g = [Math.cos(q.gate), Math.sin(q.gate)], w = [-g[1], g[0]]; q.pen = [q.c[0] + g[0] * q.R * 0.1 + w[0] * q.R * 0.6, q.c[1] + g[1] * q.R * 0.1 + w[1] * q.R * 0.6]; }
   }
   BUCKET = new Map();
   const put = (k, o) => { let l = BUCKET.get(k); if (!l) BUCKET.set(k, (l = [])); l.push(o); };

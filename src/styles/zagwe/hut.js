@@ -37,8 +37,16 @@ export function hut(el, { bag, col }) {
   const mir = (el.seed || 7) & 1 ? -1 : 1, W = (sx, sd) => [x + nrm[0] * sd + tan[0] * sx * mir, z + nrm[1] * sd + tan[1] * sx * mir];      // sx along the wall (to the left of the door's outward normal), sd from the centre toward the door
   // ---- the drum
   const ext = TH / 2 * Math.tan(dth / 2) + 0.01;
+  // the doorway is 1.7 m clear (the walker needs 1.6): the two segments beside the door's own are cut back to 0.85 of their length from it, the
+  // lintel stone carried over the gap
+  const CUT = 0.35;
   for (let k = 0; k < N; k++) {
-    const a0 = da + (k - 0.5) * dth, a1 = da + (k + 0.5) * dth, A = [x + Math.cos(a0) * rm, z + Math.sin(a0) * rm], B = [x + Math.cos(a1) * rm, z + Math.sin(a1) * rm];
+    let a0 = da + (k - 0.5) * dth, a1 = da + (k + 0.5) * dth;
+    const pt = (a) => [x + Math.cos(a) * rm, z + Math.sin(a) * rm];
+    if (k === 1 || k === N - 1) { const lo = k === 1 ? a0 : a1 - 0, o0 = k === 1 ? a0 : a1, o1 = k === 1 ? a0 + CUT * dth : a1 - CUT * dth; void lo;
+      bag.add(wall, orientedBox(pt(o0), pt(o1), TH, y + 1.95, y + H, ext)); col.segment(pt(o0), pt(o1), TH, y + 1.95, y + H);
+      if (k === 1) a0 += CUT * dth; else a1 -= CUT * dth; }
+    const A = pt(a0), B = pt(a1);
     if (k === 0) {                                                  // the doorway: a lintel stone over it
       bag.add(wall, orientedBox(A, B, TH, y + 1.95, y + H, ext)); col.segment(A, B, TH, y + 1.95, y + H);
       continue;
@@ -48,10 +56,10 @@ export function hut(el, { bag, col }) {
     else for (const yy of [0.62, 1.3, 2.0]) bag.add('rubble', orientedBox(A, B, TH + 0.05, y + yy, y + yy + 0.08, ext));      // the courses' proud bands
   }
   // the door: timber jambs and lintel, the plank leaf standing ajar inside against the wall
-  { const hw = rm * Math.sin(dth / 2), P = (s, d) => W(s, d);
+  { const hw = rm * Math.sin((0.5 + CUT) * dth), P = (s, d) => W(s, d);
     for (const sg of [-1, 1]) bag.add('timber', orientedBox(P(sg * (hw + 0.07), rm - 0.32), P(sg * (hw + 0.07), rm + 0.32), 0.14, y, y + 1.95));
     bag.add('timber', orientedBox(P(-hw - 0.2, rm), P(hw + 0.2, rm), TH + 0.2, y + 1.95, y + 2.12));
-    bag.add('timber', orientedBox(P(hw - 0.05, rm - 0.35), P(hw - 0.05 - 0.55, rm - 0.95), 0.05, y, y + 1.75));
+    bag.add('timber', orientedBox(P(hw + 0.04, ri - 0.14), P(hw + 0.95, ri - 0.3), 0.05, y, y + 1.75));      // the leaf folded back against the inside of the wall
     bag.add('rubble', orientedBox(P(-hw - 0.3, rm + 0.3), P(hw + 0.3, rm + 0.3), 0.5, y - 0.1, y + 0.12)); }       // the threshold stone
   // the eave carried on posts over the doorstep, or a stone seat by the door
   { const OUT = (sx, sd) => W(sx, sd);
