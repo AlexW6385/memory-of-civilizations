@@ -93,6 +93,7 @@ hill(KNOLL, -Math.PI / 2, 'granite_rough');
 // stair between: the Torreón stands on its rock over the cave of the Royal Tomb, the mouth in the rock's east face; a stair up beside it
 E.push({ t: 'torreon', c: [-36, 22], r: 5.5, y: 3.0, h: 4.6, tomb: { at: 11.5, w: 2.4, d: 4 } });
 E.push({ t: 'stair', rect: [-27.35, 14.4, -22.85, 16.6], y0: 0, y1: 3.0, dir: 'w', riser: 0.2, mat: 'granite_inca' });
+E.push({ t: 'mp_tread_wear', rect: [-27.35, 14.4, -22.85, 16.6], y0: 0, y1: 3.0, dir: 'w', riser: 0.2 });
 E.push({ t: 'inca_house', rect: [-52, -4, -42, 8], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', jamb: true, seed: 9, ...OPEN });
 E.push({ t: 'inca_house', rect: [-56, 34, -46, 46], y: 0, h: 3.0, front: 'e', mat: 'granite_inca', jamb: true, seed: 10, ...OPEN });
 // the way in: from the fields down into the dry ditch and up out of it to the main gate (the wall is built with the kanchas')
@@ -115,6 +116,8 @@ E.push({ t: 'inca_temple', rect: [-30, -56, -20, -42], y: 0.6, h: 3.6, open: 'w'
 // four low steps up to each temple's raised floor (0.6 m), before its open side
 E.push({ t: 'stair', rect: [-46, -43, -38, -41.8], y0: 0, y1: 0.6, dir: 'n', riser: 0.15, mat: 'granite_inca' });
 E.push({ t: 'stair', rect: [-32.2, -53, -31, -45], y0: 0, y1: 0.6, dir: 'e', riser: 0.15, mat: 'granite_inca' });
+// the feet's wear on the temples' steps and the Torreon's stair (wear.js, docs §18)
+E.push({ t: 'mp_tread_wear', rect: [-46, -43, -38, -41.8], y0: 0, y1: 0.6, dir: 'n', riser: 0.15 }, { t: 'mp_tread_wear', rect: [-32.2, -53, -31, -45], y0: 0, y1: 0.6, dir: 'e', riser: 0.15 });
 // the house of the priest closing the plaza on the south
 E.push({ t: 'inca_house', rect: [-46, -34, -36, -26], y: 0.2, h: 2.8, front: 'n', mat: 'granite_inca', roof: 'thatch', seed: 11, ...OPEN });
 // the kallanka on the plaza's east side: a long undivided hall of rough granite, seven equally spaced doors on the long side

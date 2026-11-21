@@ -118,7 +118,7 @@ function glow(el, { bag }) {
     doorGlow(H, e, h.front);
     // the smoke-hole: the hearth's glow shows through the thatch at the ridge, so a lit house reads from behind and from above [inferred]
     { const B = Math.min(x1 - x0, z1 - z0) / 2, hh = open ? 2.8 : 2.6, ry = y + hh + B * 1.45, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-      H.ball(cx, ry + 0.15, cz, 0.7, 0.55); H.floor(cx, ry + 0.1, cz, 0.55, 0.55, 8, 0.5); }
+      H.ball(cx, ry + 0.15, cz, 0.9, 0.65); H.floor(cx, ry + 0.1, cz, 0.6, 0.6, 8, 0.55); }
   });
   // the chaski's hut (lit, its door to the road) and the kallanka's hall
   { const r = [6.5, 118.6, 10.9, 123.2], y = ground.height(8.7, 120.9);

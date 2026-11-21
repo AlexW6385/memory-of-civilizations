@@ -9,9 +9,28 @@ import { STYLES } from '../../core/build.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const IN = { n: [0, 1], s: [0, -1], e: [-1, 0], w: [1, 0] };
 
+/**
+ * The wear of a flight's treads (docs §18): where feet fell, a damp-dark hollow across the middle of each tread, 4 mm over its top, narrower than the flight and
+ * kept off the nosing and the riser's foot; the lower treads the most worn is not modelled (all alike) [inferred: after worn stone stairs]. n treads over rise y0..y1, dir the way up.
+ */
+export function treadWear(bag, rect, y0, y1, dir, n) {
+  const [x0, z0, x1, z1] = rect, alongZ = dir === 'n' || dir === 's', len = alongZ ? z1 - z0 : x1 - x0, wid = alongZ ? x1 - x0 : z1 - z0, hw = Math.min(0.45, wid * 0.25), c = alongZ ? (x0 + x1) / 2 : (z0 + z1) / 2;
+  for (let k = 0; k < n; k++) {
+    const f0 = k / n, f1 = (k + 1) / n, yy = y0 + (y1 - y0) * f1, run = len / n;
+    // the tread's own strip along the flight, then the worn part of it: from 25% to 80% of its run, its width a little different from tread to tread
+    const a = f0 + (f1 - f0) * 0.25, b = f0 + (f1 - f0) * 0.8, j = 0.85 + 0.3 * (((k * 2654435761) >>> 0) % 97) / 97, w = hw * j;
+    if (run < 0.12) continue;
+    const t0 = dir === 'n' ? z1 - len * b : dir === 's' ? z0 + len * a : dir === 'e' ? x0 + len * a : x1 - len * b, t1 = t0 + len * (b - a);
+    bag.add('plaster_damp', alongZ ? box(c - w, yy - 0.01, t0, c + w, yy + 0.016, t1) : box(t0, yy - 0.01, c - w, t1, yy + 0.016, c + w));
+  }
+}
+
 let done = false;
 export function registerWear() {
   if (done) return; done = true;
+  { const sb = STYLES.inca.elements.stairs;
+    STYLES.inca.elements.stairs = function wornStairs(el, ctx) { const r = sb.call(this, el, ctx); if (!el.slab && ctx.bag) treadWear(ctx.bag, el.rect, el.y0, el.y1, el.dir, Math.max(1, Math.round((el.y1 - el.y0) / 0.16))); return r; }; }
+  STYLES.inca.elements.mp_tread_wear = (el, { bag }) => treadWear(bag, el.rect, el.y0, el.y1, el.dir, Math.max(1, Math.round(Math.abs(el.y1 - el.y0) / (el.riser || 0.17))));
   const base = STYLES.inca.elements.inca_house;
   STYLES.inca.elements.inca_house = function worn(el, ctx) {
     const r = base.call(this, el, ctx);

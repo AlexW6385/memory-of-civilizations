@@ -48,6 +48,8 @@ export function intihuatana(el, { bag, col }) {
   prism(bag, 'granite_inca', Pq, y + 0.85, Pq.map(([x, z]) => [x, z, y + 1.2 - (z - (cz - 0.75)) * 0.04]), y + 1.2);
   // a carved ledge on the east of the tier, a step on its south face (the small cut channels like stairs)
   bag.add('granite_inca', frustum([cx + 1.0, cz - 0.9, cx + 1.7, cz + 0.2], y + 0.85, y + 1.0, 0.02, 0.02, 0.02, 0.02));
+  // one of the small cut channels like stairs: a step between the mound and the tier on the east, 0.5 m wide [stated: salkantaytrekking; inferred: the size]
+  bag.add('granite_inca', frustum([cx + 1.66, cz - 0.85, cx + 2.0, cz - 0.35], y + 0.38, y + 0.66, 0.02, 0.02, 0.02, 0.02));
   // the stairs, north and south, from the hill's top to the mound's: the south one the longer, one block with its steps cut in it
   for (const [sg, n, wd, lo] of [[1, 5, 0.7, 2.1], [-1, 4, 0.55, 2.0]]) {
     const dp = 0.34;
