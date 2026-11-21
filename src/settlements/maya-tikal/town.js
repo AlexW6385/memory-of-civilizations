@@ -11,6 +11,7 @@ import { frame } from '../../styles/tikal/kit.js';
 import { boatFloat } from '../../objects/index.js';
 import { hashAt } from './walk.js';
 import './stock.js';
+import './nightlight.js';
 
 const base = (id, elements, style = 'tikal') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-18, 28], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -248,7 +249,8 @@ function openedPlaces() {
     const vc = -Lv / 2 + pt + i * (rw + pt) + rw / 2, p = F.P(3.4 - 0.5 + 0.5, vc + 0.7), woman = hashAt(vc, 5, 1) < 0.5;
     if (i % 4 !== 3) L.push(person(rand, p[0], p[1], 0.5, face(-1, 0), { woman, pose: 'sit', over: woman ? 'none' : 'cape', cloth2: i % 2 ? 'cloth_red' : 'cloth_blue' }));
   }
-  return [base('maya-tikal-stock', E), base('maya-tikal-hall-stock', HE), { ...base('maya-tikal-hall-life', L), style: 'life' }];
+  // the stock is drawn only near its place (a plan's near and centre): from the plaza the goods are too small to see
+  return [{ ...base('maya-tikal-stock', E), center: [-95, 18], near: 90 }, { ...base('maya-tikal-hall-stock', HE), center: [142, 43], near: 60 }, { ...base('maya-tikal-hall-life', L), style: 'life' }];
 }
 
 /** The life at the reservoirs: women with jars and washing at the rim, a fisher in a dugout canoe, ducks. */
