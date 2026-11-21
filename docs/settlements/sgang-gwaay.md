@@ -178,3 +178,12 @@ No recording of the village exists; the map is [inferred] from the places and wo
 - **The houses:** inside each house the hearth and one kind of work by the house's number (weaving sticks, the cooking box with its hot stones, a hide scraped, bark beaten); the landmark's the fire, and in the evening the box drum with low wordless singing, heard from the street through its doorway. A gathering, not a ceremony: nothing is depicted of one. [inferred: §4b, §9 "a drum and singing from the landmark house"]
 - **Birds and beasts:** ravens about the poles (a croak, a bell-like note), bald eagles' thin piping high up, gulls and wrens from the engine's birds, a sea lion's grunts off the rocks at the north end, a small owl of the islands at night, dogs from the engine's animals. [inferred: species of the coast]
 - Not made: voices as words (none: the language is not ours to speak), bells, any trade-goods sound (a musket, an iron adze's ring) beyond the generic chop.
+
+### 11d. Animals (critters with behaviour)
+
+`src/settlements/sgang-gwaay/fauna.js` `critters` (the engine's rigged small animals, one draw); test `tests/sgang-gwaay-critters.test.mjs`. All [inferred: species of the coast and the dossier's §5, §9; no source read].
+- **Dogs** asleep beside the doorways of two houses in three (off the cleared lane), standing and lifting the head as the visitor nears: the village dogs of §9. [inferred: dogs are in the dossier's §9; the breed is not known]
+- **Ravens** (the rook's rig stands in: the engine has no raven model; same black walking bird, larger beak is missing) and **gulls** walking and pecking at the shell middens, clam baskets and drift logs of the beach top. [inferred: §5a "shell heaps, baskets of clams"]
+- **Geese** on the beach at the north end, a **heron** (the crane's rig) in the shallows there, **cormorants** on the stakes of the fish weirs, **kingfishers** watching the water at the beach edge, **ducks** afloat in the sheltered bay (the brown duck's rig stands in for the harlequins and mergansers of such bays). [inferred: "a sheltered rocky bay"; the weirs of §5a]
+- None of: hen, cat, horse, goat, pig, cattle: not on the island in 1850 [inferred]. Eagles, small birds and fish stay the fauna flights, perches and fish of the existing list.
+- Not rigged: sea lions and seals (no model), bears and deer in the forest, which would not walk the village.

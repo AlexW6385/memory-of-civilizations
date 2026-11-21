@@ -38,11 +38,11 @@ for (const h of Hs.filter((q) => q.i % 3 !== 1)) {            // a dog asleep be
   const sg = h.i % 2 ? 1 : -1, [x, z] = toWorld(h, sg * 2.7, -h.d / 2 - 2.3);
   if (height(x, z) > 0.6) critters.push({ model: 'dog', at: [x, height(x, z) + 0.02, z], rot: h.yaw + 1.2 + h.i, range: [9, 3.5] });
 }
-for (const p of Y.props.filter((q) => q.kind === 'midden' || q.kind === 'clams').slice(0, 10)) {    // ravens and gulls at the shell heaps and clam baskets
+for (const p of Y.props.filter((q) => (q.kind === 'midden' || q.kind === 'clams') && height(q.c[0] + 1.3, q.c[1] + 0.6) > 0.4).slice(0, 10)) {    // ravens and gulls at the shell heaps and clam baskets
   const q = p.c, m = (p.seed % 3 === 0) ? 'gull_silver' : 'rook';
   critters.push({ model: m, at: [q[0] + 1.3, height(q[0] + 1.3, q[1]) + 0.02, q[1] + 0.6], rot: p.seed % 6, range: [1.8, 2.2] });
 }
-for (const l of v.logs.slice(0, 5)) critters.push({ model: 'gull_silver', at: [l.c[0] - 1.2, height(l.c[0] - 1.2, l.c[1]) + 0.02, l.c[1] + 0.9], rot: l.yaw, range: [1.8, 2.2] });
+for (const l of v.logs.filter((q) => height(q.c[0] - 1.2, q.c[1] + 0.9) > 0.3).slice(0, 5)) critters.push({ model: 'gull_silver', at: [l.c[0] - 1.2, height(l.c[0] - 1.2, l.c[1]) + 0.02, l.c[1] + 0.9], rot: l.yaw, range: [1.8, 2.2] });
 for (const [dz, k] of [[0, 0], [1.4, 1], [-1.2, 2]]) { const z = -142 + dz, x = shoreX(z) - 3 + dz * 0.3; critters.push({ model: k === 1 ? 'goose_white' : 'goose_grey', at: [x, height(x, z) + 0.02, z], rot: 1.4 + k, range: [3, 1.8] }); }
 { const z = -152, x = shoreX(z) + 0.6; critters.push({ model: 'crane', at: [x, Math.max(height(x, z), SEA + 0.1), z], rot: Math.PI / 2, range: [3, 1.2], tau: 50, speed: 0.4 }); }
 for (const w of Y.props.filter((q) => q.kind === 'weir').slice(0, 3)) critters.push({ model: 'cormorant', at: [w.c[0], w.y + 1.2, w.c[1] + 0.5], rot: Math.PI / 2, cycle: 30 + (w.seed % 9) });
