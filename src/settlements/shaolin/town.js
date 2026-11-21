@@ -159,7 +159,9 @@ function frontLife() {
   for (const sx of [-1, 1]) { L.push({ t: 'bench', at: [sx * 7.6, 149.5], y: 0.02, rot: Math.PI / 2, seed: sd() }); L.push({ t: 'handcart', at: [sx * 9, 139], y: 0.02, rot: sx * 0.4, load: pick(['baskets', 'crates', 'sacks']), seed: sd() }); }
   // the leading line to the gate: paper lamps on posts down both sides of the processional way, a hitching place for the pilgrims' mounts at the plaza's
   // south corners (a trough, the donkeys tied, their drivers squatting by them: the people are in town())
-  for (const sx of [-1, 1]) for (const z of [135, 141.5, 148]) L.push({ t: 'lantern', at: [sx * 4.4, z], y: 0.02, kind: 'paper', h: 2.6 });
+  for (const sx of [-1, 1]) for (const z of [135, 141.5, 148, 153.5, 158.5]) L.push({ t: 'lantern', at: [sx * 4.4, z], y: 0.02, kind: 'paper', h: 2.6 });
+  // night near the visitor (dossier 12.1): a paper lantern on a post at the open end of each plaza stall, so the stalls' goods and keepers are lit
+  for (const sx of [-1, 1]) for (const z of [133.5, 138, 142.5, 147]) L.push({ t: 'lantern', at: [sx * 12.9, z + 1.7], y: 0.02, kind: 'paper', h: 2.6 });
   for (const sx of [-1, 1]) { L.push({ t: 'trough', at: [sx * 11.6, 150.2], y: 0.02, rot: Math.PI / 2, seed: sd() }); L.push({ t: 'animal', kind: 'donkey', at: [sx * 12.6, 149.0], y: 0.02, rot: sx * 1.2, gear: true, graze: false, seed: sd() }); L.push({ t: 'animal', kind: 'donkey', at: [sx * 10.6, 149.6], y: 0.02, rot: -sx * 1.5, gear: false, graze: false, seed: sd() }); }
   // beasts: donkeys in carts and with packs on the approach and the street, dogs, an ox cart, goats
   L.push({ t: 'cart', kind: 'two', beast: 'donkey', load: 'sacks', at: [-9, 170], y: 0, rot: 0.15, seed: 5 });
