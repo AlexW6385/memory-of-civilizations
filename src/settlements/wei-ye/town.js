@@ -58,6 +58,12 @@ function people() {
   guards.push([-5, PALACE[3] + 2, 0, 0], [5, PALACE[3] + 2, 0, 0], [-5, W_TERRACE.r[3] + 6, Math.PI, 0], [5, W_TERRACE.r[3] + 6, Math.PI, 0]);
   for (const x of GATES_S) guards.push([x - 11, WALL.s - 9, 0, 0], [x + 11, WALL.s - 9, 0, 0]);
   guards.push([WALL.e - 9, AVENUE_Z - 11, Math.PI / 2, 0], [WALL.e - 9, AVENUE_Z + 11, Math.PI / 2, 0], [WALL.w + 9, AVENUE_Z - 11, -Math.PI / 2, 0], [WALL.w + 9, AVENUE_Z + 11, -Math.PI / 2, 0]);
+  // the gates' fire watch: two men squat by the outer fire basket of each gate (kept all night, like the fires of fires below)
+  for (const g of [...GATES_S.map((x) => [x, WALL.s]), ...GATES_N.map((x) => [x, WALL.n])]) {
+    if (Math.hypot(...g) >= RADIUS - 30) continue;
+    const sd = g[1] > 0 ? 1 : -1, o = CITY_WALL.th / 2 + 2.2;
+    for (const side of [-1, 1]) fig([g[0] + side * 4.6 + side * 1.1, g[1] + sd * o + sd * 0.4], side > 0 ? Math.PI * 0.5 : -Math.PI * 0.5, { y: 0, pose: 'squat', cloth: 'cloth_grey', cloth2: 'cloth_black', hat: 'cap', over: 'belt', nightKeep: 1 });
+  }
   for (const [x, z, r, y] of guards) fig([x, z], r, { y, dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_black', hat: 'cap', over: 'belt', pose: 'staff', carry: 'staff', len: 2.2 });
   // the market: sellers by the tower, officials of the market
   const cx = (MARKET[0] + MARKET[2]) / 2, cz = (MARKET[1] + MARKET[3]) / 2;

@@ -65,7 +65,7 @@ export function forecourtLife() {
   });
   // the officials at the stair's foot talking, the porters at the carriages' rear, a woman of the court with her maid
   const [ax, az] = [FOOT - 4.5, ZC];
-  fig([-127, ZC - 0.4], 0.4, { cloth: 'cloth_black', cloth2: 'cloth_red', pose: 'talk', beard: 1 }); fig([-126.1, ZC + 0.1], 0.4 + Math.PI, { cloth: 'cloth_blue', pose: 'talk', beard: 1 });
+  fig([-127, ZC - 0.4], 0.4, { cloth: 'cloth_black', cloth2: 'cloth_red', pose: 'talk', beard: 1, nightKeep: 1 }); fig([-126.1, ZC + 0.1], 0.4 + Math.PI, { cloth: 'cloth_blue', pose: 'talk', beard: 1, nightKeep: 1 });
   fig([-128, ZC + 3.4], 1.9, { cloth: 'cloth_red', hat: 'none', hair: 'bun', over: 'none', h: 1.5, pose: 'stand' }); fig([-129.3, ZC + 4.3], 1.9, { cloth: 'cloth_green', hat: 'none', hair: 'bun', over: 'none', h: 1.48, pose: 'stand', carry: 'pot' });
   fig([-137, ZC + 8.9], Math.PI / 2, { cloth: 'cloth_grey', hat: 'cap', pose: 'staff', carry: 'staff', len: 2.0 });
   // the storerooms at the terraces' feet (open: terrace.js): a keeper at the door with his tally, a porter at the jars
