@@ -19,7 +19,7 @@ export const WALKS = {
   // down the plateau's east edge to the harbour, along the quay, the landing at the temple's front, and on south
   quay: [ARRIVAL, [306, -49], [347, 24], [347, 33], [350, 34], [350, 46], [348, 48], [348, 54], [350, 58], [350, 72]],
   // south of the valley temple, west across the valley's slope, round the Wall of the Crow's east end to the town's gate street
-  town: [[350, 72], [347, 72], [345, 76], [335, 76], [276, 76], [200, 120], [140, 150], [90, 157], [62, 157], [GATE_X, 161], [GATE_X, 200], [GATE_X, 226]],
+  town: [[350, 72], [347, 72], [345, 76], [335, 76], [276, 76], [200, 120], [140, 150], [90, 157], [62, 157], [GATE_X, 161], [GATE_X + 2, 176], [GATE_X + 2, 203], [GATE_X + 0.3, 208], [GATE_X + 0.3, 226]],
   // through the wall's tunnel gate from the quarry's side
   gate: [[GATE_X, 138], [GATE_X, 165]],
 };

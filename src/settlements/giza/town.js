@@ -7,7 +7,7 @@ import { ground } from './ground.js';
 import { RAMP, haulRoad } from './works.js';
 import { LODGES, lodgeLife } from './lodges.js';
 import { STALLS, rationLife } from './rations.js';
-import { STANDS } from './nightlight.js';
+import { STANDS, WORK_FIRES } from './nightlight.js';
 import { housePlan } from '../../styles/oldkingdom-giza/houses.js';
 import { CAMP_ITEMS, CHIPS, HAUL, HAUL_ITEMS, YARD, campLife, haulLife, yardLife } from './camps.js';
 
@@ -209,6 +209,11 @@ function worksPlan() {
   tools.push([198.6, 0, -75.2, 'lever']);
   return base('giza-works', [
     { t: 'ok_ramp', x0, x1, z, w, h, y: 0 },
+    // the stages hung on the pyramid's foot band, where the last courses were being dressed, and the porters' ramp to the lowest (docs §23)
+    { t: 'ok_face_works', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h, bays: [
+      { f: 1, u0: 20, u1: 33, v0: 3, n: 3 }, { f: 1, u0: -44, u1: -31, v0: 3, n: 2 }, { f: 3, u0: -52, u1: -38, v0: 9, n: 3 }, { f: 3, u0: 30, u1: 44, v0: 9, n: 3 },
+      { f: 2, u0: -20, u1: -7, v0: 3, n: 3 }, { f: 0, u0: 40, u1: 54, v0: 3, n: 2 }],
+      ramp: { f: 1, u: 26.5, len: 9.4, w: 4, rise: 2.8 } },
     { t: 'ok_track', pts: haulRoad(), w: 3.4 },
     { t: 'stone_sledge', at: [RAMP.sledge, RAMP.z], y: sy, rot: Math.PI, w: 1.15, len: 1.7 },
     { t: 'ok_casing', at: stacks },
@@ -259,11 +264,20 @@ export async function town() {
   plans.push({ ...base('giza-quarry-life', quarryLife(Q)), style: 'life' });
   // the ration stalls with their keepers (docs/settlements/giza.md §19)
   plans.push(base('giza-rations', STALLS.map((S) => ({ t: 'ok_ration', at: S.at, y: S.y, rot: S.rot, seed: S.seed }))), { ...base('giza-ration-life', rationLife()), style: 'life' });
-  plans.push(base('giza-night', [{ t: 'giza_halo' }, ...STANDS.map(([x, z, y]) => ({ t: 'giza_stand', at: [x, z], y }))]));
+  plans.push(base('giza-night', [{ t: 'giza_halo' }, ...STANDS.map(([x, z, y]) => ({ t: 'giza_stand', at: [x, z], y })), ...WORK_FIRES.map(([x, z]) => ({ t: 'giza_hearth', at: [x, z], y: ground.height(x, z) }))]));
   plans.push(base('giza-boat-pits', BOAT_PITS.map((p) => ({ t: 'boat_pit', ...p }))));
   plans.push(base('giza-wall', [{ t: 'crow_wall', ...CROW_WALL }], -2.5));
   const lots = townLots();
-  for (let i = 0; i < lots.length; i += 80) plans.push(base(`giza-town-${i / 80}`, lots.slice(i, i + 80).map((l) => (l.kind === 'gallery' ? { t: 'gallery_hall', rect: l.rect } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed } : l.kind === 'yard' ? { t: 'ok_yard', rect: l.rect, kind: l.yk, seed: l.seed } : { t: 'mud_house', rect: l.rect, seed: l.seed, furnish: furnished(l) })), TOWN_Y));
+  // the town in 40 m tiles, each in two forms: the full houses, bakeries and galleries with their interiors while the visitor is near (the tile's centre within 48 m),
+  // closed shells (the style's `simple`) beyond; the far form has no collider (docs/settlements/giza.md §23)
+  const tiles = new Map(), TILE = 40, NEAR = 48;
+  for (const l of lots) { const k = `${Math.floor((l.rect[0] + l.rect[2]) / 2 / TILE)},${Math.floor((l.rect[1] + l.rect[3]) / 2 / TILE)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(l); }
+  const lotEl = (l, simple) => (l.kind === 'gallery' ? { t: 'gallery_hall', rect: l.rect, simple } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed, simple } : l.kind === 'yard' ? { t: 'ok_yard', rect: l.rect, kind: l.yk, seed: l.seed } : { t: 'mud_house', rect: l.rect, seed: l.seed, furnish: furnished(l), simple });
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE, (j + 0.5) * TILE];
+    plans.push({ ...base(`giza-town-${k}`, list.map((l) => lotEl(l, false)), TOWN_Y), near: NEAR, center });
+    plans.push({ ...base(`giza-town-${k}-far`, list.filter((l) => l.kind !== 'yard').map((l) => lotEl(l, true)), TOWN_Y), far: NEAR, center, nocollide: true });
+  }
   plans.push(...extras(lots));
   return plans;
 }

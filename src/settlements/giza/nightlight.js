@@ -45,6 +45,9 @@ export class Halo {
 /** A flame's glow ball and the pool it throws on the floor (y of the floor fy). */
 const lamp = (H, x, y, z, fy, r = 0.5, pool = 1.5) => { H.ball(x, y, z, r); H.floor(x, fy + 0.03, z, pool, 10); };
 
+/** The work-fires of the plateau near the arrival (242, -50): the watch-fire of the hauling gang, the stall's two hearths; and the watch-fires along the town's gate street. */
+export const WORK_FIRES = [[235, -54], [236, -41.5], [249.5, -63], [255.5, -63.5], [6.5, 182], [14.8, 197], [6.5, 214], [14.8, 230]];
+
 /** The night's fires of the town and the works: { sites: [{ k, x, y, z, fy, r, pool }] }, computed from the layout (pure). */
 let SITES = null;
 export function sites() {
@@ -69,6 +72,8 @@ export function sites() {
   const gx = CROW_WALL.a[0] + CROW_WALL.gate.at;
   for (const [x, z] of [[gx - 4, CROW_WALL.a[1] - 7], [gx + 4, CROW_WALL.a[1] + 7], [HARBOUR[0] + 2.5, 50], [HARBOUR[0] + 2.5, 24], [HARBOUR[0] + 2.5, 90]]) { const fy = x > 300 ? VALLEY + 0.02 : g(x, z); S.push({ k: 'fire', x, y: fy + 0.6, z, fy, r: 0.95, pool: 2.8 }); }
   for (const [x, z, fy] of [[VALLEY_TEMPLE[2] + 1.2, 47, VALLEY + 0.02], [VALLEY_TEMPLE[2] + 1.2, 57, VALLEY + 0.02]]) S.push({ k: 'stand', x, y: fy + 1.5, z, fy, r: 0.55, pool: 1.8 });
+  // the fires of the arrival's plateau: the watch-fire by the hauling gang's road and the cooking-fires at the works' ration stall (docs §23)
+  for (const [x, z] of WORK_FIRES) { const fy = g(x, z); S.push({ k: 'fire', x, y: fy + 0.5, z, fy, r: 0.9, pool: 2.8 }); }
   void QUARRY; void ENCLOSURE; void VALLEY;
   return S;
 }
@@ -91,6 +96,11 @@ function stand(el, { bag, col }) {
   col.rect([x - 0.3, z - 0.3, x + 0.3, z + 0.3], y, y + 1.4);
 }
 import { box as box3 } from '../../core/geom.js';
+/** A hearth of three stones with ash and a few logs (the plateau's work-fires). */
+function hearth(el, { bag }) {
+  const [x, z] = el.at, y = el.y ?? 0;
+  for (let k = 0; k < 3; k++) { const a = k * 2.094 + 0.4, sx = x + Math.cos(a) * 0.42, sz = z + Math.sin(a) * 0.42; bag.add('limestone_core', box3(sx - 0.14, y, sz - 0.12, sx + 0.14, y + 0.24, sz + 0.12)); }
+}
 /** The lamp-stands' places (docs §20). */
 export const STANDS = sites().filter((s) => s.k === 'stand').map((s) => [s.x, s.z, s.fy]);
 
@@ -98,5 +108,5 @@ let done = false;
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES['oldkingdom-giza'].elements;
-  E.giza_halo = haloEl; E.giza_stand = stand;
+  E.giza_halo = haloEl; E.giza_stand = stand; E.giza_hearth = hearth;
 }
