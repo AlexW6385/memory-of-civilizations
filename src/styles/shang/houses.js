@@ -27,14 +27,22 @@ export function pitHouse(F, u, v, w, d, open = false, lod = 0) {
   berm(R(0, 0.9, 1.0, d)); berm(R(w - 1.0, 0.9, w, d)); berm(R(1.0, d - 1.0, w - 1.0, d));
   const fl = R(1.0, 0.9, w - 1.0, d - 1.0);
   F.bag.add('earth_wall', box(fl[0], 0, fl[1], fl[2], 0.03, fl[3]));
-  const dw = open ? 0.62 : 0.5, dc = u + w / 2, fh = open ? 1.7 : 1.5;
+  const dw = open ? 0.62 : 0.5, dc = u + w / 2, fh = open ? 2.1 : 1.5;
   F.b('mud_plaster', u, 0, v, dc - dw, fh, v + 0.45); F.b('mud_plaster', dc + dw, 0, v, u + w, fh, v + 0.45);
-  F.b('mud_plaster', dc - dw, fh - 0.25, v, dc + dw, fh, v + 0.45, false);
-  F.b('timber', dc - dw - 0.08, 0, v - 0.04, dc - dw + 0.04, fh - 0.2, v + 0.5, false); F.b('timber', dc + dw - 0.04, 0, v - 0.04, dc + dw + 0.08, fh - 0.2, v + 0.5, false);
+  // an enterable house has a header 2.0 m above the floor (the walker's head is 1.75 m: a lintel lower than that shuts the door), jambs to it, and no plaster over the opening
+  if (!open) F.b('mud_plaster', dc - dw, fh - 0.25, v, dc + dw, fh, v + 0.45, false);
+  else F.b('timber', dc - dw - 0.12, 2.0, v - 0.06, dc + dw + 0.12, 2.22, v + 0.5, false);
+  F.b('timber', dc - dw - 0.08, 0, v - 0.04, dc - dw + 0.04, open ? 2.0 : fh - 0.2, v + 0.5, false); F.b('timber', dc + dw - 0.04, 0, v - 0.04, dc + dw + 0.08, open ? 2.0 : fh - 0.2, v + 0.5, false);
   if (!open) F.b('opening', dc - dw + 0.04, 0, v + 0.3, dc + dw - 0.04, 1.2, v + 0.34, false);
   F.b('earth_wall', dc - dw - 0.2, 0, v - 0.45, dc + dw + 0.2, 0.12, v, false);
   F.b('earth_wall', u - 0.02, 0, v - 0.02, dc - dw, 0.5, v + 0.5, false);                    // the splashed foot
-  const eave = open ? 1.0 : 0.72, rise = open ? 2.3 + w * 0.1 : 1.9 + w * 0.12;
+  // an enterable house stands on its banks with daub walls above them to an eave 2.1 m over the floor (the thatch's end plane must not cross the walker's head);
+  // a pit's floor lay 0.6-1.0 m below the ground, so this is about 1.3 m of wall above the ground [inferred]
+  const eave = open ? 2.1 : 0.72, rise = open ? 1.6 + w * 0.1 : 1.9 + w * 0.12;
+  if (open) {
+    F.b('mud_plaster', u + 0.4, bh, v + 0.95, u + 0.7, eave, v + d - 0.2, false); F.b('mud_plaster', u + w - 0.7, bh, v + 0.95, u + w - 0.4, eave, v + d - 0.2, false);
+    F.b('mud_plaster', u + 0.7, bh, v + d - 0.7, u + w - 0.7, eave, v + d - 0.4, false);
+  }
   F.roof(u + 0.2, v + 0.05, u + w - 0.2, v + d - 0.1, eave, rise, 0.45, false); ridge(F, u + 0.2, v + 0.05, u + w - 0.2, v + d - 0.1, eave, rise, 0.45, false);
   F.b('timber', dc - 0.05, eave, v + 0.1, dc + 0.05, eave + rise + 0.1, v + 0.18, false);
   if (open) {
