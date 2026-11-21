@@ -85,6 +85,8 @@ import * as BAGAN from '../settlements/bagan/soundmap.js';
 import * as BALIVILLAGE from '../settlements/bali-village/soundmap.js';
 import * as BARCELONA from '../settlements/barcelona/soundmap.js';
 import './voices-barcelona.js';
+import * as BAUHAUS from '../settlements/bauhaus-dessau/soundmap.js';
+import './voices-bauhaus.js';
 import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
 import * as BENIN from '../settlements/benin-city/soundmap.js';
 import * as BHAKTAPUR from '../settlements/bhaktapur/soundmap.js';
@@ -251,7 +253,7 @@ export const PROFILES = {
   'maya-tikal': T(TROP, { cicadas: 1, frogs: 0.7, animals: withLife({ dog: 0.3 }, { market: 0.9, map: MAYATIKAL }), roof: 'thatch' }),
   vienna: T({ ...EU, sparrow: 1 }, { animals: withLife({ horse: 0.5, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: VIENNA }), roof: 'slate', bells: null }),
   brasilia: T({ tropic: 0.7, dove: 0.5, sparrow: 0.6 }, { cicadas: 0.4, animals: {}, roof: 'flat', bells: 'angelus' }),
-  'bauhaus-dessau': T(NEAR, { animals: { dog: 0.3, rooster: 0.1 }, roof: 'flat' }),
+  'bauhaus-dessau': T({ ...EU, sparrow: 1, crow: 0.5 }, { animals: withLife({ dog: 0.3, rooster: 0.1, horse: 0.3 }, { market: 0.8, eaves: 1, map: BAUHAUS }), roof: 'flat' }),
   'sgang-gwaay': T({ gull: 1, crow: 0.8, warbler: 0.2 }, { animals: { dog: 0.3 }, roof: 'shingle' }),
   'nan-madol': T(NEAR, { animals: { pig: 0.3, rooster: 0.4, tern: 0.5 }, roof: 'thatch' }),
   giza: T(NEAR, { frogs: 0.2, animals: withLife({ donkey: 0.5, cattle: 0.4, dog: 0.3 }, { market: 0.5, canal: 0.5, map: GIZA }), roof: 'flat' }),

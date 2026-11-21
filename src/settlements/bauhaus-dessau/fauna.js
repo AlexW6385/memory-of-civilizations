@@ -2,7 +2,8 @@
 // and crows over the roofs, house sparrows on the paving and the roofs' edges, a blackbird in the pines of the Masters' grove.
 import { ground } from './ground.js';
 import { B, MASTERS, RADIUS, lots, TORTEN, KONSUM } from './layout.js';
-import { houseSpec } from '../../styles/bauhaus/tenement.js';
+import { houseSpec, frontOf } from '../../styles/bauhaus/tenement.js';
+import { Fr } from '../../styles/bauhaus/frame.js';
 
 const flights = [
   { kind: 'swallow', n: 6, lane: { a: [-180, 40], b: [180, 40] }, y: [4, 14], speed: 10, half: 18 },
@@ -32,4 +33,30 @@ for (const [x, z, y] of [[-12, 10, 12.9], [20, -20, 12.9], [30, -12, 12.9], [44,
 }
 flights.push({ kind: 'swallow', n: 5, loop: { c: [0, 60], a: [80, 30], rot: 0.1 }, y: [6, 18], speed: 10 }, { kind: 'swallow', n: 4, loop: { c: [100, -60], a: [70, 40], rot: 0.9 }, y: [6, 16], speed: 9 }, { kind: 'crow', n: 4, loop: { c: [-60, 60], a: [80, 50], rot: 0.3 }, y: [26, 44], speed: 8 });
 void B; void MASTERS; void RADIUS;
-export default { fish: [], flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; docs/settlements/bauhaus-dessau.md §15.4) ──
+const critters = [];
+const hashP = (x, z) => { const k = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return k - Math.floor(k); };
+{
+  // each lot's door in its frame: a point u along the front and d out into the street, and the heading (fauna-critters: forward is (cos rot, sin rot)) out of the door
+  const at = (l, u, d) => { const F = new Fr(null, l.rect, l.front), p = F.at(u, -d), q = F.at(u, -d - 1), rot = Math.atan2(q[1] - p[1], q[0] - p[0]); return { x: p[0], z: p[1], rot }; };
+  let i = 0;
+  for (const l of lots()) {
+    const f = frontOf(l), cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
+    if (Math.hypot(cx, cz) > 150) continue;
+    i++;
+    // a dog lying at the pub's step and one by the butcher's door (the scraps), a cat on a flat's doorstep in every fourth house
+    if (f.kind === 'pub' || f.kind === 'butcher') { const p = at(l, f.du + 1.9, 1.1); critters.push({ model: 'dog', at: [p.x, 0, p.z], rot: p.rot + (hashP(cx, cz) - 0.5), range: [9, 3.5] }); }
+    else if (!l.shop && i % 4 === 0) { const p = at(l, f.du - 1.3, 0.7); critters.push({ model: hashP(cz, cx) < 0.5 ? 'cat_tabby' : 'cat_orange', at: [p.x, 0, p.z], rot: p.rot + 1.2, range: [7, 2.5] }); }
+    // pigeons before the bakeries and the grocers' sacks
+    if (f.kind === 'baker' || f.kind === 'grocer') for (let k = 0; k < 3; k++) { const p = at(l, f.du - 2.6 + k * 1.1, 1.6 + 0.5 * (k % 2)); critters.push({ model: ['pigeon_grey', 'pigeon_dark', 'pigeon_white'][k], at: [p.x, 0, p.z], rot: hashP(p.x, p.z) * 6.28, range: [1.8, 1.4], size: 0.95 + 0.1 * hashP(p.z, p.x) }); }
+  }
+  // the forecourt before the school (the students' bicycles, crumbs of the canteen): a flock of pigeons, and rooks on the school garden's lawn
+  for (const [x, z] of [[10, -2.5], [18, -3.5], [26, -1.5], [34, -3]]) for (let k = 0; k < 2; k++) critters.push({ model: k ? 'pigeon_dark' : 'pigeon_grey', at: [x + k * 0.9, 0, z + k * 0.4], rot: hashP(x, z + k) * 6.28, range: [2.2, 1.6] });
+  for (const [x, z] of [[6, 44], [18, 62], [-4, 66]]) critters.push({ model: 'rook', at: [x, 0, z], rot: hashP(x, z) * 6.28, range: [3.2, 2.2] });
+  // the school's gate dog (the porter's), and a cat on the Masters' house steps (Klee kept cats [inferred that one sat out in 1927])
+  critters.push({ model: 'dog', at: [3.5, 0, 6.5], rot: 1.57, range: [9, 3.5] });
+  const km = MASTERS[3].rect; critters.push({ model: 'cat_tabby', at: [km[0] + 2.2, 0.3, km[3] + 0.9], rot: 1.2, range: [7, 2.5] });
+}
+
+export default { fish: [], flights, perches, critters };

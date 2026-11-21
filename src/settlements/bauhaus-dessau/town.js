@@ -3,10 +3,12 @@
 // the looms, the benches and the stairs, townspeople on the pavements, queues at the shops, children in the lane. Several plans (the four quarters, the grove, the estate)
 // so that each builds in turn and the viewer culls them by distance.
 import { streetLife, WHEELED } from './street-life.js';
+import { lampSites, LAMP_H } from './lamps.js';
+import { nightPlan } from './nightlight.js';
 import { houseSpec } from '../../styles/bauhaus/tenement.js';
 import { flatSpec, flatSeats } from '../../styles/bauhaus/flat.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
-import { RADIUS, LV, PL, B, ROADS, ROAD_K, ROAD_M, ROAD_KV, ROAD_E, FOOT, MASTERS, TORTEN, TORTEN_FRONT, KONSUM, GARDEN, GARDEN_SHED, lots, inRoad, inLot, inMasters, inSchool, inTorten, inRect } from './layout.js';
+import { RADIUS, TRAM_TRACKS, TRAM_STOP, LV, PL, B, ROADS, ROAD_K, ROAD_M, ROAD_KV, ROAD_E, FOOT, MASTERS, TORTEN, TORTEN_FRONT, KONSUM, GARDEN, GARDEN_SHED, lots, inRoad, inLot, inMasters, inSchool, inTorten, inRect } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const bboxOf = (rects, m = 6) => { const b = [1e9, 1e9, -1e9, -1e9]; for (const r of rects) { b[0] = Math.min(b[0], r[0]); b[1] = Math.min(b[1], r[1]); b[2] = Math.max(b[2], r[2]); b[3] = Math.max(b[3], r[3]); } return [b[0] - m, b[1] - m, b[2] + m, b[3] + m]; };
@@ -56,7 +58,7 @@ function streetStuff() {
     }
     for (let s = -R + 20; s < R; s += 46) { const x = alongX ? s : (r[0] + r[2]) / 2, z = alongX ? (r[1] + r[3]) / 2 : s; if (inD(x, z) && !ROADS.some((q) => q !== r && inRect(q, x, z, 1))) manholes.push([x, z]); }
   }
-  const at = (k, x, z, rot = 0) => { if (inD(x, z) && !inSchool(x, z, 2) && !inLot(x, z, 0.3)) items.push({ k, at: [x, z], rot }); };
+  const at = (k, x, z, rot = 0, name) => { if (inD(x, z) && !inSchool(x, z, 2) && !inLot(x, z, 0.3)) items.push({ k, at: [x, z], rot, name }); };
   const Mw = ROAD_M[0] - FOOT / 2, Me = ROAD_M[2] + FOOT / 2, Kn = ROAD_K[1] - FOOT / 2, Ks = ROAD_K[3] + FOOT / 2, Vw = ROAD_KV[0] - FOOT / 2, Ve = ROAD_KV[2] + FOOT / 2, En = ROAD_E[1] - FOOT / 2, Es = ROAD_E[3] + FOOT / 2;
   for (const [x, z] of [[Mw, Kn - 0.2], [Ve, Kn - 0.2], [Mw, En], [Ve, En], [100, Kn]]) at('pillar', x, z);
   for (const [x, z] of [[Mw, Ks], [Ve, Ks], [60, En]]) at('kiosk', x, z);
@@ -66,7 +68,7 @@ function streetStuff() {
   for (const z of [30, 70, 110, 150]) at('bench', Mw, z, Math.PI / 2);
   for (const x of [90, 130, 170]) at('bench', x, Ks, 0);
   for (const [x, z, a] of [[Me, -45, 0], [Mw, 33, 0], [Kn - 0.2, 100, 0], [Ks, 90, 0]]) at('bin', x, z, a);
-  for (const [x, z] of [[Mw, Ks + 0.3], [Mw, Kn - 0.4], [Ve, Ks + 0.3], [Ve, En], [Vw, Kn - 0.4]]) at('sign', x + 0.9, z, 0);
+  for (const [x, z, n] of [[Mw, Ks + 0.3, 'KOTHENER STRASSE'], [Mw, Kn - 0.4, 'KOTHENER STRASSE'], [Ve, Ks + 0.3, 'KOTHENER STRASSE'], [Ve, En, 'EBERTALLEE'], [Vw, Kn - 0.4, 'KOTHENER STRASSE']]) at('sign', x + 0.9, z, 0, n);
   for (const [x, z] of [[Me, -100], [Ve + 0.3, 20], [100, Ks + 0.5]]) at('pump', x, z);
   for (const [x, z] of [[Mw + 0.8, 8], [Ve - 0.8, 8], [60, En + 0.6]]) at('rack', x, z, Math.PI / 2);
   items.push({ k: 'goal', at: [56, 22], dir: -1 }, { k: 'goal', at: [136, 22], dir: 1 });
@@ -91,6 +93,10 @@ function buildings() {
   for (let i = 0; i < 10; i++) bike(60 + i * 12, ROAD_K[3] + 0.6, Math.PI / 2);
   for (let i = 0; i < 8; i++) bike(ROAD_KV[2] + 1.0, -150 + i * 40 + rand() * 6, 0);
   bic.forEach((b, q) => { groups[q].push(...b); b.forEach((e) => rects[q].push([e.at[0], e.at[1], e.at[0], e.at[1]])); });
+  // the tram: the double track along Kothener Strasse (a pair of rails each, z −4.5 and −1.5), a car standing at its stop east of the school, the stop's plate
+  for (const [q, x0, x1] of [[0, -RK, 0], [1, 0, RK]]) { groups[q].push({ t: 'dessau_rails', x0, x1, tracks: TRAM_TRACKS }); rects[q].push([x0, -6, x1, 0]); }
+  groups[1].push({ t: 'dessau_tram', at: [TRAM_STOP[0] + 5, TRAM_TRACKS[1]], rot: 0, seed: 1 }, { t: 'dessau_tramstop', at: [TRAM_STOP[0], ROAD_K[3] + 0.7] });
+  rects[1].push([TRAM_STOP[0] - 6, -3, TRAM_STOP[0] + 12, ROAD_K[3] + 1]);
   const plans = [];
   for (let q = 0; q < 4; q++) {
     groups[q].push({ t: 'dessau_street', seed: 7 + q, ...by[q], field: q === 3 ? [52, 4, 140, 40] : null });
@@ -118,10 +124,8 @@ function life() {
   const rand = rng(1927), P = [], F = RADIUS - 14;
   const fig = (at, rot, o = {}) => P.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: pick(rand, ['cloth_grey', 'cloth_brown', 'cloth_indigo', 'cloth_black']), cloth2: pick(rand, ['cloth_grey', 'cloth_brown', 'cloth_black']), skin: 'skin_light', hat: 'none', hair: 'short', hairMat: pick(rand, ['hair_dark', 'hide_brown', 'hide_tan']), feet: 'shod', beard: false, ...o });
   const woman = (at, rot, o = {}) => fig(at, rot, { dress: 'robe', cloth: pick(rand, ['cloth_blue', 'cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_white', 'cloth_grey']), over: 'none', hair: 'short', ...o });
-  // the street's lamps: on the outer edge of each pavement, 32 m apart
-  const lamp = (x, z) => { if (!inSchool(x, z, 2) && !inLot(x, z, 0.5) && Math.hypot(x, z) < F) P.push({ t: 'street_lamp', at: [x, z], y: 0, h: 4.6 }); };
-  for (let z = -170; z <= 170; z += 32) { lamp(ROAD_M[0] - FOOT + 0.3, z); lamp(ROAD_M[2] + FOOT - 0.3, z + 16); lamp(ROAD_KV[0] - FOOT + 0.3, z + 8); lamp(ROAD_KV[2] + FOOT - 0.3, z + 24); }
-  for (let x = -170; x <= 180; x += 32) { lamp(x, ROAD_K[1] - FOOT + 0.3); lamp(x + 16, ROAD_K[3] + FOOT - 0.3); lamp(x + 8, ROAD_E[3] + FOOT - 0.3); }
+  // the street's lamps: on the outer edge of each pavement, 32 m apart (lamps.js)
+  for (const [x, z] of lampSites()) P.push({ t: 'street_lamp', at: [x, z], y: 0, h: LAMP_H });
   // parked cars of 1927 (a Dixi, an Opel, a delivery van) at the kerbs, and a horse and cart
   const park = [[ROAD_M[0] + 1.3, -120, 0], [ROAD_M[2] - 1.3, 92, 0], [ROAD_M[0] + 1.3, 110, 0], [90, ROAD_K[1] + 1.3, Math.PI / 2], [150, ROAD_K[3] - 1.3, Math.PI / 2], [ROAD_KV[2] - 1.3, -60, 0], [20, ROAD_E[1] + 1.3, Math.PI / 2], [110, ROAD_E[3] - 1.3, Math.PI / 2], [57, MASTERS[0].rect[3] + 6.5, 0.3]];
   park.forEach(([x, z, r], i) => { if (!inSchool(x, z, 3)) P.push({ t: 'car', at: [x, z], y: 0, rot: r + (i % 2 ? Math.PI : 0), seed: i + 5, era: 1930 }); });
@@ -208,5 +212,5 @@ function life() {
 export async function town() {
   const plans = buildings();
   const lifePlan = plan('dessau-people', 'life', life(), null);
-  return [...plans, lifePlan];
+  return [...plans, nightPlan(plan), lifePlan];
 }

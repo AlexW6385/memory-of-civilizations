@@ -5,6 +5,8 @@
 import { Fr, hip } from './frame.js';
 import { S, rng } from './kit.js';
 import { flatSpec, buildFlat } from './flat.js';
+import { letters } from './letters.js';
+import { faceFrame } from '../dutch/facade.js';
 
 const WALLS = ['stucco_pale', 'stucco_cream', 'stucco_warm', 'facade_buff', 'stucco_ochre', 'plaster_grey'];
 const SHUT = ['shutter_green', 'shutter_brown', 'shutter_grey'];
@@ -12,6 +14,27 @@ const SIGN = ['car_black', 'cloth_green', 'car_blue', 'cloth_maroon', 'paint_och
 const AWN = [['cloth_red', 'cloth_white'], ['cloth_green', 'cloth_white'], ['cloth_ochre', 'cloth_white'], ['car_blue', 'cloth_white'], ['cloth_maroon', 'cloth_ochre']];
 const FL = 0.12;           // the ground floor's level (a step above the pavement)
 export const SHOPS = ['grocer', 'baker', 'butcher', 'tobacco', 'hardware', 'draper', 'pub', 'grocer', 'baker', 'draper'];
+
+
+/** The trade names on the fascias, in capitals of the 3 x 5 block alphabet (docs/settlements/bauhaus-dessau.md §15; the words are [inferred] generic German trade names, no personal names). */
+export const TRADE_WORD = { grocer: 'KOLONIALWAREN', baker: 'BÄCKEREI', butcher: 'FLEISCHEREI', tobacco: 'TABAK', hardware: 'EISENWAREN', draper: 'TEXTILWAREN', pub: 'GASTSTÄTTE' };
+
+/**
+ * What a lot's front is made of that others need besides the builder: the trade (shops), the door's column and its place along the front, the columns
+ * of windows. It repeats the draws houseIn makes from the lot's own stream, so that the night's windows and the shops' sounds sit where the doors and
+ * windows are; houseIn takes `kind` and `dcol` from here.
+ */
+export function frontOf(l) {
+  const spec = houseSpec(l), r = rng(l.seed || 1), modern = spec.modern;
+  if (!modern && spec.manner !== 'brick') r();
+  r();
+  const kind = SHOPS[Math.floor(r() * SHOPS.length)];
+  if (!(l.shop || modern)) r();
+  const [x0, z0, x1, z1] = l.rect, along = l.front === 'n' || l.front === 's', W = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
+  const cols = Math.max(3, Math.floor(W / (modern ? 3.4 : 3.0))), pitch = (W - 0.6) / cols, cu = (c) => 0.3 + pitch * (c + 0.5);
+  const dcol = l.shop ? Math.min(cols - 1, Math.max(1, Math.round(cols * (0.25 + r() * 0.5)))) : Math.floor(cols * (0.25 + r() * 0.5));
+  return { spec, kind: l.shop ? kind : null, shopTrade: kind, W, D, cols, pitch, cu, dcol, du: cu(dcol) };
+}
 
 /** The geometry that both the builder and the smoke need of a lot: levels, manner, chimneys (world positions). */
 export function houseSpec(l) {
@@ -35,6 +58,7 @@ export function chr(F, u, v, dir, y = FL, m = 'wood_painted') {
   F.b(m, u + s[0], u + s[1], y + 0.47, y + 0.9, v + s[2], v + s[3]);
 }
 export const tbl = (F, u0, u1, v0, v1, y = FL, h = 0.76, top = 'wood_ochre') => {
+  if (F.lane && v0 < 2.6 && u1 > F.lane[0] && u0 < F.lane[1]) { const w = u1 - u0, right = (u0 + u1) / 2 >= (F.lane[0] + F.lane[1]) / 2, n0 = right ? F.lane[1] : F.lane[0] - w; u0 = n0; u1 = n0 + w; }   // out of the door's lane
   F.b(top, u0, u1, y + h - 0.04, y + h, v0, v1);
   for (const [a, b] of [[u0 + 0.06, v0 + 0.06], [u1 - 0.06, v0 + 0.06], [u0 + 0.06, v1 - 0.06], [u1 - 0.06, v1 - 0.06]]) F.b('timber', a - 0.03, a + 0.03, y, y + h - 0.04, b - 0.03, b + 0.03);
   F.k(u0, u1, y, y + h, v0, v1);
@@ -70,7 +94,7 @@ export function fitShop(F, kind, y, yc, v0, pv, r) {
     F.b('timber', 1.0, W - 3.2, y + 1.0, y + 2.4, pv - 0.28, pv - 0.1); shelves(F, 1.0, W - 3.2, pv - 0.5, 0.35, y, 2.4, 3, ['glaze_green', 'glass_lamp', 'wood_ochre', 'cloth_brown'], r);
     for (const u of [2.2, 3.6, 5.0]) barrel(F, u, pv - 0.9, y + 1.0, 0.18, 0.4);
     const nT = Math.max(2, Math.floor((W - 3) / 3.2));
-    for (let i = 0; i < nT; i++) { const u = 1.8 + i * 3.0, v = 1.7 + (i % 2) * 1.2; tbl(F, u - 0.5, u + 0.5, v - 0.5, v + 0.5, y, 0.76, 'wood_dark'); chr(F, u - 0.8, v, 'u+', y); chr(F, u + 0.8, v, 'u-', y); chr(F, u, v - 0.8, 'v+', y); chr(F, u, v + 0.8, 'v-', y); F.b('cloth_white', u - 0.2, u + 0.2, y + 0.76, y + 0.8, v - 0.2, v + 0.2); }
+    for (let i = 0; i < nT; i++) { const u = 1.8 + i * 3.0, v = 1.7 + (i % 2) * 1.2; if (F.lane && v - 0.5 < 2.6 && u + 1.1 > F.lane[0] && u - 1.1 < F.lane[1]) continue; tbl(F, u - 0.5, u + 0.5, v - 0.5, v + 0.5, y, 0.76, 'wood_dark'); chr(F, u - 0.8, v, 'u+', y); chr(F, u + 0.8, v, 'u-', y); chr(F, u, v - 0.8, 'v+', y); chr(F, u, v + 0.8, 'v-', y); F.b('cloth_white', u - 0.2, u + 0.2, y + 0.76, y + 0.8, v - 0.2, v + 0.2); }
     stove(F, W - 0.9, 1.0, y, true);
     pend(F, 3.0, yc, 2.2); pend(F, W * 0.6, yc, 2.2, false);
     return;
@@ -147,7 +171,10 @@ function shopFront(F, kind, y, yc, r, du, ux0, ux1) {
   F.b(sign, 0.3, W - 0.3, yc - 1.0, yc - 0.12, -0.12, 0); F.b('paint_white', 0.3, W - 0.3, yc - 1.04, yc - 1.0, -0.14, 0); F.b('paint_white', 0.3, W - 0.3, yc - 0.12, yc - 0.08, -0.14, 0);
   // the lettering: signwriter's blocks of varying width on the fascia
   const letter = sign === 'paint_ochre' || sign === 'paint_blue' ? 'car_black' : 'car_cream';
-  for (let u = 1.2, k = 0; u < W - 2.4 && k < 40; k++) { const wd = 0.14 + r() * 0.12; if (r() < 0.12) { u += 0.3; continue; } F.b(letter, u, u + wd, yc - 0.82, yc - 0.3, -0.15, -0.12); u += wd + 0.1; }
+  {
+    const word = TRADE_WORD[kind], Ff = faceFrame(F.rect, F.f), cmat = F.sk.m(letter), v = yc - 0.82;
+    letters(F.sk.bag, Ff, 0, W / 2, v, word, 0.5, cmat, W - 2.0, 0.115);
+  }
   // the awning, striped, over the window part (two lengths either side of the door)
   for (const [a, b] of [[ux0, du - 0.9], [du + 0.9, ux1]]) {
     if (b - a < 1.2) continue;
@@ -177,10 +204,10 @@ const el_flat = (l, spec, W, D) => flatSpec(l, spec, W, D);
 function houseIn(F, l, spec, r) {
   const { n, H0, SH, yc, yb, top, manner, modern } = spec, W = F.W, D = F.D, y = FL;
   const mat = modern ? 'plaster_white' : manner === 'brick' ? 'brick_buff' : WALLS[Math.floor(r() * WALLS.length)];
-  const sandstone = 'sandstone_white', shut = SHUT[Math.floor(r() * 3)], kind = SHOPS[Math.floor(r() * SHOPS.length)];
+  const sandstone = 'sandstone_white', shut = SHUT[Math.floor(r() * 3)], kind = (r(), frontOf(l).shopTrade);
   const enter = l.shop || modern || r() < 0.55, shopKind = l.shop ? kind : null;
   const cols = Math.max(3, Math.floor(W / (modern ? 3.4 : 3.0))), pitch = (W - 0.6) / cols, cu = (c) => 0.3 + pitch * (c + 0.5);
-  const dcol = l.shop ? Math.min(cols - 1, Math.max(1, Math.round(cols * (0.25 + r() * 0.5)))) : Math.floor(cols * (0.25 + r() * 0.5)), du = cu(dcol);
+  const dcol = (r(), frontOf(l).dcol), du = cu(dcol);
   const FT = 0.35, wy1 = (s) => (s === 0 ? yc : yb + s * SH);
   // the footprint's volume above the ground storey, and the colliders of the ground storey
   const fs = el_flat(l, spec, W, D), yR = fs ? fs.yR : 0;
@@ -211,6 +238,7 @@ function houseIn(F, l, spec, r) {
   F.wall({ u0: 0.3, u1: W - 0.3, v: pv, th: 0.2, y0: y, y1: yc, mat: 'plaster_white', ops: [{ u0: pd - 0.5, u1: pd + 0.5, y1: y + 2.3 }] });
   F.b('wood_painted', 0.32, W - 0.32, y + 0.02, y + 1.1, D - 0.36, D - 0.3); F.b('wood_painted', 0.3, 0.36, y + 0.02, y + 1.1, FT + 0.02, D - 0.32); F.b('wood_painted', W - 0.36, W - 0.3, y + 0.02, y + 1.1, FT + 0.02, D - 0.32);
   F.b('paint_cab_yellow', 0.32, W - 0.32, y + 1.1, y + 1.14, D - 0.38, D - 0.3);
+  F.lane = [du - 0.9, du + 0.9];
   const fit = rng(l.seed * 7 + 3);
   if (shopKind) { fitShop(F, shopKind, y, yc, FT, pv, fit); fitFlat(F, y, yc, pv, D - 0.3, fit, true); } else if (r() < 0.7) fitFlat(F, y, yc, pv, D - 0.3, fit); else { fitWorkshop(F, y, yc, pv, D - 0.3, fit); fitFlat(F, y, yc, pv, D - 0.3, fit, true); }
   void enter;
@@ -220,6 +248,8 @@ function houseIn(F, l, spec, r) {
   for (let u = 0.3; u < W - 0.6; u += 0.5 + r() * 2.5) if (r() < 0.45) F.b('brick', u, u + 0.35 + r() * 0.3, 1.02, 1.35 + r() * 0.4, -0.03, -0.01);    // bare brick where the render fell
   // the door: a stoop, a frame, a transom, the bell and number plate (a shop's door glazed)
   F.b('sandstone_white', du - 0.8, du + 0.8, 0, 0.12, -0.7, -0.06); F.b('sandstone_white', du - 0.7, du + 0.7, 0, 0.24, -0.4, -0.06); F.k(du - 0.8, du + 0.8, 0, 0.12, -0.7, -0.06);
+  // the steps worn by feet: a darker hollow in the middle of each tread, the sill's wear
+  { const wr = 0.7 + 0.2 * r(); F.b('plaster_grey', du - 0.42, du + 0.42, 0.12, 0.123, -0.64 - 0.1 * wr, -0.46); F.b('plaster_grey', du - 0.38, du + 0.38, 0.24, 0.243, -0.34, -0.14 - 0.05 * wr); }
   const dm = shopKind ? 'wood_dark' : modern ? 'car_blue' : ['wood_dark', 'shutter_green', 'wood_painted', 'car_red'][Math.floor(r() * 4)];
   F.b(dm, du - 0.7, du - 0.62, y + 0.02, y + 2.55, -0.06, 0.12); F.b(dm, du + 0.62, du + 0.7, y + 0.02, y + 2.55, -0.06, 0.12); F.b(dm, du - 0.7, du + 0.7, y + 2.55, y + 2.65, -0.06, 0.12);
   F.b(dm, du - 0.6, du + 0.6, y + 2.0, y + 2.5, 0.0, 0.04);

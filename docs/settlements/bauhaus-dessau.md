@@ -110,3 +110,54 @@ Sources read this round: [Bauhaus Dessau Foundation, Bauhaus Building](https://b
 - **BAUHAUS lettering:** now on the west face of the plastered pier at the wing's north-west corner (before: the north face, seen edge-on from the arrival), black block letters 1.2 m tall standing in relief, reading downwards **[stated: the sign's place at the corner by the bridge, §2; the face and the letter forms inferred from the photographs, geometric block letters rather than Bayer's exact drawing]**. Departure from §2/§13: only the face the letters stand on.
 - **Prellerhaus balconies:** thin cantilevered slabs with a slim edge fascia and a coloured soffit, tube railings (round handrail, two intermediate tubes, posts on plates) on the three free sides; the solid red panel is gone **[inferred]**; coloured balcony undersides **[stated for the Masters' Houses, Bauhaus Dessau Foundation]**.
 - **Entrance, bridge, stair:** the door on Kothener Strasse has a steel frame with a fanlight, tube pulls, canopy tie rods, a lamp and two risers (handles designed by Gropius **[stated]**, forms **[inferred]**); the bridge shows down-stand beams under its slab, slab-edge stringcourses and steel sills; the scissor stairs carry tube balusters and a lower rail **[inferred]**.
+
+## 15. The standard of Suzhou, round 5 (walk, night, sound, animals, wear and writing)
+
+Sources: none newly read (the shell reaches no sites); everything below is from the sections above and general knowledge, marked honestly.
+
+### 15.1 The visitor's walk
+
+- **Shop fascias lettered.** The signwriter's blocks are replaced by the trade's German name in capitals of the 3 x 5 block alphabet (`src/styles/viennese/lettering.js`, whose glyphs were checked there; umlauts as dotted letters): KOLONIALWAREN (grocer), BÄCKEREI, FLEISCHEREI, TABAK, EISENWAREN, TEXTILWAREN (draper), GASTSTÄTTE (pub). **[inferred]** generic trade names of any German town of 1927; no personal or firm names are written, since none is documented.
+- **The tram.** Dessau had an electric tram from 1894 **[stated from general knowledge of the town's history; no page read]**. Shown: a double track along Kothener Strasse (metre gauge, z −4.5 and −1.5) **[inferred: line, gauge]**, a two-axle motor car (8.6 m, cream over red, trolley pole raised) standing at a stop east of the school **[inferred: size, colours]**, and the stop's enamel plate lettered HALTESTELLE (the usual German word for a stop **[inferred]**). The overhead wire is not drawn.
+- **Doors kept clear.** Tables that stood in a door's lane are moved out of it; `walks` of the landmark plan (`walks.js`) lead from the pavement through the door of the twelve shops and pubs nearest the arrival into their front rooms, and are walked by `tools/walk-check.mjs`.
+
+### 15.2 Night
+
+The night is one always-shown plan (`nightlight.js`, one draw, ~4 k triangles of the engine's additive `halo` material, so it shows at the low preset); every glow stands where the builders put a window or a post. The halo has one warm colour: the white of a lamp and the yellow of a window are not told apart **[inferred]**.
+
+- **Street lamps** (`lamps.js`, 35 posts on the outer edge of the pavements, 32 m apart): a glow at the lamp and its pool on the paving **[inferred: electric lamps in shades, no source read; gas lamps still stood in German towns, the glow does not tell them apart]**.
+- **Shops and pubs**: the shop windows lit by trade (`EVE`): the pubs brightest (open to the closing hour), the other trades dim (shops shut at seven by the Ladenschluss of 1919 **[inferred hours]**), the door's spill and the pools before the windows. Flats: a share of the ground-floor front rooms and of the upper windows lit, each by the lot's own hash **[inferred]**.
+- **The school**: the workshop wing's glass wall lit bay by bay on its three floors (the night photographs of the lit glass wall are well known **[inferred from memory; no page read]**; students working late, the weavers more than the carpenters), the Aula's tall glazing lit for an evening in the hall, about half of the Prellerhaus studios (§7: "a light in the studios"), the lamp over the door on Kothener Strasse.
+- **Törten, Masters' Houses, Konsum**: a share of their windows, computed from the builders' own frames (`torten.js`, `masters.js`) **[inferred]**; the Konsum's café and shop windows lit.
+- **The tram** at its stop: its windows and headlamps.
+
+### 15.3 Sound
+
+A map of its own (`soundmap.js`), the profile's `LIFE.map`, played by `src/engine/voices-bauhaus.js` (all voices `bau…`, synthesised, no samples). Nothing here is recorded: every pitch and contour is **[inferred]**; what is stated is only that these things were in Dessau.
+
+- **The tram** on Kothener Strasse (the town had one from 1894 **[stated by memory; no page read]**): motors' whine, wheels and joints, the driver's bell; its foot-gong at the stop east of the school; 5 am to just after midnight **[inferred]**.
+- **Bicycles** (free-wheel's tick, a bell), **motor cars** of the 1920s (a four-cylinder chug, the bulb horn), **horse carts** on the setts (hooves in two beats, iron tyres) **[inferred; the dossier §4 lists the bicycles, the cars and the carts]**.
+- **Far sounds**: a church bell of the old town (§9 names St Johannis and St Marien **[inferred]**), the siren of the Junkers works at the shift changes (about 6, 14 and 22 **[inferred hours]**; the works were in Dessau **[§4]**), a Junkers aeroplane crossing high over by day **[inferred: Junkers' own airfield and works lay at Dessau]**.
+- **Yards and streets**: hens in the Törten gardens (§11), the three cast-iron street pumps (§11), children after school (§11 hopscotch), a ball game on the sports field (§11 goals).
+- **Shops, pubs, flats** (every ground floor is hollow): the door bell, the till, the cleaver, the coffee mill, scissors and paper of the draper, the pub's talk, glasses and a gramophone, a flat's clock and gramophone **[inferred]**.
+- **The school's rooms by floor**: the saw, plane and hammer in the carpentry workshop; the loom on the first floor; the anvil and hammer in the metal workshop; the murmur and brush of the wall-painting workshop; a lecture in the lecture room; typewriters in the office; the library's pages; the Aula's piano in the evening (the school's parties and the Bauhaus band's jazz **[stated: §9, Bauhaus Kapelle 1926–29]**; the tune is ours); the canteen at noon and six; gramophones in the studios in the evening **[inferred]**.
+- Hubbub (`townNear`): loudest on the streets by day, half in the evening, a fifth at night, quieter in the grove and the Törten gardens.
+- Measured with `tools/sound-render.mjs`: every voice renders with a peak under 0.06 and its energy where its dossier line puts it (siren 500–700 Hz, bell 1 kHz, saw 1–5 kHz); nothing was listened to.
+
+### 15.4 Animals
+
+Critters (`fauna.js`, rigged, one draw in the engine's single mesh, 33 animals) added to the flights and perches of §7; models only from the engine's existing set. All **[inferred]** from §7's list (sparrows, swifts, jackdaws and crows, a dog or two) and the habits of a central-German town:
+
+- **Dogs** lying at the step of each pub and each butcher's door in the middle of the town (the scraps), and the porter's dog at the school's entrance court (5 in all); they lift their heads and stand as the visitor comes near.
+- **Cats** on the doorsteps of every fourth flat, and one on the steps of the last Masters' House (the masters kept cats; Paul Klee's are known, whether one sat out in 1927 is **[inferred]**).
+- **Pigeons** (grey, dark, white) in threes before the bakeries and the grocers (crumbs, spilt grain) and in pairs on the school's forecourt; they walk and peck within a few metres of where they stand.
+- **Rooks** (the engine's black walking bird; jackdaws and crows of §7 on the ground, the nearest model) on the school garden's lawn.
+- The sparrows, swifts (the `swallow` model) and crows of §7 stay as flights and perches. Hens stay as the Törten gardens' life elements (§11). No horses as critters: the carts' horses are part of their carts.
+- `tests/bauhaus-critters.test.mjs` steps the behaviours in Node. NOTE: on the master this branch started from, `src/engine/critter-models.js` does not parse (a bad merge of the Stonehenge and Bali pig models: `pigNeolithic` is cut off and its tail stands after `pigBali`), so every critters test (and `tools/showroom.mjs --site`) fails there; the test passed here against the Stonehenge branch's copy of that file, which was put back afterwards.
+
+### 15.5 Wear and writing; the landmark's gaps
+
+- **Writing**, all in the 3 x 5 block capitals (`src/styles/bauhaus/letters.js`, the glyph table of `src/styles/viennese/lettering.js`, whose letters were checked there; laid as plain boxes so that they merge into the walls' detail instead of costing instanced draws): the shop fascias' trade words (§15.1); the enamel street-name plates on the corner posts, blue with cream letters, KOTHENER STRASSE and EBERTALLEE (the streets' names, §3–§4, §10; ß written SS as on a capitals plate) **[inferred: the plates' form and wording]**; the stop plate HALTESTELLE; KONSUM over the windows of the cooperative's shop (the building is the Konsum, §11; the word's place on the front is **[inferred]**). The BAUHAUS lettering of §14 is unchanged. Not written: firm or personal names, posters' texts, any inscription the sources do not give.
+- **Wear**: the steps of every house's stoop have a darker worn hollow in the middle of each tread (the two thin patches at 3 mm); the rain streaks, damp, bare brick and soot of §11 stay as they were. Not done: ruts, polished rails, grime on the school's glass.
+- **The Aula's seven colours**: a frieze of seven panels (sand, ochre, saffron, green, blue, mid-blue, indigo) over the foyer's and the stage's wide openings, on the faces turned to the hall **[stated: "seven colours from sand to indigo", Frieze, §13; the extents and the order are inferred]**; only materials the school's plan already draws.
+- **Still missing for L3**: the ivory doors in dark recesses; the Konsum tower's upper floors; the Törten stable and cellar; the tenements' second and third floors; a moving tram (it stands at its stop; only its sound runs); the overhead wire; the shops' goods for every trade on the pavement beyond those of §11.

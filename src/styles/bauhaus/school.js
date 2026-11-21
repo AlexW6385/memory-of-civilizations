@@ -287,6 +287,12 @@ function festBlock(sk) {
   // the charcoal dado of the Aula's north wall
   sk.b('stucco_saffron', 33.2, top - 0.33, z0 + 0.45, x1 - 0.45, top - 0.3, z1 - 0.45);
   sk.b('cloth_black', 7.15, y, z0 + 0.3, 24.85, y + 1.5, z0 + 0.33);
+  // the Aula's seven colours "from sand to indigo" (Frieze): a frieze of seven panels over each wide opening, on the faces turned to the Aula (the extents are our reading)
+  const SEVEN = ['cloth_white', 'cloth_ochre', 'stucco_saffron', 'cloth_green', 'car_blue', 'cloth_blue', 'cloth_indigo'];   // (only materials the school's plan already draws: one draw each)
+  for (const [xf, dir, zA, zB, y0, y1] of [[7.1, 1, 18.5, 29.5, y + 3.25, top - 0.1], [24.9, -1, 17, 31, y + 3.45, top - 0.1]]) {
+    const w = (zB - zA) / 7;
+    SEVEN.forEach((m, i) => sk.b(m, Math.min(xf, xf + dir * 0.012), y0, zA + i * w, Math.max(xf, xf + dir * 0.012), y1, zA + (i + 1) * w));
+  }
 }
 
 // ── the Prellerhaus ───────────────────────────────────────────────────────────────────────────
