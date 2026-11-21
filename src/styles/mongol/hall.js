@@ -36,6 +36,12 @@ export function podium(bag, col, rect, h, stairs = [], opt = {}) {
       const r = ox ? [Math.min(base, base + ox * d), s.c - w / 2, Math.max(base, base + ox * d), s.c + w / 2] : [s.c - w / 2, Math.min(base, base + oz * d), s.c + w / 2, Math.max(base, base + oz * d)];
       bag.add(STONE, box(r[0], -0.1, r[1], r[2], top, r[3]));
     }
+    // the treads worn: on every step a dished patch of trodden dust where feet fall, off-centre by the stair's own place and a little different on each tread [inferred: feet on stone]
+    for (let i = 0; i < n; i++) {
+      const top = h * (i + 1) / n, hh = Math.abs(Math.sin((s.c * 12.9 + i * 78.2 + base * 3.1) * 12.9898) * 43758.5453) % 1, ww = w * (0.28 + 0.1 * hh) , mid = s.c + (hh - 0.5) * w * 0.18, d0 = (n - i - 1) * k + 0.07, d1 = (n - i) * k - 0.05;
+      const r = ox ? [Math.min(base + ox * d0, base + ox * d1), mid - ww, Math.max(base + ox * d0, base + ox * d1), mid + ww] : [mid - ww, Math.min(base + oz * d0, base + oz * d1), mid + ww, Math.max(base + oz * d0, base + oz * d1)];
+      bag.add('earth_wall', box(r[0], top + 0.012, r[1], r[2], top + 0.02, r[3]));
+    }
     const d = n * k, r = ox ? [Math.min(base, base + ox * d), s.c - w / 2, Math.max(base, base + ox * d), s.c + w / 2] : [s.c - w / 2, Math.min(base, base + oz * d), s.c + w / 2, Math.max(base, base + oz * d)];
     col.ramp(r, 0, h, asc);
   }
@@ -117,8 +123,12 @@ function pillar(bag, col, x, z, y, h, d = 0.56) {
   col?.circle(x, z, d / 2, y, y + h);
 }
 /** Beams across the tops of the columns on a grid, and the brackets of the eaves: xs, zs the column lines. */
-function frame(bag, y, xs, zs, bw = 0.34) {
-  for (const x of xs) bag.add(COL, obox([x, zs[0]], [x, zs[zs.length - 1]], bw, y - 0.5, y));
+function frame(bag, y, xs, zs, bw = 0.34, cut = null) {
+  for (const x of xs) {
+    // a beam that would cross the stair's well is broken there: [x0, z0, x1, z1]
+    if (cut && x > cut[0] - bw && x < cut[2] + bw) { bag.add(COL, obox([x, zs[0]], [x, cut[1]], bw, y - 0.5, y)); bag.add(COL, obox([x, cut[3]], [x, zs[zs.length - 1]], bw, y - 0.5, y)); }
+    else bag.add(COL, obox([x, zs[0]], [x, zs[zs.length - 1]], bw, y - 0.5, y));
+  }
   for (const z of zs) bag.add(COL, obox([xs[0], z], [xs[xs.length - 1], z], bw, y - 0.9, y - 0.5 + 0.0));
 }
 
@@ -152,6 +162,8 @@ export function palaceHall(el, { bag, col, lights }) {
     bag.add(COL, box(u - d.w / 2 - 0.28, F + d.h, zF + T / 2 - 0.02, u + d.w / 2 + 0.28, F + d.h + 0.3, zF + T / 2 + 0.2));
     bag.add('paint_caihua', box(u - d.w / 2 - 0.28, F + d.h + 0.3, zF + T / 2 - 0.02, u + d.w / 2 + 0.28, F + d.h + 0.62, zF + T / 2 + 0.12));
   }
+  // the way in worn bare: the dust trodden in on the boards inside each door, wide at the sill and narrowing inward [inferred]
+  for (const d of doors) { const u = x0 + d.at; bag.add('earth_wall', box(u - d.w * 0.42, F + 0.012, zF - 1.2, u + d.w * 0.42, F + 0.02, zF - 0.1)); bag.add('earth_wall', box(u - d.w * 0.28, F + 0.008, zF - 2.6, u + d.w * 0.28, F + 0.016, zF - 1.2)); }
   // hangings of silk and cloth of gold on the inside of the walls, between the columns
   const hang = ['cloth_red', 'cloth_ochre', 'cloth_blue', 'cloth_red', 'cloth_ochre', 'cloth_blue', 'cloth_red'];
   for (let k = 0; k < 7; k++) {
@@ -294,6 +306,50 @@ export function hallFurnish(bag, col, lights, rect, F, top, kind, seed) {
 }
 const cz0 = (a, b) => (a + b) / 2;
 
+/** The stair of the Great Hall to its upper storey: a solid timber flight rising east along the south aisle, rails each side, walled for the walker below the landing. */
+function stairUp(bag, col, F, UF, x0, x1, z0, z1) {
+  const n = 32, going = (x1 - x0) / n, rise = (UF - F) / n;
+  for (let k = 0; k < n; k++) bag.add('timber_red', box(x0 + k * going, F, z0, x0 + (k + 1) * going, F + (k + 1) * rise, z1));
+  for (const z of [z0 + 0.04, z1 - 0.04]) {
+    bag.add('timber_red', rod([x0, F + 0.95, z], [x1, UF + 0.95, z], 0.04, 5));
+    for (let k = 0; k <= n; k += 4) { const x = x0 + k * going, y = F + Math.max(k, 1) * rise; bag.add('timber_red', rod([x, y, z], [x, y + 0.95, z], 0.035, 5)); }
+  }
+  col.ramp([x0, z0, x1, z1], F, UF, 'e');
+  for (const [a, b] of [[z0 - 0.2, z0], [z1, z1 + 0.2]]) col.rect([x0, a, x1 - 0.4, b], F, F + 5.9);
+}
+
+/**
+ * The furnishing of the Great Hall's upper storey [inferred: a Chinese-model hall's upper gallery round the well of the stupa, DAI/Artefacts; no source describes it]: a timber
+ * balustrade round the opening, a gilt band at the head of the inner walls and a dado of painted timber at the foot, red silk hangings between the windows, and four paper
+ * lanterns hung from the ceiling beside the corners. f is the floor, U the half width of the room, UH its height, hole the opening [x0, z0, x1, z1].
+ */
+function upperStorey(bag, cx, cz, f, U, UH, hole) {
+  const [h0, g0, h1, g1] = [hole[0] - 0.3, hole[1] - 0.3, hole[2] + 0.3, hole[3] + 0.3], R = 1.0, step = 1.3;
+  for (const [a, b] of [[[h0, g0], [h1, g0]], [[h1, g0], [h1, g1]], [[h1, g1], [h0, g1]], [[h0, g1], [h0, g0]]]) {
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.round(len / step), ux = (b[0] - a[0]) / len, uz = (b[1] - a[1]) / len;
+    bag.add('timber_red', obox(a, b, 0.12, f + R - 0.1, f + R + 0.06));
+    bag.add('timber_red', obox(a, b, 0.08, f + 0.45, f + 0.53));
+    for (let k = 0; k < n; k++) { const px = a[0] + ux * k * len / n, pz = a[1] + uz * k * len / n; bag.add('timber_red', box(px - 0.06, f, pz - 0.06, px + 0.06, f + R - 0.1, pz + 0.06)); }
+  }
+  const e = U - 0.2, top = f - 0.16 + UH;
+  for (const [nx, nz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+    const px = -nz, pz = nx, at = (u, d) => [cx + nx * (e - d) + px * u, cz + nz * (e - d) + pz * u];
+    const span = (u0, u1, y0, y1, d, m) => { const A = at(u0, d), B = at(u1, d); bag.add(m, box(Math.min(A[0], B[0]) - 0.02, y0, Math.min(A[1], B[1]) - 0.02, Math.max(A[0], B[0]) + 0.02, y1, Math.max(A[1], B[1]) + 0.02)); };
+    span(-U + 0.5, U - 0.5, top - 0.55, top - 0.3, 0.03, 'gilt_bronze');
+    span(-U + 0.2, U - 0.2, f, f + 0.9, 0.03, 'timber_red');
+    for (const u of [-3.2, 3.2]) {
+      span(u - 0.5, u + 0.5, f + 1.0, top - 0.75, 0.06, 'cloth_red');
+      span(u - 0.58, u + 0.58, top - 0.75, top - 0.65, 0.07, 'gilt_bronze');
+    }
+  }
+  for (const [dx, dz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const x = cx + dx * (U - 2.6), z = cz + dz * (U - 2.6), ly = top - 1.5;
+    bag.add('timber_red', rod([x, top, z], [x, ly + 0.65, z], 0.025, 5));
+    bag.add('lamp_paper', lathe([[0.001, 0], [0.32, 0.14], [0.4, 0.4], [0.32, 0.66], [0.001, 0.8]], 10, null, x, ly - 0.15, z));
+    bag.add('gilt_bronze', box(x - 0.2, ly - 0.2, z - 0.2, x + 0.2, ly - 0.15, z + 0.2));
+  }
+}
+
 /**
  * great_hall: the Great Hall of Karakorum [stated: DAI: 38 × 38 m, rammed-earth podium in alternating layers, 64 granite column bases,
  * a stupa presumably at the centre, Chinese-type roof tiles, four Buddhas on lotus thrones in the reconstruction]. { c: [cx, cz], y }
@@ -307,17 +363,29 @@ export function greatHall(el, { bag, col, lights }) {
   wallRun(bag, col, [x0, z1], [x1, z1], T, F, Y + H, 'timber_red', doorS, 'lattice_red');
   wallRun(bag, col, [x0, z0], [x1, z0], T, F, Y + H, 'timber_red', [{ at: half, w: 2.4, h: 3.6 }, win(S * 1.5), win(S * 5.5)], 'lattice_red');
   for (const X of [x0, x1]) wallRun(bag, col, [X, z0], [X, z1], T, F, Y + H, 'timber_red', [{ at: half, w: 2.4, h: 3.6 }, win(S * 1.5), win(S * 5.5)], 'lattice_red');
+  bag.add('earth_wall', box(cx - 2.0, F + 0.012, z1 - 1.6, cx + 2.0, F + 0.02, z1 - 0.1)); bag.add('earth_wall', box(cx - 1.3, F + 0.008, z1 - 4.0, cx + 1.3, F + 0.016, z1 - 1.6));   // the dust trodden in at the south door
   const xs = Array.from({ length: N + 1 }, (_, i) => x0 + i * S), zs = Array.from({ length: N + 1 }, (_, i) => z0 + i * S);
   for (const x of xs) for (const z of zs) { if (Math.abs(x - cx) < S * 1.1 && Math.abs(z - cz) < S * 1.1) continue; pillar(bag, col, x, z, F, H, 0.6); }
-  frame(bag, Y + H, xs, zs, 0.4);
+  // the stair to the upper storey [inferred]: up the south aisle between two rows of columns, its well cut in the ceiling where the climber would reach it
+  const sz0 = zs[5] + 0.7, sz1 = sz0 + 1.6, sx0 = cx - 5.8, sx1 = cx + 8.0, well = [cx + 1.6, sz0 - 0.2, sx1, sz1 + 0.1], UF = Y + H + 0.16;
+  frame(bag, Y + H, xs, zs, 0.4, well);
   // ceiling over the aisles, a square opening about the stupa
   const hole = [cx - 5.3, cz - 5.3, cx + 5.3, cz + 5.3];
-  for (const r of [[x0, z0, x1, hole[1]], [x0, hole[3], x1, z1], [x0, hole[1], hole[0], hole[3]], [hole[2], hole[1], x1, hole[3]]]) bag.add('ceiling_coffer', box(r[0], Y + H, r[1], r[2], Y + H + 0.16, r[3]));
+  const minus = (r, q) => (r[0] >= q[2] || r[2] <= q[0] || r[1] >= q[3] || r[3] <= q[1]) ? [r] : [[r[0], r[1], r[2], q[1]], [r[0], q[3], r[2], r[3]], [r[0], Math.max(r[1], q[1]), q[0], Math.min(r[3], q[3])], [q[2], Math.max(r[1], q[1]), r[2], Math.min(r[3], q[3])]].filter((a) => a[2] - a[0] > 0.01 && a[3] - a[1] > 0.01);
+  for (const r0 of [[x0, z0, x1, hole[1]], [x0, hole[3], x1, z1], [x0, hole[1], hole[0], hole[3]], [hole[2], hole[1], x1, hole[3]]]) for (const r of minus(r0, well)) bag.add('ceiling_coffer', box(r[0], Y + H, r[1], r[2], Y + H + 0.16, r[3]));
+  stairUp(bag, col, F, UF, sx0, sx1, sz0, sz1);
   // upper storey: walls round the opening with three lattice windows a side (the clerestory that lights the stupa), a second eave on its own bracket sets
-  const U = 10.4, ux0 = cx - U, ux1 = cx + U, uz0 = cz - U, uz1 = cz + U, UH = 5.0, NOCOL = { segment() {}, rect() {}, circle() {}, floor() {}, ramp() {} };
+  const U = 10.4, ux0 = cx - U, ux1 = cx + U, uz0 = cz - U, uz1 = cz + U, UH = 5.0;
   const uwin = [4.2, 10.4, 16.6].map((at) => ({ at, w: 2.4, h: 1.7, y0: Y + H + 2.7, lat: true }));
-  for (const [a, b] of [[[ux0, uz0], [ux1, uz0]], [[ux1, uz0], [ux1, uz1]], [[ux1, uz1], [ux0, uz1]], [[ux0, uz1], [ux0, uz0]]]) wallRun(bag, NOCOL, a, b, T, Y + H, Y + H + UH + 0.8, 'timber_red', uwin, 'lattice_red');
+  for (const [a, b] of [[[ux0, uz0], [ux1, uz0]], [[ux1, uz0], [ux1, uz1]], [[ux1, uz1], [ux0, uz1]], [[ux0, uz1], [ux0, uz0]]]) wallRun(bag, col, a, b, T, Y + H, Y + H + UH + 0.8, 'timber_red', uwin, 'lattice_red');
   bag.add('ceiling_painted', box(ux0, Y + H + UH, uz0, ux1, Y + H + UH + 0.15, uz1));
+  upperStorey(bag, cx, cz, Y + H + 0.16, U, UH, hole);
+  {
+    // the upper floor to walk on: the room less the opening and the stair's well
+    const room = [ux0 + 0.2, uz0 + 0.2, ux1 - 0.2, uz1 - 0.2], pieces = [[room[0], room[1], room[2], hole[1] - 0.3], [room[0], hole[3] + 0.3, room[2], room[3]], [room[0], hole[1] - 0.3, hole[0] - 0.3, hole[3] + 0.3], [hole[2] + 0.3, hole[1] - 0.3, room[2], hole[3] + 0.3]];
+    for (const r0 of pieces) for (const r of minus(r0, [well[0] - 0.2, well[1] - 0.1, well[2], well[3] + 0.1])) col.floor(r, UF);
+    for (const [a, b] of [[[hole[0] - 0.3, hole[1] - 0.3], [hole[2] + 0.3, hole[1] - 0.3]], [[hole[2] + 0.3, hole[1] - 0.3], [hole[2] + 0.3, hole[3] + 0.3]], [[hole[2] + 0.3, hole[3] + 0.3], [hole[0] - 0.3, hole[3] + 0.3]], [[hole[0] - 0.3, hole[3] + 0.3], [hole[0] - 0.3, hole[1] - 0.3]]]) col.rect([Math.min(a[0], b[0]) - 0.07, Math.min(a[1], b[1]) - 0.07, Math.max(a[0], b[0]) + 0.07, Math.max(a[1], b[1]) + 0.07], UF, UF + 1.0);
+  }
   rectRoof({ c: [cx, cz], A: half + 2.7, B: half + 2.7, y: Y + H + 0.9, rise: 3.6, kind: 'hip', sweep: 1.2, mat: 'tile_green', soffit: COL, hole: [ux0 + 0.4, uz0 + 0.4, ux1 - 0.4, uz1 - 0.4] }, bag);
   rectRoof({ c: [cx, cz], A: U + 2.2, B: U + 2.2, y: Y + H + UH + 0.75, rise: 4.6, kind: 'hip', sweep: 1.0, mat: 'tile_green', soffit: COL }, bag);
   for (const [a, b] of [[[x0, z1], [x1, z1]], [[x0, z0], [x1, z0]], [[x0, z0], [x0, z1]], [[x1, z0], [x1, z1]]]) bag.add('timber_red', obox(a, b, T, Y + H, Y + H + 0.85));

@@ -118,6 +118,8 @@ export function dressItems() {
   };
   for (const [px, pz] of PENS) { placed.push([px, pz, 2.4]); add('pen', [px, pz], 0, 0, 0); }
   for (const [kind, r, n] of [['ramada', 2.9, 7], ['hearth', 1.3, 9], ['hide', 1.9, 8], ['clothes', 2.3, 8], ['squash', 1.0, 10], ['jars', 0.9, 16], ['banco', 1.3, 6]]) for (let k = 0; k < n; k++) place(kind, r);
+  // the evening fires near the visitor's way in (docs §11.1): two more hearth rings, lit (variant 0) within a few strides of the arrival, placed after the rest so nothing else moves
+  for (const reg of [[-42, -34, -26, -12], [-24, -30, -8, -14]]) place('hearth', 1.3, 80, reg);
   // 4. the creek: cattails on both banks, washing places
   const cat = [];
   for (let x = -66; x < 66; x += 2 + rand() * 3.5) for (const sd of [-1, 1]) {

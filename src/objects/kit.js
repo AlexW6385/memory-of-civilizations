@@ -28,6 +28,18 @@ export function tint(mat, shade = 1) {
 }
 /** How far off an object is still drawn (m): the small things nearer. */
 const REACH = { shop_sign: 160, hang_lantern: 120, laundry_pole: 150, tea_table: 120, drying_tray: 90, oar: 150, figure: 170, animal: 190, chickens: 90, pot: 120, basket: 110, sacks: 120, firewood: 110, crates: 140, barrel: 140, ladder: 140, laundry: 150, wash_line: 160, lantern: 120, goods_mat: 110, stool: 100 };
+/**
+ * The night level (ENV.night, 0 day … 1 full night) beyond which a copy is not drawn (src/engine/life-instances.js); 2 = stays all night.
+ * Only figures leave: a fraction `el.nightKeep` (default NIGHT_KEEP) stays, the rest each go at a level of their own, from a hash
+ * of their place, so that a street thins over dusk and fills again over dawn. Watchmen (a staff) stay; `nightKeep: 1` keeps one.
+ */
+export const NIGHT_KEEP = 0.25;
+export function nightDusk(el) {
+  if (el.t !== 'figure' || el.carry === 'staff') return 2;
+  const [x, z] = el.at, h = ((Math.imul(Math.round(x * 16) ^ 0x2545f491, 0x9e3779b1) ^ Math.imul(Math.round(z * 16) ^ 0x6a09e667, 0x85ebca6b)) >>> 0) / 4294967296;
+  const keep = el.nightKeep ?? NIGHT_KEEP;
+  return h < keep ? 2 : 0.12 + 0.75 * (h - keep) / Math.max(1e-6, 1 - keep);
+}
 const _q = new Quaternion(), _up = new Vector3(0, 1, 0), _p = new Vector3(), _s = new Vector3();
 /**
  * A placer: builds at the origin, then scales, turns and moves each piece to the object's place —
@@ -41,8 +53,8 @@ export function placer(el, bag, k = 1, sc = null) {
   const S = sc ? [s * sc[0], s * sc[1], s * sc[2]] : [s, s, s];
   const M = new Matrix4().compose(_p.set(x, y, z), _q.setFromAxisAngle(_up, rot), _s.set(...S));
   if (!bag.addInstance) return (mat, g) => { placeHanging(g, M); bag.add(mat, g); };
-  const reach = REACH[el.t] ?? 230;
-  return (mat, g, shade = 1) => { const t = tint(mat, shade); bag.addInstance(t ? t.base : mat, g, M, { color: t?.color ?? null, real: mat, reach }); };
+  const reach = REACH[el.t] ?? 230, dusk = nightDusk(el);
+  return (mat, g, shade = 1) => { const t = tint(mat, shade); bag.addInstance(t ? t.base : mat, g, M, { color: t?.color ?? null, real: mat, reach, dusk }); };
 }
 
 /** Merge pieces (non-indexed position + normal, and hang where cloth hangs) into one geometry. */

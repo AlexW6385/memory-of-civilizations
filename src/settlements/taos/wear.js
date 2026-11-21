@@ -47,6 +47,22 @@ export function registerWear() {
       bag.add('bark_dark', lathe([[0.001, 0.006], [0.38, 0.006], [0.46, 0.0]], 10, (t, i) => 1 + 0.08 * Math.sin(t * 3 + i), lx + jp, yb, zf));
       for (const [y0, y1, sd] of [[1.25, 1.55, -1], [2.0, 2.3, 1]]) bag.add('bark_dark', box(lx + sd * 0.4 - 0.1, yb + y0, Math.min(zw - v * 0.02, zw - v * 0.006), lx + sd * 0.4 + 0.1, yb + y1, Math.max(zw - v * 0.02, zw - v * 0.006)));
     }
+    // canales (docs §11.3): a hollowed-log spout through the parapet above the plaza face of a cell that stands over a lower one, a pale washed streak
+    // under its lip and a flat plaster slab on the roof below where the water lands; at x 2.4…2.6 of the cell, clear of the ladders (1.0, 4.0)
+    const Hh = el.heights, rd = (i, j) => (Hh[i]?.[j] ?? 0);
+    for (let i = 0; i < Hh.length; i++) for (let j = 0; j < Hh[0].length; j++) {
+      const n = rd(i, j), m = rd(i + fd, j);
+      if (n < 2 || m >= n || el.simple) continue;
+      const x0 = el.x0 + j * c, zf = el.z0 + (i + (fd > 0 ? 1 : 0)) * c, px = x0 + 2.4 + 0.2 * hashAt(x0, zf, 9);
+      if (hashAt(x0, zf, 4) > 0.5 || (el.ladders ?? []).some((l) => l.j === j && Math.abs(l.i - i) <= 1 && l.b === el.tag)) continue;
+      const top = n * ST, run = 0.6, drop = 0.05, lo = Math.min(zf - fd * 0.15, zf + fd * run), hi = Math.max(zf - fd * 0.15, zf + fd * run);
+      bag.add('viga', box(px - 0.1, top + 0.06 - drop, lo, px + 0.1, top + 0.26 - drop, hi));
+      bag.add('bark_dark', box(px - 0.06, top + 0.2 - drop, Math.min(zf + fd * 0.2, zf + fd * run + 0.004), px + 0.06, top + 0.262 - drop, Math.max(zf + fd * 0.2, zf + fd * run + 0.004)));   // the trough hollowed in its top
+      const w = Math.min(zf + fd * 0.021, zf + fd * 0.026), w2 = Math.max(zf + fd * 0.021, zf + fd * 0.026);
+      bag.add('kahgel', box(px - 0.11, top - 1.5 - 0.6 * hashAt(px, zf, 2), w, px + 0.11, top + 0.04, w2));
+      const sy = m * ST, sl = Math.min(zf + fd * 0.9, zf + fd * 1.7), sh = Math.max(zf + fd * 0.9, zf + fd * 1.7);
+      if (m >= 1) bag.add('mud_plaster', box(px - 0.3, sy, sl, px + 0.3, sy + 0.03, sh));
+    }
     return r;
   };
 }

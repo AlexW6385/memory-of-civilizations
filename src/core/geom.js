@@ -415,7 +415,7 @@ function bigFirst(entry, big) {
   if (nb === k) return undefined;
   const order = [...Array(k).keys()].sort((a, b) => big[b] - big[a] || a - b);
   const perm = (A, w) => { if (!A) return A; const B = new A.constructor(A.length); order.forEach((i, j) => { for (let c = 0; c < w; c++) B[j * w + c] = A[i * w + c]; }); return B; };
-  entry.matrices = perm(entry.matrices, 16); entry.colors = perm(entry.colors, 3); entry.reach = perm(entry.reach, 1);
+  entry.matrices = perm(entry.matrices, 16); entry.colors = perm(entry.colors, 3); entry.reach = perm(entry.reach, 1); entry.dusk = perm(entry.dusk, 1);
   if (entry.reals) entry.reals = order.map((i) => entry.reals[i]);
   const k0 = order.indexOf(0);
   if (k0 > 0) entry.first = k0;
@@ -534,7 +534,7 @@ export class GeoBag {
    * piece has when it is merged instead. `reach` (m): how far off the piece is still drawn.
    * Without instancing (the tools), or too few of a shape in a plan, the pieces are merged as usual.
    */
-  addInstance(mat, g, matrix, { color = null, real = mat, reach = 230 } = {}) {
+  addInstance(mat, g, matrix, { color = null, real = mat, reach = 230, dusk = 2 } = {}) {
     if (!g) return;
     if (g.index) g = g.toNonIndexed();
     // (a hang only on cloth in the wind; such a piece's family and real material are both "+wind")
@@ -547,7 +547,7 @@ export class GeoBag {
     if (!e) { e = { mat, g, sh, key: `${sh.key}#${list.length}`, items: [] }; list.push(e); }
     // the copy's matrix takes the prototype (at its box's corner) to the place
     const M = new Matrix4().makeTranslation(sh.t[0], sh.t[1], sh.t[2]).premultiply(matrix);
-    e.items.push({ m: M.elements.slice(), color, real, reach });
+    e.items.push({ m: M.elements.slice(), color, real, reach, dusk });
   }
   add(mat, g) {
     if (!g) return;
@@ -575,11 +575,11 @@ export class GeoBag {
         }
         const d = depthRank(e.mat) * DEPTH_STEP;
         const { geometry } = prototypeOf(e.g, e.sh, d);
-        const k = e.items.length, matrices = new Float32Array(k * 16), reach = new Float32Array(k);
+        const k = e.items.length, matrices = new Float32Array(k * 16), reach = new Float32Array(k), dusk = new Float32Array(k);
         const colors = e.items.some((it) => it.color) ? new Float32Array(k * 3).fill(1) : null;
         const reals = e.items.map((it) => it.real);
-        e.items.forEach((it, i) => { matrices.set(it.m, i * 16); reach[i] = it.reach; if (it.color && colors) colors.set(it.color, i * 3); });
-        const entry = { mat: e.mat, key: e.key, geometry, matrices, colors, reach, reals, detail: this.detail && isSmall(geometry, matrices) };
+        e.items.forEach((it, i) => { matrices.set(it.m, i * 16); reach[i] = it.reach; dusk[i] = it.dusk; if (it.color && colors) colors.set(it.color, i * 3); });
+        const entry = { mat: e.mat, key: e.key, geometry, matrices, colors, reach, dusk, reals, detail: this.detail && isSmall(geometry, matrices) };
         // (the viewer: the copies big for the shadows first, by their size alone: MID_SIZE)
         if (this.detail && !entry.detail) {
           const b = geometry.boundingBox, e0 = Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z), big = new Uint8Array(k);
