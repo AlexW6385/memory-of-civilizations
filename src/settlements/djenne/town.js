@@ -348,6 +348,9 @@ export async function town() {
     plans.push({ ...base('djenne-yards-life', Pm), style: 'life' }); }
   plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }, ...WELLS.map((at, i) => ({ t: 'dj_well', at, rot: i * 1.7 + 0.4 }))]));
   plans.push({ ...base('djenne-shops-life', walkLife()), style: 'life' });
+  // the mosque's lamps: in the niches of the qibla wall (three mihrabs and the minbar's) and either side of the north door
+  { const g = [[33.0, -13], [33.0, 0], [33.0, 13], [11.2, -28.8], [14.1, -28.8]].map(([x, z]) => ({ t: 'dj_glow', at: [x, z], y: 4.1, r: 0.5, pool: 1.5 }));
+    plans.push(base('djenne-mosque-lamps', g)); }
   const all = houses(), homes = enterable(all);
   // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full (interiors, fittings, door work) within NEAR of the visitor, simple (the solid form, the
   // facade's masses, the door) beyond; the arrival at the market sees the far form only of what is far

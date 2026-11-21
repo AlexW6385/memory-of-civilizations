@@ -160,6 +160,10 @@ Sources added: [Wikiwand](https://www.wikiwand.com/en/articles/Great_Mosque_of_D
 - **Wells** (`dj_well`, three on the walk): a hand-dug well with a banco curb, forked posts and a pole across with rope and leather bucket, a clay trough and jars; a woman and a boy at each. Wells in the open of Sahel towns are common; their form here [inferred].
 - Houses of the walk were already open (sections 16-19: 513 enterable, 24 with upper floors, routes in 41).
 
+### 20.2 Night
+- What lit Djenne at night: small clay oil lamps (a dish with a cotton wick, shea butter or sesame oil) in niches and on counters, the three-stone hearth in the court and the kitchen, no street lighting; in the mosque lamps in the niches of the qibla wall and by the north door. [inferred; no source for lamps at this place and date]
+- Ours (`nightlight.js`, the additive `halo` material, night only, day unchanged): the lamp and hearth of every enterable house (glow ball and floor pool) and the lamplight spilling over its step; the upper windows of solid houses glow in about a third of cases; a lamp on the counter of about half the shops with a pool in the market before it; the court house's hearth, vestibule and workshop lamps; five lamps of the mosque (three mihrabs, the minbar niche's line, either side of the north door). The market itself is dark at night (it is held by day).
+
 ## Sources
 
 - [Great Mosque of Djenne — Designing Buildings Wiki](https://designingbuildings.co.uk/wiki/Great_Mosque_of_Djenne)
