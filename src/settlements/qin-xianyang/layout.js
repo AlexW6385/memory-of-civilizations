@@ -121,7 +121,7 @@ export function lots() {
       const seed = Math.floor(rand() * 1e6);
       const lot = { tier: ws ? 1 : Math.abs(zs) < 130 ? 0 : Math.abs(zs) < 200 ? 1 : 2, rect, front, kind: !ws && kind !== 'granary' && rand() < 0.07 ? 'garden' : kind, seed, open: false, row: zs };
       if (ws) lot.trade = trades[wsi++ % trades.length];
-      if (lot.kind !== 'garden' && lot.kind !== 'granary') { const alt = Math.hypot(c[0], c[1]) < RADIUS - 44 && furnished++ % 3 === 0; if (ws || lot.kind === 'official' || alt || onWalk(lot)) lot.open = true; }   // (every lot on the visitor's walk is opened: walk.js)
+      if (lot.kind !== 'garden' && lot.kind !== 'granary') { const alt = Math.hypot(c[0], c[1]) < RADIUS - 44 && furnished++ % 4 === 0; if (ws || lot.kind === 'official' || alt || onWalk(lot)) lot.open = true; }   // (every lot on the visitor's walk is opened: walk.js)
       LOTS.push(lot);
     }
   };

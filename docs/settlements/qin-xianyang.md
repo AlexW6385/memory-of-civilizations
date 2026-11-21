@@ -119,3 +119,10 @@ Hammers on clay, the beat of rammers (the labourers' chant), kiln roar, carts' a
 - Open houses have a door leaf ajar and a clear lane from the street to the hearth: no raised sill, no jars or looms in the lane; the court gate's hurdle is built only when the house is shut. [inferred]
 - The figure-makers' yards on the walk carry one or two workers at the trade's own place (treading ring, turntables, finishing bench, kiln mouth, painters' table, sledge gang) and an overseer with a tablet at some gates; the shops have a keeper beside the counter. That the terracotta army was made in workshops under officials who signed the pieces is [stated] (the inscribed names); the poses are [inferred].
 - The imperial road has wells with a sweep (jiegao, the lever well of the Zhuangzi) and troughs along its edges. [stated: the sweep is a Warring States device; placement inferred]
+
+## 11. Night (match pass)
+
+- The light of the time: bronze and pottery oil lamps (the pit's hung lamps, the palace's lamp trees and forecourt lamp-posts), fire baskets (the ramps' braziers, the watch tower's beacon), the smith's forge and the potters' kiln. [stated for the oil lamp and the fire basket as the light of the period; the placement is inferred]
+- Every flame the style draws gets a glow (`halo` material, night only, no light, no shadow), and a pool on the floor where it stands on one. Open houses with a lamp burn it in about four of five households, the rest are dark (their lamps removed from the plan's lights); a lit house shows a pane of light at its lattice windows on the side away from the lamp. [inferred]
+- The kiln's mouth glows through the night with a pool before it and the hot gas over the chimney hole (a kiln fired for days, as updraught kilns were [inferred]).
+- A lamp hangs on each ward gate's lintel (the keeper's, the lane closed at dusk) and two lamp stands stand at the market tower's stair head. [inferred]
