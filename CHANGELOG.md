@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.73 — second pass: Bauhaus, Stonehenge, Wutai, Bali, Xianyang, Brasilia (2026-11-21)
+
+Dessau: the tenements' lit shop and flat windows, hidden behind their own glass, now show across the town at night; guests before the pubs. Stonehenge: thirteen camp huts can be entered (their doors were too narrow), a night fire at the stone-dressing. Bali: every rising stair showed as one block and now has its treads; a watchman at the kulkul, the gamelan and the priests stay at night. Xianyang: lamp stands before the archers' ranks in the pit gallery, the market's earth altar, patterned brick cheeks on the great stair. Brasilia: low lamps on the apron by the arrival, keepers behind the lit counters, a polished track up the Congress ramp. Wutai: lamp-light spilling from the hall's doors, two monks kneeling inside.
+
 ## v12.72 — rising and moving at one pace (2026-11-21)
 
 Aloft one now rises at the same pace one moves at (falling a little slower, as before); rising used to be about half again as fast as moving.
