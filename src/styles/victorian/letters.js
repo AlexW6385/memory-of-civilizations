@@ -54,14 +54,9 @@ export function write(F, text, u0, u1, ya, yb, d0, d1, m = 'gold') {
   }
   return n;
 }
-const SURNAMES = ['HOLT', 'PAGE', 'MARSH', 'WEBB', 'FOSTER', 'GRANT', 'HALL', 'BRIGHT', 'COOPER', 'DYER', 'FINCH', 'GIBBS', 'HUGHES', 'KEMP', 'LAMB', 'MASON', 'NASH', 'PRICE', 'REEVE', 'TURNER', 'WALKER', 'WOOD', 'YOUNG', 'BELL', 'CROSS', 'DEAN'];
-const INITIALS = 'ABCDEFGHJKLMNPRSTW';
 const TITLE = { draper: 'DRAPER', grocer: 'GROCER', butcher: 'BUTCHER', chemist: 'CHEMIST', baker: 'BAKER', pawnbroker: 'PAWNBROKER', bootmaker: 'BOOTMAKER', barber: 'HAIRDRESSER', tobacconist: 'TOBACCONIST', greengrocer: 'GREENGROCER' };
-/** The shopkeeper's board: "J. HOLT, BAKER" (an invented name of the period, by the lot's seed). */
-export function shopName(seed, trade) {
-  const k = Math.imul(seed || 1, 2654435761) >>> 0;
-  return `${INITIALS[k % INITIALS.length]}. ${SURNAMES[(k >>> 8) % SURNAMES.length]}, ${TITLE[trade] || 'DEALER'}`;
-}
+/** The shop's board: the trade word only (no keeper's name: none is known for these lots). */
+export function shopName(seed, trade) { return TITLE[trade] || 'DEALER'; }
 const PUBS = ['THE RED LION', 'THE CROWN', 'THE FEATHERS', 'THE ALBION', 'THE RISING SUN', 'THE ANCHOR', 'THE CROSS KEYS', 'THE WHITE HART', 'THE ROYAL OAK', 'THE GEORGE', 'THE GOAT & COMPASSES', 'THE WINDSOR CASTLE', 'THE PRINCE OF WALES', 'THE LAMB & FLAG', 'THE BLACK SWAN'];
 /** The public house's name on its fascia, by the lot's seed (real pub names of the period [inferred]). */
 export const pubName = (seed) => PUBS[(Math.imul(seed || 1, 2246822519) >>> 0) % PUBS.length];
