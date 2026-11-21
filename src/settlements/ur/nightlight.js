@@ -10,6 +10,8 @@
 // palace's rooms) also gets its glow ball and the pool of light on the floor under it; `ur_night` is the plan of what no builder lights: the lamp over the door of each house
 // that can be entered, with the pool it throws on the lane.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
+import { box, lathe } from '../../core/geom.js';
+import { COURT } from './layout.js';
 
 const TAU = Math.PI * 2;
 
@@ -89,12 +91,41 @@ export function houseDoor(rect, f) {
 }
 
 /** ur_night: { doors: [{ rect, door }], fires: [{ at, y, h?, r? }] } — one plan, one draw: the door lamp's glow and the pool before the door of each house that can be entered; the fires. */
+/** A clay oil lamp: a saucer with a pinched lip and the wick's flame; varied by k so that no two share a shape. */
+function lamp(bag, x, y, z, k) {
+  const r = 0.065 + 0.01 * ((Math.abs(Math.round(k)) % 5) / 4);
+  bag.add('pottery_dark', lathe([[0.001, 0], [r, 0.012], [r * 1.08, 0.032], [r * 0.7, 0.036], [0.001, 0.026]], 9, null, x, y, z));
+  bag.add('flame', box(x - 0.016, y + 0.03, z - 0.016, x + 0.016, y + 0.1, z + 0.016));
+}
+
+/**
+ * ur_lampware: the lamps and fire-pans themselves ({ doors, mats, pans }, as ur_night), built into a house plan that already holds pottery_dark and flame, so that they cost no draw.
+ */
+function lampware(el, { bag }) {
+  for (const d of el.doors || []) { const { p, out } = houseDoor(d.rect, d.door); lamp(bag, p[0] + out[0] * 0.14, 2.28, p[1] + out[1] * 0.14, d.rect[0] * 7 + d.rect[1]); }   // on the ledge of the niche over the door
+  for (const m of el.mats || []) lamp(bag, m.at[0], m.y ?? 0.012, m.at[1], m.at[0] * 3 + m.at[1]);
+  for (const b of el.pans || []) {
+    const [x, z] = b.at;
+    bag.add('pottery_dark', lathe([[0.001, 0.16], [0.28, 0.2], [0.34, 0.36], [0.3, 0.38], [0.22, 0.3], [0.001, 0.28]], 12, null, x, 0, z));
+    bag.add('flame', box(x - 0.14, 0.3, z - 0.14, x + 0.14, 0.52, z + 0.14));
+  }
+}
+
 function night(el, { bag }) {
   const H = new Halo();
   for (const d of el.doors || []) {
     const { p, out } = houseDoor(d.rect, d.door);
     H.ball(p[0] + out[0] * 0.3, 2.35, p[1] + out[1] * 0.3, 0.45);
     H.floor(p[0] + out[0] * 1.4, 0.04, p[1] + out[1] * 1.4, 1.8, 10);
+  }
+  for (const m of el.mats || []) {   // a lamp on the sellers' mat: its small glow and a pool on the ground and the goods
+    H.ball(m.at[0], (m.y ?? 0.012) + 0.16, m.at[1], 0.42);
+    H.floor(m.at[0], 0.04, m.at[1], 2.1, 10);
+  }
+  for (const b of el.pans || []) {   // a clay fire-pan on three bricks, coals and a low flame (bakers and the square's night-sellers)
+    const [x, z] = b.at;
+    H.ball(x, 0.75, z, 0.9);
+    H.floor(x, 0.04, z, 3.3, 10);
   }
   for (const f of el.fires || []) {
     H.ball(f.at[0], (f.y ?? 0) + (f.h ?? 1.25), f.at[1], f.r ?? 0.8);
@@ -104,4 +135,60 @@ function night(el, { bag }) {
 }
 
 /** The element table additions: the night plan's element. */
-export const NIGHT_ELEMENTS = { ur_night: night };
+export const NIGHT_ELEMENTS = { ur_night: night, ur_lampware: lampware };
+
+
+// ── the Court of Nanna near the visitor (docs/settlements/ur.md §30) ────────────────────────────────────────────────────────────
+
+/**
+ * ur_court_night: oil lamps and banked braziers of the court, placed where the visitor stands on arrival. Built into the landmark's plan (pottery_dark, flame and halo are
+ * already held there, so it costs no draw). The six standards of the way each carry a clay lamp on the ledge of their brick plinth; the two braziers that burn no flame by
+ * day glow with coals; a lamp stands on each jamb of the court's gate. Lights are pushed so that `lit` gives them their halo and pool.
+ */
+export function courtNight(el, { bag, lights }) {
+  const z0 = COURT[1], y = el.y ?? 0, saucer = (x, yy, z, r) => bag.add('pottery_dark', lathe([[0.001, 0], [r, 0.015], [r * 1.05, 0.035], [r * 0.75, 0.04], [0.001, 0.03]], 10, null, x, yy, z));
+  const flame = (x, yy, z, h = 0.07) => bag.add('flame', box(x - 0.018, yy, z - 0.018, x + 0.018, yy + h, z + 0.018));
+  for (const sx of [-1, 1]) for (const dz of [33, 41.5, 50]) {
+    const x = sx * 10.5, z = z0 + dz + 0.32, yy = y + 0.55;
+    saucer(x, yy, z, 0.08); flame(x, yy + 0.035, z);
+    lights.push({ at: [x, yy + 0.2, z], color: '#ffb060', intensity: 1.3, distance: 5 });
+  }
+  for (const [bx, bz] of [[7, z0 + 20], [-7, z0 + 44]]) {
+    bag.add('flame', box(bx - 0.13, y + 1.04, bz - 0.13, bx + 0.13, y + 1.3, bz + 0.13));
+    lights.push({ at: [bx, y + 1.5, bz], color: '#ff9a4a', intensity: 3.4, distance: 9 });
+  }
+  for (const sx of [-1, 1]) {   // the lamp stands on the court gate's jambs: a pottery stand, a saucer, a wick
+    const x = sx * 4.5, z = z0 + 1.9;
+    bag.add('pottery_dark', lathe([[0.15, y], [0.1, y + 0.12], [0.07, y + 0.7], [0.12, y + 0.95], [0.001, y + 0.95]], 10, null, x, 0, z));
+    saucer(x, y + 0.95, z, 0.1); flame(x, y + 0.99, z, 0.08);
+    lights.push({ at: [x, y + 1.3, z], color: '#ffb060', intensity: 1.8, distance: 6 });
+  }
+}
+
+// ── the terrace's stair (docs/settlements/ur.md §30) ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * ur_stair_cheeks: the flight from the court up to the terrace (plan.js: x -7..7, sixteen treads) walled in a stepped cheek of baked brick on each side, as the ziggurat's own flights
+ * are (a block to a group of four treads, a coping on each), ending at the court in a pier with a blue glazed band on its end face and a lamp ledge. `rect` is the flight's rect.
+ */
+export function stairCheeks(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, y1 = el.y1, n = Math.max(1, Math.round(y1 / 0.16)), rise = y1 / n, tr = (z1 - z0) / n, w = 0.9, g = 4;
+  for (const [c0, c1] of [[x0 - w, x0], [x1, x1 + w]]) {
+    for (let i = 0; i < n; i += g) {
+      const j = Math.min(n, i + g), a = z0 + i * tr, b = z0 + j * tr, top = j * rise + 0.95;
+      bag.add('brick_baked', box(c0, (i + 1) * rise - 0.7, a, c1, top, b));
+      bag.add('brick_buff', box(c0 - 0.07, top, a - 0.04, c1 + 0.07, top + 0.1, b + 0.04));
+      col.rect([c0, a, c1, b], 0, top + 0.1);
+    }
+    const pa = [z0 - w, z0], ph = 1.9;
+    bag.add('brick_baked', box(c0, -0.3, pa[0], c1, ph, pa[1]));
+    bag.add('brick_buff', box(c0 - 0.07, ph, pa[0] - 0.07, c1 + 0.07, ph + 0.12, pa[1] + 0.07));
+    bag.add('brick_buff', box(c0 + 0.1, ph + 0.12, pa[0] + 0.1, c1 - 0.1, ph + 0.3, pa[1] - 0.1));
+    bag.add('glaze_lapis', box(c0 + 0.12, 1.2, pa[0] - 0.03, c1 - 0.12, 1.6, pa[0]));
+    col.rect([c0, pa[0], c1, pa[1]], 0, ph + 0.3);
+    const lx = (c0 + c1) / 2, lz = pa[0] + 0.35;   // a clay lamp in a niche cut into the pier's inner face would be inside the brick: it stands on the coping
+    bag.add('pottery_dark', lathe([[0.001, 0], [0.07, 0.012], [0.075, 0.032], [0.05, 0.036], [0.001, 0.026]], 9, null, lx, ph + 0.3, lz));
+    bag.add('flame', box(lx - 0.016, ph + 0.33, lz - 0.016, lx + 0.016, ph + 0.4, lz + 0.016));
+    lights.push({ at: [lx, ph + 0.55, lz], color: '#ffb060', intensity: 1.3, distance: 5 });
+  }
+}

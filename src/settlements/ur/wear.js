@@ -2,7 +2,7 @@
 // the ziggurat's central stair (and the dust trodden into its corners), the brick thresholds of the houses polished in the middle and the drift of silt dust against the foot of the wall
 // beside each door, the salt-white and damp band on the quay's face at the water's edge. All of it low (4 mm to 7 cm), built of the settlement's own materials in one plan, no collision.
 import { box } from '../../core/geom.js';
-import { ZIG, TERRACE, HARBOUR } from './layout.js';
+import { ZIG, TERRACE, HARBOUR, COURT } from './layout.js';
 import { frame } from '../../styles/sumerian-ur/upper.js';
 
 const hash = (a, b = 0) => { let h = (Math.imul(Math.round(a * 100) | 0, 73856093) ^ Math.imul(Math.round(b * 100) | 0, 19349663)) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -23,6 +23,20 @@ function wear(el, { bag }) {
     bag.add('limestone', box(cx - w, t.y - 0.01, z0 + dz, cx + w, t.y + 0.004, z1));
     for (const s of [-1, 1]) { const wd = 0.18 + 0.2 * hash(t.y, 3 + s); bag.add('silt', box(s > 0 ? cx + 3.97 - wd : cx - 3.97, t.y - 0.01, z0, s > 0 ? cx + 3.97 : cx - 3.97 + wd, t.y + 0.006, z1)); }
   }
+  // the terrace's stair (the flight from the court, 14 m wide, sixteen treads: plan.js): the dished, polished middle of each tread, the nosing's edge rubbed pale, dust in the two corners
+  { const z0 = COURT[3], z1 = TERRACE.rect[1] + 0.6, y1 = TERRACE.y, n = Math.max(1, Math.round(y1 / 0.16)), rise = y1 / n, tr = (z1 - z0) / n;
+    for (let i = 0; i < n; i++) {
+      const a = z0 + i * tr, b = a + tr, yy = (i + 1) * rise, w = 3.1 + 0.9 * hash(yy, 11), cx0 = 0.4 * (hash(yy, 12) - 0.5);
+      bag.add('brick_buff', box(cx0 - w, yy - 0.004, a + 0.12, cx0 + w, yy + 0.004, b - 0.02));
+      for (const s of [-1, 1]) { const wd = 0.3 + 0.5 * hash(yy, 13 + s); bag.add('silt', box(s > 0 ? 7 - wd : -7, yy - 0.004, a + 0.05, s > 0 ? 7 : -7 + wd, yy + 0.006, b - 0.02)); }
+    } }
+  // the harbour's three flights (plan.js: 3.1 m long, 2.4 m wide, from the water's edge up to the quay): the lower treads wet-dark and slimed where the water laps them, a worn dip in the upper ones
+  { const [, , hx1] = HARBOUR.rect, y0 = HARBOUR.water - 0.5, y1 = 0.6, n = Math.max(1, Math.round((y1 - y0) / 0.16)), rise = (y1 - y0) / n, tr = 3.1 / n;
+    for (const zs of [-80, -30, 12]) for (let i = 0; i < n; i++) {
+      const xa = hx1 - 4.6 + i * tr, yy = y0 + (i + 1) * rise, k = hash(zs, i);
+      if (yy < HARBOUR.water + 0.45) bag.add('plaster_damp', box(xa + 0.03, yy - 0.003, zs + 0.1, xa + tr - 0.02, yy + 0.004, zs + 2.3));
+      else bag.add('brick_buff', box(xa + 0.04, yy - 0.004, zs + 0.55 + 0.2 * k, xa + tr - 0.02, yy + 0.004, zs + 1.85 - 0.2 * k));
+    } }
   // the houses' thresholds and the dust at the wall's foot beside each door
   for (const d of el.doors || []) {
     const F = frame({ rect: d.rect, door: d.door }), { R } = F, k = hash(d.rect[0], d.rect[1]);

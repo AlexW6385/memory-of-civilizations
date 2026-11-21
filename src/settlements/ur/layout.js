@@ -28,7 +28,7 @@ export const MARKET = [-44, -217, 42, -178];
 /** The houses on the square's north side that can be entered, furnished (§5.1): their seeds, the street door toward the square. */
 const OPEN = new Set([987775, 589524, 632118]);
 /** The houses whose upper floor is opened (docs/settlements/ur.md §5.14): the merchants', brewers', bakers', a potter's, a weaver's and a smith's near the market square, each walked by plan.js's routes (the others' stairs are shut or a door awning bars the way: not opened). */
-export const UPPER = new Set([987775, 589524, 288976, 133847, 560805, 943015, 964785, 199360, 80560]);
+export const UPPER = new Set([78154, 988791, 172490, 570525, 305613, 602588, 274185, 380498, 987775, 589524, 288976, 133847, 560805, 943015, 964785, 199360, 80560]);
 /** Where the scribal school's house stands: the lot nearest to this point west of the market square. */
 export const SCHOOL_AT = [-62, -200];
 /** The royal mausoleum of Shulgi, just outside the temenos's east side, on its made ground (docs/settlements/ur.md §5.11). */
