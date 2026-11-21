@@ -2,6 +2,7 @@
 // the ring of four storeys with its galleries and stair bays, the second ring of two storeys, the ancestral hall
 // in the court, two wells, the life of the lane (drying, washing, hens).
 import { T, FURNISH, polar, rng } from './layout.js';
+import { walkRoutes } from './walk.js';
 
 const E = [];
 E.push({
@@ -89,6 +90,9 @@ walks[0].y0 = 0;
   // bedrooms, the grain floor and a loom: the sitting rooms' tea tables stand close to the door and are not walked to
   for (const [s, i] of [[1, 30], [1, 33], [1, 35], [1, 37], [1, 39], [-1, 10], [-1, 14], [-1, 17], [-1, 18], [-1, 20]]) walks.push(route(s, i));
 }
+
+// the visitor's walk (walk.js): one route from the road into the hall of every opened house of the hamlet
+for (const r of walkRoutes()) walks.push(r);
 
 export const tulou = {
   id: 'hakka-tulou',

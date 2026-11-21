@@ -3,6 +3,7 @@
 // its people — farmers, women with the broad straw hat, children, elders at the hall — and animals.
 import { RADIUS, NEIGHBOURS, FARMS, YARD, STREAM, streamZ, inStream, T, rng, polar, inFoot, hill, HOUSES, SHRINES, NORIA, WASH_STEPS, PLOTS, furnishRing } from './layout.js';
 import { ground } from './ground.js';
+import { isShop, tradeOf } from './walk.js';
 import './../../styles/tulou/index.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 40], facing: 'n' } });
@@ -45,7 +46,7 @@ export async function town() {
 
   // the hamlet: the rows of houses round the yard and along the road, the shrines, the noria, the washing steps, the gardens
   const rectOf = (h) => { const q = Math.abs(Math.sin(h.yaw)) > 0.5, a = (q ? h.d : h.w) / 2 + 1.5, b = (q ? h.w : h.d) / 2 + 1.5; return [h.c[0] - a, h.c[1] - b, h.c[0] + a, h.c[1] + b]; };
-  for (const h of HOUSES) V.push({ t: 'hakka_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, seed: h.seed, rect: rectOf(h) });
+  for (const h of HOUSES) V.push({ t: 'hakka_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, seed: h.seed, trade: isShop(h) ? tradeOf(h) : undefined, rect: rectOf(h) });
   for (const [x, z, r] of SHRINES) V.push({ t: 'earth_shrine', at: [x, z], rot: r, y: ground.height(x, z), rect: [x - 2, z - 2, x + 2, z + 2] });
   { const zc = streamZ(NORIA.x); V.push({ t: 'noria', x: NORIA.x, zc, r: NORIA.r, axle: NORIA.axle, rect: [NORIA.x - 4, zc - 8, NORIA.x + 4, zc + 5] }); }
   for (const [x] of WASH_STEPS) { const z = streamZ(x); V.push({ t: 'wash_steps', x, z, rect: [x - 2, z - 5, x + 3, z - 2] }); }
