@@ -1,9 +1,10 @@
 // Round the Citadel (docs/settlements/mohenjo-daro.md §2, §6, §7): the Lower Town's houses in their grid with the drains along the streets and
 // lanes, the workshops, the market place with its great well, the town wall on the south, the landing on the Indus with its boats and the
 // harbour office, and the people — priests at the Bath, craftsmen, merchants, porters, carts with zebu.
-import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, MOUND, riverX, streets, lanes, lots, houseEl, inRect } from './layout.js';
+import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, MOUND, riverX, streets, lanes, lots, houseEl, inRect, doorU } from './layout.js';
 import { boatFloat } from '../../objects/index.js';
 import { stallSpots } from '../../styles/indus/town.js';
+import { SPOTS } from './walkdress.js';
 
 /** The quay's apron: sheds along its back (west), net frames and washing on its front. */
 export const SHEDS = [-98, -50, -8, 22].map((z) => [QUAY.x0 + 1.4, z - 6, QUAY.x0 + 8.4, z + 6]);
@@ -71,12 +72,13 @@ function people() {
   for (const l of lots()) if (!['house', 'small'].includes(l.kind)) { const p = P(l, l.rect[3] - l.rect[1] > 0 ? Math.min(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 99) / 2 : 6, 6.0); man(p, facing(l) + Math.PI, { y: l.y, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); }
   // an apprentice at each workshop, the mistress of each furnished house at her hearth in the court
   for (const l of lots()) {
+    if (l.walk) continue;   // (the walk's lots keep their master only: more figure kinds near the arrival cost draws)
     if (!['house', 'small'].includes(l.kind)) { const p = P(l, 3.5, 6.0); man(p, facing(l) + Math.PI + 0.6, { y: l.y, pose: 'stand', hair: 'short', cloth: 'cloth_white', beard: 0 }); }
     else if (l.open && l.kind === 'house') { const p = P(l, (l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]) * 0.45, 4.6); woman(p, rand() * 6.28, { y: l.y, pose: 'cross', carry: 'none' }); }
   }
   // inside the lit rooms of the open houses: the household just within the first rooms' doors, off the doorway's line (the rooms: back range, T 0.7, 4.4 deep, 2 or 3 to the width)
   for (const l of lots()) {
-    if (!l.open || l.kind === 'small') continue;
+    if (!l.open || l.kind === 'small' || l.walk) continue;
     const Wl = l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], Dl = l.front === 'w' || l.front === 'e' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
     const nb = Wl > 15 ? 3 : 2, bw = (Wl - 1.4) / nb, v = Dl - 0.7 - 4.4 + 1.0, rot = facing(l);
     for (let i = 0; i < Math.min(2, nb); i++) {
@@ -126,7 +128,10 @@ function life() {
   // at the house doors: jars, baskets, firewood, a hearth's pots
   for (const l of lots()) {
     if (rand() > 0.55) continue;
-    const du = P(l, 1.2 + rand() * (Math.max(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 3) - 2.4), -0.5);
+    const Wl = Math.max(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 3), dU = doorU(l);
+    let u = 1.2 + rand() * (Wl - 2.4);
+    if (Math.abs(u - dU) < 1.5) u = dU + (dU < Wl / 2 ? 1.6 : -1.6) * 1.15;   // (never in the doorway's lane)
+    const du = P(l, Math.max(0.6, Math.min(Wl - 0.6, u)), -0.5);
     L.push({ t: pick(rand, ['pot', 'basket', 'firewood']), kind: pick(rand, ['water_pot', 'dark_pot', 'matka']), at: du, y: l.y, rot: rand() * 6.28, n: 2, seed: Math.floor(rand() * 1e9) });
   }
   return L;
@@ -137,7 +142,7 @@ export async function town() {
   if (CACHE) return CACHE;
   const plans = [], LT = lots();
   plans.push(base('md-streets', [{ t: 'indus_streets', streets: streets(), lanes: lanes() }]));
-  { const ST = streets(); for (let i = 0; i < ST.length; i += 3) plans.push(base(`md-streetwork-${i / 3}`, [{ t: 'indus_streetwork', streets: ST.slice(i, i + 3), seed: 40 + i, avoid: [PLAZA, [QUAY.x0, QUAY.z0, QUAY.x1, QUAY.z1], CUSTOMS] }])); }
+  { const ST = streets(); for (let i = 0; i < ST.length; i += 3) plans.push(base(`md-streetwork-${i / 3}`, [{ t: 'indus_streetwork', streets: ST.slice(i, i + 3), seed: 40 + i, avoid: [PLAZA, [QUAY.x0, QUAY.z0, QUAY.x1, QUAY.z1], CUSTOMS] }, ...SPOTS.filter((sp) => sp[3] === 0 && ST.slice(i, i + 3).some((r) => inRect(r, sp[1], sp[2], 1) && ST.findIndex((q) => inRect(q, sp[1], sp[2], 1)) === ST.indexOf(r))).map((spot) => ({ t: 'md_lanework', spot, at: [spot[1], spot[2]] }))])); }
   // wells at the mouths of some lanes, in the street before them: the lanes' neighbours draw from them (one well to every three houses is the city's figure; the courts keep their own)
   {
     const W = [];

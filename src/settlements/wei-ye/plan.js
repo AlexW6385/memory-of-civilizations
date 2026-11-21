@@ -3,6 +3,7 @@
 // (ground storey furnished, the bronze bird on top) and four pavilions; on the Golden Tiger's and the Ice Well's crowns a hall of five bays.
 // Authored in world coordinates (origin 0, yaw 0).
 
+import { mainRoutes, walkRoutes } from './walkroutes.js';
 import { SPARROW, ICE, TIGER, TOWER, DAIS_STAIR, SKYWAYS, BATTER, stairRect, zOf, faceX, POND, POND_Y } from './layout.js';
 
 const E = [];
@@ -75,6 +76,7 @@ const rooms = [
 const sx = faceX(SPARROW);
 const walks = [[[-100, zOf(SPARROW)], [-141, zOf(SPARROW)], [sx + 1, zOf(SPARROW)], [-172, zOf(SPARROW)], [-180, zOf(SPARROW)], [-186, zOf(SPARROW)], [-192, zOf(SPARROW)], [tx + 3, zOf(SPARROW)], [tx + 5.5, tz - 5.0], [tx + 6.8, tz - 6.55], [tx + 0.8, tz - 6.55], [tx - 1.5, tz - 4.0], [tx - 3, tz]]];
 walks[0].y0 = 0;
+walks.push(...mainRoutes(), ...walkRoutes());          // the visitor's walk and into the places opened along it (walkroutes.js)
 
 export const sparrow = {
   id: 'wei-ye-bronze-sparrow',

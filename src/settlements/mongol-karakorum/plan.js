@@ -3,6 +3,7 @@
 // door, the dais at the north; the court before it with the khan's great ger and a wagon-house, the nine-tailed banners, the stone tortoise;
 // the storehouses and the cellar for the drinks along the walls.
 
+import { walkRoutes } from './walkroutes.js';
 import { PALACE, HALL, HALL_RECT, TREE, PALACE_GATE, STORES, COURT_GER, COURT_CART, BANNERS, TORTOISE, HOUSEHOLD } from './layout.js';
 
 const E = [];
@@ -39,6 +40,9 @@ const rooms = [
 ];
 const walks = [[[70, -4], [70, -18], [70, -38], [70, -43], [75.5, -46], [76, -60], [73, -64], [73, -71]], [[104, -18], [104, -21.6]]];
 walks[0].y0 = 0; walks[1].y0 = 0;
+// out through the gate hall to the main street, then in at the way in of sixteen open shops along it (walkroutes.js)
+walks.push(Object.assign([[70, 5], [70, 0], [70, -4]], { y0: 0 }));
+for (const b of walkRoutes()) walks.push(Object.assign(b.route, { y0: 0 }));
 
 export const palace = {
   id: 'karakorum-palace',

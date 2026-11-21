@@ -5,6 +5,8 @@
 
 import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS, BOATS, ZIG, houses } from './layout.js';
 import { upperRoute, roofRoute, hasLadder } from '../../styles/sumerian-ur/upper.js';
+import { routes as openRoutes } from './openwalk.js';
+import './trim.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
@@ -56,12 +58,14 @@ for (const h of houses()) if (h.upper) for (const r of [upperRoute(h), hasLadder
 
 // from the lane under the reed-mat awning of the street door into the court of two houses that have one (the awning once shut the doorway: src/styles/sumerian/dress.js)
 for (const h of houses()) if ([632118, 83813].includes(h.seed)) { const r = upperRoute(h).slice(0, 6); r.y0 = 0; walks.push(r); }
+// the houses that can be entered on the visitor's walk, nearest it first (docs/settlements/ur.md §24)
+walks.push(...openRoutes(16));
 
 export const precinct = {
   id: 'ur-ziggurat',
   name: { en: 'The Ziggurat of Ur', zh: '乌尔大塔庙' },
   era: { en: 'Third Dynasty of Ur, c. 2050 BC', zh: '乌尔第三王朝，约公元前2050年' },
-  style: 'sumerian',
+  style: 'ur-n',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [0, -110], facing: 's' },
   bounds: TEMENOS,
