@@ -149,6 +149,7 @@ import './voices-tenochtitlan.js';
 import * as THEBES from '../settlements/thebes/soundmap.js';
 import * as TIMURID from '../settlements/timurid-samarkand/soundmap.js';
 import './voices-timurid.js';
+import * as UR from '../settlements/ur/soundmap.js';
 import * as VERSAILLES from '../settlements/versailles/soundmap.js';
 import './voices-versailles.js';
 
@@ -274,7 +275,7 @@ export const PROFILES = {
   taos: T({ warbler: 0.6, crow: 0.6, dove: 0.3 }, { cicadas: 0.3, animals: { dog: 0.6 }, roof: 'flat' }),
   tenochtitlan: T({ warbler: 0.8, tropic: 0.5 }, { frogs: 0.7, animals: withLife({ dog: 0.3 }, { canal: 0.6, market: 1, map: TENOCHTITLAN }), roof: 'flat' }),
   teotihuacan: T({ warbler: 0.8, dove: 0.5 }, { cicadas: 0.4, animals: withLife({ dog: 0.3 }, { market: 1, map: TEOTIHUACAN }), roof: 'flat' }),
-  ur: T({ ...NEAR, gull: 0 }, { frogs: 0.5, animals: { donkey: 0.6, goat: 0.4, dog: 0.3 }, roof: 'flat' }),
+  ur: T({ ...NEAR, gull: 0 }, { frogs: 0.5, animals: withLife({ donkey: 0.6, goat: 0.4, dog: 0.3 }, { market: 0.8, canal: 0.5, map: UR }), roof: 'flat' }),
   venice: T({ ...MED, gull: 1 }, { cicadas: 0.2, animals: withLife({ dog: 0.2 }, { canal: 1, market: 1, map: VENICE }), roof: 'tile', bells: 'venice' }),
   versailles: T(EU, { animals: withLife({ horse: 0.8, dog: 0.4 }, { canal: 0.6, market: 0.8, eaves: 1, map: VERSAILLES }), roof: 'slate', bells: 'angelus' }),
 };

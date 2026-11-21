@@ -863,6 +863,7 @@ for (const k of Object.keys(GAIN)) GAIN_OWNER.set(k, 'voices.js');
 import { ATHENS_VOICES, ATHENS_GAIN } from './voices-athens.js'; addVoices('voices-athens.js', ATHENS_VOICES, ATHENS_GAIN);   // Athens' voices (docs/settlements/athens.md §20)
 import { ALEXANDRIA_VOICES, ALEXANDRIA_GAIN } from './voices-alexandria.js'; addVoices('voices-alexandria.js', ALEXANDRIA_VOICES, ALEXANDRIA_GAIN);   // Alexandria's voices (docs/settlements/alexandria.md §16.3)
 import { BABYLON_VOICES, BABYLON_GAIN } from './voices-babylon.js'; addVoices('voices-babylon.js', BABYLON_VOICES, BABYLON_GAIN);   // Babylon's voices (docs/settlements/babylon.md §20)
+import { UR_VOICES, UR_GAIN } from './voices-ur.js'; addVoices('voices-ur.js', UR_VOICES, UR_GAIN);   // Ur's voices (docs/settlements/ur.md §26)
 import { CN_VOICES, CN_GAIN } from './voices-constantinople.js'; addVoices('voices-constantinople.js', CN_VOICES, CN_GAIN);   // Constantinople's voices (docs/settlements/constantinople.md §16.3)
 import { THEBES_VOICES, THEBES_GAIN } from './voices-thebes.js'; addVoices('voices-thebes.js', THEBES_VOICES, THEBES_GAIN);   // Thebes' voices (docs/settlements/thebes.md §15c)
 import { GIZA_VOICES, GIZA_GAIN } from './voices-giza.js'; addVoices('voices-giza.js', GIZA_VOICES, GIZA_GAIN);   // Giza's voices (docs/settlements/giza.md §20)
