@@ -8,7 +8,7 @@ const E = [];
 E.push({
   t: 'tulou_ring', c: T.c, R: T.R, n: T.n, floors: T.floors, wallIn: T.wallIn, front: T.front, rail: T.rail, full: true,
   gates: [90, 270], bays: [0, 180], furnish: FURNISH, hall: T.hall,
-  ring2: T.ring2,
+  ring2: T.ring2, name: 'chengqi',
 });
 E.push({ t: 'tulou_hall', c: T.c, rect: [-7.5, -6, 7.5, 6.9] });
 for (const [x, z] of T.wells) E.push({ t: 'well', kind: 'windlass', mat: 'bluestone', at: [x, z], y: 0, rot: Math.atan2(x, z) });

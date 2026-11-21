@@ -8,6 +8,8 @@ import { STYLES } from '../../core/build.js';
 import { box, disc, lathe, rod } from '../../core/geom.js';
 import { DEG, P, hexa, sector, slope, lbox, frameOf, prism, plank } from './geo.js';
 import { furnishRooms, fillRoom } from './rooms.js';
+import { canWrite, inscription } from '../../settlements/ming-suzhou/script.js';
+import { Matrix4 } from '../../core/three.js';
 import { roofRows, cobbleFoot, windowHood, jbox, lslab, couplet, rnd } from './detail.js';
 
 const EARTH = 'mud_plaster', INNER = 'earth_wall', TIMBER = 'timber', TILE = 'tile_grey';
@@ -142,7 +144,15 @@ export function tulouRound(el, ctx) {
     // the name board between lintel and hood: black lacquer with a gilt frame and gilt strokes for the characters
     bag.add('lacquer_black', lbox(c[0], c[1], phi, -1.0, GATE_H + 0.6, R - 0.12 - lean * 0.3, 1.0, GATE_H + 1.1, R + 0.05));
     for (const [x0, y0, x1, y1] of [[-1.0, GATE_H + 0.6, 1.0, GATE_H + 0.66], [-1.0, GATE_H + 1.04, 1.0, GATE_H + 1.1], [-1.0, GATE_H + 0.66, -0.94, GATE_H + 1.04], [0.94, GATE_H + 0.66, 1.0, GATE_H + 1.04]]) J(x0, y0, R + 0.05, x1, y1, R + 0.075, 100 + Math.round(x0 * 7 + y0), 'gilt_bronze');
-    for (let q = 0; q < 4; q++) {
+    // the great gate carries its name, 承啟樓 Chengqi Lou, read right to left as a horizontal board was in 1710 [stated: the name, dossier §1; the glyphs are checked stroke by stroke in the Suzhou script]
+    const NAME = '承啟樓', named = !small && el.name === 'chengqi' && canWrite(NAME);
+    if (named) {
+      const gg = inscription(NAME, { pitch: 0.5, size: 0.34, z0: 0, z1: 0.016, thick: 1.3 });
+      gg.translate(0, GATE_H + 0.85, R + 0.075);
+      gg.applyMatrix4(new Matrix4().makeRotationY(phi).setPosition(c[0], 0, c[1]));
+      bag.add('gilt_bronze', gg);
+    }
+    for (let q = 0; q < (named ? 0 : 4); q++) {
       const cx0 = -0.62 + q * 0.34;
       for (let s = 0; s < 4; s++) {
         const hor = rnd(g + q, 3 + s) < 0.55, u = (rnd(g + q, 13 + s) - 0.5) * 0.12, v = (rnd(g + q, 23 + s) - 0.5) * 0.14;
