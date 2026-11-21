@@ -137,6 +137,25 @@ export function pagoda(el, { bag, col, lights }) {
   }
   const kinds = el.guard ?? ['wrestler', 'elephant', 'lion', 'griffin', 'goddess'];
   for (let k = 0; k < n && k < kinds.length; k++) for (const v of [-1, 1]) guardian(bag, col, kinds[k], X(uFace[k] + 1.25), k * h, cz + v * (W / 2 + 1.05), sx, 0.85 + 0.12 * k, v);
+  // the four Ganesh shrines at the corners of the first stage and the stone tap on its north face [stated: bhaktapur.com; the shrines' form inferred]
+  if (el.corner) {
+    const hw0 = P.hw[0], c = 0.26, y0 = h, sq = (u, v, r, a, b) => bx(X(u - r), a, cz + v - r, X(u + r), b, cz + v + r);
+    for (const [u, v] of [[uFace[0] - 0.9, -hw0 + 0.45], [uFace[0] - 0.9, hw0 - 0.45], [-hw0 + 0.45, -hw0 + 0.45], [-hw0 + 0.45, hw0 - 0.45]]) {
+      bag.add(STONE, sq(u, v, 0.36, y0, y0 + 0.12));
+      bag.add('sandstone', sq(u, v, c, y0 + 0.12, y0 + 0.62));
+      bag.add('opening', bx(X(u + c) - sx * 0.02, y0 + 0.2, cz + v - 0.15, X(u + c) + sx * 0.03, y0 + 0.5, cz + v + 0.15));
+      bag.add('cloth_red', lathe([[0.1, 0], [0.11, 0.06], [0.08, 0.16], [0.07, 0.24], [0.03, 0.3], [0.001, 0.3]], 7, null, X(u + c - 0.1), y0 + 0.2, cz + v));
+      bag.add('timber', sq(u, v, 0.31, y0 + 0.62, y0 + 0.68));
+      bag.add('roof_tile', frustum([Math.min(X(u - 0.32), X(u + 0.32)), cz + v - 0.32, Math.max(X(u - 0.32), X(u + 0.32)), cz + v + 0.32], y0 + 0.68, y0 + 0.92, 0.2, 0.2, 0.2, 0.2));
+      bag.add('gilt_bronze', lathe([[0.04, 0], [0.05, 0.05], [0.015, 0.2], [0.001, 0.26]], 6, null, X(u), y0 + 0.92, cz + v));
+      col.rect([Math.min(X(u - 0.36), X(u + 0.36)), cz + v - 0.36, Math.max(X(u - 0.36), X(u + 0.36)), cz + v + 0.36], y0, y0 + 0.9);
+    }
+    // the stone tap: a spout (a makara's snout) through the north face into a stone basin
+    const ut = uFace[0] - 5.2, zf = cz - hw0, sp = (a, b, c2, d, e, f) => bag.add(STONE, bx(X(a), b, zf + c2, X(d), e, zf + f));
+    sp(ut - 0.22, 0.5, -0.08, ut + 0.22, 0.82, 0.04); sp(ut - 0.14, 0.52, -0.5, ut + 0.14, 0.72, -0.08); sp(ut - 0.08, 0.5, -0.5, ut + 0.08, 0.54, -0.1);
+    bag.add(STONE, lathe([[0.62, 0], [0.62, 0.34], [0.54, 0.34], [0.54, 0.08], [0.001, 0.08]], 12, null, X(ut), 0, zf - 0.95));
+    col.rect([Math.min(X(ut - 0.62), X(ut + 0.62)), zf - 1.57, Math.max(X(ut - 0.62), X(ut + 0.62)), zf - 0.33], 0, 0.34);
+  }
   // the roofs and the walls of the tiers
   let yb = n * h - 0.02;
   const R = el.roofs;
@@ -262,6 +281,8 @@ export function pagoda(el, { bag, col, lights }) {
   // the pinnacle: a gilt vase, umbrellas and a spire
   const last = R[R.length - 1], top = yb + 0.15;
   bag.add('gilt_bronze', lathe([[0.7, 0], [0.7, 0.14], [0.45, 0.22], [0.62, 0.55], [0.3, 0.95], [0.4, 1.1], [0.16, 1.4], [0.55, 1.5], [0.55, 1.55], [0.14, 1.7], [0.28, 2.1], [0.09, 2.5], [0.035, 3.4], [0.001, 3.6]], 10, null, cx, top, cz));
+  // three gilt umbrellas (chhatras) on the spire, each smaller than the one below [inferred: the form of a Newar gajur]
+  for (const [y, r] of [[2.35, 0.52], [2.8, 0.42], [3.2, 0.32]]) bag.add('gilt_bronze', lathe([[r, 0], [r + 0.03, 0.04], [r * 0.6, 0.15], [0.05, 0.24], [0.001, 0.26]], 12, null, cx, top + y, cz));
   void last;
 }
 
