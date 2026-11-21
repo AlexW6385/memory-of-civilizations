@@ -158,6 +158,15 @@ Seen: a night render at the arrival (shots/kh-night-arrival.png, low quality): t
 
 [inferred throughout; nothing sourced to Khajuraho itself: the animals of any village and pilgrim town of central India] `fauna.js` `critters` (rigged, with behaviour; src/engine/fauna-critters.js; 25 in all): village dogs asleep at the crossings of the road and lanes and on a house step (4); a cat on the verandah platform of a sweet shop and of a flower shop of the pilgrims' lane (grain, milk and sweets draw cats); a cock and hens in two yards and goats in two others; rock pigeons on the flagged forecourt of Kandariya's stair and by the road; two rafts of ducks on the Shivsagar; a white-throated kingfisher at its west bank. Not rigged: the sarus crane (the engine's crane is the red-crowned of East Asia), peafowl (heard, §20), zebu (the life figures'), swallows' nests (no eave of the village's fronts is fit for the rig's nest model). Test: `tests/khajuraho-critters.test.mjs`.
 
+## 22. Wear and writing (item 5)
+
+[inferred] `wear.js` (the style's `bazaar_house` and `nagara_temple` wrapped from the settlement's folder; materials already used near the arrival, so no new draw): on every opened front and one in three of the others the platform's stone worn pale and smooth where the feet cross it to the door (a patch of the dressed sandstone, its size and place by hash) and, on half, a patch of damp at the platform's end where the household throws out its water; in each temple porch the threshold before the sanctum's door worn dark by hands, feet and lamp oil, and the dark stains of spilled oil under each lamp stand. The monsoon's rain streaks and the damp at the foot of the walls were there before (§11, §5).
+Writing: none drawn. Donor and pilgrim inscriptions on Chandela temples are in Nagari-script Sanskrit; the glyphs of the eleventh century cannot be checked letter by letter here, so no shop sign, tablet or lintel carries any. Shop signs remain coloured cloth.
+
+## 23. What still falls short (item 6)
+
+The landmark's remaining gaps against §5 were left as recorded in §15 and §17: the sculpture of the tower's lower storeys and the sanctum's balcony faces, the elephants in the round at the roof corners, weathering of the figures, festivals and dance, the interiors of the merchants' second storeys. Nothing was added to the landmark in this pass: the arrival's draw and triangle budget (§16) is spent.
+
 ## Sources
 
 - [Kandariya Mahadeva Temple — Wikipedia](https://en.wikipedia.org/wiki/Kandariya_Mahadeva_Temple)

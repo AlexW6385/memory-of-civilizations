@@ -5,6 +5,7 @@ import '../../styles/ming/index.js';
 import { temples, tank, life } from './plan.js';
 import music from './music.js';
 import './nightlight.js';
+import './wear.js';
 import { houses } from './town.js';
 import { sculptPlans } from './sculpt.js';
 export { music };
