@@ -159,3 +159,13 @@ What burned at Benin about 1600, and where (`src/settlements/benin-city/nightlig
 - **The forest and the night:** hornbills (stated, §7) on the rampart ring at dawn and dusk, the owl at night, cicadas by day, frogs by the ditch; goats, fowls and dogs by the engine's life.
 - **Rooms:** every compound within 200 m of the arrival (90) is a room by its use; the great gallery and the gate's vestibule are halls with their own hush.
 - **Test:** `tests/benin-sound.test.mjs` (voices, map, schedule by hour and weather, rooms).
+
+### 15.4 Animals (item 4)
+
+The rigged animals of the engine (`critters`, `src/settlements/benin-city/fauna.js`; about 75, one mesh) beside the flights and perches of §8. Models used as they are: the fowl (hens, rooster), dwarf goats (the goat model, black and white), the dog, the cat, the dove (pigeon). No model was added: the hornbill and the weaverbird have none (the sparrow stands for the weaverbird, §10) and nothing was invented in their place.
+
+- **Fowl and goats at the doors of the compounds of the walk [stated: hens and goats at the doors are in the life pass, §10; inferred: the placing]:** one or two hens at each, a rooster at every third, a goat tethered at every second, on the side of the front with more room, never in the door's lane (tested against the walk's routes).
+- **Dogs and cats [inferred: both are household animals in the forest belt; not fetched]:** a dog lying at every fourth door of the walk, in the market, by the seats of the square and at the first weaving yard; a cat on the step of every third compound.
+- **The king's square and the court [inferred]:** doves on the earth before the gate and on the paving of the court of audience (the dove's cry, §7); hens at the waiting sheds, a goat tethered by each.
+- **The Oba market and the guild lane [stated: goats and fowls were sold, §5]:** six fowl round the mats of the open floor, three goats at its edge, two dogs; hens at the fronts of four casting yards.
+- **Behaviour:** the engine's own (hens walk and peck; the goat, dog and cat lie, stand and lift the head as the visitor comes near; the doves keep to a patch). Test: `tests/benin-critters.test.mjs`.

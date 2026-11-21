@@ -36,8 +36,6 @@ for (const [z0, z1] of [[-118, -90], [-88, -60], [-58, -30], [-26, -10]]) {
   E.push({ t: 'benin_range', rect: [-138.6, z0, -133.0, z1], front: 'e', seed: Math.round(-z0) + 50, kinds: ['sleep', 'store', 'kitchen', 'sleep', 'brass', 'kitchen'] });
 }
 E.push({ t: 'benin_audience', axis: GATE_X, z0: -12, z1: -62, benches: AUD, drumZ: -36, seed: 8 });
-// the standing lamps of the court of audience (nightlight.js: bn_stand), between the way and the benches, at the three pairs of the benches' ends
-for (const s of [-1, 1]) for (const z of [-20, -40, -58]) E.push({ t: 'bn_stand', at: [GATE_X + s * 4.2, z], y: 0.03 });
 // the cast leopards at the gate
 for (const s of [-1, 1]) E.push({ t: 'benin_leopard', at: [GATE_X + s * 3.6, 6.2], y: 0.45, s, plinth: true });
 

@@ -290,6 +290,9 @@ export async function town() {
     for (const at of WAYPOTS) st.push({ t: 'benin_waypot', at, y: 0 });
     plans.push(...lodTiles('benin-street', 'benin', st, { R: RADIUS }));
   }
+  // the standing lamps of the court of audience (nightlight.js: bn_stand), between the way and the benches: a plan of their own (a tile's halo is drawn with the
+  // town's, a landmark's is a draw of its own)
+  plans.push(...lodTiles('benin-court', 'benin', [-1, 1].flatMap((s) => [-20, -40, -58].map((z) => ({ t: 'bn_stand', at: [GATE_X + s * 4.2, z], y: 0.03 }))), { R: RADIUS }));
   plans.push({ ...base('benin-people', [...F.P, ...P2]), style: 'life' });
   plans.push({ ...base('benin-street-life', lifeEls), style: 'life' });
   const els = lots().map((l) => ({ t: 'benin_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, chief: l.chief, kind: l.kind, goods: l.goods, du: l.du, fd: l.fd, bd: l.bd, swL: l.swL, swR: l.swR, pitch: l.pitch, dado: l.dado, roof: l.roof }));

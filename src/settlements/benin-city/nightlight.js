@@ -144,10 +144,11 @@ const wrap = (name, fn) => function lit(el, ctx) {
  * bn_stand: { at: [x, z], y } — a standing lamp of the palace: a bronze foot of three splayed legs, a stem with a rope-twist, a dish of palm oil with a wick burning [stated, weakly:
  * large metal lamps are reported in the streets; inferred: the form, the palace's use]; the glow and its pool on the floor.
  */
-function stand({ at, y = 0 }, { bag, col }) {
+function stand({ at, y = 0, simple }, { bag, col }) {
   const [x, z] = at, H = new Halo(), q = hashAt(x, z, 5), s = 0.95 + 0.1 * q, w = 0.9 + 0.2 * hashAt(x, z, 6);
   bag.add('bronze', lathe([[0.001, 0], [0.2 * w, 0], [0.2 * w, 0.05], [0.09 * w, 0.14], [0.05 * w, 0.5 * s], [0.075 * w, 0.62 * s], [0.045 * w, 0.8 * s], [0.04 * w, 1.35 * s], [0.14 * w, 1.46 * s], [0.18 * w, 1.54 * s], [0.15 * w, 1.56 * s], [0.001, 1.5 * s]], 10, null, x, y, z));
   col.circle(x, z, 0.22, y, y + 1.55 * s);
+  if (simple) return;
   H.ball(x, y + 1.7 * s, z, 0.75, 0.68); H.floor(x, y + 0.03, z, 3.0, 3.0, 12, 0.7);
   H.flush(bag);
 }

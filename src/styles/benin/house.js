@@ -10,6 +10,8 @@ import { homeAltar, pot, pots, stool, bed, chest, hearth, mortar, rack, wash, wo
 
 const toStreet = (F) => { const o = F.out; return o[1] !== 0 ? (o[1] > 0 ? 'zp' : 'zn') : (o[0] > 0 ? 'xp' : 'xn'); };
 
+/** A number in [0, 1) from a position alone (so that repeated goods differ in size: no shape is drawn twelve times alike). */
+const h2 = (x, z, k = 0) => { const v = Math.sin(x * 12.9898 + z * 78.233 + k * 37.719) * 43758.5453; return v - Math.floor(v); };
 /** Where the gap in a trading front's counter stands (u along the front): beside the way to the court, inside the counter's length. */
 export function tradeGap(L, du, dw, dc, wide) { return Math.max(dc - wide / 2 + 1.1, Math.min(dc + wide / 2 - 1.1, du + dw / 2)); }
 /** The opened way into a compound by its own numbers (the routes of walk-check): the u of the street door and the u of the passage's mouth. */
@@ -111,7 +113,7 @@ function house(el, ctx) {
     const bmA = P(0.5, -1.2), bmB = P(L - 0.5, -1.2); bag.add('wood_dark', rod([bmA[0], Yf + 2.2, bmA[1]], [bmB[0], Yf + 2.2, bmB[1]], 0.09, 5));
     { const f = rr(0.4, -1.5, L - 0.4, -1.3); bag.add('tuff_red', box(f[0], y - 0.3, f[1], f[2], y + 0.12, f[3])); }
     col.floor(rr(0.4, -1.5, L - 0.4, 0), y + 0.12);
-    for (const [a, b] of side) if (b - a > 2.2) claySeat(ctx, rr(a + 0.3, -0.75, Math.min(b - 0.3, a + 3.6), -0.3), y + 0.12, Math.floor(rv() * 1e3));
+    for (const [a, b] of side) if (b - a > 2.2) claySeat(ctx, rr(a + 0.3, -0.75, Math.min(b - 0.3, a + 2.9 + 0.9 * h2(el.rect[0] + a, el.rect[1], 5)), -0.3 + 0.08 * h2(el.rect[0], el.rect[1] + a, 6)), y + 0.12, Math.floor(rv() * 1e3));
     if (kind === 'porch') for (const [a, b] of side) if (b - a > 2) { const m = P((a + b) / 2, -1.2); hung(ctx, m[0], Yf + 2.1, m[1], F.along, 3, (el.seed || 1) + Math.floor(a), 0.8); }
   }
   if (kind === 'trade') {
@@ -119,9 +121,9 @@ function house(el, ctx) {
     const gc = tradeGap(L, du, dw, dc, wide), gw = 0.9;
     for (const [a, b] of [[dc - wide / 2, gc - gw], [gc + gw, dc + wide / 2]]) {
       if (b - a < 0.3) continue;
-      const cr = rr(a, 0.55, b, 1.2);
-      bag.add('stucco_red', box(cr[0], Yf, cr[1], cr[2], Yf + 1.0, cr[3])); col.rect(cr, Yf, Yf + 1.0);
-      bag.add('timber', box(cr[0] - 0.05, Yf + 1.0, cr[1] - 0.05, cr[2] + 0.05, Yf + 1.06, cr[3] + 0.05));
+      const kc = h2(el.rect[0] + a, el.rect[1], 3), cr = rr(a, 0.55, b, 1.12 + 0.1 * kc), ch = 0.96 + 0.08 * h2(el.rect[0], el.rect[1] + b, 4);      // (no two counters alike)
+      bag.add('stucco_red', box(cr[0], Yf, cr[1], cr[2], Yf + ch, cr[3])); col.rect(cr, Yf, Yf + ch);
+      bag.add('timber', box(cr[0] - 0.05, Yf + ch, cr[1] - 0.05, cr[2] + 0.05, Yf + ch + 0.06, cr[3] + 0.05));
     }
     const goods = el.goods ?? ['pots', 'yam', 'cloth', 'pepper'][Math.floor(rv() * 4)];
     if (el.goods) rv();
@@ -132,12 +134,12 @@ function house(el, ctx) {
       if (goods === 'pots') pot(ctx, gx, Yf + 1.06, gz, 0.14, 0.26, i % 2 ? 'pottery_dark' : 'terracotta');
       else if (goods === 'yam') bag.add('tuff_red', rod([gx - 0.18, Yf + 1.12, gz], [gx + 0.18, Yf + 1.2, gz], 0.08, 5));
       else if (goods === 'cloth') bag.add(['cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_green', 'cloth_blue', 'cloth_maroon'][i], box(gx - 0.18, Yf + 1.06, gz - 0.2, gx + 0.18, Yf + 1.2 + (i % 3) * 0.05, gz + 0.2));
-      else if (goods === 'oil') { pot(ctx, gx, Yf + 1.06, gz, 0.15, 0.3, 'terracotta'); bag.add('wicker', lathe([[0.001, 0], [0.1, 0.03], [0.14, 0.11], [0.09, 0.17], [0.001, 0.15]], 7, null, gx + 0.2, Yf + 1.06, gz + 0.12)); }
-      else if (goods === 'kola') bag.add('wicker', lathe([[0.001, Yf + 1.06], [0.2, Yf + 1.08], [0.24, Yf + 1.2], [0.16, Yf + 1.26], [0.001, Yf + 1.24]], 8, null, gx, 0, gz));
-      else if (goods === 'brass') bag.add('bronze', lathe([[0.1, Yf + 1.06], [0.13, Yf + 1.09], [0.13, Yf + 1.15 + (i % 3) * 0.04], [0.09, Yf + 1.18 + (i % 3) * 0.04], [0.001, Yf + 1.2 + (i % 3) * 0.04]], 8, null, gx, 0, gz));
+      else if (goods === 'oil') { const k = h2(gx, gz); pot(ctx, gx, Yf + 1.06, gz, 0.14 + 0.02 * k, 0.28 + 0.05 * h2(gx, gz, 1), 'terracotta'); bag.add('wicker', lathe([[0.001, 0], [0.09 + 0.02 * k, 0.03], [0.13 + 0.02 * k, 0.11], [0.08 + 0.02 * k, 0.16 + 0.02 * k], [0.001, 0.15]], 7, null, gx + 0.2, Yf + 1.06, gz + 0.12)); }
+      else if (goods === 'kola') { const k = h2(gx, gz); bag.add('wicker', lathe([[0.001, Yf + 1.06], [0.18 + 0.04 * k, Yf + 1.08], [0.22 + 0.05 * k, Yf + 1.2], [0.15 + 0.03 * k, Yf + 1.26 + 0.02 * k], [0.001, Yf + 1.24 + 0.02 * k]], 8, null, gx, 0, gz)); }
+      else if (goods === 'brass') { const k = h2(gx, gz); bag.add('bronze', lathe([[0.1 + 0.02 * k, Yf + 1.06], [0.13 + 0.02 * k, Yf + 1.09], [0.13 + 0.02 * k, Yf + 1.15 + 0.05 * k], [0.09, Yf + 1.18 + 0.05 * k], [0.001, Yf + 1.2 + 0.05 * k]], 8, null, gx, 0, gz)); }
       else bag.add('wall_red', lathe([[0.2, Yf + 1.06], [0.12, Yf + 1.2], [0.001, Yf + 1.3]], 7, null, gx, 0, gz));
     }
-    const sh = (u0, u1) => { const r = rr(u0, 3.8, u1, 4.3); bag.add('timber', box(r[0], Yf + 1.2, r[1], r[2], Yf + 1.26, r[3])); bag.add('timber', box(r[0], Yf + 1.9, r[1], r[2], Yf + 1.96, r[3])); };
+    const sh = (u0, u1) => { const r = rr(u0, 3.8, u1 - 0.4 * h2(el.rect[0] + u0, el.rect[1], 7), 4.3 + 0.1 * h2(el.rect[0], el.rect[1] + u1, 8)); bag.add('timber', box(r[0], Yf + 1.2, r[1], r[2], Yf + 1.26, r[3])); bag.add('timber', box(r[0], Yf + 1.9, r[1], r[2], Yf + 1.96, r[3])); };
     sh(0.7, Math.min(dc - wide / 2, 3.5)); if (L - 0.7 > dc + wide / 2) sh(dc + wide / 2, L - 0.7);
   }
   // ── the room behind the street front, by its kind: beds, stools, chests, a hearth, pots, calabashes, mats, cloth on pegs ──
