@@ -7,6 +7,7 @@ import './nightlight.js';
 import { lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { hashAt } from './nightlight.js';
+import { ROAD, height } from './layout.js';
 
 const frame = (c, yaw) => { const ca = Math.cos(yaw), sa = Math.sin(yaw); return (u, v) => [c[0] + u * ca + v * sa, c[1] - u * sa + v * ca]; };
 /** Ash and charcoal thrown out round an oven or hearth at (x, y, z): a ragged annulus of dark ash-and-charcoal earth from the ring's stones out. */
@@ -16,12 +17,12 @@ function ash(bag, x, y, z, r0, r1) {
   bag.add('bark_dark', lathe([[r0 * 1.56, 0.05], [r0 * 1.5, 0.057], [r0 * 1.02, 0.057]], 12, (t, i) => 0.7 + 0.45 * Math.abs(Math.sin(t * 2 + j * 1.3 + i * 0.3)), x, y, z));
 }
 /** A trodden way along a line: a run of ragged patches of darker earth of different sizes, strewn a little either side of the line, not a stripe. */
-function tread(bag, a, b, y, w, seed) {
+function tread(bag, a, b, y, w, seed, mat = 'bark_dark', rs = 1) {
   const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, n = Math.max(3, Math.round(L / 0.45));
   for (let k = 0; k < n; k++) {
-    const t = (k + 0.5) / n + (hashAt(a[0], a[1], seed + k) - 0.5) * 0.5 / n, side = (hashAt(b[0], b[1], seed + k * 3) - 0.5) * w * 0.8, r = 0.16 + 0.2 * hashAt(a[1], b[0], seed + k * 7);
+    const t = (k + 0.5) / n + (hashAt(a[0], a[1], seed + k) - 0.5) * 0.5 / n, side = (hashAt(b[0], b[1], seed + k * 3) - 0.5) * w * 0.8, r = (0.16 + 0.2 * hashAt(a[1], b[0], seed + k * 7)) * rs;
     const x = a[0] + dx * t - dz / L * side, z = a[1] + dz * t + dx / L * side, ph = k * 1.7 + seed;
-    bag.add('bark_dark', lathe([[r * 1.08, -0.003], [r, 0.0], [0.001, 0.0]], 9, (th) => 1 + 0.3 * Math.sin(th * 3 + ph) + 0.12 * Math.sin(th * 5 + ph * 2)).scale(1, 1, 0.7 + 0.5 * hashAt(x, z, seed)).translate(x, y + k * 0.0006, z));
+    bag.add(mat, lathe([[r * 1.08, -0.003], [r, 0.0], [0.001, 0.0]], 9, (th) => 1 + 0.3 * Math.sin(th * 3 + ph) + 0.12 * Math.sin(th * 5 + ph * 2)).scale(1, 1, 0.7 + 0.5 * hashAt(x, z, seed)).translate(x, y + k * 0.0006, z));
   }
 }
 const wrap = (fn, wear) => function worn(el, ctx) { const r = fn.call(this, el, ctx); if (ctx?.bag && !el.strip) wear(el, ctx.bag); return r; };
@@ -48,7 +49,17 @@ export function registerWear() {
     tread(bag, P(0, -W / 2 + 0.2), P(-2.2, 0.0), y0 + 0.088, 0.9, 8);
     const [hx, hz] = P(-3, 0); bag.add('bark_dark', lathe([[1.16, 0.077], [1.1, 0.083], [0.55, 0.083]], 14, (t) => 0.8 + 0.3 * Math.abs(Math.sin(t * 2.1 + 1.7)), hx, y0, hz));
   });
-  E.plaza_dress = wrap(E.plaza_dress, (el, bag) => { const y0 = el.y ?? 0.12; for (const [x, z] of [[-34, 71], [37, 69], [-16, 94]]) ash(bag, x, y0 - 0.02, z, 1.4, 2.1); });
+  E.plaza_dress = wrap(E.plaza_dress, (el, bag) => {
+    const y0 = el.y ?? 0.12; for (const [x, z] of [[-34, 71], [37, 69], [-16, 94]]) ash(bag, x, y0 - 0.02, z, 1.4, 2.1);
+    // the statue road's last stretch: the earth beaten dark by the hauling teams and the sledge-less drag, along the way into the village [inferred]
+    for (let i = ROAD.length - 3; i < ROAD.length - 1; i++) {
+      const [ax, az] = ROAD[i], [bx, bz] = ROAD[i + 1], L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / 1.6);
+      for (let k = 0; k < n; k++) {
+        const t0 = k / n, t1 = (k + 1) / n, a = [ax + (bx - ax) * t0, az + (bz - az) * t0], b = [ax + (bx - ax) * t1, az + (bz - az) * t1];
+        tread(bag, a, b, height((a[0] + b[0]) / 2, (a[1] + b[1]) / 2) + 0.02, 3.4, 40 + i * 50 + k, 'hide_brown', 0.8);
+      }
+    }
+  });
   E.approach_dress = wrap(E.approach_dress, (el, bag) => ash(bag, 8, el.ground(8, 60) - 0.02, 60, 0.9, 1.5));
 }
 registerWear();

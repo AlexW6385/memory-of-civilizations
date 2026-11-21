@@ -78,14 +78,14 @@ export async function town() {
     if (h.chief || h === strip || k % 3) return;
     const dv = -h.w / 2 - 1.9;
     const a = L2W(h, (rand() - 0.5) * 1.5, dv - 0.8); fig({ at: a, y: y(a), rot: face(a, L2W(h, 0, 0)) + Math.PI, pose: rand() < 0.6 ? 'squat' : 'sit_ground' });
-    if (rand() < 0.5) { const ou = h.len * 0.3 * (h.seed % 2 ? -1 : 1), b = L2W(h, ou + 0.95, -h.w / 2 - 2.4); fig({ at: b, y: y(b), rot: face(b, L2W(h, ou, -h.w / 2 - 2.4)), pose: 'squat', man: false }); }
+    if (rand() < 0.5) { const ou = h.len * 0.3 * (h.seed % 2 ? -1 : 1), b = L2W(h, ou + 0.95, -h.w / 2 - 2.4); fig({ at: b, y: y(b), rot: face(b, L2W(h, ou, -h.w / 2 - 2.4)), pose: 'squat', man: false, nightKeep: 1 }); }
   });
   for (const m of v.moa) for (const s of [-1, 1]) if (rand() < 0.7) { const at = [m.c[0] + s * 2.4, m.c[1] + (rand() - 0.5) * 2]; P.push({ t: 'chickens', at, y: y(at), n: 3 + Math.floor(rand() * 3), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) }); }
   // inside the houses, someone at the work of each; chickens in the yards (§4f)
   v.houses.forEach((h) => {
     if (!h.inside) return;
     const [u, vv, pose, tu, tv] = { sleep: [-1.9, 0.85, 'squat', -1.9, 0], cook: [4.0, 1.4, 'squat', 4.0, 0.3], net: [3.9, 0.55, 'sit_ground', 3.9, 1.05], tapa: [3.75, -0.8, 'squat', 3.75, -0.1], carver: [4.3, -0.6, 'sit_ground', 3.4, 0.05] }[h.kind];
-    const at = L2W(h, u, vv); fig({ at, y: y(at) + 0.07, rot: face(at, L2W(h, tu, tv)), pose, man: h.kind === 'net' || h.kind === 'carver' });
+    const at = L2W(h, u, vv); fig({ at, y: y(at) + 0.07, rot: face(at, L2W(h, tu, tv)), pose, man: h.kind === 'net' || h.kind === 'carver', ...(h.kind === 'cook' ? { nightKeep: 1 } : {}) });
   });
   v.houses.forEach((h, k) => {
     if (h.chief || h === strip || k % 5 > 2) return;
@@ -95,13 +95,13 @@ export async function town() {
   // two at the hearth, children playing a string game (kai-kai) — the first people the visitor meets, ten to twenty metres off
   E.push({ t: 'approach_dress', ground: height, seed: 12 });
   { const at = (x, z, o) => fig({ at: [x, z], y: y([x, z]), ...o });
-    at(-12.5, 55.2, { rot: face([-12.5, 55.2], [-12.5, 54]), pose: 'squat', man: false });
+    at(-12.5, 55.2, { rot: face([-12.5, 55.2], [-12.5, 54]), pose: 'squat', man: false, nightKeep: 1 });
     at(-15.4, 57.4, { rot: face([-15.4, 57.4], [-12.5, 54]) + 0.4, pose: 'sit_ground', man: false });
     at(-8.6, 53.2, { rot: face([-8.6, 53.2], [-12.5, 54]), pose: 'stand', man: true });
     at(11.4, 51.0, { rot: face([11.4, 51.0], [11.5, 52.5]), pose: 'squat', man: false });
     at(14.6, 53.6, { rot: face([14.6, 53.6], [11.5, 52.5]), pose: 'sit_ground', man: true });
-    at(6.0, 60.4, { rot: face([6.0, 60.4], [8.0, 60]), pose: 'sit_ground', man: true });
-    at(7.6, 62.0, { rot: face([7.6, 62.0], [8.0, 60]), pose: 'sit_ground', man: false });
+    at(6.0, 60.4, { rot: face([6.0, 60.4], [8.0, 60]), pose: 'sit_ground', man: true, nightKeep: 1 });
+    at(7.6, 62.0, { rot: face([7.6, 62.0], [8.0, 60]), pose: 'sit_ground', man: false, nightKeep: 1 });
     at(10.9, 63.6, { rot: face([10.9, 63.6], [12.0, 64.4]), pose: 'squat', man: true, h: 1.05 });
     at(12.9, 65.0, { rot: face([12.9, 65.0], [10.9, 63.6]), pose: 'squat', man: false, h: 1.0 });
     for (const [cx, cz] of [[14, 57.5], [-5.5, 61], [-18, 50]]) P.push({ t: 'chickens', at: [cx, cz], y: y([cx, cz]), n: 4, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
@@ -137,6 +137,16 @@ export async function town() {
     if (rand() < 0.6) { const b = [x - 1.3, z + 0.8]; fig({ at: b, y: y(b), rot: face(b, [x, z + 6]), pose: 'stand', man: true }); }
   }
   void SEA;
+  // the night's people, added last so that no earlier figure's seed moves: round the fires that burn all night (dossier §11)
+  { const at = (x, z, to, o) => fig({ at: [x, z], y: y([x, z]), rot: face([x, z], to), nightKeep: 1, ...o });
+    at(-14.3, 53.2, [-12.5, 54.6], { pose: 'sit_ground', man: true });
+    at(-10.8, 55.8, [-12.5, 54.6], { pose: 'squat', man: false });
+    at(10.0, 52.2, [11.5, 53.6], { pose: 'sit_ground', man: false });
+    at(13.0, 54.8, [11.5, 53.6], { pose: 'sit_ground', man: true });
+    at(74.2, 147.6, [76.5, 148.8], { pose: 'sit_ground', man: true });
+    at(78.6, 150.2, [76.5, 148.8], { pose: 'squat', man: true });
+    at(-35.5, 73.2, [-34, 71], { pose: 'squat', man: true });
+    at(36.0, 66.9, [37, 69], { pose: 'squat', man: false }); }
   // the crater lake of Rano Raraku (the sea round the island is the planet's: ground.js, sea)
   const [lx, lz] = RARAKU.c, lr = RARAKU.crater;
   const lake = plan('rapa-nui-crater-lake', 'ming', [{ t: 'water_cells', rect: [lx - lr, lz - lr, lx + lr, lz + lr], y: RARAKU.lake, cell: 1, inside: (x, z) => Math.hypot(x - lx, z - lz) < lr && height(x, z) < RARAKU.lake }]);
