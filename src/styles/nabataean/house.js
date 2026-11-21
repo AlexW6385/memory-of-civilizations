@@ -5,7 +5,7 @@
 // the roof). Walls are the stone as it was laid; a stuccoed cornice band, a parapet with crow-step corners, scuppers.
 // The inside of both can be walked and is furnished (src/settlements/petra/shops.js `houseLife`, from `houseLayout`).
 
-import { box, lathe } from '../../core/geom.js';
+import { box, lathe, fromTriangles, orientOutward, quad } from '../../core/geom.js';
 
 const A = 'sandstone_rose_ashlar', W = 'sandstone_white', PL = 'plaster', TI = 'timber', FL = 'flagstone', RD = 'stucco_red', TC = 'terracotta';
 const T = 0.55, DOOR = 1.3, DOOR_H = 2.35, RISER = 0.26, TREAD = 0.25;
@@ -73,6 +73,23 @@ function frame(L, bag, axis, c, dir, h, sill) {
   if (sill) g(a0 - 0.12, a1 + 0.12, y0 - 0.12, y0, 0.13);
 }
 
+
+/**
+ * A timber door leaf standing ajar on the inside of an opened doorway [inferred: houses were lived in]: hinged at the jamb of the
+ * opening [a0, a1] (the side by the house's seed), swung about 60 degrees into the room, 0.05 thick, a hand's breadth above the sill.
+ * `v` the wall's inner face in the house's frame, `dir` into the room (+1 or -1). It has no collider: it stands beside the walker's lane.
+ */
+function leaf(L, bag, a0, a1, v, dir, yb, h, seedAdd = 0) {
+  const side = ((L.seed + seedAdd) & 1) ? 1 : -1, hu = side > 0 ? a1 - 0.03 : a0 + 0.03, len = Math.min(0.62, (a1 - a0) / 2 - 0.1);
+  const du = -side * len * 0.5, dv = dir * len * 0.866, tu = -dv / len * 0.025 * 1, tv = du / len * 0.025;      // (the leaf's thickness across its run)
+  const pt = (u, vv, y) => { const [x, z] = L.P(u, vv); return [x, y, z]; };
+  const c = [];
+  for (const y of [yb, yb + h]) for (const [u, vv] of [[hu - tu, v - tv], [hu + tu, v + tv], [hu + du + tu, v + dv + tv], [hu + du - tu, v + dv - tv]]) c.push(pt(u, vv, y));
+  const t = [];
+  quad(t, c[0], c[1], c[2], c[3]); quad(t, c[7], c[6], c[5], c[4]);
+  for (let i = 0; i < 4; i++) quad(t, c[i], c[(i + 1) % 4], c[4 + (i + 1) % 4], c[4 + i]);
+  bag.add(TI, fromTriangles(orientOutward(t)));
+}
 
 /** The stoop: two more steps going down from the doorstep (0.22 each, 0.5 deep), for ground that falls away in front. */
 function stoop(L, bag, C, u, w) {
@@ -206,6 +223,7 @@ export function house(el, { bag, col: C, lights }) {
     // (the step before the door and the door's sill)
     { const r = L.Rc(d.u - d.w / 2 - 0.1, -0.5, d.u + d.w / 2 + 0.1, T); bag.add(A, box(r[0], y - 0.6, r[1], r[2], y + 0.08, r[3])); C.floor(r, y + 0.08); }
     stoop(L, bag, C, d.u, d.w);
+    leaf(L, bag, d.u - d.w / 2, d.u + d.w / 2, T, 1, y + 0.06, DOOR_H - 0.1);
     // the interior: floor, timber ceiling with its beams, the roof block above
     const ri = L.room.rect, rc = L.Rc(...ri);
     bag.add(FL, box(rc[0], y - 0.3, rc[1], rc[2], y + 0.03, rc[3])); C.floor(rc, y + 0.03);
@@ -244,6 +262,7 @@ export function house(el, { bag, col: C, lights }) {
   frame(L, bag, 'u', 0, -1, gate, false);
   { const r = L.Rc(g.u - g.w / 2 - 0.1, -0.5, g.u + g.w / 2 + 0.1, T); bag.add(A, box(r[0], y - 0.6, r[1], r[2], y + 0.08, r[3])); C.floor(r, y + 0.08); }
   stoop(L, bag, C, g.u, g.w);
+  leaf(L, bag, g.u - g.w / 2, g.u + g.w / 2, T, 1, y + 0.06, g.h - 0.1, 1);
   // the court's floor of flagstones, the cistern's lid and mouth, the oven by the side wall
   { const r = L.Rc(T, T, Wd - T, R0); bag.add(FL, box(r[0], y - 0.3, r[1], r[2], y + 0.03, r[3])); C.floor(r, y + 0.03); }
   { const [cx, cz] = L.P(L.court.cx, L.court.cz);
@@ -257,6 +276,7 @@ export function house(el, { bag, col: C, lights }) {
   run(L, bag, C, A, 'v', R0 + T, D - T, 0, T, y0, y + hr, [win((R0 + D) / 2, 1.5, 0.5, 0.8)]);
   run(L, bag, C, A, 'v', R0 + T, D - T, Wd - T, Wd, y0, y + hr);
   frame(L, bag, 'u', R0, 1, door, false);
+  leaf(L, bag, door.a0, door.a1, R0 + T, 1, y + 0.06, DOOR_H - 0.1, 2);
   for (const h of wins) frame(L, bag, 'u', R0, 1, h, true);
   { const rc = L.Rc(...L.room.rect);
     bag.add(FL, box(rc[0], y - 0.3, rc[1], rc[2], y + 0.03, rc[3])); C.floor(rc, y + 0.03);
