@@ -162,3 +162,9 @@ export function shelterSpots() {
 
 /** Half-width and half-depth of each walk-in shelter's footprint (the style's HOUSE, copied here so that the sound map needs no three.js). */
 export const HOUSE_SIZE = { bark: { hw: 1.9, hd: 2.3 }, dome: { hw: 2.0, hd: 2.0 }, shade: { hw: 2.3, hd: 1.9 } };
+
+/** The dingoes lying at the camps, under the overhang and on the apron: [x, z] (rigged critters in fauna.js: they lift their heads and stand as the visitor comes near). */
+export const DINGOES = [
+  ...CAMPS.flatMap((C) => [[C.fire[0] + 2.0, C.fire[1] + 0.2], [C.fire[0] - 3.2, C.fire[1] - 1.0]]),
+  [-14, -29.6], [14, -29.6], [-52, -32], [15.0, -22.6], [-17.2, -26.4], [3.8, -24.6],
+].filter(([x, z]) => !HOUSES.some((H) => Math.hypot(x - H.at[0], z - H.at[1]) < 3.2));

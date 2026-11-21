@@ -31,7 +31,7 @@ export async function town() {
     woman([fx - 0.4, fz + 1.5], y, 3.0, { pose: 'kneel', over: 'none' });
     man([fx + 2.4, fz - 0.8], y, 2.0, { pose: 'talk' });
     L.push({ t: 'figure', at: [fx + 1.7, fz + 1.2], y, rot: 4, seed: 70 + i, dress: 'loincloth', cloth: 'cloth_brown', skin: 'skin_dark', child: true, h: 1.05, hair: 'short', feet: 'bare', over: 'none' });
-    L.push({ t: 'animal', kind: 'dog', at: [fx + 2.0, fz + 0.2], y, rot: rand() * 6.28, seed: 5 + i });
+    rand();      // (the camp's dingo is a critter now: keeps the sequence)
   });
   // the shelters' floors: people before the paintings, looking up at them
   for (const [S, n] of [[MAIN, 3], [SMALL, 1]]) for (let k = 0; k < n; k++) {
@@ -96,7 +96,7 @@ export async function town() {
     if (i % 2 === 0) { if (!HOUSES.some((h) => C.hut && h.at[0] === C.hut[0])) put('bed', C.hut ? C.hut[0] - fx : -3, C.hut ? C.hut[1] - fz + 2.5 : 4.5, 0.2); put('bark', 2.6, 4.1, 1.0); } else { put('mat', -2.2, 3.6, 0.5); put('yams', 2.0, 3.8, 0.2); }
     if (C.fish || i === 2) put('trap', 3.2, 3.2, 0.6);
     woman([fx - 2.6, fz + 3.8], height(fx - 2.6, fz + 3.8), 0.4, { pose: i % 2 ? 'sit_ground' : 'kneel' });
-    L.push({ t: 'animal', kind: 'dog', at: [fx - 3.2, fz - 1.0], y: height(fx - 3.2, fz - 1.0), rot: R2() * 6.28, seed: 40 + i });
+    R2();
   });
   // canoes: one poled on the billabong, one drawn up on its west margin, one at the north bank
   const cx0 = POOL.c[0], cz0 = POOL.c[1], wy = POOL.water - 0.1;
@@ -111,12 +111,12 @@ export async function town() {
   // the lookout and the ledges: people sitting on the rock over the plain
   for (const [x, z, y, rot, pose] of [[44, -29, 4.7, Math.PI, 'sit_ground'], [46.2, -28.6, 4.7, Math.PI, 'sit_ground'], [50, -45, 11.3, Math.PI, 'stand'], [56, -44, 11.3, Math.PI, 'talk'], [58.4, -62, 21.1, Math.PI, 'sit_ground'], [60.4, -61, 21.1, Math.PI, 'sit_ground']]) (R2() < 0.5 ? man : woman)([x, z], y, rot, { pose });
   // a dog or two lying in the shade of the overhang, and more geese
-  for (const [x, z] of [[-14, -29.6], [14, -29.6], [-52, -32]]) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: height(x, z), rot: R2() * 6.28, seed: x + 9 });
+  R2(); R2(); R2();      // (the dingoes there are critters now)
   // the apron between the camps, seen whole from the arrival (12-30 m off, none in the lane of the way): work groups at their mats and goods, a dog beside each
   {
     const kid = (x, z, rot, seed, pose = 'sit_ground') => L.push({ t: 'figure', at: [x, z], y: height(x, z), rot, seed, dress: 'loincloth', cloth: 'cloth_brown', skin: 'skin_dark', child: true, h: 0.95 + (seed % 3) * 0.05, pose, hair: 'short', feet: 'bare', over: 'none' });
     const at = (kind, x, z, rot, sd) => K.push({ t: 'ka_item', kind, at: [x, z], y: height(x, z), rot, seed: sd });
-    const dog = (x, z, sd) => L.push({ t: 'animal', kind: 'dog', at: [x, z], y: height(x, z), rot: R2() * 6.28, seed: sd });
+    const dog = () => { R2(); };      // (the dingoes are rigged critters now: fauna.js, DINGOES in layout.js)
     const at2 = (f, x, z, rot, o) => f([x, z], height(x, z), rot, o);
     // west of the lane: a man shaping a spear shaft over a heap of shavings, a woman and a girl splitting pandanus leaf for the mat
     at('spears', -9.8, -26.0, 0.4, 61); at2(man, -8.4, -25.4, -0.6, { pose: 'sit_ground', beard: true }); at('wood', -7.6, -24.6, 0.9, 62);

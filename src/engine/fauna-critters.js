@@ -31,6 +31,7 @@ Object.assign(MODEL_KIND, { camel_dun: 'dog', camel_dark: 'dog' });   // (Dunhua
 Object.assign(MODEL_KIND, { pig_black: 'dog', pig_spotted: 'dog', cow_bali: 'dog' });   // (the Balinese village's pigs and cattle lie down and stand on the dog's rig)
 MODEL_KIND.gull_silver = 'hen';   // (Sydney's silver gulls walk and peck as the fowl do)
 Object.assign(MODEL_KIND, { pig_dark: 'dog', pig_pale: 'dog', rook: 'hen' });   // (Stonehenge's pigs lie down and stand on the dog's rig; its rooks walk and peck as the fowl do)
+MODEL_KIND.goose_magpie = 'hen';   // (Ubirr's magpie geese walk and peck as the fowl do; the model is added from critter-models-kakadu.js)
 /** Out at night too (a cat and a dog asleep, a cage hung out, the craft)? */
 const NIGHT = { cat: 1, dog: 1, cagebird: 1, craft: 1 };
 const REACH = 95;
