@@ -4,7 +4,7 @@ import { RADIUS, ARRIVAL, lots, yards, sabats, shops, tradeOf, SQUARE, SABILS, S
 import { lifePlan } from './life.js';
 import { houseRooms } from './house.js';
 import { pickHomes } from './homes.js';
-import { nightTiles, NIGHT_NEAR, NIGHT_TILE } from './nightlight.js';
+import { nightTiles, NIGHT_NEAR, NIGHT_TILE, SQUARE_FIRES } from './nightlight.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });
 const dist = (l, [x, z]) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
 const TILE = 160;
@@ -52,7 +52,7 @@ export async function town() {
   plans.push({ ...base('mamluk-cairo-sabats', sabats().map((b) => ({ t: 'cairo_sabat', ...b, along: 'z' }))), style: 'mamluk' });
   plans.push({ ...base('mamluk-cairo-square', [{ t: 'cairo_square', rect: SQUARE, y: 0, seed: 1363,
     troughs: [[130, -52, 0], [150, 72, 0], [106, -62, 0]], tents: [[140, -30], [124, 8], [152, 42]], fodder: [[160, -62], [163, -22], [100, 98]],
-    palms: [-70, -50, -30, -10, 10, 30, 50, 70, 90, 110].map((z) => [83.5, z]).concat([[100, -77], [130, -77], [160, -77], [168, 100], [168, 20], [168, -40]]), figs: [[168, -70], [120, -76], [165, 90]] }]), style: 'mamluk', bounds: [SQUARE[0] - 3, SQUARE[1] - 3, SQUARE[2] + 3, SQUARE[3] + 3] });
+    palms: [-70, -50, -30, -10, 10, 30, 50, 70, 90, 110].map((z) => [83.5, z]).concat([[100, -77], [130, -77], [160, -77], [168, 100], [168, 20], [168, -40]]), figs: [[168, -70], [120, -76], [165, 90]] }, { t: 'cairo_square_fires', list: SQUARE_FIRES }]), style: 'mamluk', bounds: [SQUARE[0] - 3, SQUARE[1] - 3, SQUARE[2] + 3, SQUARE[3] + 3] });
   const sabils = [...taken].map(([l, [x, z]]) => {
     const [x0, z0, x1, z1] = l.rect, sx = Math.abs(x - x1) < Math.abs(x - x0) ? 1 : -1, sz = Math.abs(z - z1) < Math.abs(z - z0) ? 1 : -1;
     const w = Math.min(8, x1 - x0), d = Math.min(8, z1 - z0), r = [sx > 0 ? x1 - w : x0, sz > 0 ? z1 - d : z0, sx > 0 ? x1 : x0 + w, sz > 0 ? z1 : z0 + d];
