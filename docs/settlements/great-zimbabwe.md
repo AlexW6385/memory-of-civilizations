@@ -183,3 +183,12 @@ All voices are synthesised (no recordings); names begin `gz` (`src/engine/voices
 - **Herd calls** from the kraals (`gzHerdCall`); **the southern ground hornbill's** booming at dawn (`gzHornbill`); **nightjars** and **a hyena's** whoop (`gzNightjar`, `gzHyena`) at night, out on the hill's edge [the species of the Zimbabwe plateau, call timing inferred].
 - **Rooms.** The open houses have a room's tone (kitchen, store, spinner's, sleeping house) from the plank of the house's seed, as `hutInside` furnishes them; the grass before the entrance is the open. No canal, pond, bridge or street walker is asked of the map, and no wells: none are on the disc.
 - **Measured, not heard.** `tools/sound-render.mjs` renders each voice offline and measures it (centroid, bands, envelope, onsets); nobody has listened to them. `tests/great-zimbabwe-sound.test.mjs` checks that every voice exists and can be made, that the map agrees with the settlement, and that each sound comes at its place, hour and weather.
+
+### 19.4 Animals as critters
+
+`fauna.js` lists `critters` (one mesh and one draw for all of them; models are those already in `critter-models.js`, none added). Placing is by yard, off the lanes a visitor walks (`yardFree`, and not within 1.6 m of a house wall).
+- **Fowls** (a rooster, two brown hens and a white one) scratch in the yards of the homesteads nearest the arrival, in the free sector between doors [fowls kept in Shona yards stated for later practice; the placing inferred].
+- **Goats** (black and white) stand by the houses of every third nearby homestead and two in each of the three kraals [goats are the household's small stock; placing inferred]. They lie down and stand as the visitor comes near.
+- **A dog** sleeps on the forecourt beside the east watch-fire, off the entrance's lane [inferred].
+- **Not made:** no cats (none stated on the plateau), no pigeons or ducks, no swallow nest (the walk's houses have no eave low enough to carry one; the swallows of §15 stay as flights).
+- Checked by `tests/great-zimbabwe-critters.test.mjs`: every model known, none in a house or on a walk route, fowls stay in their yard, the dog and goats answer the visitor. Main draws at the arrival unchanged (191).
