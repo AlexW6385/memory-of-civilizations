@@ -111,7 +111,8 @@ function house(el, ctx) {
   const lint = 2.1, top = 2.95;
   doorway(padd, wood, dw, pw, lint, top, rand, el.landmark ? 2 : 1);
   carved(padd, top, el.landmark ? 7.6 : (el.pole ?? 5.8) , 0.72, 0.55, wood, el.seed * 7 + 3, true, el.landmark ? 2 : 1);
-  for (const s of [-1, 1]) rectL(s > 0 ? dw : -pw, pz - 0.8, s > 0 ? pw : -dw, pz + 0.8, g, g + top);
+  // the pillars' colliders stand 0.8 m off the middle: a clear way 1.6 m wide for the walker (the carved opening itself is 1.0 m)
+  for (const s of [-1, 1]) rectL(s > 0 ? 0.8 : -pw - 0.3, pz - 0.8, s > 0 ? pw + 0.3 : -0.8, pz + 0.8, g, g + top);
   houseFront(el, { bag, add, col, W, segL, rectL, rand, hw, hd, g, yTop, ridgeY, eaveY, R, vF, vB, yAt, hole, pz, dw, pw });
   // the doorway's floor board and the dark board that shuts it in the other houses
   if (!el.tiers) { add('lacquer_black', box(-dw, 0, -hd, dw, doorTop, -hd + 0.12)); segL([-dw, -hd + 0.05], [dw, -hd + 0.05], 0.1, -0.3, doorTop); }
@@ -119,7 +120,7 @@ function house(el, ctx) {
   const wl = (a, b) => segL(a, b, wt, -0.3, yTop);
   wl([-hw + wt / 2, -hd], [-hw + wt / 2, hd]); wl([hw - wt / 2, -hd], [hw - wt / 2, hd]);
   wl([-hw, hd - wt / 2], [hw, hd - wt / 2]);
-  wl([-hw, -hd + wt / 2], [-dw, -hd + wt / 2]); wl([dw, -hd + wt / 2], [hw, -hd + wt / 2]);
+  wl([-hw, -hd + wt / 2], [-0.8, -hd + wt / 2]); wl([0.8, -hd + wt / 2], [hw, -hd + wt / 2]);
   if (!el.tiers) return;
 
   // ── the landmark's inside ────────────────────────────────────────────────────────────────

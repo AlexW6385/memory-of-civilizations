@@ -151,3 +151,44 @@ Sources: the ones already cited (tota.world, Canadian Encyclopedia, worldheritag
 - **House fronts**: the formline painting is now built in relief on the front wall and gable (the great eye, bands running up the slopes, eyes with brows and U-forms either side of the door, red fields in black frames), three designs by seed, the landmark's the richest; the beam ends of the gable stand out under the eave as round logs with black ends and red hearts. [inferred: Haida house fronts carried painted designs; the beam ends are the visible ends of the lengthwise beams]
 - **Canoe prows**: the bow piece is a thick stem curving forward and up to a carved head (snout, ears, eyes) with the formline eye in relief on each cheek, replacing the flat plate. [inferred]
 - **Departures**: none from the dossier's stated choices; the carvings stay generic. Still open: gable eye behind the landmark's pole is hidden from the front; the house posts' beings are generic.
+
+## 11. Matching the reference (Suzhou): the walk, the night, the sound, the animals, wear
+
+Method: docs/suzhou-method.md. The shell cannot reach the sources, so everything below rests on the sections above and on the standard ethnographies (Swanton 1905; Dawson 1880; MacDonald 1983; Stewart, *Cedar*, 1984), not re-read; it is [inferred] unless a cited line says [stated]. Respect holds: nothing here depicts a ceremony, a crest, a burial or a sacred object; no text is written (the Haida of 1850 had no writing; §11e).
+
+### 11a. The visitor's walk
+
+- There are no shops, stalls or script in a Haida village; the "shops and houses" of the reference are the plank houses, their hearths, the canoe beach and the work places of the street (§5a, §5b). All seventeen houses were already open and furnished; this pass adds the walk. [decision]
+- **The walk:** from the beach top before the landmark (arrival) across the street to the frontal pole, through the oval door at its foot, down the tiers to the hearth; and the same way into ten more houses of the row (nine others, six north and four south of the landmark), each a route in the landmark plan that `tools/walk-check.mjs` follows (eleven routes in all). [inferred: the way a visitor goes in]
+- The lane from the street to each door (a strip 1.4 m wide, 9.5 m long from the pole) is kept clear of benches, fires, frames, tubs and stacks, so the way in is never a prop; the pillars' colliders stand 0.8 m off the middle of the door (a clear way 1.6 m wide; the carved opening is 1.0 m, the walker's body needs the margin). [decision]
+- The houses at the south end (13–15) stand over the shore's drop and their lanes cross the beach edge: their interiors are open but they are not in the walk-check routes. [limit]
+
+### 11b. Night
+
+- What lit the village at night: fire only, in 1850 [inferred: the hearth in the pit of every house, "the fire burns on bare earth or in a box of rocks" (tota.world, §4a); the open fires of the street (§5a); a pitch-wood torch for spearing fish from a canoe by night, which the ethnographies record for the coast in general, not for this village]. No lamp, no candle, no glass. The houses' fires are not let out in the wet; some are banked low for the night, the landmark's burns high. [inferred]
+- Built (`src/settlements/sgang-gwaay/nightlight.js`, the engine's additive `halo` material, wrapping the haida style's elements from outside): in every house the fire's ball of light and its pool in the pit, the lit underside of the roof, the smoke hole glowing on the roof, the lit opening in the pole's foot and its spill on the street; at each open street fire a ball and a pool; a torch and its light at the bow of about half the moored canoes. Hearth strength varies by the house's own position (no counters, no Math.random). [inferred]
+
+### 11c. Sound
+
+No recording of the village exists; the map is [inferred] from the places and works of §5, §9 and the ethnographies named above. Voices are synthesised (`src/engine/voices-sgang.js`, every name prefixed `sga`); places are in `src/settlements/sgang-gwaay/soundmap.js`; test `tests/sgang-gwaay-sound.test.mjs`. Measured offline with `tools/sound-render.mjs` (not heard): the box drum's weight at 109 Hz (97% of its energy under 300 Hz), the singing between F2 and D#3 in five-note steps, the adze at 220 Hz with chip ticks, the raven's croak peaking near 670 Hz.
+
+- **Water:** surf on the pebbles in thirty-metre reaches along the whole beach, louder in the autumn and winter gales; the drip of the forest off the boughs behind the row, day and night, in rain and after it; rain on the cedar planks (the engine's `shingle` roof, loud inside a big hollow house). [inferred]
+- **Work, by day:** the adze at the canoe log; the maul on wedges in cedar; bark beaten with a grooved beater; split fish cut at the racks; hides scraped in their frames; a paddle laid on a canoe; children at play on the beach. [inferred: §5a, §5b]
+- **Fire:** the crackle at every open fire of the street and in every house's pit, by day and night. [inferred]
+- **The houses:** inside each house the hearth and one kind of work by the house's number (weaving sticks, the cooking box with its hot stones, a hide scraped, bark beaten); the landmark's the fire, and in the evening the box drum with low wordless singing, heard from the street through its doorway. A gathering, not a ceremony: nothing is depicted of one. [inferred: §4b, §9 "a drum and singing from the landmark house"]
+- **Birds and beasts:** ravens about the poles (a croak, a bell-like note), bald eagles' thin piping high up, gulls and wrens from the engine's birds, a sea lion's grunts off the rocks at the north end, a small owl of the islands at night, dogs from the engine's animals. [inferred: species of the coast]
+- Not made: voices as words (none: the language is not ours to speak), bells, any trade-goods sound (a musket, an iron adze's ring) beyond the generic chop.
+
+### 11d. Animals (critters with behaviour)
+
+`src/settlements/sgang-gwaay/fauna.js` `critters` (the engine's rigged small animals, one draw); test `tests/sgang-gwaay-critters.test.mjs`. All [inferred: species of the coast and the dossier's §5, §9; no source read].
+- **Dogs** asleep beside the doorways of two houses in three (off the cleared lane), standing and lifting the head as the visitor nears: the village dogs of §9. [inferred: dogs are in the dossier's §9; the breed is not known]
+- **Ravens** (the rook's rig stands in: the engine has no raven model; same black walking bird, larger beak is missing) and **gulls** walking and pecking at the shell middens, clam baskets and drift logs of the beach top. [inferred: §5a "shell heaps, baskets of clams"]
+- **Geese** on the beach at the north end, a **heron** (the crane's rig) in the shallows there, **cormorants** on the stakes of the fish weirs, **kingfishers** watching the water at the beach edge, **ducks** afloat in the sheltered bay (the brown duck's rig stands in for the harlequins and mergansers of such bays). [inferred: "a sheltered rocky bay"; the weirs of §5a]
+- None of: hen, cat, horse, goat, pig, cattle: not on the island in 1850 [inferred]. Eagles, small birds and fish stay the fauna flights, perches and fish of the existing list.
+- Not rigged: sea lions and seals (no model), bears and deer in the forest, which would not walk the village.
+
+### 11e. Wear and writing
+
+- **Wear** (`src/settlements/sgang-gwaay/wear.js`, wrapping the haida house from outside, in materials the house plan already holds): the door's sill worn dark in the middle of the threshold; the lips of the two tiers worn dark where the family steps down (at the stair's middle). [inferred: the use of a door that serves thirty people; damp, moss, drips, silvering and the soot over the fire were already in §5a, §5c] Trodden-earth patches in the door lanes were tried and taken out: any raised disc on the ground stopped the walker in the collision check (route into house 12).
+- **Writing: none.** The Haida of 1850 kept no written language; the formline paintings and carvings are the marks of the place and stay as §5d (generic, no crest copied). No tablet, sign or inscription is built, and no glyph is written. [stated: no writing system existed before the missionaries' syllabary and orthography of the later century; not cited from a source read here]

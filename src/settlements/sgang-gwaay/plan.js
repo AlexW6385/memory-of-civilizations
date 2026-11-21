@@ -4,6 +4,7 @@
 
 import { RADIUS, G, LANDMARK, houses, tiers, toWorld } from './layout.js';
 
+
 const h = houses()[LANDMARK];
 const hd = h.d / 2;
 const E = [{ t: 'haida_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, age: h.age, ridge: h.ridge, eave: h.eave, seed: h.seed, g: G, landmark: true, tiers: tiers(h) }];
@@ -14,6 +15,12 @@ const rooms = [room('house', [Math.min(ax, bx), Math.min(az, bz), Math.max(ax, b
 const P = (u, v) => toWorld(h, u, v);
 const walks = [[P(0, -hd - 6), P(0, -hd - 1.5), P(0, -hd + 1.0), P(0, -hd + 3.2), P(0, 0), P(0, 3.9), P(0, hd - 2.6)]];
 walks[0].y0 = G;
+// the visitor's walk into nine more of the row's houses: from the street before the frontal pole, through the oval door at its foot, down the tiers to the hearth and on to the back
+for (const k of [2, 3, 5, 6, 10, 11, 4, 7, 9, 12]) {
+  const o = houses()[k], Q = (u, v) => toWorld(o, u, v), od = o.d / 2;
+  const w = [Q(0, -od - 6), Q(0, -od - 1.5), Q(0, -od + 1.0), Q(0, -od + 3.2), Q(-1.5, -od + 4.4)];
+  w.y0 = G; walks.push(w);
+}
 
 export const house = {
   id: 'sgang-gwaay-house',
