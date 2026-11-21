@@ -11,6 +11,7 @@
 import { box, lathe, frustum, clothBox, addCloth } from '../../core/geom.js';
 import { faceFrame, Local, ext, archOutline, voussoirs, wrect, toW } from '../renaissance/face.js';
 import { openUp, planUp } from './upstairs.js';
+import { letterGeometry, widthOf } from './lettering.js';
 
 const T = 'travertine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -132,6 +133,9 @@ function goods(L, uc, w, y, trade, rand) {
   void rand;
 }
 
+/** The word on a bottega's sign, by trade: ordinary Italian trade words that the Latin capitals can write (no U: V stands for it). [inferred: painted signs in capitals] */
+const SIGNWORD = { grocer: 'OLIO', baker: 'PANE', cloth: 'DRAPPI', wine: 'VINO', apothecary: 'ERBE', osteria: 'OSTERIA', cobbler: 'SCARPE', devotional: 'CORONE' };
+
 /** A bottega's front: the arched opening in its travertine frame, the dark interior, a board folded down as counter with its trade's goods, one leaf of the folding doors against the jamb, a painted board on an iron bracket. */
 function bottega(L, uc, w, o, rand, open) {
   const h = 3.4, round = true;
@@ -156,6 +160,14 @@ function bottega(L, uc, w, o, rand, open) {
   const su = uc + w / 2 + 0.5;
   L.box('iron', su - 0.02, 3.5, 0.02, su + 0.02, 3.54, 0.9); L.box('iron', su - 0.02, 3.3, 0.88, su + 0.02, 3.5, 0.9);
   L.box('wood_painted', su - 0.02, 2.55, 0.5, su + 0.02, 3.3, 1.3); L.box({ grocer: 'cloth_red', baker: 'cloth_ochre', cloth: 'cloth_blue', wine: 'cloth_green', apothecary: 'cloth_white', osteria: 'cloth_maroon', cobbler: 'cloth_brown', devotional: 'cloth_blue' }[o.trade] ?? 'cloth_red', su - 0.03, 2.75, 0.62, su + 0.03, 3.1, 1.18);
+  // the word on the board's two faces, in raised dark capitals (an open shop only: the near copy): the trade's own word in Italian, V for U as in Roman capitals
+  if (open && !o.simple && SIGNWORD[o.trade]) {
+    const word = SIGNWORD[o.trade], h = Math.min(0.15, 0.5 / widthOf(word));
+    for (const sd of [-1, 1]) {
+      const P = (u, v, d) => [su + sd * (0.03 + d), 2.88 + v * h, 0.9 - sd * u * h];
+      const g = letterGeometry(word, h, P, 0.012); if (g) L.add('wood_dark', g);
+    }
+  }
 }
 
 /** The wall fountain in its niche: a scallop-headed travertine niche, the mascherone spouting into a trough, the water falling. */

@@ -220,3 +220,11 @@ Built in `src/styles/baroque/upstairs.js` (the shell, stair, floors, rooms), cal
 - **Wear [inferred]:** the treads of the three flights of the sagrato have polished foot lanes (`marble_smooth` strips, 3 per tread, by the step's place); the retta has two broken lines of coach ruts.
 - **Numbers (main draws / main tris M, before to after):** arrival 265 to 266 / 2.64 to 2.61; steps pose (58,0) 250 to 251 / 2.56 to 2.53; Borgo shop pose (165,6) 192 to 192 / 1.30 to 1.28. geo-one 86.3 MB, 1785 meshes. Checks: surface-check, plan-check, walk-check (39 routes), view-check, disc-check, worker test, sound and critter tests all pass.
 - **Still short:** the walk's gaps from §5b (upper storeys of the shops, outer ring generic, no Borgo music zone) were not touched; the shop's back wall wash is not visible in the render; ruts and lanes are not visible at 30 m (not checked closer); the front's frieze, the obelisk and the drum can be lettered when the wording is fetched from a source; arrival total frame (all cascades) is over 6 M but the main pass is within budget.
+
+
+## 8. Lettering restored after checking (2026-11-21)
+
+- [stated] The frieze of Maderno's front reads IN HONOREM PRINCIPIS APOST PAVLVS V BVRGHESIVS ROMANVS PONT MAX AN MDCXII PONT VII, in letters about a metre high (stpetersbasilica.info guide to the basilica and square; vatican.va "Basilica facade" says the inscription is Paul V's; the wording as transcribed on several photographic records of the front). Restored.
+- [stated] The band at the foot of the dome reads TV ES PETRVS ET SVPER HANC PETRAM AEDIFICABO ECCLESIAM MEAM ET TIBI DABO CLAVES REGNI CAELORVM (Matthew 16:18–19; walksinrome.com "The Dome, St Peter's Basilica"). Restored.
+- [inferred] The Borgo shop boards carry the trade's own word (OLIO, PANE, VINO…), not a name: kept, as on other settlements' boards.
+- The obelisk's four tablets stay plain: their texts were written from memory and are not restored until each is checked against a transcription.

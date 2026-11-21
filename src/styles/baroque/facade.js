@@ -17,7 +17,38 @@ import { human } from '../greek/sculpture.js';
 import { saint } from './piazza.js';
 import { ball, T } from '../qing/carving.js';
 
-const TR = 'travertine', CV = 'limestone_carved', O = 'opening', GB = 'gilt_bronze';
+const TR = 'travertine', CV = 'limestone_carved', O = 'opening', LET = 'bronze', GB = 'gilt_bronze';
+
+// a stroke font for the inscription: each letter as strokes on a 4 × 6 grid ([x0, y0, x1, y1], width 4)
+const F = {
+  A: [[0, 0, 2, 6], [4, 0, 2, 6], [1, 2, 3, 2]], B: [[0, 0, 0, 6], [0, 6, 3, 6], [3, 6, 3.5, 4.5], [3.5, 4.5, 0, 3], [0, 3, 3.6, 1.6], [3.6, 1.6, 3, 0], [3, 0, 0, 0]],
+  C: [[4, 6, 1, 6], [1, 6, 0, 4.5], [0, 4.5, 0, 1.5], [0, 1.5, 1, 0], [1, 0, 4, 0]], D: [[0, 0, 0, 6], [0, 6, 2.5, 6], [2.5, 6, 4, 4.5], [4, 4.5, 4, 1.5], [4, 1.5, 2.5, 0], [2.5, 0, 0, 0]],
+  E: [[0, 0, 0, 6], [0, 6, 4, 6], [0, 3, 3, 3], [0, 0, 4, 0]], G: [[4, 6, 1, 6], [1, 6, 0, 4.5], [0, 4.5, 0, 1.5], [0, 1.5, 1, 0], [1, 0, 4, 0], [4, 0, 4, 2.5], [4, 2.5, 2.5, 2.5]],
+  H: [[0, 0, 0, 6], [4, 0, 4, 6], [0, 3, 4, 3]], I: [[0.6, 0, 0.6, 6]], L: [[0, 6, 0, 0], [0, 0, 4, 0]],
+  M: [[0, 0, 0.5, 6], [0.5, 6, 2, 1.5], [2, 1.5, 3.5, 6], [3.5, 6, 4, 0]], N: [[0, 0, 0, 6], [0, 6, 4, 0], [4, 0, 4, 6]],
+  O: [[1, 0, 0, 1.5], [0, 1.5, 0, 4.5], [0, 4.5, 1, 6], [1, 6, 3, 6], [3, 6, 4, 4.5], [4, 4.5, 4, 1.5], [4, 1.5, 3, 0], [3, 0, 1, 0]],
+  P: [[0, 0, 0, 6], [0, 6, 3, 6], [3, 6, 4, 5], [4, 5, 4, 4], [4, 4, 3, 3], [3, 3, 0, 3]], R: [[0, 0, 0, 6], [0, 6, 3, 6], [3, 6, 4, 5], [4, 5, 4, 4], [4, 4, 3, 3], [3, 3, 0, 3], [1.5, 3, 4, 0]],
+  S: [[4, 6, 1, 6], [1, 6, 0, 5], [0, 5, 0, 4], [0, 4, 4, 2], [4, 2, 4, 1], [4, 1, 3, 0], [3, 0, 0, 0]], T: [[0, 6, 4, 6], [2, 6, 2, 0]],
+  V: [[0, 6, 2, 0], [2, 0, 4, 6]], X: [[0, 0, 4, 6], [0, 6, 4, 0]],
+};
+/** Letters of height hL along u from u0 at y0, raised by t from d0. Returns the length used. */
+function inscribe(Lc, text, u0, y0, hL, d0f, t) {
+  const dAt = typeof d0f === 'function' ? d0f : () => d0f;
+  const k = hL / 6, sw = hL * 0.12; let u = u0;
+  for (const ch of text) {
+    if (ch === ' ') { u += 2.6 * k; continue; }
+    const d0 = dAt(u + 2 * k);
+    if (ch === '·') { Lc.box(LET, u + 0.4 * k, y0 + 2.6 * k, d0, u + 1.2 * k, y0 + 3.4 * k, d0 + t); u += 1.6 * k; continue; }
+    for (const [a, b, c, d] of F[ch] ?? []) {
+      const x0 = u + a * k, yA = y0 + b * k, x1 = u + c * k, yB = y0 + d * k, L = Math.hypot(x1 - x0, yB - yA);
+      if (x0 === x1 || yA === yB) { Lc.add(LET, box(Math.min(x0, x1) - sw / 2, Math.min(yA, yB) - sw / 2, d0, Math.max(x0, x1) + sw / 2, Math.max(yA, yB) + sw / 2, d0 + t)); continue; }
+      const g = box(-sw / 2, -sw / 2, d0, L + sw / 2, sw / 2, d0 + t); g.rotateZ(Math.atan2(yB - yA, x1 - x0)); g.translate(x0, yA, 0); Lc.add(LET, g);
+    }
+    u += (ch === 'I' ? 2.2 : ch === 'M' ? 5.2 : 4.9) * k;
+  }
+  return u - u0;
+}
+const textLength = (text, hL) => { const k = hL / 6; let u = 0; for (const ch of text) u += (ch === ' ' ? 2.6 : ch === '·' ? 1.6 : ch === 'I' ? 2.2 : ch === 'M' ? 5.2 : 4.9) * k; return u; };
 
 /** A Corinthian capital on a column of top radius r at height y (local u, d): two rows of acanthus, the corner volutes, the abacus. */
 function capital(Lc, u, y, d, r, hc) {
@@ -136,7 +167,11 @@ export function stPeterFacade(bag, col, { fx, cz, fw, y, top, open = false }) {
     for (let u = u0 + 0.4; u < u1 - 0.2; u += 1.1) Lc.box(TR, u - 0.22, yE + 3.75 * s, d0 + 0.6, u + 0.22, yE + 4.6 * s, d0 + 1.75);
     Lc.box(TR, u0 - 0.5 * e0, yE + 4.6 * s, d0, u1 + 0.5 * e1, yE1, d0 + 2.0);
   }
-  // (the frieze is left plain: the wording of Paul V's inscription is not verified against a source, docs/settlements/baroque-rome.md §6e)
+  // in three parts, so that no letter straddles the break of the middle
+  const hL = 1.0 * s, yI = yE + 1.35 * s + (1.95 * s - hL) / 2, mid = 'PAVLVS V BVRGHESIVS ROMANVS', left = 'IN HONOREM PRINCIPIS APOST', right = 'PONT MAX AN MDCXII PONT VII';
+  inscribe(Lc, mid, L / 2 - textLength(mid, hL) / 2, yI, hL, P + 0.7, 0.05);
+  inscribe(Lc, left, L / 2 - 12.6 * s - 0.9 - textLength(left, hL), yI, hL, 0.7, 0.05);
+  inscribe(Lc, right, L / 2 + 12.6 * s + 0.9, yI, hL, 0.7, 0.05);
   // the pediment over the middle: its field with the arms, the raking cornices
   const pwd = 15.0 * s, ph = 7.5 * s, py = yE1, uc0 = L / 2;
   Lc.add(TR, ext([[uc0 - pwd, py], [uc0 + pwd, py], [uc0, py + ph]], [], 0, P + 0.6));
