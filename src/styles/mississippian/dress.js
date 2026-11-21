@@ -35,7 +35,7 @@ export function dressHouse({ bag, col }, el, g) {
   const P = (u, v) => [mx + u, f + sg * v];
   const yb = (u, v) => Math.min(y, gy(el, ...P(u, v))) - 0.08;
   // the soot over the door and the marks of the roof's drip: dark and pale clay patches on the walls
-  bag.add('bark_dark', box(mx - 0.55, y + 1.78, Math.min(f + sg * d0, f + sg * dz), mx + 0.55, y + wh - 0.04, Math.max(f + sg * d0, f + sg * dz)));
+  bag.add('bark_dark', box(mx - 0.55, y + (el.open ? 2.4 : 1.78), Math.min(f + sg * d0, f + sg * dz), mx + 0.55, y + wh - 0.04, Math.max(f + sg * d0, f + sg * dz)));
   if (lod < 2) {
     for (let k = 0; k < 3; k++) {
       const w = 0.5 + rand() * 0.7, h = 0.4 + rand() * 0.5, u = (rand() - 0.5) * (x1 - x0 - 1.4) - (Math.abs(rand() - 0.5) < 0.1 ? 1 : 0), yy = y + 0.3 + rand() * (wh - 1.1);
@@ -52,7 +52,7 @@ export function dressHouse({ bag, col }, el, g) {
     return;
   }
   // the porch arbor: two posts, a beam, a shallow lean-to of thatch on poles over the door
-  if (pick(0.38)) {
+  if (pick(0.38) && !el.open) {   // (not over an opened house's door: the walker's head passes under its lintel at 2.1 m, the porch's thatch lay at 2.05)
     const pw = 1.5 + rand() * 0.5, pd = 1.7 + rand() * 0.4, hp = 2.05;
     for (const s of [-1, 1]) { const [px, pz] = P(s * pw, pd); bag.add('timber', rod([px, yb(s * pw, pd) - 0.3, pz], [px, y + hp, pz], 0.075, 7)); col.circle(px, pz, 0.08, y - 0.3, y + hp); }
     const a = P(-pw - 0.35, pd + 0.3), b = P(pw + 0.35, pd + 0.3), c = P(pw + 0.35, -0.1), d = P(-pw - 0.35, -0.1);
@@ -63,7 +63,7 @@ export function dressHouse({ bag, col }, el, g) {
   }
   // jars by the door
   const nj = 1 + Math.floor(rand() * 3);
-  for (let k = 0; k < nj; k++) { const u = side * (0.95 + k * 0.42 + rand() * 0.15), v = 0.3 + rand() * 0.6, p = P(u, v); jar(bag, p[0], yb(u, v), p[1], 0.9 + rand() * 0.9, k === 2 ? 'terracotta' : 'pottery_dark'); }
+  for (let k = 0; k < nj; k++) { const u = side * (0.95 + (el.open ? 0.5 : 0) + k * 0.42 + rand() * 0.15), v = 0.3 + rand() * 0.6, p = P(u, v); jar(bag, p[0], yb(u, v), p[1], 0.9 + rand() * 0.9, k === 2 ? 'terracotta' : 'pottery_dark'); }
   // firewood stacked against a corner of the wall
   if (pick(0.5)) {
     const e = pick(0.5) ? 1 : -1, ex = e > 0 ? x1 - 1.0 : x0 + 1.0, ln = 1.1 + rand() * 0.5;

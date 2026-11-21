@@ -87,8 +87,8 @@ function house(el, ctx) {
  * the bench, the mortar and the arrangement after Southeastern practice].
  */
 function openHouse(el, { bag, col, lights }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1), t = 0.16, F = y + 0.04, top = y + 2.2;
-  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, dw = 0.85, dh = 1.95;
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1), t = 0.16, F = y + 0.04, top = y + 2.6;
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, dw = 1.6, dh = 2.15;   // the doorway 1.6 × 2.0 m clear: the walker's collision raster closes a narrower one
   // the walls, the doorway in the south wall (toward the plaza)
   const W = [[x0, z0, x1, z0 + t], [x0, z0 + t, x0 + t, z1 - t], [x1 - t, z0 + t, x1, z1 - t], [x0, z1 - t, cx - dw / 2, z1], [cx + dw / 2, z1 - t, x1, z1]];
   for (const r of W) { bag.add(WALL, box(r[0], foot, r[1], r[2], top, r[3])); col.rect(r, foot, top); }
@@ -96,7 +96,7 @@ function openHouse(el, { bag, col, lights }) {
   // the earth banked outside, broken at the door; the walls' finish by rule (front.js)
   const fr = frontRule(el.seed || 1, el.lod ?? 0, x1 - x0);
   bankRing(bag, el.rect, foot, fr.fin === 'banked' ? y + 0.9 : y + 0.32, fr.fin === 'banked' ? 0.65 : 0.45, 's', cx, dw / 2);
-  if (fr.fin !== 'plaster') matWalls(bag, el.rect, y, fr.fin === 'banked' ? 0.88 : 0.28, 2.2, { wall: 's', x: cx, hw: dw / 2, top: dh + 0.04 }, 0);
+  if (fr.fin !== 'plaster') matWalls(bag, el.rect, y, fr.fin === 'banked' ? 0.88 : 0.28, 2.6, { wall: 's', x: cx, hw: dw / 2, top: dh + 0.04 }, 0);
   // the door frame: two posts, the lintel pole, the clay step down to the floor
   for (const sd of [-1, 1]) bag.add('timber', box(cx + sd * (dw / 2 + 0.07) - 0.07, foot, z1 - 0.02, cx + sd * (dw / 2 + 0.07) + 0.07, F + dh + 0.12, z1 + 0.14));
   bag.add('timber', box(cx - dw / 2 - 0.2, F + dh, z1 - 0.025, cx + dw / 2 + 0.2, F + dh + 0.14, z1 + 0.145));
@@ -155,7 +155,7 @@ function openHouse(el, { bag, col, lights }) {
     bag.add('linen', rod([hxk, top - 0.1, hzk], [hxk, top - 0.45, hzk], 0.01, 4));
     for (let e = 0; e < 4; e++) { const a = e * 1.57 + k; bag.add(e % 3 ? 'cloth_ochre' : 'paint_ochre', lathe([[0.001, 0], [0.03, 0.04], [0.035, 0.12], [0.02, 0.17], [0.001, 0.18]], 6, null, hxk + Math.cos(a) * 0.05, top - 0.65, hzk + Math.sin(a) * 0.05)); }
   }
-  dressHouse({ bag, col }, el, { x0, z0, x1, z1, y, f: z1, sg: 1, mx: cx, wh: 2.2, rise: 3.0, seed: el.seed, lod: 0, smoke: false, skin: fr.fin !== 'plaster' });
+  dressHouse({ bag, col }, el, { x0, z0, x1, z1, y, f: z1, sg: 1, mx: cx, wh: 2.6, rise: 3.0, seed: el.seed, lod: 0, smoke: false, skin: fr.fin !== 'plaster' });
   furnishKind({ bag, col }, el, { x0, z0, x1, z1, t, F, cx, cz, top, hx, hz }, el.kind || 'cook');
 }
 /**

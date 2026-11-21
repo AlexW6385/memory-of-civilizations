@@ -83,10 +83,13 @@ function fillers() {
 }
 export const PLAZA_STALLS = [[-105, -14, 'shell'], [-105, 28, 'pots'], [-105, 48, 'chert'], [-105, 90, 'hides'], [-105, 112, 'salt'], [105, -14, 'copper'], [105, 28, 'maize'], [105, 48, 'pots'], [105, 90, 'shell'], [105, 112, 'hides'], [-60, 138, 'maize'], [-20, 138, 'chert'], [20, 138, 'salt'], [60, 138, 'copper'], [-66, -30, 'pots'], [66, -30, 'hides']];
 export const PLAZA_ARBORS = [[8, -22, 14, -17], [-65, 104, -59, 109], [73, 120, 79, 125]];
+/** The fire rings beside the two arbors at the plaza's south end, where the watchers of the games sat on into the evening [inferred] (docs §10.2). */
+export const PLAZA_FIRES = PLAZA_ARBORS.slice(1).map(([x0, z0, x1, z1]) => [x1 + 3.2, (z0 + z1) / 2]);
 /** The Grand Plaza's trade and shade: the traders' mats under hide awnings along its edges, the arbors by the chunkey yards. */
 function plazaGoods() {
   const E = PLAZA_STALLS.map(([x, z, kind], i) => ({ t: 'trade_mat', c: [x, z], y: 0, rot: x === -105 ? 0 : x === 105 ? 0 : 1.57, kind, seed: 50 + i }));
   for (const [x0, z0, x1, z1] of PLAZA_ARBORS) E.push({ t: 'shade_arbor', rect: [x0, z0, x1, z1], y: 0 });
+  for (const c of PLAZA_FIRES) E.push({ t: 'yard_fire', c, y: 0, seed: Math.round(c[0] * 3 + c[1]) });
   return [base('cahokia-plaza', E)];
 }
 const FIELD_CELLS = [34, 26];

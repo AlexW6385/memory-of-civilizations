@@ -93,6 +93,7 @@ import * as BHAKTAPUR from '../settlements/bhaktapur/soundmap.js';
 import * as BOROBUDUR from '../settlements/borobudur/soundmap.js';
 import * as BRASILIA from '../settlements/brasilia/soundmap.js';
 import './voices-brasilia.js';
+import * as CAHOKIA from '../settlements/cahokia/soundmap.js';
 import * as CATALHOYUK from '../settlements/catalhoyuk/soundmap.js';
 import * as CHICHEN from '../settlements/chichen-itza/soundmap.js';
 import * as CONQUES from '../settlements/conques/soundmap.js';
@@ -218,7 +219,7 @@ export const PROFILES = {
   barcelona: T(MED, { cicadas: 0.3, animals: withLife({ dog: 0.3, horse: 0.4 }, { market: 0.9, eaves: 1, map: BARCELONA }), bells: 'angelus' }),
   'baroque-rome': T(MED, { cicadas: 0.4, animals: withLife({ horse: 0.5, dog: 0.3, donkey: 0.2 }, { market: 0.9, eaves: 1, map: BAROQUEROME }), bells: 'angelus' }),
   borobudur: T(TROP, { cicadas: 1, frogs: 1, animals: withLife({ rooster: 1, dog: 0.3, cattle: 0.3 }, { market: 0.5, map: BOROBUDUR }), roof: 'thatch' }),
-  cahokia: T(AMER, { cicadas: 0.6, frogs: 0.8, animals: { dog: 0.6 }, roof: 'thatch' }),
+  cahokia: T(AMER, { cicadas: 0.6, frogs: 0.8, animals: withLife({ dog: 0.6 }, { market: 0.5, map: CAHOKIA }), roof: 'thatch' }),
   'chichen-itza': T(TROP, { cicadas: 1, frogs: 0.5, animals: withLife({ dog: 0.4 }, { market: 0.8, map: CHICHEN }), roof: 'thatch' }),
   conques: T(EU, { animals: withLife({ rooster: 0.7, cattle: 0.5, sheepbell: 0.5, dog: 0.3 }, { market: 0.7, map: CONQUES }), roof: 'slate', bells: 'office' }),
   constantinople: T({ ...MED, gull: 0.7 }, { cicadas: 0.5, animals: withLife({ rooster: 0.4, donkey: 0.4, dog: 0.5 }, { market: 0.9, map: CONSTANTINOPLE }), bells: 'semantron' }),
