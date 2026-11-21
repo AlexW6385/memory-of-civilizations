@@ -67,12 +67,12 @@ export function openGround(c) {
   const sh = (kind) => {
     const d1 = PD - 0.2, d0 = 1.4;
     if (kind === 'hall') {
-      // a burgher's front room, the door ajar on it: the trestle table with its benches and a cloth, a dressoir of pots along the wall, a coffer, a hanging
+      // a burgher's front room, the door ajar on it: the trestle table with its benches and a cloth, a dressoir of jugs along the wall, a coffer, a hanging
       B('timber', mu - 0.8, mu + 0.8, 2.3, 3.0, 0.74, 0.8, true); for (const a of [-0.7, 0.7]) B('wood_dark', mu + a - 0.04, mu + a + 0.04, 2.35, 2.95, 0, 0.74);
       for (const s2 of [2.05, 3.25]) B('timber', mu - 0.7, mu + 0.7, s2 - 0.12, s2 + 0.12, 0.42, 0.46, true);
-      B('cloth_red', mu - 0.4, mu + 0.4, 2.45, 2.85, 0.8, 0.815); vase('pottery_dark', mu - 0.3, 2.65, 0.08, 0.22, 0.815); vase('terracotta', mu + 0.25, 2.55, 0.06, 0.12, 0.815); B('hide_tan', mu + 0.0, mu + 0.28, 2.75, 3.0, 0.8, 0.84);
+      B('cloth_red', mu - 0.4, mu + 0.4, 2.45, 2.85, 0.8, 0.815); B('wood_dark', mu - 0.36, mu - 0.24, 2.6, 2.72, 0.815, 1.0); B('wood_dark', mu + 0.2, mu + 0.3, 2.5, 2.6, 0.815, 0.92);   // a jug and a cup (boxes: a lathe shape would cost a draw) B('hide_tan', mu + 0.0, mu + 0.28, 2.75, 3.0, 0.8, 0.84);
       WB('wood_dark', d0, d0 + 1.5, 0, 0.9, 0.45, true); WB('timber', d0 - 0.02, d0 + 1.52, 0.9, 0.95, 0.5); WB('timber', d0, d0 + 1.5, 1.55, 1.6, 0.3);
-      for (let d = d0 + 0.2; d < d0 + 1.4; d += 0.3) { vase(d < d0 + 0.8 ? 'pottery_dark' : 'terracotta', wu + sg * 0.22, d, 0.07, 0.2, 0.95); vase('pottery_dark', wu + sg * 0.15, d + 0.08, 0.06, 0.16, 1.6); }
+      for (let d = d0 + 0.2; d < d0 + 1.4; d += 0.3) { B('wood_dark', wu + sg * 0.1 - 0.07, wu + sg * 0.1 + 0.07, d - 0.07, d + 0.07, 0.95, 0.95 + 0.16 + (d * 7 % 0.1)); B('wood_dark', wu + sg * 0.1 - 0.06, wu + sg * 0.1 + 0.06, d - 0.06, d + 0.06, 1.6, 1.72); }   // jugs and platters on the dressoir
       B('wood_dark', mu - 0.5, mu + 0.5, d1 - 0.5, d1, 0, 0.55, true); B('iron', mu - 0.5, mu + 0.5, d1 - 0.5, d1, 0.55, 0.59);
       WB('linen', d0 + 2.2, d0 + 3.3, 1.2, 2.0, 0.04); WB('cloth_red', d0 + 2.35, d0 + 3.15, 1.3, 1.5, 0.06);
       B('wood_dark', u0 + 0.1, u0 + 0.5, 3.8, 4.1, 0, 0.42, true);   // a stool by the cold hearth side
