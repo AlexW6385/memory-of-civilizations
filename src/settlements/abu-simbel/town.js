@@ -7,7 +7,9 @@ import { ground } from './ground.js';
 import { sculptPlans } from './sculpt.js';
 import { cliffTop } from '../../styles/ramesside/dims.js';
 import { STANDS, FIRES, registerNight } from './nightlight.js';
-registerNight();
+import { wearElements, registerWear } from './wear.js';
+import { doorX } from './walk.js';
+registerNight(); registerWear();
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, y = 0, rooms = []) => ({ id, style: 'ramesside', origin: [0, 0], base: y, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [FX + 44, 0], facing: 'w' } });
@@ -235,6 +237,7 @@ export async function town() {
   plans.push(base('abu-simbel-granaries', [{ t: 'granaries', list: granaryList(), y: 0 }]));
   if (yardHere) plans.push(base('abu-simbel-yard', [{ t: 'masons_yard', rect: YARD, y: 0, seed: 53 }, ...FIRES.filter(([x]) => x < 40).map(([x, z, y]) => ({ t: 'abu_fire', at: [x, z], y }))]));
   plans.push(base('abu-simbel-night', [{ t: 'abu_halo' }, ...STANDS.map(([x, z, y]) => ({ t: 'abu_stand', at: [x, z], y }))]));
+  plans.push(base('abu-simbel-wear', wearElements(doorX)));
   plans.push(...sculptPlans());
   plans.push({ ...base('abu-simbel-people', people()), style: 'life' });
   plans.push({ ...base('abu-simbel-boats', [...boats(), ...crews()], 0), style: 'life' });
