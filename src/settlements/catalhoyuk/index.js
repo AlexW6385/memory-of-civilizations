@@ -2,6 +2,8 @@
 import '../../styles/catal/index.js';
 import catal from './plan.js';
 import music from './music.js';
+import './nightlight.js';
+import './wear.js';
 export { town } from './town.js';
 export { music };
 export const landmarks = [{ plan: catal, music }];

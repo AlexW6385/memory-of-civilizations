@@ -87,6 +87,7 @@ import * as BAROQUEROME from '../settlements/baroque-rome/soundmap.js';
 import * as BENIN from '../settlements/benin-city/soundmap.js';
 import * as BHAKTAPUR from '../settlements/bhaktapur/soundmap.js';
 import * as BOROBUDUR from '../settlements/borobudur/soundmap.js';
+import * as CATALHOYUK from '../settlements/catalhoyuk/soundmap.js';
 import * as CHICHEN from '../settlements/chichen-itza/soundmap.js';
 import * as CONQUES from '../settlements/conques/soundmap.js';
 import * as CONSTANTINOPLE from '../settlements/constantinople/soundmap.js';
@@ -218,7 +219,7 @@ export const PROFILES = {
   thebes: T(NEAR, { frogs: 0.3, animals: withLife({ donkey: 0.5, dog: 0.3, cattle: 0.3 }, { market: 0.7, canal: 0.5, map: THEBES }), roof: 'flat' }),
   fez: T(NEAR, { animals: withLife({ donkey: 0.6, rooster: 0.3, cat: 0.3 }, { market: 1, map: FEZ }), roof: 'flat', adhan: 1 }),
   'mongol-karakorum': T(NEAR, { animals: withLife({ horse: 0.8, dog: 0.6, sheep: 0.4, camel: 0.2 }, { market: 0.9, map: KARAKORUM }), roof: 'flat', adhan: 1 }),
-  catalhoyuk: T({ sparrow: 0.4, warbler: 0.5, crow: 0.4, dove: 0.2 }, { frogs: 0.6, animals: { dog: 0.4, goat: 0.5, cattle: 0.4 }, roof: 'flat' }),
+  catalhoyuk: T({ sparrow: 0.4, warbler: 0.5, crow: 0.4, dove: 0.2 }, { frogs: 0.6, animals: withLife({ dog: 0.4, goat: 0.5, cattle: 0.4 }, { market: 0.4, map: CATALHOYUK }), roof: 'flat' }),
   shibam: T(NEAR, { animals: withLife({ donkey: 0.4, goat: 0.4, cat: 0.2 }, { market: 0.8, map: SHIBAM }), roof: 'flat', adhan: 1 }),
   mycenae: T(MED, { cicadas: 0.9, animals: withLife({ goat: 0.5, sheepbell: 0.5, donkey: 0.3, dog: 0.3 }, { market: 0.6, map: MYCENAE }), roof: 'flat' }),
   delphi: T(MED, { cicadas: 0.7, animals: withLife({ sheepbell: 0.7, donkey: 0.3, dog: 0.25, rooster: 0.3 }, { market: 0.8, map: DELPHI }), roof: 'tile' }),

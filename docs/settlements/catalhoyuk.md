@@ -99,3 +99,39 @@ No new sources were read this pass; the forms follow what §4 and §12 already s
 - **Leopard reliefs** [stated: moulded leopard reliefs, a pair of facing lionesses, §4]: modelled as soft plaster relief (body, shoulder, haunch, neck, head with ears and muzzle, four legs, a tail curling over the back, rosettes in black set on the flank), a pair facing across a red panel widened to 2.2 m so the heads do not meet.
 - **Platforms and pillar** [stated: plastered platforms, thick wooden posts, §4]: the platforms of the opened house have their top edges rolled in plaster and a foot-moulding; the pillar at their corner is a round plastered post swelling at the foot and under the beams, with the red band, and a bucranium on two faces (it was a square block).
 - **Departures:** the roofs are still within 0.2 m of one level (neighbours must stay within step reach for the walkers), so the "many levels" of §5 (second rooms over some houses, ladders between levels) is not yet built; the other wall paintings (hunt, vultures, town and volcano) were left as they are.
+
+## 14. Reference pass (the visitor's walk, night, sound, animals, wear)
+
+No site could be fetched this pass; every line is from the sections above or from general knowledge of the published excavations, marked [inferred] where it goes beyond them. Nothing is written anywhere: there is no script at Çatalhöyük (c. 6500 BC), so no signs, tablets or inscriptions are shown.
+
+### 14.1 The visitor's walk
+
+- The way in is the arrival on the trodden ground south of the landmark house, then the ladder against its south wall, the roof, and the hatch [stated: §4, houses entered only from the roof]. The roofs are the streets [stated: §2], so the walk goes house to house over the roofs, and each opened house is entered by its own hatch: 14 routes (`walks` in `plan.js`) start on the house's roof, cross the hatch's rim, go down the ramp by the ladder's foot and stand on the plastered floor by the hearth [inferred: the ramp stands for the ladder, as in the landmark].
+- Shops, signs and wells do not exist here [inferred: no market, no coin, no script; goods were made and used by the household]. What takes their place is already built (§11, §12): the households' trades (baker, potter, knapper, hide-worker, mat-maker) at the courts, open to the walker, and the opened rooms with their hearths, ovens, bins, platforms and burials.
+
+### 14.2 Night
+
+- Fire is the light: the hearth of each house under its hatch, the oven's mouth with embers, the fire pits of the courts and yards [stated: hearth and oven per §4; fire pits ringed with stones per §11 (inferred there)]. The houses have no windows [stated: §12], so the only light a passer-by sees leaves by the hatch, with the smoke lit from beneath [inferred]. No lamp is shown: pottery and stone vessels that may have burned fat exist, but none is certain from the pages read [inferred].
+- About six houses in ten keep a fire in at night, the rest let it die [inferred]; the court and yard fires burn on at about seven in ten [inferred]. Light: halo glow over hatches, hearth pools on the plaster floors of the opened houses, glow at oven mouths. Code: `src/settlements/catalhoyuk/nightlight.js`, wrapping the style from the settlement's folder.
+
+### 14.3 Sound
+
+All [inferred]: nothing of the town's sound survives; the works are those §4, §7, §11 name. Code: `src/engine/voices-catal.js` (voices prefixed `cat`), `src/settlements/catalhoyuk/soundmap.js` (places, hours, rooms), `tests/catalhoyuk-sound.test.mjs`.
+
+- **Work, from the courts by trade:** the saddle quern and the baker's oven (mornings, a second baking at dusk), obsidian knapping, hide scraping, reed plaiting, potter's clay and jars (hours of light) [§11 trades; §7 work].
+- **Rooms:** the opened houses and the landmark's main room and storeroom are rooms for the engine (soft mud roof, the hatch the only opening): quern, hearth crackle, knapping in the knapper's house, plaster laid by hand now and then [§4 plaster renewed; §12 "up to 450 times"].
+- **People:** a wordless murmur and calls across the roofs by day (no words are written or spoken in the map); in the evening a hand drum and a bone flute from two roofs [§9 inferred music].
+- **Animals:** sheep, goats and cattle at the two pens [stated: §2 penned animals]; far dogs at night; jackals on the plain and owls in the willows at night [inferred: Anatolian steppe fauna]; cranes over the marsh at morning and evening [inferred: §8]; wind in the reeds at every pool, frogs round the pools in the warm months.
+- **Not here:** bells, hens, horses, donkeys (domestic donkey and horse not yet in Anatolia c. 6500 BC [inferred]), metal, carts. Levels were measured with `tools/sound-render.mjs` (spectrum, onsets); no one has listened.
+
+### 14.4 Animals
+
+All [inferred] from §8 and the site's fauna as generally published (sheep and goats, cattle and dogs kept; ducks, geese and cranes of the marsh): `fauna.js` `critters`.
+
+- Dogs asleep on four roofs of opened houses, two by court fire pits, one in the yard south of the landmark [dog kept at the site: inferred]. Sheep and goats lying and standing in both pens, shown with the goat model (no sheep model yet; the cattle of the pens remain the static figures of `town.js`). Brown ducks as loops on the four nearest pools; grey geese grazing on the bank by each reed landing. Two mud nests of swallows under the eave of the landmark's south wall between the beam ends, birds sweeping out and back [inferred; barn swallows nest in mud on buildings].
+- Left out on purpose: cat, hen, horse, donkey (not kept yet), and the red-crowned crane model (East Asian, wrong species for the plain: the grey cranes stay as the existing heron and egret perches and the sound).
+
+### 14.5 Wear (no writing)
+
+- No inscription, sign or tablet: there is no script at Çatalhöyük [stated: §14 header]. Wear only. Code: `wear.js`.
+- The roof worn by the feet from the ladder's head over the landmark roof to the hatch, and from the middle of each opened house's roof to its hatch's rim, where the rim's top is rubbed pale; soot in tongues on the roofs round every hatch (`pottery_dark`) [inferred: smoke leaves by the hatch, §4; the hatch's inner soot is already stated]. The earth trodden dark at the foot of the landmark's ground ladder, the wall rubbed at hand and shoulder height beside it [inferred: the ladder is climbed daily]. Inside: the plaster floor greyed under each hatch and black round the landmark's hearth [inferred].
