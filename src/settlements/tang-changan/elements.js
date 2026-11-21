@@ -6,6 +6,7 @@ import { daciHall } from './hall.js';
 import { registerNight } from './night.js';
 import { box } from '../../core/geom.js';
 import { framePt } from './walk.js';
+import { pagodaWear } from './wear.js';
 
 /**
  * The Tang shop row for the walker: (1) the red tag hung from each signboard is raised clear of a head (it hung to 2.1 m in the door bay's line and
@@ -49,5 +50,5 @@ function keepers(el, ctx) {
   for (const f of el.list) fig({ ...f }, { bag: ctx.bag, col: ctx.col });
 }
 
-registerStyle('tang-changan', { ...STYLES.tang, elements: { ...STYLES.tang.elements, daci_hall: daciHall, tang_shop_row: shopRow, tc_keepers: keepers } });
+registerStyle('tang-changan', { ...STYLES.tang, elements: { ...STYLES.tang.elements, daci_hall: daciHall, tang_shop_row: shopRow, tc_keepers: keepers, tc_pagoda_wear: pagodaWear } });
 registerNight();

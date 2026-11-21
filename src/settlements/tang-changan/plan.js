@@ -19,7 +19,7 @@ pave([ax - 34, DACI_MAIN[1] + 10.4, ax - 5, 138]); pave([ax + 5, DACI_MAIN[1] + 
 pave([ax - 34, 156, ax - 5, 190]); pave([ax + 5, 156, ax + 34, 190]);
 pave([ax - 24, 98, ax + 24, DACI_MAIN[1] - 9]);
 // the pagoda
-E.push({ t: 'tang_pagoda', c: PAGODA, y: 0 });
+E.push({ t: 'tang_pagoda', c: PAGODA, y: 0 }, { t: 'tc_pagoda_wear', c: PAGODA, y: 0 });
 // the main hall (Mahavira): seven bays on a high platform, big bracket sets, deep eaves, the Buddha and his company inside
 const MH = { w: 33.6, d: 14.0 }, MAIN = [ax - MH.w / 2, DACI_MAIN[1] - MH.d / 2, ax + MH.w / 2, DACI_MAIN[1] + MH.d / 2];
 E.push({ t: 'daci_hall', c: DACI_MAIN, w: MH.w, d: MH.d, face: 's', y: 0, plat: 1.2, H: 5.6, nb: 7, kind: 'hall', roof: 'hip', over: 3.2, bh: 1.9, big: true, doorW: 3.4, interior: true, det: 2, chi: 1.9, pitch: 0.24, terrace: true, wadang: true, lanterns: true });
