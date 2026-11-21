@@ -71,7 +71,23 @@ export const [weirs, riverPeople] = riverLife();
 // the hall's plain lacquered block under Amida is replaced by a sumeru dais with mother-of-pearl inlay and gilt fittings (§10)
 const isAltar = (e) => e.t === 'block' && e.mat === 'lacquer_black' && e.rect.join() === '-2.7,-2,1.2,2';
 // (walks: the hall's own, then into the opened houses of the walk, openwalk.js)
-export const hall = { ...hallPlan, elements: [...hallPlan.elements.filter((e) => !isAltar(e)), { t: 'uji_hall_light' }], walks: [...(hallPlan.walks || []), ...walkRoutes()], origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 9, -10, HALL.origin[0] + 10, 10] };
+/**
+ * Wear where feet go (dossier §20), in materials the hall holds: the treads of the stair polished down their middle, the veranda and
+ * the way from the middle door to the dais polished by bare and stockinged feet, damp at the foot of the stone footing. Thin sheets laid 6 mm
+ * above what they cover; no collision. The stair: 6 risers of 0.18 from the gravel (x 9.0, going west to 7.2), 0.3 m a tread.
+ */
+function hallWear() {
+  const E = [], F = 1.1, blk = (rect, y0, y1, mat) => E.push({ t: 'block', rect, y0, y1, mat, collide: false });
+  for (let i = 0; i < 6; i++) { const xa = 9.0 - 0.3 * (i + 1), top = 0.02 + 0.18 * (i + 1); blk([xa + 0.04, -0.8 + 0.05 * (i % 3), xa + 0.28, 0.8 - 0.05 * (i % 3)], top, top + 0.006, 'polished_sandstone'); }
+  blk([4.6, -1.0, 7.2, 1.0], F + 0.006, F + 0.012, 'polished_sandstone');             // the veranda from the stair to the middle door
+  blk([1.3, -0.9, 3.7, 0.9], F + 0.006, F + 0.012, 'polished_sandstone');             // inside, to the offering table and the dais
+  const foot = 0.45;                                                                    // the damp of the ground, up the footing's faces (not at the stair)
+  blk([7.2, -8.7, 7.206, -2.5], 0.02, foot, 'plaster_damp'); blk([7.2, 2.5, 7.206, 8.7], 0.02, foot, 'plaster_damp');
+  blk([-7.206, -8.7, -7.2, 8.7], 0.02, foot, 'plaster_damp');
+  blk([-7.2, -8.706, 7.2, -8.7], 0.02, foot, 'plaster_damp'); blk([-7.2, 8.7, 7.2, 8.706], 0.02, foot, 'plaster_damp');
+  return E;
+}
+export const hall = { ...hallPlan, elements: [...hallPlan.elements.filter((e) => !isAltar(e)), { t: 'uji_hall_light' }, ...hallWear()], walks: [...(hallPlan.walks || []), ...walkRoutes()], origin: HALL.origin, base: 0, district: undefined, view: [HALL.origin[0] - 9, -10, HALL.origin[0] + 10, 10] };
 const HF = 1.1, hx = HALL.origin[0];                // the central hall's floor; its centre in the settlement
 export const dais = {
   id: 'heian-uji-dais', style: 'japanese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [],
