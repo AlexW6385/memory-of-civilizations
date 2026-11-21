@@ -133,3 +133,7 @@ Hammers on clay, the beat of rammers (the labourers' chant), kiln roar, carts' a
 - The market tower's drum opens and shuts the market (6.5-7.2 h and 16.8-17.5 h), the ward gates' bars drop at dusk and lift at dawn, the watch's clapper goes the rounds from 20 h to 4.5 h. [inferred: ward gates and a closed market are Qin practice, the drum and clapper patterns are ours]
 - The pit's lamps tick and the draught moves along the corridors at every hour; the listener in the pit hears them as a long cold hall (`pit` room), in the hall as a stone-and-timber one (`hall`). [inferred]
 - No Qin music survives; the bells are bronze with the inharmonic partials of a flat-mouthed bell, pitches ours. Voices: `src/engine/voices-qin.js`, all prefixed `qin` (the engine's own `qin` is the zither). Heard by no one yet: only rendered and measured (tools/sound-render.mjs).
+
+## 13. Animals with behaviour (match pass)
+
+- `fauna.js` lists critters (one mesh, one draw) along the visitor's walk: dogs lying by the house fronts (they lift their heads and stand as the visitor comes), a cock and hens, geese, goats, and the swallows' mud nests under the eaves (the birds fly out and come home); hens, a cock and a dog in a clay yard. Nothing stands on the walking line. No cat (not certain for the Qin town), no pigeons. [inferred: the placing; the species are those a Warring States or Qin household kept - dog, hen, goose, goat are all attested in the household finds and the Qin legal texts' livestock rules, to be checked against a source before this is called stated]
