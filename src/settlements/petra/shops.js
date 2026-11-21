@@ -44,7 +44,7 @@ export function shopLife() {
     // the keeper: on the stool behind the counter, a headcloth for some; a customer in the door for every third
     L.push({ t: 'stool', at: [counterX, zf + 1.5], y, rot: 0, seed: k + 12 });
     person([counterX, zf + 1.5], y, Math.PI, { pose: 'sit_low', beard: rand() < 0.8, hat: rand() < 0.5 ? 'turban' : 'none', hatMat: 'cloth_white' });
-    if (s.i % 3 === 1) person([s.m, s.z0 - 1.9], 0.15, 0, { pose: rand() < 0.5 ? 'talk' : 'stand', beard: true, over: 'cape', hat: 'turban', hatMat: 'cloth_white' });
+    if (s.i % 3 === 1) person([s.m + 1.5, s.z0 - 1.9], 0.15, 0.4, { pose: rand() < 0.5 ? 'talk' : 'stand', beard: true, over: 'cape', hat: 'turban', hatMat: 'cloth_white' });
   }
   return L;
 }
