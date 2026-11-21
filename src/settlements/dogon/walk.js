@@ -7,6 +7,8 @@ import { houseOf, frontOf } from '../../styles/dogon/compound.js';
 export const ARRIVAL = [4.5, 27.5];
 /** z of the walking line in the lane before each row's fronts (the lane between the row and the one below, or the place). */
 export const LANE_Z = { C: 12.6, B: -3.2, A: -19.5 };
+/** The evening fire on the place (nightlight.js dg_fire): clear of the visitor's lane (x = -1) and of the stalls. */
+export const FIRE = [5.6, 22.4];
 /** The wells of the place: stone-curbed, one at each end of the place's north edge, clear of the stalls and the lanes. */
 export const WELLS = [[17.4, 18.6], [-17.4, 18.4]];
 

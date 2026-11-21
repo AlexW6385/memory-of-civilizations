@@ -10,6 +10,7 @@ import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { STYLES } from '../../core/build.js';
 import { houseOf } from '../../styles/dogon/compound.js';
 import { hv } from './furniture.js';
+import { lathe, rod } from '../../core/geom.js';
 
 const TAU = Math.PI * 2, MAT = 'halo';
 export class Halo {
@@ -79,11 +80,26 @@ const fieldHut = (fn) => function haloed(el, ctx) {
   return r;
 };
 
+/**
+ * dg_fire: { at: [x, z], y, seed }: an evening fire on the place, three stones' worth of ring (rubble), crossed logs and a low halo; the
+ * people sat round it are town.js figures with `nightKeep: 1`. Collides as nothing (a stone ring, 0.9 m across). [inferred: millet-stalk and wood
+ * fires of an unelectrified village; no source read describes the place at night]
+ */
+function fire(el, { bag }) {
+  const [x, z] = el.at, y = el.y ?? 0;
+  for (let k = 0; k < 9; k++) { const a = k / 9 * TAU + 0.3 * hv(x, z, k), r = 0.42 + 0.04 * hv(x, z, k + 9), sz = 0.12 + 0.05 * hv(x + k, z, 3); bag.add('schist_rubble', lathe([[sz, 0], [sz * 0.85, 0.1], [0.001, 0.16]], 6, null, x + Math.cos(a) * r, y, z + Math.sin(a) * r)); }
+  for (let k = 0; k < 4; k++) { const a = k * 1.57 + 0.4 + hv(x, z, 20) * 0.5; bag.add('wood_dark', rod([x + Math.cos(a) * 0.38, y + 0.12, z + Math.sin(a) * 0.38], [x - Math.cos(a) * 0.1, y + 0.2, z - Math.sin(a) * 0.1], 0.045, 5)); }
+  const H = new Halo();
+  H.ball(x, y + 0.45, z, 0.7, 0.8); H.floor(x, y + 0.04, z, 3.2, 3.2, 12, 0.9);
+  H.flush(bag);
+}
+
 let done = false;
 export function registerNight() {
   if (done) return; done = true;
   const E = STYLES.dogon.elements;
   E.dogon_landmark = ginna(E.dogon_landmark); E.dogon_house = ginna(E.dogon_house);
+  E.dg_fire = fire;
   E.forge = forge(E.forge); E.field_hut = fieldHut(E.field_hut);
 }
 registerNight();

@@ -3,7 +3,7 @@
 import { TOGUNA, PLACE, PLACE_Y, COMPOUNDS, FORGE, DYE, THRESH, PENS, SHADE, height, inCompound, nearBaobab } from './layout.js';
 import { frontOf, houseOf } from '../../styles/dogon/compound.js';
 import { dressing } from './dressing.js';
-import { WELLS } from './walk.js';
+import { WELLS, FIRE } from './walk.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-90, -90, 90, 90], entrance: { at: [0, 30], facing: 'n' } });
@@ -65,6 +65,12 @@ export async function town() {
     man([tx - 1.6, tz + 1.4], ty, 1.2, { pose: 'sit_ground' });
     P.push({ t: 'figure', at: [tx - 0.2, tz - 2.0], y: ty, rot: 0.7, seed: 8800 + Math.round(tx), dress: 'tunic', legs: 'bare', cloth: 'cloth_white', over: 'none', hat: 'none', feet: 'bare', hair: 'short', beard: false, child: true, h: 1.05, ...SK() });
   }
+  // round the evening fire on the place: an elder and two others sat on the ground, a woman with a child; they stay out all night (`nightKeep: 1`)
+  { const [fx0, fz0] = FIRE, nk = { nightKeep: 1 };
+    man([fx0 + 1.5, fz0 + 0.2], PLACE_Y, -Math.PI / 2 - 0.1, { pose: 'sit_ground', dress: 'robe', cloth: 'cloth_white', over: 'none', ...nk });
+    man([fx0 + 0.3, fz0 - 1.5], PLACE_Y, 0.1, { pose: 'sit_ground', ...nk });
+    woman([fx0 - 0.3, fz0 + 1.5], PLACE_Y, Math.PI + 0.2, { pose: 'sit_ground', cloth: 'cloth_indigo', ...nk });
+    P.push({ t: 'figure', at: [fx0 + 1.2, fz0 + 1.1], y: PLACE_Y, rot: -2.3, seed: 6611, dress: 'tunic', legs: 'bare', cloth: 'cloth_ochre', over: 'none', hat: 'none', feet: 'bare', hair: 'short', beard: false, child: true, h: 0.95, pose: 'sit_ground', nightKeep: 1, ...SK() }); }
   // the fronts: at every compound's ginna, by the doors — what the day is doing there
   const L = [], seat = (x, z, yy, rot, o) => { L.push({ t: 'stool', at: [x, z], y: yy, rot }); (o.m ? man : woman)([x, z - 0.02], yy, rot, { pose: 'sit_low', ...o.f }); };
   for (const [n, c] of COMPOUNDS.entries()) {
