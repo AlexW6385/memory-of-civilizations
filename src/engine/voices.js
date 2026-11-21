@@ -867,6 +867,7 @@ import { UR_VOICES, UR_GAIN } from './voices-ur.js'; addVoices('voices-ur.js', U
 import { CN_VOICES, CN_GAIN } from './voices-constantinople.js'; addVoices('voices-constantinople.js', CN_VOICES, CN_GAIN);   // Constantinople's voices (docs/settlements/constantinople.md §16.3)
 import { THEBES_VOICES, THEBES_GAIN } from './voices-thebes.js'; addVoices('voices-thebes.js', THEBES_VOICES, THEBES_GAIN);   // Thebes' voices (docs/settlements/thebes.md §15c)
 import { GIZA_VOICES, GIZA_GAIN } from './voices-giza.js'; addVoices('voices-giza.js', GIZA_VOICES, GIZA_GAIN);   // Giza's voices (docs/settlements/giza.md §20)
+import { ABU_VOICES, ABU_GAIN } from './voices-abu-simbel.js'; addVoices('voices-abu-simbel.js', ABU_VOICES, ABU_GAIN);   // Abu Simbel's voices (docs/settlements/abu-simbel.md §20)
 import { VOICES_FLORENCE } from './voices-florence.js'; addVoices('voices-florence.js', VOICES_FLORENCE);       // (Florence's own: the market's cries, the chain, the cleaver, the weirs)
 addVoices('voices-qing.js', QING_VOICES);         // Beijing's
 addVoices('voices-ottoman.js', OTTOMAN_VOICES);   // Istanbul's

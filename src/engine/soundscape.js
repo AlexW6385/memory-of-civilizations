@@ -70,6 +70,7 @@
 // - Birds, animals, cicadas, frogs and roofs: from each dossier's townscape and climate [inferred].
 
 import * as BAGHDAD from '../settlements/abbasid-baghdad/soundmap.js';
+import * as ABUSIMBEL from '../settlements/abu-simbel/soundmap.js';
 import * as SUZHOU from '../settlements/ming-suzhou/soundmap.js';
 import * as AGRA from '../settlements/mughal-agra/soundmap.js';
 import * as BEIJING from '../settlements/qing-beijing/soundmap.js';
@@ -205,7 +206,7 @@ export const PROFILES = {
   'timurid-samarkand': T(NEAR, { animals: withLife({ donkey: 0.5, horse: 0.3, dog: 0.2 }, { market: 1, map: TIMURID }), roof: 'flat', adhan: 1 }),
   dunhuang: T({ warbler: 0.3, crow: 0.8, dove: 0.4, sparrow: 0.6 }, { animals: withLife({ dog: 0.3, donkey: 0.3, camel: 0.2 }, { market: 0.8, map: DUNHUANG }), roof: 'flat', bells: 'monastery' }),
   'muromachi-kyoto': T(EAS, { cicadas: 0.5, frogs: 0.5, roof: 'shingle', bells: null, animals: withLife({ dog: 0.2, crow: 0.2, rooster: 0.25 }, { canal: 1, market: 0.8, eaves: 1, map: KYOTO }) }),
-  'abu-simbel': T(NEAR, { animals: { donkey: 0.3, dog: 0.3 }, roof: 'flat' }),
+  'abu-simbel': T(NEAR, { frogs: 0.3, animals: withLife({ donkey: 0.5, cattle: 0.3, dog: 0.4 }, { market: 0.6, canal: 0.5, map: ABUSIMBEL }), roof: 'flat' }),
   'qin-xianyang': T(NEAR, { animals: { cattle: 0.5, dog: 0.3, horse: 0.3 }, roof: 'tile' }),
   thebes: T(NEAR, { frogs: 0.3, animals: withLife({ donkey: 0.5, dog: 0.3, cattle: 0.3 }, { market: 0.7, canal: 0.5, map: THEBES }), roof: 'flat' }),
   fez: T(NEAR, { animals: withLife({ donkey: 0.6, rooster: 0.3, cat: 0.3 }, { market: 1, map: FEZ }), roof: 'flat', adhan: 1 }),
