@@ -16,6 +16,7 @@ import { nearEntrance, rng as rng2, fitCell } from '../../styles/artdeco/dress.j
 import { narrowRect, stripRect, adsOf } from './upper-plan.js';
 import { withUpstairs } from './upper.js';
 import { withTenement } from './tenement.js';
+import { shopPeople } from './people.js';
 
 const LS = 'facade_limestone', PLAIN = 'limestone';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -55,7 +56,7 @@ function soot(bag, rect, f, y, h, mat, rand) {
 function wallAd(bag, rect, f, y, y0, h, r) {
   const F = face(rect, f), vis = h - y0;
   if (vis < 8.5 || F.L < 9) return;
-  const name = 'X'.repeat(8), bm = ADS[Math.floor(r() * ADS.length)], w = Math.min(14, F.L - 3), u0 = (F.L - w) / 2 + (r() - 0.5) * 1.5, cell = fitCell(['COCA-COLA', 'CAMELS', 'LUCKY STRIKE', 'WRIGLEYS', 'CHESTERFIELD', 'PEPSODENT', 'ARROW SHIRTS', 'CAMPBELLS SOUP'][ADS.indexOf(bm)], w - 1.2, 0.3), hh = Math.min(vis - 4.2, 5 * cell + 2.4), yb = y + h - 2.6 - hh;
+  const name = 'X'.repeat(8), bm = ADS[Math.floor(r() * ADS.length)], w = Math.min(14, F.L - 3), u0 = (F.L - w) / 2 + (r() - 0.5) * 1.5, cell = fitCell(['SODA', 'CIGARETTES', 'TOBACCO', 'CANDY', 'CIGARS', 'TOOTHPASTE', 'SHIRTS', 'SOUP'][ADS.indexOf(bm)], w - 1.2, 0.3), hh = Math.min(vis - 4.2, 5 * cell + 2.4), yb = y + h - 2.6 - hh;
   bag.add(bm, F.R(u0, u0 + w, yb, yb + hh, 0, 0.07));
   return name;
 }
@@ -207,7 +208,12 @@ const lowBox = (h, m) => (el, { bag }) => { const [x0, z0, x1, z1] = el.rect, y 
  * blues, maroon and black to one each, the soot to the dark brick, the gilt letters to gold, the chimney pots to brick, the
  * awnings' green to the shutters', the pale stucco to cream, the lamps' glasses to one.
  */
-const FOLD = { prussian_blue: 'car_blue', cloth_blue: 'car_blue', cloth_maroon: 'cloth_red', car_black: 'cloth_black', plaster_damp: 'pottery_dark', gilt_bronze: 'gold', terracotta: 'brick', cloth_green: 'shutter_green', stucco_pale: 'stucco_cream', timber: 'wood_dark', lamp_white: 'lamp_glass', glass_lamp: 'lamp_glass', wood_ochre: 'wood_painted' };
+const FOLD = { prussian_blue: 'car_blue', cloth_blue: 'car_blue', cloth_maroon: 'cloth_red', car_black: 'cloth_black', plaster_damp: 'pottery_dark', gilt_bronze: 'gold', terracotta: 'brick', cloth_green: 'shutter_green', stucco_pale: 'stucco_cream', timber: 'wood_dark', lamp_white: 'lamp_glass', glass_lamp: 'lamp_glass', wood_ochre: 'wood_painted',
+  // second pass: the rare materials of the shop rooms and goods folded into the commoner (each distinct material of a near tile is a draw at the arrival)
+  glaze_blue: 'glaze_white', glaze_green: 'glaze_white', glaze_red: 'glaze_white', marble_dark: 'granite_black', marble: 'plaster_white', mirror_tin: 'steel_chrome', silver: 'steel_chrome',
+  asphalt: 'granite_black', brushbox: 'wood_dark', fresco_green: 'shutter_green', car_cream: 'stucco_cream', car_red: 'cloth_red', tile_dark: 'granite_black', tile_white: 'plaster_white',
+  linen: 'cloth_white', sacking: 'wood_painted', planks_grey: 'wood_dark', limestone_yellow: 'limestone', leather_bench: 'cloth_black', rope_fibre: 'wood_dark', ivory: 'plaster_white', iron_galv: 'iron',
+  cloth_indigo: 'cloth_grey', cloth_brown: 'cloth_grey' };
 const FOLD_FAR = { ...FOLD, paint_cab_yellow: 'cloth_ochre', limestone_yellow: 'limestone' };
 const folded = (bag, T) => {
   const b = Object.create(bag);
@@ -226,4 +232,13 @@ registerStyle('artdeco_far', {
   objects: {},
 });
 // the near form: the style's own builders, their materials folded
-registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: lean(withUpstairs(A.skyscraper)), walkup: withTenement(A.walkup) }, FOLD) });
+/** A lot with a shop room: its keeper and customers built in beside the room (people.js). */
+const withPeople = (fn) => (el, ctx) => {
+  fn(el, ctx);
+  const fig = STYLES.life?.elements?.figure;
+  if (fig && el.room && el.front && el.h < 70) for (const p of shopPeople(el)) fig(p, { bag: ctx.bag, col: ctx.col });
+};
+registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: lean(withPeople(withUpstairs(A.skyscraper))), walkup: withTenement(A.walkup) }, FOLD) });
+// the street's things (pavements' furniture, vans, carts, yards, stands): the same folds, so that a lamp's glass or a crate's boards is one mesh a tile, not two
+const FOLD_STREET = { ...FOLD, glass_lamp: 'lamp_glass', timber: 'wood_dark', cloth_green: 'shutter_green', car_black: 'cloth_black', car_red: 'car_red' };
+registerStyle('artdeco_street', { ...STYLES.artdeco, elements: wrapAll({ ...A }, FOLD_STREET) });

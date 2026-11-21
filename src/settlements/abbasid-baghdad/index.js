@@ -2,6 +2,7 @@
 // the markets of Karkh, the Tigris with its bridges of boats.
 import '../../styles/abbasid/index.js';
 import baghdad from './plan.js';
+import './elements.js';
 import music from './music.js';
 export { town } from './town.js';
 export { music };

@@ -3,6 +3,7 @@
 // the Passeig for it (both built with the landmark). The street life of 1910 (§5a): the trams on the
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
+import { STYLES } from '../../core/build.js';
 import { blockShops, blockPortals, blockHouses } from '../../styles/modernisme/index.js';
 import { worksElements, arrivalLife, arrivalStreet } from './arrival.js';
 import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, ARRIVAL, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
@@ -10,6 +11,26 @@ import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, ARRIVAL,
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'modernisme', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 46], facing: 'n' } });
 const Y = (x, z) => height(x, z);
+
+/** The lanes to the doors of the shops and the portals (a door's width 1.72 m and 3.2 m out into the street, §14.1): nothing but the walker stands in them. */
+let LANES = null;
+function laneList(els) {
+  if (LANES) return LANES;
+  LANES = [];
+  for (const el of els) {
+    for (const sh of blockShops(el)) LANES.push({ d: sh.door, n: sh.n, u: sh.u });
+    if (el.portals) for (const q of blockPortals(el)) LANES.push({ d: q.door, n: q.face, u: q.u });
+  }
+  return LANES;
+}
+/** Is (x, z) in a door's lane, with `mt` m of margin along the street and `mn` m out from it? */
+export function inLane(x, z, els, mt = 0.5, mn = 0.5) {
+  for (const l of laneList(els)) {
+    const dx = x - l.d[0], dz = z - l.d[1], t = dx * l.u[0] + dz * l.u[1], n = dx * l.n[0] + dz * l.n[1];
+    if (Math.abs(t) < 0.86 + mt && n > -0.3 && n < 3.2 + mn) return true;
+  }
+  return false;
+}
 
 /** A straight run from a to b, sampled every 4 m (the ground's slope followed). */
 function straight(a, b) { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / 4)), out = []; for (let i = 0; i <= n; i++) { const x = a[0] + (b[0] - a[0]) * i / n, z = a[1] + (b[1] - a[1]) * i / n; out.push([x, z, Y(x, z)]); } return out; }
@@ -138,6 +159,23 @@ function shopLife(els) {
   });
   return out;
 }
+/** bcn_keepers { list: [figure parameters] }: the people of the shops, built into the near plan of their 60 m cell (a life element's figures reach 170 m wherever they stand; this is the pattern of Tang Chang'an's keeperPlans). */
+function keepers(el, ctx) {
+  const fig = STYLES.life?.elements?.figure;
+  if (!fig) return;
+  for (const f of el.list) fig({ ...f }, { bag: ctx.bag, col: ctx.col });
+}
+Object.assign(STYLES.modernisme.elements, { bcn_keepers: keepers });
+/** The shops' people (shopLife) gathered by 60 m cell: [{ key, center, list }]. */
+function keeperCells(els) {
+  const cells = new Map();
+  for (const L of shopLife(els)) for (const f of L) {
+    const i = Math.floor(f.at[0] / 60), j = Math.floor(f.at[1] / 60), k = `${i}_${j}`;
+    if (!cells.has(k)) cells.set(k, { key: k, center: [i * 60 + 30, j * 60 + 30], list: [] });
+    cells.get(k).list.push(f);
+  }
+  return [...cells.values()];
+}
 /** The porters of the houses with vestibules (styles/modernisme/portal.js): a portera in her apron, or a man in his cap, standing inside the door by the mailboxes; about one house in three. */
 function porterLife(els) {
   const out = [];
@@ -155,7 +193,7 @@ function porterLife(els) {
   return out;
 }
 /** One gas lamp at each crossing of the streets between the blocks with portals, on the kerb's corner (not on the tram streets, where the poles stand, nor on the Diagonal). */
-function fanals(els) {
+export function fanals(els) {
   const seen = new Set(), out = [], o = BLOCK / 2 + 4.4 - 0.6;
   for (const e of els) {
     if (!e.portals) continue;
@@ -172,7 +210,7 @@ function fanals(els) {
   return out;
 }
 /** Street sellers on the pavements of the arrival's streets and the Passeig's house (not on the tram streets, where the poles stand): a fruiterer's stall under an awning, flower and bread sellers on mats, with their buyers. */
-function vendors(els) {
+export function vendors(els) {
   const L = [], rand = rng(1911), pick = (a) => a[Math.floor(rand() * a.length)];
   const half = BLOCK / 2 + 2.6, tramX = [GRACIA_X, PITCH * 2.5], tramZ = [PITCH / 2];
   els.forEach((el) => {
@@ -184,8 +222,10 @@ function vendors(els) {
     }
     for (let n = 0; n < 2; n++) {
       if (!sides.length || rand() < 0.2) continue;
-      const sd = sides.splice(Math.floor(rand() * sides.length), 1)[0], al = (rand() - 0.5) * 36;
-      const x = sd.p[0] + (sd.f[0] ? 0 : al), z = sd.p[1] + (sd.f[1] ? 0 : al), y = height(x, z) + 0.05, fx = sd.f[0] * 0 + 0;
+      const sd = sides.splice(Math.floor(rand() * sides.length), 1)[0]; let al = (rand() - 0.5) * 36;
+      let x = sd.p[0] + (sd.f[0] ? 0 : al), z = sd.p[1] + (sd.f[1] ? 0 : al);
+      for (let k = 0; k < 40 && inLane(x, z, els, 1.9, 0.8); k++) { al += 0.9; x = sd.p[0] + (sd.f[0] ? 0 : al); z = sd.p[1] + (sd.f[1] ? 0 : al); }       // (a stall and its buyers stand off the lane to a door)
+      const y = height(x, z) + 0.05, fx = sd.f[0] * 0 + 0;
       // the stall's front is toward the house wall (the buyers on the pavement's inner side), its seller by the kerb
       const wx = -sd.f[0], wz = -sd.f[1], rot = Math.atan2(wx, wz), ax = x + sd.f[0] * 0.2, az = z + sd.f[1] * 0.2;
       void fx;
@@ -283,7 +323,8 @@ export async function town() {
   plans.push(base('barcelona-casa', [{ t: 'casa_cafe', fx: CASA.fx, z0: CASA.z0, y: height(CASA.fx - 9, CASA.z0 + 8), h: CASA.h, seed: 1910 }]));
   plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
   // the shops' people, a plan to a few blocks
-  shopLife(els).forEach((L, i) => plans.push({ ...base(`barcelona-shop-life-${i}`, L), style: 'life' }));
+  // (built into near plans of their 60 m cells: a life element's figures would show to 170 m)
+  for (const c of keeperCells(els)) plans.push({ ...base(`barcelona-keepers-${c.key}`, [{ t: 'bcn_keepers', list: c.list }]), center: c.center, near: 45 });
   plans.push({ ...base('barcelona-works-life', worksLife()), style: 'life' });
   porterLife(els.filter((e) => e.portals)).forEach((L, i) => plans.push({ ...base(`barcelona-porters-${i}`, L), style: 'life' }));
   plans.push({ ...base('barcelona-vendors', vendors(els)), style: 'life' });

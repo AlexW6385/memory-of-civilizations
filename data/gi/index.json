@@ -2394,7 +2394,7 @@
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
-  "hash": "a55ebdd2b231fd34",
+  "hash": "9232bbea5721c74d",
   "rays": 128,
   "probes": 22750,
   "boxes": [
@@ -2415,9 +2415,9 @@
     ]
    }
   ],
-  "bytes": 353903,
-  "seconds": 142,
-  "baked": "2026-11-20"
+  "bytes": 354061,
+  "seconds": 199,
+  "baked": "2026-11-21"
  },
  "kakadu-ubirr": {
   "site": "kakadu",

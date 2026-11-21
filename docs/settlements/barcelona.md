@@ -265,3 +265,31 @@ Code: `src/styles/modernisme/signs.js` (text and writing), `shops.js` (the board
 - **Worn steps** [inferred: a century of feet is how granite steps wear]: the shops' granite step and the portals' stoop keep their cheeks at full height and are dished 1 cm in the lane to the door with a rounded lip. One centimetre is the most that does not read as coplanar with the pavement (surface-check); a deeper dish would need the pavement lowered. The grime and damp on the lower stone is §5c's.
 - **Not done:** moss (the climate is dry), stains on the pavements, worn tread in the upstairs stairs.
 - Budget: main draws at the arrival 346 (baseline 347), main triangles 3.17 M (baseline 3.07 M, +3.3 %).
+
+## 15. Second pass, narrow form (2026-11-21)
+
+### 15.0 Names off the fascias
+The first pass put invented house names (a Catalan surname after "CASA": PUIG, SERRA, ...) on the longer boards [inferred, no source]. All are removed (`src/styles/modernisme/signs.js`: `HOUSES` gone): every fascia reads the trade word alone, in Catalan or Castilian (FORN, BODEGA, FARMACIA ...), as London's did. No board carries the name of a person, shop or brand.
+
+### 15.1 Night near the visitor
+Rendered the arrival and the Marina's west pavement at the kiosk (x 226.6, z -58, yaw 0) at night (1024x576, low, radius 70). The walk pose reads well (kiosk glow, lit shops and windows, the tram's lamp); at the arrival the foot of the façade, the cabs and the stall stood dark, with only the corner lamp lit. Added to the existing night halo (`nightlight.js`, no new plan, no draw): the cabs' carriage lamps (two each, candle lanterns) with a pool under each, the fruiterer's stall lantern, lanterns on the works' gate posts and three pools on the paving along the hoarding [inferred: stalls, cabs and building sites were lit by candle or oil lantern]. Re-rendered: the cab and stall glows show as halos in the arrival frame; the gate's lanterns are small at 50 m. Shots: shots/bcn-night-*.png (not committed).
+
+### 15.2 Budget (main pass, `tools/draw-count.mjs barcelona`)
+Before the changes of job 3: arrival 346 main draws / 3.17 M triangles; six poses on the walk (x,z, yaw): (226.6,-100, 0) 264 / 2.71 M, (226.6,-100, pi) 320 / 3.07 M, (222,-92, west) 262 / 2.69 M, (222,-92, east) 364 / 3.31 M, (190,-46, west) 275 / 2.83 M, (190,-46, east) 383 / 3.44 M. None over (450 / 4.5 M, arrival 440 / 4.3 M): no split needed.
+
+### 15.3 The walk's gaps
+- **Keepers into near plans** (`town.js` `keeperCells`, element `bcn_keepers`, pattern of Tang Chang'an's `keeperPlans`): the people of the 150 shops (keepers, the arrival street's customers, the keepers on their doorsteps) are no longer street-life figures (which show to 170 m and cost life draws) but built into near plans of 60 m cells (`barcelona-keepers-<i>_<j>`, shown within 45 m of the cell's centre; 50 m or more costs five draws at the arrival). The people are the same, the stream of the generator unchanged. Main draws at the arrival 346 to 339; walk poses 321, 353, 379, 273 for the four poses re-measured (were 320, 364, 383, 275).
+- **Routes into 24 more shops** (`shoproutes.js` `shopRoutes(els, 24, 3, 2)`: the third to fifth nearest of each of the eight trades; 36 shops in all): walk-check 61 routes, 736 legs, ok (was 37 routes).
+- **Door lanes**: `inLane` (town.js) is the lane of every shop and portal door (1.72 m wide, 3.2 m out). Found in it: three street sellers' stalls or mats with their buyers (at about (-222,-188), (-38,-12), (54,97), (279,-130)); they now slide along the pavement until clear (`vendors`). No lamp, arrival prop or doorstep keeper stood in a lane. `tests/barcelona-lanes.test.mjs` keeps it so.
+- Still closed: the 114 shops beyond the 36 routed (their interiors open by the same code; only the routes are not walked), the floors above the third in the ten opened houses, every other house's upstairs.
+
+### 15.4 The landmark: the foot of the Nativity façade
+Standing before the façade the three portals were dark holes opening straight on the ground, with no sill, no door and no trace of use (`styles/modernisme/nativity.js` `stoop`, one per portal).
+- **Three limestone treads** (16 cm rise, 0.7 m tread, the top the landing to the sill) across each doorway's foot plus 0.35 m: the stoop of a raised transept floor [inferred: the Nativity portals are entered by steps; heights ours]. A ramp in the collision; walk-check route 'up the Charity portal's three treads' (2.8 m off the axis: the trumeau, its groups and a collider of the Nativity group stand in the axis; a route 1.6 m off it is refused with 'under 2.58', not examined further).
+- **Wear where feet went**: each tread's lane to the door (the middle 2.4 m) is 2 cm lower (the cheeks keep full height) and in the grey of the porch's stone (`sandstone_carved`), a polished and dirtied trodden lane [inferred: a century of feet is not in 1910, but the works' masons and visitors used these steps for 20 years]; 2 cm is the least that does not read as coplanar.
+- **The doors**: the doorway stood closed with planked timber leaves 4.4 m high in a stepped parabola following the arch, a seam down the middle, three iron-free battens in dark wood, the dark of the doorway left above them [inferred: temporary boarding while the works went on; the bronze doors are of the 20th century]. Collision: a wall.
+- Budget: arrival main draws unchanged (339), triangles 3.03 M; the three stoops add no material to the plan.
+- Not done: the pelican, the chameleons, the rosary windows; moss and stains on the paving; no night render of the stoop; 'under 2.58' near the trumeau was not examined.
+
+### 15.5 Summary of this pass
+Arrival main draws 346 to 339, main triangles 3.17 M to 3.03 M; worst walk pose (190,-46, east) 383 to 379 draws. Checks: surface-check, plan-check, walk-check (62 routes, 740 legs), view-check, disc-check, worker test, signs/sound/critters/lanes tests. Still short: 114 shops' routes unwalked; floors above the third and every unopened house; moss and pavement stains; Casa Milà unlit; the pelican and chameleons; night view of the stoop and the keepers' interiors unrendered.

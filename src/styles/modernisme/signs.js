@@ -1,5 +1,5 @@
-// The writing on the Eixample's shop fascias (docs/settlements/barcelona.md §14.5): the trade named in Catalan or Castilian, now and then with the house's name
-// ("CASA PUIG"), in block capitals of the victorian style's 5 by 7 alphabet (Latin A–Z and . , & only, so no accents: capitals on the signs of the time often left them off).
+// The writing on the Eixample's shop fascias (docs/settlements/barcelona.md §14.5, §15.0): the trade named in Catalan or Castilian and nothing else
+// (the first pass's invented house names, "CASA PUIG" and the like, were removed), in block capitals of the victorian style's 5 by 7 alphabet (Latin A–Z and . , & only, so no accents: capitals on the signs of the time often left them off).
 // A pure function of the shop's seed, trade and width. [inferred throughout: no sign of these streets is recorded; the words are the two languages' own names of the trades.]
 import { write, widthOf } from '../victorian/letters.js';
 
@@ -14,16 +14,13 @@ export const WORDS = {
   sabater: ['SABATERIA', 'ZAPATERIA', 'CALZADO', 'ZAPATERIA Y CALZADO'],
   perruqueria: ['BARBERIA', 'PERRUQUERIA', 'PELUQUERIA', 'PELUQUERIA Y BARBERIA'],
 };
-/** House names, Catalan surnames. */
-export const HOUSES = ['PUIG', 'SERRA', 'VILA', 'FONT', 'SOLER', 'PLANAS', 'ROIG', 'VIDAL', 'FERRER', 'COSTA', 'PUJOL', 'BOSCH', 'GRAU', 'MAS', 'VALLS', 'MIR', 'RIBAS', 'SALA', 'CASAS', 'COMA'];
 const PX_MIN = 0.036, PX_FULL = 0.054;                          // a letter 0.25 m high at the least, 0.38 m at the most
 const hashOf = (seed, k) => { let h = Math.imul((seed | 0) ^ (k * 0x9e3779b9), 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
-/** The text for a board `width` m wide (the board's own length less its margins): the longest that stays legible, chosen among the fitting by the seed. */
+/** The text for a board `width` m wide (the board's own length less its margins): the trade's words only, the longest that stays legible, chosen among the fitting by the seed. */
 export function signText(seed, trade, width) {
-  const words = WORDS[trade] ?? ['TENDA'], house = HOUSES[Math.floor(hashOf(seed, 1) * HOUSES.length)];
-  const all = [...words, ...words.map((w) => `${w}, CASA ${house}`)];
-  const fit = all.filter((t) => width / widthOf(t) >= PX_MIN);
+  const words = WORDS[trade] ?? ['TENDA'];
+  const fit = words.filter((t) => width / widthOf(t) >= PX_MIN);
   if (!fit.length) return words[0];
   const best = fit.filter((t) => width / widthOf(t) >= PX_FULL), pool = best.length ? best : fit;
   return pool[Math.floor(hashOf(seed, 2) * pool.length)];

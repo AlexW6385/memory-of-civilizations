@@ -93,8 +93,9 @@ const GOODS = {
 };
 /** The name and trade of the nth shop of a front: { text, kind, board: [board material, letter material] }. */
 export function shopName(x, z, r) {
-  const D = NAMES[districtOf(x, z)], [trade, kind] = D.trade[Math.floor(r() * D.trade.length)], sur = D.sur[Math.floor(r() * D.sur.length)];
-  const long = trade.length > 7, text = long || r() < 0.4 ? trade : `${sur} ${trade}`;
+  const D = NAMES[districtOf(x, z)], [trade, kind] = D.trade[Math.floor(r() * D.trade.length)];
+  r();   // (the stream keeps its place: the surname's draw)
+  const long = trade.length > 7, text = trade;   // (trade words only: no names of people or shops)
   const pn = PANE[kind] ?? [];
   return { text, kind, board: BOARD[Math.floor(r() * BOARD.length)], pane: pn.length && r() < 0.55 ? pn[Math.floor(r() * pn.length)] : null };
 }

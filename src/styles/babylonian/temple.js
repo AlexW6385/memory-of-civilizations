@@ -264,6 +264,8 @@ export function etemenanki(el, ctx) {
   };
   STYLES.sumerian.elements.ziggurat(el, { ...ctx, bag: inner });
   zigPiers(el, ctx);
+  stairWear(el, ctx);
+  gatehouseDress(el, ctx);
   const { bag, col } = ctx, [cx, c] = el.c, W = el.shrine.w, D = el.shrine.d, Hs = el.shrine.h, y = top;
   // positions on the north-fronted ziggurat, seen in the mirror when it fronts south
   const Z = el.front === 's' ? (z) => 2 * c - z : (z) => z, zr = (a, b) => [Math.min(Z(a), Z(b)), Math.max(Z(a), Z(b))];
@@ -305,6 +307,48 @@ export function etemenanki(el, ctx) {
   bag.add(AU, lathe([[0.001, 0], [0.1, 0.01], [0.17, 0.07], [0.18, 0.09], [0.001, 0.03]], 12, null, gx, y + 0.92, gz - 0.25));
   bag.add(AU, lathe([[0.05, 0], [0.09, 0.07], [0.1, 0.18], [0.05, 0.26], [0.06, 0.3], [0.001, 0.3]], 10, null, gx, y + 0.92, gz + 0.3));
   col.rect([gx - 0.45, gz - 0.7, gx + 0.45, gz + 0.7], y, y + 0.92);
+}
+
+/**
+ * Where feet went on the great stair (docs/settlements/babylon.md §24): the two tracks the climbers and the descending priests wore into the
+ * treads of baked brick (darker, packed with the grime of sandals), and the dust the wind swept into the angle of each tread against the parapets.
+ * One thin strip per tread, a hair above it, in materials the plan already holds. [inferred]
+ */
+function stairWear(el, { bag }) {
+  const [cx, cz] = el.c, S = el.stages[0], front = el.front === 's', y0 = el.y ?? 0;
+  const b = S.batter ?? S.h * 0.12, fz = cz - S.d / 2, run = S.h, z0 = fz - run * 1.9, z1 = fz + b + 0.5;
+  const n = Math.max(1, Math.round(S.h / 0.16)), rise = S.h / n, tr = (z1 - z0) / n, Z = front ? (z) => 2 * cz - z : (z) => z;
+  for (let i = 4; i < n; i++) {
+    const a = z0 + i * tr, yy = y0 + (i + 1) * rise, [m0, m1] = [Math.min(Z(a + 0.04), Z(a + tr - 0.04)), Math.max(Z(a + 0.04), Z(a + tr - 0.04))];
+    const worn = i < n * 0.8 ? 0.55 : 0.3;                                  // the lower treads most trodden: each track narrows toward the top, where fewer went
+    for (const sg of [-1, 1]) {
+      bag.add('silt', box(cx + sg * 1.5 - worn, yy - 0.004, m0, cx + sg * 1.5 + worn, yy + 0.008, m1));
+      bag.add('brick_baked', box(cx + sg * 3.55, yy - 0.004, m0, cx + sg * 3.95, yy + 0.012, m1));
+    }
+  }
+}
+
+/**
+ * The gatehouse at the stair's head dressed (§24): pilasters and blind niches on the towers' fronts, a stepped frame of baked brick round the way with a
+ * band of blue glaze over it, and a battlement on each tower, as the glazed gatehouses of Nebuchadnezzar's temples were. [inferred: the forms]
+ */
+function gatehouseDress(el, { bag }) {
+  const [cx, cz] = el.c, S = el.stages[0], front = el.front === 's', y1 = (el.y ?? 0) + S.h, b = S.batter ?? S.h * 0.12;
+  const gz = cz - S.d / 2 + b + 1, GH = 6.2, gw = 2.6, Z = front ? (z) => 2 * cz - z : (z) => z;
+  const zr = (a, c2) => [Math.min(Z(a), Z(c2)), Math.max(Z(a), Z(c2))];
+  const fb = (x0, y0, a, x1, y2, c2) => { const [za, zb] = zr(a, c2); return box(Math.min(x0, x1), y0, za, Math.max(x0, x1), y2, zb); };
+  for (const sx of [-1, 1]) {
+    for (const u of [3.45, 4.5, 5.55]) bag.add(B, fb(cx + sx * u - 0.25, y1, gz - 0.22, cx + sx * u + 0.25, y1 + GH - 1.0, gz));
+    for (const u of [3.975, 5.025]) bag.add('opening', fb(cx + sx * u - 0.2, y1 + 1.7, gz - 0.02, cx + sx * u + 0.2, y1 + 4.3, gz));
+    bag.add(B, fb(cx + sx * 2.6, y1, gz - 0.4, cx + sx * 3.0, y1 + 4.9, gz));
+    bag.add(B, fb(cx + sx * 3.0, y1, gz - 0.2, cx + sx * 3.25, y1 + 4.9, gz));
+    bag.add(G, fb(cx + sx * 2.6, y1 + GH - 0.9, gz - 0.06, cx + sx * 6.5, y1 + GH - 0.3, gz));
+    const [ta, tb] = zr(gz, gz + 4);
+    crenels(bag, [Math.min(cx + sx * 2.6, cx + sx * 6.5), ta, Math.max(cx + sx * 2.6, cx + sx * 6.5), tb], y1 + GH, B, 0.7, { gap: 0.75, depth: 0.5 });
+  }
+  bag.add(B, fb(cx - gw, y1 + 4.8, gz - 0.4, cx + gw, y1 + 5.15, gz));
+  bag.add(B, fb(cx - gw - 0.65, y1 + 4.9, gz - 0.2, cx + gw + 0.65, y1 + 5.3, gz));
+  bag.add(G, fb(cx - gw, y1 + 5.15, gz - 0.42, cx + gw, y1 + 5.6, gz));
 }
 
 /**
