@@ -3,7 +3,7 @@
 // stair element's own numbers. Registered into the greek elements (as house.js does); decals 4 mm above the tread, no collision.
 import '../../styles/delphi/index.js';
 import { STYLES } from '../../core/build.js';
-import { box } from '../../core/geom.js';
+import { box, fromTriangles } from '../../core/geom.js';
 import { hashAt } from './nightlight.js';
 
 function stairWear(el, { bag }) {
@@ -23,3 +23,34 @@ function stairWear(el, { bag }) {
   }
 }
 Object.assign(STYLES.greek.elements, { dl_stairwear: stairWear });
+
+// dl_stepwear: { rect (the stylobate), y0, steps, rise, tread, at: [x…] (where the feet cross), w? } — a hollow worn into each step of a krepis on its south side, at each
+// crossing; the front band of step i is [z1 + o − tread, z1 + o] with o = (steps − 1 − i)·tread (greek krepis), the top step's band lies inside the stylobate edge.
+function stepWear(el, { bag }) {
+  const [, , , z1] = el.rect, n = el.steps ?? 2, tread = el.tread, mat = el.wear ?? 'plaster_damp';
+  for (const xc of el.at) for (let i = 0; i < n; i++) {
+    const o = (n - 1 - i) * tread, yTop = el.y0 + (i + 1) * el.rise, h = hashAt(xc, z1 + i, 7), w = (el.w ?? 1.5) * (0.8 + 0.3 * h), off = (hashAt(xc, z1, 8 + i) - 0.5) * 0.3;
+    const zb = z1 + o - tread * 0.78, zf = z1 + o - tread * 0.12;
+    bag.add(mat, box(xc + off - w / 2, yTop + 0.001, zb, xc + off + w / 2, yTop + 0.005, zf));
+  }
+}
+// dl_wayworn: { pts: [[x, y, z], …] (the Way's centre line), w } — the polished band the feet have worn down the middle of the paving: short darker patches along the line,
+// 0.9–1.4 m across, a third of the length left unworn, by the hash of each patch's own place; decals 6 mm above the paving (the ribbon lifts 4 mm).
+function wayWorn(el, { bag }) {
+  const P = el.pts;
+  for (let i = 0; i + 1 < P.length; i++) {
+    const [ax, ay, az] = P[i], [bx, by, bz] = P[i + 1], L = Math.hypot(bx - ax, bz - az);
+    if (L < 0.1) continue;
+    const ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
+    for (let s = 0.2; s < L - 0.4; s += 1.1 + 0.5 * hashAt(ax + ux * s, az + uz * s, 2)) {
+      const px = ax + ux * s, pz = az + uz * s, h = hashAt(px, pz, 1);
+      if (h < 0.3) continue;
+      const half = (0.45 + 0.35 * hashAt(px, pz, 3)) / 2 * (el.w / 3.6 + 0.3), len = 0.55 + 0.6 * hashAt(px, pz, 4), off = (hashAt(px, pz, 5) - 0.5) * 0.7;
+      const y = ay + (by - ay) * (s / L) + 0.05, cx = px + nx * off, cz = pz + nz * off;
+      const q = [[cx - nx * half, cz - nz * half], [cx + nx * half, cz + nz * half], [cx + nx * half + ux * len, cz + nz * half + uz * len], [cx - nx * half + ux * len, cz - nz * half + uz * len]];
+      bag.add(el.mat ?? 'plaster_damp', fromTriangles(tri(q, y)));
+    }
+  }
+}
+const tri = (q, y) => { const v = (p) => [p[0], y, p[1]]; return [...v(q[0]), ...v(q[1]), ...v(q[2]), ...v(q[0]), ...v(q[2]), ...v(q[3])]; };
+Object.assign(STYLES.greek.elements, { dl_stepwear: stepWear, dl_wayworn: wayWorn });

@@ -62,7 +62,7 @@ export class Halo {
 export function lightHalo(H, l, floor) {
   const [x, y, z] = l.at, d = l.distance ?? 6, k = Math.min(1, (l.intensity ?? 2) / 2.4);
   H.ball(x, y, z, Math.max(0.42, Math.min(0.95, d * 0.11)) * (0.8 + 0.2 * k));
-  if (floor !== undefined && y - floor < 3.0 && y - floor > 0.2) H.floor(x, floor + 0.03, z, Math.max(1.3, Math.min(3.4, d * 0.42)), Math.max(1.3, Math.min(3.4, d * 0.42)), 10, 0.8);
+  if (floor !== undefined && y - floor < 3.0 && y - floor > 0.2) H.floor(x, floor + 0.09, z, Math.max(1.3, Math.min(3.4, d * 0.42)), Math.max(1.3, Math.min(3.4, d * 0.42)), 10, 0.8);
 }
 
 /** The lights some elements give that the style does not push as lights (their flames are a material only): [(el) → [{ at, distance, intensity, color }]]. */
@@ -86,13 +86,13 @@ const wrap = (name, fn) => function haloed(el, ctx) {
     const F = frame(el.rect, 's'), D = houseDoors(el.rect, el.seed || 1), y = el.y ?? 0;
     // the street door ajar: the lamp of the passage spilling over the step into the lane
     const [px, pz] = F.P(D.du, -1.1);
-    H.floor(px, y + 0.06, pz, 2.0, 1.5, 8, 0.6);
+    H.floor(px, y + 0.1, pz, 2.0, 1.5, 8, 0.6);
     // the shop kept open into the evening: a lit sheet in the opening, and the spill on the lane before it
     const mx = F.P((D.so[0] + D.so[1]) / 2, 0)[0], mz = F.P(0, 0)[1];
     if (hashAt(mx, mz, 11) < 0.45) {
       const a = F.P(D.so[0] + 0.1, -0.07), b = F.P(D.so[1] - 0.1, -0.07), f = 0.5 + 0.3 * hashAt(mx, mz, 12);
       H.quad([a[0], y + 1.0, a[1]], [b[0], y + 1.0, b[1]], [b[0], y + 2.05, b[1]], [a[0], y + 2.05, a[1]], [0, 1], f);
-      const [sx, sz] = F.P((D.so[0] + D.so[1]) / 2, -1.2); H.floor(sx, y + 0.06, sz, 2.0, 1.3, 8, 0.7);
+      const [sx, sz] = F.P((D.so[0] + D.so[1]) / 2, -1.2); H.floor(sx, y + 0.1, sz, 2.0, 1.3, 8, 0.7);
     }
   }
   H.flush(ctx.bag);

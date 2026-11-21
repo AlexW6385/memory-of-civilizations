@@ -248,5 +248,12 @@ function delphiHouse(el, ctx) {
   }
   void krater; void merge;
 }
-Object.assign(STYLES.greek.elements, { delphi_house: delphiHouse });
+// The village's materials are folded into fewer: every distinct material of the houses is a draw in the main pass and in each shadow cascade (a tile batch is one mesh
+// per material), and a rope, a handful of pebbles or a patch of red wall is not worth one. Nearly the same colours, so the lanes read as before.
+export const NEAR_MAP = { rope_fibre: 'wood_dark', pebbles: 'rubble', lime_plaster: 'plaster_white', wood_ochre: 'timber', shutter_brown: 'wood_dark', wall_red: 'cloth_red', cloth_brown: 'wood_dark', granite_black: 'lacquer_black', marble: 'plaster_white', sacking: 'cloth_ochre', log_pine: 'timber', iron: 'lacquer_black', paint_blue: 'cloth_indigo', bark_olive: 'wood_dark', linen: 'cloth_white', plaster_grey: 'plaster_white' };
+/** The closed form of a house (the far twin and the closed lots) in ten materials. */
+export const FAR_MAP = { ...NEAR_MAP, mudbrick: 'mud_plaster', plaster_damp: 'plaster_streak', plaster_ochre: 'mud_plaster', plaster_white: 'mud_plaster', terracotta: 'roof_tile', paint_ochre: 'mud_plaster', wood_painted: 'wood_dark', cloth_red: 'cloth_green' };
+const remap = (bag, map) => new Proxy(bag, { get(t, k) { const v = t[k]; if (k === 'add' || k === 'addInstance') return (m, ...r) => v.call(t, map[m] ?? m, ...r); return typeof v === 'function' ? v.bind(t) : v; } });
+const closedHouse = (el, ctx) => STYLES.greek.elements.athens_house(el, { ...ctx, bag: remap(ctx.bag, FAR_MAP) });
+Object.assign(STYLES.greek.elements, { delphi_house: (el, ctx) => delphiHouse(el, el.lite ? { ...ctx, bag: remap(ctx.bag, NEAR_MAP) } : ctx), dl_closed_house: closedHouse });
 export { delphiHouse };
