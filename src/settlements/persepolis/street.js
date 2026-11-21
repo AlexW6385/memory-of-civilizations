@@ -52,7 +52,7 @@ export function street() {
         if (g[0] === 'pot') e.kind = 'pithos'; if (g[0] === 'firewood') e.len = 1.6;
         F.push(e);
       }
-      if (l.enter) person(at(-0.2 + d.w * 0.25, -1.1), rotOut(o), { el: { pose: 'talk' } });
+      if (l.enter) person(at(-0.9, -1.1), rotOut(o), { el: { pose: 'talk' } });      // behind the counter's closed end, clear of the way in (a + 0.65)
       if (rand() < 0.5) person(at(-0.5, 2.2), rotIn(o), { woman: rand() < 0.5, el: { pose: rand() < 0.5 ? 'talk' : 'stand' } });
     } else if (l.enter && rand() < 0.5) person(at(-1.0, -2.0 - rand() * 1.5), rand() * 6, { woman: rand() < 0.6, el: { pose: 'cross' } });
   }

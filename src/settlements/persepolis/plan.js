@@ -5,7 +5,7 @@
 
 import { TERRACE, STAIR, COURT, mountain } from './layout.js';
 import { people } from './people.js';
-import { walkRoutes } from './walkroutes.js';
+import { walkRoutes, placeRoutes } from './walkroutes.js';
 
 // the ways visitors walk on the terrace: the royal way from the stair's head to the Apadana's west stair, and the file from the
 // Gate of All Nations along the Apadana's north stair (the carved figures there are modelled in full within 12 m of them)
@@ -123,6 +123,7 @@ const walks = [[[-220, STAIR.z], [-162.5, STAIR.z], [-162.5, STAIR.z - 54], [-15
 walks[0].y0 = 0;
 // the visitor's walk into the opened houses (walk.js, walkroutes.js): the terrace's lodgings from the court, and the houses on the road below
 for (const r of walkRoutes()) { const route = r.route.map((p) => [p[0], p[1]]); route.y0 = r.where === 'terrace' ? T : 0; walks.push(route); }
+for (const r of placeRoutes()) { const route = r.route.map((p) => [p[0], p[1]]); route.y0 = r.where === 'terrace' ? T : 0; walks.push(route); }
 // the royal way from the arrival toward the Apadana's west stair
 walks.push(Object.assign([[-122, -60], [-96, -60]], { y0: T }));
 

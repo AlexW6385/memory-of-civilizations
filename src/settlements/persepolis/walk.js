@@ -12,7 +12,7 @@ export const WALK = [
   { y: T, line: [[-112, -132], [-91, -123], [-44, -123]] },           // from the Gate of All Nations along the Apadana's north stair
   { y: 0, line: [[-400, -140], [-176, -140]] },                       // the road on the plain, from the town to the foot of the stair
 ];
-export const WALK_REACH = 10;
+export const WALK_REACH = 30;
 export function segDist(p, a, b) {
   const vx = b[0] - a[0], vz = b[1] - a[1], l2 = vx * vx + vz * vz || 1, t = Math.max(0, Math.min(1, ((p[0] - a[0]) * vx + (p[1] - a[1]) * vz) / l2));
   return Math.hypot(p[0] - a[0] - vx * t, p[1] - a[1] - vz * t);
