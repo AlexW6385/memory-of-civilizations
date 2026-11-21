@@ -10,6 +10,7 @@ import { campElements } from './camp.js';
 import { frontFrame } from '../../styles/mongol/local.js';
 import { bayLeft } from '../../styles/mongol/shops.js';
 import { bays } from './walkroutes.js';
+import { nightElements } from './nightlight.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, elements });
@@ -58,6 +59,7 @@ function fabric() {
   // wagons at the south and east gates
   for (const [x, z] of OUTSIDE_WAGONS.s) E.push({ t: 'coffer_cart', at: [x, z], y: 0, yaw: 0.2 + r() * 0.4 });
   for (const [x, z] of OUTSIDE_WAGONS.e) E.push({ t: 'coffer_cart', at: [x, z], y: height(x, z), yaw: 1.4 + r() * 0.3 });
+  E.push(...nightElements());
   return E;
 }
 
