@@ -37,6 +37,8 @@ E.push({ t: 'court_awning', rect: [-104.5, -38, -95, -29.5], y: T, h: 2.9, cloth
 E.push({ t: 'court_awning', rect: [-119, -99, -98, -93.5], y: T, h: 2.9, cloth: 'cloth_ochre', trim: 'cloth_indigo' });
 // the scribes of the court seated at their mats by the stair, tablets drying beside them (the Aramaic scribes: leather scrolls)
 for (const [x, z, rot, scroll] of [[-100.5, -34.5, -Math.PI / 2, false], [-100.5, -32.5, -Math.PI / 2, true], [-107, -104, Math.PI / 2, true]]) E.push({ t: 'scribe_kit', at: [x, z], y: T, rot, scroll });
+// the two bronze braziers either side of the royal way (the guards' night fires), lit: the court's light by night (docs/settlements/persepolis.md §23.2)
+E.push({ t: 'furnish', y: T, items: [['brazier', -118, -67.2, 0, { light: true }], ['brazier', -118, -52.8, 0, { light: true }]] });
 // the Gate of All Nations
 E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 // the Apadana on its 2.6 m plinth: 6 × 6 columns in the hall, porticoes north, west and east
