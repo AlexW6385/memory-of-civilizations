@@ -151,3 +151,14 @@ Sources: the ones already cited (tota.world, Canadian Encyclopedia, worldheritag
 - **House fronts**: the formline painting is now built in relief on the front wall and gable (the great eye, bands running up the slopes, eyes with brows and U-forms either side of the door, red fields in black frames), three designs by seed, the landmark's the richest; the beam ends of the gable stand out under the eave as round logs with black ends and red hearts. [inferred: Haida house fronts carried painted designs; the beam ends are the visible ends of the lengthwise beams]
 - **Canoe prows**: the bow piece is a thick stem curving forward and up to a carved head (snout, ears, eyes) with the formline eye in relief on each cheek, replacing the flat plate. [inferred]
 - **Departures**: none from the dossier's stated choices; the carvings stay generic. Still open: gable eye behind the landmark's pole is hidden from the front; the house posts' beings are generic.
+
+## 11. Matching the reference (Suzhou): the walk, the night, the sound, the animals, wear
+
+Method: docs/suzhou-method.md. The shell cannot reach the sources, so everything below rests on the sections above and on the standard ethnographies (Swanton 1905; Dawson 1880; MacDonald 1983; Stewart, *Cedar*, 1984), not re-read; it is [inferred] unless a cited line says [stated]. Respect holds: nothing here depicts a ceremony, a crest, a burial or a sacred object; no text is written (the Haida of 1850 had no writing; §11e).
+
+### 11a. The visitor's walk
+
+- There are no shops, stalls or script in a Haida village; the "shops and houses" of the reference are the plank houses, their hearths, the canoe beach and the work places of the street (§5a, §5b). All seventeen houses were already open and furnished; this pass adds the walk. [decision]
+- **The walk:** from the beach top before the landmark (arrival) across the street to the frontal pole, through the oval door at its foot, down the tiers to the hearth; and the same way into ten more houses of the row (nine others, six north and four south of the landmark), each a route in the landmark plan that `tools/walk-check.mjs` follows (eleven routes in all). [inferred: the way a visitor goes in]
+- The lane from the street to each door (a strip 1.4 m wide, 9.5 m long from the pole) is kept clear of benches, fires, frames, tubs and stacks, so the way in is never a prop; the pillars' colliders stand 0.8 m off the middle of the door (a clear way 1.6 m wide; the carved opening is 1.0 m, the walker's body needs the margin). [decision]
+- The houses at the south end (13–15) stand over the shore's drop and their lanes cross the beach edge: their interiors are open but they are not in the walk-check routes. [limit]
