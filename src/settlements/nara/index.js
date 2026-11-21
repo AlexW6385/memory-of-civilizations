@@ -44,6 +44,11 @@ for (const x of [-28, -22, 22, 28]) for (const z of [cz - 6, cz + 2, cz + 10]) {
   banners.push({ t: 'beam', a: [x - 0.7, z], b: [x + 0.7, z], w: 0.12, y: CEIL - 0.95, h: 0.1, mat: 'gilt_bronze' });
   banners.push({ t: 'beam', a: [x - 0.62, z], b: [x + 0.62, z], w: 0.08, y: CEIL - 9.6, h: 0.12, mat: 'gilt_bronze' });
 }
+// The foot of each stair (docs §20.4): an apron of dressed setts 2.2 m deep where the treads begin, on the hall's stair, the Middle Gate's south stair and both
+// faces of the Great South Gate [inferred]. Scuffs and polish on the flagging were tried in the dark timber material and read as holes: they wait for a worn-stone material.
+function wear() {
+  return [[-29, -26.8], [51.1, 53.3], [134.3, 136.5], [155.5, 157.7]].map(([z0, z1]) => ({ t: 'block', rect: [-6.6, z0, 6.6, z1], y0: -0.1, y1: 0.03, mat: 'granite_block', collide: false }));
+}
 const daibutsu = {
   id: 'nara-daibutsu', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [hx0, hz0, hx1, hz1], entrance: { at: [0, 180], facing: 'n' },
   elements: [
@@ -60,7 +65,7 @@ const daibutsu = {
     { t: 'block', rect: [-3, 152, 3, 183], y0: -0.1, y1: 0.04, mat: 'flagstone', collide: false },
     { t: 'block', rect: [-3.2, 152, -3, 183], y0: -0.1, y1: 0.12, mat: 'granite_block', collide: false },
     { t: 'block', rect: [3, 152, 3.2, 183], y0: -0.1, y1: 0.12, mat: 'granite_block', collide: false },
-    ...inner, ...ceil, ...banners,
+    ...inner, ...ceil, ...banners, ...wear(),
   ],
 };
 // the Great Buddha, Rushana, in bronze as at the eye-opening of 752, on its lotus throne

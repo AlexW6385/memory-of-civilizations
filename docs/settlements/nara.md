@@ -220,3 +220,26 @@ Nothing of Nara in 752 was recorded; every voice is synthesised and [inferred] f
 
 ### 19.6 Not done in this pass
 - Wear and weathering of the court's stone (worn steps and thresholds, grass in the joints); the bell in the tower; the landmark gaps of §14-§18 beyond what is listed there.
+
+## 20. Second pass (narrow form): night near the visitor, budget, the walk's gaps, the landmark
+
+Marks as in §19. Measurements are MAIN-pass figures (tools/draw-count.mjs); the arrival before this pass was main 260 / 1.93 M tris.
+
+### 20.1 Night near the visitor
+- Seen (night, low preset, 1024x576): at the arrival the court is lit (fire baskets, lamp stands, the lantern, halos visible). On the walk, at z 125 on the axis facing south, nothing lit the ground within 15 m: only two distant lamps at the gate's foot.
+- Built: lamp stands (`tomyo`) in pairs along the service quarter's way at z 68, 80, 92, 116, 128, 140 (x +-6.5), and torch posts (`taimatsu`) down Suzaku Avenue's two sides at z 172, 196, 220, 244 (x +-7) [inferred, as the lamps of §19.2: oil lamps and pine torches are what a way of the time was lit by]. They are elements of the existing temple plan in materials it already held.
+- Re-rendered at the same pose: the stands' glow and pools show on the way and in the distance.
+
+### 20.2 Budget
+Main draws / main tris (before job 1 numbers from §19.7): arrival 262 / 1.94 M. Walk poses (z along the axis, two opposite yaws): z 70: 278 / 2.05 M and 335 / 1.94 M; z 104: 286 / 2.29 M and 306 / 1.65 M; (10, 200): 352 / 2.37 M and 234 / 1.12 M. All under 450 / 4.5 M; nothing to split.
+
+### 20.3 The walk's gaps
+- Keepers, the service quarter's people and the craft workers were life elements (figures reach 170 m); they are now figures built into near plans of 60 m cells drawn within 80 m (`cells()` in town.js), as Changan's keeperPlans does. Draw counts at two walk poses are unchanged (merged per material), so the figures neither cost nor were seen to vanish: not looked at in a render (the one day render at the service lane did not frame a shop front).
+- walk-check: 30 routes, 67 legs ok (before and after). No route stops short of a door.
+- Not done: the market's stall figures remain a life plan; shop signs (no writing).
+
+### 20.4 The landmark
+- Aprons of dressed setts, 13.2 m by 2.2 m, at the foot of the hall's stair, the Middle Gate's south stair and both faces of the Great South Gate's [inferred]; `wear()` in index.js, in a material the plan holds (no draw).
+- Wear on the flagged way (scuffed patches) and polished pads on the aprons were built and looked at, in `wood_dark` (the only dark material that costs no draw): they read as holes in the paving, so they were taken out. Wear needs a worn-stone material (darker, polished granite or flagstone) in the shared palette: not available to this pass; granite_grey would add one draw at the arrival (263 vs the +2 limit).
+- The bell in the tower exists (yard.js naraBelltower: bronze bell, studs, striking log); the "not done" of §19.6 was stale.
+- Not done: worn treads on the stairs (the `stairs` element is shared), grass in the joints, thresholds of the hall's doors.
