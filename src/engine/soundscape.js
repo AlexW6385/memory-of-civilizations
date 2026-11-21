@@ -102,6 +102,8 @@ import './voices-isfahan.js';
 import * as JERUSALEM from '../settlements/jerusalem/soundmap.js';
 import './voices-jerusalem.js';
 import * as KNOSSOS from '../settlements/knossos/soundmap.js';
+import * as LHASA from '../settlements/lhasa/soundmap.js';
+import * as MACHUPICCHU from '../settlements/machu-picchu/soundmap.js';
 import * as NEWYORK from '../settlements/new-york/soundmap.js';
 import './voices-ny.js';
 import * as VENICE from '../settlements/venice/soundmap.js';
@@ -116,6 +118,7 @@ import * as LISBON from '../settlements/manueline-lisbon/soundmap.js';
 import * as ISTANBUL from '../settlements/ottoman-istanbul/soundmap.js';
 import * as PARIS from '../settlements/paris/soundmap.js';
 import './voices-paris.js';
+import * as PETRA from '../settlements/petra/soundmap.js';
 import * as ROME from '../settlements/rome/soundmap.js';
 import * as HANGZHOU from '../settlements/song-hangzhou/soundmap.js';
 import * as KAIFENG from '../settlements/song-kaifeng/soundmap.js';
@@ -224,9 +227,9 @@ export const PROFILES = {
   kilwa: T({ ...TROP, gull: 0.6 }, { cicadas: 0.6, animals: { goat: 0.5, rooster: 0.5, dog: 0.2 }, roof: 'flat', adhan: 1 }),
   knossos: T(MED, { cicadas: 0.9, animals: withLife({ goat: 0.5, cattle: 0.35, donkey: 0.35, dog: 0.25 }, { market: 0.7, map: KNOSSOS }), roof: 'flat' }),
   lalibela: T({ dove: 0.8, kite: 0.6, tropic: 0.4, crow: 0.4 }, { animals: { goat: 0.5, cattle: 0.5, rooster: 0.6, dog: 0.4, donkey: 0.3 }, roof: 'thatch' }),
-  lhasa: T({ crow: 1, sparrow: 0.7, kite: 0.4 }, { animals: { dog: 0.8, cattle: 0.3 }, roof: 'flat', bells: 'dungchen' }),
+  lhasa: T({ crow: 1, sparrow: 0.7, kite: 0.4 }, { animals: withLife({ dog: 0.5, cattle: 0.3 }, { market: 1, eaves: 1, map: LHASA }), roof: 'flat', bells: null }),
   london: T({ ...EU, gull: 0.5 }, { animals: withLife({ horse: 0.8, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: LONDON }), roof: 'slate', bells: 'westminster' }),
-  'machu-picchu': T({ warbler: 0.6, tropic: 0.4, dove: 0.4 }, { animals: { dog: 0.2 }, roof: 'thatch' }),
+  'machu-picchu': T({ warbler: 0.6, tropic: 0.4, dove: 0.4 }, { animals: withLife({ dog: 0.2 }, { map: MACHUPICCHU }), roof: 'thatch' }),
   madurai: T(IND, { cicadas: 0.5, frogs: 0.5, animals: withLife({ cattle: 0.7, rooster: 0.4, goat: 0.4, dog: 0.3 }, { market: 1, eaves: 1, map: MADURAI }), roof: 'tile', bells: 'puja' }),
   'mamluk-cairo': T(NEAR, { animals: withLife({ donkey: 0.8, horse: 0.3, rooster: 0.3, dog: 0.4 }, { market: 1, map: CAIRO }), roof: 'flat', adhan: 1 }),
   maori: T({ warbler: 1, tropic: 0.5 }, { cicadas: 0.6, animals: { dog: 0.3 }, roof: 'thatch' }),
@@ -242,7 +245,7 @@ export const PROFILES = {
   'ottoman-istanbul': T({ ...MED, gull: 0.8 }, { cicadas: 0.4, animals: withLife({ dog: 0.5, donkey: 0.3, horse: 0.3 }, { market: 1, map: ISTANBUL }), roof: 'tile', adhan: 2 }),
   paris: T(EU, { roof: 'slate', bells: 'paris', animals: withLife({ horse: 0.5, rooster: 0.3, dog: 0.3 }, { canal: 1, market: 1, eaves: 1, map: PARIS }) }),
   persepolis: T(NEAR, { animals: { horse: 0.5, donkey: 0.4, dog: 0.3 }, roof: 'flat' }),
-  petra: T({ dove: 1, kite: 0.4, sparrow: 0.5 }, { animals: { goat: 0.6, donkey: 0.4 }, roof: 'flat' }),
+  petra: T({ dove: 1, kite: 0.4, sparrow: 0.5 }, { animals: withLife({ goat: 0.6, donkey: 0.4 }, { market: 0.8, map: PETRA }), roof: 'flat' }),
   'qing-beijing': T({ ...EAS, crow: 1 }, { cicadas: 0.7, roof: 'tile', bells: 'beijing', animals: withLife({ dog: 0.3, horse: 0.2 }, { market: 1, patrol: 1, eaves: 1, map: BEIJING }) }),
   'rapa-nui': T({ gull: 1, tropic: 0.2 }, { animals: { rooster: 0.4 }, roof: 'thatch' }),
   rome: T(MED, { cicadas: 0.5, frogs: 0.3, animals: withLife({ donkey: 0.4, horse: 0.3, dog: 0.3, rooster: 0.3 }, { canal: 1, market: 1, eaves: 1, map: ROME }) }),
