@@ -197,6 +197,34 @@ A punter at the stern of most moored boats, a man seated amidships in some; wome
 
 - **Ours** (`layout.js`): the houses that can be entered beyond the first 120 m rise from about 60 to about 110 — trade houses by the places of their trades round the ring of the town (the north-east with the brickyard, the east, the south-east, the south, the south-west, the west, the north-west), each with its worker at his place (`tradeWorkers`), and twenty family houses of no trade among them (the reception room, the chapel, the kitchen, the lavatory, the storeroom), their doors toward the temple. At the doors of one house in six beyond the core, a woman with her jar, an old man on the step, a child, a dog or a tied donkey (`laneLife`). The lots stay as they were (the new exclusions use the random stream as before) [inferred: places, numbers].
 
+## 24. The visitor's walk (match pass, 2026-11-20)
+
+- [inferred] The arrival stands in the Court of Nanna; the walk's spine runs north by the avenue of date palms, the temenos's north gate, the market square and the north street (`SPINE`, src/settlements/ur/openwalk.js). The sixteen houses that can be entered nearest that line get a walk-check route each (street door, lobby, court, reception room's door); with the earlier routes walk-check now runs 37 routes. The doors of every entered house have a `door_clear` lane (2.4 x 3.6 m, a no-op element) so that the street-life pass keeps animals and things out of them. The houses are the trade houses, the school, the family houses and the temple's workshops of §5.1-§5.14, their workers at their places; nothing was rebuilt.
+- The town's plans use `ur-g`, Ur's own wrapper of `sumerian-ur` (src/settlements/ur/trim.js: small pieces varied by a hash of their place, so the core merges them instead of instancing each shape): main draws at the arrival 401 -> 348.
+- Flaw left: the street door of an entered house is 0.95 m wide (urHouseOpen in the shared `sumerian` style, read-only here), under the 1.6 m the later passes use; walk-check passes it, a wheelchair-wide door would need the shared builder changed.
+
+## 25. Night (match pass)
+
+- [inferred] No source describes Ur at night; what lit it is what Mesopotamia gives: clay oil lamps (a saucer with a pinched lip, sesame oil) over doors and in rooms, the altar's fire and the braziers of the Court of Nanna, the shrines' lamps. Every light a landmark builder pushes (the court's altar fire and braziers, the shrine, the Giparu's and the palace's rooms) gets an additive `halo` ball and floor pool (`lit`, nightlight.js; the landmark's style is `ur-n`); a door lamp with its pool before each entered house (`ur_night`, one plan, one draw). Seen in the night renders at the arrival (altar and brazier glow, warm pools on the pavement) and at a door of the market square.
+- Not built: the lanes had no lighting; the house interiors' own lights are not haloed (a draw per tile each); the door lamp is a glow without a drawn lamp niche over the door.
+
+## 26. Sound (match pass)
+
+- [stated] The rites of Nanna, the lyre, harp, pipe and frame drum: §9, §4.4a. [inferred] Everything else: sound map src/settlements/ur/soundmap.js (the rites' chant and the great drum in the Court at the day's two ends, the lyre at the way's edge, the market sellers, the work of each trade house (quern, loom, wheel, hammer, vats, granary, fisher, reeder), the edubba's recitation, kitchens, the quay's porters, the brickyard's treading, the moulder's slap and the shaduf at its pool, geese at the quay, doves, donkeys, sheep in the pens, jackals beyond the rampart and owls by night), two tracks (reed boats on the basin, donkey trains on the north street), rooms for the houses by use, the shrine and the palace hall. Nineteen voices prefixed `ur` (src/engine/voices-ur.js), the two of the brickyard new; the rest follow Babylon's synthesis with the camel and the carpenter's adze left out and no bell, no call to prayer. Measured with tools/sound-render.mjs (rms 2.5e-3 to 2.7e-2 at source before gain); not heard by anyone. Test: tests/ur-sound.test.mjs.
+
+## 27. Animals (match pass)
+
+- [inferred] 18 critters and a raft of ducks, one draw: dogs at the doors of the entered houses on the walk, domestic geese behind the quay (geese and ducks were fattened for the temples in Ur III administrative texts [inferred from memory, no source fetched]), doves on the Court's paving and the market square, a kingfisher and a cormorant on mooring posts, a crane on the basin's rim. Left out: cats and hens (no secure evidence for the date), camels and horses (not yet), sheep and goats (the street-life pass draws them). Test: tests/ur-critters.test.mjs.
+
+## 28. Wear and writing (match pass)
+
+- [inferred] A polished lane of limestone (1.6 m wide, 4 mm) up every tread of the ziggurat's central stair with trodden dust in the corners against the parapets, a polished stripe on each entered house's brick threshold, a drift of silt dust at the foot of the wall beside each door, a damp band on the quay face at the waterline (src/settlements/ur/wear.js, plan `ur-wear`). On the day render the lane reads faintly on the nearest treads only (the flight is in shade).
+- Cuneiform: not written. No sign table could be fetched and signs not verified are not drawn; the stamped bricks and inscribed cones (§4.1) stay plain.
+
+## 29. Still below the Suzhou reference
+
+No near/far split of the opened interiors (all hollow houses are built whole; the plans are merged by tile); the street door 0.95 m; no written signs; the door lamp has no lamp object; upper floors open in nine houses only; the terrace stair and the harbour steps are not worn; no inscriptions or stamped bricks; the landmark's remaining gaps against §5 were not examined beyond the night and the stair.
+
 ## Sources
 
 - [Craft Manufacture and Production — encyclopedia.com](https://encyclopedia.com/history/news-wires-white-papers-and-books/craft-manufacture-and-production)
