@@ -11,6 +11,7 @@ import { bayRoutes, roomRoutes } from './walk.js';
 const E = [
   { t: 'golden_palace', rect: PALACE, face: 's', y: 0, seed: 762 },
   { t: 'great_mosque', rect: MOSQUE, face: 's', y: 0, seed: 763 },
+  { t: 'golden_wear', rect: PALACE, face: 's', y: 0, seed: 762 },
   { t: 'house_of_wisdom', rect: LIBRARY, face: 's', y: 0, seed: 786 },
 ];
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });

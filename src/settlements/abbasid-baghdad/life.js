@@ -15,11 +15,11 @@ const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));  
 const CL = ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_indigo', 'cloth_green', 'cloth_grey', 'cloth_maroon', 'cloth_white'];
 const BLACK = 'cloth_black';
 
-/** The keepers of the suq bays and of the south gate road's rooms, in 60 m cells, each cell a plan shown within 100 m of its middle (docs §20). */
+/** The keepers of the suq bays and of the south gate road's rooms, in 120 m cells, each cell a plan shown within 130 m of its middle (docs §20). */
 function keeperPlans(K) {
   const cells = new Map();
-  for (const f of K) { const k = `${Math.floor(f.at[0] / 60)},${Math.floor(f.at[1] / 60)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(f); }
-  return [...cells].sort().map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { id: `abbasid-baghdad-keepers-${k}`, style: 'abbasid-baghdad', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t: 'bag_keepers', list }], rooms: [], bounds: [-520, -520, 520, 520], entrance: { at: [C[0], C[1] + 60], facing: 'n' }, center: [i * 60 + 30, j * 60 + 30], near: 100 }; });
+  for (const f of K) { const k = `${Math.floor(f.at[0] / 120)},${Math.floor(f.at[1] / 120)}`; if (!cells.has(k)) cells.set(k, []); cells.get(k).push(f); }
+  return [...cells].sort().map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { id: `abbasid-baghdad-keepers-${k}`, style: 'abbasid-baghdad', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t: 'bag_keepers', list }], rooms: [], bounds: [-520, -520, 520, 520], entrance: { at: [C[0], C[1] + 60], facing: 'n' }, center: [i * 120 + 60, j * 120 + 60], near: 130 }; });
 }
 export async function lifePlan() {
   const rand = rng(762), P = [], plans = [];
