@@ -71,19 +71,25 @@ walks[0].y0 = 0;
   const a = [[14, 0], [-40, 0], [-52, 0], [-66, 0], [-64, -17], [-60, -17], [-56.5, -21.5]];
   const b = [[14, 0], [-40, 0], [-52, 0], [-66, 0], [-64, 17], [-60, 17], [-56.5, 21.5]];
   const k = [[14, 0], [40, 0], [KHANQAH.rect[2] - 17 + 0.5, 0], [KHANQAH.rect[2] - 11, 0]];
-  for (const w of [a, b, k]) { w.y0 = 0; walks.push(w); }
+  // the west range (docs §21): the lecture hall and the hall of the sciences from the gallery, the mosque through the west iwan's door
+  const lh = [[14, 0], [-40, 0], [-52, 0], [-66, 0], [-80, -12], [-100, -17], [-104, -20.15], [-112, -20.15]];
+  const hs = [[14, 0], [-40, 0], [-52, 0], [-66, 0], [-80, 12], [-100, 17], [-104, 20.15], [-112, 20.15]];
+  const mo = [[14, 0], [-40, 0], [-52, 0], [-66, 0], [-100, 0], [-107, 0], [-112, 0], [-115.5, 0]];
+  for (const w of [a, b, k, lh, hs, mo]) { w.y0 = 0; walks.push(w); }
 }
 // the houses nearest the arrival: lane, the passage of the street door, the court, the talar (the porch of the court), and the room of the trade at its wing
 {
-  const BLOCKED = new Set([954925, 423350, 725441]);      // courts whose side path is shut by the furniture of their trade (a walked check, not a design)
+  const FLIP = new Set([954925, 423350]);      // courts whose screen leaves too little room at the passage's mouth: the lateral leg runs further out (a walked check)
+  const SHUT = new Set([725441]);      // the carpenter's court whose planks shut the long way across: not walked
   const rng = (seed) => { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); };
-  const near = houses().filter((h) => h.full && !h.garden && !BLOCKED.has(h.seed)).map((h) => ({ h, d: Math.hypot((h.rect[0] + h.rect[2]) / 2 - 14, (h.rect[1] + h.rect[3]) / 2) })).sort((x, y) => x.d - y.d).slice(0, 10);
+  const near = houses().filter((h) => h.full && !h.garden && !SHUT.has(h.seed)).map((h) => ({ h, d: Math.hypot((h.rect[0] + h.rect[2]) / 2 - 14, (h.rect[1] + h.rect[3]) / 2) })).sort((x, y) => x.d - y.d).slice(0, 13);
   near.forEach(({ h }, i) => {
     const G = houseGeom(h), W = G.W, D = G.D, zf = -D / 2 + 4.8, zs = D / 2 - 4.6, xl = -W / 2 + 4.3, xr = W / 2 - 4.3, zc = (zf + zs) / 2;
     const xd = Math.max(-W / 2 + 3.2, Math.min(W / 2 - 3.2, h.xd));
-    const q = rng(h.seed + 7); q(); if (!h.rich) q(); const rsgn = q() < 0.5 ? -1 : 1, X = 2.4 * rsgn;
+    const q = rng(h.seed + 7); q(); if (!h.rich) q(); const rsgn = (q() < 0.5 ? -1 : 1), X = 2.4 * rsgn;
+    const zl = FLIP.has(h.seed) ? 0.8 : 0.3;      // (lateral past the passage's screen, in the clear band between the wing's wall and the screen)
     let r;
-    if (i % 2 === 0 || h.trade === 'smith') r = [[xd, D / 2 + 3], [xd, zs + 1], [xd, zs - 0.3], [X, zs - 0.3], [X, zf + 0.6], [X, zf - 1.2]];
+    if (i % 2 === 0 || h.trade === 'smith') r = [[xd, D / 2 + 3], [xd, zs + 1], [xd, zs - zl], [X, zs - zl], [X, zf + 0.6], [X, zf - 1.2]];
     else { const ex = rsgn < 0 ? xl + 1.6 : xr - 1.6, dx = rsgn < 0 ? xl - 0.25 : xr + 0.25, ix = rsgn < 0 ? -W / 2 + 2.2 : W / 2 - 2.2; r = [[xd, D / 2 + 3], [xd, zs + 1], [xd, zs - 0.3], [X, zs - 0.3], [X, zc], [ex, zc], [dx, zc], [ix, zc]]; }
     const w = r.map(([u, v]) => G.toWorld(u, v)); w.y0 = 0; walks.push(w);
   });
