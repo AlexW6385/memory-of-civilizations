@@ -18,6 +18,6 @@ export function wearElements() {
     patch('bark_dark', dx + 0.5 * (hashAt(dx, dz, 63) - 0.5), dz + (r[r.length - 1][1] > r[r.length - 2][1] ? -0.9 : 0.9), 0.9 + 0.3 * hashAt(dx, dz, 64), 0.5, 0.016);
   });
   // the smithy's forecourt: scale and cinders (the smithy's door is at x −106.6 on the lane's south side)
-  for (let k = 0; k < 9; k++) patch('iron', -106.6 + (hashAt(k, 1, 65) - 0.5) * 3.4, 2.1 + hashAt(k, 2, 66) * 0.7, 0.2 + hashAt(k, 3, 67) * 0.3, 0.15 + hashAt(k, 4, 68) * 0.25, 0.02 + hashAt(k, 5, 69) * 0.02);
+  for (let k = 0; k < 9; k++) patch('bark_dark', -106.6 + (hashAt(k, 1, 65) - 0.5) * 3.4, 2.1 + hashAt(k, 2, 66) * 0.7, 0.2 + hashAt(k, 3, 67) * 0.3, 0.15 + hashAt(k, 4, 68) * 0.25, 0.02 + hashAt(k, 5, 69) * 0.02);
   return E;
 }
