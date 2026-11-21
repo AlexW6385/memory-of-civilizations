@@ -346,11 +346,7 @@ export async function town() {
     plans.push(base('djenne-yards', Y)); const rr = rng(77); const Pm = [];
     for (const y of Y) { Pm.push({ t: 'figure', at: [y.c[0] + 1, y.c[1] - 2], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), dress: 'tunic', legs: 'bare', top: 'bare', skin: 'skin_dark', hat: 'none', feet: 'bare', carry: 'hoe' }); Pm.push({ t: 'animal', kind: 'donkey', at: [y.c[0] + 4, y.c[1] + 3], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), gear: true }); }
     plans.push({ ...base('djenne-yards-life', Pm), style: 'life' }); }
-  plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }, ...WELLS.map((at, i) => ({ t: 'dj_well', at, rot: i * 1.7 + 0.4 }))]));
-  plans.push({ ...base('djenne-shops-life', walkLife()), style: 'life' });
-  // the mosque's lamps: in the niches of the qibla wall (three mihrabs and the minbar's) and either side of the north door
-  { const g = [[33.0, -13], [33.0, 0], [33.0, 13], [11.2, -28.8], [14.1, -28.8]].map(([x, z]) => ({ t: 'dj_glow', at: [x, z], y: 4.1, r: 0.5, pool: 1.5 }));
-    plans.push(base('djenne-mosque-lamps', g)); }
+  plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }, ...WELLS.map((at, i) => ({ t: 'dj_well', at, rot: i * 1.7 + 0.4 })), ...[[33.0, -13], [33.0, 0], [33.0, 13], [11.2, -28.8], [14.1, -28.8]].map(([x, z]) => ({ t: 'dj_glow', at: [x, z], y: 4.1, r: 0.5, pool: 1.5 }))]));   // (the last five: the mosque's lamps)
   const all = houses(), homes = enterable(all);
   // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full (interiors, fittings, door work) within NEAR of the visitor, simple (the solid form, the
   // facade's masses, the door) beyond; the arrival at the market sees the far form only of what is far
@@ -362,6 +358,6 @@ export async function town() {
   const lod = lodTiles('djenne-houses', 'sahel', lots.map((l) => ({ t: 'sahel_near_wall', ...l })), { near: NEAR, R: RADIUS, entrance: { at: [70, 0], facing: 'w' } });
   for (const p of lod) if (p.far) p.elements = p.elements.map((e) => ({ ...e, simple: true }));
   plans.push(...lod);
-  plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...laneLife(all), ...mosqueLife(), ...plain()]), style: 'life' });
+  plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...laneLife(all), ...mosqueLife(), ...plain(), ...walkLife()]), style: 'life' });
   return plans;
 }
