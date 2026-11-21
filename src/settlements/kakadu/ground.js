@@ -1,7 +1,7 @@
 // Kakadu — the ground: the floodplain's grey-brown clay and dry sedge, bare earth in the shelters and along the beaten tracks, sandstone
 // at the rock's foot, the billabong and its hollows; woodland of gums on the rock's flanks; a high hot sun and long clear weather
 // (docs/settlements/kakadu.md §4, §7).
-import { RADIUS, POOL, MAIN, SMALL, TRACKS, CAMPS, height, inPool, inHollow, poolD, smooth, inRect } from './layout.js';
+import { RADIUS, POOL, MAIN, SMALL, TRACKS, ROUTE, CAMPS, height, inPool, inHollow, poolD, smooth, inRect } from './layout.js';
 
 function nearTrack(x, z, w) {
   for (const t of TRACKS) for (let i = 0; i < t.length - 1; i++) {
@@ -12,11 +12,14 @@ function nearTrack(x, z, w) {
   return false;
 }
 const inShelter = (x, z, m = 0) => inRect([MAIN.x0 - 2, MAIN.zb, MAIN.x1 + 2, MAIN.zl + 3], x, z, m) || inRect([SMALL.x0 - 2, SMALL.zb, SMALL.x1 + 2, SMALL.zl + 3], x, z, m);
+function segD2(x, z, [ax, az], [bx, bz]) { const dx = bx - ax, dz = bz - az, k = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz || 1))); return Math.hypot(x - ax - dx * k, z - az - dz * k); }
 function cover(x, z) {
   const c = { sand: 0.15, grass: 0.2, rock: 0, soil: 0.35, fields: 0, dry: 0.7, warmth: 0.85, red: 0.35, road: 0, snow: 0, forest: 0 };
   if (z < -16) { c.rock = 0.55; c.red = 0.7; c.grass = 0.05; c.soil = 0.4; c.sand = 0.2; }                  // the rock's skirt of grit and red earth
   if (inShelter(x, z, 1)) { c.road = 0.5; c.soil = 0.5; c.sand = 0.35; c.grass = 0; c.rock = 0.1; c.dry = 0.9; return c; }   // beaten, dry dust
   if (CAMPS.some((k) => Math.hypot(x - k.fire[0], z - k.fire[1]) < 4.5)) { c.road = 0.45; c.grass = 0.02; c.soil = 0.5; c.dry = 0.9; c.sand = 0.3; return c; }   // the trodden ground of a camp
+  // the way the visitor's feet go (arrival, the Main Gallery's mouth, along its foot, on to the steps): a narrow strip of bare, paler, hard-beaten earth, wider before the shelters and the steps
+  if (z > -33 && ROUTE.slice(0, 7).some((p, i, A) => i < A.length - 1 && segD2(x, z, p, A[i + 1]) < 0.9)) { c.road = 0.8; c.grass = 0; c.soil = 0.4; c.dry = 1; c.sand = 0.45; c.rock = 0.1; return c; }
   if (nearTrack(x, z, 1.6)) { c.road = 0.5; c.grass = 0.02; c.soil = 0.5; c.dry = 0.9; return c; }
   const d = poolD(x, z);
   if (d < 1.2 || inHollow(x, z, 1)) { c.sand = 0.1; c.soil = 0.6; c.grass = 0.1; c.dry = 0.1; c.warmth = 0.5; return c; }

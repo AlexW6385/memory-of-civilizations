@@ -296,6 +296,15 @@ export async function town() {
   // a rectangle or a line: give every house, store, oven, tree and post one, and mark the way in and the marae ātea as kept clear
   const RAD = { whare: (e) => e.l / 2 + 0.7, pataka: () => 2.2, rua: () => 2.4, hangi: () => 2.8, waka_build: () => 5, waka: (e) => (e.l ?? 10) / 2, wharewaka: (e) => (e.l ?? 10) / 2, harakeke: () => 0.5, hinaki: () => 0.4, tikouka: () => 0.6, ponga: () => 0.5, pou: () => 0.4, yard: () => 1.4, weaving: () => 1.2, whakairo: () => 2.4, pahu: () => 1.6, kamaka: (e) => (e.r ?? 0.9) + 0.4 };
   for (const e of E) if (RAD[e.t] && !e.r) { const at = e.c ?? e.at; if (!at) continue; e.r = RAD[e.t](e); if (!e.c) e.c = at; }
+  // ---- night near the visitor (docs/settlements/maori.md §4j): added LAST, fixed seeds, so no other figure's random draw moves ----
+  // two open fires on the marae ātea's edges (the host's fires for a night's gathering [inferred]); those who sit by them stay all night (nightKeep)
+  for (const [k, [fx, fz]] of [[-11.5, 22.5], [4.8, 21]].entries()) {
+    E.push({ t: 'watchfire', c: [fx, fz], r: 1.4, y: top, seed: 40 + k });
+    [[1.9, 0.9, 'sit_ground', 'long'], [-0.3, 2.0, 'squat', 'bun'], [-1.9, -0.5, 'sit_ground', 'bun']].forEach(([u, w, pose, hair], i) => {
+      const at = [fx + u, fz + w], sk = i === 1 ? 'skin_dark' : 'skin_medium';
+      P.push({ t: 'figure', at, y: top, rot: face(at, [fx, fz]), seed: 7100 + k * 10 + i, dress: 'wrap', cloth: CLOAK[(k + i) % CLOAK.length], cloth2: 'cloth_brown', over: hair === 'long' ? 'shawl' : 'cape', skin: sk, hat: 'none', feet: 'bare', hair, beard: false, pose, nightKeep: 1 });
+    });
+  }
   E.push({ t: 'trim', rect: [-2.6, HILL.c[1] + HILL.ditch, 2.6, RADIUS - 20] });
   E.push({ t: 'trim', rect: [hxm - 10, 11, hxm + 10, 33] });
   return [plan('maori-kainga', 'maori', E), plan('maori-people', 'life', P)];
