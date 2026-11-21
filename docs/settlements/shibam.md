@@ -167,3 +167,10 @@ Nothing was heard or recorded: everything below is [inferred] from the dossier's
 - **Voices** (`shb…`): `shbOud` (plucked phrase in a pentatonic-leaning mode, tonic doubled at the close), `shbDan` (eight-beat hand-drum cycle with claps), `shbBrick`, `shbCall` (three wordless cries). The mode and rhythms are gestures, not transcriptions.
 - Test: `tests/shibam-sound.test.mjs` (profile, voices, map against the settlement, brickyard, drum, smith by hour).
 - Not done: a muezzin's own voice from the minaret placed in space (the engine's call is not positioned), swifts at dusk, camel bells, wind in the palms' fronds (the engine's leaf layer follows `leafNear`).
+
+## 19. Animals (`fauna.js`, `critters`)
+
+[inferred] unless marked: the town's livestock are stated (livestock kept on ground floors and at the foot of the houses, Aramco World; Earth Architecture), the rest is the ordinary domestic fauna of a southern Arabian oasis town.
+- **Critters** (rigged, with behaviour; `src/engine/fauna-critters.js`, models of `critter-models.js`, none added): three cats (orange and tabby) on the doorsteps of the shops along the square's south edge, off the door's lane; two dogs lying in the shade, one outside the gate beside its tower and one in the main street; goats (black and white) tethered at the foot of the houses along the main street from the gate and hens with a cock scratching beside the fronts of the ordinary houses there, never before a door; two pigeons on the merchant's roof terrace by the parapet.
+- Already there: swallows and crows in loops over the town and the wadi, sparrows on the mastabas and the parapets, pigeons in the square, the donkeys, camels, goats and sheep of §11 as animal elements.
+- Not built: a donkey and a camel as rigged critters (no model; would need an addition to `critter-models.js`), swifts at the minaret, kites over the wadi.
