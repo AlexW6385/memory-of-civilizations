@@ -241,8 +241,8 @@ function paris_house(el, { bag, col, lights }) {
       for (let k = 0; k < nw; k++) if (r2() < 0.7) { const uc = (k + 0.5) * sp + (r2() - 0.5) * 0.2; B('plaster_streak', uc - 0.3, uc + 0.3, yq + 0.3, yq + 0.72, -jf - 0.085, -jf - 0.075); }
       yq += ST;
     }
-    // the corner lantern on its iron bracket, the stone gargoyle spout at the eaves, a pot of herbs or a cage at a window
-    if (r2() < 0.55) { const u = r2() < 0.5 ? 0.12 : L - 0.12; R('iron', [u, 2.9, -0.1], [u, 2.9, -0.7], 0.014, 4); B('glass_lamp', u - 0.09, u + 0.09, 2.45, 2.85, -0.8, -0.62); B('iron', u - 0.1, u + 0.1, 2.85, 2.9, -0.82, -0.6); }
+    // the corner lantern on its iron bracket (el.noLantern leaves it off: Paris of 1248 has none; the random stream is unchanged), the stone gargoyle spout at the eaves, a pot of herbs or a cage at a window
+    if (r2() < 0.55) { const u = r2() < 0.5 ? 0.12 : L - 0.12; if (!el.noLantern) { R('iron', [u, 2.9, -0.1], [u, 2.9, -0.7], 0.014, 4); B('glass_lamp', u - 0.09, u + 0.09, 2.45, 2.85, -0.8, -0.62); B('iron', u - 0.1, u + 0.1, 2.85, 2.9, -0.82, -0.6); } }
     if (r2() < 0.5) { const u = r2() < 0.5 ? 0.3 : L - 0.3; B('limestone', u - 0.08, u + 0.08, ye - 0.38, ye - 0.2, -jt - 0.55, -jt); }
     if (n > 2 && r2() < 0.45) { const uc = L * (0.3 + r2() * 0.4), ya2 = ST0 + ST + 0.55; B('timber', uc - 0.35, uc + 0.35, ya2, ya2 + 0.18, -jet(1) - 0.34, -jet(1) - 0.08); for (let k = -1; k <= 1; k++) bag.add(['terracotta', 'pottery_dark'][k & 1], lathe([[0.05, 0], [0.08, 0.1], [0.07, 0.17], [0.001, 0.17]], 7, null, ...P(uc + k * 0.2, ya2 + 0.18, -jet(1) - 0.2).map((v, i) => v))); }
     // the doorstep: a worn stone, and a boot-scraper

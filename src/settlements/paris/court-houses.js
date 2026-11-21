@@ -13,7 +13,7 @@ export { courtLots };
 
 export function courtHouses() {
   const y = RIVER.ground, opts = { near: 200, R: 420, entrance: { at: [-250, -10], facing: 'e' } };
-  return lodTiles('paris-court-houses', 'gothic', courtLots().map((l) => ({ t: 'paris_house', y, foot: y, rect: l.rect, seed: l.seed, front: 'n', storeys: l.storeys, open: true, lit: true, upper: l.upper })), opts);
+  return lodTiles('paris-court-houses', 'gothic', courtLots().map((l) => ({ t: 'paris_house', noLantern: true, y, foot: y, rect: l.rect, seed: l.seed, front: 'n', storeys: l.storeys, open: true, lit: true, upper: l.upper })), opts);
 }
 /** Who is inside and at the doors: the master behind the counter, a customer, goods and a lantern outside. */
 export function courtHouseLife() {
