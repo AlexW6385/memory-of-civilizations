@@ -1,7 +1,7 @@
 // Taos Pueblo — the animals (src/engine/fauna.js draws them; docs/settlements/taos.md §4.4): swallows over the creek and the
 // plaza, ravens high over the terraces, small birds (sparrow stand-ins) on the plaza's earth and the roofs' parapets, an egret
 // standing in for a heron at the creek's edge, small dark trout in Red Willow Creek [inferred: a snowmelt stream of the valley].
-import { CREEK, creekZ, NORTH, SOUTH, CELL, PENS, WALL, inCreek, nearYard, onKeep } from './layout.js';
+import { CREEK, creekZ, NORTH, SOUTH, CELL, PENS, WALL, ROOMS, isRoom, inCreek, nearYard, onKeep } from './layout.js';
 import { ground } from './ground.js';
 
 const creekDist = (x, z) => Math.abs(z - creekZ(x)) - CREEK.w / 2;
@@ -44,4 +44,30 @@ for (const [x, z] of [[-12.5, -55.5], [4, -54], [-46, -62]]) perches.push({ kind
 flights.push({ kind: 'swallow', n: 4, loop: { c: [40, 8], a: [30, 14], rot: 0.2 }, y: [1.2, 6], speed: 9 }, { kind: 'swallow', n: 3, loop: { c: [-45, 4], a: [24, 10], rot: -0.2 }, y: [1.2, 5], speed: 9 }, { kind: 'crow', n: 4, loop: { c: [60, 60], a: [50, 30], rot: 0.6 }, y: [24, 46], speed: 8 });
 for (let x = -62; x <= 62; x += 31) fish.push({ n: 4, size: [0.1, 0.18], palette: 'carp', y: CREEK.water, dist: creekDist, margin: 0.5, k: 1, rot: 0, area: [x - 14, creekZ(x) - 0.35, x + 14, creekZ(x) + 0.35], a: [11, 1.1], ratio: 0.1, minA: 1.2, speed: 0.35, rise: 0.1 });
 void nearYard;
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §10.4) ──
+// Only what the valley had about 1500: dogs (the Pueblos' only domestic mammal besides the turkey's keepers' own company), turkeys kept for their feathers and their keep,
+// ducks on the creek, cliff swallows' mud nests under the plaza face's eaves. No cat, goat, hen, rooster or horse: the Spanish brought them after 1540 (§4.1).
+const critters = [];
+// dogs lying beside the doorways of four of the plaza rooms of the walk, off the door's lane (the door at 2.8 m of its cell; the dog at 0.9 m)
+for (const [k, r] of ROOMS.filter((q) => (q.b === 'N' ? q.j : q.j + 40) % 3 === 0).slice(0, 4).entries()) {
+  const B = r.b === 'N' ? NORTH : SOUTH, x0 = B.x0 + r.j * CELL, wall = r.door === 's' ? B.z0 + (r.i + 1) * CELL : B.z0 + r.i * CELL, g = r.door === 's' ? 1 : -1;
+  critters.push({ model: 'dog', at: [x0 + 0.9, 0.02, wall + g * 0.95], rot: 1.2 + k * 1.3, range: [9, 3.5] });
+}
+// two more dogs in the plaza's open, one by the racks
+critters.push({ model: 'dog', at: [-36, 0.02, -41], rot: 0.4, range: [9, 3.5] }, { model: 'dog', at: [22, 0.02, 31], rot: 3.2, range: [9, 3.5] });
+// turkeys walking and pecking round the plaza (the pens' and the loose flocks are static figures; these move)
+for (const [x, z] of [[-24, -14], [-22.6, -13.2], [16, 24], [17.4, 25.1], [-47, 20], [-45.6, 21.4]]) critters.push({ model: 'turkey', at: [x, 0.02, z], rot: x * 0.37, range: [1.6, 2.0] });
+// cliff swallows' nests of mud under the eaves of the North House's plaza face, between the viga ends, on cells that are not rooms
+{
+  let n = 0;
+  for (let j = 1; j < NORTH.heights[0].length - 1 && n < 6; j++) {
+    const h = NORTH.heights[8][j];
+    if (!h || isRoom(NORTH, 8, j)) continue;
+    if (j % 2) continue;
+    critters.push({ model: 'swallow_nest', at: [NORTH.x0 + j * CELL + 2.2, 2.0, NORTH.z0 + 9 * CELL + 0.14], rot: Math.PI / 2, cycle: 33 + (j % 5), flight: 9, radius: 10, side: n % 2 ? 1 : -1, rise: -0.8 }); n++;
+  }
+}
+// mallards on the creek, upstream and downstream of the visitor's reach, as the fish's loops
+for (const x of [80, -95]) critters.push({ type: 'floaters', models: ['duck_brown', 'duck_brown'], area: [x - 10, creekZ(x) - 0.3, x + 10, creekZ(x) + 0.3], dist: creekDist, margin: 0.5, a: [8, 1.0], ratio: 0.12, minA: 1.2, y: CREEK.water, speed: 0.25, cycle: [18, 24] });
+export default { fish, flights, perches, critters };

@@ -4,6 +4,8 @@
 
 import { PLAT, MOUND, MOUND_BATTER, EAST_STAIR, SOUTH_RAMP, BATH, GRANARY, PILLARED, COLLEGE, TOP, lanes, lots, houseEl, inRect } from './layout.js';
 import { house } from '../../styles/indus/house.js';
+import { walkRoutes } from './walkroutes.js';
+import { SPOTS } from './walkdress.js';
 
 const E = [];
 E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EAST_STAIR.rect, SOUTH_RAMP.rect], hole: BATH.pool });
@@ -11,6 +13,7 @@ E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EA
 {
   const [x0, z0, x1, z1] = EAST_STAIR.rect;
   E.push({ t: 'stair', rect: EAST_STAIR.rect, y0: 0, y1: PLAT, dir: 'w', riser: 0.17, mat: 'brick', base: -0.3 });
+  E.push({ t: 'md_stairwear', rect: EAST_STAIR.rect, y0: 0, y1: PLAT, riser: 0.17, w: 3.2 });
   for (const z of [z0 - 0.5, z1 + 0.2]) E.push({ t: 'block', rect: [x0, z - 0.3 + 0.3, x1, z + 0.3], y0: -0.3, y1: PLAT * 0.62, mat: 'brick', batter: [0, 0, 0, 0] });
   const [a0, b0, a1, b1] = SOUTH_RAMP.rect;
   E.push({ t: 'stair', rect: SOUTH_RAMP.rect, y0: 0, y1: PLAT, dir: 'n', riser: 0.2, mat: 'brick', base: -0.3 });
@@ -37,6 +40,9 @@ E.push({ t: 'indus_college', rect: COLLEGE, y: PLAT });
   E.push({ t: 'indus_topdress', y: PLAT, B: BATH, college: COLLEGE, pillared: PILLARED, granary: GRANARY, stair: EAST_STAIR.rect, seed: 8 });
 }
 
+// what stands in the streets of the platform on the visitor's walk (walkdress.js)
+for (const spot of SPOTS) if (spot[3] === 7) E.push({ t: 'md_lanework', spot, at: [spot[1], spot[2]] });
+
 const room = (id, rect, y, kind, o = {}) => ({ id, rect, y, kind, ...o });
 const [cx0, cz0, cx1, cz1] = BATH.court, ex = BATH.outer[2] - 7.2 - 0.45;
 const rooms = [
@@ -59,6 +65,8 @@ walks[0].y0 = 0;
     if (ctx.route) { const w = ctx.route.map(([x, z]) => [+x.toFixed(2), +z.toFixed(2)]); w.y0 = l.y; walks.push(w); }
   }
 }
+// into each other opened lot of the visitor's walk: from the lane through the door into the court
+for (const r of walkRoutes()) { const w = r.route; w.y0 = r.y0; walks.push(w); }
 const [bx0, bz0, bx1, bz1] = BATH.outer;
 
 export const citadel = {

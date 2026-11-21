@@ -3,6 +3,9 @@
 // inside blocks bounded by streets of 9 m, doors on the lanes, the market place at the crossing of First Street; the Indus on the
 // east with the landing. Compressed from the real 250 ha. Pure data. Coordinates: metres, +x east, +z south, y up.
 
+import { rng as styleRng } from '../../styles/indus/kit.js';
+import { walkDistance, frontPoint, WALK_REACH, WALK_TRADES, WALK_MAX } from './walk.js';
+
 export const RADIUS = 330;
 export const PLAT = 7;                                              // the Citadel platform's top above the plain
 export const MOUND = [-246, -120, -64, 40];
@@ -131,9 +134,26 @@ export function lots() {
   const A = [-155, -72.5], dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]);
   LOTS.filter((l) => l.open && l.tag === 'top').sort((a, b) => dist(a) - dist(b)).slice(0, 8).forEach((l) => { l.up = l.kind === 'small' ? 'poor' : 'household'; });
   LOTS.filter((l) => l.open && l.kind !== 'house' && l.kind !== 'small').forEach((l) => { l.up = 'craftsman'; });
+  // the visitor's walk (walk.js, docs/settlements/mohenjo-daro.md §16.1): every lot whose door is on it is opened, nearest the arrival first; on the first lane of the first block
+  // every second one that is deep enough is a workshop of the trades in turn, the rest lived-in houses; on the platform's lane the houses stay houses
+  {
+    const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]);
+    const on = LOTS.filter((l) => walkDistance(frontPoint(l)) <= WALK_REACH && l.rect[3] - l.rect[1] >= 11).sort((a, b) => d(a) - d(b)).slice(0, WALK_MAX);
+    let t = 0, k = 0;
+    for (const l of on) {
+      l.open = true; l.walk = true;
+      if (l.tag === 'town' && l.kind === 'house' && l.rect[3] - l.rect[1] >= 12.5 && k++ % 2 === 0) { l.kind = WALK_TRADES[t++ % WALK_TRADES.length]; l.variant = 1; l.up = 'craftsman'; }
+    }
+  }
   return LOTS;
 }
 export const houseEl = (l) => ({ t: 'indus_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, variant: l.variant, open: l.open, y: l.y, street: l.street, ends: l.ends, up: l.up ? 1 : 0 });
+/** Where a lot's door is along its lane (u from the lot's first end): the second draw of the generator the house style seeds with the lot (src/styles/indus/house.js). */
+export function doorU(l) {
+  const r = styleRng(l.seed); r();
+  const W = l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0];
+  return Math.max(1.6, Math.min(W - 1.6, W * (0.25 + 0.5 * r())));
+}
 export function lanes() { lots(); return LANES; }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 const GRID = new Map();

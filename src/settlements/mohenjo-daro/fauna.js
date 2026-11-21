@@ -1,6 +1,6 @@
 // Mohenjo-daro — the animals (src/engine/fauna.js; docs/settlements/mohenjo-daro.md §8): river fish in the Indus, swallows over the water and the streets,
 // kites over the Citadel (drawn as crows), sparrows on the paving, a heron and an egret on the bank and at the quay.
-import { RIVER, QUAY, MOUND, PLAZA, riverX, height } from './layout.js';
+import { RIVER, QUAY, MOUND, PLAZA, riverX, height, lots, doorU } from './layout.js';
 
 const inWater = (x, z) => Math.abs(x - riverX(z)) - (RIVER.hw - 3);
 const fish = [];
@@ -27,4 +27,29 @@ for (const [x, z] of [[286, -125], [288, 128]]) perches.push({ kind: 'egret', x:
 perches.push({ kind: 'heron', x: riverX(-170) - RIVER.hw + 3, z: -170, y: -1.9, rot: Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 perches.push({ kind: 'egret', x: QUAY.x1 - 0.9, z: 25, y: 0.5, rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 });
 void PLAZA;
-export default { fish, flights, perches };
+
+// ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §16.4) ──
+// The animals of the city, domestic and wild-in-town [stated: "cattle, buffalo, goat, pig and chicken", Wikipedia "Indus Valley Civilisation"; dogs; the zebu and buffalo are
+// life elements, not critters]: dogs at the doors of the walk's lanes (dog paw prints are on Indus bricks, a dog's and a cat's together at Chanhudaro [inferred from memory, not
+// checked]), a cat on a doorstep, goats tethered in the platform's street, fowl pecking in the lanes (the chicken is stated), rock doves on the Bath's paving and in the market
+// (the blue rock pigeon is native [inferred]), ducks on the river's backwater, a kingfisher fishing at the landing.
+const critters = [];
+const walkLots = lots().filter((l) => l.walk);
+const doorSpot = (l, du, v) => { const [x0, z0, x1, z1] = l.rect, W = l.front === 'w' || l.front === 'e' ? z1 - z0 : x1 - x0; du = Math.max(0.6, Math.min(W - 0.6, du)); return l.front === 'w' ? [x0 - v, z0 + du] : l.front === 'e' ? [x1 + v, z0 + du] : l.front === 'n' ? [x0 + du, z0 - v] : [x0 + du, z1 + v]; };
+// the dogs: beside the door of four of the walk's lots, off the doorway's lane, in the lane's edge
+walkLots.filter((l) => l.tag === 'town' || l.rect[1] < -30).slice(0, 12).filter((_, i) => i % 3 === 1).forEach((l, i) => {
+  const d = doorU(l), [x, z] = doorSpot(l, d + (d < 6 ? 2.7 : -2.7), 0.55);
+  critters.push({ model: 'dog', at: [x, height(x, z) + l.y + 0.02, z], rot: 1.2 + i, range: [9, 3.5] });
+});
+// a cat on a doorstep of the platform's lane
+{ const l = walkLots.find((q) => q.tag === 'top' && q.front === 'w'); if (l) { const d = doorU(l), [x, z] = doorSpot(l, d + (d < 6 ? 2.2 : -2.2), 0.5); critters.push({ model: 'cat_tabby', at: [x, l.y + 0.05, z], rot: 2.4, range: [7, 2.5] }); } }
+// goats tethered in the platform's street under the Pillared Hall's south wall
+critters.push({ model: 'goat_black', at: [-110, 7.05, -80.6], rot: 0.6, range: [9, 3.2] }, { model: 'goat_white', at: [-111.4, 7.05, -81.0], rot: 3.0, range: [9, 3.2] });
+// fowl in the plain's lanes and the street before the market, at the lane's edge
+for (const [x, z, m] of [[-5.0, 24, 'hen_brown'], [-4.4, 25.2, 'rooster'], [-5.2, 26.1, 'hen_white'], [36.4, -12, 'hen_brown'], [36.9, -11, 'hen_brown'], [-91.2, -50, 'hen_white']]) critters.push({ model: m, at: [x, height(x, z) + (x < -80 ? 7 : 0) + 0.05, z], rot: x * 3, range: [2.4, 1.3] });
+// rock doves on the Bath's court (by the coping), on the Citadel's street, and at the market's edge
+for (const [x, y, z, m] of [[-146, 7.07, -73, 'pigeon_grey'], [-145.2, 7.07, -74.3, 'pigeon_grey'], [-147, 7.07, -95, 'pigeon_white'], [-128, 7.07, -61, 'pigeon_grey'], [-127.1, 7.07, -60.2, 'pigeon_grey'], [52, 0.07, -28, 'pigeon_grey'], [53, 0.07, -27, 'pigeon_grey'], [80, 0.07, -22, 'pigeon_white']]) critters.push({ model: m, at: [x, y, z], rot: x * 3, range: [1.4, 1.2] });
+// ducks on the Indus's backwater under the quay, a kingfisher on the bank, fishing
+critters.push({ type: 'floaters', models: ['duck_brown', 'duck_brown', 'duck_white'], area: [riverX(95) - RIVER.hw - 2, 80, riverX(95) - RIVER.hw + 16, 112], dist: (x, z) => Math.abs(x - riverX(z)) - (RIVER.hw - 1), a: [8, 2.6], ratio: 0.3, margin: 1.0, y: RIVER.level, speed: 0.2, cycle: [22, 30] });
+{ const z = -60, x = riverX(z) - RIVER.hw + 2.5; critters.push({ model: 'kingfisher', at: [x, 0.05, z], rot: Math.PI / 2, water: [x + 1.6, z, RIVER.level], cycle: 34 }); }
+export default { fish, flights, perches, critters };
