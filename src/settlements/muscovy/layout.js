@@ -94,7 +94,17 @@ export function streetSegments(step = 4) {
   return S;
 }
 
-export const openIzba = (l) => { if (l.kind === 'barn') return false; const d = Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20); return d < 90 ? l.seed % 2 === 0 : d < 200 ? l.seed % 2 === 1 : l.seed % 4 === 1; };
+/** The visitor's walk's lines [x, z] (openwalk.js): from the arrival south to St Basil's, the lane before the rows and its inner lanes, across the square to the Spassky bridge. */
+export const WALK_LINES = () => {
+  const zs = gateZ(SPASSKY[1]), xb = wallX(zs) + MOAT.d1 + 2;
+  return [[[40, 20], [40, 96], [BASIL[0] + 8, BASIL[1] - 24]], [[68, -100], [68, 85]], [[68, 52.6], [90, 52.6]], [[77.5, -25], [77.5, 85]], [[87.5, -25], [87.5, 85]], [[40, 20], [xb + 3, zs]]];
+};
+const segD = (x, z, a, b) => { const dx = b[0] - a[0], dz = b[1] - a[1], t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - a[0] - t * dx, z - a[1] - t * dz); };
+let WL = null;
+/** True for a house within 30 m of the walk: every one of them stands open (the walk's houses are all furnished). */
+const nearWalk = (x, z) => { WL = WL || WALK_LINES(); return WL.some((w) => w.some((_, i) => i < w.length - 1 && segD(x, z, w[i], w[i + 1]) < 30)); };
+export const onWalk = (l) => l.kind !== 'barn' && nearWalk((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2);
+export const openIzba = (l) => { if (l.kind === 'barn') return false; const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, d = Math.hypot(cx - 40, cz - 20); if (nearWalk(cx, cz)) return true; return d < 90 ? l.seed % 2 === 0 : d < 200 ? l.seed % 2 === 1 : l.seed % 4 === 1; };
 export function waysides() {
   const E = [], H = (i, j) => { let h = (i * 73856093) ^ (j * 19349663); h = Math.imul(h ^ (h >>> 13), 0x5bd1e995); return (h ^ (h >>> 15)) >>> 0; };
   for (let i = 0; i < 10; i++) for (let j = 0; j < 12; j++) {

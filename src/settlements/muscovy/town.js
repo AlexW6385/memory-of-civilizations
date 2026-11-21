@@ -2,7 +2,7 @@
 import { openShops } from './openwalk.js';
 import { cressets } from './nightlight.js';
 import { keeperOf, TRADE_SHELF } from './lavki.js';
-import { openIzba, waysides } from './layout.js';
+import { openIzba, onWalk, waysides } from './layout.js';
 import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, NIKOLSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ, streetSkip, inLot } from './layout.js';
 const base = (id, elements, rooms = []) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
@@ -170,7 +170,8 @@ export function yards(all) {
     const R = (la, lb, da, db) => (ex ? [da, la, db, lb] : [la, da, lb, db]);
     const yy = (r) => Math.max(height(r[0], r[1]), height(r[2], r[1]), height(r[0], r[3]), height(r[2], r[3]));
     const yl = (r) => Math.min(height(r[0], r[1]), height(r[2], r[1]), height(r[0], r[3]), height(r[2], r[3]), height((r[0] + r[2]) / 2, (r[1] + r[3]) / 2)) - 0.1;
-    const bigSide = gLo >= gHi ? -1 : 1, gBig = Math.max(gLo, gHi), gSmall = Math.min(gLo, gHi);
+    const keep = onWalk(l);                                                              // a house on the visitor's walk: its door side (lat0) stays free
+    const bigSide = keep ? 1 : gLo >= gHi ? -1 : 1, gBig = keep ? gHi : Math.max(gLo, gHi), gSmall = keep ? 0 : Math.min(gLo, gHi);
     let used = 0;
     const sideRange = (s, w) => (s < 0 ? [lat0 - 0.3 - w, lat0 - 0.3] : [lat1 + 0.3, lat1 + 0.3 + w]);
     if (gBig >= 2.3 && rand() < (d < 200 ? 0.62 : 0.3)) {
