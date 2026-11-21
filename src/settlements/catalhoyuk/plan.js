@@ -33,6 +33,14 @@ for (const e of ENTER) rooms.push(room('house-' + e.i + '-' + e.j, cellGeom([col
 const cx = (lx0 + lx1) / 2;
 const walks = [[[cx, lz1 + 6], [cx, lz1 + 1.0], [cx, lz0 + 3.5]]];
 walks[0].y0 = 0;
+// into each opened house: from its roof by the hatch's north rim, down the hatch's ramp (the ladder's foot at its south end), then out into the room (the households' rooms)
+for (const e of ENTER) {
+  const G = cellGeom([colX(e.j), rowZ(e.i), colX(e.j) + CW[e.j], rowZ(e.i) + CD[e.i]], e.mirror), [h0, h1, h2, h3] = G.hole, rx = G.lx(1.95), top = TOP[e.i][e.j] + 0.09;
+  const r = [[rx, h1 - 0.5], [rx, h1 + 0.2], [rx, h1 + 0.95], [rx, h1 + 1.3]];
+  r.y0 = top;
+  void h0; void h2;
+  walks.push(r);
+}
 
 export const catal = {
   id: 'catalhoyuk-town',

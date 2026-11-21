@@ -99,3 +99,12 @@ No new sources were read this pass; the forms follow what §4 and §12 already s
 - **Leopard reliefs** [stated: moulded leopard reliefs, a pair of facing lionesses, §4]: modelled as soft plaster relief (body, shoulder, haunch, neck, head with ears and muzzle, four legs, a tail curling over the back, rosettes in black set on the flank), a pair facing across a red panel widened to 2.2 m so the heads do not meet.
 - **Platforms and pillar** [stated: plastered platforms, thick wooden posts, §4]: the platforms of the opened house have their top edges rolled in plaster and a foot-moulding; the pillar at their corner is a round plastered post swelling at the foot and under the beams, with the red band, and a bucranium on two faces (it was a square block).
 - **Departures:** the roofs are still within 0.2 m of one level (neighbours must stay within step reach for the walkers), so the "many levels" of §5 (second rooms over some houses, ladders between levels) is not yet built; the other wall paintings (hunt, vultures, town and volcano) were left as they are.
+
+## 14. Reference pass (the visitor's walk, night, sound, animals, wear)
+
+No site could be fetched this pass; every line is from the sections above or from general knowledge of the published excavations, marked [inferred] where it goes beyond them. Nothing is written anywhere: there is no script at Çatalhöyük (c. 6500 BC), so no signs, tablets or inscriptions are shown.
+
+### 14.1 The visitor's walk
+
+- The way in is the arrival on the trodden ground south of the landmark house, then the ladder against its south wall, the roof, and the hatch [stated: §4, houses entered only from the roof]. The roofs are the streets [stated: §2], so the walk goes house to house over the roofs, and each opened house is entered by its own hatch: 14 routes (`walks` in `plan.js`) start on the house's roof, cross the hatch's rim, go down the ramp by the ladder's foot and stand on the plastered floor by the hearth [inferred: the ramp stands for the ladder, as in the landmark].
+- Shops, signs and wells do not exist here [inferred: no market, no coin, no script; goods were made and used by the household]. What takes their place is already built (§11, §12): the households' trades (baker, potter, knapper, hide-worker, mat-maker) at the courts, open to the walker, and the opened rooms with their hearths, ovens, bins, platforms and burials.
