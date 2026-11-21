@@ -171,6 +171,13 @@ Sources added: [Wikiwand](https://www.wikiwand.com/en/articles/Great_Mosque_of_D
 ### 20.4 Animals
 - Critters (`fauna.js`, 21 rigged animals): dogs lying in the shade at two wells and the market's east edge, a tabby on a shop counter and an orange cat on the court house's facade bench, goats tethered at two wells, hens and a rooster in the court house's yard and at the market's south edge, doves on the mosque platform before the north door and by the south-west tower. They answer the visitor as the engine's critters do. [inferred: the domestic animals of Sahel towns (the profile's goats, donkeys, roosters, cattle); no source for this town and date. No donkey model exists; the donkeys remain the life layer's.] Test `tests/djenne-critters.test.mjs`.
 
+### 20.5 Wear and writing
+- **Wear** (`wear.js`): the threshold of every enterable house trodden bare and darker in its middle (two worn patches of banco mud plaster out from the door), and the same before the entry of each shop. The climate's wear (the rains' erosion and runnels before the crepissage) is already section 13; dust is the harmattan's. [inferred: form of the wear]
+- **Writing: none.** The Qur'anic boards and any inscription would be Arabic; the geometry cannot be checked here glyph by glyph, so the boards stay plain (as sections 15-16). Not written rather than written wrong.
+
+### 20.6 Landmark gaps
+- Still open from section 17: the crier's room over the central mihrab, the three missing platform stairs, carved doors in the open (hollow) houses, indoor lamps by trade beyond the shops' counters, weathering inside the hall, the hall's sound beyond its room tone.
+
 ## Sources
 
 - [Great Mosque of Djenne — Designing Buildings Wiki](https://designingbuildings.co.uk/wiki/Great_Mosque_of_Djenne)
