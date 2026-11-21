@@ -5,8 +5,9 @@
 
 import '../../styles/hanlodge/index.js';
 import './nightlight.js';
-import { walkRoutes, mainRoute } from './walkroutes.js';
+import { walkRoutes, mainRoute, wardRoute, westRoute } from './walkroutes.js';
 import { crownNight } from './nightplace.js';
+import './landmarkwear.js';
 import { AX, TIERS, CROWN, RAMP, HALL, SIDE_HALLS, EAST_GATE, PALACE, CHANGLE_HALL, PALACE_WALL } from './layout.js';
 
 const E = [];
@@ -25,6 +26,8 @@ for (const [dz, s] of [[-14, 1], [14, -1]]) E.push({ t: 'hanl_que', at: [wx + PA
 
 for (const sd of [-1, 1]) E.push({ t: 'hanl_horses', at: [AX + sd * 11.7, -154.5], y: CROWN + 0.03, face: [0, 1] });
 E.push(...crownNight());
+E.push({ t: 'hanl_hangings', cx: AX, z1: HALL.z1, floor: HALL.floor, h: HALL.h, bayW: HALL.bayW, bays: HALL.bays, first: 3, last: 5 });
+E.push({ t: 'hanl_wear', ax: AX, ramp: RAMP, top: CROWN, hallZ: HALL.z1 });
 E.push({ t: 'han_crown', ax: AX, top: CROWN, z0: TIERS[TIERS.length - 1].r[3], z1: HALL.z1, seed: 5 });
 E.push({ t: 'han_court', ax: AX, z0: RAMP.z1, z1: PALACE[3] - 2, seed: 5 });
 
@@ -43,7 +46,7 @@ const rooms = [
 const walks = [[[AX, 60], [AX, -60], [AX, -90], [AX, -110], [AX, -127], [AX, -140], [AX, -160], [AX, -166], [AX, -172], [AX, -184]]];
 walks[0].y0 = 0;
 // the visitor's walk (walk.js): the whole way from the arrival to the East Market's tower, and in at the door of each opened place on it
-walks.push(mainRoute(), ...walkRoutes());
+walks.push(mainRoute(), wardRoute(), westRoute(), ...walkRoutes());
 
 export const weiyang = {
   id: 'han-changan-weiyang',

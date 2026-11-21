@@ -12,6 +12,10 @@ export const WALK = [
   [[150, -104], [150, -262], [190, -262], [190, -280]],                         // the great avenue north, the street east, to the market's gate
   [[190, -280], [203, -280], [252, -280]],                                      // through the East Market's west gate, along its cross lane to the tower
   [[265, -250], [265, -268]], [[265, -292], [265, -310]],                        // the market's other cross lane, either side of the tower
+  // the branches (second pass): down the axial way through the south gate to the street, west to the ward's gate and along its first lane
+  [[-110, -75.75], [-110, 126], [-124, 126], [-124, 162.4], [-111, 162.4], [-20, 162.4]],
+  // and north: east of the terrace, round the Jiaofang hall, out at the palace's north gate, along the street to the West Market's east gate and its cross lane to the tower
+  [[-36.5, -75.75], [-33, -80], [-33, -104], [-33, -244.5], [-110, -244.5], [-110, -262], [-55, -262], [-55, -330], [-70, -330], [-122, -330]],
 ];
 export const WALK_REACH = 9.5;
 export const OFFICE_REACH = 34;                                                 // the avenue's offices stand 15–25 m off its middle

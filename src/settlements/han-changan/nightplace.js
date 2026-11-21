@@ -1,6 +1,6 @@
 // Where the new night lights stand (nightlight.js; docs/settlements/han-changan.md §14): the fire baskets at the gates of the palaces, the city and the markets and at
 // the ward gates, the courtyard torches of the forecourt and the crown. Pure data (elements of the han styles); positions beside the guards, never in a gate's passage.
-import { AX, PALACE, SOUTH_GATE, EAST_GATE, CHANGLE, CHANGLE_HALL, WARDS, WARD_WALL, WEST_MARKET, EAST_MARKET, MARKET_WALL, WALL_W, WALL_S, GATE_W, GATE_S, CROWN, RAMP } from './layout.js';
+import { AX, PALACE, SOUTH_GATE, EAST_GATE, CHANGLE, CHANGLE_HALL, WARDS, WARD_WALL, WEST_MARKET, EAST_MARKET, MARKET_WALL, WALL_W, WALL_S, GATE_W, GATE_S, CROWN, RAMP, QUARTERS } from './layout.js';
 
 const C = (x, z) => ({ t: 'han_cresset', at: [x, z] });
 const T = (x, z, y = 0) => ({ t: 'han_tingliao', at: [x, z], y });
@@ -11,6 +11,8 @@ export function palaceNight() {
   for (const s of [-1, 1]) E.push(C(SOUTH_GATE.x + s * g, PALACE[3] - 3.6), C(PALACE[2] - 3.6, EAST_GATE.z + s * g), C(AX + s * g, PALACE[1] + 3.6), C(AX + s * 9, RAMP.z1 + 3));
   // the courtyard torches (庭燎): in pairs down the forecourt, clear of the lamp trees (±7.5), the banners (±11) and the steles (±20)
   for (const z of [-76, -38, 0, 38, 76]) for (const s of [-1, 1]) E.push(T(AX + s * 16, z));
+  // the watch lamps of the service quarters' lanes on the visitor's walk (the lanes where the clerks', guards' and stewards' houses stand): a fire basket every 22 m at the lane's edge
+  for (const q of QUARTERS.slice(3)) { const cz = q[1] + 22 + 2.25; for (let x = q[0] + 7; x < q[2] - 4; x += 22) E.push(C(x, cz + 1.5 * (Math.floor((x - q[0]) / 22) % 2 ? -1 : 1))); }
   return E;
 }
 /** The Changle Palace's gates (plan 'han-changle'). */
@@ -21,7 +23,10 @@ export function changleNight() {
 }
 /** The crown's apron before the Front Hall (landmark plan): the pair of courtyard torches beside the way to the hall's steps. */
 export function crownNight() {
-  return [-1, 1].map((s) => T(AX + s * 17.5, -145, CROWN));
+  const E = [-1, 1].map((s) => T(AX + s * 17.5, -145, CROWN));
+  // watch fires at the head of the ramp, so the visitor arriving stands in firelight (the ramp's head is 10 m wide: kept clear)
+  for (const s of [-1, 1]) E.push({ t: 'han_cresset', at: [AX + s * 6.8, -133], y: CROWN }, { t: 'han_cresset', at: [AX + s * 13, -152], y: CROWN });
+  return E;
 }
 /** The city gates (plan 'han-citywall'): the inner and the outer sides of the west and the south gate. */
 export function cityNight() {

@@ -7,11 +7,13 @@ import { RADIUS, AX, PALACE, PALACE_WALL, HALL, CROWN, EAST_GATE, SOUTH_GATE, CH
   RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, inService, serviceKind, rankOf, enterable, wardKind, TIERS, marketShops, BRIDGES, MOAT_Y, AVENUE } from './layout.js';
 const AVENUE_BAND = { mid: [AVENUE[0] + 11, AVENUE[1], AVENUE[2] - 11, WALL_S - 6], kerbW: [AVENUE[0], AVENUE[1], AVENUE[0] + 0.6, WALL_S - 6], kerbE: [AVENUE[2] - 0.6, AVENUE[1], AVENUE[2], WALL_S - 6] };
 
-import { lifePlans } from './life.js';
+import { lifePlans, keeperCells } from './life.js';
+import { STYLES } from '../../core/build.js';
 import { palaceNight, changleNight, cityNight, wardNight, marketNight } from './nightplace.js';
 import '../../styles/hanlodge/index.js';
 import './nightlight.js';
 import './wear.js';
+import { wardAltars } from './altars.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'han', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [AX, 60], facing: 'n' }, ...o });
 const pick = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
@@ -90,7 +92,8 @@ export async function town() {
     const W = PALACE, th = PALACE_WALL.th, E = walledRect(W, th, PALACE_WALL.h, 'lime_plaster', [{ side: 's', c: SOUTH_GATE.x, w: 14 }, { side: 'e', c: EAST_GATE.z, w: 14 }, { side: 'n', c: AX, w: 14 }]);
     // the corridors along the forecourt, their back walls outward
     for (const s of [-1, 1]) E.push({ t: 'han_corridor', a: [AX + s * 80, -80], b: [AX + s * 80, 84], w: 3.4, h: 3.6, wall: s });
-    E.push({ t: 'han_corridor', a: [AX - 80, 84], b: [AX + 80, 84], w: 3.4, h: 3.6, wall: 1 });
+    // the south corridor leaves the axial way open (a gap of 14 m: the way to the south gate ran through it)
+    E.push({ t: 'han_corridor', a: [AX - 80, 84], b: [AX - 7, 84], w: 3.4, h: 3.6, wall: 1 }, { t: 'han_corridor', a: [AX + 7, 84], b: [AX + 80, 84], w: 3.4, h: 3.6, wall: 1 });
     // the Jiaofang hall behind the terrace, the offices west of the court, the library pavilions on their platforms
     E.push({ t: 'hanl_hall', cx: JIAOFANG.cx, z1: JIAOFANG.cz + 6, bays: 5, bayW: 7.2, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 5.8, roof: 'hip', rise: 4.4, overhang: 2.8, ap: 1.6, furnish: 'court', open: [2, 2], seed: 31 });
     for (const [cz, sd] of [[-130, 41], [-176, 43]]) E.push({ t: 'han_hall', cx: -228, z1: cz, bays: 5, bayW: 6, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 5.0, roof: 'gable', rise: 3.4, overhang: 2.4, ap: 1.6, furnish: 'office', open: [2, 2], seed: sd });
@@ -125,7 +128,7 @@ export async function town() {
       const z0 = w[1], lc = [z0 + WARD_WALL + 24.55, z0 + WARD_WALL + 72.85];
       E.push({ t: 'han_ward', rect: w, gates: [{ side: 'w', c: lc[0], w: 4.5 }, { side: 'e', c: lc[0], w: 4.5 }, { side: 'w', c: lc[1], w: 3.5 }, { side: 'e', c: lc[1], w: 3.5 }] });
     }
-    E.push(...wardNight());
+    E.push(...wardNight(), ...wardAltars());
     plans.push(base('han-wards', E));
     const H = lots().filter((l) => l.kind !== 'office' && !inService(l) && !enterable(l)), K = { court: 'han_house', row: 'han_house', tower: 'han_house' };
     for (let i = 0; i < H.length; i += 40) plans.push(base(`han-houses-${i / 40}`, H.slice(i, i + 40).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: false }))));
@@ -173,6 +176,9 @@ export async function town() {
     const A = AVENUE_BAND;
     plans.push(base('han-avenue', [{ t: 'floor', rect: A.mid, y: 0.04, mat: 'brick_paving', th: 0.3 }, { t: 'floor', rect: A.kerbW, y: 0.1, mat: 'bluestone', th: 0.3 }, { t: 'floor', rect: A.kerbE, y: 0.1, mat: 'bluestone', th: 0.3 }]));
   }
+  // the keepers of the shops on the walk, built into near plans (their figures would otherwise reach 170 m as life)
+  STYLES.han.elements.han_keepers = (el, ctx) => { const fig = STYLES.life?.elements?.figure; if (fig) for (const f of el.list) fig({ ...f }, { bag: ctx.bag, col: ctx.col }); };
+  for (const c of keeperCells()) plans.push({ ...base(c.id, [{ t: 'han_keepers', list: c.list }]), center: c.center, near: 80 });
   plans.push({ ...base('han-people', people()), style: 'life' }, ...lifePlans());
   void TIERS; void rand;
   return (CACHE = plans);
