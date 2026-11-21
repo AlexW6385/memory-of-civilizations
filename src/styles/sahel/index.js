@@ -338,9 +338,11 @@ function greatMosque(el, { bag, col }) {
   bag.add('banco_smooth', box(cx - A, -0.4, cz - A, cx + A, py, cz + A));
   col.floor([cx - A, cz - A, cx + A, cz + A], py);
   col.rect([cx - A, cz - A, cx + A, cz + A], -0.4, py - 0.31);
-  for (const [r, dir] of [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e']]) STYLES.qing.elements.stairs({ rect: r, y0: 0, y1: py, dir, mat: 'banco_smooth' }, { bag, col });
+  // six flights of steps (Designing Buildings; wondermondo): north and south at the middle, the west one at the court, a second on the west, two on the market's side
+  const FL = [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e'], [[cx - A - 5, cz + 19, cx - A, cz + 29], 'e'], [[cx + A, cz - 27, cx + A + 5, cz - 17], 'w'], [[cx + A, cz + 17, cx + A + 5, cz + 27], 'w']];
+  for (const [r, dir] of FL) STYLES.qing.elements.stairs({ rect: r, y0: 0, y1: py, dir, mat: 'banco_smooth' }, { bag, col });
   // the mass under each flight, in slices that follow the rising steps, so the flanks are solid where the steps are drawn
-  for (const [r, dir] of [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e']]) {
+  for (const [r, dir] of FL) {
     const SL = 10, alongZ = dir === 'n' || dir === 's', u0 = alongZ ? r[1] : r[0], u1 = alongZ ? r[3] : r[2], up = dir === 'n' || dir === 'w' ? -1 : 1;
     for (let k = 4; k < SL; k++) {
       const a = up > 0 ? u0 + (u1 - u0) * k / SL : u1 - (u1 - u0) * (k + 1) / SL, b = up > 0 ? u0 + (u1 - u0) * (k + 1) / SL : u1 - (u1 - u0) * k / SL;
@@ -348,9 +350,9 @@ function greatMosque(el, { bag, col }) {
     }
   }
   // the cheek walls of each flight, rising with the steps to a pinnacle on the platform's edge, and a small pinnacle at their foot
-  // (Designing Buildings: the stairs are "adorned with pinnacles"; six flights in the original, three here)
-  for (const [r, dir] of [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e']]) {
-    const alongZ = dir === 'n' || dir === 's', uFar = dir === 'n' ? r[3] : dir === 's' ? r[1] : r[0], uPlat = dir === 'n' ? r[1] : dir === 's' ? r[3] : r[2], inward = Math.sign(uPlat - uFar) * (alongZ && dir === 'n' ? 1 : 1);
+  // (Designing Buildings: the stairs are "adorned with pinnacles"; six flights, as here)
+  for (const [r, dir] of FL) {
+    const alongZ = dir === 'n' || dir === 's', uFar = dir === 'n' ? r[3] : dir === 's' ? r[1] : dir === 'e' ? r[0] : r[2], uPlat = dir === 'n' ? r[1] : dir === 's' ? r[3] : dir === 'e' ? r[2] : r[0], inward = Math.sign(uPlat - uFar) * (alongZ && dir === 'n' ? 1 : 1);
     for (const [l0, l1] of alongZ ? [[r[0] - 0.55, r[0]], [r[2], r[2] + 0.55]] : [[r[1] - 0.55, r[1]], [r[3], r[3] + 0.55]]) {
       const V = (l, u, y) => (alongZ ? [l, y, u] : [u, y, l]), yb = -0.4, tf = 0.9, tp = py + 0.9, tris = [];
       const q = (A1, B1, C1, D1) => tris.push(...A1, ...B1, ...C1, ...A1, ...C1, ...D1);
@@ -372,9 +374,10 @@ function greatMosque(el, { bag, col }) {
   // the platform's edge, hand-plastered (docs/settlements/djenne.md §18): a rounded coping roll along the top of its face and a low
   // foot course a hand's breadth proud of it, both broken where the flights of steps reach it
   { const D = 0.3, halves = (g) => [[0, A - g], [A + g, 2 * A]];
+    const cuts = (gs) => { const out = []; let a = 0; for (const [g0, g1] of gs) { out.push([a, A + g0]); a = A + g1; } out.push([a, 2 * A]); return out; };
     const edges = [
       { x: true, c: cz + A, sg: 1, runs: halves(6.6) }, { x: true, c: cz - A, sg: -1, runs: halves(6.6) },
-      { x: false, c: cx - A, sg: -1, runs: halves(5.6) }, { x: false, c: cx + A, sg: 1, runs: [[0, 2 * A]] },
+      { x: false, c: cx - A, sg: -1, runs: cuts([[-5.6, 5.6], [18.4, 29.6]]) }, { x: false, c: cx + A, sg: 1, runs: cuts([[-27.6, -16.4], [16.4, 27.6]]) },
     ];
     edges.forEach((e, i) => {
       for (const [t0, t1] of e.runs) {
