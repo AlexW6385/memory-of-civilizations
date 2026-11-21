@@ -72,7 +72,9 @@ function houseGlow(H, h, far) {
   { const [x, y, z] = P(hS * 0.3, -hF * 0.15, up + 0.55); H.ball(x, y, z, 0.9); H.floor(x, up + 0.03, z, 2.0, 0.85, 10); }
   // the doorway lit from within (the door is an opening: the sheet stands in it, facing out), and the spill on the deck
   const nF = [W(0, 1)[0] - W(0, 0)[0], W(0, 1)[1] - W(0, 0)[1]], d = 0.75;
-  { const a = P(-d, hF - 0.12, up + 0.05), b = P(d, hF - 0.12, up + 0.05), c = P(d, hF - 0.12, up + 1.85), e = P(-d, hF - 0.12, up + 1.85); H.quad(a, b, c, e, nF, 0.55); }
+  { const a = P(-d, hF - 0.12, up + 0.05), b = P(d, hF - 0.12, up + 0.05), c = P(d, hF - 0.12, up + 1.85), e = P(-d, hF - 0.12, up + 1.85); H.quad(a, b, c, e, nF, 0.4); }
+  // the light falling through the floor boards and out of the door onto the yard in front of the stair
+  { const [x, , z] = P(0, hF + 2.6, 0); H.floor(x, 0.07, z, 4.2, 0.55, 10); const [x2, , z2] = P(0, 0, 0); H.floor(x2, 0.07, z2, 3.2, 0.4, 10); }
   if (h.kind !== 'small') { const [x, , z] = P(0, hF + 0.5, 0); H.floor(x, up + 0.04, z, 1.5, 0.6); }
   // the shuttered window of each long side wall, propped open: the lamp seen through it
   if (hF > 2.6) for (const s of [-1, 1]) {

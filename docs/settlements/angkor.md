@@ -345,3 +345,9 @@ Code: `fauna.js` (`critters`), `tests/angkor-critters.test.mjs`. Ducks (brown an
 - Wear: not added as geometry. The monsoon's damp (`damp: 0.9` in plan.js) already stains the stone and posts; worn treads or thresholds would have needed new coplanar pieces on a plan at its draw budget, and were left out rather than made wrongly.
 - Writing: the Old Khmer of the inscriptions is not drawn: a script written wrongly would be worse than a plain face. The door jambs that carry inscriptions in Khmer temples are left plain.
 - Remaining landmark gaps (the cella and the Hall of Echoes, extra temple walk routes): not done in this pass.
+
+## 36. Second pass: the night made visible
+
+- Seen (night, rain): from the arrival the causeway was black (its lamps belonged to a plan drawn only within 45 m of the court's middle, 48 m away); in the village the lit houses showed only a flat doorway rectangle, the ground round them black. [inferred: engineering and lighting only]
+- Changed: the causeway's lamps have their own halo plan drawn from the arrival; two more lamp-stands (four pairs, 14 m apart) stand on the causeway, built in the road plan, flame carried by the halo; glows brighter but softer; lit houses throw a pool on the yard before the stair and one beneath the deck; the doorway sheet is dimmer. Arrival main draws 293 to 295, geometry 110.7 MB / 2304 meshes.
+- Not done (still short): steps C-E (no new opened places, no landmark additions, no writing); the day view at two metres was not re-rendered; the village paddies and the galleries remain dark; lamp-stands of the causeway have a stone bowl, not bronze, to hold the draw count.
