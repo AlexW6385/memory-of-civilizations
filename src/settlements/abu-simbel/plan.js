@@ -50,7 +50,9 @@ export const great = {
 const S = [];
 S.push({ t: 'small_temple', fx: FXS, z: ZS });
 S.push({ t: 'floor', rect: SMALL_TERRACE, y: FLOOR, th: 0.4, mat: 'sandstone_floor' });
-for (const dz of [-21, 21]) S.push({ t: 'wall', a: [FXS, ZS + dz], b: [SMALL_TERRACE[2], ZS + dz], th: 1.6, y0: -0.2, y1: 3.0, mat: 'mudbrick' });
+// the south wall of the Small Temple's terrace has a gate where the processional way from the Great Temple arrives (x −18)
+for (const dz of [-21, 21]) S.push({ t: 'wall', a: [FXS, ZS + dz], b: [SMALL_TERRACE[2], ZS + dz], th: 1.6, y0: -0.2, y1: 3.0, mat: 'mudbrick', openings: dz > 0 ? [{ at: -18 - FXS, w: 3.2, h: 2.8 }] : [] });
+S.push({ t: 'stone_gate', at: [-18, ZS + 21], w: 3.2, h: 2.8, th: 1.6, y: 0 });
 S.push({ t: 'temple_furnish', kind: 'small', fx: FXS, z: ZS });
 const SR = smallRooms();
 const smallRoomsList = [
