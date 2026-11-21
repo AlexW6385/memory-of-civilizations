@@ -98,7 +98,7 @@ export function litShops() {
   const out = [];
   const add = (l, y) => {
     const sp = shopPoint({ rect: l.rect, y, seed: l.seed, front: l.front });
-    if (sp.trade === 'baker' || (sp.trade === 'tavern' && hashAt(l.rect[0], l.rect[1], 51) < 0.75)) out.push({ trade: sp.trade, at: sp.at, out: sp.out, inside: sp.inside, y });
+    if (sp.trade === 'baker' || (sp.trade === 'tavern' && hashAt(l.rect[0], l.rect[1], 51) < 0.75) || hashAt(l.rect[0], l.rect[1], 52) < 0.5) out.push({ trade: sp.trade, at: sp.at, out: sp.out, inside: sp.inside, y });   // (the rest: a hearth or a tallow dip kept at the back of half the open shops [inferred])
   };
   for (const [l] of openMap()) add(l, height((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2));
   for (const l of courtLots()) add(l, 1.0);
@@ -106,6 +106,19 @@ export function litShops() {
 }
 
 // ── the halos ───────────────────────────────────────────────────────────────────────────────────────────
+/** The court row's lodgings that show a light at the door (a hearth, a rushlight or tallow candle in the shop, [inferred]: the court's tenants kept late hours for the palace) besides the bakers' and taverns' fires of litShops(): a share by hash. */
+export function courtGlow() {
+  const out = [];
+  for (const l of courtLots()) {
+    const sp = shopPoint({ rect: l.rect, y: 1.0, seed: l.seed, front: l.front });
+    if (sp.trade === 'baker' || sp.trade === 'tavern') continue;
+    if (hashAt(l.rect[0], l.rect[1], 61) < 0.7) out.push({ at: sp.at, out: sp.out, inside: sp.inside, y: 1.0 });
+  }
+  return out;
+}
+/** The watch's fires in the palace court [inferred: the sergeants of the household kept the court at night]: a brazier near the way in and a cresset at the chapel stair's foot. */
+export const COURT_FIRES = [[-232, -4, 'brazier'], [-186, -4, 'cresset'], [146.5, -7.5, 'cresset'], [146.5, 7.5, 'cresset']];   // (the last two: the cathedral's west front, kept lit by the chapter for the pilgrims' watch [inferred])
+
 /** A fire in the open: the glow, the pool on the ground. */
 function fire(H, x, gy, by, z, ball, pool) { H.ball(x, by, z, ball); H.floor(x, gy + 0.03, z, pool); }
 export function halos() {
@@ -125,11 +138,18 @@ export function halos() {
     H.head(P(-1, w.y1), P(1, w.y1), [x, w.y1 + w.w * 0.9, z], w.n, w.f);
   }
   for (const s of litShops()) {
-    const o = s.out, along = o[1] !== 0, yaw = along ? 0 : Math.PI / 2, sa = s.trade === 'baker' ? 1.25 : 1;
+    const o = s.out, along = o[1] !== 0, yaw = along ? 0 : Math.PI / 2, sa = s.trade === 'baker' ? 1.4 : 1.2;
     H.ball(s.inside[0], s.y + 1.0, s.inside[1], 0.95 * sa);
     H.floor(s.inside[0], s.y + 0.04, s.inside[1], 1.7, 1.3, yaw);
     H.floor(s.at[0] + o[0] * 0.3, height(s.at[0], s.at[1]) + 0.04, s.at[1] + o[1] * 0.3, 2.4 * sa, 1.7 * sa, yaw, 10);
   }
+  for (const s of courtGlow()) {
+    const o = s.out, along = o[1] !== 0, yaw = along ? 0 : Math.PI / 2;
+    H.ball(s.inside[0], s.y + 1.1, s.inside[1], 0.9);
+    H.floor(s.inside[0], s.y + 0.04, s.inside[1], 1.7, 1.3, yaw);
+    H.floor(s.at[0] + o[0] * 0.3, s.y + 0.04, s.at[1] + o[1] * 0.3, 2.6, 1.9, yaw, 10);
+  }
+  for (const [x, z, k] of COURT_FIRES) fire(H, x, height(x, z), height(x, z) + (k === 'cresset' ? 2.15 : 1.0), z, k === 'cresset' ? 1.6 : 1.4, 4.2);
   return H;
 }
 
@@ -157,6 +177,7 @@ export function nightPlan(RADIUS) {
   const els = [{ t: 'paris_night' }];
   for (const [x, z] of CRESSETS) els.push({ t: 'paris_fire', at: [x, z], y: height(x, z), kind: 'cresset' });
   for (const [x, z] of BRAZIERS) els.push({ t: 'paris_fire', at: [x, z], y: height(x, z), kind: 'brazier' });
+  for (const [x, z, kind] of COURT_FIRES) els.push({ t: 'paris_fire', at: [x, z], y: height(x, z), kind });
   return { id: 'paris-night', style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [], elements: els };
 }
 Object.assign(STYLES.gothic.elements, { paris_fire: parisFire, paris_night: parisNight });
