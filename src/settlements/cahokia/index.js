@@ -3,6 +3,7 @@ import '../../styles/mississippian/index.js';
 import '../../styles/ming/index.js';
 import { monks, precinct } from './plan.js';
 import music from './music.js';
+import './nightlight.js';
 import { houses } from './town.js';
 import { RADIUS, CREEK, PONDS, creekZ, inPond } from './layout.js';
 export { music };

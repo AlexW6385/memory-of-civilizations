@@ -50,6 +50,8 @@ export const monks = {
     ...[[-62, -76], [62, -76], [-60, -120], [60, -120], [-48, -153], [-6, -153], [44, -153]].map(([x, z], i) => ({ t: 'standard', c: [x, z], y: height, h: 8 + (i % 3), seed: i })),
     { t: 'terrace_fence', from: [-57, -75], to: [-57, -122], y: height }, { t: 'terrace_fence', from: [57, -75], to: [57, -122], y: height },
     { t: 'terrace_fence', from: [-50, -153], to: [-50, -235], y: height }, { t: 'terrace_fence', from: [50, -153], to: [50, -235], y: height },
+    // the settlement's fires at night, one halo mesh (nightlight.js)
+    { t: 'night_town' },
     // chunkey yards on the Grand Plaza
     ...YARDS.map((rect, i) => ({ t: 'chunkey_yard', rect, y: 0, seed: 3 + i * 2 })),
   ],
