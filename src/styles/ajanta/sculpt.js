@@ -213,6 +213,23 @@ function torana(bag, cx, y, z, a, n) {
   for (let i = 0; i < N; i++) bag.add(WHITE, rod([cx + prof[i][0], y + prof[i][1], z], [cx + prof[i + 1][0], y + prof[i + 1][1], z], 0.026, 5));
   for (const sg of [-1, 1]) bag.add(STONE, lat([[0.001, 0], [0.05, 0.02], [0.06, 0.1], [0.03, 0.15], [0.001, 0.16]], 8, null, 1.1, 0.7, cx + sg * a, y - 0.04, z + n * 0.02));      // the makara's head at each foot
 }
+/** A beast of the frieze in low relief over a pillar, 0.34 m long, walking along x, its flank to the nave (docs/settlements/ajanta.md §21): the elephant (even i) or the aquatic bull, a
+ *  bull whose hind part ends in a fish's tail (odd i), both small as the band is 0.4 m high. n is the face's direction (±1 along z). */
+function frieze_beast(bag, xm, y, z, n, i) {
+  const f = (i >> 1) & 1 ? -1 : 1, X = (d) => xm + f * d, M = WHITE;
+  if (i % 2 === 0) {
+    bag.add(M, lat([[0.001, 0], [0.08, 0.03], [0.1, 0.09], [0.07, 0.15], [0.001, 0.17]], 8, null, 1.35, 0.4, xm, y + 0.09, z));                       // the body
+    bag.add(M, lat([[0.001, 0], [0.05, 0.02], [0.05, 0.08], [0.001, 0.11]], 7, null, 1, 0.45, X(0.15), y + 0.2, z));                               // the head
+    bag.add(M, rod([X(0.19), y + 0.2, z], [X(0.26), y + 0.1, z + n * 0.01], 0.014, 5)); bag.add(M, rod([X(0.26), y + 0.1, z + n * 0.01], [X(0.24), y + 0.06, z + n * 0.01], 0.01, 5));   // the trunk
+    for (const d of [-0.1, -0.04, 0.07, 0.13]) bag.add(M, rod([X(d), y + 0.02, z], [X(d), y + 0.1, z], 0.02, 5));                                  // four legs
+  } else {
+    bag.add(M, lat([[0.001, 0], [0.07, 0.03], [0.085, 0.08], [0.06, 0.13], [0.001, 0.15]], 8, null, 1.25, 0.4, X(0.04), y + 0.1, z));              // the bull's fore body
+    bag.add(M, lat([[0.001, 0], [0.04, 0.02], [0.04, 0.07], [0.001, 0.1]], 7, null, 1, 0.45, X(0.17), y + 0.2, z));                                // the head
+    for (const sg of [-1, 1]) bag.add(M, rod([X(0.19), y + 0.27, z + sg * 0.012], [X(0.22), y + 0.33, z + sg * 0.03], 0.008, 4));                  // the horns
+    bag.add(M, rod([X(-0.1), y + 0.14, z], [X(-0.2), y + 0.2, z], 0.03, 5)); bag.add(M, rod([X(-0.2), y + 0.2, z], [X(-0.26), y + 0.3, z], 0.012, 5)); bag.add(M, rod([X(-0.2), y + 0.2, z], [X(-0.28), y + 0.14, z], 0.012, 5));   // the fish's tail
+    for (const d of [0.08, 0.14]) bag.add(M, rod([X(d), y + 0.02, z], [X(d), y + 0.09, z], 0.018, 5));
+  }
+}
 /** The entablature of Cave 19's nave on each side: a lotus-petal moulding, a frieze in the bay over each pair of pillars of a seated Buddha under a makara
  *  torana, an elephant or an aquatic bull between (stated: IGNCA Architecture), and the dentilled cornice; x from xA (north end) to xB, the vault's side at |dz|. */
 export function nave_frieze(ctx, xs, y, zc, hw) {
@@ -232,6 +249,7 @@ export function nave_frieze(ctx, xs, y, zc, hw) {
       bag.add(PAL.skin, lat([[0.001, 0], [0.07, 0.02], [0.065, 0.12], [0.001, 0.15]], 8, null, 1, 0.8, xm, y + 4.84, zz + n * 0.0));
       bag.add(PAL.ochre, diskX(0.14, 0, 0, 0, 12).rotateY(Math.PI / 2).translate(xm, y + 4.92, zz - n * 0.06));
       torana(bag, xm, y + 4.54, zz + n * 0.05, 0.5, n);
+      if (i > 0) frieze_beast(bag, xs[i], y + 4.5, zf + n * 0.08, n, i);
     }
   }
 }

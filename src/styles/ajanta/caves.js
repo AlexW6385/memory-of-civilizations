@@ -5,7 +5,7 @@
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 import { Panel, PAL, wall, figM, bodhiM, lotusBand, jatakaM, ceilingM, buddhaM, rngOf } from './paint.js';
-import { pillar, figure, shrineBuddha, nave_frieze, toranaFront } from './sculpt.js';
+import { pillar, figure, shrineBuddha, nave_frieze, toranaFront, lat } from './sculpt.js';
 import { horseshoe, brackets, windowLattice } from './carving.js';
 
 const FLOORM = 'sandstone_floor', PLASTER = 'plaster_ochre', STONE = 'sandstone_carved', WHITE = 'lime_plaster';
@@ -177,6 +177,12 @@ export function vihara(ctx, xf, zc, y) {
       // the carved doorframe at the hall wall: two jambs and a lintel with a roundel
       monkKit(ctx, c.x - 0.6, y + 0.62, zb - c.nz * 1.3, c.x + 0.1, zb - c.nz * 0.5, y, c.x * 7);
       const zf = c.z; for (const sx of [-1, 1]) slab(ctx, STONE, c.x + sx * 0.62 - 0.08, y, zf - 0.12 + (c.nz > 0 ? 0 : -0.1), c.x + sx * 0.62 + 0.08, y + 2.3, zf + 0.12 + (c.nz > 0 ? 0.0 : -0.1));
+      // the relief on the doorframe's hall face (docs/settlements/ajanta.md §21): a lintel with a lotus roundel, and a column of lotus beads up each jamb
+      { const n = -c.nz, zh = c.nz > 0 ? zf - 0.12 : zf + 0.02, za = Math.min(zh, zh + n * 0.05), zb2 = Math.max(zh, zh + n * 0.05);
+        slab(ctx, STONE, c.x - 0.74, y + 2.3, za, c.x + 0.74, y + 2.46, zb2);
+        ctx.bag.add(PLASTER, lathe([[0.001, 0], [0.13, 0.01], [0.12, 0.025], [0.07, 0.04], [0.001, 0.05]], 10).rotateX(n > 0 ? Math.PI / 2 : -Math.PI / 2).translate(c.x, y + 2.38, zh + n * 0.05));
+        for (const sx of [-1, 1]) for (let k = 0; k < 6; k++) ctx.bag.add(PLASTER, lat([[0.001, 0], [0.045 + 0.003 * ((k + sx) & 1), 0.01], [0.001, 0.04]], 7, null, 1, 1, c.x + sx * 0.62, y + 0.45 + k * 0.3, zh + n * 0.02));
+      }
     } else {
       plane(ctx, 'z', c.z - 1.1, 1, c.x - 3.6, c.x, y, y + 2.6); plane(ctx, 'z', c.z + 1.1, -1, c.x - 3.6, c.x, y, y + 2.6); plane(ctx, 'x', c.x - 3.6, 1, c.z - 1.1, c.z + 1.1, y, y + 2.6);
       slab(ctx, PLASTER, c.x - 3.6, y + 2.56, c.z - 1.1, c.x, y + 2.6, c.z + 1.1);
