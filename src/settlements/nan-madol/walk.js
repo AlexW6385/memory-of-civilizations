@@ -14,8 +14,8 @@ export function WALK() {
   return [[[ax, az + 40], [ax, az], [ax, -8]], [[s1[0] + 3, az], [s1[2] - 3, az]], [[s1[0] + 3, pc], [s1[2] - 3, pc]]];
 }
 
-/** Two nahs whose route from the path stops short for a cause not yet found (a cell with nothing listed at 0.6 m before the platform, and a 0.5 m kerb): they are enterable, only not routed. */
-const NO_ROUTE = new Set([298838, 420983]);
+/** Nahs left without a route (none now: the two that stopped short had a pig in their lane, docs §14.1). */
+const NO_ROUTE = new Set([]);
 
 /** The nahs the walk opens: the first rows of Idehd and Peiniot, nearest the arrival first, with the point on the islet's path they are entered from. */
 export function walkHouses(n = 26) {

@@ -19,8 +19,8 @@ if (routesFile) routes.push(...(await import(new URL(routesFile, 'file://' + pro
 const f2 = (v) => (Number.isFinite(v) ? v.toFixed(2) : String(v));
 function explain(P, dx, dz) {
   const d = Math.hypot(dx, dz), ux = dx / d, uz = dz / d, out = [];
-  // the next 0.12 m step, as move() takes it
-  const nx0 = P.x + ux * 0.12, nz0 = P.z + uz * 0.12;
+  // the next step as the check takes it (WALK/60 m a frame: a coarser 0.12 m step jumps over what stops a fine one)
+  const nx0 = P.x + ux * (WALK / 60), nz0 = P.z + uz * (WALK / 60);
   let g = footing(cw, nx0, nz0, P.y + STEP);
   out.push(`step to (${f2(nx0)}, ${f2(nz0)}): footing ${f2(g)} (feet ${f2(P.y)}), ground ${f2(cw.groundAt(nx0, nz0, P.y + STEP))}, top ${f2(cw.topAt(nx0, nz0, RADIUS, P.y + STEP))}`);
   const [rx, rz] = cw.resolve(nx0, nz0, RADIUS, Math.max(g, P.y) + LOW, Math.max(g, P.y) + HEAD);
