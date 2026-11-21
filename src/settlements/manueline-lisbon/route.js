@@ -10,7 +10,11 @@ export const MAIN_WALK = [
 export const QUAY_WALK = [[-95, 94.6], [-48, 94.6]];
 /** From the Rua Nova south by the alley at x 120 into the Terreiro do Paço, to the river's edge and east into the shipyard. */
 export const TERREIRO_WALK = [[120, -4.5], [120, 12], [120, 26], [120, 60], [110, 90], [150, 90], [160, 60]];
-export const WALKS = [MAIN_WALK, QUAY_WALK, TERREIRO_WALK];
+/** From the Terreiro along the palace's portico into the guard hall by the door at its third arch (z 69.25). */
+export const PALACE_WALK = [[120, 60], [120, 69.25], [60, 69.25], [44, 69.25], [34, 69.25], [30, 66]];
+/** From the Rua Nova up the alley at x 22, along the cross street at z -104 and down the lane by the Sé's west front, through its porch and nave. */
+export const SE_WALK = [[22, -4.5], [22, -52], [22, -104], [32, -104], [32, -92], [32, -80], [37, -80], [38.4, -81.4], [44, -81.4], [52, -81.4], [60, -81.4]];
+export const WALKS = [MAIN_WALK, QUAY_WALK, TERREIRO_WALK, PALACE_WALK, SE_WALK];
 /** Distance from (x, z) to the main walk's lines (a corridor test). */
 export function nearWalk(x, z, half) {
   for (const W of WALKS) for (let i = 1; i < W.length; i++) {

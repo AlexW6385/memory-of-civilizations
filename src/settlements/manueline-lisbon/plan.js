@@ -4,7 +4,7 @@ import { frame } from '../../styles/greek/agora.js';
 import { storeysOf, HEIGHTS } from '../../styles/manueline/houses.js';
 import { sv1Of, SV0 } from '../../styles/manueline/upstairs.js';
 import { openRoutes } from './openwalk.js';
-import { MAIN_WALK, QUAY_WALK, TERREIRO_WALK } from './route.js';
+import { MAIN_WALK, QUAY_WALK, TERREIRO_WALK, PALACE_WALK, SE_WALK } from './route.js';
 import { lots, height, GROUND, CHURCH, CLOISTER, MONASTERY, PLAZA, PORTAL_X, TOWER, CAUSEWAY } from './layout.js';
 import { churchFrame } from '../../styles/manueline/church.js';
 import { cloisterFrame } from '../../styles/manueline/cloister.js';
@@ -93,7 +93,7 @@ export const jeronimos = {
 jeronimos.walks.push(...houseWalks());
 jeronimos.walks.push(...openRoutes());
 // the visitor's way out of the plaza: east by the lane, the quay street, the alley to the Rua Nova and along it; the quay to the palace; the Terreiro and the yard (route.js)
-jeronimos.walks.push(Object.assign([...MAIN_WALK], { y0: g }), Object.assign([...QUAY_WALK], { y0: g }), Object.assign([...TERREIRO_WALK], { y0: height(120, -4.5) }));
+jeronimos.walks.push(Object.assign([...MAIN_WALK], { y0: g }), Object.assign([...QUAY_WALK], { y0: g }), Object.assign([...TERREIRO_WALK], { y0: height(120, -4.5) }), Object.assign([...PALACE_WALK], { y0: height(120, 60) }), Object.assign([...SE_WALK], { y0: height(22, -4.5) }));
 jeronimos.walks.push(Object.assign([[PORTAL_X, PLAZA[3] - 6], [PORTAL_X, 46], [PORTAL_X + 1.8, 39], [PORTAL_X + 1.8, CF.zc + 3], [CF.bays[3] + 2, CF.zc - 1], [CF.bays[3] + 2, CF.zi0 + 2.1], [CF.bays[1] - 1.5, CF.zi0 + 2.1], [CF.bays[1] - 3, CF.zc]], { y0: g }));
 export const belem = {
   id: 'manueline-belem',
