@@ -286,3 +286,7 @@ What lit Bianjing at night [stated: Dongjing meng hua lu, via rujiazg 14649 and 
 ### 19.6 The landmark
 
 Not worked in this pass (the remaining gaps in §17: bracket proportions, door leaves, the boats' masts).
+
+## 20. Second pass (2026-11-21): the night streets
+
+Seen: at night the arrival court and the shop street were dark near the visitor; lamps showed only far off. Changed (`nightlight.js`): a lantern post (pole, lantern box, halo with a wide pool) every 7 m down both sides of the monastery approach, at the four corners of the pagoda's base and every 14 m (alternating sides) along the shop street and the main street [stated: Mahang street "its lamp-light lit the sky", food shops lit many lamps, Dongjing meng hua lu via rujiazg 14649; the posts' form and spacing inferred]; counter lamps lit in 80 % of shops (was 40 %) with a larger pool and a glow at the door. Checked: surface-check, plan-check, walk-check (133 routes), draw-count at the arrival (main 298 draws, 2.20 M triangles). Rendered: arrival at night was not re-rendered after the change; the shop street at night (x 60, facing west) shows the street lit by posts and shop lamps. Still short: steps C (second courts, closed house doors, far keepers), D (landmark brackets, door leaves, worn steps, pagoda moss), E (the unverified glyphs), walk poses beyond the shop street not measured.
