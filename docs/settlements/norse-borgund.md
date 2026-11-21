@@ -156,3 +156,11 @@ One mesh, one draw (src/engine/fauna-critters.js). The dossier names horses and 
 - Three goats (white and black) at each of the three summer huts.
 - Swallows' mud nests under the eaves of every second barn near the arrival (four), on the wall away from the door, the birds sallying out over the yard and home again.
 - The existing fauna stays: trout, swallows, crows, sparrows, herons.
+
+### R6.5 Wear and writing (`wear.js`)
+- **Wear** [inferred: the effects of use on a tarred log farm in a wet climate; the dossier's damp 0.85, moss and rain streaks already stand]: before each open door a trodden apron of mud beyond the step (only where the ground is flat); on each door-jamb a pale patch at hand height where the tar has been rubbed off the pine; inside, a darker trodden strip and a darker hollow at the sill of a dwelling's earth floor, the threshing floor of a barn swept pale across its doors, charcoal dust and scale on the smithy's floor round the anvil, and in the church the pale scrubbed track of feet on the planks from the west door through the porch and nave to the chancel screen, with the darker worn hollow of the porch's sill.
+- **Writing: none.** The church has runic inscriptions in life, but the dossier gives neither their text nor where they are cut, and no runes were verified here, so none is drawn. No shop boards or signs exist at a farm settlement. Left plain on purpose.
+
+### R6.6 The landmark's remaining gaps (against DESIGN §5)
+- Built: the eight round openings in the nave's upper walls glow faintly at night with the candles' light from within [inferred].
+- Still short, recorded: the portals' original paint (green, red, black and white [stated: Wikipedia "Borgund Stave Church"]) — the dossier chose tarred wood; the runic inscriptions; the true measured dimensions from the drawings; real spruce and birch species (stand-ins `sugi`, `red_pine`, `poplar`); the stave church's carved capitals in the arcade of the svalgang beyond the portals; the root-grown knees of the bell tower; the shingle patterns varying roof to roof.

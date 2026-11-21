@@ -127,6 +127,10 @@ const wrapChurch = (fn) => function haloedChurch(el, ctx) {
   const H = new Halo(), fl = (el.y ?? 0) + 0.35 * (el.s ?? 1);
   // the altar's two wax candles in the apse: a glow round each flame and the pool on the altar's floor
   for (const l of lights.slice(n)) lightHalo(H, l, fl);
+  // the eight round openings high in the central room's long walls (style: x = ±0.95 and ±2.85, 8.75 up, on the walls at z = ∓3.4, 0.15 m radius): the candles' light
+  // reaches them from within and they show as faint warm discs from outside [inferred: a lit room's small openings glow in the dark]
+  const s = el.s ?? 1, [cx, cz] = el.c, ry = (el.y ?? 0) + 8.75 * s;
+  for (const [sd, zz] of [[-1, cz - 3.4 * s - 0.02], [1, cz + 3.4 * s + 0.02]]) for (const u of [-2.85, -0.95, 0.95, 2.85]) H.disc([cx + u * s, ry, zz], [1, 0, 0], [0, 1, 0], 0.15, 0.15, [0, sd], 10, [0.5, 0.45, 0.25]);
   H.flush(ctx.bag);
   return r;
 };
