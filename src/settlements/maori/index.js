@@ -3,6 +3,7 @@ import '../../styles/maori/index.js';
 import pa from './plan.js';
 import music from './music.js';
 import './nightlight.js';
+import './wear.js';
 export { town } from './town.js';
 export { music };
 export const landmarks = [{ plan: pa, music }];
