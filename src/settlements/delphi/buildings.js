@@ -96,12 +96,10 @@ export function temple(E) {
   E.push({ t: 'coffers', rect: [ADY[0], ADY[1], ADY[2], ADY[3]], y: FT - 0.3, depth: 0.3, cell: 1.2, beam: 0.2, mat: 'cedar' });
   E.push({ t: 'coffers', rect: [19.5, WZ0 + 0.55, XE - 0.1, WZ1 - 0.55], y: FT - 0.3, depth: 0.3, cell: 1.2, beam: 0.2, mat: 'cedar' });
   E.push({ t: 'obj', kind: 'doors', at: [18.4, cz], y: FL, yaw: -PI / 2, w: 3.4, h: 6.6, th: 0.2, depth: 0 });
-  // the maxims cut in the pronaos' face of the cross wall: three tablets in lines of lettering, the E in bronze over the door
-  for (const [za, zb, k] of [[cz - 6.0, cz - 3.9, 0], [cz - 3.7, cz - 2.2, 1], [cz + 1.4, cz + 3.9, 2]]) {
-    E.push({ t: 'block', rect: [19.5, za, 19.56, zb], y0: FL + 1.8, y1: FL + 4.1, mat: 'marble_smooth', collide: false });
-    // the first two tablets carry real letters (writing.js MAXIMS: Know thyself; Nothing in excess); the third, "Surety brings ruin", keeps its unlettered lines (the elided Greek is not in the table)
-    if (k < 2) E.push({ t: 'dl_text', lines: MAXIMS[k], at: [19.575, (za + zb) / 2], n: [1, 0], y: FL + 3.35, h: k === 0 ? 0.3 : 0.26, mat: 'marble_dark', pitch: 0.22 });
-    else for (let i = 0; i < 9; i++) E.push({ t: 'block', rect: [19.56, za + 0.14, 19.585, zb - 0.14 - (i % 3 === 2 ? 0.45 : 0)], y0: FL + 1.95 + i * 0.22, y1: FL + 2.03 + i * 0.22, mat: 'marble_dark', collide: false });
+  // the maxims cut in the pronaos' face of the cross wall, one panel either side of the door, the letters 0.58 m high and painted red (legible by day from the steps); the third maxim, "Surety brings ruin", is not cut (its elided Greek is not in the table)
+  for (const [za, zb, k] of [[cz - 6.1, cz - 2.8, 0], [cz + 1.0, cz + 4.1, 1]]) {
+    E.push({ t: 'block', rect: [19.5, za, 19.56, zb], y0: FL + 1.9, y1: FL + 3.95, mat: 'marble_smooth', collide: false });
+    E.push({ t: 'dl_text', lines: MAXIMS[k], at: [19.575, (za + zb) / 2], n: [1, 0], y: FL + 3.6, h: 0.58, mat: 'wall_red', pitch: 0.22, line: 1.4 });
   }
   // the E of Delphi, in gilded bronze, on the frieze band over the door
   { const ye = ENT + ARCH + 0.12, xe = XE + 0.2 + 0.56;
