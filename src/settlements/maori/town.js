@@ -278,6 +278,7 @@ export async function town() {
     for (const sx of [-1, 1]) { const at = [sx * 3.4, gz + (k === 0 ? 2.6 : -2.4)]; E.push({ t: 'kamaka', at, y: height(at[0], at[1]), r: 0.8, yaw: sx * 0.5, spears: sx > 0 ? 5 : 0 }); }
     if (k < 4) { const at = [-2.9, gz + 3.2]; warrior(at, height(at[0], at[1]), face(at, [0, gz + 9])); }
     void gyv;
+    if (k > 0) { const at = [5.2, gz - 6.6]; E.push({ t: 'watchfire', c: at, r: 1.4, y: height(at[0], at[1]), seed: k }); }   // the sentries' fire inside the gate (docs/settlements/maori.md §4i)
     if (k > 0 && k < 4) {                                              // by each terrace's gate: an old man at his ease with a kurī, a woman with her kete
       const a = [4.6, gz - 3.4], b = [-4.4, gz - 4.2];
       man(a, height(a[0], a[1]), face(a, [0, gz - 1]), { pose: 'sit', beard: true, cloth: 'hide_brown' });
