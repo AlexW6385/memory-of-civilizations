@@ -103,6 +103,17 @@ export function westFront(bag, col, o) {
     if (k !== 2) {
       Lc.box(O, uc - hw, 0, 0, uc + hw, dh, 0.03);
       Lc.box(WD, uc - hw + 0.1, 0, 0.03, uc + hw - 0.1, 0.2, 0.06);
+      // the closed doors: two bronze leaves, each with four raised panels and a gilt boss in each, a ring on the meeting stile [inferred: bronze doors on the side portals]
+      for (const sg of [-1, 1]) {
+        const a0 = sg < 0 ? uc - hw + 0.08 : uc + 0.015, a1 = sg < 0 ? uc - 0.015 : uc + hw - 0.08, pw = a1 - a0 - 0.3, ph = (dh - 0.7) / 4;
+        Lc.box('bronze', a0, 0.2, 0.03, a1, dh - 0.12, 0.07);
+        for (let r = 0; r < 4; r++) {
+          const y0 = 0.35 + r * ph, mu = (a0 + a1) / 2;
+          Lc.box('bronze', mu - pw / 2, y0 + 0.06, 0.07, mu + pw / 2, y0 + ph - 0.06, 0.1);
+          Lc.box(GB, mu - 0.05, y0 + ph / 2 - 0.05, 0.1, mu + 0.05, y0 + ph / 2 + 0.05, 0.12);
+        }
+        Lc.box(GB, (sg < 0 ? a1 - 0.14 : a0 + 0.04), 2.0, 0.07, (sg < 0 ? a1 - 0.04 : a0 + 0.14), 2.1, 0.11);
+      }
     }
     for (const sg of [-1, 1]) Lc.box(M, sg < 0 ? uc - hw - 0.25 : uc + hw, 0, 0, sg < 0 ? uc - hw : uc + hw + 0.25, dh + 0.3, 0.16);
     Lc.box(PC, uc - hw - 0.3, dh + 0.3, 0, uc + hw + 0.3, dh + 0.55, 0.26);
