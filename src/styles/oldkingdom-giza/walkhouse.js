@@ -32,8 +32,21 @@ export function lampMesh(bag, x, y, z, rot = 0) {
   bag.add('flame', lathe([[0.001, 0], [0.012, 0.012], [0.001, 0.055]], 6, null, x + Math.cos(rot) * 0.055, y + 0.05, z + Math.sin(rot) * 0.055));
 }
 
-/** mud_house { rect, seed, furnish } — see the module's note. */
+/** The far form of a house { rect, seed }: a closed shell (outer walls with the door walled up, the wall between court and room, the roof over the room), no interior, no detail. */
+function houseShell(el, { bag, col }) {
+  const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 2.6 + rand() * 0.6, th = TH, W = x1 - x0, court = rand() < 0.7, split = court ? x0 + W * (0.45 + rand() * 0.2) : x1;
+  bag.add('mud_plaster', box(x0 - th / 2, 0, z0 - th / 2, x1 + th / 2, h, z0 + th / 2));
+  bag.add('mud_plaster', box(x0 - th / 2, 0, z1 - th / 2, x1 + th / 2, h, z1 + th / 2));
+  bag.add('mud_plaster', box(x0 - th / 2, 0, z0 + th / 2, x0 + th / 2, h, z1 - th / 2));
+  bag.add('mud_plaster', box(x1 - th / 2, 0, z0 + th / 2, x1 + th / 2, h, z1 - th / 2));
+  if (court) bag.add('mud_plaster', box(split - th / 2, 0, z0 + th / 2, split + th / 2, h, z1 - th / 2));
+  const rx1 = split + (court ? th / 2 : 0);
+  bag.add('mud_plaster', box(x0 - 0.25, h, z0 - 0.25, rx1 + 0.1, h + 0.3, z1 + 0.25));
+}
+
+/** mud_house { rect, seed, furnish } — see the module's note. With `simple`: the far form (houseShell). */
 export function gizaHouse(el, { bag, col }) {
+  if (el.simple) return houseShell(el, { bag, col });
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 2.6 + rand() * 0.6, th = TH;
   const W = x1 - x0, court = rand() < 0.7, split = court ? x0 + W * (0.45 + rand() * 0.2) : x1, F = !!el.furnish;
   const xd = court ? (split + x1) / 2 : (x0 + split) / 2, dw = DOOR;
@@ -125,6 +138,12 @@ export function bakeryFires(el) {
 /** bakery { rect, seed }: the Old Kingdom's, its door 1.6 m wide, in the north wall west of the middle. */
 export function gizaBakery(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, h = 1.3, th = 0.5, rand = rng(el.seed || 3);
+  if (el.simple) {                                             // the far form: the four walls closed, the hearth platform, nothing inside
+    bag.add('limestone_core', box(x0 - th / 2, 0, z0 - th / 2, x1 + th / 2, h, z0 + th / 2)); bag.add('limestone_core', box(x0 - th / 2, 0, z1 - th / 2, x1 + th / 2, h, z1 + th / 2));
+    bag.add('limestone_core', box(x0 - th / 2, 0, z0 + th / 2, x0 + th / 2, h, z1 - th / 2)); bag.add('limestone_core', box(x1 - th / 2, 0, z0 + th / 2, x1 + th / 2, h, z1 - th / 2));
+    bag.add('mudbrick', box(x0 + th / 2, 0, z1 - th / 2 - 1.5, x1 - th / 2, 0.4, z1 - th / 2));
+    return;
+  }
   const walls = [[[x0, z1], [x1, z1]], [[x1, z0], [x1, z1]], [[x0, z0], [x0, z1]]];
   const mx = (x0 + x1) / 2, xd = x0 + BAKERY_DOOR, dh = DOOR / 2;
   walls.push([[x0, z0], [xd - dh, z0]], [[xd + dh, z0], [x1, z0]]);

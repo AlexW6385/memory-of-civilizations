@@ -263,7 +263,16 @@ export async function town() {
   plans.push(base('giza-boat-pits', BOAT_PITS.map((p) => ({ t: 'boat_pit', ...p }))));
   plans.push(base('giza-wall', [{ t: 'crow_wall', ...CROW_WALL }], -2.5));
   const lots = townLots();
-  for (let i = 0; i < lots.length; i += 80) plans.push(base(`giza-town-${i / 80}`, lots.slice(i, i + 80).map((l) => (l.kind === 'gallery' ? { t: 'gallery_hall', rect: l.rect } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed } : l.kind === 'yard' ? { t: 'ok_yard', rect: l.rect, kind: l.yk, seed: l.seed } : { t: 'mud_house', rect: l.rect, seed: l.seed, furnish: furnished(l) })), TOWN_Y));
+  // the town in 40 m tiles, each in two forms: the full houses, bakeries and galleries with their interiors while the visitor is near (the tile's centre within 48 m),
+  // closed shells (the style's `simple`) beyond; the far form has no collider (docs/settlements/giza.md §23)
+  const tiles = new Map(), TILE = 40, NEAR = 48;
+  for (const l of lots) { const k = `${Math.floor((l.rect[0] + l.rect[2]) / 2 / TILE)},${Math.floor((l.rect[1] + l.rect[3]) / 2 / TILE)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(l); }
+  const lotEl = (l, simple) => (l.kind === 'gallery' ? { t: 'gallery_hall', rect: l.rect, simple } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed, simple } : l.kind === 'yard' ? { t: 'ok_yard', rect: l.rect, kind: l.yk, seed: l.seed } : { t: 'mud_house', rect: l.rect, seed: l.seed, furnish: furnished(l), simple });
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE, (j + 0.5) * TILE];
+    plans.push({ ...base(`giza-town-${k}`, list.map((l) => lotEl(l, false)), TOWN_Y), near: NEAR, center });
+    plans.push({ ...base(`giza-town-${k}-far`, list.filter((l) => l.kind !== 'yard').map((l) => lotEl(l, true)), TOWN_Y), far: NEAR, center, nocollide: true });
+  }
   plans.push(...extras(lots));
   return plans;
 }
