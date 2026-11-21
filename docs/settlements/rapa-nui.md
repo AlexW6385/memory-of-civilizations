@@ -175,3 +175,12 @@ Chant (riu) with hand-clapping and a stamping stone; voices and a drone stand in
 - **Terns** (drawn as the small perching bird) resting on the heads of some of the ahu's statues, along the platform's back, on the shore's stones and the canoes' sterns.
 - **The turf:** patches of drier, yellower and redder grass with the soil showing and stones in the thin places, in a broad low-frequency pattern, instead of an even cover.
 - **A hamlet east of the plaza:** six more boat-shaped houses with their yards, three chicken houses and four garden walls on the plain east of the plaza (x 78–127), so that the plain to the right of the arrival is not bare [inferred: the villages lay along the coast between the ahu].
+
+## 10. Match pass: the visitor's walk, night, sound, animals, wear (Suzhou as the reference)
+
+Rapa Nui had no shops, streets or markets about 1500; "shops and houses" here are the houses, earth ovens, gardens and work places of §4c-§4g. No script is written anywhere: rongorongo is undeciphered and is not imitated (§10.5).
+
+### 10.1 The visitor's walk
+- The walk (`walks` in plan.js): from the arrival up the paved way to the plaza and the ramp (the existing route); then in at the door of each of the ten nearest houses to enter, over the sill, along the floor to the hearth's side, and in at the chief's long house's door. Eleven places opened, all walked by `walk-check`. [inferred: the route follows the furnished houses of §4f]
+- Fixes found by walking: the long house's wall collider left no gap at its door (its ring was too coarse for 26 m: 88 points now, as the common houses' spacing) and no floor lay over its sill (a floor now covers the sill and the first of the pavement). The doorway stays 1.2 m in the carving [inferred, §4d] and about 2 m clear to the walker.
+- Already in place from §4f-§4g and unchanged: houses with their yards, ovens and keepers (a woman at the oven, people on the forecourts, a worker in each furnished house), the yards by the way up (`approach_dress`), the plaza's feast ovens and offerings, the shore. There are no wells (the island has no springs near Tongariki; water was kept in gourds [inferred]) and no signs or shrines other than the ahu and the poles with bark cloth on the plaza (§4g).
