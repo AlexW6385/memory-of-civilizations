@@ -61,6 +61,8 @@ export { MESE_STOAS };
 for (const s of MESE_STOAS) E.push({ t: 'stoa', y: height(...s.a), depth: 5, h: 6, d: 0.62, spacing: 3.8, ...s });
 // the night (nightlight.js): the lamps hung in the porticoes, the light of the church's south door
 E.push({ t: 'cn_lamps', list: porticoLamps() }, ...fires());
+// two street shrines at the ends of the forecourt's porticoes, fronts to the court, each with its lamp (docs §17.3)
+for (const [x, z, rot] of [[-51, 98, -Math.PI / 2], [41, 98, Math.PI / 2]]) E.push({ t: 'byz_shrine', at: [x, z], y: height(x, z), rot }, { t: 'cn_flame', at: [x + Math.sign(-x) * 0.55, height(x, z) + 1.15, z], intensity: 1.6, distance: 6, floor: height(x, z), r: 0.6 });
 
 export const city = {
   id: 'constantinople-city',
