@@ -61,6 +61,9 @@ export function life() {
     either([x, z], 0.1, rand() * 6.28, { pose: rand() < 0.5 ? 'talk' : 'stand' });
   }
 
+  // the Fiaker coachmen on their box seats (street.js fiaker: forward is +x, the seat at 1.0 m, its cushion top 1.75 m above the street): a bowler, a dark coat, a moustache
+  for (const [x, z] of [[-44, -216], [-33, -216], [-22, -216], [-11, -216], [-48, -57.2]]) man([x + 1.0, z], 0.03 + 1.3, -Math.PI / 2, { pose: 'sit', hat: 'brim', cloth: 'cloth_black', cloth2: 'cloth_grey', over: 'cape', carry: 'none', beard: rand() < 0.5 });
+
   // the Opera: the audience in the stalls and the dancers on the stage
   const xc = (OPERA[0] + OPERA[2]) / 2, z0 = OPERA[1];
   for (const [s, t] of operaSeats()) if (rand() < 0.4) either([xc + s, z0 + t], 0.12, faceTo([0, 1]), { pose: 'sit', hat: 'none' });
