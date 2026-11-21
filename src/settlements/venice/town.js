@@ -36,10 +36,12 @@ export async function town() {
   // Istrian stone (relaid in trachyte only from 1723) [stated: Wikipedia "Piazza San Marco"]; the bands every 10 m [inferred]
   const pave = [];
   for (const r of [PIAZZA, PIAZZETTA]) {
-    pave.push({ t: 'floor', rect: r, y: GROUND + 0.03, th: 0.1, mat: 'brick_paving' });
+    pave.push({ t: 'floor', rect: r, y: GROUND + 0.03, th: 0.1, mat: 'cotto_floor' });
     for (let x = r[0] + 5; x < r[2] - 2; x += 10) pave.push({ t: 'floor', rect: [x - 0.25, r[1], x + 0.25, r[3]], y: GROUND + 0.035, th: 0.1, mat: 'limestone' });
+    // cross bands (the fields are squares of brick between the bands) and a stone kerb along the edge [inferred: the layout of the fields]
+    for (let z = r[1] + 4.5; z < r[3] - 2; z += 9) pave.push({ t: 'floor', rect: [r[0], z - 0.2, r[2], z + 0.2], y: GROUND + 0.04, th: 0.1, mat: 'limestone' });
   }
-  pave.push({ t: 'floor', rect: [MERCERIA[0], MERCERIA[1], MERCERIA[2], MERCERIA[3] - 2.5], y: GROUND + 0.03, th: 0.1, mat: 'brick_paving' });
+  pave.push({ t: 'floor', rect: [MERCERIA[0], MERCERIA[1], MERCERIA[2], MERCERIA[3] - 2.5], y: GROUND + 0.03, th: 0.1, mat: 'cotto_floor' });
   pave.push({ t: 'floor', rect: [(MERCERIA[0] + MERCERIA[2]) / 2 - 0.25, MERCERIA[1], (MERCERIA[0] + MERCERIA[2]) / 2 + 0.25, MERCERIA[3] - 2.5], y: GROUND + 0.035, th: 0.1, mat: 'bluestone' });
   plans.push(base('venice-piazza-paving', pave));
   // (the water of the canals, the basin and the lagoon is the planet's sea: ground.js, sea)
