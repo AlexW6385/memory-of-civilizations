@@ -19,9 +19,9 @@ export async function town() {
   const man = (at, y, rot, o = {}) => { const leo = rand() < 0.2; P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'loincloth', cloth: leo ? 'hide_tan' : 'hide_brown', cloth2: leo ? 'hide_brown' : 'hide_tan', over: leo ? 'cloak' : 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'long', beard: rand() < 0.4, ...o }); };
   // the opened house: a woman grinding at the quern in the storeroom, one sitting on the east platform, a child by the hearth
   const [lx0, lz0] = LANDMARK.rect, T = 0.45, ix0 = lx0 + T, iz0 = lz0 + T, mx1 = ix0 + 4.9, sx0 = mx1 + 0.4, bx = lx0 + 8.4 - T - 1.05;
-  woman([bx + 0.35, iz0 + 4.88], 0.05, Math.PI, { pose: 'kneel', over: 'none' });
-  woman([ix0 + 4.1, iz0 + 2.6], 0.45, -Math.PI / 2, { pose: 'sit_ground', over: 'none' });
-  woman([ix0 + 1.1, iz0 + 3.55], 0.05, 0, { pose: 'sit_ground', child: true, h: 0.6, over: 'none' });
+  woman([bx + 0.35, iz0 + 4.88], 0.05, Math.PI, { pose: 'kneel', over: 'none', nightKeep: 1 });
+  woman([ix0 + 4.1, iz0 + 2.6], 0.45, -Math.PI / 2, { pose: 'sit_ground', over: 'none', nightKeep: 1 });
+  woman([ix0 + 1.1, iz0 + 3.55], 0.05, 0, { pose: 'sit_ground', child: true, h: 0.6, over: 'none', nightKeep: 1 });
   // a second household member on the far corner of some roofs, a dog on others, a child with a bowl
   const roof2 = (i, j) => {
     const x0 = colX(j), z0 = rowZ(i), y = TOP[i][j] + 0.09, at = [x0 + CW[j] - 0.9 - rand() * 0.4, z0 + 0.9 + rand() * 0.5], r = rand();
@@ -46,7 +46,7 @@ export async function town() {
     } else if (k === 'c') {
       const cx = x0 + CW[j] / 2, cz = z0 + CD[i] / 2, tr = TRADE[i][j];
       if (tr === 0) {
-        woman([cx - 1.0, cz + 0.5], 0, Math.PI, { pose: 'kneel', over: 'none' });                 // at the oven
+        woman([cx - 1.0, cz + 0.5], 0, Math.PI, { pose: 'kneel', over: 'none', nightKeep: 1 });                 // at the oven
         woman([cx + 0.3, cz + 1.9], 0, 0, { pose: 'kneel', over: 'none' });                          // at the grinding stone
       } else if (tr === 1) {
         woman([cx, cz + 0.5], 0, Math.PI, { pose: 'kneel', over: 'none' });                          // at the pots drying on the bench
@@ -71,7 +71,7 @@ export async function town() {
   for (const e of ENTER) {
     const G = cellGeom([colX(e.j), rowZ(e.i), colX(e.j) + CW[e.j], rowZ(e.i) + CD[e.i]], e.mirror), { lx, lz, W, D, S } = G, F = 0.05, face = (dx, dz) => Math.atan2(dx, dz);
     const [hx, hz] = G.hearth, [ox, oz] = G.oven;
-    woman([hx + S * 0.2, hz - 0.65], F, face(0, 1), { pose: 'kneel', over: 'none' });                  // at the hearth
+    woman([hx + S * 0.2, hz - 0.65], F, face(0, 1), { pose: 'kneel', over: 'none', nightKeep: 1 });                  // at the hearth
     if (rand() < 0.7) woman([lx(W - 0.7), lz(0.75)], 0.45 + F, face(-S, 0), { pose: 'sit_ground', over: 'none', ...(rand() < 0.5 ? { child: true, h: 0.6 } : {}) });   // on the north platform's end
     if (e.variant === 3) man([lx(1.6), lz(2.3) + 0.8], F, face(-S * 0.2, -1), { pose: 'squat' });       // at the knapper's anvil
     else if (e.variant === 4) woman([lx(W * 0.5 + 0.4), lz(D - 0.95)], F, face(0, 1), { pose: 'kneel', over: 'none' });   // at the quern
