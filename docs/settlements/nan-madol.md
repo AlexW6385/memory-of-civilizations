@@ -161,3 +161,12 @@ Pigs, chickens (brought by the settlers) and dogs [§7]; rats are left out. Crit
 
 ### 14.6 Landmark gaps left (item 6)
 Not attempted. Seen on the way: Nandauwas's courts have no lit interior of the crypt beyond one offering lamp; the gates are steps only (no lintel or capping stones are recorded [inferred]); the sakau stones have no people at night; moving canoes carry no torch light (movers are the engine's); the ground between nahs has no trodden-path decals.
+
+## 15. Narrow second pass (Nov 2026): night near the visitor, budget, walk gaps, landmark wear
+
+All [inferred]; no source describes the place at night or its wear. Nothing here was heard; renders were looked at (night at the arrival and on the forecourt, day at Nandauwas's gate).
+- **Night.** Seen at the arrival and at (-10, 14): lamps on poles, cook-house fires and hearth pools light the forecourt to the walls within 15 m; no darkness near the visitor, so no new light was needed. Still figures now leave at dusk (a quarter stay); the ones that belong to the night take `nightKeep: 1`: the households at the lit nahs' lamps, cook-house and cook-shed women, the hall's elders and chief, the sakau men and their head, the landing store's keeper. New figures, added last in the builder so no seed moves: a seated person at three forecourt lamps, at four cook-house fires and at four of the courts' gate lamps (outside the walkers' lane). Seen: one at a cook-house fire in the night render.
+- **Budget (MAIN pass).** Arrival 268 draws / 1.90 M tris (266 / 1.88 M before). Walk: (-10,70) yaw 0/π 267, 254; (20,28) yaw -π/2 and π/2 258, 265; (-10,-10) yaw 0/π 265, 267; all ≤ 1.9 M. Nothing over; no split needed.
+- **Walk gaps.** Routes into nahs 12 → 24 (islets s1, s4, s3, s2, s5, s6, nearest first); walk-check 29 routes. Two nahs (seeds 298838, 420983) stay unrouted: their route stops 0.6 m (nothing listed by door-probe) and at a 0.5 m kerb; cause not found, they are enterable like the rest.
+- **Landmark.** Worn way at each flight of both gates: flakes of coral rag pressed into the ground, thinning from the steps (the way to the door). A second offering bowl at the lesser tomb's bier. Seen by day at the south gate.
+- **Still short.** Nandauwas's own crypt has no lamp or halo (the floor height under the roof beams was not worked out); the worn treads themselves; canoes afloat carry no torch (engine movers); gate lintel/capping unrecorded; no pig model; trodden-path decals between nahs; the two unrouted nahs.

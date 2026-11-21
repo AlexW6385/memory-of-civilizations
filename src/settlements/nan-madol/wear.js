@@ -12,7 +12,7 @@ import { hashAt } from './nightlight.js';
 let done = false;
 export function registerWear() {
   if (done) return; done = true;
-  const E = STYLES.nanmadol.elements, nah0 = E.nah, sakau0 = E.sakau;
+  const E = STYLES.nanmadol.elements, nah0 = E.nah, sakau0 = E.sakau, gate0 = E.gate;
   E.nah = function worn(el, ctx) {
     const r = nah0.call(this, el, ctx);
     if (!ctx?.bag) return r;
@@ -21,6 +21,22 @@ export function registerWear() {
     const h = (s) => hashAt(el.c[0], el.c[1], s);
     // the step of a commoner's house worn dark in its middle by feet; the matting at the threshold trodden dark
     put('bark_dark', box(-0.4 + 0.15 * (h(3) - 0.5), ph + 0.03, -l / 2 + 0.2, 0.4 + 0.15 * (h(4) - 0.5), ph + 0.04, -l / 2 + 0.95));
+    return r;
+  };
+  E.gate = function trodden(el, ctx) {
+    const r = gate0.call(this, el, ctx);
+    if (!ctx?.bag) return r;
+    // the ground where feet come to each flight: flakes of rag pressed in by feet, thinning out from the steps [inferred]
+    const [cx, cz] = el.c, w = el.w, th = el.th, n = el.n ?? 2;
+    for (const side of [1, -1]) {
+      const zs = cz + side * (th / 2 + n * 0.55);
+      for (let i = 0; i < 14; i++) {
+        // pebbles and flakes of rag pressed into the lane by feet: dense in the lane's middle, few at its edge
+        const a = hashAt(cx, zs, 40 + i), b = hashAt(cx, zs, 70 + i), c = hashAt(cx, zs, 100 + i), d = hashAt(cx, zs, 130 + i);
+        const reach = 0.1 + a * 2.8, x = cx + (b - 0.5) * w * 0.7 * (1 - reach / 5), z = zs + side * reach, r = 0.07 + 0.09 * c;
+        ctx.bag.add('coral_rag', box(x - r * (1 + d), 0.002, z - r, x + r * (1 + d), 0.02 + 0.02 * c, z + r));
+      }
+    }
     return r;
   };
   E.sakau = function stained(el, ctx) {

@@ -108,7 +108,9 @@ export function registerNight() {
   E.nah = wrap(E.nah, lowFlame, null, true);
   E.court = wrap(E.court, poleFlame, (el, real) => {
     // the offering lamp in the crypt, lit beside the bier [inferred]; the tomb court's gate lamps are the court lamps
-    if (el.kind === 'tombgift') { const [x, z] = el.c; real.add('bark_dark', lathe([[0.001, 0], [0.07, 0.01], [0.08, 0.06], [0.001, 0.06]], 6, null, x + 0.75, 0.56, z)); real.add('flame', lathe([[0.001, 0.06], [0.015, 0.075], [0.001, 0.13]], 5, null, x + 0.75, 0.56, z)); lowFlame(real, x + 0.75, 0.62, z); }
+    if (el.kind === 'tombgift') { const [x, z] = el.c; real.add('bark_dark', lathe([[0.001, 0], [0.07, 0.01], [0.08, 0.06], [0.001, 0.06]], 6, null, x + 0.75, 0.56, z)); real.add('flame', lathe([[0.001, 0.06], [0.015, 0.075], [0.001, 0.13]], 5, null, x + 0.75, 0.56, z)); lowFlame(real, x + 0.75, 0.62, z);
+      // a second bowl at the bier's other side, so the crypt is lit from both ends [inferred]
+      real.add('bark_dark', lathe([[0.001, 0], [0.07, 0.01], [0.08, 0.06], [0.001, 0.06]], 6, null, x - 0.75, 0.56, z)); real.add('flame', lathe([[0.001, 0.06], [0.015, 0.075], [0.001, 0.13]], 5, null, x - 0.75, 0.56, z)); lowFlame(real, x - 0.75, 0.62, z); }
   });
   E.works = wrap(E.works, lowFlame, (el, real) => {
     if (el.kind !== 'cookshed') return;
