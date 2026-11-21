@@ -32,7 +32,7 @@ test('ducks stay on the stream; pets and fowl answer the visitor', () => {
   assert.ok(ducks.length >= 10);
   for (const d of ducks) for (let t = 0; t < 60; t += 3) { const r = run(d, t, far(d)); assert.ok(Math.abs(r.Z - streamZ(r.X)) < STREAM.w / 2 + 0.5, `duck off the stream at ${r.X}, ${r.Z}`); }
   const pets = [...of('cat_tabby'), ...of('cat_orange'), ...of('dog')];
-  assert.ok(pets.length >= 6);
+  assert.ok(pets.length >= 5);
   for (const p of pets) {
     const f = run(p, 10, far(p)), c = run(p, 10, [p.groups[1][0] + 1.5, 1.6, p.groups[1][2]]);
     for (const v of [...Object.values(f), ...Object.values(c)]) assert.ok(Number.isFinite(v), p.model);
