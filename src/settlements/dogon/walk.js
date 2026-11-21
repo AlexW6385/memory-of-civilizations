@@ -15,7 +15,7 @@ const PICKS = [['C', 1, 0, 11.8], ['C', 1, 1, 13.4], ['C', 1, 2, 13.4], ['C', -1
 /** The route to a compound's first door and in to the central room: [[x, z]…] (plan frame), with `y0` for the first waypoint's floor. */
 export function routeTo(c, lz) {
   const r = houseOf(c).rect, doorX = r[0] + 0.45 + 1.5, hz1 = r[3], iz0 = hz1 - 5.4 + 0.45;
-  const way = c.row === 'C' ? [[-1.0, 36], [-1.0, 26], [-1.0, 14], [-1.0, lz]] : [[-1.0, 36], [-1.0, 26], [-1.0, 14], [-1.0, 12.6], [1.6, 12.6], [1.6, lz]];
+  const way = c.row === 'C' ? [[-1.0, 36], [-1.0, 26], [-1.0, 14], [-1.0, 13.0]] : [[-1.0, 36], [-1.0, 26], [-1.0, 14], [-1.0, 12.6], [1.6, 12.6], [1.6, lz]];
   return Object.assign([...way, [doorX, lz], [doorX, hz1 - 1.2], [doorX, iz0 + 1.2]], { y0: PLACE_Y });
 }
 /** The routes of the walk: the landmark's own and into eight more opened ginnas of rows C and B. */
