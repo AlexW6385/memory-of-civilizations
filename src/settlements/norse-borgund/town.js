@@ -3,6 +3,7 @@
 // meadows and stacked, wood cut and stacked by the doors, the sledges of the farm, hens in the yards;
 // cattle, sheep, goats and horses at pasture with their herders; at the church the priest at the
 // altar and a few people in the churchyard and at its gate.
+import { hashAt } from './nightlight.js';
 import { SETERS, LANDING, RADIUS, CHURCH, BELL, YARD, FARMS, RIVER, height, buildings, doorOf, inBuilding, inRiver, riverZ } from './layout.js';
 
 const face = (dx, dz) => Math.atan2(-dx, -dz);
@@ -63,6 +64,7 @@ export function life() {
   if (free(2.8, YARD[3] + 5.5, 1)) fig([2.8, YARD[3] + 5.5], 2.6, { pose: 'stand', h: 1.15, dress: 'tunic', hat: 'cap', beard: 0 });
   if (free(-3.8, YARD[3] + 6.8, 1)) fig([-3.8, YARD[3] + 6.8], 0.4, { pose: 'talk', carry: 'staff', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_grey', cloth2: 'cloth_white' });
   { const c = [-44, -40]; if (free(c[0], c[1], 3)) { for (let k = 0; k < 7; k++) { const p = near(c, 8); if (p) beast('sheep', p, 0.6 + (rand() - 0.5) * 1.6); } const h = near(c, 6); if (h) fig(h, 2.4, { carry: 'pole', dress: 'tunic', pose: 'stand' }); } }
+  if (free(-44, -37, 1)) { fig([-45.4, -36.2], face(1.4, 1.2), { pose: 'sit_ground', carry: 'none', dress: 'tunic', nightKeep: 1 }); fig([-42.6, -36.0], face(-1.4, 1.0), { pose: 'sit_ground', carry: 'none', dress: 'robe', hair: 'long', beard: 0, nightKeep: 1 }); }
   for (const [x, z] of [[-38, -10], [-40, 6]]) if (free(x, z, 2)) fig([x, z], rand() * 6.28, { carry: 'yoke', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_indigo' });
   if (free(-36, -22, 1)) put('haystack', [-36, -22]);
   if (free(-33, -44, 1)) put('firewood', [-33, -44], { rot: 0.3, len: 2.2 });
@@ -71,23 +73,24 @@ export function life() {
   B.forEach((b) => {
     const [x0, z0, x1, z1] = b.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, alongX = x1 - x0 >= z1 - z0, fl = b.y + 0.17, wt = 0.19;
     const A0 = alongX ? x0 + wt : z0 + wt, A1 = alongX ? x1 - wt : z1 - wt, B0 = alongX ? z0 + wt : x0 + wt, B1 = alongX ? z1 - wt : x1 - wt, am = alongX ? cx : cz, bm = alongX ? cz : cx;
+    const kept = hashAt(b.rect[0], b.rect[1], 5) < 0.85; // the household whose hearth stays banked (nightlight.js `lit`): its people stay in
     const W = (a, bb) => (alongX ? [a, bb] : [bb, a]), doorB = b.front ? B0 : B1, far = doorB === B0 ? B1 : B0, sg = far === B1 ? -1 : 1;
     if (b.kind === 'stue' && b.use) {
       // the cook-house: the farm wife at the worktable; the weaving house: the weaver at her loom (both stand a pace in front of the gable's work)
       const dirA = alongX ? [1, 0] : [0, 1];
-      fig(W(A1 - (b.use === 'cook' ? 1.35 : 1.15), bm), face(...dirA), { y: fl, pose: 'stand', dress: 'robe', hair: 'long', beard: 0, hat: 'none', cloth: b.use === 'cook' ? 'cloth_brown' : 'cloth_indigo', cloth2: 'cloth_white', ...(b.use === 'cook' ? { over: 'apron' } : {}) });
-      if (b.use === 'cook') fig(W(am - 1.45, bm - 0.75), face(...(alongX ? [0, 1] : [1, 0])), { y: fl, pose: 'squat', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_red' });
+      fig(W(A1 - (b.use === 'cook' ? 1.35 : 1.15), bm), face(...dirA), { nightKeep: kept ? 1 : 0, y: fl, pose: 'stand', dress: 'robe', hair: 'long', beard: 0, hat: 'none', cloth: b.use === 'cook' ? 'cloth_brown' : 'cloth_indigo', cloth2: 'cloth_white', ...(b.use === 'cook' ? { over: 'apron' } : {}) });
+      if (b.use === 'cook') fig(W(am - 1.45, bm - 0.75), face(...(alongX ? [0, 1] : [1, 0])), { nightKeep: kept ? 1 : 0, y: fl, pose: 'squat', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_red' });
     } else if (b.kind === 'stue') {
-      if (rand() < 0.8) fig(W(am - 0.3, bm + 0.62), face(...(alongX ? [0, -1] : [-1, 0])), { y: fl, pose: 'squat', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_red' });
-      if (rand() < 0.55) { const bb = far + sg * 0.5; fig(W(am - 2.0, bb), face(...(alongX ? [0, -sg] : [-sg, 0])), { y: fl + 0.01, pose: 'sit', dress: 'tunic', hair: 'short', beard: 1, hat: 'none', cloth: 'cloth_brown' }); }
+      if (rand() < 0.8) fig(W(am - 0.3, bm + 0.62), face(...(alongX ? [0, -1] : [-1, 0])), { nightKeep: kept ? 1 : 0, y: fl, pose: 'squat', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_red' });
+      if (rand() < 0.55) { const bb = far + sg * 0.5; fig(W(am - 2.0, bb), face(...(alongX ? [0, -sg] : [-sg, 0])), { nightKeep: kept ? 1 : 0, y: fl + 0.01, pose: 'sit', dress: 'tunic', hair: 'short', beard: 1, hat: 'none', cloth: 'cloth_brown' }); }
     } else if (b.kind === 'smithy') {
-      fig(W(am + 0.6, bm + 0.8 * sg), face(...(alongX ? [0, -sg] : [-sg, 0])), { y: fl, pose: 'stand', dress: 'tunic', over: 'apron', hair: 'short', beard: 1, hat: 'none', cloth: 'cloth_grey', cloth2: 'hide_brown', carry: 'none' });
+      fig(W(am + 0.6, bm + 0.8 * sg), face(...(alongX ? [0, -sg] : [-sg, 0])), { nightKeep: 1, y: fl, pose: 'stand', dress: 'tunic', over: 'apron', hair: 'short', beard: 1, hat: 'none', cloth: 'cloth_grey', cloth2: 'hide_brown', carry: 'none' });
       fig(W(am - 0.7, nearBb(doorB, B0, B1, 1.3)), face(...(alongX ? [0, doorB === B0 ? -1 : 1] : [doorB === B0 ? -1 : 1, 0])), { y: fl, pose: 'stand', dress: 'tunic', hair: 'short', beard: 0, cloth: 'cloth_brown' });
     } else if (b.kind === 'barn') {
       const mowSide = (b.seed % 2) ? 1 : -1, y0 = mowSide > 0 ? A0 : am + 1.6, y1 = mowSide > 0 ? am - 1.6 : A1, n = Math.max(2, Math.floor((y1 - y0) / 1.25)), w = (y1 - y0) / n;
       const kind = ['ox', 'sheep', 'goat', 'horse'][b.seed % 4], dir = alongX ? [0, -sg] : [-sg, 0];
       for (let k = 0; k < n; k++) if (rand() < 0.85) beast(kind === 'ox' && k > 1 ? 'goat' : kind, W(y0 + (k + 0.5) * w, far + sg * 1.25), face(...dir), fl);
-      if (rand() < 0.5) fig(W(am - 0.5, nearBb(doorB, B0, B1, 1.5)), face(...dir), { y: fl, pose: 'stand', carry: 'pole', dress: 'tunic' });
+      if (rand() < 0.5) fig(W(am - 0.5, nearBb(doorB, B0, B1, 1.5)), face(...dir), { nightKeep: 1, y: fl, pose: 'stand', carry: 'pole', dress: 'tunic' });
     }
     if (b.kind === 'stue' || b.kind === 'barn') {
       const { at, n } = doorOf(b);
