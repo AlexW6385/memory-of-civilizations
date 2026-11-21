@@ -29,6 +29,8 @@ function wearEl(el, { bag }) {
     // the soot over the door of a trade that kept a fire
     if (d.kind === 'shop' && SOOTY.has(d.trade)) { const [z0, z1] = zs(0.014, 0.02); bag.add('pottery_dark', tbox(x - 0.34 - a * 0.1, 2.78, z0, x + 0.34 + b * 0.1, 3.02 + c * 0.08, z1, 0.0005 * (a + 1))); }
   }
+  // the way from the south to the Great Temple's door, worn by pilgrims' feet: dark dished scuffs, thicker and wider toward the door (docs §24)
+  for (const [px, pz, w] of el.way ?? []) bag.add('limestone_core', lathe([[1, 0], [1, 0.003], [0.001, 0.003]], 10).scale(w * 0.32, 1, w * 0.17).rotateY(hash(px, pz) * 3).translate(px, 0.0435 + hash(pz, px) * 0.0004, pz));
   // the terrace's paving black under the braziers' bowls
   for (const [bx, bz] of el.rings ?? []) bag.add('pottery_dark', lathe([[0.62, 0], [0.62, 0.004], [0.001, 0.004]], 12, null, bx, 0.043, bz));
 }
@@ -40,5 +42,15 @@ export { hash as wearHash };
 /** The doors with their wear, from the lots (doorX is replayed by the caller to keep this file free of walk.js's dice). */
 export function wearElements(doorX) {
   const doors = lots().map((l) => { const n = l.front === 'n', th = l.kind === 'bakery' ? 0.5 : 0.45; return { x: doorX(l), zo: n ? l.rect[1] - th / 2 : l.rect[3] + th / 2, s: n ? -1 : 1, seed: l.seed, trade: l.trade, kind: l.kind, xr: [l.rect[0], l.rect[2]] }; });
-  return [{ t: 'abu_wear', doors, rings: [-9.8, 9.8].map((z) => [TERRACE[0] + 14.5, z]) }];
+  return [{ t: 'abu_wear', doors, rings: [-9.8, 9.8].map((z) => [TERRACE[0] + 14.5, z]), way: wayWear() }];
+}
+
+/** The scuffs of the way: from the arrival's end of the terrace (−4, 17) to the door (z 0), spread by a hash of their own place. */
+function wayWear() {
+  const out = [];
+  for (let k = 0; k < 70; k++) {
+    const t = Math.pow((k + 0.5) / 70, 0.8), cx = TERRACE[0] + 0.6 + t * (-6 - TERRACE[0] - 0.6), spread = 0.6 + 2.2 * t, zc = 17 * Math.max(0, (t - 0.25) / 0.75);
+    out.push([cx + (hash(k, 1) - 0.5) * 1.6, zc + (hash(k, 2) - 0.5) * spread, 0.35 + hash(k, 3) * 0.35 + (1 - t) * 0.25]);
+  }
+  return out;
 }
