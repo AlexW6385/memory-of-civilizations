@@ -17,6 +17,8 @@ walks[0].y0 = 0;
 // the visitor's walk (docs §20.1): from the arrival to the foot of the mosque, and into each of the eight shops by the entry beside its counter and on to the shelf at the back
 walks.push([ARRIVAL, [75, 22], [55, 22], [55, -43.2], [40, -43.2], [38, -48], [0, -48]]);
 for (let i = 0; i < SHOP_N; i++) { const S = shopAt(i); walks.push([[S.entry, -43.2], [S.entry, -44.5], [S.entry, -47.2], [S.entry, S.zBack + 1.6]]); }
+// the Great Mosque: up the north stair, round the entrance tower to the main door (between the towers, the hall's fourth aisle), down the aisle and east through the arches to the qibla wall by the mihrab of each side tower
+for (const zz of [-13, 14]) { const r = [[0, -48], [0, -36], [12.65, -36], [12.65, -31], [12.65, -20], [12.65, zz], [31.5, zz]]; r.y0 = 0; walks.push(r); }
 // the court house: through the door and the vestibule to the court, into the workshop, the reading room and up the court's stair to the east roof
 { const C = courtAt(), dz = C.zf + 0.0;
   walks.push([[C.xm, C.z1 + 1.8], [C.xm, C.z1 - 0.2], [C.xm, dz - 2], [C.xm, C.zp - 0.25], [C.xm, C.zp - 2.5], [C.west, C.zp - 2.5], [C.west, C.zp + 0.1], [C.west, C.zp + 2.0]]);

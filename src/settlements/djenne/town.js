@@ -348,6 +348,7 @@ function walkLife() {
 function mosqueLamps() {
   const out = [];
   for (const z of [-27.275, -16.725, 16.725, 27.275]) out.push([41.4, 1.75, z, 0.4, 0]);
+  for (const z of [-24, -13, -3, 8, 18]) out.push([12.65, 4.5, z, 0.45, 1.8]);   // lamps hung from the beams over the hall's fourth aisle, the way from the door to the mihrabs
   return out;
 }
 
