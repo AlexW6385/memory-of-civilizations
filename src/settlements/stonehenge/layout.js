@@ -86,6 +86,8 @@ export function height(x, z) {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 let H = null;
+/** The houses a visitor may enter (indices in houses()): the fourteen about the Durrington avenue's near end, which the walk comes to (§11). */
+export const OPEN = [60, 8, 45, 34, 35, 14, 25, 11, 24, 39, 17, 31, 21, 41];
 /** The houses: { c, s (inner side), yaw, y (the chalk floor, on its levelled platform), seed }. */
 export function houses() {
   if (H) return H;
@@ -101,7 +103,7 @@ export function houses() {
     const s = 4.8 + rand() * 0.9, yaw = rand() * Math.PI * 2, e = s / 2 + 0.3;
     const ys = [[-e, -e], [e, -e], [e, e], [-e, e], [0, 0]].map(([u, v]) => baseHeight(x + u * Math.cos(yaw) - v * Math.sin(yaw), z + u * Math.sin(yaw) + v * Math.cos(yaw)));
     const y = ys.reduce((a, b) => a + b, 0) / ys.length + 0.05;
-    H.push({ c: [x, z], s, yaw, y, low: y - 0.1, seed: Math.floor(rand() * 1e6) });
+    H.push({ c: [x, z], s, yaw, y, low: y - 0.1, seed: Math.floor(rand() * 1e6), open: OPEN.includes(H.length) });
   }
   return H;
 }

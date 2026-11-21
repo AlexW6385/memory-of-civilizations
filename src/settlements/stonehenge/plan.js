@@ -5,7 +5,7 @@
 // Slaughter Stone and its partner at the entrance and the Heel Stone; the four Station Stones.
 // +x east, +z south; the axis runs to the north-east (AXIS).
 
-import { height, AXIS, HEEL, STATIONS, DITCH, ringGrid } from './layout.js';
+import { height, AXIS, HEEL, STATIONS, DITCH, ringGrid, houses, DURR } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const rand = rng(2500);
@@ -116,6 +116,18 @@ E.push({ t: 'earthwork', grids: [ringGrid([0, 0], DITCH.r - 9, DITCH.r + 7.5), .
   }
 }
 
+/** The visitor's walk (§11): from the arrival through the entrance stones and along the Avenue past the Heel Stone, then across the down to the Durrington
+ *  avenue's near end and the open houses beside it. The waypoints were found by a search over the collision raster (they keep clear of the granaries and
+ *  camps, which stand where the settlement's own hashes put them) and are checked by tools/walk-check.mjs. */
+const WALK_TO_DURRINGTON = [[34,-15.5],[34,-19.5],[34,-23.5],[34,-27.5],[33,-31.5],[35,-35.1],[39,-39.1],[43,-43.1],[46,-47.1],[48,-51.1],[50,-55.1],[51.8,-59.3],[54.8,-63.3],[58.8,-67.3],[61.8,-71.3],[65.8,-75.3],[69.8,-79.3],[73.8,-81.3],[78.2,-85.6],[82.2,-89.6],[86.2,-93.6],[90.2,-97.6],[94.2,-101.6],[98.2,-105.6],[102.2,-109.6],[106.5,-113.9],[110.5,-117.9],[114.5,-121.9],[117.5,-125.9],[121.5,-128.9],[125.5,-132.9],[129.5,-136.9],[133.8,-141],[137.8,-145],[141.8,-149],[143.8,-153],[147,-154],[151,-154],[155,-151],[159,-148],[163,-146],[167,-146],[171,-144],[174,-140],[178,-136],[182,-133],[186,-135],[190,-139],[194,-139],[197,-137],[196,-134]];
+function walkToDurrington() { return Object.assign(WALK_TO_DURRINGTON.map((p) => p.slice()), { y0: height(34, -16) }); }
+/** A route into each open house (§11): from 5 m in front of the doorway, through it, to the hearth. (rng(h.seed)'s first number is the doorway's place.) */
+function houseWalks() {
+  return houses().filter((h) => h.open).map((h) => {
+    const r = rng(h.seed), doorU = (r() - 0.5) * 0.8 * 0.7, hw = h.s / 2, c = Math.cos(h.yaw), s = Math.sin(h.yaw), W = (u, v) => [h.c[0] + u * c - v * s, h.c[1] + u * s + v * c];
+    return Object.assign([W(doorU, hw + 3.5), W(doorU, hw + 0.4), W(doorU, hw - 0.9), W(doorU, 0.9)], { y0: h.y });
+  });
+}
 export const henge = {
   id: 'stonehenge-henge',
   name: { en: 'Stonehenge', zh: '巨石阵' },
@@ -128,6 +140,6 @@ export const henge = {
   bakeTop: 10,
   elements: E,
   rooms: [{ id: 'circle', rect: [-14, -14, 14, 14], y: Y0, kind: 'open' }],
-  walks: [Object.assign([[40, -40], [18, -18], [0, 0]], { y0: height(40, -40) })],
+  walks: [Object.assign([[40, -40], [18, -18], [0, 0]], { y0: height(40, -40) }), walkToDurrington(), ...houseWalks()],
 };
 export default henge;

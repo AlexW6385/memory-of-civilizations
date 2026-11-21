@@ -190,12 +190,22 @@ export function village() {
   const ax = Math.cos(AXIS), az = Math.sin(AXIS), P = (u, v) => [u * ax - v * az, u * az + v * ax];
   const person = (at, rot, o = {}) => L.push({ t: 'figure', at, y: height(at[0], at[1]), rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.45 ? 'robe' : 'tunic', cloth: CLOTH[Math.floor(rand() * CLOTH.length)], cloth2: CLOTH[Math.floor(rand() * CLOTH.length)], skin: rand() < 0.6 ? 'skin_light' : 'skin_medium', hat: 'none', ...o });
   // the yards
-  for (const h of H) Y.push({ t: 'yard', c: h.c, s: h.s, yaw: h.yaw, y: h.y, seed: h.seed, k: h.seed % 4 });
+  for (const h of H) Y.push({ t: 'yard', c: h.c, s: h.s, yaw: h.yaw, y: h.y, seed: h.seed, k: h.seed % 4, open: h.open });
   // the people inside: at the hearth, on the log seat, in about a third of the houses
   for (const h of H) if (rand() < 0.33) {
     const F = house_frame(h), at = F(0.85, 0.15), hearth = F(0, -0.1);
     person(at, face(at, hearth), { pose: rand() < 0.5 ? 'sit_low' : 'sit_ground' });
     if (rand() < 0.4) { const a2 = F(-0.95, -0.2); person(a2, face(a2, hearth), { pose: 'sit_low' }); }
+  }
+  // the open houses (§11): the keeper at the hearth, from a stream of its own (the village's stream above is left as it was); in every second one
+  // a second person on the far log seat and a child on the hide; the household sits, never in the lane from the door to the hearth
+  {
+    const r3 = rng(2611), mk = (h, u, v, o) => { const F = house_frame(h), at = F(u, v), hearth = F(0, -0.1); L.push({ t: 'figure', at, y: height(...at), rot: face(at, hearth), seed: Math.floor(r3() * 1e9), dress: r3() < 0.5 ? 'robe' : 'tunic', cloth: CLOTH[Math.floor(r3() * CLOTH.length)], cloth2: CLOTH[Math.floor(r3() * CLOTH.length)], skin: r3() < 0.6 ? 'skin_light' : 'skin_medium', hat: 'none', ...o }); };
+    H.filter((h) => h.open).forEach((h, i) => {
+      mk(h, 0.0, -1.1, { pose: i % 3 === 0 ? 'kneel' : 'sit_ground' });
+      if (i % 2 === 0) mk(h, -1.05, 0.5, { pose: 'sit_low' });
+      if (i % 3 === 1) mk(h, 1.0, -0.9, { pose: 'sit_ground', h: 0.62 });
+    });
   }
   // the crafts, in the open spaces among the houses: each with its worker (and a watching child, a dog)
   const KINDS = ['knap', 'pots', 'basket', 'grind', 'hides'], POSE = { knap: 'squat', pots: 'squat', basket: 'sit_ground', grind: 'kneel', hides: 'kneel' };
@@ -321,3 +331,17 @@ export async function town() {
   ]);
 }
 void avenue;
+
+let SPOTS = null;
+/** Where the sounds of the town are made (soundmap.js): the open fires, the places of work in the open, the animals; from the same plans the town is built from. */
+export function soundSpots() {
+  if (SPOTS) return SPOTS;
+  SPOTS = { fires: [], crafts: [], animals: [] };
+  for (const p of [...feast(), ...camp(), ...village()]) for (const e of p.elements) {
+    if (e.t === 'feast_fire') SPOTS.fires.push({ at: e.c, pig: e.pig !== false });
+    else if (e.t === 'craft') SPOTS.crafts.push({ kind: e.kind, at: e.c });
+    else if (e.t === 'animal') SPOTS.animals.push({ kind: e.kind, at: e.at });
+  }
+  for (const e of people()) if (e.t === 'animal') SPOTS.animals.push({ kind: e.kind, at: e.at });
+  return SPOTS;
+}

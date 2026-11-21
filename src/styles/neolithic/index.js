@@ -341,7 +341,8 @@ const groovedWare = (r, h) => [[0.001, 0], [r * 0.82, 0], [r * 0.86, h * 0.1], [
 function house(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x, z] = el.c, s = el.s ?? 5, y = el.y ?? 0, a = el.yaw ?? 0, low = el.low ?? y - 0.4;
   const fr = { x, z, y, c: Math.cos(a), s: Math.sin(a) };
-  const hw = s / 2, th = 0.16, wh = 1.75, dw = 0.85, dh = 1.5, doorU = (rand() - 0.5) * 0.8;
+  // a house the visitor may enter (el.open, §11): the doorway 1.6 m wide under a lintel 2.1 m up, the walls 2.45 m (the others: 0.85 m, 1.5, 1.75)
+  const open = !!el.open, hw = s / 2, th = 0.16, wh = open ? 2.45 : 1.75, dw = open ? 1.6 : 0.85, dh = open ? 2.1 : 1.5, doorU = (rand() - 0.5) * 0.8 * (open ? 0.7 : 1);
   const foot = low - y - 0.25;
   // the floor: chalk, beaten and plastered, its edge bedded into the ground
   bag.add('chalk', obox(fr, -hw - th + 0.04, hw + th - 0.04, foot, 0, -hw - th + 0.04, hw + th - 0.04));
@@ -495,7 +496,7 @@ function house(el, { bag, col }) {
   // with antler picks hung above it; and, but for the bare one, a worn threshold slab
   {
     const fv = Math.floor((el.seed || 0) / 5) % 5, rv = rng((el.seed || 1) * 104729 + 7), sd = doorU > 0 ? -1 : 1, vw = hw + th;
-    if (fv !== 0) bag.add('sandstone_white', obox(fr, doorU - 0.5, doorU + 0.5, -0.07, 0.035, vw, vw + 0.42));
+    if (fv !== 0) bag.add('sandstone_white', obox(fr, doorU - dw / 2 - 0.1, doorU + dw / 2 + 0.1, -0.07, 0.035, vw, vw + 0.42));
     if (fv === 1) {
       const hide = ['hide_tan', 'hide_brown', 'hide_grey'][Math.floor(rv() * 3)];
       bag.add(hide, stick(W(fr, doorU - dw / 2 + 0.06, dh - 0.07, vw + 0.06), W(fr, doorU + dw / 2 - 0.06, dh - 0.07, vw + 0.06), 0.065, 8));
@@ -852,17 +853,18 @@ function antlerPick(bag, p, ang, rand, y0 = 0.03) {
 function yard(el, { bag, col }) {
   const rand = rng(el.seed || 5), [x, z] = el.c, y = el.y ?? 0, a = el.yaw ?? 0, s = el.s ?? 5, hw = s / 2;
   const fr = { x, z, y, c: Math.cos(a), s: Math.sin(a) }, k = el.k ?? 0;
+  const wide = el.open ? 1 : 0;                                // before an open door the lane (1.6 m wide, 1.2 m either side of the middle) is kept clear
   const at = (u, v, yy = 0) => { const p = W(fr, u, 0, v); return [p[0], y + yy, p[2]]; };
   const front = hw + 0.16 + 0.9;
   // the way up to the door trodden: a scatter of chalk lumps and flints
   for (let i = 0; i < 9; i++) bag.add(i % 3 ? 'chalk' : 'granite_black', pebble(0.04 + rand() * 0.04, at((rand() - 0.5) * 2.6, front + rand() * 2.4, 0)));
   if (k === 0 || k === 2) {                                  // a hurdle screen forming a yard on one side of the door, a log seat
-    const sg = rand() < 0.5 ? -1 : 1, u0 = sg * 1.3, u1 = sg * 3.4, v = front + 0.2;
+    const sg = rand() < 0.5 ? -1 : 1, u0 = sg * (1.3 + wide * 0.9), u1 = sg * (3.4 + wide * 0.9), v = front + 0.2;
     const p = W(fr, u0, 0, v), q = W(fr, u1, 0, v), p2 = W(fr, u1, 0, v + 2.2);
     const gy = () => y;
     hurdle({ a: [p[0], p[2]], b: [q[0], q[2]], y: gy(p), h: 1.1, seed: el.seed }, { bag, col });
     hurdle({ a: [q[0], q[2]], b: [p2[0], p2[2]], y: gy(q), h: 1.1, seed: el.seed + 1 }, { bag, col });
-    const lg = at(sg * 2.2, v + 1.1, 0.14); bag.add('log_pine', stick([lg[0] - fr.c * 0.5, lg[1], lg[2] - fr.s * 0.5], [lg[0] + fr.c * 0.5, lg[1], lg[2] + fr.s * 0.5], 0.14, 7));
+    const lg = at(sg * (2.2 + wide * 0.9), v + 1.1, 0.14); bag.add('log_pine', stick([lg[0] - fr.c * 0.5, lg[1], lg[2] - fr.s * 0.5], [lg[0] + fr.c * 0.5, lg[1], lg[2] + fr.s * 0.5], 0.14, 7));
     col.circle(lg[0], lg[2], 0.3, y, y + 0.3);
   }
   if (k === 1 || k === 3) {                                  // a storage pit lidded with a weighted hurdle disc, a basket by it
@@ -886,7 +888,7 @@ function yard(el, { bag, col }) {
     for (let i = 0; i < 6; i++) { const p = at(-sg * (hw - 0.3) - i * 0.015 * sg, hw + 0.16 + 0.3 + i * 0.02, 0), q = at(-sg * (hw - 0.3) + (i - 3) * 0.02, hw + 0.16 + 0.03, 1.9); bag.add('wicker', stick(p, q, 0.012, 4)); }
   }
   // a pot of water by the door
-  { const p = at((rand() < 0.5 ? -1 : 1) * 0.9, hw + 0.16 + 0.35, 0); bag.add('terracotta', lathe(groovedWare(0.2, 0.42), 12, null, p[0], p[1], p[2])); }
+  { const p = at((rand() < 0.5 ? -1 : 1) * (0.9 + wide * 1.3), hw + 0.16 + 0.35, 0); bag.add('terracotta', lathe(groovedWare(0.2, 0.42), 12, null, p[0], p[1], p[2])); }
 }
 
 /**

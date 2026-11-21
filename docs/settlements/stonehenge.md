@@ -171,6 +171,48 @@ Up the Avenue from the north-east into the circle. [stated: the Avenue]
 
 Nothing is known; pipes, drums and voices stand in, under the wind. [inferred]
 
+## 11. The visitor's walk (2026-11 match to the reference; `OPEN` in `layout.js`, `walkToDurrington`/`houseWalks` in `plan.js`, `open` in the style's `house` and `yard`)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Open houses | Fourteen of the houses about the Durrington avenue's near end (indices in `OPEN`) can be entered: doorway 1.6 m wide under a lintel 2.1 m up, walls 2.45 m (the others keep 0.85 m, 1.5 m and 1.75 m); their yards keep the lane before the door clear (hurdle screen, log seat and water pot moved aside); each has its keeper sitting at the hearth, in some a second person on the far log seat and a child on the hide | The houses were about 5 m square with a central hearth, box beds and dressers [stated, §5a]; the doorway's size and place are not known: wider than the reconstructions' so that a visitor can walk in, which is a concession to the walker, not a finding [inferred] |
+| The route | From the arrival through the entrance stones, along the Avenue past the Heel Stone and across the down to the houses; plus a route from 3.5 m before each open door to the hearth | The Avenue runs from the stones toward the north-east [stated, §1]; the waypoints were found by a search over the collision raster [inferred] |
+| Far houses | The other 47 houses keep the closed form (door 0.85 m) | as §5a |
+
+## 12. Night (`nightlight.js`)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Hearths | Each house's hearth as the style draws it: a flame, where one is drawn, throws a ball and a pool of firelight on the chalk floor, the doorway spills a pool on the trodden chalk outside, the smoke glows where it breaks through the thatch; in the open houses and half the others, where no flame is drawn, banked embers (a faint red pool) | Hearths in the middle of every house [stated, §5a]; smoke rising through the thatch [stated, EH "Neolithic Houses"] |
+| Open fires | Every feast and camp fire, and the one at the heart of the Southern Circle: a large glow and a wide pool, the light on the pig on the spit | Pigs roasted over open fires [stated, §10a]; the fire in the circle [inferred, §10c] |
+| Camp huts | Where the hut's fire is lit: the glow at the smoke hole and the spill at the door | [inferred] |
+| No lamp, torch or candle | None is built | None is attested for the Late Neolithic of Wessex [inferred] |
+
+## 13. Sound (`soundmap.js`, `src/engine/voices-stonehenge.js`, voices prefixed `sth`; test `tests/stonehenge-sound.test.mjs`)
+
+All [inferred]: no sound of the Late Neolithic survives; the works are those of §1c, §10a and §10c, the animals those of the bone counts (§10a), the birds those of chalk downland.
+
+| Where | Voice | Hours |
+|---|---|---|
+| The sarsen dressed at the arrival (and the knapper by it) | `sthMaul`: stone mauls pounding, an uneven rhythm of 2-3 men; `sthKnap` | 7-17.5, dry |
+| The sarsen on its sledge on the Avenue | `sthHaul`: a low call and answer, the rope's creak, the rollers' knock | 7-17, dry |
+| Crafts among the houses (24 places) | `sthKnap` (knapping), `sthPaddle` (pots), `sthQuern` (grain), `sthScrape` (hides), `sthChop` (basket rods and wood) | 7-17, dry |
+| Every open fire (26) | `sthFire`: a bed of hiss, crackles, fat dripping | all day, thinner in rain |
+| Houses | `sthFire` at the hearth, `sthQuern` in the morning, `clay`; indoors the thatch's soft rain and the doorway's open hush | |
+| Pigs, oxen, sheep | `sthPig`, `sthLow`, `sthBleat` at animals' places | 5-21 |
+| Evening | `sthDrum` (frame drum), `sthSong` (wordless voices), `sthPipe` (a bone pipe) at the Southern Circle, a quieter drum at the stones | 17-23.5, not in rain |
+| The down | `sthLark` (skylarks), `sthLapwing` by day; `sthCurlew` (stone-curlews) at dusk and by night | |
+
+Measured with `tools/sound-render.mjs`: the maul's energy is under 300 Hz (dull blows, 5 onsets in 8 s), the fire's centroid 2.6 kHz, the drum's 117 Hz, the lark steady at 3.8 kHz. Not heard by anyone.
+
+## 14. Animals (`fauna.js` `critters`; models `pigNeolithic`, `rook` in `src/engine/critter-models.js`)
+
+Dogs lying beside the doors of seven open houses; 21 pigs (small, long-snouted, dark, near the boar: the early domestic pig) beside the walls of every fourth closed house and rooting at the four middens; 29 rooks walking and pecking at the middens, about the feast fires and on the trodden chalk of the Avenue. Pigs are 90% of the bones at Durrington [stated, §10a]; corvids followed feasts and herds [inferred]. No cat, hen, goose, horse or donkey (the domestic fowl came about 800 BC, the cat in the Roman period) [inferred from these dates].
+
+## 15. Wear (`wear.js`) and writing
+
+In each open house: the floor trodden dark in a path from the door to the hearth and across the sill, a ragged ring of ash about the hearth's kerb, and the soot of the smoke up the daub over the doorway [inferred; materials already in the plan]. No writing, sign or inscription anywhere: Britain had no script in 2500 BC [stated: general knowledge].
+
 ## Sources
 
 - [Stonehenge — Wikipedia](https://en.wikipedia.org/wiki/Stonehenge)
