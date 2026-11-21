@@ -4,15 +4,21 @@
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { hipLite, eaveTiles, rng, roofs } from '../han/kit.js';
 import { corridor } from '../han/scenery.js';
-import { bronzeBird, bracketSet, tileRows, pentRows, eaveStruts, stairBalustrade, earthBay, pierBracing, jb } from './landmark.js';
+import { bronzeBird, bracketSet, tileRows, pentRows, eaveStruts, stairBalustrade, earthBay, earthBaySide, pierBracing, jb } from './landmark.js';
 
 /** A straight flight over rect from y0 to y1, rising toward dir ('w' = −x, 'n' = −z): one strip per step, each solid down to `base`. */
-function steps(bag, col, rect, y0, y1, dir, mat, riser, base, mat2) {
+const jbx = (x0, y0, z0, x1, y1, z1) => jb(x0, y0, z0, x1, y1, z1);
+function steps(bag, col, rect, y0, y1, dir, mat, riser, base, mat2, worn = false) {
   const [x0, z0, x1, z1] = rect, n = Math.max(1, Math.round((y1 - y0) / riser)), len = dir === 'w' ? x1 - x0 : z1 - z0, d = len / n;
   for (let i = 0; i < n; i++) {
     const yT = y0 + (y1 - y0) * (i + 1) / n, m = mat2 && i % 2 ? mat2 : mat;
     const a = (dir === 'w' ? x1 : z1) - d * (i + 1), b = (dir === 'w' ? x1 : z1) - d * i;
     bag.add(m, dir === 'w' ? box(a, base, z0, b, yT, z1) : box(x0, base, a, x1, yT, b));
+    if (worn && dir === 'w') {      // where feet went: a darker strip down the middle, deepest at the nosing and fading to the stair's sides, a little off-centre by the step's own place
+      const zm = (z0 + z1) / 2 + Math.sin(i * 2.4 + a) * 0.35, hw = Math.min(1.6, (z1 - z0) * 0.22) * (0.85 + 0.15 * Math.sin(i * 1.3)), e = yT + 0.002 + (i % 2) * 0.0006;
+      bag.add('granite_grey', jbx(a + d * 0.2, e, zm - hw, b - d * 0.05, e + 0.003, zm + hw));
+      bag.add('granite_grey', jbx(a + d * 0.4, e + 0.003, zm - hw * 0.5, b - d * 0.25, e + 0.006, zm + hw * 0.5));
+    }
   }
   col.ramp(rect, y0, y1, dir);
 }
@@ -62,8 +68,8 @@ function leanTo(bag, r, ya, yb, cuts, skip) {
         bag.add('timber_red', box(bx0, ya, bz0, bx1, yi - 0.02, bz1));
         bag.add('bluestone', box(bx0 - 0.04, ya, bz0 - 0.04, bx1 + 0.04, ya + 0.22, bz1 + 0.04));
       }
-      // the bays between the pilasters of the east faces: stone skirt, framed panel, ramming courses
-      if (F.k === 'E') for (let q = 0; q < n; q++) earthBay(bag, F.f, s0 + 0.9 + (L - 1.8) * q / n + T + 0.03, s0 + 0.9 + (L - 1.8) * (q + 1) / n - T - 0.03, ya, yb);
+      // the bays between the pilasters of every face: stone skirt, framed panel, ramming courses
+      for (let q = 0; q < n; q++) (F.k === 'E' ? earthBay(bag, F.f, s0 + 0.9 + (L - 1.8) * q / n + T + 0.03, s0 + 0.9 + (L - 1.8) * (q + 1) / n - T - 0.03, ya, yb) : earthBaySide(bag, F.ax, F.f, F.n, s0 + 0.9 + (L - 1.8) * q / n + T + 0.03, s0 + 0.9 + (L - 1.8) * (q + 1) / n - T - 0.03, ya, yb));
     }
   }
   bag.add('tile_grey', fromTriangles(top)); bag.add('timber_red', fromTriangles(under));
@@ -176,7 +182,16 @@ export function terrace(el, ctx) {
   // the parapet round the crown (plaster under a tile cap), open at the stair
   const sdir = el.stair?.dir ?? 'w', gap = el.stair && sdir === 'w' ? [el.stair.rect[1] - 0.5, el.stair.rect[3] + 0.5] : null;
   const gapS = el.stair && sdir === 'n' ? [el.stair.rect[0] - 0.5, el.stair.rect[2] + 0.5] : null;
-  const par = (q) => { bag.add('lime_plaster', box(q[0], T, q[1], q[2], T + 0.9, q[3])); col.rect(q, T, T + 0.9); bag.add('tile_grey', box(q[0] - 0.08, T + 0.9, q[1] - 0.08, q[2] + 0.08, T + 1.02, q[3] + 0.08)); };
+  const par = (q) => {
+    bag.add('lime_plaster', box(q[0], T, q[1], q[2], T + 0.9, q[3])); col.rect(q, T, T + 0.9); bag.add('tile_grey', box(q[0] - 0.08, T + 0.9, q[1] - 0.08, q[2] + 0.08, T + 1.02, q[3] + 0.08));
+    // a stone footing round the foot, and red pilasters under the cap about every 3.4 m (the lean-to's own spacing), so the wall reads as a framed plaster parapet
+    bag.add('bluestone', box(q[0] - 0.04, T, q[1] - 0.04, q[2] + 0.04, T + 0.16, q[3] + 0.04));
+    const lx = q[2] - q[0], lz = q[3] - q[1], alongX = lx > lz, L = alongX ? lx : lz, m = Math.max(1, Math.round(L / 3.4));
+    for (let k = 0; k <= m; k++) {
+      const u = (alongX ? q[0] : q[1]) + 0.1 + (L - 0.2) * k / m;
+      bag.add('timber_red', alongX ? box(u - 0.09, T + 0.16, q[1] - 0.06, u + 0.09, T + 0.9, q[3] + 0.06) : box(q[0] - 0.06, T + 0.16, u - 0.09, q[2] + 0.06, T + 0.9, u + 0.09));
+    }
+  };
   const t = 0.3;
   const gx = el.skyX, gw = 3.4;
   const parX = (z, side) => { if (gx !== undefined && el['gap' + side]) { par([c[0], z[0], gx - gw, z[1]]); par([gx + gw, z[0], c[2], z[1]]); } else par([c[0], z[0], c[2], z[1]]); };
@@ -184,7 +199,7 @@ export function terrace(el, ctx) {
   if (gapS) { par([c[0], c[3] - t, gapS[0], c[3]]); par([gapS[1], c[3] - t, c[2], c[3]]); } else parX([c[3] - t, c[3]], 'S'); par([c[0], c[1], c[0] + t, c[3]]);
   if (gap) { par([c[2] - t, c[1], c[2], gap[0]]); par([c[2] - t, gap[1], c[2], c[3]]); } else par([c[2] - t, c[1], c[2], c[3]]);
   // the stair up the east face
-  if (el.stair) steps(bag, col, el.stair.rect, 0, T, sdir, 'bluestone', el.stair.riser ?? 0.25, -0.4, 'brick_paving');
+  if (el.stair) steps(bag, col, el.stair.rect, 0, T, sdir, 'bluestone', el.stair.riser ?? 0.25, -0.4, 'brick_paving', true);
   if (el.stair && sdir === 'w') stairFlanks(bag, col, el.stair.rect, T, Math.max(1, Math.round(T / (el.stair.riser ?? 0.25))));
   // the storerooms: arched doors at the foot of the east face (shut; the stores of grain, salt, water, fuel, ice), between the stair and the ends
   if (el.doors) {
@@ -206,7 +221,7 @@ export function terrace(el, ctx) {
     bag.add('bluestone', box(d[0] - 0.15, DT - 0.3, d[1], d[0] + 0.4, DT, d[3])); bag.add('bluestone', box(d[2] - 0.4, DT - 0.3, d[1], d[2] + 0.15, DT, d[3]));
     bag.add('brick_paving', box(d[0] + 0.01, DT - 0.02, d[1] + 0.01, d[2] - 0.01, DT + 0.02, d[3] - 0.01));
     col.floor(d, DT);
-    if (el.dais.stair) steps(bag, col, el.dais.stair, T, DT, 'w', 'bluestone', 0.25, T - 0.05, 'brick_paving');
+    if (el.dais.stair) steps(bag, col, el.dais.stair, T, DT, 'w', 'bluestone', 0.25, T - 0.05, 'brick_paving', true);
   }
 }
 
