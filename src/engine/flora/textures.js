@@ -74,6 +74,19 @@ const DRAW = {
       g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + (rand() - 0.5) * S * 0.1, y + L * 0.6, x + (rand() - 0.5) * S * 0.15, y + L); g.stroke();
     }
   },
+  /** Willow: slender hanging whips from the top edge, each set with small narrow leaves, light between them. */
+  willow(g, S, rand) {
+    for (let k = 0; k < 22; k++) {
+      const x = S * (0.04 + rand() * 0.92), L = S * (0.55 + rand() * 0.42), sw = (rand() - 0.5) * S * 0.08;
+      g.strokeStyle = jitter(rand, '#7a8a3e', 20); g.lineWidth = S * 0.005;
+      g.beginPath(); g.moveTo(x, 0); g.quadraticCurveTo(x + sw * 0.3, L * 0.5, x + sw, L); g.stroke();
+      for (let j = 0; j < 20; j++) {
+        const u = 0.12 + 0.88 * (j + rand() * 0.6) / 20, t = u, px = x + sw * (2 * t - t * t) * 0.5 + 0, py = L * u;
+        const side = j % 2 ? 1 : -1;
+        leaf(g, px, py, Math.PI / 2 + side * (0.5 + rand() * 0.4), S * (0.05 + rand() * 0.025), S * 0.009, jitter(rand, rand() < 0.3 ? '#a9c765' : '#86b04e', 22));
+      }
+    }
+  },
   /** Grass: a tuft of blades from a point at the bottom centre, green to straw. */
   grass(g, S, rand, base = '#7f8e4c', dry = '#c4b47c') {
     for (let k = 0; k < 150; k++) {
