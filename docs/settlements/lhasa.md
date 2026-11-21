@@ -229,3 +229,13 @@ Still short of the reference: no keepers or goods inside most houses' shops beyo
 - [Tibetan Architecture (藏式建筑) — chinese-architecture-jycsd](https://chinese-architecture-jycsd.pages.dev/regional-styles/tibetan-style.html)
 - [Tibetan Architecture Guide — tibettour.org](https://www.tibettour.org/tibetan-architecture.html)
 - [Tibet: Potala — buffaloah.com (quoting Wikipedia and Tibet Heritage Fund)](https://buffaloah.com/a/virtual/tib/pot/pot.html)
+
+## 20. Narrow pass: the climb walked, worn stairs, more mani walls, open shops (2026-11)
+
+- **Night** (job 1): the arrival was already lit (lanterns, lit panes); the pass went to the stairway instead, as asked. No night re-render made.
+- **Budget** (job 2): arrival main 362 draws / 2.08 M tris (was 444 listed in §17; now under); walk poses (-1,100), (66,40), (108,-50) at yaw 0 and pi: main 160-360 draws, 1.4-2.0 M tris. Nothing over.
+- **The climb** (job 3, extra): one route (plan.js `CLIMB`) walks from the south road through the east zigzag stairs, both ramps, the gate passage, the Deyang Shar, the triple stair, the Great East Hall, the stairwell to the White Palace roof, the link and the flight to the Red Palace's top landing (117 m). It reaches every waypoint. [inferred: routing only]
+- **Wear on the stairs** (job 4): every stone tread of the zigzag, the ramps' flights and the triple stair has a strip of dark polished granite down the middle, dished 1.5 cm, wandering a little step to step (styles/tibetan `treadTop`) [inferred: pilgrims' feet; no source]. Not seen close in a render: two showroom poses were inside a wall and at the foot looking at a white face; the strips are unverified by eye.
+- **Mani walls**: three now (the comment in town.js had named two): a wall each side of the stairs' foot (z 57) besides the circuit's south one. [inferred]
+- **Shops**: all 12 trading houses and the 3 tea houses have walked routes in (15; 54 routes in all).
+- **Still short**: far town windows unlit; wear on landings, thresholds and the wooden stair; keepers in the tea houses' far rooms; script on mani stones and signs; rain and snow sounds; the Red Palace's chapels beyond the tomb hall.

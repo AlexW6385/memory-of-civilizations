@@ -105,6 +105,7 @@ export async function town() {
   E.push({ t: 'sangkhang', at: SANG, rot: 0 });
   // two mani walls of the pilgrims' stones: on the open ground below the palace (west of the stairs' foot) and along the circuit's south leg outside the gate (docs §19)
   E.push({ t: 'mani_wall', a: [34, 216], b: [58, 216], y: 0, seed: 11 });
+  E.push({ t: 'mani_wall', a: [100, 57], b: [124, 57], y: gy(112, 57), seed: 13 }); E.push({ t: 'mani_wall', a: [-128, 57], b: [-104, 57], y: gy(-116, 57), seed: 17 });
   plans.push(base('lhasa-shops', E));
   // sangkhang in the street, its smoke (smoke.js)
   plans.push(base('lhasa-street-life', [

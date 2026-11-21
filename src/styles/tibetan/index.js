@@ -342,6 +342,16 @@ function roundTower(el, { bag, col }) {
   for (const [m, t] of [['lacquer_black', sink.black], ['limewash_red', sink.red], ['limewash_white', sink.white]]) if (t.length) bag.add(m, fromTriangles(t));
 }
 /**
+ * A tread's top, worn: a flagstone either side and, down the middle where the feet go, a strip of dark
+ * granite polished by feet and dished 1.5 cm; the strip wanders a little from step to step (by the step's own height).
+ * acrossZ: the tread's width runs along z (else along x).
+ */
+function treadTop(bag, x0, z0, x1, z1, yy, acrossZ) {
+  const a = acrossZ ? z0 : x0, b = acrossZ ? z1 : x1, c = (a + b) / 2 + (Math.round(yy * 100) % 5 - 2) * 0.03 * (b - a) / 3, h = 0.27 * (b - a), lo = c - h, hi = c + h, y0 = yy - 0.08;
+  const bx = (u0, u1, y1, m) => bag.add(m, acrossZ ? box(x0, y0, u0, x1, y1, u1) : box(u0, y0, z0, u1, y1, z1));
+  bx(a, lo + 0.002, yy, 'flagstone'); bx(hi - 0.002, b, yy, 'flagstone'); bx(lo, hi, yy - 0.015, 'granite_grey');
+}
+/**
  * zigzag: the stairs up the face of a terrace { x0, x1, zf (the face they lean on, they stand south
  * of it), w (width of each flight), n (flights), y1 (top), land (landing length), start ('w' | 'e':
  * the end the lowest flight starts from), bridge (how far the top landing reaches north over the
@@ -370,7 +380,7 @@ function zigzag(el, { bag, col }) {
       bag.add('limewash_white', fromTriangles(fixOut(t))); }
     for (let i = 0; i < ns; i++) {
       const a = east ? fl[0] + len * i / ns : fl[1] - len * (i + 1) / ns, bq = a + len / ns, yy = h0 + (h1 - h0) * (i + 1) / ns, yp = h0 + (h1 - h0) * i / ns;
-      bag.add('limewash_white', box(a, yp - 0.3, zA, bq, yy - 0.08, zi)); bag.add('flagstone', box(a, yy - 0.08, zA, bq, yy, zi));
+      bag.add('limewash_white', box(a, yp - 0.3, zA, bq, yy - 0.08, zi)); treadTop(bag, a, zA, bq, zi, yy, true);
     }
     col.ramp([fl[0], zA, fl[1], zi], h0, h1, east ? 'e' : 'w'); if (k > 0) col.rect([fl[0], zA, fl[1], zB], B0, h0 - 0.3);
     // the outer parapet: along the flight and the end landing (the start landing is open to the flight below it)
@@ -928,7 +938,7 @@ function tripleStair(el, { bag, col }) {
     const za = z0 + T + f * (w + T), zb = za + w;
     for (let i = 0; i < ns; i++) {
       const xa = xf - run * (i + 1) / ns, xb = xf - run * i / ns, yy = y0 + (y1 - y0) * (i + 1) / ns;
-      bag.add('limewash_white', box(xa, yy - 0.45, za, xb, yy - 0.07, zb)); bag.add('flagstone', box(xa - 0.03, yy - 0.07, za, xb, yy, zb));
+      bag.add('limewash_white', box(xa, yy - 0.45, za, xb, yy - 0.07, zb)); treadTop(bag, xa - 0.03, za, xb, zb, yy, true);
     }
     col.ramp([xt, za, xf, zb], y0, y1, 'w');
   }
@@ -985,7 +995,7 @@ function flight(el, { bag, col }) {
   const ns = Math.max(2, Math.round((y1 - y0) / 0.17));
   for (let i = 0; i < ns; i++) {
     const u0 = L * i / ns, u1 = L * (i + 1) / ns, yy = y0 + (y1 - y0) * (i + 1) / ns, yp = y0 + (y1 - y0) * i / ns, r = R(u0, u1, -hw, hw);
-    bag.add('limewash_white', box(r[0], yp - 0.3, r[1], r[2], yy - 0.08, r[3])); bag.add('flagstone', box(r[0], yy - 0.08, r[1], r[2], yy, r[3]));
+    bag.add('limewash_white', box(r[0], yp - 0.3, r[1], r[2], yy - 0.08, r[3])); treadTop(bag, r[0], r[1], r[2], r[3], yy, alongX);
   }
   col.ramp(R(0, L, -hw, hw), y0, y1, alongX ? (sg > 0 ? 'e' : 'w') : (sg > 0 ? 's' : 'n'));
   for (const s of [-1, 1]) {

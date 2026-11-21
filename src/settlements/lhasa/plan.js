@@ -194,6 +194,9 @@ walks[0].y0 = 0;
 // the upper floors of the houses opened (upstairs.js): from the lane through the gate, up the ladder to the main room, into the weaving room, up to the roof and the roof room
 walks.push(...openWalks((x, z) => ground.height(x, z)));
 // the street's shops and tea houses, the printing house and the chapel of the great wheel (openwalk.js)
+// the great climb: from the south gate's road up the east zigzag stairs, the two ramps, the gate passage, the court, the triple stair, the Great East Hall, the stairwell to its roof, and on over the roofs to the Red Palace's top
+const CLIMB = [[-1, 228], [-1, 140], [-1, 58], [49, 58], [49, 50], [49, 44], [83, 44], [83, 40], [49, 40], [49, 36], [83, 36], [83, 32], [49, 32], [49, 18], [81, 16], [81, 10], [88, 8], [92, 6.5], [134, 6.5], [138, 4], [138, -1], [132, -1], [120, -3], [100, -3], [100, -11.5], [104, -11.5], [130, -11.5], [133, -14], [133, -20.5], [130, -20.5], [112, -20.5], [108, -20.5], [108, -26], [108, -46], [112, -56], [118, -74], [114, -74], [99, -74], [90, -74.9], [67.25, -74.9], [67.25, -90.9], [62, -90.9], [53, -90.5], [49, -90.5], [40, -90.1], [30, -90.1], [16.4, -90.1], [14, -88], [14, -61], [10.3, -61], [10.3, -63], [10.3, -87], [9.5, -89.5]];
+walks.push(Object.assign(CLIMB, { y0: 0 }));
 walks.push(...shopWalks().map((w) => Object.assign(w, { y0: 0 })), ...placeWalks());
 
 export const potala = {
