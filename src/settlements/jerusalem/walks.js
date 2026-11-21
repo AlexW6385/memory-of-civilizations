@@ -34,7 +34,7 @@ export function shopsWalked() {
   const all = openShops(), seen = new Set(), pick = [];
   const d = (c) => (q) => Math.hypot(q.sh.door[0] - c[0], q.sh.door[1] - c[1]);
   // one trade each, spread along the Cardo: south of the Sepulchre's stair on the west side, north of the street's mouth on the east, and two between
-  for (const c of [[CARDO.x - 6.5, -150], [CARDO.x + 6.5, -60], [CARDO.x - 6.5, 60], [CARDO.x + 6.5, 150]]) {
+  for (const c of [[CARDO.x - 6.5, -150], [CARDO.x + 6.5, -60], [CARDO.x - 6.5, 60], [CARDO.x + 6.5, 150], [CARDO.x + 6.5, -110], [CARDO.x - 6.5, 110]]) {
     const q = all.filter((m) => Math.abs(m.sh.door[0] - CARDO.x) < 20 && !seen.has(m.sh.trade)).sort((p, r) => d(c)(p) - d(c)(r))[0];
     if (q) { seen.add(q.sh.trade); pick.push(q); }
   }
@@ -55,11 +55,17 @@ export function housesWalked() {
   const c = [-185, -30];
   // (where the lane falls a metre below the court the door's steps are a climb the walk does not make: those houses are left)
   const drop = (h) => Math.max(h.lot.y, ...[[h.rect[0], h.rect[1]], [h.rect[2], h.rect[1]], [h.rect[0], h.rect[3]], [h.rect[2], h.rect[3]]].map(([a, b]) => height(a, b))) + 0.05 - height((h.rect[0] + h.rect[2]) / 2, h.rect[3] + 0.8);
-  return openHouses().filter((h) => !h.up && drop(h) < 0.5).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - c[0], a.rect[3] - c[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - c[0], b.rect[3] - c[1])).slice(0, 3);
+  return openHouses().filter((h) => !h.up && drop(h) < 0.5).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - c[0], a.rect[3] - c[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - c[0], b.rect[3] - c[1])).slice(0, 6);
 }
 
 /** The lodges walked in: the oil store, the wick-makers and the glass-lamp makers. */
 export function lodgesWalked() { return LODGES.filter((l) => ['oil', 'wick', 'glass'].includes(l.use)).filter((l, i, a) => a.findIndex((m) => m.use === l.use) === i); }
+
+/** The long walk (§12.1, job 3): from the arrival on the Dome's platform down its west stair, across the esplanade and down the Haram's west stair into the market street, to the Cardo. */
+export function longWalk(origin, base) {
+  const pts = [[-67.6, -40], [-66, -20], [-74, -20], [-100, -20], [-130, -14], [-148, -2], [-160, 0], [-176, 0], [-200, 0], [-228, 0]];
+  return route(pts, 18, origin, base);
+}
 
 /** Every route of the visitor's walk, local to the plan at `origin` with ground `base`. */
 export function visitWalks(origin, base) {
@@ -67,5 +73,6 @@ export function visitWalks(origin, base) {
   for (const q of shopsWalked()) out.push(shopRoute(q, origin, base));
   for (const h of housesWalked()) out.push(houseRoute(h.rect, height((h.rect[0] + h.rect[2]) / 2, h.rect[3] + 0.8), origin, base));
   for (const l of lodgesWalked()) out.push(houseRoute(l.rect, HARAM.top, origin, base));
+  out.push(longWalk(origin, base));
   return out;
 }
