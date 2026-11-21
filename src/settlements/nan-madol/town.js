@@ -34,6 +34,8 @@ export function moored() {
 
 export async function town() {
   const E = [], P = [], rand = rng(1300), v = village();
+  /** A point moved off the islets' paths' lanes (the visitor's way is 2.4 m either side of each path's middle line). */
+  const offPath = (at) => { for (const q of v.paths) { const dx = q.b[0] - q.a[0], dz = q.b[1] - q.a[1], t = Math.max(0, Math.min(1, ((at[0] - q.a[0]) * dx + (at[1] - q.a[1]) * dz) / (dx * dx + dz * dz))), px = q.a[0] + dx * t, pz = q.a[1] + dz * t, d = Math.hypot(at[0] - px, at[1] - pz); if (d < 2.4) { const k = d > 0.01 ? 2.5 / d : 0, nx = d > 0.01 ? (at[0] - px) * k : (dz === 0 ? 0 : 2.5), nz = d > 0.01 ? (at[1] - pz) * k : (dz === 0 ? 2.5 : 0); at = [px + nx, pz + nz]; } } return at; };
   // ── the walls of the islets, steps, causeways ──
   let seed = 100;
   for (const s of ISLETS) {
@@ -90,6 +92,8 @@ export async function town() {
     E.push({ t: 'court', kind: 'topdress', a: [cx0, cz0], b: [cx1, cz0], top: () => 3.3, seed: 21 }); E.push({ t: 'court', kind: 'topdress', a: [cx1, cz0], b: [cx1, cz1], top: () => 3.3, seed: 22 });
   }
   for (const k of cooks()) E.push({ t: 'cookhouse', c: k.c, yaw: k.yaw, seed: k.seed });
+  // Peiniot, behind the landing's store and by its water steps: fish and breadfruit on racks, a net on poles, logs for the fires [inferred: §14.1]
+  E.push({ t: 'things', list: [{ k: 'rack', at: [16.2, 79.4], rot: 0 }, { k: 'net', at: [17.4, 85.2], rot: Math.PI / 2 }, { k: 'logs', at: [15.6, 88.2], rot: 0.1, len: 2.4 }, { k: 'nuts', at: [-14.8, 86.5], rot: 0.7 }], seed: 17 });
   // the forecourt of Idehd, along the way from the crossroads to the causeway: worked ground either side, lamps down the way
   E.push({ t: 'things', list: FORECOURT.things, seed: 16 });
   for (const c of FORECOURT.lamps) E.push({ t: 'court', kind: 'lamp', c });
@@ -155,7 +159,8 @@ export async function town() {
   const hrand = rng(404);
   v.houses.forEach((h, k) => {
     const F = frameW(h.c, h.yaw), ph = h.rank ? 0.7 : 0.45, r = hrand();
-    if (r < 0.5) { const at = F(hrand() * 1.2 - 0.6, 0.6); (r < 0.2 ? man : woman)(at, ph, face(at, F(0, -h.l)), { pose: hrand() < 0.5 ? 'sit_ground' : 'cross' }); }
+    if (r < 0.5) { const u0 = hrand() * 1.2 - 0.6, at = F(Math.sign(u0 || 1) * (1.05 + Math.abs(u0) * 0.7), 0.6);   // beside the door's lane (1.7 m down the middle), not in it
+      (r < 0.2 ? man : woman)(at, ph, face(at, F(0, -h.l)), { pose: hrand() < 0.5 ? 'sit_ground' : 'cross' }); }
     if (r > 0.3 && r < 0.65) { const at = F(h.w / 2 + 1.0, -h.l / 2 - 0.9); woman(at, 0, face(at, F(h.w / 2 + 1.0 - 1.1, -h.l / 2 - 0.5)), { pose: 'kneel' }); }
     if (r > 0.65 && r < 0.85) { const at = F(-0.8, -h.l / 2 - 2.0); man(at, 0, hrand() * 6.28, { carry: 'basket' }); }
     if (hrand() < 0.5) P.push({ t: 'basket', n: 2, at: F(-h.w / 2 - 0.2, -h.l / 2 - 0.5), y: 0, seed: k, goods: 'cloth_ochre' });
@@ -173,10 +178,11 @@ export async function town() {
   });
   // Peiniot, the landing: food brought in baskets from the canoes to the houses of the chief
   const pe = ISLET.s4.rect;
-  for (let i = 0; i < 9; i++) { const at = [pe[0] + 6 + rand() * (pe[2] - pe[0] - 12), pe[1] + 6 + rand() * (pe[3] - pe[1] - 12)]; if (v.houses.some((h) => Math.hypot(h.c[0] - at[0], h.c[1] - at[1]) < 4.5) || Math.abs(at[0] + 10) < 3) continue; (i % 3 ? woman : man)(at, 0, rand() * 6.28, { carry: i % 2 ? 'basket' : 'pole' }); }
+  for (let i = 0; i < 9; i++) { const at = [pe[0] + 6 + rand() * (pe[2] - pe[0] - 12), pe[1] + 6 + rand() * (pe[3] - pe[1] - 12)]; if (v.houses.some((h) => Math.hypot(h.c[0] - at[0], h.c[1] - at[1]) < 4.5) || Math.abs(at[0] + 10) < 3) continue; { const pz = (pe[1] + pe[3]) / 2; if (Math.abs(at[1] - pz) < 2.4) at[1] = pz + (at[1] < pz ? -2.4 : 2.4); }   // off the path's lane (the walk's way)
+    (i % 3 ? woman : man)(at, 0, rand() * 6.28, { carry: i % 2 ? 'basket' : 'pole' }); }
   for (const [lx, lz] of [[pe[2] - 3, pe[1] + 14], [pe[0] + 18, pe[3] - 3]]) P.push({ t: 'basket', n: 4, at: [lx, lz], y: 0, seed: Math.round(lx), goods: 'cloth_green' });
   // dogs and a few pigs on the larger islets' paths
-  for (let i = 0; i < 12; i++) { const s = ISLETS[Math.floor(rand() * 12)], at = [s.rect[0] + 3 + rand() * (s.rect[2] - s.rect[0] - 6), s.rect[1] + 3 + rand() * (s.rect[3] - s.rect[1] - 6)]; if (s.kind === 'landmark' || v.houses.some((h) => Math.hypot(h.c[0] - at[0], h.c[1] - at[1]) < 4)) continue; P.push({ t: 'animal', kind: i % 3 ? 'pig' : 'dog', at, y: 0, rot: rand() * 6.28, seed: 900 + i }); }
+  for (let i = 0; i < 12; i++) { const s = ISLETS[Math.floor(rand() * 12)], at = [s.rect[0] + 3 + rand() * (s.rect[2] - s.rect[0] - 6), s.rect[1] + 3 + rand() * (s.rect[3] - s.rect[1] - 6)]; if (s.kind === 'landmark' || v.houses.some((h) => Math.hypot(h.c[0] - at[0], h.c[1] - at[1]) < 4)) continue; P.push({ t: 'animal', kind: i % 3 ? 'pig' : 'dog', at: offPath(at), y: 0, rot: rand() * 6.28, seed: 900 + i }); }
   // the works: crews at the shipyard, the oil works, the cook-shed, the chief's hall and the landing's store
   for (const k of v.works) {
     const F = frameW(k.c, k.yaw), at = (u, w) => F(u, w), hr = rng(k.seed + 11);
@@ -196,11 +202,13 @@ export async function town() {
       const ch = at(k.l / 2 - 1.1, 0); man(ch, 1.15, face(ch, at(0, 0)), { pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cloak', beard: true, hair: 'bun' });
       for (let i = 0; i < 3; i++) { const p0 = at(-k.l / 2 + 2 + i * 2.5, -k.w / 2 - 2.2); (i % 2 ? woman : man)(p0, 0, hr() * 6.28, { carry: 'basket' }); }
     } else if (k.kind === 'landing') {
-      for (let i = 0; i < 5; i++) { const p0 = at(-k.l / 2 + 1.0 + i * (k.l - 2) / 4, -k.w / 2 - 1.6 - (i % 2) * 1.2); (i % 2 ? woman : man)(p0, 0, face(p0, at(p0 && 0, 0)), { carry: i % 2 ? 'basket' : 'pole' }); }
+      // the store's keeper, seated among the baskets facing the way, and a woman sorting yams beside him [inferred: §14.1]; off the lane the walker takes (u 1.5)
+      { const kp = at(3.3, 0.2); man(kp, 0.37, face(kp, at(3.3, -k.w)), { pose: 'cross', cloth: 'cloth_white', beard: true, hair: 'bun' }); const sp = at(-3.4, 0.0); woman(sp, 0.37, face(sp, at(-3.4, -k.w)), { pose: 'sit_ground' }); }
+      for (let i = 0; i < 5; i++) { const p0 = at(-k.l / 2 + 1.0 + i * (k.l - 2) / 4, k.w / 2 + 1.6 + (i % 2) * 1.2);   /* behind the store, by the water, not across the path in front of it */ (i % 2 ? woman : man)(p0, 0, face(p0, at(p0 && 0, 0)), { carry: i % 2 ? 'basket' : 'pole' }); }
     }
   }
   // children about the houses, a few
-  v.houses.forEach((h, k) => { if (k % 6 !== 3) return; const F = frameW(h.c, h.yaw); for (let i = 0; i < 2; i++) { const at = F(-1.5 + i * 2.2, -h.l / 2 - 1.5 - i * 0.7); man(at, 0, rand() * 6.28, { h: 0.62, pose: 'stand', beard: false, hair: 'long' }); } });
+  v.houses.forEach((h, k) => { if (k % 6 !== 3) return; const F = frameW(h.c, h.yaw); for (let i = 0; i < 2; i++) { const at = F((i ? 1 : -1) * (1.25 + i * 0.3), -h.l / 2 + 1.1 + i * 0.6); man(at, h.rank ? 0.7 : 0.45, rand() * 6.28, { h: 0.62, pose: 'stand', beard: false, hair: 'long' }); } });
   // the forecourt of Idehd, which the arrival looks down: women at the pounding boards, men at the canoe hull, someone at every rack and net,
   // porters and priests on the way to the causeway (none nearer than 9 m of the arrival at (−10, 28))
   { const at = (x, z) => [x, z], fc = (a, b, o = {}, f = woman) => f(a, 0, face(a, b), o);
@@ -228,7 +236,7 @@ export async function town() {
   for (const [x, z, k] of [[-13.2, 66, 0], [-6.8, 70, 1], [-6.6, 84, 2], [-13.4, 86, 3], [-12.8, 77, 4], [-7.0, 77, 5]]) { const at = [x, z]; (k % 2 ? man : woman)(at, 0, face(at, [-10, z + (k % 3 - 1) * 3]), { pose: k < 2 ? 'talk' : k < 4 ? 'sit_ground' : 'stand' }); }
   moored().forEach((m, i) => { if (i % 2) return; const at = [m.at[0], m.at[1]]; man(at, m.y + 0.18, m.yaw + Math.PI, { pose: 'cross', hat: 'none' }); });
   // and in each of the lit houses someone sits at the lamp, whatever the draw gave (a stream of its own: the households' stay as they were)
-  { const lr = rng(1771); [...litSet].forEach((h, i) => { const F = frameW(h.c, h.yaw), ph = h.rank ? 0.7 : 0.45, at = F(-h.w / 2 + 1.5 + lr() * 0.6, 1.9 + lr() * 0.8); (i % 3 === 0 ? man : woman)(at, ph, face(at, F(0, -h.l)), { pose: i % 2 ? 'cross' : 'sit_ground' }); }); }
+  { const lr = rng(1771); [...litSet].forEach((h, i) => { const F = frameW(h.c, h.yaw), ph = h.rank ? 0.7 : 0.45, at = F(Math.min(-h.w / 2 + 1.5 + lr() * 0.6, -1.05), 1.9 + lr() * 0.8); (i % 3 === 0 ? man : woman)(at, ph, face(at, F(0, -h.l)), { pose: i % 2 ? 'cross' : 'sit_ground' }); }); }
   void INNER; void OUTER; void OUTER_GATE; void INNER_GATE; void TOMB; void inRect;
   return [plan('nan-madol-islets', 'nanmadol', E), plan('nan-madol-people', 'life', P)];
 }

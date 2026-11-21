@@ -4,6 +4,7 @@
 // the tomb — a platform of columns 2.4 m high with a crypt, roofed in part with columns laid across — reached by stairs.
 
 import { OUTER, OUTER_GATE, INNER, INNER_GATE, TOMB, SAKAU, ISLET } from './layout.js';
+import { walkRoutes } from './walk.js';
 
 const E = [];
 const sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -71,6 +72,8 @@ const rooms = [
 // from the landing's causeway, over the canal, in through the south gate, round into the inner court and to the crypt's stair
 const walks = [[[-10, 80], [-10, 56], [-10, 8], [-10, -2], [-10, -9], [-10, -16], [1, -16], [1, -22], [1, -27], [-10, -26.6]]];
 walks[0].y0 = 0;
+// the opened nahs, the hall and the landing's store of the visitor's walk (walk.js): each a route from the islet's path to the middle of the room
+walks.push(...walkRoutes());
 
 export const nandauwas = {
   id: 'nandauwas',
