@@ -5,7 +5,9 @@ import { STYLES } from '../../core/build.js';
 import '../../styles/renaissance/index.js';
 import { box, lathe } from '../../core/geom.js';
 import { Halo } from './halo.js';
-import { DUOMO, PALAZZO, MEDICI, RADIUS } from './layout.js';
+import { Vector3 } from '../../core/three.js';
+import { faceFrame } from '../../styles/renaissance/face.js';
+import { DUOMO, PALAZZO, MEDICI, ORSAN, BAPTISTERY, RADIUS } from './layout.js';
 
 const IR = 'iron';
 /** A torch-holder on a wall at (x, z) facing n = [nx, nz], its lantern y m up: the bracket, the lantern, the glow, the wash on the wall and the pool on the ground. */
@@ -14,15 +16,25 @@ function torch(bag, H, x, z, n, y = 3.5) {
   const ax = (d0, d1, w, y0, y1) => box(Math.min(ex(d0), ex(d1)) - (nx ? 0 : w), y0, Math.min(ez(d0), ez(d1)) - (nz ? 0 : w), Math.max(ex(d0), ex(d1)) + (nx ? 0 : w), y1, Math.max(ez(d0), ez(d1)) + (nz ? 0 : w));
   bag.add(IR, ax(0, 0.8, 0.02, y - 0.2, y - 0.16));          // the arm
   bag.add(IR, ax(0.02, 0.1, 0.03, y - 0.5, y + 0.3));         // the plate on the wall
-  bag.add(IR, ax(0.76, 0.84, 0.02, y - 0.16, y));             // the post of the lantern
-  bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.25], [0.001, 0.32]], 6, null, ex(0.8), y, ez(0.8)));
-  H.ball(ex(0.8), y + 0.15, ez(0.8), 0.95);
+  bag.add(IR, ax(0.76, 0.84, 0.02, y - 0.16, y + 0.55));      // the post of the lantern, with the spike above it that the oiled rags were lit on [stated: §17]
+  bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.06], [0.15, 0.3], [0.12, 0.4], [0.001, 0.44]], 6, null, ex(0.8), y, ez(0.8)));
+  H.ball(ex(0.8), y + 0.2, ez(0.8), 0.95);
   H.disc([ex(0.1), y + 0.1, ez(0.1)], [-nz, 0, nx], [0, 1, 0], 2.0, 1.6, [nx, nz], 6, [0.9, 0], [0, 1]);
   H.floor(ex(1.4), 0.04, ez(1.4), 2.6, 2.6, 6, 0.8);
+}
+/** A lamp hung by a chain from a vault at (x, z), its glass at height y, over a floor at fy: the chain, the glass, the glow, the pool on the floor, and a wash on each wall given ({ at, n }). */
+function hung(bag, H, x, z, y, fy, walls) {
+  bag.add(IR, box(x - 0.012, y + 0.3, z - 0.012, x + 0.012, y + 1.7, z + 0.012));
+  bag.add(IR, box(x - 0.1, y - 0.03, z - 0.1, x + 0.1, y, z + 0.1));
+  bag.add('lamp_glass', lathe([[0.001, 0], [0.13, 0.06], [0.17, 0.26], [0.12, 0.4], [0.001, 0.44]], 6, null, x, y, z));
+  H.ball(x, y + 0.17, z, 1.1);
+  H.floor(x, fy + 0.03, z, 2.7, 2.7, 6, 0.8);
+  for (const w of walls ?? []) H.disc([w.at[0], y - 0.6, w.at[1]], [-w.n[1], 0, w.n[0]], [0, 1, 0], 2.7, 2.1, w.n, 6, [0.9, 0], [0, 1]);
 }
 function lamps(el, { bag }) {
   const H = new Halo();
   for (const l of el.torches ?? []) torch(bag, H, l.at[0], l.at[1], l.n, l.y);
+  for (const h of el.hangs ?? []) hung(bag, H, h.at[0], h.at[1], h.y, h.floor ?? 0.04, h.walls);
   for (const p of el.pools ?? []) { H.floor(p.at[0], p.y ?? 0.06, p.at[1], p.r, p.rz ?? p.r, 6, p.b ?? 0.5); if (p.sheet) H.disc([p.sheet[0], p.sheet[1], p.at[1]], [0, 0, 1], [0, 1, 0], 2.0, 3.6, [-1, 0], 6, [0.8, 0], [0, 1]); }
   const g = H.geometry(); if (g) bag.add('halo', g);
 }
@@ -31,11 +43,30 @@ if (STYLES.renaissance) STYLES.renaissance.elements.florence_lamps = lamps;
 const plan = (id, c, el) => ({ id, style: 'renaissance', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, center: c, near: 140, nocollide: true, elements: [{ t: 'florence_lamps', ...el }] });
 
 /** The plans of these lamps. [inferred: the torch-holders of the Palazzo Strozzi and Vecchio were the city's; the cathedral's lamps burnt before its altars through the night] */
+/** A point of a face of rect (u along it, 0 at the wall) in the world, and the face's outward normal. */
+function onFace(rect, f, u) {
+  const { M } = faceFrame(rect, f, 0), p = new Vector3(u, 0, 0).applyMatrix4(M), q = new Vector3(0, 0, 1).transformDirection(M);
+  return { at: [p.x, p.z], n: [Math.round(q.x), Math.round(q.z)] };
+}
+/** Orsanmichele: the lamp that burnt by the pier of a guild's tabernacle on each front (the tabernacles of the streets had candles burning at night, §17), on the pier's edge beside the niche. [inferred: which piers] */
+function orsanLamps() {
+  const L = { e: 22.1, w: 22.1, n: 32.4, s: 32.4 }, nb = { e: 2, w: 2, n: 3, s: 3 }, P = 3.6, out = [];
+  for (const [f, i] of [['s', 1], ['n', 2], ['w', 1], ['e', 1]]) {
+    const bw = (L[f] - P) / nb[f], q = onFace(ORSAN, f, P / 2 + i * bw + 1.35);
+    out.push({ at: q.at, n: q.n, y: 3.7 });
+  }
+  return out;
+}
 export function lampPlans() {
   const nave = [DUOMO.c[0] - DUOMO.nave - DUOMO.d / 2, DUOMO.c[1]];
   return [
     plan('florence-lamps-signoria', [PALAZZO[0], (PALAZZO[1] + PALAZZO[3]) / 2], { torches: [{ at: [PALAZZO[0], PALAZZO[1] + 3], n: [-1, 0], y: 3.6 }, { at: [PALAZZO[0], PALAZZO[3] - 3], n: [-1, 0], y: 3.6 }] }),
     plan('florence-lamps-medici', [MEDICI[2], (MEDICI[1] + MEDICI[3]) / 2], { torches: [{ at: [MEDICI[2], MEDICI[1] + 3], n: [1, 0], y: 3.6 }, { at: [MEDICI[2], MEDICI[1] + 17], n: [1, 0], y: 3.6 }] }),
+    plan('florence-lamps-orsanmichele', [(ORSAN[0] + ORSAN[2]) / 2, (ORSAN[1] + ORSAN[3]) / 2], { torches: orsanLamps() }),
+    // the Baptistery: lanterns each side of the Gate of Paradise on the east, one beside each of the other two doors. [inferred: the door the city's feasts went to was lit]
+    plan('florence-lamps-baptistery', BAPTISTERY, { torches: [{ at: [BAPTISTERY[0] + 12.8, BAPTISTERY[1] - 4.9], n: [1, 0], y: 3.8 }, { at: [BAPTISTERY[0] + 12.8, BAPTISTERY[1] + 4.9], n: [1, 0], y: 3.8 }, { at: [BAPTISTERY[0] + 4.4, BAPTISTERY[1] - 12.8], n: [0, -1], y: 3.8 }, { at: [BAPTISTERY[0] - 4.4, BAPTISTERY[1] + 12.8], n: [0, 1], y: 3.8 }] }),
+    // the Palazzo Medici's corner loggia, open in 1480: a lamp hung from its vault (the loggia is [23, -165.6, 28, -156], its floor at 0.04, the vault at 8.4)
+    plan('florence-lamps-medici-loggia', [MEDICI[2] - 2.5, MEDICI[3] - 5], { hangs: [{ at: [MEDICI[2] - 2.6, MEDICI[3] - 4.9], y: 6.2, floor: 0.04, walls: [{ at: [MEDICI[2] - 5 + 0.06, MEDICI[3] - 4.9], n: [1, 0] }, { at: [MEDICI[2] - 2.6, MEDICI[3] - 9.6 + 0.06], n: [0, 1] }] }] }),
     plan('florence-lamps-duomo', [nave[0], nave[1]], { pools: [{ at: [nave[0] - 0.3, nave[1]], r: 4.6, rz: 3.4, b: 0.9, sheet: [nave[0] + 0.4, 3.6] }] }),
   ];
 }
