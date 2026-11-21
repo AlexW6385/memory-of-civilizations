@@ -1,7 +1,7 @@
 {
  "abbasid-baghdad": {
   "site": "abbasid-baghdad",
-  "hash": "32cdbc1ca6e0efae",
+  "hash": "af17c4b86804c168",
   "rays": 128,
   "probes": 79494,
   "boxes": [
@@ -107,9 +107,9 @@
     ]
    }
   ],
-  "bytes": 1283103,
-  "seconds": 404,
-  "baked": "2026-11-20"
+  "bytes": 1283185,
+  "seconds": 707,
+  "baked": "2026-11-21"
  },
  "abu-simbel-great-temple": {
   "site": "abu-simbel",
@@ -519,7 +519,7 @@
  },
  "babylon-centre": {
   "site": "babylon",
-  "hash": "fc75b572c4d05961",
+  "hash": "0e5c321e7b1f925a",
   "rays": 128,
   "probes": 51084,
   "boxes": [
@@ -577,9 +577,9 @@
     ]
    }
   ],
-  "bytes": 809128,
-  "seconds": 736,
-  "baked": "2026-11-20"
+  "bytes": 809181,
+  "seconds": 389,
+  "baked": "2026-11-21"
  },
  "bali-pura": {
   "site": "bali-village",
@@ -626,7 +626,7 @@
  },
  "barcelona-sagrada": {
   "site": "barcelona",
-  "hash": "9f25d860d576b35f",
+  "hash": "884ee502103c1595",
   "rays": 128,
   "probes": 12096,
   "boxes": [
@@ -649,8 +649,8 @@
    }
   ],
   "bytes": 193128,
-  "seconds": 24,
-  "baked": "2026-11-20"
+  "seconds": 85,
+  "baked": "2026-11-21"
  },
  "baroque-rome-stpeter": {
   "site": "baroque-rome",
@@ -3052,12 +3052,12 @@
    }
   ],
   "bytes": 292491,
-  "seconds": 30,
-  "baked": "2026-11-18"
+  "seconds": 61,
+  "baked": "2026-11-21"
  },
  "manueline-jeronimos": {
   "site": "manueline-lisbon",
-  "hash": "eacf73156b6ec29b",
+  "hash": "9559b68799dee22e",
   "rays": 128,
   "probes": 78936,
   "boxes": [
@@ -3085,8 +3085,8 @@
     ]
    }
   ],
-  "bytes": 1280885,
-  "seconds": 1397,
+  "bytes": 1280901,
+  "seconds": 210,
   "baked": "2026-11-21"
  },
  "maori-pa": {
@@ -3580,12 +3580,12 @@
    }
   ],
   "bytes": 625124,
-  "seconds": 251,
+  "seconds": 117,
   "baked": "2026-11-21"
  },
  "muscovy-red-square": {
   "site": "muscovy",
-  "hash": "4701019425615b35",
+  "hash": "eb3f74a5b8299905",
   "rays": 128,
   "probes": 79092,
   "boxes": [
@@ -3610,8 +3610,8 @@
     ]
    }
   ],
-  "bytes": 1216335,
-  "seconds": 702,
+  "bytes": 1216294,
+  "seconds": 500,
   "baked": "2026-11-21"
  },
  "mycenae-citadel": {
@@ -3864,7 +3864,7 @@
    }
   ],
   "bytes": 685975,
-  "seconds": 1018,
+  "seconds": 1402,
   "baked": "2026-11-21"
  },
  "norse-borgund-church": {
@@ -4916,7 +4916,7 @@
  },
  "sydney-opera": {
   "site": "sydney",
-  "hash": "d02536c331f6daf4",
+  "hash": "589dd35a55128f43",
   "rays": 128,
   "probes": 76680,
   "boxes": [
@@ -4953,9 +4953,9 @@
     ]
    }
   ],
-  "bytes": 1268471,
-  "seconds": 915,
-  "baked": "2026-11-20"
+  "bytes": 1267950,
+  "seconds": 437,
+  "baked": "2026-11-21"
  },
  "tang-changan-daci-en": {
   "site": "tang-changan",
