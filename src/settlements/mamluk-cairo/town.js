@@ -17,7 +17,7 @@ export async function town() {
   // the houses (house_mamluk, style vernacular: stone storey, corbelled plastered storeys, mashrabiyas,
   // the bent entrance, malqafs), in 100 m tiles, near and far; the shop fronts of the market streets (cairo_shopfront);
   // the dressing of the faces and roofs (cairo_dress), near only
-  const NEAR = 150, ent = { at: [-37, -30], facing: 's' };
+  const NEAR = 90, ent = { at: [-37, -30], facing: 's' };
   const yardEls = [...rest.filter((l) => l.yard).map((l) => ({ t: 'cairo_yard', rect: l.rect, front: l.front, seed: l.seed })), ...yards().filter((r) => !rest.some((l) => l.yard && l.rect === r)).map((r, i) => ({ t: 'cairo_yard', rect: r, front: 's', seed: 900 + i }))];
   // one plan per TILE-metre tile for houses, shop fronts and yards together (their materials shared, so one mesh per material
   // and tile), its simple twin for the far; the dressing apart, near only. The world shows a tile by its distance to its
