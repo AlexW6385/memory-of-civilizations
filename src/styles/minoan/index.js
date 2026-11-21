@@ -236,6 +236,10 @@ function steps(el, { bag, col }) {
     const r = el.dir === 'n' ? [x0, z1 - (z1 - z0) * f1, x1, z1 - (z1 - z0) * f0] : el.dir === 's' ? [x0, z0 + (z1 - z0) * f0, x1, z0 + (z1 - z0) * f1] : el.dir === 'e' ? [x0 + (x1 - x0) * f0, z0, x0 + (x1 - x0) * f1, z1] : [x1 - (x1 - x0) * f1, z0, x1 - (x1 - x0) * f0, z1];
     const full = el.dir === 'n' ? [x0, z0, x1, r[3]] : el.dir === 's' ? [x0, r[1], x1, z1] : el.dir === 'e' ? [r[0], z0, x1, z1] : [x0, z0, r[2], z1];
     bag.add(G, box(full[0], y0 - 0.5, full[1], full[2], y, full[3])); col.floor(r, y);
+    // the worn middle of the tread where the feet climb: a darker, polished band over the middle two fifths of its width, the more worn on the lower steps
+    const along = el.dir === 'n' || el.dir === 's', c = along ? (x0 + x1) / 2 : (z0 + z1) / 2, hw = Math.min(0.9, (along ? x1 - x0 : z1 - z0) * 0.2) * (1 - 0.4 * f0), e = 0.05;
+    const wr = along ? [c - hw, r[1] + e, c + hw, r[3] - e] : [r[0] + e, c - hw, r[2] - e, c + hw];
+    if (wr[2] - wr[0] > 0.05 && wr[3] - wr[1] > 0.05) bag.add('plaster_damp', box(wr[0], y + 0.001, wr[1], wr[2], y + 0.005, wr[3]));
   }
 }
 
@@ -416,6 +420,7 @@ function lightwellTiers(el, { bag, col }) {
       const top = ya + i * rise, za = east ? z1 - ld - tread * i : z0 + ld + tread * (i - 1), zb = za + tread;
       const bot = kf === 0 ? ya : top - 0.45;
       bag.add(G, box(xa, bot, za, xb, top, zb)); col.floor([xa, za, xb, zb], top);
+      { const cx = (xa + xb) / 2, hw = 0.5 * (1 - 0.4 * i / NS); bag.add('plaster_damp', box(cx - hw, top + 0.001, za + 0.04, cx + hw, top + 0.005, zb - 0.04)); }   // worn where the feet climb
       if (kf > 0 && i % 5 === 0) bag.add('timber', box(xa, top - 0.62, za - 0.02, xb, top - 0.45, zb + 0.02));
       if (i < NS) {
         const ra = east ? inner - 0.2 : inner, rb = east ? inner : inner + 0.2;

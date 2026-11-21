@@ -16,7 +16,9 @@ const jarG = (r, h) => lathe([[0.001, 0], [r * 0.55, 0], [r, h * 0.35], [r * 0.9
 const cupG = lathe([[0.001, 0], [0.03, 0], [0.05, 0.07], [0.045, 0.07], [0.025, 0.01], [0.001, 0.01]], 7);
 const SH = 2.9, T = 0.5;
 /** Half the width of the doorway of a house that is entered: 1.6 m clear, so that the walker's body and the raster of its collision pass (the doors of the houses kept shut are narrower). */
-const DW = 0.8;
+const DW0 = 0.8;
+/** Half the opening of a shop's front: the open front of a trading house is wide (a counter either side of the passage), the plain door 0.8. */
+export const shopHalf = (FR) => { const h = Math.min(1.5, FR.du - 0.4, FR.L - FR.du - 0.4); return h >= 1.15 ? h : DW0; };
 /** A storage jar of the house, light: the narrow foot, the swelling body with two raised bands, the thick rim (s: 1 is about 1.5 m high). */
 const bigJars = new Map();
 const bigJar = (s) => { const k = Math.round(s * 20); if (!bigJars.has(k)) bigJars.set(k, lathe([[0.001, 0], [0.24 * s, 0], [0.4 * s, 0.4 * s], [0.47 * s, 0.8 * s], [0.5 * s, 0.82 * s], [0.47 * s, 0.86 * s], [0.46 * s, 1.05 * s], [0.34 * s, 1.47 * s], [0.38 * s, 1.52 * s], [0.3 * s, 1.55 * s], [0.001, 1.5 * s]], 10)); return bigJars.get(k).clone(); };
@@ -44,6 +46,7 @@ function dwelling(el, ctx) {
   // by class: the elaborate houses near the palace stand on ashlar and are plastered fine, the outlying ones are of mud and rubble
   const PL = poor ? (PL0 === 'plaster_ochre' ? 'mud_plaster' : PL0) : elite && PL0 === 'lime_plaster' ? 'plaster_white' : PL0, base = elite ? G : poor ? 'rubble' : base0;
   const FR = dwellingFrame(el), du = FR.du, depth = FR.D;
+  const fronted = enter && el.kind === 'shop', DW = fronted ? shopHalf(FR) : DW0, wide = fronted && DW > 1.0;
   const upOn = enter && !!el.up && n >= 2, UP = upOn ? stairLayout(FR, n, y) : null, UPH = upOn ? holeRects(FR, UP) : [];
   let upper = null;
   const stepped = !far && !enter && n >= 2 && depth >= 9.5 && rand() < 0.3, TER = 2.8;
@@ -113,7 +116,21 @@ function dwelling(el, ctx) {
     F.at('timber', du - 0.75, du + 0.75, y + 2.25, y + 2.5, 0.06, 0.1);
     F.at(G, du - 0.7, du + 0.7, y, y + 0.5, -0.05, 0.45);
   } else {
-    const q = F.at('wood_dark', du + DW - 0.08, du + DW, y + 0.2, y + 2.2, 0.0, 0.95); void q;
+    if (!wide) { const q = F.at('wood_dark', du + DW - 0.08, du + DW, y + 0.2, y + 2.2, 0.0, 0.95); void q; }
+    else {
+      // the open front of the shop: the shutters folded away, a counter of stone under a timber top either side of the passage (1.8 m clear), a post at the end of each,
+      // the keeper's goods set out on them (jars and a balance on the one, bolts of cloth and a basket on the other) [inferred: after the Town Mosaic's open ground-floor rooms]
+      const cb = (u0, u1) => { F.at(G, u0, u1, y - 0.1, y + 0.98, 0.04, 0.58); F.at('timber', u0 - 0.04, u1 + 0.04, y + 0.98, y + 1.04, 0.0, 0.62);
+        const a = FR.P(u0, -0.04), b = FR.P(u1, -0.62), r = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; col.rect(r, y - 0.1, y + 1.04); };
+      const uA = du - DW, uB = du - 0.9, uC = du + 0.9, uD = du + DW;
+      cb(uA, uB); cb(uC, uD);
+      for (const u of [uB, uC]) F.at('timber', u - 0.05, u + 0.05, y + 1.04, y + 2.2, 0.28, 0.38);
+      const jar = (u, v, h, r, yy) => { const [x, z] = FR.P(u, -v); bag.add('terracotta', lathe([[0.001, 0], [r * 0.55, 0], [r, h * 0.45], [r * 0.7, h * 0.85], [r * 0.75, h], [0.001, h]], 8).translate(x, yy, z)); };
+      for (let i = 0; i < 4; i++) jar(uC + 0.2 + i * (DW - 0.9 - 0.3) / 3, 0.2 + (i % 2) * 0.22, 0.28 + 0.06 * rand(), 0.09 + 0.03 * rand(), y + 1.04);
+      F.at('wood_dark', uD - 0.35, uD - 0.31, y + 1.04, y + 1.4, 0.3, 0.34); F.at('bronze', uD - 0.65, uD - 0.01, y + 1.38, y + 1.4, 0.29, 0.35);
+      F.at('cloth_red', uA + 0.1, uA + 0.55, y + 1.04, y + 1.14, 0.12, 0.5); F.at('cloth_white', uA + 0.1, uA + 0.55, y + 1.14, y + 1.24, 0.14, 0.48); F.at('cloth_red', uA + 0.6, uA + 0.95, y + 1.04, y + 1.12, 0.12, 0.5);
+      { const [x, z] = FR.P(uB - 0.18, -0.3); bag.add('wicker', lathe([[0.001, 0], [0.13, 0], [0.16, 0.2], [0.001, 0.2]], 8).translate(x, y + 1.04, z)); }
+    }
     F.at(G, du - DW - 0.15, du + DW + 0.15, y - 0.4, y + 0.2, -0.05, 0.4);
   }
   if (elite && !far) { for (const [a, b] of [[-1.0, -0.88], [0.88, 1.0]]) F.at(RED, du + a, du + b, enter ? y + 0.2 : y + 0.5, y + 2.55, 0.0, 0.08); if (!enter) F.at(G, du - 1.0, du + 1.0, y - 0.1, y + 0.18, 0.4, 0.62); }
