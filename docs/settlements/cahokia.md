@@ -181,3 +181,12 @@ Drums and rattles, cane flutes, voices at ceremonies. [inferred]
 - [Cahokia economy — Illinois State Museum, RiverWeb](https://www.museum.state.il.us/RiverWeb/landings/Ambot/Archives/History/Cahokia/miss/econ.html)
 - [Residence (house types and doors) — RiverWeb, res-3](https://www.museum.state.il.us/RiverWeb/landings/Ambot/prehistory/mississippian/technology/res-3.html)
 - [Le Page du Pratz, Histoire de la Louisiane, vol. III ch. 2 (tr. G. Sayre)](https://darkwing.uoregon.edu/~gsayre/LPDPIII,2.html)
+
+## 10. Bring-up to the reference (Suzhou): the walk, night, sound, animals, wear
+
+Tags as above. The place has no shops, no script and no wells (water came from the creek and the borrow pits, §5.10); "shops and houses" are read here as the houses, hearths, work places and plaza of §5.
+
+### 10.1 The visitor's walk (`walks.js`, `mississippian/index.js`, `dress.js`)
+
+- **The walk.** From the arrival in the corridor between the two chunkey yards (§5.13) the visitor goes up the first log stair to the terrace court, in at the terrace hall's door (south wall) and out, along the court, up the second stair to the summit and in at the great house's door; the two lodges of the terrace and the six lodges of the lesser mounds (each up its own log stair) are entered the same way; the eight houses nearest the ramp are entered from the south. 18 routes in all (`plan.walks`, from `walks.js`), 55 legs, every one walked to its end by the walk check [inferred: the order of the walk; the places are those of §4.2, §5.1, §5.8].
+- **Correction to §5.1.** The opened houses' doorway of 0.85 × 1.95 m could not be walked: the walker's collision raster (0.5 m cells) closed it, and the house's porch and the soot patch hung into it. The doorway is now 1.6 m wide with its lintel 2.15 m above the floor (the walls 2.6 m), an opened house has no porch arbor over its door, its jars stand 0.5 m further out, and the soot over the door sits above the lintel. The doors of the closed houses (0.72–0.96 m, §5.14) stay: no one enters them [inferred: the size; a plain reading of "simple and covered with mats or hides", RiverWeb "Residence" res-3].

@@ -1,4 +1,5 @@
 // Mississippian Cahokia about 1175 (docs/settlements/cahokia.md §2–§4).
+import { walks } from './walks.js';
 import { RADIUS, LODGES, SUMMIT, PLAZA, YARDS, PALISADE, WOODHENGE, MOUNDS, MONKS, FOX, CONES, RIDGES, HALLS, height, smallPlazas, mRamp } from './layout.js';
 
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
@@ -53,7 +54,7 @@ export const monks = {
     ...YARDS.map((rect, i) => ({ t: 'chunkey_yard', rect, y: 0, seed: 3 + i * 2 })),
   ],
   rooms: [{ id: 'plaza', rect: PLAZA, y: 0, kind: 'open' }, ...LODGES.map((r, i) => ({ id: 'lodge-' + i, rect: [r[0] + 0.6, r[1] + 0.6, r[2] - 0.6, r[3] - 0.6], y: height(...mid(r)), kind: 'hall' })), { id: 'summit-hall', rect: [SUMMIT[0] + 0.6, SUMMIT[1] + 20.6, SUMMIT[2] - 0.6, SUMMIT[1] + 39.4], y: height(...mid(SUMMIT)), kind: 'hall' }],
-  walks: [Object.assign([[-25, -5], [-25, -36]], { y0: 0 })],
+  walks: walks(),
 };
 export const precinct = {
   id: 'cahokia-precinct', style: 'mississippian', origin: [0, 0], base: 0, yaw: 0, feature: true,
