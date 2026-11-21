@@ -3,30 +3,11 @@
 // worshippers at the caves, goats, zebu and fowl.
 import { RADIUS, RIVER, EAST, XF, ZW, FLOOR, VILLAGE, WELL, PEN, THRESH, VSHRINE, GRANARIES, GHATS, C1, C19, C12, PATHS, rng, inRect, riverX } from './layout.js';
 import '../../styles/ajanta/index.js';
+import { lots } from './layout.js';
 
 const base = (id, style, elements, b = 0) => ({ id, style, origin: [0, 0], base: b, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 14], facing: 'w' } });
 
-/** Every hut: { rect, front, seed }, exported for the movers and the smoke. */
-export function lots() {
-  const r = rng(480), out = [], [vx0, , vx1] = VILLAGE;
-  const rows = [{ zc: 12, front: 's' }, { zc: 52, front: 'n' }, { zc: 64, front: 's' }, { zc: 76, front: 'n' }];
-  rows.forEach((row, ri) => {
-    for (let x = vx0 + 6; x < vx1 - 6; x += 8.5 + r() * 3) {
-      const w = 4.6 + r() * 1.8, d = 3.8 + r() * 1.4, cx = x + w / 2, cz = row.zc + (r() - 0.5) * 2;
-      const rect = [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2];
-      const k = r(), skip = r() < 0.12 || Math.abs(rect[0] - WELL[0]) < 3 && Math.abs(rect[1] - WELL[1]) < 3;
-      if (skip) continue;
-      let variant = k < 0.3 ? 0 : k < 0.55 ? 1 : k < 0.8 ? 2 : 3;
-      if (variant === 2 && row.front === 'n') variant = 1;
-      out.push({ rect, front: row.front, row: ri, variant, seed: Math.round(x * 13 + row.zc * 7), mud: r() < 0.3 ? 'earth_wall' : 'mud_plaster' });
-    }
-  });
-  // four of the lots are the trades' sheds (docs/settlements/ajanta.md §14): the potter near the ford's road, the oil-presser, the smith and the weaver at the village's far edge
-  for (const [i, craft] of [[3, 'potter'], [8, 'oilpress'], [10, 'smithy'], [15, 'weaver']]) if (out[i]) { out[i].craft = craft; out[i].variant = 0; }
-  // the six houses nearest the road from the ford stand open to the visitor: a door of 1.64 m, the front room walkable (walk.js)
-  out.filter((l) => !l.craft).sort((a, b) => Math.hypot(a.rect[0] - 40, a.rect[1] - 30) - Math.hypot(b.rect[0] - 40, b.rect[1] - 30)).slice(0, 6).forEach((l) => { l.open = true; });
-  return out;
-}
+export { lots } from './layout.js';
 
 export async function town() {
   const E = [], L = [], V = [], rand = rng(481), seed = () => Math.floor(rand() * 1e9);
