@@ -209,6 +209,11 @@ function worksPlan() {
   tools.push([198.6, 0, -75.2, 'lever']);
   return base('giza-works', [
     { t: 'ok_ramp', x0, x1, z, w, h, y: 0 },
+    // the stages hung on the pyramid's foot band, where the last courses were being dressed, and the porters' ramp to the lowest (docs §23)
+    { t: 'ok_face_works', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h, bays: [
+      { f: 1, u0: 20, u1: 33, v0: 3, n: 3 }, { f: 1, u0: -44, u1: -31, v0: 3, n: 2 }, { f: 3, u0: -52, u1: -38, v0: 9, n: 3 }, { f: 3, u0: 30, u1: 44, v0: 9, n: 3 },
+      { f: 2, u0: -20, u1: -7, v0: 3, n: 3 }, { f: 0, u0: 40, u1: 54, v0: 3, n: 2 }],
+      ramp: { f: 1, u: 26.5, len: 9.4, w: 4, rise: 2.8 } },
     { t: 'ok_track', pts: haulRoad(), w: 3.4 },
     { t: 'stone_sledge', at: [RAMP.sledge, RAMP.z], y: sy, rot: Math.PI, w: 1.15, len: 1.7 },
     { t: 'ok_casing', at: stacks },
