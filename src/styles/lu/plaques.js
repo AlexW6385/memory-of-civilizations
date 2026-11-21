@@ -1,6 +1,9 @@
 // The writing of the Dacheng Hall (docs/settlements/lu-qufu.md §10): the characters of its name board and of the imperial plaques hung in it,
 // as tapered brush strokes on the grid of the shops' glyphs (shops.js). The strokes are schematic: right in kind and place, not calligraphy.
 import { GLYPHS, glyph } from './shops.js';
+import { fromTriangles } from '../../core/geom.js';
+import { relief } from '../../settlements/ming-suzhou/brush.js';
+import { GLYPH, COUNT } from '../../settlements/ming-suzhou/brush-data.js';
 
 Object.assign(GLYPHS, {
   大: [['h', 8, 62, 92, 62], ['p', 52, 98, 14, 4], ['n', 50, 62, 94, 4]],
@@ -17,3 +20,14 @@ Object.assign(GLYPHS, {
 });
 
 export { glyph };
+
+/** True when every character of the text is in the checked table (ming-suzhou/brush-data.js: each laid over the reference typeface; docs/settlements/ming-suzhou.md §27). */
+export const canWrite = (text) => [...text].every((c) => GLYPH[c] && COUNT[c]);
+/** A vertical line of checked characters, raised in gilt: the first at the top, the next below at `pitch`; centre (x, y of the first), the board's face plane z0 to z1. Text with an unchecked character is not drawn. */
+export function writeColumn(bag, text, x, y, z0, z1, pitch, size) {
+  if (!canWrite(text)) return false;
+  const out = [];
+  [...text].forEach((c, k) => relief(out, GLYPH[c], x, y - k * pitch, size, z0, z1, { thick: 1.25, top: 0.55 }));
+  bag.add('gilt_bronze', fromTriangles(out));
+  return true;
+}

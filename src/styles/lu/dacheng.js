@@ -10,7 +10,7 @@ import { placeColumn } from './colwork.js';
 import { confucius, correlate } from './statue.js';
 import { dougongHeight } from '../qing/caihua.js';
 import { rng } from './kit.js';
-import { glyph } from './plaques.js';
+import { glyph, writeColumn } from './plaques.js';
 import { tileCourses } from './tiles.js';
 
 const PAL = { ...IMPERIAL, column: 'granite_grey', base: 'marble' };
@@ -155,7 +155,8 @@ export function dacheng(el, ctx) {
     // the name board of the hall under the upper eaves: the three characters on a vertical board over the middle bay
     const yb = y + H + bk, u = cx, zf = z1 - 4.52 + 0.07;                                       // the upper wall's front plane is z1 less the inset; the skirt roof covers its lowest 4 m
     bag.add('gilt_bronze', box(u - 0.62, yb + 4.4, zf - 0.02, u + 0.62, yb + 6.95, zf + 0.1)); bag.add('paint_blue', box(u - 0.5, yb + 4.52, zf + 0.1, u + 0.5, yb + 6.83, zf + 0.13));
-    ['大', '成', '殿'].forEach((ch, k) => glyph(bag, ch, u, yb + 6.4 - k * 0.74, zf + 0.165, 0, 0.7));
+    // 大成殿 in checked characters (docs/settlements/lu-qufu.md §10b); the schematic strokes stay only if a character were not in the table
+    if (!writeColumn(bag, '大成殿', u, yb + 6.4, zf + 0.13, zf + 0.17, 0.74, 0.7)) ['大', '成', '殿'].forEach((ch, k) => glyph(bag, ch, u, yb + 6.4 - k * 0.74, zf + 0.165, 0, 0.7));
   }
   // hanging banners (cloth) are left out; the lamps
   for (const [dx, dz] of [[0, 7], [-12, 9], [12, 9], [0, 17], [-14, 19], [14, 19]]) lights.push({ at: [cx + dx, y + H - 1.4, z0 + dz], color: '#ffcf93', intensity: 7, distance: 20 });
