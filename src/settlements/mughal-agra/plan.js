@@ -4,6 +4,7 @@
 // pool; the walls and their octagonal towers; the great gate; the forecourt.
 
 import { upWalks } from './walks.js';
+import './wear.js';
 import { rows, cellRoutes } from './cells.js';
 import { TERRACE, PLINTH, GARDEN, GATE, FORECOURT, POOL, GWALKS, GW, GRIM } from './layout.js';
 
@@ -18,6 +19,12 @@ E.push({ t: 'block', walk: true, rect: [PLINTH.c[0] - PLINTH.a, PLINTH.c[1] - PL
   E.push({ t: 'plinth_floor', rect: [pcx - pa, pcz - pa, pcx + pa, pcz + pa], y: PLINTH.y, keep: [pcx - 29.8, pcz - 29.8, pcx + 29.8, pcz + 29.8], circles: [-1, 1].flatMap((sx) => [-1, 1].map((sz) => [pcx + sx * (pa - 3), pcz + sz * (pa - 3), 4.4])) }); }
 E.push({ t: 'stairs', rect: [-6, PLINTH.c[1] + PLINTH.a, 6, PLINTH.c[1] + PLINTH.a + 9], y0: ty, y1: PLINTH.y, dir: 'n', mat: 'marble' });
 E.push({ t: 'stairs', rect: [-10, tz1, 10, tz1 + 4], y0: 0, y1: ty, dir: 'n', mat: 'sandstone_red' });
+// wear (wear.js, dossier §18): the dust of feet in the middle of both stairs and along the way across the plinth's paving from the stairs to the tomb's south door,
+// and the water's line on the inside face of the channels' marble kerbs (water 0.25, kerb top 0.55; the faces stand at ±3 and the water ends 2 m short of the walls)
+E.push({ t: 'agra_wear', kind: 'stairs', rect: [-6, PLINTH.c[1] + PLINTH.a, 6, PLINTH.c[1] + PLINTH.a + 9], y0: ty, y1: PLINTH.y, mat: 'plaster_grey', dust: 'plaster_damp' });
+E.push({ t: 'agra_wear', kind: 'stairs', rect: [-10, tz1, 10, tz1 + 4], y0: 0, y1: ty, mat: 'sandstone_floor', dust: 'earth_wall' });
+E.push({ t: 'agra_wear', kind: 'path', rect: [-1.8, PLINTH.c[1] + 28.3 + 1.0, 1.8, PLINTH.c[1] + PLINTH.a - 0.8], y: PLINTH.y, mat: 'plaster_grey' });
+E.push({ t: 'agra_wear', kind: 'waterline', y0: 0.255, y1: 0.33, mat: 'plaster_damp', rects: [[-3, GARDEN[1] + 2, -2.995, GARDEN[3] - 2], [2.995, GARDEN[1] + 2, 3, GARDEN[3] - 2], [GARDEN[0] + 2, -3, GARDEN[2] - 2, -2.995], [GARDEN[0] + 2, 2.995, GARDEN[2] - 2, 3]] });
 // the mausoleum: 56.6 m square with chamfered corners, its dome rising 73 m above the plinth
 E.push({ t: 'mausoleum', c: PLINTH.c, y: PLINTH.y, a: 28.3, chamfer: 8.5, h: 33, dome: { r: 17.7, h: 28, drum: 7 }, interior: true });
 for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) E.push({ t: 'minaret', c: [PLINTH.c[0] + sx * (PLINTH.a - 3), PLINTH.c[1] + sz * (PLINTH.a - 3)], y: PLINTH.y, h: 40, r: 2.6 });
