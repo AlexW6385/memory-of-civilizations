@@ -250,13 +250,14 @@ function nah(el, { bag, col, lights }) {
     const t0 = -l / 2 + 0.3;
     for (const [x0, x1] of [[-w / 2 + 0.12, -w / 2 + 0.2], [w / 2 - 0.2, w / 2 - 0.12]]) put('wicker', box(x0, ph + 0.92, t0, x1, wt, l / 2 - 0.12));
     put('wicker', box(-w / 2 + 0.2, ph + 0.92, l / 2 - 0.2, w / 2 - 0.2, wt, l / 2 - 0.12));
-    for (const [x0, x1] of [[-w / 2 + 0.12, -0.55], [0.55, w / 2 - 0.12]]) put('wicker', box(x0, ph, t0, x1, wt, t0 + 0.1));
-    put('timber', box(-0.62, ph + 1.45, t0 - 0.03, 0.62, ph + 1.55, t0 + 0.13));
-    for (const x of [-0.58, 0.58]) put(WOOD, lathe([[0.05, 0], [0.05, 1.55]], 6, null, x, ph, t0 + 0.05));
-    put('reed_mat', lathe([[0.07, 0], [0.07, 1.0]], 8).rotateZ(Math.PI / 2).translate(-0.5, ph + 1.6, t0 - 0.06));
-    for (const u of [-w / 4 - 0.2, w / 4 + 0.2]) if (Math.abs(u) > 0.9) { put('opening', box(u - 0.28, ph + 0.95, t0 - 0.015, u + 0.28, ph + 1.4, t0 + 0.11)); put('timber', box(u - 0.32, ph + 1.4, t0 - 0.03, u + 0.32, ph + 1.46, t0 + 0.13)); }
+    // the door is 1.7 m wide with its lintel 2.1 m over the platform (the walker needs 1.6 m clear and a head of 2.0 m); the mat rolled up hangs beside it
+    for (const [x0, x1] of [[-w / 2 + 0.12, -0.85], [0.85, w / 2 - 0.12]]) put('wicker', box(x0, ph, t0, x1, wt, t0 + 0.1));
+    put('timber', box(-0.95, ph + 2.0, t0 - 0.03, 0.95, wt, t0 + 0.13));
+    for (const x of [-0.88, 0.88]) put(WOOD, lathe([[0.05, 0], [0.05, 2.0]], 6, null, x, ph, t0 + 0.05));
+    put('reed_mat', lathe([[0.07, 0], [0.07, 0.5]], 8).rotateZ(Math.PI / 2).translate(-1.45, ph + 1.7, t0 - 0.06));
+    for (const u of [-w / 4 - 0.2, w / 4 + 0.2]) if (Math.abs(u) > 1.2) { put('opening', box(u - 0.28, ph + 0.95, t0 - 0.015, u + 0.28, ph + 1.4, t0 + 0.11)); put('timber', box(u - 0.32, ph + 1.4, t0 - 0.03, u + 0.32, ph + 1.46, t0 + 0.13)); }
     const Sw = (u0, v0, u1, v1) => col.segment(F.W(u0, v0), F.W(u1, v1), 0.12, ph, wt);
-    Sw(-w / 2 + 0.16, t0, -0.55, t0); Sw(0.55, t0, w / 2 - 0.16, t0);
+    Sw(-w / 2 + 0.16, t0, -0.85, t0); Sw(0.85, t0, w / 2 - 0.16, t0);
     Sw(-w / 2 + 0.16, -l / 2 + 0.5, -w / 2 + 0.16, t0); Sw(w / 2 - 0.16, -l / 2 + 0.5, w / 2 - 0.16, t0);
   }
   // the lamp of a lit house: the bowl of coconut oil by the wall, its light in the room
