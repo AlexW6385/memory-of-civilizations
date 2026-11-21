@@ -740,3 +740,49 @@ export function turkeyOcellated() {
   return m;
 }
 MODELS.turkey_ocellated = turkeyOcellated;
+
+// ═════════════ Stonehenge's animals (docs/settlements/stonehenge.md §14) ═════════════
+/** A Neolithic domestic pig, standing, on the dog's rig (parts 1 neck, 2 head, 3 tail, 4–7 legs; the shader lies it down and stands it up as the visitor comes): small, long-legged and long-snouted as the early pigs were, close to the wild boar, dark grey-brown bristle with a ridge along the back, small upright ears, a thin curled tail. Back at 0.6 m. */
+export function pigNeolithic(variant) {
+  const m = new Model(), dark = variant === 'pale' ? [0.5, 0.4, 0.3] : [0.2, 0.16, 0.12], mid = variant === 'pale' ? [0.62, 0.5, 0.38] : [0.33, 0.26, 0.18], snout = [0.42, 0.3, 0.26];
+  const bristle = ({ p, n }) => lerp(lerp(dark, mid, sm(0.1, -0.7, n[1])), shade(dark, 0.7), sm(0.7, 1, n[1]) * sm(-0.3, 0.2, p[0]) * 0.6 + hash3(p, 6) * 0.08);
+  const S = [[0.36, 0.5, 0.07, 0.08], [0.26, 0.55, 0.14, 0.12], [0.12, 0.6, 0.18, 0.14], [-0.04, 0.6, 0.19, 0.15], [-0.2, 0.58, 0.17, 0.14], [-0.34, 0.55, 0.12, 0.11], [-0.4, 0.52, 0.03, 0.03]];
+  m.tube(S.map((q) => [q[0], q[1], 0]), S.map((q) => [q[2], q[3]]), { sides: 9, col: bristle });
+  m.tube([[0.3, 0.7, 0], [0.1, 0.77, 0], [-0.15, 0.74, 0], [-0.33, 0.66, 0]], [[0.025, 0.02], [0.03, 0.02], [0.03, 0.02], [0.012, 0.01]], { sides: 4, col: shade(dark, 0.6) });   // the ridge of bristles
+  const NP = [0.3, 0.55, 0], HP = [0.46, 0.5, 0];
+  m.as(1, NP, null, () => m.tube([[0.26, 0.55, 0], [0.36, 0.54, 0], [0.43, 0.5, 0]], [[0.12, 0.1], [0.095, 0.08], [0.08, 0.07]], { sides: 7, ref: [1, 0, 0], col: bristle }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.47, 0.5, 0], [0.085, 0.075, 0.065], bristle, { nu: 6, nv: 7 });
+    m.tube([[0.52, 0.48, 0], [0.62, 0.43, 0], [0.7, 0.4, 0]], [[0.045, 0.04], [0.036, 0.034], [0.03, 0.03]], { sides: 6, col: ({ t }) => lerp(bristle({ p: [0.55, 0.45, 0], n: [0, 1, 0] }), snout, t) });   // the long snout
+    m.ball([0.71, 0.4, 0], [0.012, 0.03, 0.034], [0.3, 0.2, 0.18], { nu: 4, nv: 5 });                                                                                // the disc of the nose
+    for (const s of [-1, 1]) m.tube([[0.44, 0.55, s * 0.045], [0.41, 0.62, s * 0.06], [0.4, 0.66, s * 0.075]], [[0.02, 0.035], [0.015, 0.028], [0.003, 0.005]], { sides: 4, col: shade(dark, 0.8) });   // the ears
+    eyes(m, 0.54, 0.525, 0.052, 0.008, [0.12, 0.08, 0.05]);
+  });
+  m.as(3, [-0.38, 0.53, 0], null, () => m.tube([[-0.38, 0.53, 0], [-0.44, 0.56, 0.02], [-0.47, 0.5, 0.04], [-0.44, 0.46, 0.03]], [0.012, 0.01, 0.008, 0.003], { sides: 4, col: shade(dark, 0.9) }));
+  const legs = [[4, 1, -1, 0.26], [5, 1, 1, 0.26], [6, 0, -1, -0.27], [7, 0, 1, -0.27]];
+  for (const [part, front, z, x] of legs) {
+    const hip = [x, 0.46, z * 0.09];
+    m.as(part, hip, null, () => {
+      m.tube([hip, [x - (front ? 0 : 0.03), 0.28, z * 0.09], [x - (front ? 0 : 0.02), 0.1, z * 0.09], [x + 0.005, 0.02, z * 0.09]], [[0.055, 0.05], [0.03, 0.028], [0.022, 0.02], [0.024, 0.024]], { sides: 5, col: ({ t }) => lerp(bristle({ p: [x, 0.4, z], n: [0, 1, 0] }), [0.18, 0.14, 0.12], t * 0.7) });
+      m.ball([x + 0.012, 0.012, z * 0.09], [0.03, 0.014, 0.02], [0.12, 0.1, 0.09], { nu: 4, nv: 5 });
+    });
+  }
+  return m;
+}
+MODELS.pig_dark = () => pigNeolithic('dark');
+MODELS.pig_pale = () => pigNeolithic('pale');
+
+/** A rook on the ground (the fowl's rig: parts 1 neck, 2 head, 3 tail, 4 5 legs, so that it walks and pecks as the fowl do): all black with a purple sheen, a long straight pale bill, a bare grey-white patch at its base, black legs; the fowl's own model recoloured. */
+export function rook() {
+  const m = fowl('brown');
+  for (let i = 0; i < m.col.length; i += 3) {
+    const r = m.col[i], g = m.col[i + 1], b = m.col[i + 2], lum = (r + g + b) / 3;
+    let c;
+    if (r > 0.75 && g < 0.25) c = [0.1, 0.09, 0.11];                              // (the comb and wattle: none)
+    else if (r > 0.75 && g > 0.55) c = m.pos[i + 1] < 0.2 ? [0.1, 0.09, 0.09] : [0.72, 0.68, 0.62];   // the legs' yellow: black; the bill's: horn-grey
+    else c = [0.035 + lum * 0.05, 0.035 + lum * 0.045, 0.045 + lum * 0.08];             // the black plumage, a violet shine
+    m.col[i] = c[0]; m.col[i + 1] = c[1]; m.col[i + 2] = c[2];
+  }
+  return m;
+}
+MODELS.rook = rook;
