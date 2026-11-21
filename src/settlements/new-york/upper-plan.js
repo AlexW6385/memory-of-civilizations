@@ -7,21 +7,24 @@ export const SW = 1.9;
 /** The upper floors' use over each trade: the family's flat over the grocer, the baker and the deli; the doctor's and the dentist's offices over the drug store, the haberdasher and the cigar store; the trades' lofts over the hatter, the tailor and the dry goods; the rooming house over the lunch room and the barber's. */
 const USE = { drug: 'office', haber: 'office', cigar: 'office', deli: 'flat', bakery: 'flat', shoe: 'flat', grocer: 'flat', butcher: 'flat', hat: 'loft', tailor: 'loft', fabric: 'loft', hardware: 'loft', barber: 'rooming', lunch: 'rooming', automat: 'rooming' };
 const ENTRANCE = [4, 176];
-const HOW_MANY = 8;
+const HOW_MANY = 8, IRON_SKIP = 1;
 let OPEN = null;
 function decide() {
   if (OPEN) return;
   OPEN = new Map();
   const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
-  const cand = lots().filter((l) => l.room && !l.iron && !l.row && l.rect[2] - l.rect[0] - SW >= 8 && (l.rect[3] - l.rect[1]) >= 12 && !onElStair(...mid(l.rect), 4))
+  const cand = lots().filter((l) => l.room && !l.row && l.rect[2] - l.rect[0] - SW >= 8 && (l.rect[3] - l.rect[1]) >= 12 && !onElStair(...mid(l.rect), 4))
     .map((l) => ({ l, d: Math.hypot(mid(l.rect)[0] - ENTRANCE[0], mid(l.rect)[1] - ENTRANCE[1]) })).sort((a, b) => a.d - b.d);
+  // (the cast-iron fronts: their loft floor opens too, for the nearest one that has a shop room, behind its iron columns and plate glass; the rest as before)
+  let ironOpen = 0, ironSeen = 0;
   for (const { l } of cand) {
-    if (OPEN.size >= HOW_MANY) break;
+    if (l.iron ? ironOpen >= 1 : OPEN.size - ironOpen >= HOW_MANY) continue;
     // the hall at the end away from the shop's door, unless that end is a corner (its side face has a shop front of its own)
+    if (l.iron && ironSeen++ < IRON_SKIP) continue;
     const want = l.room.door === 1 ? 'lo' : 'hi', blocked = (e) => l.shops.includes(e === 'lo' ? 'w' : 'e');
     const end = !blocked(want) ? want : !blocked(want === 'lo' ? 'hi' : 'lo') ? (want === 'lo' ? 'hi' : 'lo') : null;
     if (!end) continue;
-    OPEN.set(l, { end, use: USE[l.room.kind] ?? 'flat' });
+    if (l.iron) { ironOpen++; OPEN.set(l, { end, use: 'loft' }); } else OPEN.set(l, { end, use: USE[l.room.kind] ?? 'flat' });
   }
 }
 /** The opening of a lot ({ end: 'lo' | 'hi' (the hall at the low or high u end), use }) or undefined. */
