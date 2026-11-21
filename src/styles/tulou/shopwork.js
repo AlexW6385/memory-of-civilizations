@@ -6,6 +6,7 @@ import { rod } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { Matrix4 } from '../../core/three.js';
 import { lbox } from './geo.js';
+import { canWrite, inscription } from '../../settlements/ming-suzhou/script.js';
 
 const hash = (a, b) => { let h = Math.imul(a + 1, 374761393) ^ Math.imul(b + 7, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
@@ -54,8 +55,31 @@ export function shopFit(ctx, f) {
   B('wood_dark', -1.5, TOP, hz + 0.9, -1.2, TOP + 0.02, hz + 0.98); for (let q = 0; q < 4; q++) { const x = -1.46 + q * 0.08; R('bronze', [x, TOP + 0.02, hz + 0.9], [x, TOP + 0.02, hz + 0.98], 0.004, 3); }
   B('wood_dark', -1.9, TOP, hz + 0.95, -1.7, TOP + 0.015, hz + 1.0);
   R('timber', [-1.0, 2.2, hz + 1.0], [-1.0, 1.86, hz + 1.0], 0.006, 3); R('timber', [-1.0, 1.86, hz + 0.78], [-1.0, 1.86, hz + 1.2], 0.011, 5); stack('bronze', -1.0, 1.72, hz + 0.84, [[0.07, 0.03]], 8);
+  signChar(ctx, f);
   // the keeper behind the counter (a woman at the tea and the greens, a man at the wine and the tobacco), facing the road
   const woman = trade === 'tea' || trade === 'pickles';
   if (!f.nokeeper) STYLES.life.elements.figure({ t: 'figure', at: W(-2.3, hz + 0.2), y: 0, rot: phi + Math.PI, seed: 5000 + sd, dress: 'trousers', cloth: woman ? 'cloth_red' : 'wood_dark', cloth2: 'wood_dark', over: 'none', skin: 'skin_medium', hat: woman ? 'none' : 'cap', hair: woman ? 'bun' : 'short', feet: 'shod', pose: 'stand', carry: 'none', beard: false }, ctx);
   void Matrix4; void hx;
+}
+
+/** The one character a shop's hanging board carries, where the script has it verified (Suzhou's brush-data: 茶 tea, 酒 wine — the commonest shop-board characters, [stated: the
+ *  glyphs are checked stroke by stroke there]); the tobacco and greens shops keep a plain board (煙 and 菜 are not in the script). */
+export const signOf = (trade) => ({ tea: '茶', wine: '酒' }[trade] ?? null);
+/** The glyph on the hanging board: gilt on the black, upright, read from the road. */
+export function signChar(ctx, f) {
+  const ch = signOf(f.trade);
+  if (!ch || !canWrite(ch)) return;
+  const g = inscription(ch, { pitch: 0.34, size: 0.34, z0: 0, z1: 0.014, vertical: true, thick: 1.3 });
+  g.translate(f.hx - 0.52, 3.5, f.hz + 1.25);
+  g.applyMatrix4(new Matrix4().makeRotationY(f.phi).setPosition(f.cx, 0, f.cz));
+  ctx.bag.add('gilt_bronze', g);
+}
+/** Wear at a house front (docs §10): the doorstep dished by feet (a darker polished track on the sill and the flagstone before it), pits under the eave's drip line, moss at the damp foot. */
+export function wearFront(ctx, f) {
+  const { bag } = ctx, { cx, cz, phi, hx, hz, dw, sd } = f, B = (m, x0, y0, z0, x1, y1, z1) => bag.add(m, lbox(cx, cz, phi, x0, y0, z0, x1, y1, z1));
+  const j = (k) => hash(sd, k);
+  // the track of feet on the sill and the apron (a hand's breadth wide, 1 m long, darker with polish), set a hair over the stone
+  B('bluestone', -0.5 + 0.2 * j(1), 0.1, hz - 0.45, 0.5 - 0.2 * j(2), 0.108, hz + 0.1);
+  // damp at the foot of the wall: dark and mossy where the splash lies, more under the roof's low back, patches of different widths
+  for (let k = 0; k < 3; k++) { const x0 = -hx + 0.3 + (hx * 2 - 1.5) * j(40 + k), w = 0.5 + 0.7 * j(50 + k); if (x0 + w > -dw - 0.2 && x0 < dw + 0.2) continue; B('plaster_damp', x0, 0.7, hz + 0.0, x0 + w, 0.7 + 0.35 + 0.25 * j(60 + k), hz + 0.026); }
 }
