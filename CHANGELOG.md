@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.70 — second pass: the tulou, Dogon, Catalhoyuk, Borgund, Abu Simbel (2026-11-21)
+
+Hakka tulou: the great gate's board reads 承啟樓, lamps on the hall porch light the court, every opened house can be walked through to its kitchen and back room, a water buffalo grazes by the road. Dogon: an evening fire on the place by the arrival with four people round it, ways to the well, the dyers' yard, the toguna and the forge. Catalhoyuk: cooking fires on one roof in five, a shelf niche and grave goods in each opened house, a trodden way to the ladder. Borgund: cressets at the churchyard gate, a herders' fire in the meadow, ten more buildings on the walk, proper little columns on the church's gallery. Abu Simbel: lamp stands at the terrace's end, watchmen at the fires, tracked-in sand on the way to the door.
+
 ## v12.69 — two real name boards; second pass: Yinxu, Khajuraho, Great Zimbabwe, Sanchi, Qufu (2026-11-21)
 
 The Meridian Gate in Beijing carries 午門 and the Dacheng Hall in Qufu 大成殿, in checked characters; Shaolin's gate board, the Temple of Heaven and the Wild Goose Pagoda stay plain because their known wording is later than the date shown. Yinxu: watch fires with their keepers before the arrival, inside the south gate and on the Huan's landings; rammed-earth layers on the hall platforms. Khajuraho: all ninety-three open fronts on the walk can now be entered (twelve were blocked by posts and goods). Great Zimbabwe: a herders' fire by the arrival, fires along the lane of the Great Enclosure, someone at every open house's hearth. Sanchi: lamp pillars up the summit way, the south approach paved to the gateway, a keeper in every open shop. Qufu: watch fires in the great court, ridge beasts on the Dacheng Hall, five lane houses opened.
