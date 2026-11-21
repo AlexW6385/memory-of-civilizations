@@ -104,6 +104,14 @@ const wrap = (fn, extra) => function lit(el, ctx) {
 /** The opened houses' hatches (the ladder's way out, and the smoke of the hearth below it): the glow over each hole (their fire is the flame found in the bag). */
 function quarterExtra(H, el) {
   const X = (j) => el.x0 + el.cols.slice(0, j).reduce((a, b) => a + b, 0), Z = (i) => el.z0 + el.rows.slice(0, i).reduce((a, b) => a + b, 0);
+  // rooftop cooking fires: on about one house roof in five a small fire burns on the roof by night (the roof is the yard) [inferred]
+  for (let i = 0; i < el.rows.length; i++) for (let j = 0; j < el.cols.length; j++) {
+    if (el.kind[i][j] !== 'h') continue;
+    const x0 = X(j), z0 = Z(i);
+    if (hashAt(x0, z0, 21) >= 0.22) continue;
+    const fx = x0 + el.cols[j] * (0.3 + 0.4 * hashAt(x0, z0, 22)), fz = z0 + el.rows[i] * (0.62 + 0.2 * hashAt(x0, z0, 23)), ty = el.tops[i][j] + 0.09;
+    H.ball(fx, ty + 0.3, fz, 0.65, 0.62); H.floor(fx, ty + 0.04, fz, 1.9, 1.9, 10, 0.8);
+  }
   for (const e of el.enter || []) {
     const x0 = X(e.j), z0 = Z(e.i), g = cellGeom([x0, z0, x0 + el.cols[e.j], z0 + el.rows[e.i]], e.mirror), top = el.tops[e.i][e.j];
     hatchGlow(H, (g.hole[0] + g.hole[2]) / 2, top + 0.09, (g.hole[1] + g.hole[3]) / 2, 0.55);
@@ -113,6 +121,7 @@ function quarterExtra(H, el) {
 function houseExtra(H, el) {
   const [x0, z0] = el.rect, T = 0.45, top = el.top ?? 2.5;
   hatchGlow(H, x0 + T + 1.6, top + 0.09, z0 + T + 4.4, 0.6);
+  H.ball(x0 + 2.3, top + 0.39, z0 + 1.7, 0.65, 0.62); H.floor(x0 + 2.3, top + 0.13, z0 + 1.7, 1.9, 1.9, 10, 0.8);   // the roof's fire ring
 }
 let done = false;
 export function registerNight() {

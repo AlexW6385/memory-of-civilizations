@@ -155,5 +155,16 @@ export function cell(el, { bag, col, lights }) {
   jar(bag, lx(0.4), F, lz(bvz + 0.1), 1.2, V === 3 ? 'terracotta' : 'pottery_dark'); jar(bag, lx(0.95), F, lz(bvz + 0.2), 0.9); basket(bag, lx(1.6), F, lz(bvz), 0.25, 'cloth_ochre');
   if (V !== 3) { bag.add(REED, B(1.0, F, 2.0, Math.min(W - 1.5, 3.0), F + 0.012, 3.0)); for (let k = 0; k < 3; k++) bag.add(rand() < 0.5 ? 'cloth_ochre' : 'hide_brown', B(1.2 + k * 0.5, F + 0.012, 2.1, 1.65 + k * 0.5, F + 0.04, 2.4)); }
   for (let k = 0; k < 3; k++) { const u = 0.8 + k * 1.0 + rand() * 0.2; bag.add(LOG, rod([lx(u), 1.6, iz0 + 0.02], [lx(u), 1.58, iz0 + 0.2], 0.02, 4)); bag.add(k % 2 ? 'cloth_ochre' : 'hide_brown', lathe([[0.001, 0], [0.09, -0.05], [0.07, -0.25], [0.001, -0.3]], 7, null, lx(u), 1.58, iz0 + 0.2)); }
+  // a plaster shelf-niche on the south wall beside the ladder (a ledge with a moulded lip) with a jar, a bowl, obsidian blades and a bone point [inferred: niches and shelves of the Mellaart houses]
+  { const u0 = Math.min(W - 1.0, 2.9), u1 = Math.min(W - 0.3, u0 + 1.2), sy = 1.05;
+    bag.add(MUD, B(u0, sy, D - 0.26, u1, sy + 0.06, D - PL)); bag.add(LIME, B(u0 - 0.03, sy + 0.06, D - 0.29, u1 + 0.03, sy + 0.09, D - 0.26)); bag.add(MUD, B(u0, sy - 0.12, D - 0.2, u1, sy, D - PL));
+    jar(bag, lx(u0 + 0.25), sy + 0.09, lz(D - 0.14), 0.45, 'terracotta');
+    bag.add('pottery_dark', lathe([[0.001, 0], [0.07, 0.005], [0.09, 0.05], [0.001, 0.05]], 8, null, lx(u0 + 0.62), sy + 0.09, lz(D - 0.14)));
+    for (let q = 0; q < 3; q++) bag.add('obsidian', box(lx(u0 + 0.8 + q * 0.1) - 0.03, sy + 0.09, lz(D - 0.2), lx(u0 + 0.8 + q * 0.1) + 0.03, sy + 0.1, lz(D - 0.06)));
+    bag.add(BONE, rod([lx(u1 - 0.06), sy + 0.1, lz(D - 0.22)], [lx(u1 - 0.06), sy + 0.1, lz(D - 0.06)], 0.01, 4)); }
+  // burial goods on the fresh plaster patch of the east platform: a string of beads, an obsidian blade and a bone point laid beside the wrapped dead [inferred: grave goods of the site]
+  { const bv = Math.max(2.72, D - 2.68), bu = W - 0.65;
+    for (let q = 0; q < 9; q++) { const a = q / 8 * Math.PI; bag.add(q % 3 ? BONE : 'terracotta', lathe([[0.001, 0], [0.012, 0.004], [0.012, 0.014], [0.001, 0.018]], 5, null, lx(bu + Math.cos(a) * 0.2), PH + 0.015, lz(bv + Math.sin(a) * 0.09))); }
+    bag.add('obsidian', box(lx(bu) - 0.025, PH + 0.015, lz(bv + 0.12), lx(bu) + 0.025, PH + 0.025, lz(bv + 0.24))); bag.add(BONE, rod([lx(bu - 0.2), PH + 0.02, lz(bv - 0.1)], [lx(bu - 0.2), PH + 0.02, lz(bv + 0.1)], 0.008, 4)); }
   if (lights) lights.push({ at: [hx, F + 0.6, hz], color: '#ff9a4a', intensity: 2.4, distance: 5 });
 }
