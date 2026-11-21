@@ -11,9 +11,11 @@ import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import '../../styles/japanese/index.js';
 import '../../buildings/byodo-in-phoenix-hall/style.js';
-import { RIVER, POND_LEVEL, HALL } from './layout.js';
+import { RIVER, POND_LEVEL, HALL, height } from './layout.js';
 import { riverX, fireSpots, sanNoMa, deckY } from './fires.js';
 import { tiled } from './street.js';
+import { VIEW_PIER } from './shore.js';
+import { waysideSpots } from './waysides.js';
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -73,7 +75,8 @@ export function kagaribi(el, { bag, col }) {
   bag.add('iron', lathe([[0.001, 0], [0.14, 0], [0.3, 0.2], [0.34, 0.34], [0.32, 0.36], [0.28, 0.34], [0.12, 0.05], [0.001, 0.05]], 8, null, x, y + 0.93, z));
   for (let k = 0; k < 4; k++) bag.add('iron', rod([x + Math.cos(k * 1.57) * 0.16, y + 0.98, z + Math.sin(k * 1.57) * 0.16], [x + Math.cos(k * 1.57) * 0.33, y + 1.27, z + Math.sin(k * 1.57) * 0.33], 0.014, 4));
   for (let k = 0; k < 5; k++) { const a = k * 1.26 + 0.3, c = Math.cos(a), s = Math.sin(a); bag.add('wood_dark', rod([x + c * 0.15, y + 1.04, z + s * 0.15], [x - c * 0.05 + s * 0.05, y + 1.4 + (k % 2) * 0.06, z - s * 0.05 - c * 0.05], 0.045, 5)); }
-  H.ball(x, y + 1.5, z, 1.25, 0.7); H.floor(x, y + 0.04, z, 3.4, 3.4, 0, 10, false, 0.85);
+  const q = el.s ?? 1;
+  H.ball(x, y + 1.5, z, 1.25 * q, 0.7 * (q < 1 ? 0.7 : 1)); H.floor(x, y + 0.04, z, 3.4 * q, 3.4 * q, 0, 10, false, 0.85);
   if (el.water) {
     const [dx, dz] = el.water, d = el.d ?? 3, a = 2.6;
     H.floor(x + dx * (d + a * 0.5), (el.wy ?? RIVER.level) + 0.02, z + dz * (d + a * 0.5), 0.8, a, Math.atan2(dx, dz), 10, true);
@@ -142,6 +145,17 @@ export function nightElements() {
   for (const f of fireSpots()) E.push({ t: 'uji_kagaribi', at: f.at, y: f.y });
   const [sx, sz] = sanNoMa();
   E.push({ t: 'uji_todai', at: [sx, sz], y: deckY(sx), h: 1.1 });             // at Hashihime's place on the san-no-ma
+  // the viewing pier of the villa: a basket fire either side of its middle and a stand lamp near its landward end, so the visitor at its end has light about him [inferred: §20]
+  const py = VIEW_PIER.y;
+  E.push({ t: 'uji_kagaribi', at: [4.8, 1.0], y: py, water: [0, 1], d: 0.3, wy: POND_LEVEL, s: 0.4 }, { t: 'uji_kagaribi', at: [14, -1.0], y: py, water: [0, -1], d: 0.3, wy: POND_LEVEL, s: 0.4 });
+  E.push({ t: 'uji_todai', at: [5.6, -1.0], y: py, h: 1.1 });
+  // the crossings of the roads: a stand lamp or a small basket fire kept before the road gods' shrine, beside it, off the road [inferred: §20]
+  for (const w of waysideSpots()) {
+    const k = w.seed < 0.5 ? 0.9 : -0.9, dx = w.at[0] - w.c[0], dz = w.at[1] - w.c[1], d = Math.hypot(dx, dz) || 1, p = [w.at[0] + (dz / d) * k * 1.4, w.at[1] - (dx / d) * k * 1.4];
+    if (hashAt(w.at[0], w.at[1], 7) < 0.5) E.push({ t: 'uji_kagaribi', at: p, y: w.y, s: 0.6 }); else E.push({ t: 'uji_todai', at: p, y: w.y, h: 1.0 });
+  }
+  // the market of the south approach: basket fires kept along the lane for the night's stragglers and watchmen of the market guild [inferred: §20]
+  for (const [i, z] of [128, 156, 184, 212, 240].entries()) { const x = -40 + (i % 2 ? 4.2 : -4.2); E.push({ t: 'uji_kagaribi', at: [x, z], y: height(x, z), s: 0.6 }); }
   // the fire boats of the river, moored in the shallows of the west bank (the fishers' craft, not fishing: §19.2)
   for (const [z, xo, rot] of [[-70, -17, 0.25], [-30, -19, -0.2], [20, -18, 0.1]]) E.push({ t: 'uji_hibune', at: [rx(z) + xo, z], y: RIVER.level, rot });
   return E;
