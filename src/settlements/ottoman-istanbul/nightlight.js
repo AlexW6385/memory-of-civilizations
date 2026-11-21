@@ -165,6 +165,23 @@ function nightHouses(el, { bag }) {
   g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
   bag.add(MAT, g);
 }
+/**
+ * shop_lamps: { list } — the lit shops of the arasta (docs §24): a hanging oil lamp over the keeper's seat, the glow of it on the vault's back wall and
+ * the plank floor, and a pool spilling through the gap in the shutter onto the avenue, so that a shop with its keeper in it is not dark at night.
+ * Each shop's lamp is a function of its place; one geometry, the halo material only.
+ */
+function shopLamps(el, { bag }) {
+  const H = new Halo();
+  for (const s of el.list) {
+    if (hashAt(s.xb, s.zc, 41) > 0.72) continue;
+    const v = (u) => s.xb + s.sg * u, y = s.y + 0.62, k = 0.85 + 0.3 * hashAt(s.xb, s.zc, 42);
+    H.ball(v(2.2), s.y + 2.05, s.zc, 0.85 * k);
+    H.floor(v(2.2), y + 0.03, s.zc, 1.5 * k, 1.1 * k);
+    H.wall(v(0.06), s.y + 1.7, s.zc, [s.sg, 0], 1.5 * k, 1.1 * k);
+    H.floor(v(s.d + 1.3), s.y + 0.03, s.zc, 1.5 * k, 1.1 * k);
+  }
+  H.flush(bag);
+}
 let DONE = false;
 /** Register the lit forms: the landmark's windows and lamps, the coffee house, and the night plan's element. Called once by the settlement's index. */
 export function registerNight() {
@@ -184,4 +201,5 @@ export function registerNight() {
   ]) wrapElement('ottoman', name, o);
   const S = STYLES.ottoman;
   S.elements.night_houses = nightHouses;
+  S.elements.shop_lamps = shopLamps;
 }
