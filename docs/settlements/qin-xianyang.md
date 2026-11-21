@@ -126,3 +126,10 @@ Hammers on clay, the beat of rammers (the labourers' chant), kiln roar, carts' a
 - Every flame the style draws gets a glow (`halo` material, night only, no light, no shadow), and a pool on the floor where it stands on one. Open houses with a lamp burn it in about four of five households, the rest are dark (their lamps removed from the plan's lights); a lit house shows a pane of light at its lattice windows on the side away from the lamp. [inferred]
 - The kiln's mouth glows through the night with a pool before it and the hot gas over the chimney hole (a kiln fired for days, as updraught kilns were [inferred]).
 - A lamp hangs on each ward gate's lintel (the keeper's, the lane closed at dusk) and two lamp stands stand at the market tower's stair head. [inferred]
+
+## 12. Sound map (match pass)
+
+- Placed sounds, from §7: the beat of the rammers with their chant at the building yard, the sledge gang on the haul road, the kiln's roar and the clay, the chisel and the brushes in the figure-makers' yards, the palace's bronze bells before the morning audience, carts' axles on the imperial road, the market's calls. [stated in the dossier's §7 as the sounds of the place; where and when each is made is inferred]
+- The market tower's drum opens and shuts the market (6.5-7.2 h and 16.8-17.5 h), the ward gates' bars drop at dusk and lift at dawn, the watch's clapper goes the rounds from 20 h to 4.5 h. [inferred: ward gates and a closed market are Qin practice, the drum and clapper patterns are ours]
+- The pit's lamps tick and the draught moves along the corridors at every hour; the listener in the pit hears them as a long cold hall (`pit` room), in the hall as a stone-and-timber one (`hall`). [inferred]
+- No Qin music survives; the bells are bronze with the inharmonic partials of a flat-mouthed bell, pitches ours. Voices: `src/engine/voices-qin.js`, all prefixed `qin` (the engine's own `qin` is the zither). Heard by no one yet: only rendered and measured (tools/sound-render.mjs).
