@@ -8,6 +8,7 @@
 import { box, lathe, clothBox, addCloth } from '../../core/geom.js';
 import { rng, lotFrame, eaveTilesGable, hipLite, eaveTiles } from '../han/kit.js';
 import { PROP_KINDS } from './props.js';
+import { STYLES } from '../../core/build.js';
 
 const WALLS = ['earth_wall', 'earth_wall', 'lime_plaster', 'mud_plaster', 'lime_plaster'];
 const pickOf = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
@@ -248,11 +249,12 @@ function yard(F, W, D, gateU, hallV0, rand, o) {
   if (!o.noFront) F.b('brick_paving', gateU - 0.8, 0, 0.5, gateU + 0.8, 0.04, hallV0 - 0.2, false);
   const spots = [];
   const free = (u, v, r) => spots.every(([a, b, q]) => Math.hypot(a - u, b - v) > r + q + 0.3);
-  const put = (kind, u, v, r, extra = {}) => { if (u < 1.0 || u > W - 1.0 || v < 1.6 || v > hallV0 - 1.2 || !free(u, v, r)) return false; spots.push([u, v, r]); prop(F, ctx, kind, u, v, extra); return true; };
+  // (the way from the gate to the hall's door stays clear: a corridor down the gate's line and a strip before the hall, for the walker)
+  const put = (kind, u, v, r, extra = {}) => { if (u < 1.0 || u > W - 1.0 || v < 1.6 || v > hallV0 - 2.3 - r || Math.abs(u - gateU) < r + 1.2 || (o.du !== undefined && Math.abs(u - o.du) < r + 1.2) || !free(u, v, r)) return false; spots.push([u, v, r]); prop(F, ctx, kind, u, v, extra); return true; };
   const mid = (hallV0 + 1.6) / 2;
   if (rand() < 0.65) put('well', gateU + (rand() < 0.5 ? 3.2 : -3.2), mid - 1, 1.1);
-  if (rand() < 0.6) put('stack', rand() < 0.5 ? 1.9 : W - 1.9, hallV0 - 2.6, 1.3, { r: 0.9 + rand() * 0.4 });
-  if (rand() < 0.55) put('jars', 1.8 + rand() * (W - 3.6), hallV0 - 1.6, 0.9, { seed: Math.floor(rand() * 99), n: 3 + Math.floor(rand() * 3) });
+  if (rand() < 0.6) put('stack', rand() < 0.5 ? 1.9 : W - 1.9, hallV0 - 4.0, 1.3, { r: 0.9 + rand() * 0.4 });
+  if (rand() < 0.55) put('jars', 1.8 + rand() * (W - 3.6), hallV0 - 3.4, 0.9, { seed: Math.floor(rand() * 99), n: 3 + Math.floor(rand() * 3) });
   if (rand() < 0.5) {
     // a pen of rough poles with a pig or a few hens (the animals are the street life's) in the corner
     const u = rand() < 0.5 ? 1.2 : W - 3.8, v = mid + 1.2;
@@ -278,20 +280,40 @@ function yard(F, W, D, gateU, hallV0, rand, o) {
   if (rand() < 0.4) put('block', gateU + (rand() < 0.5 ? 2.0 : -2.0), mid + 2.2, 0.7, { turn: 0 });
 }
 
+/** The kind of room a house of this seed is furnished as (the fifth draw of the house's own stream; a watch-tower house's hall is a store where it would be a dwelling). */
+export function roomKind(el) {
+  const rand = rng(el.seed);
+  rand(); rand(); rand(); rand();
+  const room1 = pickOf(rand, ROOMS), room0 = el.room ?? room1;
+  return el.kind === 'tower' && room0 === 'dwelling' ? 'store' : room0;
+}
+/** Where the doors of the houses built so far are (key: rect and seed): { gateU (the lane gate; none on a row house), du (the hall's door), v (its depth into the lot), W, D }. */
+export const DOORS = new Map();
+export const doorKey = (el) => `${el.rect.join(',')}:${el.seed}`;
+const NOOPS = new Proxy({}, { get: () => () => {} });
+/** The doors of a house, found by building it into a bag that keeps nothing. */
+export function houseDoors(el) {
+  const k = doorKey(el);
+  if (!DOORS.has(k)) house({ ...el, open: true }, { bag: NOOPS, col: NOOPS, lights: [], style: { elements: { wei_prop: () => {} } } });
+  return DOORS.get(k);
+}
+
 /** wei_house: { rect, front, kind ('court' | 'row' | 'tower'), seed, open } */
 export function house(el, ctx) {
   const rand = rng(el.seed), F = lotFrame(ctx, el.rect, el.front), W = F.W, D = F.D, kind = el.kind;
   const wm = WALLS[Math.floor(rand() * WALLS.length)], H = 3.3 + rand() * 0.4, wallH = 2.2 + rand() * 0.6;
-  const gateU = Math.max(1.6, Math.min(W - 1.6, W * (0.25 + 0.5 * rand()))), room1 = pickOf(rand, ROOMS), room0 = el.room ?? room1;
+  let gateU = Math.max(1.6, Math.min(W - 1.6, W * (0.25 + 0.5 * rand()))); const room1 = pickOf(rand, ROOMS), room0 = el.room ?? room1;
+  if (kind === 'tower') gateU = Math.max(1.6, Math.min(gateU, W - 2 * Math.min(2.8, (W - 3.4) / 2) - 3.2));      // (the gate's line stays clear of the watch-tower's block)
   const poor = kind === 'row' && rand() < 0.45, rich = kind === 'court' && rand() < 0.3 && W > 11.5;
   const o = { open: el.open, thatch: poor, hip: rich, rich, shut: !el.open && rand() < 0.5 };
   if (kind === 'row') {
     // a single hall on the lane's side with a yard behind: the poorer house (under thatch in a part of them)
     perimeter(F, W, D, wallH - 0.2, gateU, 1.7, wm, rand, { ...o, noFront: true });
     const hv = 1.4, hv1 = hv + 6.4;
-    hallBlock(F, 0.5, W - 0.5, hv, hv1, H - 0.2, wm, o, rand);
+    const du = hallBlock(F, 0.5, W - 0.5, hv, hv1, H - 0.2, wm, o, rand);
+    DOORS.set(doorKey(el), { du, v: hv, W, D });
     if (el.open) room(F, room0, 0.5, W - 0.5, hv, hv1, 0, rand, ctx.lights);
-    yard(F, W, D, W / 2, D, rand, { noFront: true });
+    yard(F, W, D, W / 2, D, rand, { noFront: true, du });
     // the door lintel hung with a bundle of mugwort or a cloth, a lamp over it
     F.b('cloth_red', W / 2 - 0.2, H - 1.3, hv - 0.3, W / 2 + 0.2, H - 0.7, hv - 0.27, false);
     F.b('bluestone', W - 2.6, 0, D - 3.2, W - 0.9, 0.6, D - 1.5);
@@ -301,19 +323,29 @@ export function house(el, ctx) {
   if (kind === 'tower') {
     const a = Math.min(2.8, (W - 3.4) / 2);
     louBlock(F, W - a - 1.0, 5.6 + a, a, 3.4, 3.0, wm, rand, !!el.open);
-    hallBlock(F, 1.0, W - 1.0, D - 7.0, D - 0.9, H - 0.2, wm, o, rand);
+    const du = hallBlock(F, 1.0, W - 1.0, D - 7.0, D - 0.9, H - 0.2, wm, o, rand);
+    DOORS.set(doorKey(el), { gateU, du, v: D - 7.0, W, D });
     if (el.open) room(F, room0 === 'dwelling' ? 'store' : room0, 1.0, W - 1.0, D - 7.0, D - 0.9, 0, rand, ctx.lights);
-    yard(F, W, D, gateU, D - 7.0, rand, {});
+    yard(F, W, D, gateU, D - 7.0, rand, { du });
     return;
   }
   // the court house: the hall at the back across the yard, a wing along one side (a workroom), the yard furnished
   const hallV0 = D - 7.8;
-  hallBlock(F, 1.0, W - 1.0, hallV0, D - 0.9, H, wm, o, rand);
+  const du = hallBlock(F, 1.0, W - 1.0, hallV0, D - 0.9, H, wm, o, rand);
+  DOORS.set(doorKey(el), { gateU, du, v: hallV0, W, D });
   if (el.open) room(F, room0, 1.0, W - 1.0, hallV0, D - 0.9, 0, rand, ctx.lights);
   let wing = false;
-  if (rand() < 0.8) { const left = rand() < 0.5; sideWing(F, left ? 0.8 : W - 4.2, left ? 4.2 : W - 0.8, 3.4, hallV0 - 1.6, H - 0.5, wm, o); wing = true; }
-  yard(F, W, D, gateU, hallV0 - (wing ? 0 : 0), rand, {});
-  F.b('bluestone', W / 2 - 0.6 + (rand() - 0.5) * 2, 0, hallV0 - 3.4, W / 2 + 0.6 + (rand() - 0.5) * 2, 0.6, hallV0 - 2.2);
+  if (rand() < 0.8) {
+    // (the wing stands on the side of the gate's line with more room, and not at all where there is none: the way to the hall stays clear)
+    const left0 = rand() < 0.5, roomL = gateU - 0.9 - 4.5, roomR = W - gateU - 0.9 - 4.5, left = roomL > roomR || (roomL === roomR && left0);
+    if (Math.max(roomL, roomR) > 0) { sideWing(F, left ? 0.8 : W - 4.2, left ? 4.2 : W - 0.8, 3.4, hallV0 - 1.6, H - 0.5, wm, o); wing = true; }
+  }
+  yard(F, W, D, gateU, hallV0 - (wing ? 0 : 0), rand, { du });
+  // the stone block before the hall (a mounting block), set aside from the line down from the gate and from the hall's door
+  let bu = W / 2 + (rand() - 0.5) * 2;
+  for (let k = 0; k < 2; k++) for (const c of [gateU, du]) if (Math.abs(bu - c) < 1.9) bu = c + (bu >= c ? 1.9 : -1.9);
+  bu = Math.max(1.4, Math.min(W - 1.4, bu));
+  F.b('bluestone', bu - 0.6, 0, hallV0 - 3.4, bu + 0.6, 0.6, hallV0 - 2.2);
 }
 
 /** wei_office: { rect, seed, open } — an office (shu) on the great avenue: a walled compound with its gate on the south, the board of orders, drum and halberd rack before it, a hall with desk and shelves. */
@@ -338,8 +370,18 @@ const TRADES = ['silk', 'pottery', 'lacquer', 'bronze', 'grain', 'baskets', 'iro
 const AWN = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_brown', 'cloth_green'];
 
 /** wei_shop_row: { rect, front, n, seed } — n shops side by side under one tiled roof; the front open, a door through the counter, a shelf at the back, the trade's goods, a hanging sign. */
+/** Where each shop of a row has its way in and its keeper (u along the row; filled as the row is built): key → [{ gate, keeper, sw, u0 }]. */
+export const SHOPS = new Map();
+export const shopKey = (el) => `${el.rect.join(',')}:${el.seed}`;
+/** The shops' ways in, found by building the row into a bag that keeps nothing. */
+export function shopDoors(el) {
+  const k = shopKey(el);
+  if (!SHOPS.has(k)) shopRow(el, { bag: NOOPS, col: NOOPS, lights: [], style: { elements: { wei_prop: () => {} } } });
+  return SHOPS.get(k);
+}
 export function shopRow(el, ctx) {
   const rand = rng(el.seed), F = lotFrame(ctx, el.rect, el.front), W = F.W, D = F.D, n = el.n ?? Math.max(1, Math.round(W / 5.2)), sw = W / n, H = 3.2;
+  const skey = shopKey(el); SHOPS.set(skey, []);
   F.b('brick_paving', -0.2, 0, -0.9, W + 0.2, 0.2, D, false);
   F.b('earth_wall', 0, 0.2, D - 0.4, W, H, D); F.b('earth_wall', 0, 0.2, 0, 0.4, H, D); F.b('earth_wall', W - 0.4, 0.2, 0, W, H, D);
   for (let i = 0; i <= n; i++) { const u = i * sw; F.b('timber_red', u - 0.14, 0.2, -0.3, u + 0.14, H, 0.0, false); if (i > 0 && i < n) F.b('earth_wall', u - 0.15, 0.2, 0, u + 0.15, H, D - 0.4); }
@@ -350,7 +392,9 @@ export function shopRow(el, ctx) {
   for (let i = 0; i < n; i++) {
     const u0 = i * sw, kind = TRADES[Math.floor(rand() * TRADES.length)], awn = AWN[Math.floor(rand() * AWN.length)], door = rand() < 0.5 ? 0.3 : sw - 1.5;
     // the counter, with the way in at one end of it; the awning shading the front
-    if (door < 1) F.b('lacquer_black', u0 + 1.5, 0.2, 0.05, u0 + sw - 0.3, 1.05, 0.7, true); else F.b('lacquer_black', u0 + 0.3, 0.2, 0.05, u0 + sw - 1.5, 1.05, 0.7, true);
+    // (the way in is 1.9 m wide at the counter's end so that a walker passes; the keeper stands behind the counter's middle)
+    if (door < 1) F.b('lacquer_black', u0 + 1.9, 0.2, 0.05, u0 + sw - 0.3, 1.05, 0.7, true); else F.b('lacquer_black', u0 + 0.3, 0.2, 0.05, u0 + sw - 1.9, 1.05, 0.7, true);
+    SHOPS.get(skey).push({ gate: door < 1 ? u0 + 0.95 : u0 + sw - 0.95, keeper: door < 1 ? (u0 + 1.9 + u0 + sw - 0.3) / 2 : (u0 + 0.3 + u0 + sw - 1.9) / 2, sw, u0 });
     const a = F.pt(u0 + 0.2, 0), b = F.pt(u0 + sw - 0.2, -0.9);
     addCloth(F.bag, awn, clothBox(Math.min(a[0], b[0]), H - 0.9, Math.min(a[1], b[1]), Math.max(a[0], b[0]), H - 0.3, Math.max(a[1], b[1]), 0.3), H - 0.3);
     const put = (u, v, y, fn) => { const p = F.pt(u, v); fn(p[0], y, p[1]); };
@@ -375,7 +419,14 @@ export function shopRow(el, ctx) {
       F.b('lacquer_red', u0 + 0.3, 1.4, -0.64, u0 + 0.75, 2.2, -0.6, false); F.b('gilt_bronze', u0 + 0.4, 1.55, -0.655, u0 + 0.65, 2.05, -0.64, false);
     }
     if (rand() < 0.35) { F.b('timber', u0 + sw - 0.15, 0.2, -0.62, u0 + sw - 0.07, 4.6, -0.54, false); const a2 = F.pt(u0 + sw - 0.07, -0.6), b2 = F.pt(u0 + sw - 0.07, -0.56), g = clothBox(Math.min(a2[0], b2[0]) - 0.0, 3.0, Math.min(a2[1], b2[1]), Math.max(a2[0], b2[0]) + 0.5, 4.5, Math.max(a2[1], b2[1]) + 0.5, 0.3); void g; F.b('timber', u0 + sw - 0.15, 4.5, -0.62, u0 + sw - 0.07 + 0.01, 4.6, -0.54, false); }
-    if (i === 0 && rand() < 0.5) { const p = F.pt(0.5, -1.4); ctx.style.elements.wei_prop({ kind: 'stall', at: p, yaw: 0, w: 2.4, cloth: AWN[Math.floor(rand() * AWN.length)], seed: el.seed }, ctx); }
+    if (i === 0 && rand() < 0.5) { const p = F.pt(-1.8, -1.4); ctx.style.elements.wei_prop({ kind: 'stall', at: p, yaw: 0, w: 2.4, cloth: AWN[Math.floor(rand() * AWN.length)], seed: el.seed }, ctx); }
   }
   void hipLite; void eaveTiles;
+}
+
+/** wei_keepers: { list: [figure parameters of the street life's own figure builder] } — the keepers behind the counters, built into the near plan of the shops they stand in. */
+export function keepers(el, ctx) {
+  const fig = STYLES.life?.elements?.figure;
+  if (!fig) return;
+  for (const f of el.list) fig({ ...f }, { bag: ctx.bag, col: ctx.col });
 }
