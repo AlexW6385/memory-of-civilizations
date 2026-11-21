@@ -12,5 +12,7 @@ export function nightLights() {
   const gaps = shopGapZs();
   for (const s of [-1, 1]) E.push(C(s * 4.4, [z - th - 1.6, z - th - 3.0, z - th - 4.5, z - th - 6.0, z - th - 7.5].find((q) => gaps[s].every((g) => Math.abs(g - q) > 1.3)) ?? z - th - 1.6), C(s * 4.4, z + th + 2.4));
   for (const s of [-1, 1]) E.push(C(MX + s * 6.6, 114));
+  // the great court before the Dacheng Hall (the arrival): the watch fires of the temple's keepers on both sides of the Apricot court and at the foot of the terrace's flights
+  for (const s of [-1, 1]) E.push(C(s * 34, -66), C(s * 31, -82), C(s * 22, -93));
   return E;
 }
