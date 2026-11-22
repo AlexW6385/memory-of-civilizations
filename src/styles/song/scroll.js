@@ -10,6 +10,7 @@ import { gateDoors } from '../qing/carving.js';
 import { hexa } from './kaifeng.js';
 import { vajra } from './guardian.js';
 import { Matrix4 } from '../../core/three.js';
+import { textTris, mapTris, canWrite } from './lettering.js';
 
 const fromTri = (g) => { const p = g.index ? g.toNonIndexed() : g; return Array.from(p.attributes.position.array); };
 
@@ -140,22 +141,22 @@ function shanmen(el, { bag, col }) {
 }
 /**
  * shop_plaque: the horizontal name board over a shop's front { at (the board's middle, on the face
- * of the beam over the opening), y (the house's ground), rot (the board faces +z turned by rot), n
- * (characters, 2–5), scheme (0: black board, gilt characters; 1: white board, black characters;
- * 2: red board, gilt), seed, yb (the board's foot above y) }: a board in a moulded frame, the name in
- * abstract strokes, hung on two iron hooks. A few shapes repeated over the town, so built once each
- * and placed as instances.
+ * of the beam over the opening), y (the house's ground), rot (the board faces +z turned by rot), text
+ * (the trade's word, one or two checked characters, lettering.js boardWord; none: a plain board),
+ * scheme (0: black board, gilt characters; 1: white board, black characters; 2: red board, gilt), yb
+ * (the board's foot above y) }: a board in a moulded frame, the word in raised brush characters read
+ * right to left, hung on two iron hooks. A few shapes repeated over the town, so built once each and
+ * placed as instances.
  */
 const PLAQUES = new Map();
-function plaqueParts(n, scheme, v) {
-  const key = `${n}|${scheme}|${v}`;
+function plaqueParts(text, scheme) {
+  const key = `${text}|${scheme}`;
   if (PLAQUES.has(key)) return PLAQUES.get(key);
-  const cw = 0.36, w = n * cw + 0.22, h = 0.5, fr = [], bd = [], ink = [], hk = [];
-  const P = (x, y, z) => [x, y, z];
+  const n = [...text].length, cw = 0.42, w = Math.max(0.74, n * cw + 0.24), h = 0.54, fr = [], bd = [], hk = [];
   const B8 = (x0, y0, z0, x1, y1, z1) => box4(x0, y0, z0, x1, y1, z1);
   hexa(bd, B8(-w / 2, 0, -0.035, w / 2, h, 0.01));
   for (const [a, b, c, d] of [[-w / 2 - 0.07, -0.07, w / 2 + 0.07, 0.02], [-w / 2 - 0.07, h - 0.02, w / 2 + 0.07, h + 0.07], [-w / 2 - 0.07, 0.02, -w / 2 + 0.03, h - 0.02], [w / 2 - 0.03, 0.02, w / 2 + 0.07, h - 0.02]]) hexa(fr, B8(a, b, -0.04, c, d, 0.04));
-  for (let k = 0; k < n; k++) { const u = -w / 2 + 0.11 + (k + 0.5) * cw; strokes(ink, (uu, vv, kk) => P(u + uu, 0.08 + vv, 0.01 + kk), cw * 0.82, h - 0.16, v * 17 + k * 5 + n); }
+  const ink = n ? mapTris(textTris(text, { pitch: cw, size: Math.min(cw * 0.92, h - 0.12), z0: 0.006, z1: 0.024, thick: 1.25 }), (u, v, k) => [u, v + h / 2, k]) : [];
   for (const u of [-w / 2 + 0.25, w / 2 - 0.25]) { hexa(hk, B8(u - 0.012, h + 0.07, -0.055, u + 0.012, h + 0.3, -0.03)); }
   const mats = [['lacquer_black', 'gilt_bronze', 'lacquer_red'], ['paint_white', 'lacquer_black', 'wood_dark'], ['lacquer_red', 'gilt_bronze', 'lacquer_black']][scheme];
   const parts = [[mats[0], fromTriangles(bd)], [mats[2], fromTriangles(fr)], [mats[1], fromTriangles(ink)], ['iron', fromTriangles(hk)]];
@@ -163,10 +164,12 @@ function plaqueParts(n, scheme, v) {
   return parts;
 }
 function shopPlaque(el, { bag }) {
-  const [x, z] = el.at, n = Math.max(2, Math.min(5, el.n ?? 4)), parts = plaqueParts(n, el.scheme ?? 0, (el.seed ?? 0) % 3);
+  const [x, z] = el.at, text = canWrite(el.text) ? el.text : '', parts = plaqueParts(text, el.scheme ?? 0);
   const M = new Matrix4().makeRotationY(el.rot ?? 0).premultiply(new Matrix4().makeTranslation(x, (el.y ?? 0) + (el.yb ?? 2.28), z));
-  for (const [mat, g] of parts) {
-    if (bag.addInstance) bag.addInstance(mat, g.clone(), M, { reach: 140 });
+  for (const [pi, [mat, g]] of parts.entries()) {
+    if (!g.attributes.position.count) continue;
+    // (the board, frame and hooks are instanced; the characters, many different shapes of few copies each, are merged into the plan's gilt or black mesh: no draw of their own)
+    if (bag.addInstance && pi !== 2) bag.addInstance(mat, g.clone(), M, { reach: 140 });
     else bag.add(mat, g.clone().applyMatrix4(M));
   }
 }
@@ -246,8 +249,8 @@ function songOxcart(el, { bag, col }) {
 
 /**
  * signboard: a standing signboard (li pai) { at, y, rot (its face toward −z turned by rot), h (the
- * board), w, chars, board (material), ink, roof }: an upright board in a frame on two feet braced by
- * struts, a little tiled hood over it, its characters in a column.
+ * board), w, text (checked characters, a column, top to bottom, on both faces), board (material), ink,
+ * roof }: an upright board in a frame on two feet braced by struts, a little tiled hood over it.
  */
 function signboard(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, c = Math.cos(el.rot ?? 0), sn = Math.sin(el.rot ?? 0), h = el.h ?? 2.2, w = el.w ?? 0.55, y0 = el.foot ?? 0.45;
@@ -261,15 +264,16 @@ function signboard(el, { bag, col }) {
   }
   hexa(fr, B8(-w / 2 - 0.1, y0 - 0.08, -0.05, w / 2 + 0.1, y0, 0.05)); hexa(fr, B8(-w / 2 - 0.1, y0 + h, -0.05, w / 2 + 0.1, y0 + h + 0.08, 0.05));
   hexa(bd, B8(-w / 2, y0, -0.025, w / 2, y0 + h, 0.025));
-  const n = el.chars ?? 6, ch = Math.min(w * 0.8, (h - 0.2) / n - 0.05);
-  for (let k = 0; k < n; k++) for (const side of [-1, 1]) {
-    const yy = y0 + h - 0.1 - (k + 1) * (h - 0.2) / n + ((h - 0.2) / n - ch) / 2;
-    // (read from either face: across it from the reader's left to right, which is −x on the face toward −z)
-    strokes(ink, (u, v, kk) => P(side * u, yy + v, side * (0.025 + kk)), ch, ch, (el.seed ?? 1) * 31 + k);
+  // the board's word (checked characters, a column from the top; none: a plain board), lettered on both faces, each facing its reader
+  const word = canWrite(el.text) ? [...el.text] : [], n = word.length;
+  if (n) {
+    const ch = Math.min(w * 0.8, (h - 0.3) / n - 0.04), pitch = ch * 1.06, yc = y0 + h - 0.15 - ch / 2 - (n - 1) * pitch / 2;
+    const col1 = textTris(el.text, { pitch, size: ch, vertical: true, z0: 0, z1: 0.012, thick: 1.2 });
+    ink.push(...mapTris(col1, (u, v, k) => P(-u, yc + v, -(0.025 + k))), ...mapTris(col1, (u, v, k) => P(u, yc + v, 0.025 + k)));
   }
   // the hood: two sloped boards over the top
   for (const s of [-1, 1]) hexa(hood, [P(-w / 2 - 0.22, y0 + h + 0.12, s * 0.3), P(w / 2 + 0.22, y0 + h + 0.12, s * 0.3), P(w / 2 + 0.22, y0 + h + 0.32, 0), P(-w / 2 - 0.22, y0 + h + 0.32, 0), P(-w / 2 - 0.22, y0 + h + 0.16, s * 0.3), P(w / 2 + 0.22, y0 + h + 0.16, s * 0.3), P(w / 2 + 0.22, y0 + h + 0.36, 0), P(-w / 2 - 0.22, y0 + h + 0.36, 0)]);
-  bag.add('wood_dark', fromTriangles(fr)); bag.add(el.board ?? 'paint_white', fromTriangles(bd)); bag.add(el.ink ?? 'lacquer_black', fromTriangles(ink)); bag.add(el.roof ?? 'tile_dark', fromTriangles(hood));
+  bag.add('wood_dark', fromTriangles(fr)); bag.add(el.board ?? 'paint_white', fromTriangles(bd)); if (ink.length) bag.add(el.ink ?? 'lacquer_black', fromTriangles(ink)); bag.add(el.roof ?? 'tile_dark', fromTriangles(hood));
   col.circle(x, z, Math.max(0.35, w / 2 + 0.1), y, y + y0 + h);
 }
 
@@ -282,7 +286,7 @@ function fortune(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, c = Math.cos(el.rot ?? 0), sn = Math.sin(el.rot ?? 0);
   const P = (lx, ly, lz) => [x + lx * c + lz * sn, y + ly, z - lx * sn + lz * c];
   const B8 = (x0, y0, z0, x1, y1, z1) => [P(x0, y0, z0), P(x1, y0, z0), P(x1, y0, z1), P(x0, y0, z1), P(x0, y1, z0), P(x1, y1, z0), P(x1, y1, z1), P(x0, y1, z1)];
-  const tim = [], mat = [], cloth = [], dk = [], ink = [];
+  const tim = [], mat = [], cloth = [], dk = [];
   const hw = 1.5, hd = 1.2;
   for (const [px, pz, hh] of [[-hw, -hd, 2.35], [hw, -hd, 2.35], [-hw, hd, 2.6], [hw, hd, 2.6]]) { tim.push(...fromTri(rod(P(px, 0, pz), P(px, hh + 0.05, pz), 0.035, 5))); col.circle(...[P(px, 0, pz)].map((p) => [p[0], p[2]])[0], 0.08, y, y + hh); }
   for (const [a, b] of [[[-hw, 2.35, -hd], [hw, 2.35, -hd]], [[-hw, 2.6, hd], [hw, 2.6, hd]], [[-hw, 2.35, -hd], [-hw, 2.6, hd]], [[hw, 2.35, -hd], [hw, 2.6, hd]]]) tim.push(...fromTri(rod(P(...a), P(...b), 0.025, 4)));
@@ -305,11 +309,10 @@ function fortune(el, { bag, col }) {
     const [lx, lz] = [[-hw + 0.05, -hd - 0.13], [hw - 0.05, -hd - 0.13], [0, hd + 0.14]][i], top = i === 2 ? 2.55 : 2.2, bw = 0.32, bh = 1.15;
     tim.push(...fromTri(rod(P(lx, 0, lz), P(lx, top + 0.1, lz), 0.025, 4)));
     hexa(cloth, B8(lx - bw / 2, top - bh, lz - 0.04, lx + bw / 2, top, lz - 0.02));
-    for (let k = 0; k < 2; k++) { const v0 = top - 0.5 - k * 0.45; strokes(ink, (u, v, kk) => P(lx - u, v0 + v, lz - 0.04 - kk), 0.24, 0.3, 50 + i * 7 + k); }
+    // (the signs' wording in the scroll is not in the checked table: the cloth is left plain)
     col.circle(...[P(lx, 0, lz)].map((p) => [p[0], p[2]])[0], 0.08, y, y + top);
   }
-  bag.add('bamboo_culm', fromTriangles(tim)); bag.add('reed_mat', fromTriangles(mat)); bag.add(el.cloth ?? 'cloth_white', fromTriangles(cloth)); bag.add('wood_dark', fromTriangles(dk)); bag.add('lacquer_black', fromTriangles(ink));
-  col.circle(...[P(0, 0, 0)].map((p) => [p[0], p[2]])[0], 0.85, y, y + 0.85);
+  bag.add('bamboo_culm', fromTriangles(tim)); bag.add('reed_mat', fromTriangles(mat)); bag.add(el.cloth ?? 'cloth_white', fromTriangles(cloth)); bag.add('wood_dark', fromTriangles(dk)); col.circle(...[P(0, 0, 0)].map((p) => [p[0], p[2]])[0], 0.85, y, y + 0.85);
 }
 
 /**

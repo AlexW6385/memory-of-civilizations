@@ -13,6 +13,7 @@ import './style.js';
 import { STONE_BANK, WHARVES, STEPS, LANES, onLane } from './layout.js';
 import { ground } from './ground.js';
 import { tradeOf } from './trades.js';
+import { boardWord } from '../../styles/song/lettering.js';
 import { shopElements } from './shops.js';
 import { interiorElements, interiorLife, furnishedLots } from './interiors.js';
 import { SEDANS, OXCARTS, BARROWS, DRAY } from './doors.js';
@@ -123,7 +124,7 @@ function scroll() {
   for (const l of teaHouses()) {
     const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2 - 0.6, Y = 0.45;
     S.push({ t: 'tea_house', rect: l.rect, y: 0, seed: l.seed });
-    S.push({ t: 'shop_plaque', at: [(x0 + x1) / 2, z1 - 0.435], y: 0, yb: 3.3, rot: 0, n: 2, scheme: 0, seed: l.seed >> 5 });
+    S.push({ t: 'shop_plaque', at: [(x0 + x1) / 2, z1 - 0.435], y: 0, yb: 3.3, rot: 0, text: '茶館', scheme: 0 });
     for (const zz of [z0 + 3.9, z0 + 7.5]) {
       L.push({ t: 'tea_table', at: [cx, zz], y: Y, rot: 0, seed: Math.floor(rand() * 1e9) });
       for (const [dx, dz] of [[0.85, 0], [-0.85, 0], [0, 0.85], [0, -0.85]]) if (rand() < 0.6) person([cx + dx, zz + dz], Y, faceTo([-dx, -dz]), { pose: 'sit', dress: 'robe', hat: rand() < 0.6 ? 'cap' : 'none' });
@@ -136,8 +137,11 @@ function scroll() {
     if (!l.shop || wine.has(l) || tea.has(l)) continue;
     if (hotDist((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) > 200) continue;      // (name boards are read from near: none on the far shops)
     const F = frontLine(l), m = [(F.a[0] + F.b[0]) / 2 - F.out[0] * 0.505, (F.a[1] + F.b[1]) / 2 - F.out[1] * 0.505], L = Math.hypot(F.b[0] - F.a[0], F.b[1] - F.a[1]);
-    const n = Math.min(Math.floor((L - 0.6) / 0.36), 2 + (l.seed % 3));          // (2-4 characters, two stroke sets: 18 shapes in all, each repeated enough to be instanced)
-    if (n >= 2) S.push({ t: 'shop_plaque', at: m, y: 0, rot: Math.atan2(F.out[0], F.out[1]), n, scheme: [0, 0, 1, 2][l.seed % 4 === 3 ? (l.seed >> 3) % 4 : (l.seed >> 2) % 3], seed: (l.seed >> 5) % 2 });
+    // (the trade's word, one or two characters, if the front is wide enough for it; a trade the checked table has no word for keeps a plain board)
+    if (L < 1.3) continue;
+    let text = boardWord(tradeOf(l));
+    if ([...text].length * 0.42 + 0.4 > L) text = [...text].slice(0, 1).join('');
+    S.push({ t: 'shop_plaque', at: m, y: 0, rot: Math.atan2(F.out[0], F.out[1]), text, scheme: [0, 0, 1, 2][[...text].reduce((a, c) => a + c.codePointAt(0), 0) % 4] });      // (a board's colours go with its word: fewer shapes, each repeated enough to be instanced)
   }
   more(S, L, rand, person, pick);
   return [base('song-kaifeng-scroll', S), base('song-kaifeng-crowds', L, 'life')];
@@ -212,7 +216,7 @@ function more(S, L, rand, person, pick) {
   {
     const l = wineShops()[0], F = frontLine(l), back = l.front === 'e' ? [-1, 0] : l.front === 'w' ? [1, 0] : l.front === 's' ? [0, -1] : [0, 1];
     const sx = F.a[0] + F.out[0] * 2.9 - (F.b[0] - F.a[0]) * 0.08, sz = F.a[1] + F.out[1] * 2.9 - (F.b[1] - F.a[1]) * 0.08;
-    S.push({ t: 'signboard', at: [sx, sz], y: 0.04, rot: faceTo(F.out), h: 2.9, w: 0.78, chars: 3, board: 'paint_white', seed: 11 });
+    S.push({ t: 'signboard', at: [sx, sz], y: 0.04, rot: faceTo(F.out), h: 2.9, w: 0.78, text: '正店', board: 'paint_white' });
     // the yard: the first clear spot behind the shop
     const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, depth = Math.abs(back[0]) ? x1 - x0 : z1 - z0;
     for (let d = depth / 2 + 3; d < depth / 2 + 30; d += 1) {
@@ -225,8 +229,8 @@ function more(S, L, rand, person, pick) {
     const l = lots().filter((q) => q.shop && q.front === 's' && q.rect[3] > -85 && q.rect[3] < -83 && q.rect[0] > -275 && q.rect[0] < -262)[0];
     if (l) {
       const F = frontLine(l), zf = F.a[1] + 0.9;
-      S.push({ t: 'signboard', at: [l.rect[0] + 0.7, zf], y: 0.04, rot: faceTo([0, 1]), h: 2.9, w: 0.5, chars: 9, board: 'paint_white', seed: 21 });
-      S.push({ t: 'signboard', at: [l.rect[2] - 0.7, zf], y: 0.04, rot: faceTo([0, 1]), h: 2.5, w: 0.45, chars: 7, board: 'paint_white', seed: 22 });
+      S.push({ t: 'signboard', at: [l.rect[0] + 0.7, zf], y: 0.04, rot: faceTo([0, 1]), h: 2.9, w: 0.5, text: '藥店', board: 'paint_white' });
+      S.push({ t: 'signboard', at: [l.rect[2] - 0.7, zf], y: 0.04, rot: faceTo([0, 1]), h: 2.5, w: 0.45, text: '藥', board: 'paint_white' });
       const mx = (l.rect[0] + l.rect[2]) / 2;
       person([mx - 0.5, zf + 0.6], 0.04, faceTo([0, -1]), { dress: 'robe', cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'none', hair: 'bun', beard: false, pose: 'talk' });
       person([mx + 0.4, zf + 0.8], 0.04, faceTo([0, -1]), { dress: 'robe', cloth: 'cloth_green', cloth2: 'cloth_white', hat: 'none', hair: 'bun', beard: false, carry: 'none' });

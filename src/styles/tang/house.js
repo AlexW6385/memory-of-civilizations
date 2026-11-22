@@ -2,7 +2,8 @@
 // and thatch, and the rows of open-fronted shops of the market (party walls, a counter and the goods of each trade, the
 // wine flag on its pole). Lot-based, like the other towns: a lot { rect, front, kind, seed, det } becomes one house.
 
-import { box, lathe } from '../../core/geom.js';
+import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { boardWord, textTris, mapTris } from '../song/lettering.js';
 import { inFrame, YAW, rng, wallRun, tangRoof } from './kit.js';
 import { buildHall } from './hall.js';
 import { furnishHouse } from './interior.js';
@@ -184,7 +185,12 @@ function frontage(L, trade, x0, x1, zf, rand, det) {
   const pot = (x, z, r, h, m) => { jar(bag, x, 0, z, r, h, m); col.circle(x, z, r, 0, h); };
   // the lanterns at the unit's ends and the signboard hung from the architrave
   for (const x of [x0 + 0.5, x1 - 0.5]) { bag.add('wood_dark', box(x - 0.006, 3.0, zf - 0.55, x + 0.006, 3.3, zf - 0.54)); bag.add('lamp_paper', box(x - 0.13, 2.62, zf - 0.68, x + 0.13, 3.02, zf - 0.42)); }
-  bag.add('lacquer_black', box(mx - 0.45, 2.5, zf - 0.6, mx + 0.45, 3.0, zf - 0.55)); bag.add('gilt_bronze', box(mx - 0.38, 2.57, zf - 0.57, mx + 0.38, 2.93, zf - 0.52)); bag.add('cloth_red', box(mx - 0.03, 2.1, zf - 0.6, mx + 0.03, 2.5, zf - 0.57));
+  bag.add('lacquer_black', box(mx - 0.45, 2.5, zf - 0.6, mx + 0.45, 3.0, zf - 0.55)); {   // the board's gilt rim and the trade's word (checked characters, right to left; a trade with none in the table keeps a plain board)
+    const g = [[-0.38, 2.57, 0.38, 2.6], [-0.38, 2.9, 0.38, 2.93], [-0.38, 2.6, -0.35, 2.9], [0.35, 2.6, 0.38, 2.9]];
+    for (const [a, b, c, d] of g) bag.add('gilt_bronze', box(mx + a, b, zf - 0.57, mx + c, d, zf - 0.52));
+    const word = boardWord(trade);
+    if (word) bag.add('gilt_bronze', fromTriangles(mapTris(textTris(word, { pitch: 0.36, size: 0.3, z0: 0.004, z1: 0.016, thick: 1.25 }), (u, v, k) => [mx + u, 2.75 + v, zf - 0.55 + k])));
+  } bag.add('cloth_red', box(mx - 0.03, 2.1, zf - 0.6, mx + 0.03, 2.5, zf - 0.57));
   if (det < 1) return;
   const rackAt = (a, b, hmin, hmax, mats) => {
     for (const x of [a, b]) { bag.add('bamboo_culm', box(x - 0.04, 0, zf + 0.5, x + 0.04, hmax + 0.15, zf + 0.58)); col.circle(x, zf + 0.54, 0.08, 0, hmax); }

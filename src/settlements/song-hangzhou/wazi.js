@@ -87,13 +87,12 @@ function fangGate(el, { bag, col }) {
   bag.add('lacquer_red', box(x - 0.14, y0 + 3.45, z - half - 0.3, x + 0.14, y0 + 3.7, z + half + 0.3));                  // the tie beam
   bag.add('lacquer_red', box(x - 0.2, y0 + h - 0.3, z - half - 0.55, x + 0.2, y0 + h, z + half + 0.55));                  // the lintel
   gableRoof(bag, [x - 0.8, z - half - 0.5, x + 0.8, z + half + 0.5], y0 + h, 0.85, 0.5, false, 'plaster_white');
-  // the board: black lacquer, a white border and three white strokes standing for its characters
+  // the board: black lacquer in a white border, left plain (the theatre's name is not known)
   const bx0 = x - 0.07, bx1 = x + 0.07, bz = (z - 1.0), bw = 2.0, by = y0 + 2.55;
   for (const sx of [-1, 1]) bag.add('rope_fibre', rod([x + sx * 0.0, y0 + 3.45, bz + 0.1], [x, by + 0.75, bz + 0.1], 0.01, 4));
   bag.add('lacquer_black', box(bx0, by, bz, bx1, by + 0.75, bz + bw));
   bag.add('paint_white', box(bx1, by + 0.04, bz + 0.04, bx1 + 0.012, by + 0.71, bz + bw - 0.04));
   bag.add('lacquer_black', box(bx1, by + 0.07, bz + 0.07, bx1 + 0.014, by + 0.68, bz + bw - 0.07));
-  for (let k = 0; k < 3; k++) { const c = bz + 0.35 + k * 0.65; bag.add('paint_white', box(bx1 + 0.014, by + 0.16, c - 0.16, bx1 + 0.03, by + 0.6, c + 0.16)); bag.add('lacquer_black', box(bx1 + 0.03, by + 0.2 + (k % 2) * 0.05, c - 0.1, bx1 + 0.04, by + 0.56, c + 0.1)); }
   for (const s of [-1, 1]) lamp(bag, x + 0.45, y0 + 3.45, z + s * (half - 0.7), 1.1);
   void rand;
 }
@@ -127,11 +126,11 @@ function gateway(bag, col, y0, g, rect) {
   for (const s of [-1, 1]) { const [px, pz] = at(g.at + s * W / 2); bag.add('granite_grey', box(px - 0.3, y0, pz - 0.3, px + 0.3, y0 + 0.45, pz + 0.3)); bag.add('lacquer_red', rod([px, y0 + 0.45, pz], [px, y0 + h, pz], 0.15, 8)); col.circle(px, pz, 0.3, y0, y0 + h); }
   const [ax, az] = at(g.at - W / 2 - 0.4), [bx, bz] = at(g.at + W / 2 + 0.4);
   bag.add('lacquer_red', box(Math.min(ax, bx) - (g.side === 'e' ? 0.15 : 0), y0 + h, Math.min(az, bz) - (g.side === 's' ? 0.15 : 0), Math.max(ax, bx) + (g.side === 'e' ? 0.15 : 0), y0 + h + 0.3, Math.max(az, bz) + (g.side === 's' ? 0.15 : 0)));
-  // the board over the gate, black with a white rim and white strokes; the red valance under the beam, scalloped
+  // the board over the gate, black with a white rim, left plain (the name is not known); the red valance under the beam, scalloped
   const mid = at(g.at), alongX = g.side === 's';
   const bw = 2.6, bh = 0.7, by = y0 + h + 0.34;
-  if (alongX) { bag.add('lacquer_black', box(mid[0] - bw / 2, by, mid[1] - 0.05, mid[0] + bw / 2, by + bh, mid[1] + 0.05)); bag.add('paint_white', box(mid[0] - bw / 2 + 0.05, by + 0.05, mid[1] + 0.05, mid[0] + bw / 2 - 0.05, by + bh - 0.05, mid[1] + 0.058)); bag.add('lacquer_black', box(mid[0] - bw / 2 + 0.1, by + 0.1, mid[1] + 0.058, mid[0] + bw / 2 - 0.1, by + bh - 0.1, mid[1] + 0.066)); for (let k = 0; k < 2; k++) bag.add('paint_white', box(mid[0] - 0.8 + k * 1.0, by + 0.17, mid[1] + 0.066, mid[0] - 0.2 + k * 1.0, by + bh - 0.17, mid[1] + 0.074)); }
-  else { bag.add('lacquer_black', box(mid[0] - 0.05, by, mid[1] - bw / 2, mid[0] + 0.05, by + bh, mid[1] + bw / 2)); bag.add('paint_white', box(mid[0] - 0.058, by + 0.05, mid[1] - bw / 2 + 0.05, mid[0] - 0.05, by + bh - 0.05, mid[1] + bw / 2 - 0.05)); bag.add('lacquer_black', box(mid[0] - 0.066, by + 0.1, mid[1] - bw / 2 + 0.1, mid[0] - 0.058, by + bh - 0.1, mid[1] + bw / 2 - 0.1)); for (let k = 0; k < 2; k++) bag.add('paint_white', box(mid[0] - 0.074, by + 0.17, mid[1] - 0.8 + k * 1.0, mid[0] - 0.066, by + bh - 0.17, mid[1] - 0.2 + k * 1.0)); }
+  if (alongX) { bag.add('lacquer_black', box(mid[0] - bw / 2, by, mid[1] - 0.05, mid[0] + bw / 2, by + bh, mid[1] + 0.05)); bag.add('paint_white', box(mid[0] - bw / 2 + 0.05, by + 0.05, mid[1] + 0.05, mid[0] + bw / 2 - 0.05, by + bh - 0.05, mid[1] + 0.058)); bag.add('lacquer_black', box(mid[0] - bw / 2 + 0.1, by + 0.1, mid[1] + 0.058, mid[0] + bw / 2 - 0.1, by + bh - 0.1, mid[1] + 0.066)); }
+  else { bag.add('lacquer_black', box(mid[0] - 0.05, by, mid[1] - bw / 2, mid[0] + 0.05, by + bh, mid[1] + bw / 2)); bag.add('paint_white', box(mid[0] - 0.058, by + 0.05, mid[1] - bw / 2 + 0.05, mid[0] - 0.05, by + bh - 0.05, mid[1] + bw / 2 - 0.05)); bag.add('lacquer_black', box(mid[0] - 0.066, by + 0.1, mid[1] - bw / 2 + 0.1, mid[0] - 0.058, by + bh - 0.1, mid[1] + bw / 2 - 0.1)); }
   for (let i = 0; i < 6; i++) {
     const t = (i + 0.5) / 6, a = g.at - W / 2 + W * t, [vx, vz] = at(a);
     if (alongX) bag.add('cloth_red', fromTriangles([vx - 0.3, y0 + h, vz, vx + 0.3, y0 + h, vz, vx, y0 + h - 0.45, vz, vx - 0.3, y0 + h, vz, vx, y0 + h - 0.45, vz, vx + 0.3, y0 + h, vz]));
@@ -195,11 +194,10 @@ function hzWazi(el, { bag, col }) {
   for (const px of [sx0 + 0.35, sx1 - 0.35]) bag.add('lacquer_red', box(px - 0.12, yw - 0.4, sz0 + 0.4, px + 0.12, yw, sz1 - 0.45));
   for (let x = sx0 + 0.9; x < sx1 - 0.5; x += 1.35) for (const pz of [sz1 - 0.45]) { bag.add('timber', box(x - 0.06, yw - 0.02, pz - 0.5, x + 0.06, yw + 0.12, pz + 0.1)); bag.add('timber', box(x - 0.1, yw - 0.1, pz - 0.2, x + 0.1, yw - 0.02, pz + 0.16)); }
   gableRoof(bag, [sx0 - 0.1, sz0 - 0.3, sx1 + 0.1, sz1 + 0.2], yw, 1.9, 1.2, true, 'plaster_white');
-  // a board of the theatre's name under the ridge front, black with a white border
+  // a board for the theatre's name under the ridge front, black with a white border (left plain: the name is not known)
   bag.add('lacquer_black', box(cx - 1.6, yw - 0.02 + 0.05, sz1 + 0.3 - 0.0, cx + 1.6, yw + 0.7, sz1 + 0.34));
   bag.add('paint_white', box(cx - 1.55, yw + 0.1, sz1 + 0.34, cx + 1.55, yw + 0.65, sz1 + 0.348));
   bag.add('lacquer_black', box(cx - 1.48, yw + 0.17, sz1 + 0.348, cx + 1.48, yw + 0.58, sz1 + 0.356));
-  for (let k = 0; k < 2; k++) bag.add('paint_white', box(cx - 1.0 + k * 1.1, yw + 0.22, sz1 + 0.356, cx - 0.2 + k * 1.1, yw + 0.53, sz1 + 0.364));
   // the back wall (planks) with two doorways at the ends — "go out as a general, come in as a minister" (出将入相) — each with a curtain, and red hangings between
   const bz = sz0 + 0.1;
   const pieces = [[sx0 + 0.1, sx0 + 1.55], [sx0 + 3.35, sx1 - 3.35], [sx1 - 1.55, sx1 - 0.1]];

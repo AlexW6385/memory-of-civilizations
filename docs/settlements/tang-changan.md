@@ -171,3 +171,5 @@ Code: `src/settlements/tang-changan/walk.js` (the walk as data), `walkroutes.js`
 ## Plaque of the Big Wild Goose Pagoda (round 8): left as it is
 
 No period plaque is stated. The pagoda was "慈恩寺塔" in the early Tang; 雁塔 appears in Song texts and 大雁塔 only in the Ming, to tell it from the Jianfu Temple's pagoda [stated: The Paper, https://m.thepaper.cn/newsDetail_forward_24621530]; the same article names Tang inscriptions on the first-floor lintels without their wording, and the 大慈恩寺 board it mentions is on the temple's mountain gate and modern. A 大雁塔 board at c. 750 would be wrong, so none was made (the glyphs exist).
+
+Shop signboards (lettering): each shop's hung board carries its trade's word in checked characters (the Tang kaishu is attested), plain if the table has none [inferred].
