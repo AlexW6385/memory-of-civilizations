@@ -150,7 +150,7 @@ function paris_house(el, { bag, col, lights }) {
     // the burgher's front: two small windows with iron bars and wooden shutters, a stone bench, a niche over the door with a saint
     const wu = doorL ? [su + 0.3, su + ws * 0.5 + 0.3] : [su + 0.1, su + ws * 0.5 + 0.1], ww = Math.min(0.62, ws * 0.38);
     for (const u0 of wu) {
-      if (OPEN) B('opening', u0, u0 + ww, 1.3, 2.1, -0.125, -0.1); else B('opening', u0, u0 + ww, 1.3, 2.1, -0.03, 0.05);
+      B('opening', u0, u0 + ww, 1.3, 2.1, -0.03, 0.05);       // (an open house too: a slab proud of the wall hid the frame and the bars and read as a blank black board)
       B('limestone', u0 - 0.1, u0 + ww + 0.1, 1.2, 1.3, -0.12, 0.06); B('limestone', u0 - 0.1, u0 + ww + 0.1, 2.1, 2.2, -0.1, 0.06);
       for (const u of [u0 - 0.1, u0 + ww]) B('limestone', u, u + 0.1, 1.3, 2.1, -0.1, 0.06);
       for (let k = 1; k < 4; k++) R('iron', [u0 + ww * k / 4, 1.3, -0.07], [u0 + ww * k / 4, 2.1, -0.07], 0.012, 4);
@@ -203,9 +203,9 @@ function paris_house(el, { bag, col, lights }) {
       for (const sg of [-1, 1]) {
         if (gk) break;
         const ue = uc + sg * (ww / 2 + 0.01);
-        if (open < 0.4) B('wood_dark', ue, ue + sg * 0.04, ya, ya + hw, dd - 0.5, dd - 0.02);               // opened out against the wall's face
-        else if (open < 0.75) { const e = ue + sg * 0.1; B('wood_dark', Math.min(e, e + sg * 0.45), Math.max(e, e + sg * 0.45), ya, ya + hw, dd - 0.06, dd - 0.02); }
-        else B('wood_dark', Math.min(ue, ue - sg * ww / 2), Math.max(ue, ue - sg * ww / 2), ya, ya + hw, dd - 0.06, dd - 0.02);
+        if (open < 0.4) B('timber', ue, ue + sg * 0.04, ya, ya + hw, dd - 0.5, dd - 0.02);               // opened out against the wall's face
+        else if (open < 0.75) { const e = ue + sg * 0.1; B('timber', Math.min(e, e + sg * 0.45), Math.max(e, e + sg * 0.45), ya, ya + hw, dd - 0.06, dd - 0.02); }
+        else B('timber', Math.min(ue, ue - sg * ww / 2), Math.max(ue, ue - sg * ww / 2), ya, ya + hw, dd - 0.06, dd - 0.02);
       }
       // St Andrew's cross under the sill in the plaster panel between the beam and the window
       if (!gk) { const ua = uc - ww / 2 - 0.1, ub = uc + ww / 2 + 0.1, y0 = yb + 0.3, y1 = ya - 0.22; if (y1 - y0 > 0.3) { R('timber', [ua, y0, dd - 0.01], [ub, y1, dd - 0.01], 0.032, 4); R('timber', [ub, y0, dd - 0.01], [ua, y1, dd - 0.01], 0.032, 4); } }
