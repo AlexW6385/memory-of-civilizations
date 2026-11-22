@@ -311,6 +311,15 @@ export function village() {
     const r4 = rng(2613), nf = P(30, 20);
     [0.3, 2.6, 4.4].forEach((t, k) => { const at = [nf[0] + Math.cos(t) * 2.8, nf[1] + Math.sin(t) * 2.8]; L.push({ t: 'figure', at, y: height(...at), rot: face(at, nf), seed: Math.floor(r4() * 1e9), dress: r4() < 0.5 ? 'robe' : 'tunic', cloth: CLOTH[Math.floor(r4() * CLOTH.length)], cloth2: CLOTH[Math.floor(r4() * CLOTH.length)], skin: 'skin_light', hat: 'none', pose: k === 0 ? 'squat' : 'sit_ground', nightKeep: 1 }); });
   }
+  // two more night fires (§16b), last of all: a camp fire in the arrival's foreground off the walk line, and a small one in the sarsen circle's open floor
+  {
+    const r5 = rng(2617), mk = (c, rr, ang, n) => {
+      C.push({ t: 'feast_fire', c, r: rr, y: height(...c), yaw: 0.4, pig: false, seed: 4261 + Math.round(c[0]) });
+      for (let k = 0; k < n; k++) { const t = ang + k * 6.28 / n + r5() * 0.4, at = [c[0] + Math.cos(t) * (rr + 0.5), c[1] + Math.sin(t) * (rr + 0.5)]; L.push({ t: 'figure', at, y: height(...at), rot: face(at, c), seed: Math.floor(r5() * 1e9), dress: r5() < 0.5 ? 'robe' : 'tunic', cloth: CLOTH[Math.floor(r5() * CLOTH.length)], cloth2: CLOTH[Math.floor(r5() * CLOTH.length)], skin: 'skin_light', hat: 'none', pose: k % 3 === 0 ? 'squat' : 'sit_ground', nightKeep: 1 }); }
+    };
+    mk([20.5, -14], 2.0, 0.5, 5);
+    mk([-3, 3], 1.4, 1.1, 3);
+  }
   const rooms = H.map((h, i) => { const k = h.s / 2 / (Math.abs(Math.cos(h.yaw)) + Math.abs(Math.sin(h.yaw))) - 0.15; return { id: 'house ' + i, rect: [h.c[0] - k, h.c[1] - k, h.c[0] + k, h.c[1] + k], y: h.y, kind: 'hall' }; });
   return [base('stonehenge-yards', Y, 'neolithic', rooms), base('stonehenge-crafts', C, 'neolithic'), base('stonehenge-scrub', S, 'neolithic'), base('stonehenge-village-life', L, 'life')];
 }

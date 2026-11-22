@@ -259,3 +259,6 @@ In each open house: the floor trodden dark in a path from the door to the hearth
 - **Sheep as critters.** Two of the six flocks on the down (about [-41, 135] and [-205, -35]) are twelve small brown horned sheep critters (`critter-models-farm.js`) in place of their still sheep, herders and dogs still; the other four flocks stay still life [inferred: Neolithic flocks were small].
 
 - Herds and yard groups: 51 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 42 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.
+
+## 16b. Night fires in the arrival's frame
+- [inferred] A camp fire with five people sits 15 m from the arrival, off the walk line toward the circle, and a small fire with three people on the open floor of the sarsen circle: the midwinter feasting gatherings (§10a) put people out at night; a fire among the stones is [inferred] (no source for it). Both in `town.js`, added last (`rng(2617)`).
