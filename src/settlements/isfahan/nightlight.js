@@ -149,6 +149,9 @@ function wrapElement(name, o) {
  * arcade's passage and another on the square before the arch), the lamps of the bazaar's shops (a glow in the shop, a pool in the street),
  * the lamps hung in the court's four iwans.
  */
+// kept here, not in the plan's element: the generated street life is seeded from the plans' data, and a change there moves its figures off the walks
+const NEAR_LAMPS = [{ at: [-1.5, 172.6], h: 1.7, r: 3.0 }, { at: [-7, 188], h: 1.9, r: 3.4 }, { at: [7, 192], h: 1.9, r: 3.4 },
+  ...[-1, 1].flatMap((sd) => Array.from({ length: 8 }, (_, i) => ({ at: [sd * 77.7, 128 + i * 13], h: 3.0, r: 3.4 })))];   // [inferred; Isfahan.ir §5: the square lit by oil lamps at night]
 function night(el, { bag }) {
   const H = new Halo();
   for (const b of el.shops || []) {
@@ -182,6 +185,8 @@ function night(el, { bag }) {
     if (s.mat) { H.ball(x, 0.55, zz, 0.55); H.floor(x, 0.07, zz, 2.0, 1.7); }
     else { H.ball(x, 1.95, zz - 0.2, 0.85 + 0.2 * h); H.floor(x, 0.07, zz - 0.6, 2.9, 2.4); }
   }
+  // the lamps set apart: a lamp under an awning, or one hung in the arcade's passage (a glow and a pool): { at: [x, z], h, r } — two on the aisle ahead of the arrival, eight in each side's arcade passage
+  for (const l of NEAR_LAMPS) { H.ball(l.at[0], l.h, l.at[1], 0.8 + 0.2 * hashAt(l.at[0], l.at[1], 62)); H.floor(l.at[0], 0.08, l.at[1], l.r, l.r * 0.85); }
   for (const [x, y, zz] of el.iwans || []) H.ball(x, y, zz, 1.0);
   H.flush(bag);
 }
