@@ -67,4 +67,7 @@ critters.push({ model: 'pigeon_grey', at: [-15.6, 0.44, 9.9], rot: 1.0, range: [
 critters.push({ type: 'floaters', models: ['goose_white', 'goose_grey', 'duck_brown'], area: [riverX(-30) - 0.4, -36, riverX(-30) + 0.4, -22], dist: (x, zz) => Math.abs(x - riverX(zz)) - RIVER.w / 2, a: [7, 1.7], ratio: 0.22, margin: 1.0, minA: 1.2, y: RIVER.water, speed: 0.22, cycle: [18, 24], size: 0.95 });
 // a kingfisher on the west bank below the second washing place, looking at the water
 { const z = 52, x = riverX(z) - 6.0; critters.push({ model: 'kingfisher', at: [x, gy(x, z) + 0.05, z], rot: Math.PI / 2, water: [riverX(z) - 3.0, z, RIVER.water], cycle: 36 }); }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('ajanta'));
 export default { fish, flights, perches, critters };

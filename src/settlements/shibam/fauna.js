@@ -47,4 +47,7 @@ critters.push({ model: 'dog', at: [GATE.x + 6.2, ground.height(GATE.x + 6.2, 101
   } }
 // pigeons on the merchant's terrace, on the parapet's side away from the stair-head
 { const y = topOf(LM.storeys); critters.push({ model: 'pigeon_grey', at: [LM.rect[0] + 3.2, y, LM.rect[3] - 2.4], rot: 0.5, range: [1.2, 1.0] }, { model: 'pigeon_white', at: [LM.rect[0] + 3.9, y, LM.rect[3] - 2.0], rot: 2.0, range: [1.2, 1.0] }); }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('shibam'));
 export default { fish, flights, perches, critters };

@@ -57,4 +57,7 @@ for (const [s, t] of [[84, 6], [88, -6.2], [52, 7.4]]) { const [x, z] = A(s, t);
 [[-47.8, 130.8, 'sheep_horned'], [-44.2, 138.2, 'sheep_dark'], [-41.4, 135.5, 'sheep_horned'], [-37.3, 136.4, 'sheep_white'], [-42.7, 140.1, 'sheep_dark'], [-39.5, 135, 'sheep_horned'],
  [-199.7, -32.1, 'sheep_horned'], [-210.4, -35.2, 'sheep_dark'], [-208.6, -30.2, 'sheep_horned'], [-202.1, -35, 'sheep_white'], [-202.5, -36.1, 'sheep_horned'], [-210, -39.6, 'sheep_dark']]
   .forEach(([x, z, model], i) => critters.push({ model, at: on([x, z]), rot: 0.7 + i * 1.13, range: [2.4, 1.7], tau: 30 + (i % 6) * 2.5 }));
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('stonehenge'));
 export default { fish, flights, perches, critters };

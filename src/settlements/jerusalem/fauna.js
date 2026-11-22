@@ -70,4 +70,7 @@ const critters = [];
 for (const [x, z] of WELLS.filter(([x, z]) => x > HARAM.rect[0] + 10 && x < HARAM.rect[2] - 10 && z > HARAM.rect[1] + 10 && z < HARAM.rect[3] - 10).slice(0, 3)) {
   [['pigeon_grey', 2.7, 0.3], ['pigeon_white', 3.2, -0.6], ['pigeon_dark', 2.5, -1.0]].forEach(([model, dx, dz]) => critters.push({ model, at: [x + dx, HARAM.top + 0.04, z + dz], rot: hashAt(x + dx, z) * 6.28, range: [1.4, 1.1] }));
 }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('jerusalem'));
 export default { fish, flights, perches, critters };

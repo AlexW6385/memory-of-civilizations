@@ -56,4 +56,7 @@ KRAAL_AT.forEach(([cx, cz, r], i) => {
   for (const [model, u, v] of [['goat_black', 0.35, 0.2], ['goat_white', -0.3, 0.38]]) { const x = cx + u * r, z = cz + v * r; critters.push({ model, at: [x, height(x, z) + 0.02, z], rot: hashAt(x, z) * 6.28, range: [7, 2.5] }); }
   void i;
 });
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('great-zimbabwe'));
 export default { fish, flights, perches, critters };

@@ -173,3 +173,5 @@ Rigged critters (src/settlements/nalanda/fauna.js; the engine's fauna-critters.j
 Still short: keepers of the booths remain life figures; the upper tiers' lamps unseen; no writing (Siddham not verifiable); the village houses' interiors by hour; critter models for zebu and peafowl.
 
 - **Zebu as critters.** Humped zebu (white, grey, red; `critter-models-farm.js`) stand and graze in two village yards (3 and 2 animals); those yards' still zebu are dropped from `town.js` [inferred: the cattle of any Gangetic village]. The carts' zebu and the other yards' stay still life.
+
+- Herds and yard groups: 4 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 4 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

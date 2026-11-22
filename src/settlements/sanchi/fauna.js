@@ -64,4 +64,7 @@ critters.push({ type: 'floaters', models: ['goose_grey', 'goose_grey', 'duck_bro
 // zebu on the open ground between the hill's foot and the first rows (village.js leaves those places to the critters)
 for (const [x, z, m, rot] of [[-48, 134, 'zebu_red', 0.8], [-45.6, 136.4, 'zebu_white', 2.4], [48, 135, 'zebu_grey', 4.1], [50.6, 133.2, 'zebu_white', 5.2], [66, 132, 'zebu_red', 1.2], [96, 160, 'zebu_white', 0.3]]) critters.push({ model: m, at: [x, ground.height(x, z), z], rot, range: [3.5, 2.5], tau: 34 + (x % 7) });
 void HALL;
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('sanchi'));
 export default { fish, flights, perches, critters };

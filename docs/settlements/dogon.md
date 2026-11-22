@@ -180,3 +180,5 @@ Method of the Suzhou reference (docs/suzhou-method.md); the shell reaches no web
 - **Trodden ground (2026-11-21).** Wear patches are now ragged, overlapping 'earth_trodden' polygons (`src/core/wearpatch.js`: 6–10 jittered sides, shrinking layers 4–8 mm proud, flecks at the rim, no collision), no longer boxes of mud_plaster; before each ginna door and out toward the lane, and at the toguna's seats.
 
 - **Donkeys as critters.** Four donkeys (grey and brown; `critter-models-farm.js`) are tethered on the place (two, one moved 3.4 m off the lane) and stand at the millet field's edge (two); the three still donkeys they replace are dropped [inferred]. Sheep, cattle and zebu stay still life.
+
+- Herds and yard groups: 11 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 11 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

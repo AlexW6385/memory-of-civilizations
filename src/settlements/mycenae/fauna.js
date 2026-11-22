@@ -45,4 +45,7 @@ for (const l of lots().filter((q) => q.kind === 'cult')) { const [x, z] = lotPoi
     const u = l.du > l.W / 2 ? 0.9 : l.W - 0.9, [x, z] = lotPoint(l, u, -0.14);
     critters.push({ model: 'swallow_nest', at: [x, l.y + 2.35, z], rot: l.face === 's' ? Math.PI / 2 : -Math.PI / 2, cycle: 33 + (l.seed % 5), flight: 9, radius: 10, side: k % 2 ? 1 : -1, rise: -0.8 }); k++;
   } }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('mycenae'));
 export default { fish, flights, perches, critters };

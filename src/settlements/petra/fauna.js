@@ -40,4 +40,7 @@ for (const k of [0, 2, 4, 6]) { const o = outer[k], [x, y, z] = at(o, 0.16, 2.1)
 critters.push({ model: 'cat_orange', at: [12.5, 0.45 + 0.47, STREET.a[1] + STREET.w / 2 + 2.1 - 0.05], rot: 0.4, range: [7, 0.5] }, { model: 'cat_tabby', at: [-2.0, 0.45 + 0.47, STREET.a[1] + STREET.w / 2 + 2.1 - 0.05], rot: 2.2, range: [7, 0.5] });
 // rock doves on the paving: at the Nymphaeum's basin, the forecourt's basin and before the great altar's stair
 for (const [x, z, m] of [[63.8, STREET.a[1] + 4.6, 'pigeon_grey'], [64.8, STREET.a[1] + 5.4, 'pigeon_white'], [63.2, STREET.a[1] + 6.0, 'pigeon_grey'], [PLAZA.c[0] - 2.6, PLAZA.c[1] + 12.4, 'pigeon_grey'], [PLAZA.c[0] - 1.6, PLAZA.c[1] + 11.6, 'pigeon_dark'], [QASR.altar[0] - 12, QASR.altar[1] - 1, 'pigeon_grey'], [QASR.altar[0] - 12.8, QASR.altar[1] + 0.4, 'pigeon_white']]) critters.push({ model: m, at: [x, ground.height(x, z) + 0.05, z], rot: x * 3, range: [1.4, 1.2] });
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('petra'));
 export default { fish, flights, perches, critters };

@@ -62,4 +62,7 @@ critters.push({ model: 'dog', at: [sx1 + 15, 0.04, -184.5], rot: -0.6, range: [9
   }
 }
 void CANAL;
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('isfahan'));
 export default { fish: [], flights, perches, critters };

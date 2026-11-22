@@ -144,3 +144,5 @@ All [inferred] unless named; no web source was reachable. Source of the Great Ha
 - **Still short.** Minaret not climbable; no ox critter model use; upper storey has no view stairs onward to the roof; no weather variation of lamps; the Mongol, Arabic and Syriac scripts unwritten (no verified tables).
 
 - **Farm animals as critters.** The first two pens of the north gate's horse market hold four horses each (bay, chestnut, grey, black) and the west gate's first pen five sheep and a goat, as critters on the new grazer pose (`critter-models-farm.js`: they walk, graze, lift the head to the visitor); the still horses and sheep of those pens are dropped [inferred; Rubruck's horse and sheep markets are stated]. Oxen at the carts and the horses at the camps stay still life.
+
+- Herds and yard groups: 44 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 42 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

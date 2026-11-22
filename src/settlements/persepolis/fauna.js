@@ -69,4 +69,7 @@ const critters = [];
   const wx = (WORKSHOPS[0] + WORKSHOPS[2]) / 2; critters.push({ model: 'dog', at: [wx + 7, 0.02, WORKSHOPS[1] - 3], rot: 2.2, range: [6, 2.5] }); }
 // on the terrace: a dog by the lodgings at the court's south edge, doves-no: sparrows only (perches above)
 critters.push({ model: 'dog', at: [-139, 14.02, -18], rot: 1.0, range: [6, 2.5] });
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('persepolis'));
 export default { fish, flights, perches, critters };

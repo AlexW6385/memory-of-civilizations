@@ -62,4 +62,7 @@ for (const [x, z] of [[MARKET[0] + 6, MARKET[1] + 8], [MARKET[0] + 6.8, MARKET[1
 critters.push({ model: 'kingfisher', at: [riverX(-40) + 23 - 1.45, RIVER.level + 0.5, -40], rot: -Math.PI / 2, water: [riverX(-40) + 23 - 3.4, -40, RIVER.level], cycle: 34 });
 critters.push({ model: 'crane', at: [riverX(-70) - 44, 0.02, -70], rot: Math.PI / 2, range: [7.0, 1.6], tau: 50, speed: 0.4 });
 void lots; void height;
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('babylon'));
 export default { fish, flights, perches, critters };

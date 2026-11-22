@@ -74,4 +74,7 @@ barns.filter((_, i) => i % 2 === 0).slice(0, 4).forEach((b, i) => {
 // the flock of sheep west of the churchyard wall, in the first view from the arrival (critter-models-farm.js): on the seven places where town.js's still sheep stood; the herder stays still life
 [[-37.8, -40.9, 'sheep_white'], [-46.1, -37.7, 'sheep_white'], [-44.7, -37.1, 'sheep_dark'], [-41.8, -34.6, 'sheep_white'], [-41, -40.5, 'sheep_white'], [-42.7, -47.7, 'sheep_dark'], [-41.1, -39.1, 'sheep_white']]
   .forEach(([x, z, m], i) => critters.push({ model: m, at: [x, height(x, z), z], rot: 0.6 + i * 0.9, range: [2.2, 1.6], tau: 28 + i * 2.5 }));
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('norse-borgund'));
 export default { fish, flights, perches, critters };

@@ -70,4 +70,7 @@ for (const [k, L] of LANDINGS.entries()) {
 // the flock on the plain south-west of the town: the primitive, brown sheep (the still flock of town.js stood on these seven places)
 [[-51.8, -37.6, 'sheep_horned'], [-53, -42.9, 'sheep_dark'], [-51.2, -39.8, 'sheep_dark'], [-55.7, -36.6, 'sheep_horned'], [-53.2, -38.2, 'sheep_white'], [-60.2, -42.3, 'sheep_white'], [-55.7, -39.8, 'sheep_horned']]
   .forEach(([x, z, model], i) => critters.push({ model, at: [x, ground.height(x, z) + 0.02, z], rot: 0.5 + i * 0.97, ...(model.startsWith('sheep') ? { range: [2.2, 1.6], tau: 30 + i * 2.5 } : { range: wake }) }));
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('catalhoyuk'));
 export default { fish, flights, perches, critters };

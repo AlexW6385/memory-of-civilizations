@@ -233,3 +233,5 @@ Method: docs/suzhou-method.md and the Suzhou files named in the assignment; engi
 ## Night near the visitor (the maidan at the arrival)
 
 Seen first: at 22:00 the ground within 30 m of the arrival and the stall at its shoulder were unlit; the lit stalls began 40 m out. [inferred; Isfahan.ir §5 (stated in §26): the square was lit by oil lamps at night] Added in `nightlight.js` (`NEAR_LAMPS`, halo only, in the existing `isf_night` element): a lamp at the stall by the arrival, two on the aisle ahead, and eight lamps hung in each side arcade's passage (x = ±77.7, z 128 to 219). Kept in the builder, not in the plan's data: the generated street life reacts to changes there (a stall and a walk route moved), so the data stays as it was.
+
+- Herds and yard groups: 12 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 12 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

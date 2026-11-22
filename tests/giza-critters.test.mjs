@@ -11,7 +11,7 @@ const of = (...m) => inst.filter((i) => m.includes(i.model));
 const lots = town();
 
 test('the instances: known models, a modest number, none that Giza had not (no hens, no pigeons)', () => {
-  assert.ok(inst.length >= 18 && inst.length <= 60, `${inst.length} critters`);
+  assert.ok(inst.length >= 18 && inst.length <= 90, `${inst.length} critters`);   // ceiling 60 -> 90: the settlement's herds and yard groups are critters too (src/settlements/herds-data.js, at most 56 per settlement)
   for (const i of inst) assert.ok(POSES[i.groups[0][0]], i.model);
   assert.ok(of('dog').length >= 4 && of('goat_black', 'goat_white').length >= 3 && of('goose_grey', 'goose_white').length >= 4 && of('duck_brown', 'duck_white').length >= 2);
   assert.equal(of('hen_brown', 'hen_white', 'rooster', 'pigeon_grey', 'pigeon_white', 'pigeon_dark', 'turkey', 'cagebird', 'cormorant').length, 0);

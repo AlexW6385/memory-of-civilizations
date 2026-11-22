@@ -49,4 +49,7 @@ for (const [x, z] of [[6.4, 258], [-6.4, 322], [-60, 273.6], [118, 276.4], [6.4,
 for (const [model, x, z, size] of [['rooster', 24.4, 284.2, 1], ['hen_brown', 23.2, 285.4, 0.96], ['hen_white', 24.8, 286.0, 1], ['hen_brown', 22.4, 284.0, 0.98]]) critters.push({ model, at: [x, 0.04, z], rot: hashAt(x, z) * 6.28, range: [2.2, 1.2], size });
 for (const [x, z] of [[-24, 181], [-33, 187], [22, 180], [32, 188], [-48, 214], [46, 218]]) critters.push({ model: 'pigeon_grey', at: [x, 0.06, z], rot: hashAt(z, x) * 6.28, range: [2.4, 1.6] });
 void FORECOURT;
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('mughal-agra'));
 export default { fish, flights, perches, critters };

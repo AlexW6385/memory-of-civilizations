@@ -73,4 +73,7 @@ for (const q of MOSQUES) { const cx = (q[0] + q[2]) / 2; for (const [dx, dz, m] 
   }
 }
 void WALL; void PALACE;
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('mongol-karakorum'));
 export default { fish, flights, perches, critters };

@@ -15,7 +15,7 @@ const of = (model) => inst.filter((i) => i.model === model);
 const inHouse = (x, z, m = 0.2) => buildings().some((b) => inRect(b.rect, x, z, m));
 
 test('the instances: every model is known, the count is small, no animal on the ground stands in a building', () => {
-  assert.ok(inst.length >= 25 && inst.length <= 60, `${inst.length} critters`);
+  assert.ok(inst.length >= 25 && inst.length <= 120, `${inst.length} critters`);   // ceiling 60 -> 120: the settlement's herds and yard groups are critters too (src/settlements/herds-data.js, at most 56 per settlement)
   for (const i of inst) assert.ok(POSES[i.groups[0][0]], i.model);
   for (const i of inst) if (i.model !== 'swallow_nest') assert.ok(!inHouse(i.groups[1][0], i.groups[1][2]), `${i.model} in a building at ${i.groups[1]}`);
   assert.ok(of('dog').length >= 6 && of('goat_white').length >= 3 && of('goose_grey').length >= 2 && of('cat_tabby').length + of('cat_orange').length >= 4);

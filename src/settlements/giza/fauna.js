@@ -62,4 +62,7 @@ for (const [z, rot] of [[34, 0.3], [35.2, 1.1], [33.2, 2.0], [74, 0.8], [75.4, 4
 critters.push({ model: 'crane', at: [HARBOUR[0] + 2.4, QY, 84], rot: 1.57, range: [3, 1.2], tau: 50, speed: 0.4 });
 critters.push({ model: 'kingfisher', at: [HARBOUR[0] + 4.6, QY + 0.05, 41], rot: Math.PI / 2, water: [HARBOUR[0] + 7, 41, VALLEY - 1.2], cycle: 34 });
 critters.push({ type: 'floaters', models: ['duck_brown', 'duck_white', 'duck_brown'], area: [HARBOUR[0] + 8, 62, HARBOUR[2] - 3, HARBOUR[3] - 3], dist: (x, z) => -Math.min(x - HARBOUR[0], HARBOUR[2] - x, z - HARBOUR[1], HARBOUR[3] - z), margin: 1.6, a: [10, 8], ratio: 0.5, speed: 0.5, y: VALLEY - 1.2 });
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('giza'));
 export default { fish, flights, perches, critters };

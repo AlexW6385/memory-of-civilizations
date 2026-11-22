@@ -13,7 +13,7 @@ const run = (i, t) => val(POSES[i.groups[0][0]](context(t, [i.groups[1][0] + 70,
 const H = houses();
 
 test('Lalibela critters: dogs, cats, fowl, goats and doves, all known models', () => {
-  assert.ok(inst.length >= 12 && inst.length <= 40, inst.length + ' critters');
+  assert.ok(inst.length >= 12 && inst.length <= 80, inst.length + ' critters');   // ceiling 40 -> 80: the settlement's herds and yard groups are critters too (src/settlements/herds-data.js, at most 56 per settlement)
   for (const i of inst) assert.ok(POSES[i.groups[0][0]], i.model);
   for (const m of ['dog', 'cat_tabby', 'rooster', 'pigeon_grey']) assert.ok(inst.some((i) => i.model === m), m);
 });

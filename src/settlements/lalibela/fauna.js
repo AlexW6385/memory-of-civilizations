@@ -47,4 +47,7 @@ const critters = [];
   const dove = (id, dx, dz, m) => { const p = PITS[id], c = [(p.rect[0] + p.rect[2]) / 2 + dx, (p.rect[1] + p.rect[3]) / 2 + dz]; critters.push({ model: m, at: [c[0], -p.depth + 0.2, c[1]], rot: dx, range: [1.4, 1.2] }); };
   dove('giyorgis', -15.5, 9.5, 'pigeon_grey'); dove('giyorgis', -15.0, 10.4, 'pigeon_white'); dove('medhane', -20.6, 8.2, 'pigeon_grey'); dove('medhane', -20.0, 9.0, 'pigeon_grey'); dove('maryam', -10.5, 6.4, 'pigeon_white'); dove('maryam', -10.0, 7.2, 'pigeon_grey');
 }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('lalibela'));
 export default { fish, flights, perches, critters };

@@ -146,3 +146,5 @@ All [inferred] from §2, §4, §11, §12 (no new source read; no writing anywher
 - **Job 4, landmark:** trodden yard way from the arrival to the ladder's foot; on the roof a fire ring of stones with ash, a saddle quern, two jars, leaning reed bundles (clear of the worn way). Seen at night.
 
 - **Sheep as critters.** The first pen's still sheep and goats are dropped; its six critters are three goats (dog rig) and three small brown horned sheep (`critter-models-farm.js`, grazer pose), and the flock south-west of the town is seven sheep critters [inferred: domestic sheep and goats of c. 6500 BC were small and brown]; the other flocks and the cattle pen stay still life.
+
+- Herds and yard groups: 32 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 29 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

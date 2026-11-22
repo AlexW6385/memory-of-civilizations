@@ -8,6 +8,7 @@
 import { LIFE_KINDS, boatFloat } from './index.js';
 import { buildPlan, toWorld } from '../core/build.js';
 import { ARRIVALS } from '../planet/arrivals.js';
+import { dropHerds } from '../settlements/herds.js';
 /** Settlements whose arrival looks along a causeway or a street: metres of the view line kept free of the street life's figures. */
 const VIEW_LINE_CLEAR = { angkor: 8 };
 
@@ -765,7 +766,7 @@ export function withLife(id, mod, G, R) {
     G.planting = (x, z, p) => (paved(x, z) ? null : plant(x, z, p));
     G.pavedMask = true;
   }
-  const out = { ...mod, town: async () => { const town = await mod.town(); return [...town, ...lifePlans(id, R, mod.landmarks.map((l) => l.plan), town, G)]; } };
+  const out = { ...mod, town: async () => { const town = await mod.town(); return [...dropHerds(id, town), ...lifePlans(id, R, mod.landmarks.map((l) => l.plan), town, G)]; } };
   let cached = null;
   const once = { ...out, town: () => (cached ??= out.town()) };
   DONE.set(id, once);

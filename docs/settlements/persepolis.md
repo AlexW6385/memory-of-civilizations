@@ -243,3 +243,5 @@ Sources added:
 **Job 4, landmark.** Wear on the treads of the great double stair (all four flights) and of the Apadana's two west flights: a darker polished hollow per tread in `marble_dark`, each different; soot streaks over lit lamp niches of the houses in `iron` (+2 draws). Checks: surface-check, plan-check, walk-check, view-check, disc-check, worker test, persepolis tests, geo-one 32.5 MB / 734 meshes.
 
 **Still short.** The Treasury, Tripylon and Gate interiors have no routes; Hadish and Tachara stairs are walked from the side only; wear is on treads only (no worn thresholds in the halls); the Apadana's porch stands and the gate's braziers not seen in a render; no writing (§23.5).
+
+- Herds and yard groups: 7 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 7 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

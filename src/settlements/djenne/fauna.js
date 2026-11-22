@@ -45,4 +45,7 @@ critters.push({ model: 'cat_tabby', at: [shopAt(1).c - 1.0, 0.96, SHOPS[3] - 0.5
 critters.push({ model: 'goat_black', at: [w1[0] + 2.2, 0.02, w1[1] + 1.4], rot: 0.6, range: [9, 3.2] }, { model: 'goat_white', at: [w1[0] + 3.0, 0.02, w1[1] + 2.6], rot: 3.0, range: [9, 3.2] }, { model: 'goat_white', at: [w0[0] + 3.4, 0.02, w0[1] - 1.0], rot: 1.8, range: [9, 3.2] });
 for (const [x, z, m] of [[105.5, -55.5, 'hen_brown'], [106.4, -55.0, 'hen_white'], [104.8, -54.6, 'hen_brown'], [106.0, -56.4, 'rooster'], [70, 43.5, 'hen_brown'], [71, 44.2, 'hen_white'], [69.6, 44.4, 'rooster']]) critters.push({ model: m, at: [x, 0.02, z], rot: x * 3, range: [2.2, 1.8] });
 for (const [x, z, m] of [[12, -34, 'pigeon_grey'], [13.1, -34.8, 'pigeon_white'], [10.8, -33.6, 'pigeon_grey'], [18, -33, 'pigeon_white'], [4, 36, 'pigeon_grey'], [5.2, 35, 'pigeon_grey']]) critters.push({ model: m, at: [x, 3.05, z], rot: x * 3, range: [1.4, 1.2] });
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('djenne'));
 export default { fish, flights, perches, critters };

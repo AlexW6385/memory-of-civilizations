@@ -194,3 +194,5 @@ Still short: lit shop interiors seen from the street at night were not rendered;
 ## Budget trim (f-budget)
 
 - `base()` in `town.js` carries `minSaved: 8000` (per-plan, `src/core/geom.js` / `build.js`; default 2400): the tower houses' small repeated shapes (shutters, beams, window frames; each had become its own instanced "detail" draw) merge into the plan's mesh. Street pose (−9.5, 70) facing north 451 → 365 main draws, south 165 → 133; arrival 263; main triangles 2.03 → 2.16 M. Geo 39.9 → 50.2 MB, meshes 1331 → 1057.
+
+- Herds and yard groups: 35 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 32 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.
