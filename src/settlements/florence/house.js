@@ -21,6 +21,7 @@ import { rusticate } from '../../styles/renaissance/signoria.js';
 import { openGround, openUpper, doorAt } from '../../styles/renaissance/casa-open.js';
 import { openFloors, layout, houseClass, balconyOf } from '../../styles/renaissance/casa-up.js';
 import { Halo } from './halo.js';
+import { litRooms } from './roomlamps.js';
 
 const PF = 'limestone_yellow', SER = 'pietra_serena', W = 'wood_dark', O = 'opening', IR = 'iron', TM = 'timber', ROOF = 'roof_tile';
 const WALLS = ['stucco_pale', 'stucco_siena', 'stucco_ochre', 'stucco_cream', 'stucco_warm', 'stucco_rome'];
@@ -244,11 +245,12 @@ export function casaF(el, { bag, col }) {
   }
   if (open) {
     const stairs = n >= 2 && !jet;
-    openGround(bag, col, { ...el, use: el.use ?? (kind === 'bottega' ? el.trade : 'home') }, { wall: PF, y, gh, f, rand, foot, stairs, upper: !!up });
+    const lbag = litRooms(bag, ys.map((v, i) => y + v + 0.17));
+    openGround(lbag, col, { ...el, use: el.use ?? (kind === 'bottega' ? el.trade : 'home') }, { wall: PF, y, gh, f, rand, foot, stairs, upper: !!up });
     if (up) {
-      openFloors(bag, col, { ...el, use: el.use ?? (kind === 'bottega' ? el.trade : 'home') }, { y, wall: el.plaster ? wall : PF, holes: up.holes });
+      openFloors(lbag, col, { ...el, use: el.use ?? (kind === 'bottega' ? el.trade : 'home') }, { y, wall: el.plaster ? wall : PF, holes: up.holes });
     } else if (stairs) {
-      openUpper(bag, col, el, { y, gh, top2: ys[2], f, rand });
+      openUpper(lbag, col, el, { y, gh, top2: ys[2], f, rand });
       if (el.plaster) { const t = 0.4, [a0, b0, a1, b1] = R, m = wall; for (const r of [[a0, b0, a1, b0 + t], [a0, b1 - t, a1, b1], [a0, b0, a0 + t, b1], [a1 - t, b0, a1, b1]]) bag.add(m, box(r[0] - 0.01, y + gh, r[1] - 0.01, r[2] + 0.01, y + ys[2], r[3] + 0.01)); }
       if (n > 2) bag.add(el.plaster ? wall : PF, box(R[0], y + ys[2] - 0.02, R[1], R[2], y + H, R[3]));
       else bag.add(el.plaster ? wall : PF, box(R[0], y + H - 0.02, R[1], R[2], y + H, R[3]));
