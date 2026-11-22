@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.76 — horses, oxen, donkeys and sheep that move; shopkeepers go home; first fixes from the acceptance round (2026-11-21)
+
+Horse, ox and zebu, donkey and sheep are new moving animals: they walk, graze, and lift their heads when one comes near; they replace still animals at Karakorum, Nalanda, Sanchi, Mohenjo-daro, Dogon, Wutai, Borgund, Catalhoyuk and Stonehenge. Shopkeepers and court ranks built into the near tiles now leave at night like the street's people (Seoul's court is empty at night but for its guards). Venice at night: lamps in San Marco's portals and under the arcades, and its eight hundred lane lanterns hang outside the walls, not inside them. Lamps near the arrival at Florence, Isfahan and Kyoto. The arrival at Uji no longer has a brazier before the eye, Angkor's no figure; Lalibela's now stands on the pit's rim. Ye's second lane runs its full length.
+
 ## v12.75 — worn ground that shows; doors that were blocked (2026-11-21)
 
 Trodden earth and worn stone are new materials, and the worn ways at Dogon, Wutai, SGang Gwaay and Rapa Nui can now be seen (Kakadu's could not be made to read on its coarse ground and are taken out). Cahokia's five houses and Nan Madol's two that the walker could not enter are open: firewood, benches and household pigs stood in their doorways. Light bakes renewed for the thirty-odd settlements of the last passes.
