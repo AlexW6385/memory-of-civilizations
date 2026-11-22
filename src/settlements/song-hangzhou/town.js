@@ -4,7 +4,8 @@
 // peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
 // their shoulder poles, a fruit seller under a parasol.
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, canalLandings, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
-import { lifePlans, upLots, walkLanes, interiorLots, dwellingLots, dwellingPlans, dwellingShells } from './life.js';
+import { lifePlans, upLots, walkLanes, interiorLots, dwellingLots, dwellingPlans, dwellingShells, tradeOf } from './life.js';
+import { boardWord } from '../../styles/song/lettering.js';
 import './townscape.js';
 import './houses.js';
 import { streetsideElements } from './houses.js';
@@ -65,13 +66,16 @@ function tideDay() {
   teaInside(S, L, rand, person);
   // the shops' name boards over their fronts, on the beam over the opening; the tea houses' on their front beam
   const tea = new Set([...teaHouses(), ...Object.entries(interiorLots()).filter(([k]) => k !== 'house').flatMap(([, v]) => v)]), F = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
-  const dwSet = new Set([...dwellingLots(), ...upLots()]);
+  const dwSet = new Set([...dwellingLots(), ...upLots()]), riverTea = new Set(teaHouses());
   for (const l of lots()) {
     if (!l.shop || dwSet.has(l)) continue;
     const [x0, z0, x1, z1] = l.rect, o = F[l.front], len = o[0] ? z1 - z0 : x1 - x0, edge = [o[0] > 0 ? x1 : o[0] < 0 ? x0 : (x0 + x1) / 2, o[1] > 0 ? z1 : o[1] < 0 ? z0 : (z0 + z1) / 2];
-    const n = Math.min(Math.floor((len - 1.6) / 0.36), 2 + (l.seed % 4)), back = tea.has(l) ? 0.435 : 0.505;
-    if (n < 2) continue;
-    S.push({ t: 'shop_plaque', at: [edge[0] - o[0] * back, edge[1] - o[1] * back], y: LEVEL.street, yb: tea.has(l) ? 3.3 : 2.28, rot: Math.atan2(o[0], o[1]), n: tea.has(l) ? 2 : n, scheme: tea.has(l) ? 0 : [0, 0, 1, 2][(l.seed >> 2) % 4], seed: l.seed >> 5 });
+    const isTea = tea.has(l), back = isTea ? 0.435 : 0.505, tr = l.trade || tradeOf(l);
+    // (the trade's word, one or two checked characters: a tea house's 茶館; a trade the table has no word for — wares, flowers — keeps a plain board)
+    let text = riverTea.has(l) || (isTea && tr === 'tea') ? '茶館' : boardWord(tr);
+    if (len < 2.4) continue;
+    if ([...text].length * 0.42 + 0.4 > len - 1) text = [...text].slice(0, 1).join('');
+    S.push({ t: 'shop_plaque', at: [edge[0] - o[0] * back, edge[1] - o[1] * back], y: LEVEL.street, yb: isTea ? 3.3 : 2.28, rot: Math.atan2(o[0], o[1]), text, scheme: isTea ? 0 : [0, 0, 1, 2][[...text].reduce((a, c) => a + c.codePointAt(0), 0) % 4] });      // (colours by word: fewer shapes, each repeated enough to be instanced)
   }
   return [base('song-hangzhou-stands', S), base('song-hangzhou-tide-crowd', L, 'life')];
 }

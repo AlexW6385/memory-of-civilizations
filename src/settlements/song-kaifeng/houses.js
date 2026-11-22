@@ -8,6 +8,7 @@
 
 import { box, fromTriangles, lathe, addCloth, clothBox } from '../../core/geom.js';
 import { inLot } from './layout.js';
+import { boardWord, textTris, mapTris } from '../../styles/song/lettering.js';
 import { upperStorey, stairLayout, floorSlab } from './upper.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -469,14 +470,13 @@ export function houseSong(el, { bag, col }) {
           const bw = Math.min(L - 1.2, 1.4 + rand() * 1.6), am = L * (0.3 + rand() * 0.4), ya = yF + 0.12, yb2 = yF + 0.8, bf = b0 - 0.02, a0 = Math.max(0.4, am - bw / 2), a1 = Math.min(L - 0.4, am + bw / 2);
           B('lacquer_red', a0 - 0.05, bf - 0.045, a1 + 0.05, bf + 0.02, ya - 0.05, yb2 + 0.05);
           B('lacquer_black', a0, bf - 0.065, a1, bf + 0.02, ya, yb2);
-          const nc = Math.max(2, Math.min(6, Math.floor((a1 - a0 - 0.2) / 0.4)));
-          for (let c = 0; c < nc; c++) {
-            const cx = a0 + (a1 - a0) * (c + 0.5) / nc, h = 0.42;
-            B('paint_white', cx - 0.12, bf - 0.075, cx + 0.12, bf - 0.065, yF + 0.46 - h / 2, yF + 0.46 - h / 2 + 0.05);
-            B('paint_white', cx - 0.02, bf - 0.075, cx + 0.02, bf - 0.065, yF + 0.46 - h / 2, yF + 0.46 + h / 2);
-            if (rand() < 0.6) B('paint_white', cx - 0.12, bf - 0.075, cx + 0.12, bf - 0.065, yF + 0.46 + h / 2 - 0.05, yF + 0.46 + h / 2);
-            if (rand() < 0.5) B('paint_white', cx - 0.1, bf - 0.075, cx - 0.06, bf - 0.065, yF + 0.46 - h / 2, yF + 0.46 + h / 2);
-            if (rand() < 0.5) B('paint_white', cx + 0.06, bf - 0.075, cx + 0.1, bf - 0.065, yF + 0.46 - h / 2, yF + 0.46 + h / 2);
+          // the trade's word in white (checked characters, right to left as the street sees them; a trade with no word in the table keeps a plain board).
+          // (the old strokes' draws are still taken, so that everything after the board stays as it was)
+          for (let c = Math.max(2, Math.min(6, Math.floor((a1 - a0 - 0.2) / 0.4))); c > 0; c--) { rand(); rand(); rand(); }
+          const word = boardWord(kind === 'wine' ? 'wine' : kind === 'tea' ? 'tea' : el.trade);
+          if (word) {
+            const n = [...word].length, ac = (a0 + a1) / 2, pitch = Math.min(0.9, (a1 - a0 - 0.2) / n), sz = Math.min(0.5, pitch * 0.9);
+            arr('paint_white').push(...mapTris(textTris(word, { pitch, size: sz, flat: true, z0: 0.012, z1: 0.012, thick: 1.2 }), (u, v, k) => W(ac - u, bf - 0.065 - k, yF + 0.46 + v)));
           }
         }
         // the side walls: a string course at the floor, a small lattice window upstairs, damp and streaks under the sill

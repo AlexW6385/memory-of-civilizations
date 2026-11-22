@@ -3,6 +3,7 @@
 import { box, lathe, clothBox, addCloth, fromTriangles, rod } from '../../core/geom.js';
 import { rectRoof } from '../ming/index.js';
 import { rng, lotFrame } from './kit.js';
+import { boardWord, textTris, mapTris } from '../song/lettering.js';
 
 
 // ── the writing on the boards: a few characters as tapered brush strokes [kind, x0, y0, x1, y1] on a 100-unit grid ──
@@ -29,6 +30,13 @@ export function glyph(bag, ch, x, y, z, yaw, s) {
   const g = fromTriangles(t); g.scale(s, s, 1); g.rotateY(yaw); g.translate(x, y, z); bag.add('gilt_bronze', g);
 }
 
+/** The trade's word in gilt on a board at (x, y, z) facing yaw (0: +z; checked characters from the Suzhou table, right to left as the street reads them; vertical: top to bottom); none if the table has no word for the trade. */
+function trade_word(bag, text, x, y, z, yaw, size, vertical = false) {
+  if (!text) return;
+  const c = Math.cos(yaw), sn = Math.sin(yaw);
+  const tris = mapTris(textTris(text, { pitch: size * 1.1, size, vertical, z0: 0.004, z1: 0.016, thick: 1.25 }), (u, v, k) => [x + u * c + k * sn, y + v, z - u * sn + k * c]);
+  bag.add('gilt_bronze', fromTriangles(tris));
+}
 const TRADES = ['incense', 'paper', 'books', 'rubbings', 'cakes', 'tea', 'cloth', 'pottery', 'brush'];
 const AWN = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_brown', 'cloth_blue'];
 
@@ -93,13 +101,13 @@ export function shopRow(el, ctx) {
     for (const dz of [-0.4, 0.4]) F.b('wood_dark', u0 + sw / 2 - 0.17, 0.18, 5.9 + dz - 0.17, u0 + sw / 2 + 0.17, 0.58, 5.9 + dz + 0.17, false);
     put(u0 + sw / 2, 3.5, (x, z) => { bag.add('lamp_paper', lathe([[0.001, 0], [0.18, 0.1], [0.18, 0.4], [0.001, 0.5]], 8, null, x, 2.45, z)); });
     // the name board over the doorway: black, a gilt character; the signboard hung at the corner with its own
-    const ch = GKEYS[Math.floor(rand() * GKEYS.length)], cu = (u0 + sw / 2);
+    const word = boardWord(trade), cu = (u0 + sw / 2); rand();      // (the trade's word, or a plain board: the table has none for rubbings; the old draw is kept)
     F.b('lacquer_black', u0 + 0.5, 3.12, -0.37, u0 + sw - 0.5, 3.48, -0.29, false);
-    const pn = F.pt(cu, -0.41); glyph(bag, ch, pn[0], 3.3, pn[1], yaw, 0.32);
+    const pn = F.pt(cu, -0.41); trade_word(bag, word, pn[0], 3.3, pn[1], yaw, 0.3);
     if (rand() < 0.6) {
       F.b('lacquer_chestnut', u0 + 0.05, 0.18, -0.95, u0 + 0.15, 3.7, -0.85, false);
       F.b('lacquer_red', u0 - 0.05, 1.8, -0.98, u0 + 0.25, 3.3, -0.82, false);
-      const ps = F.pt(u0 + 0.1, -1.01); glyph(bag, GKEYS[Math.floor(rand() * GKEYS.length)], ps[0], 2.55, ps[1], yaw, 0.26);
+      rand(); const ps = F.pt(u0 + 0.1, -1.01); trade_word(bag, [...word][0], ps[0], 2.55, ps[1], yaw, 0.26);
     }
     // out in the street: a trestle with the day's goods and a stool (a third of the shops)
     if (rand() < 0.35) {

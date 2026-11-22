@@ -148,11 +148,11 @@ function teaHouse(el, { bag, col }) {
       for (let u = a + 0.06; u < b - 0.03; u += 0.14) beamTris(lt, [wx + 0.08, wy0, u], [wx + 0.08, wy1, u], 0.02, 0.02);
       for (let q = 0; q <= 4; q++) { const yy = wy0 + (wy1 - wy0) * q / 4; beamTris(lt, [wx + 0.08, yy, a], [wx + 0.08, yy, b], 0.02, 0.02); }
       bag.add('granite_grey', box(wx, wy0 - 0.14, a - 0.2, wx + 0.14, wy0 - 0.08, b + 0.2));
-      // the couplet board to the south of the window: two boards, black lacquer with characters picked out in ochre
+      // the couplet board to the south of the window: two boards of black lacquer, left plain (the couplets' wording is not known)
       const cb = zc + 1.3;
       if (cb + 0.2 < fz - 0.5) for (const dz of [-0.17, 0.17]) {
         bag.add('lacquer_black', box(wx, Y + 0.9, cb + dz - 0.12, wx + 0.035, Y + 2.5, cb + dz + 0.12));
-        for (let q = 0; q < 7; q++) bag.add('paint_ochre', box(wx + 0.035, Y + 1.0 + q * 0.2, cb + dz - 0.06 - (rand() - 0.5) * 0.02, wx + 0.042, Y + 1.13 + q * 0.2, cb + dz + 0.06));
+        for (let q = 0; q < 7; q++) rand();      // (the couplets' wording is not in the checked table: the boards stay plain; the draws are kept so that nothing after them moves)
       }
     }
     bag.add('lattice_red', fromTriangles(lt)); void fr;

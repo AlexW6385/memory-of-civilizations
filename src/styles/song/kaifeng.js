@@ -6,6 +6,7 @@
 import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import { LANDING_ELEMENTS } from './landing.js';
+import { textTris, mapTris, onFace } from './lettering.js';
 
 /** Push the triangles of a convex polygon (points in order), turned to face `n` (a direction). */
 function face(out, pts, n) {
@@ -359,7 +360,11 @@ function caimen(el, { bag, col }) {
     const bw = 0.26;
     const sb = (a0, a1, y0, y1, m, d = 0) => bag.add(m, box(Math.min(sp[0] + ux * a0, sp[0] + ux * a1) - Math.abs(nx) * (0.03 + d), y + y0, Math.min(sp[2] + uz * a0, sp[2] + uz * a1) - Math.abs(nz) * (0.03 + d), Math.max(sp[0] + ux * a0, sp[0] + ux * a1) + Math.abs(nx) * (0.03 + d), y + y1, Math.max(sp[2] + uz * a0, sp[2] + uz * a1) + Math.abs(nz) * (0.03 + d)));
     sb(-bw, bw, 2.4, 5.0, 'paint_white');
-    for (let k = 0; k < 6; k++) sb(-0.11, 0.11, 2.55 + k * 0.4, 2.55 + k * 0.4 + 0.28, 'lacquer_black', 0.012);
+    {   // the wine shop's word in black, top to bottom, on both faces (checked characters: 酒店, "wine shop")
+      const col2 = textTris('酒店', { pitch: 1.0, size: 0.5, vertical: true, flat: true, z0: 0.01, z1: 0.01, thick: 1.15 }), ink2 = [];
+      for (const sd of [1, -1]) { const f = onFace(sp[0], y + 3.7, sp[2], nx * sd, nz * sd); ink2.push(...mapTris(col2, (u, v, k) => f(u, v, k + 0.03))); }
+      bag.add('lacquer_black', fromTriangles(ink2));
+    }
     sb(-bw - 0.1, bw + 0.1, 5.0, 5.08, 'wood_dark'); sb(-bw - 0.1, bw + 0.1, 2.32, 2.4, 'wood_dark');
     bag.add('cloth_red', rod([sp[0], y + 2.32, sp[2]], [sp[0], y + 1.85, sp[2]], 0.012, 3));
   }
@@ -375,7 +380,7 @@ function caimen(el, { bag, col }) {
     bag.add('wood_dark', box(c[0] - s - 0.06, y + 1.75, c[2] - s - 0.06, c[0] + s + 0.06, y + 1.83, c[2] + s + 0.06));
     bag.add('wood_dark', lathe([[0.001, 0], [0.5, 0], [0.001, 0.32]], 4).rotateY(Math.PI / 4).translate(c[0], y + 1.83, c[2]));
     const ink = [];
-    for (const [fx, fz] of [[nx, nz], [-nx, -nz]]) for (let k = 0; k < 2; k++) { const yy = y + 1.15 + (1 - k) * 0.38 - 0.1, cxx = c[0] + fx * (s + 0.012), czz = c[2] + fz * (s + 0.012); ink.push(...fromTri(box(cxx - Math.abs(fz) * 0.15 - Math.abs(fx) * 0.01, yy, czz - Math.abs(fx) * 0.15 - Math.abs(fz) * 0.01, cxx + Math.abs(fz) * 0.15 + Math.abs(fx) * 0.01, yy + 0.3, czz + Math.abs(fx) * 0.15 + Math.abs(fz) * 0.01))); }
+    for (const sd of [1, -1]) { const f = onFace(c[0], y + 1.12, c[2], nx * sd, nz * sd); ink.push(...mapTris(textTris('酒', { pitch: 0, size: 0.56, flat: true, z0: 0.01, z1: 0.01, thick: 1.2 }), (u, v, k) => f(u, v, k + s + 0.002))); }      // the trade's word on each face, facing its reader
     bag.add('lacquer_black', fromTriangles(ink));
     col.circle(c[0], c[2], 0.45, y, y + 2);
   }
