@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.81 — the herds move (2026-11-22)
+
+In thirty-one settlements the flocks and herds that stood still now graze and wander: the yards of Giza, Ur, Lalibela, Jerusalem and Conques, Great Zimbabwe's cattle, Petra's goats, Stonehenge's other flocks, Karakorum's camp horses and many more. The farm animals' hind legs are smooth at the hock. Animals in harness, ridden or laden stand as before.
+
 ## v12.80 — two more name boards, lit plazas in Mesoamerica; every arrival looked at (2026-11-22)
 
 The Temple of Heaven's hall carries its name of the time, 大享殿, and the Dacheng Hall at Qufu the Kangxi emperor's 萬世師表 inside; the Meridian Gate's board is larger, to be read from its court. Twenty-three more characters are drawn and checked. Chichen Itza, Tenochtitlan and Teotihuacan have braziers and torch stands on their plazas at night. All ninety-four arrivals have now been looked at by day and by night in the author's browser.
