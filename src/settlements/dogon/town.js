@@ -120,7 +120,7 @@ export async function town() {
     if (c.landmark || q() < 0.5) man([lx(0.3), lz(3.55)], f, -Math.PI / 2, { pose: 'sit', dress: 'robe', cloth: 'cloth_white', over: 'none' });
     if (c.landmark || q() < 0.4) woman([kx - 1.1, kz + 0.25], f, -0.73, { pose: 'sit_ground', cloth: 'cloth_ochre' });
   }
-  A.push({ t: 'animal', kind: 'donkey', at: [-39, 28.4], y: PLACE_Y, rot: 1.7, seed: 99 }, { t: 'animal', kind: 'donkey', at: [22.5, 22], y: PLACE_Y, rot: 3.5, seed: 98 });
+  // (the two donkeys tethered on the place, at [-39, 28.4] and [22.5, 22], are the donkey critters of fauna.js)
   // (last, so that the random stream of everything above is unchanged by it)
   // round the evening fire on the place: an elder and two others sat on the ground, a woman with a child; they stay out all night (`nightKeep: 1`)
   { const [fx0, fz0] = FIRE, nk = { nightKeep: 1 };

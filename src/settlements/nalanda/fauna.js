@@ -34,7 +34,7 @@ MONASTERIES.forEach((m, i) => perches.push({ kind: 'sparrow', x: m.rect[0] + 25,
 // village dogs lying at the gate and at the doors of the way and two houses, a cat on the step of a kitchen and of the refectory (the household cat of India is old), hens and a
 // cock in the village yards (the jungle fowl was domesticated in the Indus valley and the plains), goats in two pens, pigeons on the paving before the great temple's stair and in the
 // courts (doves were fed at shrines), ducks on the east tank and a kingfisher at its steps, swallows' mud nests under the annexes' eaves (the swallows already fly over the tanks).
-// No peafowl and no zebu are rigged (the engine has no model for them): the zebu are the life figures'.
+// Zebu (humped cattle, white, grey and red; critter-models-farm.js) stand and graze in two village yards (the yards' still zebu are dropped from town.js); no peafowl.
 const critters = [];
 const doorSide = (l) => { const F = houseDoor(l), u = F.du < F.L / 2 ? F.du + 2.1 : F.du - 2.1; return F.P(u, -0.8); };
 critters.push({ model: 'dog', at: [-7.6, 0.02, GATE.c[1] + 3.6], rot: 1.1, range: [9, 3.5] });
@@ -56,4 +56,9 @@ critters.push({ type: 'floaters', models: ['duck_white', 'duck_brown', 'duck_bro
 critters.push({ model: 'kingfisher', at: [TANKS[0].rect[0] - 0.2, height(TANKS[0].rect[0] - 0.2, 4) + 0.08, 4], rot: -Math.PI / 2, water: [TANKS[0].rect[0] + 3.2, 4, LEVEL], cycle: 36 });
 // swallows' mud nests under the eave of two annexes' south fronts, away from the doors
 for (const [i, a] of [ANNEXES[0], ANNEXES[2]].entries()) critters.push({ model: 'swallow_nest', at: [a.rect[0] + 1.4, 3.2, a.rect[3] + 0.44], rot: Math.PI / 2, cycle: 33 + 4 * i, flight: 9, radius: 10, side: i ? 1 : -1, rise: -0.8 });
+// zebu in two of the village yards, off the way: they walk a little, graze and lift the head to the visitor
+for (const [yi, models] of [[0, ['zebu_white', 'zebu_grey', 'zebu_red']], [4, ['zebu_grey', 'zebu_white']]]) {
+  const y = yards()[yi], cx = (y.rect[0] + y.rect[2]) / 2, cz = (y.rect[1] + y.rect[3]) / 2;
+  models.forEach((m, i) => critters.push({ model: m, at: [cx + (i - (models.length - 1) / 2) * 2.7, 0.05, cz + (i % 2 ? 1.2 : -1.0)], rot: 1.2 + i * 1.9 + yi, range: [1.3, 0.9], tau: 36 + i * 4 }));
+}
 export default { fish, flights, perches, critters };

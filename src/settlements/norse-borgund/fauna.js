@@ -71,4 +71,7 @@ barns.filter((_, i) => i % 2 === 0).slice(0, 4).forEach((b, i) => {
   const out = alongX ? [0, n[1] > 0 ? -1 : 1] : [n[0] > 0 ? -1 : 1, 0];
   critters.push({ model: 'swallow_nest', at: [wx, b.y + H - 0.4, wz], rot: Math.atan2(out[1], out[0]), cycle: 33 + (b.seed % 5), flight: 9, radius: 10, side: i % 2 ? 1 : -1, rise: -0.8 });
 });
+// the flock of sheep west of the churchyard wall, in the first view from the arrival (critter-models-farm.js): on the seven places where town.js's still sheep stood; the herder stays still life
+[[-37.8, -40.9, 'sheep_white'], [-46.1, -37.7, 'sheep_white'], [-44.7, -37.1, 'sheep_dark'], [-41.8, -34.6, 'sheep_white'], [-41, -40.5, 'sheep_white'], [-42.7, -47.7, 'sheep_dark'], [-41.1, -39.1, 'sheep_white']]
+  .forEach(([x, z, m], i) => critters.push({ model: m, at: [x, height(x, z), z], rot: 0.6 + i * 0.9, range: [2.2, 1.6], tau: 28 + i * 2.5 }));
 export default { fish, flights, perches, critters };

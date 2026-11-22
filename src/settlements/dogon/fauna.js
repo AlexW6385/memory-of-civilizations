@@ -1,6 +1,6 @@
 // A Dogon village — the animals (src/engine/fauna.js; docs/settlements/dogon.md §8): swallows over the village and the fields, crows
 // (pied crows, kites stand in) wheeling along the cliff, sparrows on the flat roofs and the place's earth. No water: no fish, no egret.
-import { COMPOUNDS, LANDMARK, PENS, FORGE, height } from './layout.js';
+import { COMPOUNDS, LANDMARK, PENS, FORGE, PLACE_Y, height } from './layout.js';
 import { WELLS } from './walk.js';
 import { frontOf } from '../../styles/dogon/compound.js';
 
@@ -45,5 +45,8 @@ for (const c of COMPOUNDS.filter((q) => q.row === 'C' && q.i < 2)) {
   const f = frontOf(c), top = c.y + 2.7;
   for (const [k, m] of ['pigeon_grey', 'pigeon_white'].entries()) critters.push({ model: m, at: [f.x0 + 1.2 + k * 0.9, top, f.zf - 1.5], rot: c.seed % 5 + k, range: [1.4, 1.2] });
 }
+// donkeys [inferred: the Dogon's pack animal]: two tethered on the place (one moved 3.4 m off the lane, which the still donkey stood too near), two at the millet field's edge (critter-models-farm.js; they stand and graze a little, short range as at a tether)
+critters.push({ model: 'donkey_grey', at: [-39, PLACE_Y + 0.02, 25], rot: 1.7, range: [1.0, 0.7], tau: 40 }, { model: 'donkey_brown', at: [22.5, PLACE_Y + 0.02, 22], rot: 3.5, range: [1.0, 0.7], tau: 44 });
+critters.push({ model: 'donkey_grey', at: [-16, g(-16, 46.5) + 0.02, 46.5], rot: 2.2, range: [2.5, 1.5], tau: 36 }, { model: 'donkey_brown', at: [-13.8, g(-13.8, 47.4) + 0.02, 47.4], rot: 0.8, range: [2.5, 1.5], tau: 41 });
 critters.push({ model: 'cat_tabby', at: [LANDMARK.rect[0] + 3.0, LANDMARK.y + 2.7, LANDMARK.rect[3] - 1.6], rot: 3.0, range: [1.0, 0.3] });
 export default { fish, flights, perches, critters };

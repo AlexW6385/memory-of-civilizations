@@ -23,7 +23,7 @@ export function dress() {
     Lf.push({ t: 'lantern', kind: 'paper', h: 2.2, at: [GATE_X - 3.0, s * 5.2], y: gy(GATE_X - 3.0, s * 5.2) });
   }
   { const x = GATE_X - 7, z = -7.4, y = gy(x, z); blk([x - 0.6, z - 0.4, x + 0.6, z + 0.4], y - 0.3, y + 0.3, 'limestone', true); blk([x - 0.4, z - 0.17, x + 0.4, z + 0.17], y + 0.3, y + 2.1, 'limestone', true); blk([x - 0.46, z - 0.23, x + 0.46, z + 0.23], y + 2.1, y + 2.25, 'limestone'); }
-  Lf.push({ t: 'animal', kind: 'donkey', at: [GATE_X - 9.2, 6.6], y: gy(GATE_X - 9.2, 6.6), seed: 71, rot: 1.6 });
+  // (the donkey at [GATE_X - 9.2, 6.6] is a donkey critter of fauna.js)
   monk(GATE_X - 4.8, -1.8, gy(GATE_X - 4.8, -1.8), 1.57, 6101, { pose: 'talk' });
   // the pilgrims' tea shed south of the lane before the gate: a seller at the counter, two pilgrims at a table, a donkey tied outside (teashed.js)
   { const tx = GATE_X - 6.5, tz = 10.5, ty = gy(tx, tz);
@@ -32,7 +32,7 @@ export function dress() {
     person(0.2, 0.55, 0, 6201, { hair: 'bun' });                                    // the seller behind the counter, facing the lane (north)
     person(-1.4, -1.0, Math.PI, 6203, { pose: 'low', hat: 'brim', carry: 'basket', y: ty + 0.45 });   // a pilgrim sitting at the table
     monk(tx + 0.7, tz + 0.3, ty + 0.15, 0, 6204, { pose: 'talk' });
-    Lf.push({ t: 'animal', kind: 'donkey', at: [tx + 4.0, tz - 1.2], y: gy(tx + 4.0, tz - 1.2), seed: 6205, rot: 2.0 }); }
+    /* (the donkey tied outside, at [tx + 4.0, tz - 1.2], is a donkey critter of fauna.js) */ }
   // stone lamp pillars and benches on the three levels (courtyard 0, middle terrace 6.5, upper terrace 13), set beside the axis
   for (const [x, y] of [[-34, 0], [6, 6.5], [44, 13]]) for (const s of [-1, 1]) {
     C.push({ t: 'wutai_lamp', at: [x, s * 9], y });
