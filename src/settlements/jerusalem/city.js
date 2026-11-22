@@ -15,7 +15,8 @@ import { cardoColonnades, bazaarColonnades, ZN, ZS } from './shopline.js';
 import { STREET, RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const plan = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' }, ...extra });
+// minSaved: repeated small shapes merge into the plan's mesh instead of each being an instanced draw (src/core/geom.js INSTANCING; budget trim)
+const plan = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, minSaved: 8000, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' }, ...extra });
 const D2R = Math.PI / 180;
 /** The style of the plans that carry lamps: the islamic style with its lamps given their glow at night (nightlight.js). */
 const LIT = 'jerusalem-lit';
