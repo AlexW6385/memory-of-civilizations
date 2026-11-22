@@ -245,3 +245,7 @@ Each of the 26 enterable shops (the merchant's and the 25 trade shops) now has i
 The great portal's approach (x -37.5, z -9...6) is now paved in slabs of dark marble 3.8 m wide with a pale track worn smooth through the middle, wider and paler toward the door and a little off-centre from slab to slab, ending in a long pale dished threshold (`hasan_wear` in `tomb.js`; 2-3 cm proud, no collision) [inferred: paving and wear]. No new material. Not done: the tomb's south portal, the mastabas' polished edges, the iwans' floors.
 
 Still short: Arabic writing (no verified glyph table); keepers' goods-handling poses; lit town houses; donkey and camel critter models; the Bayn pose at 451 draws; mesh count above the 2600 aim; the shut upper floors of the shared rab'/qa'a/wikala.
+
+## Budget trim (f-budget)
+
+- The block and dress tiles (near and far) carry `minSaved: 8000` (`town.js` `tiles()`; per-plan `minSaved` in `src/core/geom.js` / `build.js`, default 2400): small repeated shapes merge into the tile's mesh instead of each being an instanced draw. Bayn pose (−160, −250) looking south 451 → 405 main draws, north 246 → 233; arrival 392 → 356; main triangles 2.18 → 2.19 M. Meshes 2753 → 2707 (limit 2800; not raised), geo 75.5 → 94.7 MB.
