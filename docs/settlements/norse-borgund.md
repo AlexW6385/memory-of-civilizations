@@ -177,3 +177,6 @@ One mesh, one draw (src/engine/fauna-critters.js). The dossier names horses and 
 - **Sheep as critters.** The flock west of the churchyard wall (seven sheep, white and dark; `critter-models-farm.js`) walks and grazes; its still sheep are dropped, the herder stays [inferred; Norwegian farms kept sheep, cattle, goats and horses]. The other herds and the churchyard's horses stay still life.
 
 - Herds and yard groups: 29 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 29 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.
+
+## Night near the visitor, second pass
+- [inferred] The church's west porch and door show a service or vigil light within (glow on the door, porch and the ground before it); the round openings glow warmer; two more pine-splinter cresset posts stand in the churchyard on the path from the west gate, pooling on the ground. Hearths of the farms are unchanged.

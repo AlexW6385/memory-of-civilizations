@@ -17,7 +17,8 @@ import { box } from '../../core/geom.js';
 import { doorOf, YARD, height } from './layout.js';
 
 /** The outdoor fires of the night [inferred]: a pine-splinter cresset on a post at each side of the churchyard's gate (where the parish's horses stand), and the herder's fire at the west meadow's sheep. */
-export const FIRES = [[-2.6, YARD[3] + 0.9, 1.9], [2.6, YARD[3] + 0.9, 1.9], [-44, -37, 0.55]];
+export const FIRES = [[-2.6, YARD[3] + 0.9, 1.9], [2.6, YARD[3] + 0.9, 1.9], [-44, -37, 0.55], [-15, -34, 1.9], [-15, -26, 1.9]];
+// [inferred] the two west cressets stand in the churchyard on the path from the west gate to the porch, where the parish gathered for a vigil
 
 /** A number in [0, 1) from a position alone. */
 export function hashAt(x, z, s = 0) {
@@ -135,10 +136,17 @@ const wrapChurch = (fn) => function haloedChurch(el, ctx) {
   // reaches them from within and they show as faint warm discs from outside [inferred: a lit room's small openings glow in the dark]
   const s = el.s ?? 1, [cx, cz] = el.c, ry = (el.y ?? 0) + 8.75 * s;
   for (const [sd, zz] of [[-1, cz - 3.4 * s - 0.02], [1, cz + 3.4 * s + 0.02]]) for (const u of [-2.85, -0.95, 0.95, 2.85]) H.disc([cx + u * s, ry, zz], [1, 0, 0], [0, 1, 0], 0.15, 0.15, [0, sd], 10, [0.5, 0.45, 0.25]);
+  // the west porch (open) and its door: a service or vigil light within [inferred] lights the porch, the door's opening and the ground before it
+  { const px = el.c[0] - 8.8 * s, pz = el.c[1], g = (el.y ?? 0);
+    H.ball(px + 1.0 * s, g + 1.4, pz, 1.3, 0.8);
+    H.floor(px - 2.2, g + 0.06, pz, 4.2, 3.6, 12, 0.85);
+    H.floor(px + 0.6, g + 0.45, pz, 1.6, 1.4, 10, 0.9);
+    H.quad([px - 0.05, g + 0.4, pz - 0.5], [px - 0.05, g + 0.4, pz + 0.5], [px - 0.05, g + 1.9, pz + 0.5], [px - 0.05, g + 1.9, pz - 0.5], [-1, 0], 0.85);
+    for (const u of [-2.85, -0.95, 0.95, 2.85]) for (const zz of [el.c[1] - 3.4 * s - 0.02, el.c[1] + 3.4 * s + 0.02]) H.ball(el.c[0] + u * s, (el.y ?? 0) + 8.75 * s, zz, 0.55, 0.5); }
   for (const [fx, fz, fh] of FIRES) {
     const g = height(fx, fz);
     if (fh > 1) { ctx.bag.add('tar_wood', box(fx - 0.06, g, fz - 0.06, fx + 0.06, g + fh - 0.12, fz + 0.06)); ctx.bag.add('iron', box(fx - 0.2, g + fh - 0.14, fz - 0.2, fx + 0.2, g + fh - 0.1, fz + 0.2)); ctx.bag.add('iron', box(fx - 0.2, g + fh - 0.1, fz - 0.2, fx - 0.17, g + fh + 0.1, fz + 0.2)); ctx.bag.add('iron', box(fx + 0.17, g + fh - 0.1, fz - 0.2, fx + 0.2, g + fh + 0.1, fz + 0.2)); ctx.bag.add('iron', box(fx - 0.17, g + fh - 0.1, fz - 0.2, fx + 0.17, g + fh + 0.1, fz - 0.17)); ctx.bag.add('iron', box(fx - 0.17, g + fh - 0.1, fz + 0.17, fx + 0.17, g + fh + 0.1, fz + 0.2)); }
-    else { for (let k = 0; k < 3; k++) { const a = k * 2.1, c = Math.cos(a) * 0.3, d = Math.sin(a) * 0.3; ctx.bag.add('log_pine', box(fx + c - 0.45, g, fz + d - 0.06, fx + c + 0.45, g + 0.12, fz + d + 0.06)); } } H.ball(fx, g + fh, fz, fh > 1 ? 0.8 : 0.95, 0.8); H.floor(fx, g + 0.05, fz, fh > 1 ? 2.6 : 3.2, fh > 1 ? 2.6 : 3.2, 10, 0.62); }
+    else { for (let k = 0; k < 3; k++) { const a = k * 2.1, c = Math.cos(a) * 0.3, d = Math.sin(a) * 0.3; ctx.bag.add('log_pine', box(fx + c - 0.45, g, fz + d - 0.06, fx + c + 0.45, g + 0.12, fz + d + 0.06)); } } H.ball(fx, g + fh, fz, fh > 1 ? 0.8 : 0.95, 0.8); H.floor(fx, g + 0.05, fz, fh > 1 ? 4.2 : 3.2, fh > 1 ? 4.2 : 3.2, 12, fh > 1 ? 0.9 : 0.62); }
   H.flush(ctx.bag);
   return r;
 };
