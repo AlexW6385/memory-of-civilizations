@@ -54,7 +54,7 @@ export function placer(el, bag, k = 1, sc = null) {
   const M = new Matrix4().compose(_p.set(x, y, z), _q.setFromAxisAngle(_up, rot), _s.set(...S));
   if (!bag.addInstance) return (mat, g) => { placeHanging(g, M); bag.add(mat, g); };
   const reach = REACH[el.t] ?? 230, dusk = nightDusk(el);
-  return (mat, g, shade = 1) => { const t = tint(mat, shade); bag.addInstance(t ? t.base : mat, g, M, { color: t?.color ?? null, real: mat, reach, dusk }); };
+  return (mat, g, shade = 1) => { const t = tint(mat, shade); bag.addInstance(t ? t.base : mat, g, M, { color: t?.color ?? null, real: mat, reach, dusk, life: dusk < 2 }); };
 }
 
 /** Merge pieces (non-indexed position + normal, and hang where cloth hangs) into one geometry. */

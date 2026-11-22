@@ -94,6 +94,7 @@ export function dressing() {
   let seed = 3;
   const F = (at, y, dir, o) => L.push({ t: 'figure', at, y, rot: faceDir(dir), seed: seed++ * 7919, feet: 'bare', hat: 'none', carry: 'none', pose: 'stand', skin: rand() < 0.6 ? 'skin_medium' : 'skin_dark', dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_white', hair: 'short', ...o });
   const pickOf = (a) => a[Math.floor(rand() * a.length)];
+  const ZEBU_CRITTERS = [[-48, 134], [48, 135], [66, 132], [96, 160]];
   const woman = (at, y, dir, o = {}) => F(at, y, dir, { cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, ...o });
   // the farmsteads on the plain: a haystack, the cattle tied by the house, hens, pots by the door
   for (const l of lots()) {
@@ -225,7 +226,12 @@ export function dressing() {
     woman([h2 - 1.3, h3 - 1.2], 0.5, [-1, 0], { carry: 'pot' }); }
   for (const [x, z, d] of [[1.5, -178, [0, 1]], [-1.4, -184, [0, 1]], [2.0, -188, [0, 1]]]) F([x, z], 0.03, d, { carry: rand() < 0.5 ? 'basket' : 'none' });
   // cattle and goats on the open ground between the hill's foot and the first rows
-  for (const [x, z, rot, graze] of [[-48, 134, 0.8, true], [-60, 140, 2.2, false], [48, 135, 4.1, true], [66, 132, 1.2, true], [-90, 160, 3.3, false], [96, 160, 0.3, true]]) L.push({ t: 'animal', kind: rand() < 0.3 ? 'buffalo' : 'zebu', at: [x, z], y: 0, rot, seed: seed++, graze, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
+  // (the cattle at [-48, 134], [48, 135], [66, 132] and [96, 160] are the zebu critters of fauna.js: the random stream and the seeds still run on, nothing is drawn)
+  for (const [x, z, rot, graze] of [[-48, 134, 0.8, true], [-60, 140, 2.2, false], [48, 135, 4.1, true], [66, 132, 1.2, true], [-90, 160, 3.3, false], [96, 160, 0.3, true]]) {
+    const buffalo = rand() < 0.3, s0 = seed++, mat = pickOf(['hide_white', 'hide_grey', 'hide_tan']);
+    if (ZEBU_CRITTERS.some((w) => w[0] === x && w[1] === z)) continue;
+    L.push({ t: 'animal', kind: buffalo ? 'buffalo' : 'zebu', at: [x, z], y: 0, rot, seed: s0, graze, mat });
+  }
   for (const [x, z] of [[-40, 131], [-36, 133], [56, 133], [60, 130]]) L.push({ t: 'animal', kind: 'goat', at: [x, z], y: 0, rot: rand() * 6, seed: seed++, graze: true });
   return L;
 }

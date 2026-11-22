@@ -53,4 +53,8 @@ for (const p of feast()) for (const e of p.elements) if (e.t === 'midden') {
 // rooks about the open fires of the feast (the scraps), on the trodden chalk of the Avenue by the Heel Stone, and on the ground by the dressing of the sarsen
 soundSpots().fires.filter((f) => f.pig).slice(0, 5).forEach((f, i) => { for (let k = 0; k < 2; k++) { const a = i * 2 + k * 3.3; critters.push({ model: 'rook', at: on([f.at[0] + Math.cos(a) * 4.4, f.at[1] + Math.sin(a) * 4.4]), rot: a, range: [3, 2.2] }); } });
 for (const [s, t] of [[84, 6], [88, -6.2], [52, 7.4]]) { const [x, z] = A(s, t); critters.push({ model: 'rook', at: on([x, z]), rot: s, range: [3, 2.2] }); }
+// two of the flocks on the down, with their herders and dogs still (critter-models-farm.js: the small, brown, horned sheep of the Neolithic flocks, a few lighter): where town.js's still flocks stood
+[[-47.8, 130.8, 'sheep_horned'], [-44.2, 138.2, 'sheep_dark'], [-41.4, 135.5, 'sheep_horned'], [-37.3, 136.4, 'sheep_white'], [-42.7, 140.1, 'sheep_dark'], [-39.5, 135, 'sheep_horned'],
+ [-199.7, -32.1, 'sheep_horned'], [-210.4, -35.2, 'sheep_dark'], [-208.6, -30.2, 'sheep_horned'], [-202.1, -35, 'sheep_white'], [-202.5, -36.1, 'sheep_horned'], [-210, -39.6, 'sheep_dark']]
+  .forEach(([x, z, model], i) => critters.push({ model, at: on([x, z]), rot: 0.7 + i * 1.13, range: [2.4, 1.7], tau: 30 + (i % 6) * 2.5 }));
 export default { fish, flights, perches, critters };

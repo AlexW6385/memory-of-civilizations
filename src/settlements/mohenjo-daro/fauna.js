@@ -32,7 +32,7 @@ void PLAZA;
 // The animals of the city, domestic and wild-in-town [stated: "cattle, buffalo, goat, pig and chicken", Wikipedia "Indus Valley Civilisation"; dogs; the zebu and buffalo are
 // life elements, not critters]: dogs at the doors of the walk's lanes (dog paw prints are on Indus bricks, a dog's and a cat's together at Chanhudaro [inferred from memory, not
 // checked]), a cat on a doorstep, goats tethered in the platform's street, fowl pecking in the lanes (the chicken is stated), rock doves on the Bath's paving and in the market
-// (the blue rock pigeon is native [inferred]), ducks on the river's backwater, a kingfisher fishing at the landing.
+// (the blue rock pigeon is native [inferred]), ducks on the river's backwater, a kingfisher fishing at the landing, and three humped zebu [stated: "humped zebu-type cattle appear often on seals"] standing and grazing on an open stretch of the town west of the market (critter-models-farm.js).
 const critters = [];
 const walkLots = lots().filter((l) => l.walk);
 const doorSpot = (l, du, v) => { const [x0, z0, x1, z1] = l.rect, W = l.front === 'w' || l.front === 'e' ? z1 - z0 : x1 - x0; du = Math.max(0.6, Math.min(W - 0.6, du)); return l.front === 'w' ? [x0 - v, z0 + du] : l.front === 'e' ? [x1 + v, z0 + du] : l.front === 'n' ? [x0 + du, z0 - v] : [x0 + du, z1 + v]; };
@@ -47,6 +47,8 @@ walkLots.filter((l) => l.tag === 'town' || l.rect[1] < -30).slice(0, 12).filter(
 critters.push({ model: 'goat_black', at: [-110, 7.05, -80.6], rot: 0.6, range: [9, 3.2] }, { model: 'goat_white', at: [-111.4, 7.05, -81.0], rot: 3.0, range: [9, 3.2] });
 // fowl in the plain's lanes and the street before the market, at the lane's edge
 for (const [x, z, m] of [[-5.0, 24, 'hen_brown'], [-4.4, 25.2, 'rooster'], [-5.2, 26.1, 'hen_white'], [36.4, -12, 'hen_brown'], [36.9, -11, 'hen_brown'], [-91.2, -50, 'hen_white']]) critters.push({ model: m, at: [x, height(x, z) + (x < -80 ? 7 : 0) + 0.05, z], rot: x * 3, range: [2.4, 1.3] });
+// zebu on the open ground of the town's west side (clear of the houses and 16 m from every walk route)
+for (const [x, z, m, rot] of [[-40, -4, 'zebu_white', 0.6], [-36.5, 2.5, 'zebu_grey', 2.3], [-43.5, 3, 'zebu_red', 4.4]]) critters.push({ model: m, at: [x, height(x, z) + 0.02, z], rot, range: [2.6, 2], tau: 34 + (-x % 5) });
 // rock doves on the Bath's court (by the coping), on the Citadel's street, and at the market's edge
 for (const [x, y, z, m] of [[-146, 7.07, -73, 'pigeon_grey'], [-145.2, 7.07, -74.3, 'pigeon_grey'], [-147, 7.07, -95, 'pigeon_white'], [-128, 7.07, -61, 'pigeon_grey'], [-127.1, 7.07, -60.2, 'pigeon_grey'], [52, 0.07, -28, 'pigeon_grey'], [53, 0.07, -27, 'pigeon_grey'], [80, 0.07, -22, 'pigeon_white']]) critters.push({ model: m, at: [x, y, z], rot: x * 3, range: [1.4, 1.2] });
 // ducks on the Indus's backwater under the quay, a kingfisher on the bank, fishing

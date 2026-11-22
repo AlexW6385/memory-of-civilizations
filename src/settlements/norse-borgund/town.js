@@ -63,7 +63,8 @@ export function life() {
   if (free(-8.5, YARD[3] + 5.5, 1)) put('sledge', [-8.5, YARD[3] + 5.5], { load: 'bales', rot: 0.4 });
   if (free(2.8, YARD[3] + 5.5, 1)) fig([2.8, YARD[3] + 5.5], 2.6, { pose: 'stand', h: 1.15, dress: 'tunic', hat: 'cap', beard: 0 });
   if (free(-3.8, YARD[3] + 6.8, 1)) fig([-3.8, YARD[3] + 6.8], 0.4, { pose: 'talk', carry: 'staff', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_grey', cloth2: 'cloth_white' });
-  { const c = [-44, -40]; if (free(c[0], c[1], 3)) { for (let k = 0; k < 7; k++) { const p = near(c, 8); if (p) beast('sheep', p, 0.6 + (rand() - 0.5) * 1.6); } const h = near(c, 6); if (h) fig(h, 2.4, { carry: 'pole', dress: 'tunic', pose: 'stand' }); } }
+  // (the flock west of the wall is the sheep critters of fauna.js at these seven places: the random stream runs on, nothing is drawn)
+  { const c = [-44, -40]; if (free(c[0], c[1], 3)) { for (let k = 0; k < 7; k++) { const p = near(c, 8); if (p) { void (0.6 + (rand() - 0.5) * 1.6); rand(); } } const h = near(c, 6); if (h) fig(h, 2.4, { carry: 'pole', dress: 'tunic', pose: 'stand' }); } }
   for (const [x, z] of [[-38, -10], [-40, 6]]) if (free(x, z, 2)) fig([x, z], rand() * 6.28, { carry: 'yoke', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_indigo' });
   if (free(-36, -22, 1)) put('haystack', [-36, -22]);
   if (free(-33, -44, 1)) put('firewood', [-33, -44], { rot: 0.3, len: 2.2 });

@@ -247,8 +247,9 @@ export async function town() {
   // lone herd-boys, a woman milking mares at the horse lines, tethers
   for (const c of [CAMPS.sw, CAMPS.se]) { mwoman([c[0] + 28, c[1] - 6], height(c[0], c[1]), 1.0, { pose: 'kneel' }); for (let k = 0; k < 4; k++) E_animal(T, 'horse', [c[0] + 30 + (k % 2) * 1.6, c[1] - 4 + k * 1.6], height(c[0], c[1]), 1.57, seed()); }
   // ── the markets at the gates [stated: Rubruck]: horses at the north, sheep and goats at the west, oxen and carts at the south, grain at the east ──
-  for (const q of PENS.n) for (let k = 0; k < 6; k++) E_animal(T, 'horse', [q[0] + 2 + rand() * (q[2] - q[0] - 4), q[1] + 2 + rand() * (q[3] - q[1] - 4)], height(q[0], q[1]), rand() * 6.28, seed());
-  for (const q of PENS.w) for (let k = 0; k < 9; k++) E_animal(T, rand() < 0.55 ? 'sheep' : 'goat', [q[0] + 1.5 + rand() * (q[2] - q[0] - 3), q[1] + 1.5 + rand() * (q[3] - q[1] - 3)], height(q[0], q[1]), rand() * 6.28, seed());
+  // (the first two horse pens and the first sheep pen are drawn as the critters of fauna.js: the arguments are still evaluated, so that the random stream is unchanged)
+  for (const [qi, q] of PENS.n.entries()) for (let k = 0; k < 6; k++) (qi < 2 ? E_skip : E_animal)(T, 'horse', [q[0] + 2 + rand() * (q[2] - q[0] - 4), q[1] + 2 + rand() * (q[3] - q[1] - 4)], height(q[0], q[1]), rand() * 6.28, seed());
+  for (const [qi, q] of PENS.w.entries()) for (let k = 0; k < 9; k++) (qi < 1 ? E_skip : E_animal)(T, rand() < 0.55 ? 'sheep' : 'goat', [q[0] + 1.5 + rand() * (q[2] - q[0] - 3), q[1] + 1.5 + rand() * (q[3] - q[1] - 3)], height(q[0], q[1]), rand() * 6.28, seed());
   for (const q of PENS.n.slice(0, 2)) { mongol([(q[0] + q[2]) / 2, q[3] + 2.6], height(q[0], q[3]), 3.14, { pose: 'talk' }); mongol([(q[0] + q[2]) / 2 + 1.2, q[3] + 3.4], height(q[0], q[3]), 0.4, {}); }
   for (const q of PENS.w) { saracen([q[2] + 2.4, (q[1] + q[3]) / 2], height(q[2], q[1]), 1.57, { pose: 'talk' }); }
   OUTSIDE_WAGONS.s.forEach(([x, z], i) => { const yaw = 0.2; for (const sd of [-0.45, 0.45]) E_animal(T, 'ox', [x + Math.sin(yaw) * 5.2 + sd * 1.0, z + Math.cos(yaw) * 5.2], 0, Math.PI - yaw, seed()); mongol([x - 2.6, z + 1], 0, 1.57, { pose: 'talk' }); void i; });
@@ -265,4 +266,5 @@ export async function town() {
 }
 const rot_ = (rand) => rand() * Math.PI * 2;
 const side_ = (rand) => (rand() < 0.5 ? -1 : 1);
+function E_skip() {}
 function E_animal(T, kind, at, y, rot, seed) { T.push({ t: 'animal', kind, at, y, rot, seed }); }

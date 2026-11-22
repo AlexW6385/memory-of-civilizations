@@ -112,7 +112,7 @@ async function buildOne(plan) {
     if (p.colors) transfer.push(p.colors.buffer);
     if (p.reach) transfer.push(p.reach.buffer);
     if (p.dusk) transfer.push(p.dusk.buffer);
-    return { mat: p.mat, key: p.key, detail: p.detail, big: p.big, first: p.first, lod, pos, nor, hang, index, matrices: p.matrices, colors: p.colors, reach: p.reach, dusk: p.dusk, reals: p.reals };
+    return { mat: p.mat, key: p.key, detail: p.detail, big: p.big, first: p.first, life: p.life, lod, pos, nor, hang, index, matrices: p.matrices, colors: p.colors, reach: p.reach, dusk: p.dusk, reals: p.reals };
   });
   b.colliders.tops = tops;
   return { built: { parts, instanced, lights: b.lights, colliders: b.colliders }, transfer: [...new Set(transfer)] };
@@ -125,7 +125,7 @@ async function buildOne(plan) {
  * keeps its own; a buffer sent is gone from the worker).
  */
 function coarseOf(plan, p, transfer) {
-  const g = p.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array, life = plan.style === 'life';
+  const g = p.geometry, P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array, life = plan.style === 'life' || !!p.life;
   if (p.detail && !life) return undefined;
   // (cloth in the wind has no coarse version: a coarse one would have no hang, and hang still)
   if (p.mat.endsWith('+wind')) return undefined;

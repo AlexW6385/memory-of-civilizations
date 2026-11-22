@@ -115,13 +115,15 @@ export async function town() {
     const [x0, z0, x1, z1] = p.rect;
     for (let q = 0; q < (n ? 5 : 9); q++) {
       const at = [x0 + 2 + rand() * (x1 - x0 - 4), z0 + 2 + rand() * (z1 - z0 - 4)];
-      E.push({ t: 'animal', kind: n ? 'ox' : rand() < 0.5 ? 'sheep' : 'goat', at, y: 0.02, rot: rand() * 6.28, seed: q * 11 + n, mat: n ? 'hide_black' : undefined });
+      const kind = n ? 'ox' : rand() < 0.5 ? 'sheep' : 'goat', rot = rand() * 6.28;
+      if (!n) continue;   // (the first pen's sheep and goats are the critters of fauna.js; the random stream is unchanged)
+      E.push({ t: 'animal', kind, at, y: 0.02, rot, seed: q * 11 + n, mat: n ? 'hide_black' : undefined });
     }
     woman([p.gate === 'w' ? x0 - 1.5 : x1 + 1.5, (z0 + z1) / 2 + 1.2], 0, p.gate === 'w' ? Math.PI / 2 : -Math.PI / 2, {});
   });
   // flocks grazing on the plain with a herder and a dog: sheep and goats mixed, a few kids
   for (const [fx, fz, n] of [[-52, 30, 10], [50, 36, 9], [-6, 58, 8], [-56, -40, 7]]) {
-    for (let q = 0; q < n; q++) E.push({ t: 'animal', kind: q % 3 === 2 ? 'goat' : 'sheep', at: [fx + (rand() - 0.5) * 10, fz + (rand() - 0.5) * 7], y: 0.02, rot: rand() * 6.28, graze: true, seed: q * 5 + Math.floor(fx) });
+    for (let q = 0; q < n; q++) { const at = [fx + (rand() - 0.5) * 10, fz + (rand() - 0.5) * 7], rot = rand() * 6.28; if (fx === -56) continue; /* (that flock is the sheep critters of fauna.js) */ E.push({ t: 'animal', kind: q % 3 === 2 ? 'goat' : 'sheep', at, y: 0.02, rot, graze: true, seed: q * 5 + Math.floor(fx) }); }
     man([fx + 6, fz + 3], 0, -2, { pose: 'staff', carry: 'staff' });
     E.push({ t: 'animal', kind: 'dog', at: [fx + 4.5, fz - 3], y: 0, rot: 1, seed: Math.floor(fz) });
   }

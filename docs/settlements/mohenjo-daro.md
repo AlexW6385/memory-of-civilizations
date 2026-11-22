@@ -177,3 +177,5 @@ All [inferred]; no new sources, no new writing (the script stays undeciphered).
 - **Walk gaps:** the masters and apprentices of the walk's opened workshops were life figures (reach 170 m); they are built into near plans of 60 m cells (`md_keepers`, town.js `md-keepers-*`), the apprentice added since the draw budget allows it. walk-check 28 routes ok.
 - **Landmark wear:** a pale rubbed track over the Bath court's paving from the south doors to the south stair (brick_buff, thin boxes, no collision). Wet-paving patches tried and dropped (read as pale bars).
 - **Still short:** pig, peacock, palm squirrel (no critter models); no Indus script anywhere (undeciphered); gallery wooden screens between the piers (stated as possible) not built; the Lower Town's far lots still closed; wear on the Granary's ramp and College steps.
+
+- **Zebu as critters.** Three humped zebu (`critter-models-farm.js`) stand and graze on the open ground of the town's west side, 16 m from any walk route [stated: humped zebu-type cattle are common on the seals; Wikipedia "Indus Valley Civilisation"]; the carts' zebu and the street animals stay still life.

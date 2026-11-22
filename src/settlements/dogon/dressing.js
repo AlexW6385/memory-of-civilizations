@@ -55,7 +55,7 @@ export function dressing() {
     else fig([x, z], y, rand() * 6.28, { carry: 'pot', arms: 'head' });
   }
   for (const [x, z] of [[-18, 45.5], [22, 45]]) { E.push({ t: 'sacks', n: 4, at: [x, z], y: height(x, z), rot: rand() * 3, seed: Math.round(x) }); }
-  E.push({ t: 'animal', kind: 'donkey', at: [-16, 46.5], y: height(-16, 46.5), rot: 2.2, seed: 301 });
+  // (the donkey at the field's edge, at [-16, 46.5], is a donkey critter of fauna.js)
   // a little troop of goats on the slope above the compounds' row A, a herdboy with his stick
   { const bx = -44, bz = -20, by = height(bx, bz);
     for (let k = 0; k < 5; k++) E.push({ t: 'animal', kind: k % 4 === 3 ? 'sheep' : 'goat', at: [bx + rand() * 5, bz + rand() * 4], y: height(bx + 2.5, bz + 2), rot: rand() * 6.28, seed: 500 + k });

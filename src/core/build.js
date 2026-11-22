@@ -84,7 +84,7 @@ function finishBuild({ bag, col, lights, plan }) {
   // and their prototypes' normals too (not the street life's, src/engine/life-instances.js): with
   // float normals a material's instanced shapes and its parts were two vertex layouts, so two
   // shaders and pipelines (scene and shadow) for one material — 33 of Suzhou's 73 materials
-  if (bag.weld && plan.style !== 'life') for (const p of instanced) packNormals(p.geometry);
+  if (bag.weld && plan.style !== 'life') for (const p of instanced) if (!p.life) packNormals(p.geometry);
   const A = new Matrix4(), B = new Matrix4();
   for (const p of instanced) {
     const M = p.matrices;

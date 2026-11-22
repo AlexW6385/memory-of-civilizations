@@ -9,12 +9,13 @@
 //   { type:'floaters', models:['mandarin_drake','mandarin_hen'], area, dist, margin, a:[ax,az], ratio, speed, y, raft? }
 //       a loop of the water the animals share (as the fish's), the models going round it side by side
 //   { model, at:[x,y,z], rot, ...}  any other single animal: `range` [a,b] and tau/speed/stride (a walker: crane, hen_*,
-//       rooster), range [far, near] (cat_*, dog: the distance the head lifts and the dog stands), cycle (cormorant),
+//       rooster, grazer: horse_*, ox_*, zebu_*, donkey_*, sheep_*), range [far, near] (cat_*, dog: the distance the head lifts and the dog stands), cycle (cormorant),
 //       cycle + flight + radius + side (swallow_nest), water [x, z, y] + cycle (kingfisher); fishing_craft and cagebird as props
 import * as THREE from 'three/webgpu';
 import { attribute, uniform, vec3, float, positionGeometry, sin, cos, normalize, dot, max, mix, smoothstep, step, abs, renderGroup, faceDirection, length, select } from 'three/tsl';
 import { ENV } from './env.js';
 import { MODELS } from './critter-models.js';
+import { FARM_GAIT, farmKind } from './critter-models-farm.js';
 import { POSES, KIND, context, RIG_FIELDS, TAU } from './critter-poses.js';
 import { X } from './critter-math.js';
 
@@ -34,6 +35,8 @@ MODEL_KIND.gull_silver = 'hen';   // (Sydney's silver gulls walk and peck as the
 MODEL_KIND.noddy = 'hen'; MODEL_KIND.kiore = 'dog';   // (Rapa Nui's noddies walk and peck as the fowl do; its rats stand and lie down on the dog's rig)
 Object.assign(MODEL_KIND, { pig_dark: 'dog', pig_pale: 'dog', rook: 'hen' });   // (Stonehenge's pigs lie down and stand on the dog's rig; its rooks walk and peck as the fowl do)
 MODEL_KIND.goose_magpie = 'hen';   // (Ubirr's magpie geese walk and peck as the fowl do; the model is added from critter-models-kakadu.js)
+// (the farm animals of critter-models-farm.js: horses, oxen and zebu, donkeys, sheep; they walk, graze and look up on the grazer pose)
+for (const n of Object.keys(MODELS)) if (farmKind(n)) MODEL_KIND[n] = 'grazer';
 /** Out at night too (a cat and a dog asleep, a cage hung out, the craft)? */
 const NIGHT = { cat: 1, dog: 1, cagebird: 1, craft: 1 };
 const REACH = 95;
@@ -81,6 +84,7 @@ export function expandCritters(list, site) {
     let c = [0, 0, 0, 0], d = [0, 0, 0, 0];
     if (kind === 'crane') { c = [...(sp.range ?? [6, 2]), sp.tau ?? 50, sp.speed ?? 0.42]; d = [sp.stride ?? 0.7, 0, 0, 0]; }
     else if (kind === 'hen' || kind === 'rooster') { c = [...(sp.range ?? [2.5, 2]), sp.tau ?? 14, sp.speed ?? 0.5]; d = [sp.stride ?? 0.22, 0, 0, 0]; }
+    else if (kind === 'grazer') { const G = FARM_GAIT[farmKind(sp.model)]; c = [...(sp.range ?? [4, 3]), sp.tau ?? 30, sp.speed ?? G.speed]; d = [sp.stride ?? G.stride, sp.swing ?? G.swing, sp.graze ?? G.graze, 0]; }
     else if (kind === 'cat') c = [...(sp.range ?? [7, 2.5]), 0, 0];
     else if (kind === 'dog') c = [...(sp.range ?? [9, 3.5]), 0, 0];
     else if (kind === 'cormorant') c = [sp.cycle ?? 52, 0, 0, 0];
