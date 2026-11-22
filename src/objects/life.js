@@ -8,6 +8,8 @@
 import { LIFE_KINDS, boatFloat } from './index.js';
 import { buildPlan, toWorld } from '../core/build.js';
 import { ARRIVALS } from '../planet/arrivals.js';
+/** Settlements whose arrival looks along a causeway or a street: metres of the view line kept free of the street life's figures. */
+const VIEW_LINE_CLEAR = { angkor: 8 };
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const hash = (str) => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
@@ -685,6 +687,13 @@ export function lifePlans(id, R, landmarks, town, G) {
   }
   // (and what was put without asking the grid: kept off the arrival point too; the lines and poles overhead may cross it)
   if (AR) for (let i = els.length - 1; i >= 0; i--) { const e = els[i]; if (e.t !== 'wash_line' && e.t !== 'laundry_pole' && Math.hypot(e.at[0] - AR[0], e.at[1] - AR[2]) < AR_CLEAR + sz(e.t) * 0.5) els.splice(i, 1); }
+  // (and the first metres of the arrival's view line, for the settlements whose view runs along a way: no figure within
+  // 8 m ahead and 2.5 m to either side; dropped after the draw, so no other figure's seed moves)
+  if (AR && VIEW_LINE_CLEAR[id]) for (let i = els.length - 1; i >= 0; i--) {
+    const e = els[i]; if (e.t !== 'figure') continue;
+    const dx = e.at[0] - AR[0], dz = e.at[1] - AR[2], hx = -Math.sin(AR[3]), hz = -Math.cos(AR[3]), fwd = dx * hx + dz * hz, lat = Math.abs(-dx * hz + dz * hx);
+    if (fwd > -1 && fwd < VIEW_LINE_CLEAR[id] && lat < 2.5) els.splice(i, 1);
+  }
   // as plans of a few hundred objects each
   // as plans of one 100 m tile each, so that what is out of view or far is not drawn
   const tiles = new Map();
