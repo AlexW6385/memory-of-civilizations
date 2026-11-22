@@ -15,6 +15,7 @@ import { roomAcoustics } from './engine/acoustics.js';
 import { profileOf, due } from './engine/soundscape.js';
 import { Climate, sunPlanet, moonPlanet } from './engine/climate.js';
 import { Rain } from './engine/rain.js';
+import { openToSky } from './engine/shelter.js';
 import { GlobeView } from './ui/globe.js';
 import { MiniMap } from './ui/minimap.js';
 import { initLang, setLang, getLang, t, onLang } from './ui/i18n.js';
@@ -732,6 +733,7 @@ async function main() {
     onStep?.(1);
   }
 
+  let shelterT = 0, skyOpen = true;
   function frameOnce(dt) {
     if (!controls.free) { world.reanchor(controls); controls.apply(); }
     world.place(R.camera, !controls.free);
@@ -742,6 +744,8 @@ async function main() {
     const u = world.here(controls), f = world.anchor.frame;
     R.setRange(world.camAlt ?? 2, c.y - world.collide.terrain(c.x, c.z));
     const outdoors = !here.room || here.room.kind === 'open';
+    // the rain and snow also stop under a roof the room list does not know (a loggia, a porch): the top fields asked four times a second
+    if ((shelterT -= dt) <= 0) { shelterT = 0.25; skyOpen = openToSky(here, world.collide.tops, c.x, c.y, c.z); }
     climate.indoors += ((outdoors ? 0 : 1) - climate.indoors) * Math.min(1, dt / 1.5);
     // the sky: the settlement's own in its zone, blended out into the open country's
     climate.lonHours = latLon(u)[1] / 15;
@@ -756,7 +760,7 @@ async function main() {
     const tC = HITCH.mark();
     const cl = climate.update({ sun: dirToLocal(f, sunPlanet(climate.utc)), moon: dirToLocal(f, moonPlanet(climate.utc)), up: dirToLocal(f, u), zones }, Math.min(dt, 0.25));
     HITCH.since('climate', tC);
-    rain.update(dt, cl.rain, outdoors);
+    rain.update(dt, cl.rain, skyOpen);
     const tA = HITCH.mark();
     music.ambience(cl.rain, cl.windy, !outdoors);
     HITCH.since('audio', tA);

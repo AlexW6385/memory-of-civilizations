@@ -1,6 +1,6 @@
 // Rain: thin streaks falling around the viewer, moved entirely on the GPU. Each streak has a
 // fixed random seed; its position wraps inside a box that follows the camera, slanted by the
-// wind. Faded out indoors (rooms that are not open to the sky) and when it is not raining.
+// wind. Faded out (0.5 s) indoors and under any roof (src/engine/shelter.js: the whole cloud, so rain seen through a door goes too) and when it is not raining.
 // Snow and blowing dust (ENV.snow, ENV.dust: the set pieces of src/planet/setpieces.js) are a
 // second such cloud of small round flakes: snow drifting down and swaying, dust motes driven
 // along the wind near the ground. One draw each, drawn only while it falls. And the lightning's
@@ -53,18 +53,19 @@ export class Rain {
     this.mesh.renderOrder = 10;
     this.mesh.visible = false;
     scene.add(this.mesh);
-    this.level = 0;
+    this.level = 0; this.open = 1;
     this.flakes = new Flakes(scene);
     this.bolt = new Bolt(scene);
   }
 
   /** rain: 0…1 from the climate; outdoors: whether the viewer is under the open sky. */
   update(dt, rain, outdoors) {
-    const target = outdoors ? rain : 0;
-    this.level += (target - this.level) * Math.min(1, dt / 2.5);
-    this.amount.value = this.level;
-    this.mesh.visible = this.level > 0.01;
-    this.flakes.update(dt, outdoors);
+    this.level += (rain - this.level) * Math.min(1, dt / 2.5);
+    // under a roof the fall is shut off in about half a second (a door walked through does not pop); the weather itself changes slowly
+    this.open += ((outdoors ? 1 : 0) - this.open) * Math.min(1, dt / 0.2);
+    this.amount.value = this.level * this.open;
+    this.mesh.visible = this.amount.value > 0.01;
+    this.flakes.update(dt, this.open);
     this.bolt.update();
   }
 }
@@ -193,11 +194,11 @@ class Flakes {
     scene.add(this.mesh);
     this.s = 0; this.d = 0;
   }
-  update(dt, outdoors) {
+  update(dt, open) {
     const f = Math.min(1, dt / 2.5);
-    this.s += ((outdoors ? ENV.snow.value : 0) - this.s) * f;
-    this.d += ((outdoors ? ENV.dust.value : 0) - this.d) * f;
-    this.snow.value = this.s; this.dust.value = this.d;
-    this.mesh.visible = this.s + this.d > 0.01;
+    this.s += (ENV.snow.value - this.s) * f;
+    this.d += (ENV.dust.value - this.d) * f;
+    this.snow.value = this.s * open; this.dust.value = this.d * open;
+    this.mesh.visible = (this.s + this.d) * open > 0.01;
   }
 }
