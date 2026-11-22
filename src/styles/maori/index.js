@@ -710,7 +710,7 @@ function pou(el, { bag, col }) {
 /** The fence's stakes, three heights. */
 const STAKES = [1.25, 1.4, 1.55].map((hh) => lathe([[0.04, 0], [0.03, hh], [0.001, hh + 0.03]], 5));
 /** The kūmara mound at unit size. */
-const PUKE = lathe([[1, -0.3], [1, 0], [0.8, 0.28], [0.45, 0.42], [0.001, 0.46]], 8);
+const PUKE = lathe([[1, -0.3], [1, 0], [0.8, 0.28], [0.45, 0.42], [0.001, 0.46]], 6);
 /** A kūmara's vine at unit size: five heart-shaped leaves spread over the mound's top, each a pair of triangles seen from both sides. */
 const VINE = (() => {
   const t = [];
