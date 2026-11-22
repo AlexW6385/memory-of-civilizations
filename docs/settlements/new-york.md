@@ -241,3 +241,7 @@ Not done in this round: new opened shops and routes, street-name and subway lett
 4. Signs: names removed. Shop boards carry the trade word only (no surnames), the roof boards carry goods in place of brands (SODA, CIGARETTES, TOBACCO, CANDY, CIGARS, TOOTHPASTE, SHIRTS, SOUP). Not done: worn stoop treads (a patch of dark granite on each tread failed surface-check as coplanar and was dropped), subway-stair and kerb wear, any landmark work (lobby, setbacks, crown).
 Budget: walk poses main 400 (barber, both ways 400/430); the row-house pose at (34, 66) is 513/465 against 507/467 on master before this pass (over 450 already, not made worse).
 Still short: wear; landmark gaps; the shop glass hides the room's halos from the street; other row houses and lofts shut; the nearest iron-front lot unopened.
+
+## Budget trim (f-budget)
+
+- The near block tiles carry `minSaved: 6000` (`src/settlements/new-york/town.js`; `GeoBag` and `build.js` take a per-plan `minSaved`, default unchanged at 2400): the small repeated iron and stone shapes (stoop rails, areaway pickets, fire-escape bars) merge into the tile's mesh rather than each shape being an instanced draw. Pose (34, 66) main draws, worst yaw (−0.8) 532 → 434; 0 / π 453 / 437 → 390 / 350; main triangles 2.4 → 2.5 M; geo 107 → 123 MB (a value of 20000 gave 148 MB, over the limit).

@@ -93,6 +93,8 @@ const EXTRA = (() => {
 const nearVehicle = (x, z) => EXTRA.vehicles.some((v) => Math.abs(v.at[0] - x) < v.box[0] && Math.abs(v.at[1] - z) < v.box[1]);
 /** A point at (lx, lz) of a thing placed at `at` turned by `rot` (as Matrix4.makeRotationY). */
 const loc = (at, rot, lx, lz) => [at[0] + lx * Math.cos(rot) + lz * Math.sin(rot), at[1] - lx * Math.sin(rot) + lz * Math.cos(rot)];
+// the near tiles' small repeated shapes (stoop rails, areaway pickets, fire-escape bars) merge into the tile's mesh instead of each shape being an instanced draw (src/core/geom.js INSTANCING)
+const MIN_SAVED = 6000;
 const base = (id, elements) => ({ id, style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t: 'turned', angle: GRID, elements }], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: entranceOf() });
 /** A placed thing of the grid's frame in the settlement's: its place and its turn. */
 const placed = (e) => ({ ...e, at: toCity(...e.at), rot: (e.rot ?? 0) + GRID });
@@ -322,7 +324,7 @@ export async function buildings() {
   for (const l of all) { const c = toCity((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2), k = `${Math.floor((c[0] + OFF) / TILE)},${Math.floor((c[1] + OFF) / TILE)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(l); }
   for (const [k, list] of tiles) {
     const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE - OFF, (j + 0.5) * TILE - OFF], els = list.flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l), up: upOf(l), openRow: openRowOf(l) }]);
-    plans.push({ ...base(`new-york-blocks-${k}`, els), style: 'artdeco_near', near: NEAR, center });
+    plans.push({ ...base(`new-york-blocks-${k}`, els), style: 'artdeco_near', near: NEAR, center, minSaved: MIN_SAVED });
     plans.push({ ...base(`new-york-blocks-${k}-far`, els), style: 'artdeco_far', far: NEAR, center, nocollide: true });
   }
   const dl = dinerLife(), c = toCity(...DINER_AT);

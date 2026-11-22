@@ -66,7 +66,7 @@ function startBuild(plan, { instancing = false, detail = false, weld = instancin
   resetBuildState();   // the jitter counters of the styles restart, so the same plan always builds the same geometry
   // the life of the streets is gathered settlement-wide by the viewer (src/engine/life-instances.js),
   // so every placed piece of it is instanced however few there are in one tile
-  return { bag: new GeoBag({ instancing, detail, weld, always: instancing && plan.style === 'life' }), col: new Colliders(), lights: [], style, plan };
+  return { bag: new GeoBag({ instancing, detail, weld, always: instancing && plan.style === 'life', ...(plan.minSaved ? { minSaved: plan.minSaved } : {}) }), col: new Colliders(), lights: [], style, plan };
 }
 function buildElement(el, ctx) {
   const fn = GENERIC[el.t] || ctx.style.elements?.[el.t];
