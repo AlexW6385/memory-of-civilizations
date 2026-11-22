@@ -49,4 +49,7 @@ for (const c of COMPOUNDS.filter((q) => q.row === 'C' && q.i < 2)) {
 critters.push({ model: 'donkey_grey', at: [-39, PLACE_Y + 0.02, 25], rot: 1.7, range: [1.0, 0.7], tau: 40 }, { model: 'donkey_brown', at: [22.5, PLACE_Y + 0.02, 22], rot: 3.5, range: [1.0, 0.7], tau: 44 });
 critters.push({ model: 'donkey_grey', at: [-16, g(-16, 46.5) + 0.02, 46.5], rot: 2.2, range: [2.5, 1.5], tau: 36 }, { model: 'donkey_brown', at: [-13.8, g(-13.8, 47.4) + 0.02, 47.4], rot: 0.8, range: [2.5, 1.5], tau: 41 });
 critters.push({ model: 'cat_tabby', at: [LANDMARK.rect[0] + 3.0, LANDMARK.y + 2.7, LANDMARK.rect[3] - 1.6], rot: 3.0, range: [1.0, 0.3] });
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('dogon'));
 export default { fish, flights, perches, critters };

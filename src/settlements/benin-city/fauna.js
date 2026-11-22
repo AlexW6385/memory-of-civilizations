@@ -63,4 +63,7 @@ const critters = [];
   for (const y of YARDS.filter((q) => q.kind === 'cast').slice(0, 4)) { const F = frame(y.rect, y.front), [x, z] = F.P(F.L * 0.62, 3.1), [a, b] = F.P(F.L * 0.62 + 1.3, 3.6); critters.push({ model: 'hen_brown', at: [x, 0.05, z], rot: x, range: [1.8, 0] }, { model: 'hen_white', at: [a, 0.05, b], rot: a, range: [1.8, 0] }); }
   { const y = YARDS.find((q) => q.kind === 'weave'); if (y) { const F = frame(y.rect, y.front), [x, z] = F.P(F.L * 0.7, 3.4); critters.push({ model: 'dog', at: [x, 0.05, z], rot: 1.3, range: [9, 3.5] }); } }
 }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('benin-city'));
 export default { fish: [], flights, perches, critters };

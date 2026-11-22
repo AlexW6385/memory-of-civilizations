@@ -187,3 +187,5 @@ All [inferred] unless marked; nothing written anywhere.
 - **Still short.** Worn treads on the pilgrims' stair, on Temple 40's flights and the double stairway themselves; thresholds and cell sills of the monasteries (their style is shared, read-only); a circumambulation track on the ground walk; lamps on the bazaar lanes between the fronts; zebu and peafowl as rigged critters; Brahmi writing (no verified table).
 
 - **Zebu as critters.** Six zebu (`critter-models-farm.js`) graze on the open ground between the hill's foot and the first rows, where four of village.js's still cattle stood (dropped; the random stream is unchanged) [inferred]. The cart zebu and the yards' cattle stay still life.
+
+- Herds and yard groups: 32 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 32 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

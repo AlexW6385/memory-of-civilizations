@@ -48,4 +48,7 @@ const critters = [];
     for (const [model, a, d, sz] of [['rooster', 2.4, 0.2, 1], ['hen_brown', 3.0, 0.9, 1], ['hen_white', 2.0, 1.0, 0.96]]) { const x = dx + sx * a, z = dz + (r[r.length - 1][1] > dz ? -1 : 1) * d; critters.push({ model, at: at(x, z), rot: 0.5 + a + i, range: [3.4, 1.4], size: sz }); }
   });
 }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('tang-wutai'));
 export default { fish, flights, perches, critters };

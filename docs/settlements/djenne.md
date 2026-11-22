@@ -213,3 +213,5 @@ Sources added: [Wikiwand](https://www.wikiwand.com/en/articles/Great_Mosque_of_D
 - [Djenné: A Living Tradition — Aramco World, Nov/Dec 1990](https://archive.aramcoworld.com/issue/199006/djenn.-living.tradition.htm)
 - [Maas & Mommersteeg, on the Djenné house — Bulletin KNOB](https://bulletin.knob.nl/index.php/knob/article/download/Maas24/298/344)
 - [Djenné — Wikipedia](https://en.wikipedia.org/wiki/Djenn%C3%A9)
+
+- Herds and yard groups: 21 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 21 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

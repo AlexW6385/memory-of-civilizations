@@ -15,7 +15,7 @@ const pts = [];
 for (const { route } of allRoutes()) for (let k = 0; k + 1 < route.length; k++) for (let u = 0; u <= 1; u += 0.1) pts.push([route[k][0] + (route[k + 1][0] - route[k][0]) * u, route[k][1] + (route[k + 1][1] - route[k][1]) * u]);
 
 test('Petra critters: dogs, goats, fowl, cats, doves and nests, all known models', () => {
-  assert.ok(inst.length >= 20 && inst.length <= 40, inst.length + ' critters');
+  assert.ok(inst.length >= 20 && inst.length <= 90, inst.length + ' critters');   // ceiling 40 -> 90: the settlement's herds and yard groups are critters too (src/settlements/herds-data.js, at most 56 per settlement)
   for (const i of inst) assert.ok(POSES[i.groups[0][0]], i.model);
   for (const m of ['dog', 'goat_black', 'rooster', 'cat_orange', 'pigeon_grey', 'swallow_nest']) assert.ok(inst.some((i) => i.model === m), m);
 });

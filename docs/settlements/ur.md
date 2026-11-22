@@ -271,3 +271,5 @@ No near/far split of the opened interiors (all hollow houses are built whole; th
 ## Round 5: measured
 
 Within 120 m of the arrival (0, −118), in the court before the ziggurat: 41 lots, 14 entered and furnished (the temple's workshops of weavers, bakers and potters in the temenos, houses of brewers, weavers and smiths by the north gate, the scribal school), every one lit (two to four lamps) and nine with someone inside (the trades' figures at their places, `life.js`). Fronts along the first 100 m: single- and two-storey courtyard houses, mud-plastered or limewashed, with the trade's wares at the door; the public chapel; the temenos wall and gate towers; the ziggurat's court. Nothing needed adding.
+
+- Herds and yard groups: 55 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 55 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

@@ -183,3 +183,5 @@ Arrival 144 -> 143 draws, 0.84 -> 0.84 M triangles. Walk poses x,z,yaw: (-60,-6)
 
 ### Still short
 Interiors at night and the Great Court's braziers not rendered; lichen is faint; Linear B still unwritten (no verified glyph table); the upper floors' rooms of the lower town have one plan; sleeping rooms and shops' interiors were not varied.
+
+- Herds and yard groups: 12 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 12 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

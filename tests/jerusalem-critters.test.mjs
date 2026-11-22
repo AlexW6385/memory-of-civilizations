@@ -18,7 +18,7 @@ const of = (model) => inst.filter((i) => i.model === model);
 const at = (i) => run(i, 0, far(i));
 
 test('the instances: every model is known and the count is small', () => {
-  assert.ok(inst.length >= 25 && inst.length <= 45, `${inst.length} critters`);
+  assert.ok(inst.length >= 25 && inst.length <= 100, `${inst.length} critters`);   // ceiling 45 -> 100: the settlement's herds and yard groups are critters too (src/settlements/herds-data.js, at most 56 per settlement)
   for (const i of inst) assert.ok(POSES[i.groups[0][0]], i.model);
 });
 test('cats and dogs lie before shut shops only, none before an open one, none in the portico walk', () => {

@@ -94,4 +94,7 @@ for (const [x, z, m] of [[-31, -4, 'pigeon_grey'], [-30, -3, 'pigeon_white'], [-
     if (critters.some((c) => c.model === 'swallow_nest' && Math.abs(c.at[0] - x) < 9 && Math.abs(c.at[2] - fz) < 9)) continue;
     critters.push({ model: 'swallow_nest', at: [x, ytop - 0.4, fz + sg * 0.14], rot: l.front === 's' ? Math.PI / 2 : -Math.PI / 2, cycle: 33 + (l.seed % 5), flight: 9, radius: 10, side: k % 2 ? 1 : -1, rise: -0.8 }); k++;
   } }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('conques'));
 export default { fish, flights, perches, critters };

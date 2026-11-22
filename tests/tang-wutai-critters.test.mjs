@@ -16,7 +16,7 @@ const of = (m) => inst.filter((i) => i.model === m);
 const houses = village().chinese.filter((e) => e.t === 'wutai_house' || e.t === 'wutai_dwelling');
 
 test('every model is known, the count is small, nothing on the ground stands in a house', () => {
-  assert.ok(inst.length >= 14 && inst.length <= 30, `${inst.length} critters`);
+  assert.ok(inst.length >= 14 && inst.length <= 40, `${inst.length} critters`);   // ceiling 30 -> 40: the settlement's herds and yard groups are critters too (src/settlements/herds-data.js, at most 56 per settlement)
   for (const i of inst) assert.ok(POSES[i.groups[0][0]], i.model);
   for (const i of inst) assert.ok(!houses.some((h) => inRect(h.rect, i.groups[1][0], i.groups[1][2], 0.1)), `${i.model} in a house at ${i.groups[1]}`);
 });

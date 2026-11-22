@@ -210,3 +210,5 @@ All [inferred]: no source describes 857 Wutai's nights or monks' watches.
 - **Trodden ground (2026-11-21).** Yard patches are ragged `earth_trodden`; on the East Hall's platform, before each of the five doors, at the door sills and at the stair's foot, ragged `stone_worn` patches (`src/core/wearpatch.js`) [inferred].
 
 - **Donkeys as critters.** Three donkeys (`critter-models-farm.js`) are tied before the gate, at the pilgrims' tea shed and on the village green; the still donkeys that stood there are dropped [inferred]. The shop and lane donkeys, oxen and carts stay still life.
+
+- Herds and yard groups: 11 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 11 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

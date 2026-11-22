@@ -76,4 +76,7 @@ for (const z of [-60, 70]) { const x = bankX(z) + 0.8; critters.push({ model: 'k
     used.push([x, z]); k++;
   } }
 void hs; void RADIUS; void PRECINCT; void MAIN_ROAD; void ANANDA; void SHWE; void inRect;
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('bagan'));
 export default { fish, flights, perches, critters };

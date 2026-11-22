@@ -16,7 +16,7 @@ const of = (m) => inst.filter((i) => i.model === m);
 const inHouse = (x, z, m = 0.2) => lots().some((l) => inRect(l.rect, x, z, m));
 
 test('every model is known, the count is moderate, nothing on the ground stands in a compound or a door lane', () => {
-  assert.ok(inst.length >= 40 && inst.length <= 80, `${inst.length} critters`);
+  assert.ok(inst.length >= 40 && inst.length <= 90, `${inst.length} critters`);   // ceiling 80 -> 90: the settlement's herds and yard groups are critters too (src/settlements/herds-data.js, at most 56 per settlement)
   for (const i of inst) assert.ok(POSES[i.groups[0][0]], i.model);
   for (const i of inst) assert.ok(!inHouse(i.groups[1][0], i.groups[1][2]), `${i.model} in a compound at ${i.groups[1]}`);
   for (const r of walkRoutes()) for (const i of inst) assert.ok(Math.hypot(i.groups[1][0] - r.route[0][0], i.groups[1][2] - r.route[0][1]) > 1.5, `${i.model} in the door lane at ${r.route[0]}`);

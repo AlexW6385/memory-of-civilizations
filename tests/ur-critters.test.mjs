@@ -12,7 +12,7 @@ const of = (...m) => inst.filter((i) => m.includes(i.model));
 const at = (i) => i.groups[1];
 
 test('the instances: every model is known, a modest number, none that Ur had not', () => {
-  assert.ok(inst.length >= 12 && inst.length <= 40, `${inst.length} critters`);
+  assert.ok(inst.length >= 12 && inst.length <= 80, `${inst.length} critters`);   // ceiling 40 -> 80: the settlement's herds and yard groups are critters too (src/settlements/herds-data.js, at most 56 per settlement)
   for (const i of inst) assert.ok(POSES[i.groups[0][0]], i.model);
   assert.ok(of('dog').length >= 3 && of('goose_grey', 'goose_white').length >= 4 && of('pigeon_grey').length >= 4);
   assert.equal(of('cat_tabby', 'cat_orange', 'hen_brown', 'hen_white', 'rooster', 'turkey', 'cagebird', 'mandarin_drake', 'mandarin_hen').length, 0);

@@ -64,4 +64,7 @@ critters.push({ type: 'floaters', models: ['duck_white', 'duck_brown'], raft: tr
 { const x = -110, z = riverZ(x) - RIVER.half - 2.2; critters.push({ model: 'crane', at: [x, ground.height(x, z) + 0.02, z], rot: Math.PI / 2, range: [7.0, 1.6], tau: 50, speed: 0.4 }); }
 { const g0 = landings().find((q) => q.a[0] > -60 && q.a[0] < 0 && q.n[1] === -1); if (g0) critters.push({ model: 'kingfisher', at: [g0.b[0] + 0.9, RIVER.water + 0.9, g0.b[1] - 0.2], rot: 0, water: [g0.b[0] + g0.n[0] * 3, g0.b[1] + g0.n[1] * 3, RIVER.water], cycle: 40 }); }
 void COURT;
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('shang-yinxu'));
 export default { fish, flights, perches, critters };

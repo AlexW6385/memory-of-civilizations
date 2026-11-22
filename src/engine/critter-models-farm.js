@@ -14,12 +14,27 @@ const hash3 = (p, s = 0) => { const k = Math.sin(p[0] * 127.1 + p[1] * 311.7 + p
 const cell = (p, k, s) => hash3([Math.round(p[0] * k), Math.round(p[1] * k), Math.round(p[2] * k)], s);
 // (the eyes: as critter-models.js's, parts 11 blinking about the head's and the neck's pivots)
 const eyes = (m, x, y, z, r, col) => { const hp = m.def.pv, np = m.def.pv2 || m.def.pv; for (const s of [-1, 1]) m.as(11, [x, y, s * z], hp, () => m.ball([x, y, s * z], [r, r * 1.05, r], col, { nu: 4, nv: 5 }), np); };
+/** The hind leg's path with its hock rounded: a Catmull-Rom point is put in the two segments about the hock (indices 0-1, 1-2 and 2-3), radii averaged, so that the bend is three short turns, not one kink. */
+function hock(path, rad) {
+  const cr = (a, b, c, d) => a.map((_, i) => 0.5 * (2 * b[i] + (-a[i] + c[i]) * 0.5 + (2 * a[i] - 5 * b[i] + 4 * c[i] - d[i]) * 0.25 + (-a[i] + 3 * b[i] - 3 * c[i] + d[i]) * 0.125));
+  const sx = path.map((q, i) => (i >= 1 && i <= path.length - 3 ? [q[0] * 0.5 + (path[i - 1][0] + path[i + 1][0]) * 0.25, q[1]] : q));   // (the zig-zag of x along the leg eased first)
+  path = sx;
+  const P = [], R = [];
+  path.forEach((q, i) => {
+    P.push(q); R.push(rad[i]);
+    if (i <= 2) {
+      const a = path[Math.max(i - 1, 0)], c = path[i + 1], d = path[Math.min(i + 2, path.length - 1)], r0 = rad[i], r1 = rad[i + 1];
+      P.push(cr(a, q, c, d)); R.push(Array.isArray(r0) ? r0.map((v, k) => (v + r1[k]) / 2) : (r0 + r1) / 2);
+    }
+  });
+  return [P, R];
+}
 /** The four legs of a quadruped: spec { fx, hx, fz, hz, front: [path, radii], hind: [path, radii], col(t, front), hoof: [rx, ry, rz], hoofCol } with paths made for x = 0 and shifted. */
 function legs(m, o) {
   for (const [part, front, z] of [[4, 1, -1], [5, 1, 1], [6, 0, -1], [7, 0, 1]]) {
-    const x = front ? o.fx : o.hx, zz = z * (front ? o.fz : o.hz), [path, rad] = front ? o.front : o.hind, P = path.map((q) => [q[0] + x, q[1], zz]), hip = P[0];
+    const x = front ? o.fx : o.hx, zz = z * (front ? o.fz : o.hz), [path0, rad0] = front ? o.front : o.hind, [path, rad] = front ? [path0, rad0] : hock(path0, rad0), P = path.map((q) => [q[0] + x, q[1], zz]), hip = P[0];
     m.as(part, hip, null, () => {
-      m.tube(P, rad, { sides: o.sides ?? 6, col: ({ t }) => o.col(t, front) });
+      m.tube(P, rad, { sides: o.sides ?? 6, ref: [1, 0, 0], col: ({ t }) => o.col(t, front) });
       const h = P[P.length - 1]; m.ball([h[0] + o.hoof[3], o.hoof[1] * 0.9, zz], [o.hoof[0], o.hoof[1], o.hoof[2]], o.hoofCol, { nu: 4, nv: 5 });
     });
   }

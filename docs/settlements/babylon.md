@@ -286,3 +286,5 @@ No real cuneiform; no near/far split for opened interiors; no Akitu procession; 
 - [Striding Lion — Wikipedia](https://en.wikipedia.org/wiki/Striding_Lion)
 - [Herodotus 1.179 — Perseids](https://cts.perseids.org/read/greekLit/tlg0016/tlg001/perseus-eng2/1.179.1-1.179.3)
 - [Writing cuneiform on other media — ORACC, Ancient Kalhu](https://oracc.museum.upenn.edu/nimrud/ancientkalhu/thewritings/cuneiformonothermedia/index.html)
+
+- Herds and yard groups: 5 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 5 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

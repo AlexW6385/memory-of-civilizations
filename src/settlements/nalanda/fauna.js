@@ -61,4 +61,7 @@ for (const [yi, models] of [[0, ['zebu_white', 'zebu_grey', 'zebu_red']], [4, ['
   const y = yards()[yi], cx = (y.rect[0] + y.rect[2]) / 2, cz = (y.rect[1] + y.rect[3]) / 2;
   models.forEach((m, i) => critters.push({ model: m, at: [cx + (i - (models.length - 1) / 2) * 2.7, 0.05, cz + (i % 2 ? 1.2 : -1.0)], rot: 1.2 + i * 1.9 + yi, range: [1.3, 0.9], tau: 36 + i * 4 }));
 }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('nalanda'));
 export default { fish, flights, perches, critters };

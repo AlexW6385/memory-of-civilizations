@@ -231,3 +231,5 @@ Marks as in §12.
 ## Budget trim (f-budget)
 
 - The houses' plans (`town.js`) and every plan built by `city.js` carry `minSaved: 8000` (per-plan, `src/core/geom.js` / `build.js`; default 2400): small repeated shapes merge into the plan's mesh instead of each being an instanced draw. Main draws: (−300, 0) facing east 496 → 418, facing west 324 → 275; (−280, −80) east 463 → 399, west 356 → 295; Cardo (−226, −60) 447 / 354 → 374 / 304; arrival 3.06 M triangles; main triangles 3.30 → 3.28 M. Geo 52.5 → 59.3 MB.
+
+- Herds and yard groups: 56 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 56 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

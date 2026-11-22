@@ -58,4 +58,7 @@ critters.push({ model: 'dog', at: at3(121, 116.8), rot: 0.5, range: [9, 3.5] }, 
 // doves on the terrace's paving before the arrival, and on the treasuries' steps
 for (const [x, z, m] of [[65.5, 14.2, 'pigeon_grey'], [66.4, 15.4, 'pigeon_white'], [64.8, 16.6, 'pigeon_grey'], [76, 6, 'pigeon_white'], [77.1, 7.2, 'pigeon_grey']]) critters.push({ model: m, at: at3(x, z, 0.07), rot: x * 3, range: [1.4, 1.2] });
 for (const t of TREASURIES.slice(0, 4)) { const x = (t.rect[0] + t.rect[2]) / 2 + 2.2, z = t.rect[3] + 0.9; critters.push({ model: 'pigeon_grey', at: [x, t.y + 0.05, z], rot: x, range: [1.4, 1.2] }); }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('delphi'));
 export default { fish, flights, perches, critters };

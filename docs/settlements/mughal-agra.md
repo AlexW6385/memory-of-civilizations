@@ -216,3 +216,5 @@ Rigged critters of the engine (fauna-critters.js; models only from the engine's 
 ## Budget trim (f-budget)
 
 - `base()` in `town.js` carries `minSaved: 8000` (per-plan, `src/core/geom.js` / `build.js`; default 2400): small repeated shapes of the houses, katras, open house and workshop merge into the plan's mesh instead of each being an instanced draw. Axis street looking north: z 300 452 → 424, z 310 469 → 437, z 320 480 → 445 (z 305, 315, 290, 330: 432, 441, 399, 406); looking south 188–201; main triangles 2.4 M unchanged; arrival 1.27 M; geo 94.9 → 119.8 MB, meshes 2711 → 2195 (a value of 5000 left 458–467 draws).
+
+- Herds and yard groups: 4 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 4 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

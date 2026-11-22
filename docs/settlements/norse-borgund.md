@@ -175,3 +175,5 @@ One mesh, one draw (src/engine/fauna-critters.js). The dossier names horses and 
 - **Still short:** portal paint; runes; carved relief on the capitals; the near ground at night; root-grown knees; shingle patterns by roof; the shingles of the barns.
 
 - **Sheep as critters.** The flock west of the churchyard wall (seven sheep, white and dark; `critter-models-farm.js`) walks and grazes; its still sheep are dropped, the herder stays [inferred; Norwegian farms kept sheep, cattle, goats and horses]. The other herds and the churchyard's horses stay still life.
+
+- Herds and yard groups: 29 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 29 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.

@@ -72,4 +72,7 @@ critters.push({ type: 'floaters', models: ['duck_brown', 'duck_white'], area: [T
   for (let d = -4; d < 8; d += 0.1) { const x = TANK.c[0] - TANK.r[0] - d, z = TANK.c[1], e = Math.abs(height(x, z) - (TANK.level + 0.3)); if (!best || e < best[2]) best = [x, z, e]; }
   critters.push({ model: 'kingfisher', at: [best[0], height(best[0], best[1]) + 0.08, best[1]], rot: Math.PI / 2, water: [best[0] + 4.5, best[1], TANK.level], cycle: 36 });
 }
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('khajuraho'));
 export default { fish, flights, perches, critters };

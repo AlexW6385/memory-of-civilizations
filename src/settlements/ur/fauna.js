@@ -49,4 +49,7 @@ critters.push({ model: 'kingfisher', at: [hx1 - 1.21, 1.45, -113], rot: -Math.PI
 critters.push({ model: 'cormorant', at: [hx1 - 1.21, 1.45, -59], rot: -Math.PI / 2, range: [0.6, 0.4] });
 // a crane (the winter visitor of the marshes) among the reeds on the basin's north rim
 critters.push({ model: 'crane', at: [hx0 + 40, 0.02, hz0 - 2.5], rot: Math.PI / 2, range: [7.0, 1.6], tau: 50, speed: 0.4 });
+// the herds, flocks and yard groups of the plans as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('ur'));
 export default { fish, flights, perches, critters };

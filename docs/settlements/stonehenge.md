@@ -257,3 +257,5 @@ In each open house: the floor trodden dark in a path from the door to the hearth
 - Still short: far houses stay closed (only 14 enterable); no hut interiors by day looked at; the new path is pebbles only, no bare trodden patch.
 
 - **Sheep as critters.** Two of the six flocks on the down (about [-41, 135] and [-205, -35]) are twelve small brown horned sheep critters (`critter-models-farm.js`) in place of their still sheep, herders and dogs still; the other four flocks stay still life [inferred: Neolithic flocks were small].
+
+- Herds and yard groups: 51 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 42 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.
