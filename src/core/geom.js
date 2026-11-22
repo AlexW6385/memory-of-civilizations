@@ -525,7 +525,7 @@ export function weld(pos, nor, hang = null) {
 export class GeoBag {
   /** instancing: find repeated pieces (the viewer); without it every piece is merged (the tools). */
   /** weld (default: with instancing, i.e. the viewer): merged meshes indexed, identical corners kept once (weld). */
-  constructor({ instancing = false, always = false, detail = false, weld = instancing } = {}) { this.parts = new Map(); this.instancing = instancing; this.always = always; this.detail = detail; this.weld = weld; this.explicit = new Map(); }
+  constructor({ instancing = false, always = false, detail = false, weld = instancing, minSaved = INSTANCING.minSaved } = {}) { this.minSaved = minSaved; this.parts = new Map(); this.instancing = instancing; this.always = always; this.detail = detail; this.weld = weld; this.explicit = new Map(); }
   /**
    * A piece built at its object's origin and placed by a matrix (rotation, uniform scale,
    * translation): the objects of use and the figures (src/objects/index.js). Pieces of the same
@@ -566,7 +566,7 @@ export class GeoBag {
     for (const list of this.explicit.values()) {
       for (const e of list) {
         const n = e.g.attributes.position.count;
-        const worth = this.instancing && (this.always || e.life || (e.items.length >= INSTANCING.minCount && (e.items.length - 1) * n >= INSTANCING.minSaved));
+        const worth = this.instancing && (this.always || e.life || (e.items.length >= INSTANCING.minCount && (e.items.length - 1) * n >= this.minSaved));
         if (!worth) {
           const local = prototypeOf(e.g, e.sh, 0).geometry.toNonIndexed();
           const M = new Matrix4();
@@ -614,7 +614,7 @@ export class GeoBag {
         const take = new Set();
         for (const idx of groups) {
           const n = all[idx[0]].attributes.position.count;
-          if (idx.length < INSTANCING.minCount || (idx.length - 1) * n < INSTANCING.minSaved) continue;
+          if (idx.length < INSTANCING.minCount || (idx.length - 1) * n < this.minSaved) continue;
           // (fine detail or not by the first piece as found, before the big ones are put first)
           const i0 = idx[0];
           if (big) idx.sort((a, b) => big[b] - big[a] || a - b);

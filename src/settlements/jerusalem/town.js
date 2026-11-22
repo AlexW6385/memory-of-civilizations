@@ -7,7 +7,7 @@ export { openLots, upLots };
 import { upperLayout } from './house-up.js';
 import { frontClass } from './houses.js';
 import { houseLife, pilgrims, lodgeLife, lodgeFront, domeLife } from './life.js';
-const base = (id, elements, style = 'islamic-houses') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' } });
+const base = (id, elements, style = 'islamic-houses') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, minSaved: 8000, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' } });
 const UPMAP = () => new Map(upLots().map((u) => [u.lot, u.up]));
 /** Walk routes (local to the Dome's plan, whose origin is at z = -20 and base y): from the lane through the house door and up the court stair to the terrace and its balcony, through the west chamber and the partition's door to the east chamber and its gallery. */
 export function upWalks(planOrigin, planBase) {

@@ -192,3 +192,7 @@ Living culture (DESIGN §7): only what is publicly documented; no sacred chant, 
 - **Budget.** Before/after main pass at the arrival (yaw 0.27): 3.07 M triangles and 157 draws after; at (0,33) looking south 4.48 M before, 4.50 after, 163 draws; at (−2,19) looking south (yaw 3.44) 4.61 M before and 4.62 after, 161 draws; at (0,60) looking south 4.49 M, 170 draws; at (−10,24) both ways 3.16 M and 3.80 M, 154 and 164 draws. Draws are far under the limits. The one pose over 4.5 M (−2,19 looking back down the terraces) was already 4.61 M before this pass; left, not caused here.
 - **Walk's gaps.** All twelve routes still walk (36 legs). The kurī and the fire-side people stand clear of the house routes. Moss and damp on thatch still missing (no material).
 - **Landmark's wear.** The chief's house (rank 2, skipped by the ordinary houses' wear): the sill's earth trodden dark where all who enter stand to be called, and a short ragged run of bare earth leading to it, and a soot tongue over the door, all in `bark_dark` (no new draw) [inferred]. Seen in a daylight render: the sill patch reads; the run beyond it is faint under the figures.
+
+## 4k. Budget trim (f-budget)
+
+- The kūmara mound (`PUKE`, src/styles/maori/index.js) is a 6-sided lathe instead of 8: main triangles at (−2,19) looking south 4.62 M → 4.34 M (161 draws), looking north 3.17 M unchanged; the mounds are 0.4 m across and seen at 135 m or more, and a render shows nothing missing.

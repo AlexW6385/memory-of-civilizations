@@ -227,3 +227,7 @@ Marks as in §12.
 - Walk: one long route from the arrival down the platform's west stair, across the esplanade, down the Haram's west stair and along the market street to the Cardo (the gap named in §12.1); three more open houses and two more Cardo shops walked (42 routes, 274 legs, walk-check ok). Keepers as life figures were not moved into near plans: the draw count had no room.
 - Landmark: worn stone where the feet went at the Dome: the treads of the platform's four stairs and a track down each of the four paved ways to the foot of the porch, with a wider patch there (`jer_stair_wear`, `jer_way_wear`; material already in the plan; 0 draws). Eight years of use at the shrine and the platform's Herodian pavement: a light track only [inferred]. The Dome itself is not worn (§12.5).
 - Still short: far forms for the Cardo's shops and the houses (two walk poses over 450); life-figure keepers; the Dome's porch thresholds (inside the shared building); no writing.
+
+## Budget trim (f-budget)
+
+- The houses' plans (`town.js`) and every plan built by `city.js` carry `minSaved: 8000` (per-plan, `src/core/geom.js` / `build.js`; default 2400): small repeated shapes merge into the plan's mesh instead of each being an instanced draw. Main draws: (−300, 0) facing east 496 → 418, facing west 324 → 275; (−280, −80) east 463 → 399, west 356 → 295; Cardo (−226, −60) 447 / 354 → 374 / 304; arrival 3.06 M triangles; main triangles 3.30 → 3.28 M. Geo 52.5 → 59.3 MB.

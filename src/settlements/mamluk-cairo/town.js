@@ -30,7 +30,8 @@ export async function town() {
     const out = [];
     for (const [k, list] of m) {
       const [i, j] = k.split(',').map(Number), center = [i * TILE + TILE / 2, j * TILE + TILE / 2];
-      const b = { style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: ent, center };
+      // minSaved: repeated small shapes merge into the tile's mesh instead of each being an instanced draw (src/core/geom.js INSTANCING; budget trim)
+      const b = { style, origin: [0, 0], base: 0, yaw: 0, feature: true, minSaved: 8000, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: ent, center };
       out.push({ ...b, id: `${id}-${k}`, near: near + grow, elements: list });
       if (withFar) out.push({ ...b, id: `${id}-${k}-far`, far: near + grow, elements: list.filter((e) => e.t !== 'cairo_yard').map((e) => ({ ...e, simple: true })), nocollide: true });
     }
