@@ -4,6 +4,7 @@
 import { Vector3 } from '../../core/three.js';
 import { faceFrame } from '../../styles/renaissance/face.js';
 import { shopSlots, TRADE_NAMES, P, FW, RD } from '../../styles/venetian/shops.js';
+import { piazzaLights } from './piazzalight.js';
 import { PIAZZA, CAMPANILE, CLOCK, GROUND, RADIUS, MERCERIA_ROWS } from './layout.js';
 
 /** The Procuratie's ranges that have shops (plan.js draws them): the north range (front on the piazza, +u east) and the south range (+u west). */
@@ -43,7 +44,7 @@ export function shopPlans() {
 /** The night's glow of every shop (one plan, seen from the whole piazza): the pool before each door, the lit doorway and counter-window. */
 export function shopGlowPlan() {
   return { id: 'venice-night-shops', style: 'venetian', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], entrance: { at: [-120, -5], facing: 'e' }, center: [-62, -5], near: 190,
-    bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], elements: RANGES.map((r) => ({ t: 'ven_shopglow', span: r.rect, front: r.front, y: GROUND, shops: shopsOf(r.rect).map((s) => ({ i: s.i, trade: s.trade, seed: s.seed })) })) };
+    bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], elements: RANGES.map((r) => ({ t: 'ven_shopglow', span: r.rect, front: r.front, y: GROUND, shops: shopsOf(r.rect).map((s) => ({ i: s.i, trade: s.trade, seed: s.seed })) })).concat([{ t: 'ven_halo', items: piazzaLights() }]) };
 }
 /** Routes into every opened shop (plan `walks`): from the arcade's floor, through the door, along the aisle to the room's back. */
 export function shopWalks() {

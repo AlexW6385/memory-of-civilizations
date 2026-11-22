@@ -9,7 +9,7 @@ const sc = (rot) => [Math.sin(rot), Math.cos(rot)];
 const place = (g, x, y, z, rot) => { g.rotateY(rot); g.translate(x, y, z); return g; };
 
 /**
- * ven_halo { items: [{ k: 'lantern' | 'stern', at: [x, z], y, rot, h }] }
+ * ven_halo { items: [{ k: 'lantern' | 'lamp' | 'stern', at: [x, z], y, rot, h }] }
  * lantern: the street lantern of the shared `life` style (a post at `at`, its arm 0.42 m out along rot, the lamp at h − 0.07 over y, the wall 0.06 behind):
  *   the glow round the lamp, the pool on the paving, the wash on the wall. stern: a post with a lantern at a moored boat's stern (y: the waterline), its glow,
  *   the pool on the deck and the streak on the water.
@@ -22,6 +22,10 @@ export function venHalo(el, { bag }) {
       const lx = x + sx * 0.42, lz = z + sz * 0.42, ly = y + (it.h ?? 2.6) - 0.07, s = 0.9 + 0.2 * hashAt(x, z, 4);
       H.ball(lx, ly, lz, 0.95 * s); H.floor(lx, y + 0.04, lz, 2.5 * s);
       H.wall(x - sx * 0.1, ly, z - sz * 0.1, [sx, sz], 1.9 * s, 1.5 * s);
+    } else if (it.k === 'lamp') {
+      // a lamp of the square: its glow at height h over the ground, the pool on the paving (pool: [rx, rz]), the wash on the wall it hangs before (wall: { at, n, y, rw, rh })
+      H.ball(x, y + it.h, z, it.ball ?? 1); H.floor(x, y + 0.05, z, it.pool?.[0] ?? 3, it.pool?.[1] ?? it.pool?.[0] ?? 3, it.yaw ?? 0, 12);
+      if (it.wall) H.wall(it.wall.at[0], y + it.wall.y, it.wall.at[1], it.wall.n, it.wall.rw, it.wall.rh);
     } else if (it.k === 'stern') {
       bag.add('iron', place(box(-0.025, 0.2, -0.025, 0.025, 1.1, 0.025), x, y, z, 0));
       bag.add('iron', place(box(-0.015, 1.05, -0.02, 0.015, 1.08, 0.3), x, y, z, it.rot ?? 0));
