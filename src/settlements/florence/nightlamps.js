@@ -35,6 +35,14 @@ function lamps(el, { bag }) {
   const H = new Halo();
   for (const l of el.torches ?? []) torch(bag, H, l.at[0], l.at[1], l.n, l.y);
   for (const h of el.hangs ?? []) hung(bag, H, h.at[0], h.at[1], h.y, h.floor ?? 0.04, h.walls);
+  // a shop's lit opening on a wall at (x, z) facing n: the door and the counter-window as warm panels (the wall plane is 0.05 out), the pool across the step
+  for (const o of el.shops ?? []) {
+    const [nx, nz] = o.n, tx = -nz, tz = nx, P = (u, yy, d) => [o.at[0] + tx * u + nx * d, yy, o.at[1] + tz * u + nz * d], w = o.w ?? 1.4;
+    H.quad(P(-w / 2, 0.1, 0.05), P(w / 2, 0.1, 0.05), P(w / 2, 2.4, 0.05), P(-w / 2, 2.4, 0.05), o.n, 0.3);
+    H.quad(P(w / 2 + 0.5, 0.95, 0.05), P(w / 2 + 1.7, 0.95, 0.05), P(w / 2 + 1.7, 2.2, 0.05), P(w / 2 + 0.5, 2.2, 0.05), o.n, 0.2);
+    H.floor(o.at[0] + nx * 1.5 + tx * 0.7, 0.06, o.at[1] + nz * 1.5 + tz * 0.7, 2.6, 2.2, 6, 0.7);
+    H.ball(o.at[0] + nx * 0.5, 1.6, o.at[1] + nz * 0.5, 0.8);
+  }
   for (const p of el.pools ?? []) { H.floor(p.at[0], p.y ?? 0.06, p.at[1], p.r, p.rz ?? p.r, 6, p.b ?? 0.5); if (p.sheet) H.disc([p.sheet[0], p.sheet[1], p.at[1]], [0, 0, 1], [0, 1, 0], 2.0, 3.6, [-1, 0], 6, [0.8, 0], [0, 1]); }
   const g = H.geometry(); if (g) bag.add('halo', g);
 }
@@ -57,6 +65,11 @@ function orsanLamps() {
   }
   return out;
 }
+// The street at the arrival (the cathedral square's north-west corner, docs/settlements/florence.md §21b), in the Baptistery's plan: the torch-holders of the palazzo
+// on the square's north side, the tabernacle lamp at its corner, the lantern and the lit opening of the bottega beside it.
+const NEAR_TORCHES = [{ at: [-146, -120], n: [0, 1], y: 3.6 }, { at: [-134.5, -120], n: [0, 1], y: 3.6 }, { at: [-151.6, -120], n: [0, 1], y: 2.9 }, { at: [-123.1, -120], n: [0, 1], y: 3.1 }];
+const NEAR_POOLS = [{ at: [-146, -116.5], r: 6.5, rz: 5, b: 0.6 }, { at: [-134.5, -116.5], r: 6.5, rz: 5, b: 0.6 }, { at: [-124, -116], r: 6, rz: 4.5, b: 0.6 }];
+const NEAR_SHOPS = [{ at: [-125.7, -120], n: [0, 1], w: 1.4 }];
 export function lampPlans() {
   const nave = [DUOMO.c[0] - DUOMO.nave - DUOMO.d / 2, DUOMO.c[1]];
   return [
@@ -64,7 +77,7 @@ export function lampPlans() {
     plan('florence-lamps-medici', [MEDICI[2], (MEDICI[1] + MEDICI[3]) / 2], { torches: [{ at: [MEDICI[2], MEDICI[1] + 3], n: [1, 0], y: 3.6 }, { at: [MEDICI[2], MEDICI[1] + 17], n: [1, 0], y: 3.6 }] }),
     plan('florence-lamps-orsanmichele', [(ORSAN[0] + ORSAN[2]) / 2, (ORSAN[1] + ORSAN[3]) / 2], { torches: orsanLamps() }),
     // the Baptistery: lanterns each side of the Gate of Paradise on the east, one beside each of the other two doors. [inferred: the door the city's feasts went to was lit]
-    plan('florence-lamps-baptistery', BAPTISTERY, { torches: [{ at: [BAPTISTERY[0] + 12.8, BAPTISTERY[1] - 4.9], n: [1, 0], y: 3.8 }, { at: [BAPTISTERY[0] + 12.8, BAPTISTERY[1] + 4.9], n: [1, 0], y: 3.8 }, { at: [BAPTISTERY[0] + 4.4, BAPTISTERY[1] - 12.8], n: [0, -1], y: 3.8 }, { at: [BAPTISTERY[0] - 4.4, BAPTISTERY[1] + 12.8], n: [0, 1], y: 3.8 }] }),
+    plan('florence-lamps-baptistery', BAPTISTERY, { torches: [...NEAR_TORCHES, { at: [BAPTISTERY[0] + 12.8, BAPTISTERY[1] - 4.9], n: [1, 0], y: 3.8 }, { at: [BAPTISTERY[0] + 12.8, BAPTISTERY[1] + 4.9], n: [1, 0], y: 3.8 }, { at: [BAPTISTERY[0] + 4.4, BAPTISTERY[1] - 12.8], n: [0, -1], y: 3.8 }, { at: [BAPTISTERY[0] - 4.4, BAPTISTERY[1] + 12.8], n: [0, 1], y: 3.8 }], shops: NEAR_SHOPS, pools: NEAR_POOLS }),
     // the Palazzo Medici's corner loggia, open in 1480: a lamp hung from its vault (the loggia is [23, -165.6, 28, -156], its floor at 0.04, the vault at 8.4)
     plan('florence-lamps-medici-loggia', [MEDICI[2] - 2.5, MEDICI[3] - 5], { hangs: [{ at: [MEDICI[2] - 2.6, MEDICI[3] - 4.9], y: 6.2, floor: 0.04, walls: [{ at: [MEDICI[2] - 5 + 0.06, MEDICI[3] - 4.9], n: [1, 0] }, { at: [MEDICI[2] - 2.6, MEDICI[3] - 9.6 + 0.06], n: [0, 1] }] }] }),
     plan('florence-lamps-duomo', [nave[0], nave[1]], { pools: [{ at: [nave[0] - 0.3, nave[1]], r: 4.6, rz: 3.4, b: 0.9, sheet: [nave[0] + 0.4, 3.6] }] }),

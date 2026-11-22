@@ -157,3 +157,7 @@ Changed: four `streak` halos (the existing unit, so no new draw) lie on the pond
 Job 3: all 21 routes (nine upper rooms, the open shops and keepers' houses, the two landmarks) walk; no further gap found without a new look. Boards of the Kannon-den and hōjō: not drawn (their text is not [stated] with a source and the glyphs are not in the repo's tables).
 Not done: wear on thresholds of shops and on the shrine's wooden steps (no stone material in those elements; a dish in wood needs a new material); a dawn/dusk render of the garden.
 Checks: surface-check, plan-check, walk-check, view-check, disc-check, worker test pass; geo-one 56.2 MB / 1612 meshes. Draw count not re-measured (no new material or element in the plan; last frame at the Kannon-den pose 584 total incl. shadow cascades).
+
+## Night near the visitor (the road at the arrival)
+
+Seen first: at 22:00 the road and bank before the arrival were unlit; the two stone lanterns nearest (x 185 and 215) stand outside the first view. [inferred; stone lanterns of temple precincts are stated in §12, the placing is ours] Two more ishidoro, lit by the existing `stoneHalos` (same plan, no new draw): one by the road on the pond's south bank (193.2, 9.8) and one at the head of the stone bridge (213.6, 9.4).

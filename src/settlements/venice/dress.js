@@ -39,7 +39,7 @@ function frontsOf(l) {
     const rot = sd.rot, bays = Math.max(1, Math.round(len / 2.5)), doorU = (Math.floor(bays / 2) + 0.5) * len / bays;   // (the door of house_med: the middle bay, counted from the west)
     if (c >= 1.7 && r() < (isFront ? 0.5 : 0.65)) E.push({ t: 'shop_sign', board: true, at: P(len * (0.12 + 0.2 * r())), y: GROUND + 0.2, rot, h: 3.0 + r() * 0.5, seed: Math.floor(r() * 1e6) });
     if (c >= 1.7 && r() < 0.4) E.push({ t: 'laundry_pole', at: P(len * (0.25 + 0.5 * r())), y: GROUND + 4.35, rot, seed: Math.floor(r() * 1e6) });
-    if (r() < 0.3) E.push({ t: 'lantern', kind: 'iron', at: P(len * (0.8 + 0.12 * r()), 0.06), y: GROUND, rot: rot + Math.PI, h: 2.6, });
+    if (r() < 0.3) E.push({ t: 'lantern', kind: 'iron', at: P(len * (0.8 + 0.12 * r()), 0.06), y: GROUND, rot, h: 2.6, });   // (rot: the arm points out from the wall, as the halo reads it)
     if (isFront) for (const k of [-1, 1]) if (r() < 0.8) E.push({ t: 'pot', kind: pick(r, ['water_pot', 'dark_pot', 'glazed_jar', 'blue_jar']), at: P(doorU + k * 1.0, 0.35), y: GROUND, rot: r() * 6, n: 1 + Math.floor(r() * 2), seed: Math.floor(r() * 1e6) });
     else if (r() < 0.5) E.push({ t: 'pot', kind: pick(r, ['water_pot', 'dark_pot', 'glazed_jar']), at: P(len * (0.15 + 0.7 * r()), 0.35), y: GROUND, rot: r() * 6, n: 2, seed: Math.floor(r() * 1e6) });
     if (c >= 1.7 && r() < 0.28) { const bu = len * (0.65 + 0.2 * r()), back = r() < 0.5; if (!(isFront && Math.abs(bu - doorU) < 1.6)) E.push({ t: 'bench', at: P(bu, 0.28), y: GROUND, rot, len: 1.7, back }); }

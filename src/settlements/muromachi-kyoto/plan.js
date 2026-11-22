@@ -34,7 +34,7 @@ E.push(...togudoWear());                                    // the worn treads b
 E.push({ t: 'kyoto_board', at: [GINKAKU.togudo[0] + 3.55, GINKAKU.togudo[1]], y: 3.25, rot: Math.PI / 2, text: '東求堂', w: 1.3, h: 0.32 });   // the hall's name on the beam over its front (dossier §12)
 // the court of gravel before the pavilion, with a path of stones to the Tōgu-dō
 E.push({ t: 'lane', rect: [GINKAKU.kannon[0] - 14, GINKAKU.kannon[1] + 7.6, GINKAKU.kannon[0] + 14, GINKAKU.kannon[1] + 11], y: 0.02, mat: 'flagstone' });
-for (const [x, z, s] of [[170, -16, 1], [232, -16, 1], [150, 38, 0.9], [244, 30, 0.9], [185, 15.5, 1.1], [215, 15.5, 1.1], [GINKAKU.togudo[0] + 9, GINKAKU.togudo[1] + 6, 0.8]]) E.push({ t: 'ishidoro', at: [x, z], y: 0, s });
+for (const [x, z, s] of [[170, -16, 1], [232, -16, 1], [150, 38, 0.9], [244, 30, 0.9], [185, 15.5, 1.1], [215, 15.5, 1.1], [193.2, 9.8, 1], [213.6, 9.4, 0.9], [GINKAKU.togudo[0] + 9, GINKAKU.togudo[1] + 6, 0.8]]) E.push({ t: 'ishidoro', at: [x, z], y: 0, s });
 for (const [x, z] of [[120, 50], [276, 60], [276, -60], [120, -60]]) E.push({ t: 'niwaki', at: [x, z], y: 0, h: 5.5, seed: Math.round(x + z) });
 
 // the garden (docs §3): the sand platform Ginshadan and its cone Kogetsudai west of the pavilion's court, moss under the trees,
