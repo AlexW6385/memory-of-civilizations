@@ -39,7 +39,7 @@ export const QUALITY = {
   cinema: { pixelRatio: 2, overScreen: true, shadowMap: 4096, cascades: 4, shadowFar: 480, ao: true, aoScale: 1, aoSamples: 24, aa: true, air: true, airScale: 1, airSteps: 32, lamps: 8, ssr: true, ssrScale: 1 },
   high: { pixelRatio: 1.5, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: true, lamps: 4, ssr: true },
   medium: { pixelRatio: 1.0, shadowMap: 2048, cascades: 3, ao: true, aa: true, air: false, lamps: 2, ssr: false },
-  low: { pixelRatio: 0.75, shadowMap: 1024, cascades: 2, ao: false, aa: false, air: false, lamps: 0, ssr: false },
+  low: { pixelRatio: 1.0, shadowMap: 1024, cascades: 2, ao: false, aa: false, air: false, lamps: 0, ssr: false },
 };
 
 /** A geometry's vertex layout as the pipeline sees it: each attribute's name, size, array type and normalization, and the index's type. */

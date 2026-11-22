@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.78 — a sharper picture at the low setting (2026-11-22)
+
+The low quality setting drew at three quarters of the page's resolution, which on a high-density screen left far buildings blurred. It now draws at the full page resolution and lowers itself a step only where the graphics chip cannot keep up.
+
 ## v12.77 — the views over budget brought under; the deploy repaired (2026-11-21)
 
 Seven views that drew too much now sit inside the budget: New York's block at (34,66), London's bridge deck and Bridge Street, two views in Jerusalem, Agra's axis street, Cairo's Bayn al-Qasrayn, Shibam's north street and the pa looking south. Small repeated things (stoop rails, shutters, beams) are merged into their tile there instead of each becoming its own draw; nothing was removed. v12.76 did not deploy: the geometry count still took the night-leaving figures as meshes of their tiles and put Venice, Thebes and Alexandria over 3000; the count now takes them as the street life it draws them as.

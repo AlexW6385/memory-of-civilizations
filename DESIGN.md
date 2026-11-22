@@ -298,7 +298,7 @@ All 94 are built.
 
 ## 8. Performance and budgets
 
-Targets on the author's machine (Apple M2, 8 GB). Automatic quality settles there at low @0.75 ("low" at 0.75× resolution), and the targets are met at that setting. They are met by engineering (§3); detail is thinned only as the last resort and recorded.
+Targets on the author's machine (Apple M2, 8 GB). Automatic quality settles there at low. Since v12.78 low draws at 1.0× (it was 0.75×, which on that screen of two pixels a point was a seventh of its pixels and blurred far buildings) and steps down to 0.85× and 0.75× by itself where the GPU is the limit (src/engine/dynres.js); the targets were measured at 0.75× and are to be re-measured at 1.0× on an idle machine. They are met by engineering (§3); detail is thinned only as the last resort and recorded.
 
 - **Frame:** aim 60 fps in a settlement; ≥ 40 in the densest interior; ≥ 30 in high flight; no frame over 50 ms ever. Visible triangles ≤ 4.5 M at an arrival; draw calls ≤ 450 typical and ≤ 800 at a peak; GPU memory ≤ 1.5 GB; three shadow cascades.
 - **Start:** first frame ≤ 6 s on a warm cache, ≤ 15 MB transferred; only the start settlement and the planet's base are loaded.

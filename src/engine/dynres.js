@@ -1,5 +1,5 @@
 // Dynamic resolution (DESIGN §8): the picture's pixel ratio is lowered a step (high: 1.5 → 1.25 →
-// 1.0 → 0.85; medium: 1.0 → 0.85, and → 0.75 on a screen of two pixels a point, where that is
+// 1.0 → 0.85; medium and low: 1.0 → 0.85, and → 0.75 on a screen of two pixels a point, where that is
 // still 1.5 screen pixels to one) when the frames stay slow, and raised again when there is room
 // for a while. (A view that missed every other refresh at 1.0 — Suzhou on an M2 at 60 Hz, the GPU
 // the limit — is smooth at 0.85, and a little softer.) `?dpr=1.25` pins the ratio (on any preset) and turns this off.
@@ -12,7 +12,9 @@
 // on a slow machine): changes are kept apart by GAP ms at least, and a step up followed soon by a
 // step down doubles the wait before the next step up (to at most four minutes).
 
-const STEPS = { high: [1.5, 1.25, 1.0, 0.85], medium: [1.0, 0.85, 0.75] };
+// (low starts at 1.0 since v12.78: at 0.75 on a screen of two pixels a point the picture held a seventh of the
+// screen's pixels and far buildings were a blur; where the GPU is the limit it steps down again by itself)
+const STEPS = { high: [1.5, 1.25, 1.0, 0.85], medium: [1.0, 0.85, 0.75], low: [1.0, 0.85, 0.75] };
 // (SLOW 17.5: at 60 Hz, one refresh in ten missed — each a frame shown twice, a visible stutter)
 const SLOW = 17.5, ROOM = 12, DOWN_HOLD = 2000, UP_HOLD = 6000, GAP = 5000;
 
