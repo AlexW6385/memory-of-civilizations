@@ -41,7 +41,7 @@ export function gpuBytes(g) {
 }
 
 /** Count one built plan (the output of buildPlan). */
-export function countBuilt(b, life = null) {
+export function countBuilt(b, life = null, lifePlan = !!life) {
   const c = { verts: 0, tris: 0, meshes: 0, instances: 0, protoVerts: 0, bytes: 0 };
   for (const p of b.parts) {
     const g = p.geometry, n = g.attributes.position.count;
@@ -53,7 +53,8 @@ export function countBuilt(b, life = null) {
     const g = p.geometry, n = g.attributes.position.count, idx = g.index ? g.index.count : n, k = p.matrices.length / 16;
     // the life of the streets is gathered settlement-wide (src/engine/life-instances.js): counted
     // per shape at the end (measureSite)
-    if (life) { const e = life.get(p.key) || life.set(p.key, { n: 0, v: n, idx, colors: !!p.colors, bytes: gpuBytes(g) }).get(p.key); e.n += k; continue; }
+    // (so are the figures of an ordinary plan that leave at night: flagged `life`, v12.76)
+    if (life && (lifePlan || p.life)) { const e = life.get(p.key) || life.set(p.key, { n: 0, v: n, idx, colors: !!p.colors, bytes: gpuBytes(g) }).get(p.key); e.n += k; continue; }
     c.meshes++; c.protoVerts += n; c.bytes += gpuBytes(g);
     c.instances += k; c.tris += (idx / 3) * k; c.bytes += k * (64 + (p.colors ? 12 : 0));
   }
@@ -70,7 +71,7 @@ export async function measureSite(id) {
     const t0 = performance.now();
     const b = buildPlan(plan, { instancing: true, detail: true });
     S.ms += performance.now() - t0;
-    const c = countBuilt(b, plan.style === 'life' ? life : null);
+    const c = countBuilt(b, life, plan.style === 'life');
     for (const k of ['verts', 'protoVerts', 'instances', 'tris', 'meshes', 'bytes']) S[k] += c[k];
   }
   // life: shapes of LIFE_MIN copies or more are one instanced mesh each; rarer ones are merged into

@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.77 — the views over budget brought under; the deploy repaired (2026-11-21)
+
+Seven views that drew too much now sit inside the budget: New York's block at (34,66), London's bridge deck and Bridge Street, two views in Jerusalem, Agra's axis street, Cairo's Bayn al-Qasrayn, Shibam's north street and the pa looking south. Small repeated things (stoop rails, shutters, beams) are merged into their tile there instead of each becoming its own draw; nothing was removed. v12.76 did not deploy: the geometry count still took the night-leaving figures as meshes of their tiles and put Venice, Thebes and Alexandria over 3000; the count now takes them as the street life it draws them as.
+
 ## v12.76 — horses, oxen, donkeys and sheep that move; shopkeepers go home; first fixes from the acceptance round (2026-11-21)
 
 Horse, ox and zebu, donkey and sheep are new moving animals: they walk, graze, and lift their heads when one comes near; they replace still animals at Karakorum, Nalanda, Sanchi, Mohenjo-daro, Dogon, Wutai, Borgund, Catalhoyuk and Stonehenge. Shopkeepers and court ranks built into the near tiles now leave at night like the street's people (Seoul's court is empty at night but for its guards). Venice at night: lamps in San Marco's portals and under the arcades, and its eight hundred lane lanterns hang outside the walls, not inside them. Lamps near the arrival at Florence, Isfahan and Kyoto. The arrival at Uji no longer has a brazier before the eye, Angkor's no figure; Lalibela's now stands on the pit's rim. Ye's second lane runs its full length.
