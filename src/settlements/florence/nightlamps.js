@@ -7,7 +7,7 @@ import { box, lathe } from '../../core/geom.js';
 import { Halo } from './halo.js';
 import { Vector3 } from '../../core/three.js';
 import { faceFrame } from '../../styles/renaissance/face.js';
-import { DUOMO, PALAZZO, MEDICI, ORSAN, BAPTISTERY, RADIUS } from './layout.js';
+import { DUOMO, PALAZZO, MEDICI, ORSAN, BAPTISTERY, CAMPANILE, RADIUS, lots } from './layout.js';
 
 const IR = 'iron';
 /** A torch-holder on a wall at (x, z) facing n = [nx, nz], its lantern y m up: the bracket, the lantern, the glow, the wash on the wall and the pool on the ground. */
@@ -70,6 +70,30 @@ function orsanLamps() {
 const NEAR_TORCHES = [{ at: [-146, -120], n: [0, 1], y: 3.6 }, { at: [-134.5, -120], n: [0, 1], y: 3.6 }, { at: [-151.6, -120], n: [0, 1], y: 2.9 }, { at: [-123.1, -120], n: [0, 1], y: 3.1 }];
 const NEAR_POOLS = [{ at: [-146, -116.5], r: 6.5, rz: 5, b: 0.6 }, { at: [-134.5, -116.5], r: 6.5, rz: 5, b: 0.6 }, { at: [-124, -116], r: 6, rz: 4.5, b: 0.6 }];
 const NEAR_SHOPS = [{ at: [-125.7, -120], n: [0, 1], w: 1.4 }];
+
+// The street to the cathedral from the north (the flanks of the lots that face it, x -70 to -50, z -215 to -112): a wall lantern at the quarter of each flank, hung at two heights
+// (the low ones the tabernacle lamps of the corners). [inferred: the lanterns of the streets were hung by the households and the guilds (§17); which flanks is ours]
+function streetLamps() {
+  const out = [];
+  for (const l of lots()) {
+    const [a, b, c, d] = l.rect, ex = l.exposed ?? [];
+    if (l.kind === 'torre' || b < -215 || d > -112) continue;
+    for (const t of d - b > 14 ? [0.2, 0.78] : [0.27]) {
+      const z = b + (d - b) * t;
+      if (c > -70 && c < -60 && ex.includes('e')) out.push({ at: [c, z], n: [1, 0] });
+      if (a > -58 && a < -50 && ex.includes('w')) out.push({ at: [a, z], n: [-1, 0] });
+    }
+  }
+  return out.map((o, i) => ({ ...o, y: i % 3 === 1 ? 2.4 : 3.2 + (i % 2) * 0.25 }));
+}
+const VIA = streetLamps();
+const VIA_POOLS = VIA.map((t) => ({ at: [t.at[0] + t.n[0] * 1.4, t.at[1]], r: 4.2, rz: 3.4, b: 0.55 }));
+// the cathedral's west front (the front's plane at x = nave[0] - 1.9; the corner piers at its ends, the lanterns by the three portals) and the campanile's base
+const FRONT_X = DUOMO.c[0] - DUOMO.nave - DUOMO.d / 2 - 1.9 - 0.45, FZ = DUOMO.c[1];
+const FRONT = [-19.5, -16.2, -7.8, -4.2, 4.2, 7.8, 16.2, 19.5].map((u) => ({ at: [FRONT_X, FZ + u], n: [-1, 0], y: 3.4 }));
+const FRONT_POOLS = [-12, 0, 12].map((u) => ({ at: [FRONT_X - 2.0, FZ + u], r: 5, rz: 4.5, b: 0.7 }));
+const CAMP = [{ at: [CAMPANILE[0] - 7.4, CAMPANILE[1] - 3.5], n: [-1, 0], y: 3.2 }, { at: [CAMPANILE[0] - 7.4, CAMPANILE[1] + 3.5], n: [-1, 0], y: 3.2 }, { at: [CAMPANILE[0] - 3.5, CAMPANILE[1] + 7.4], n: [0, 1], y: 3.2 }, { at: [CAMPANILE[0] + 3.5, CAMPANILE[1] + 7.4], n: [0, 1], y: 3.2 }];
+const CAMP_POOLS = CAMP.map((t) => ({ at: [t.at[0] + t.n[0] * 1.5, t.at[1] + t.n[1] * 1.5], r: 4.5, rz: 4.5, b: 0.6 }));
 export function lampPlans() {
   const nave = [DUOMO.c[0] - DUOMO.nave - DUOMO.d / 2, DUOMO.c[1]];
   return [
@@ -80,6 +104,8 @@ export function lampPlans() {
     plan('florence-lamps-baptistery', BAPTISTERY, { torches: [...NEAR_TORCHES, { at: [BAPTISTERY[0] + 12.8, BAPTISTERY[1] - 4.9], n: [1, 0], y: 3.8 }, { at: [BAPTISTERY[0] + 12.8, BAPTISTERY[1] + 4.9], n: [1, 0], y: 3.8 }, { at: [BAPTISTERY[0] + 4.4, BAPTISTERY[1] - 12.8], n: [0, -1], y: 3.8 }, { at: [BAPTISTERY[0] - 4.4, BAPTISTERY[1] + 12.8], n: [0, 1], y: 3.8 }], shops: NEAR_SHOPS, pools: NEAR_POOLS }),
     // the Palazzo Medici's corner loggia, open in 1480: a lamp hung from its vault (the loggia is [23, -165.6, 28, -156], its floor at 0.04, the vault at 8.4)
     plan('florence-lamps-medici-loggia', [MEDICI[2] - 2.5, MEDICI[3] - 5], { hangs: [{ at: [MEDICI[2] - 2.6, MEDICI[3] - 4.9], y: 6.2, floor: 0.04, walls: [{ at: [MEDICI[2] - 5 + 0.06, MEDICI[3] - 4.9], n: [1, 0] }, { at: [MEDICI[2] - 2.6, MEDICI[3] - 9.6 + 0.06], n: [0, 1] }] }] }),
+    plan('florence-lamps-via-duomo', [-58, -145], { torches: VIA, pools: VIA_POOLS }),
+    plan('florence-lamps-duomo-front', [FRONT_X, FZ], { torches: [...FRONT, ...CAMP], pools: [...FRONT_POOLS, ...CAMP_POOLS] }),
     plan('florence-lamps-duomo', [nave[0], nave[1]], { pools: [{ at: [nave[0] - 0.3, nave[1]], r: 4.6, rz: 3.4, b: 0.9, sheet: [nave[0] + 0.4, 3.6] }] }),
   ];
 }

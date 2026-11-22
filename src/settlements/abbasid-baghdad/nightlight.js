@@ -73,6 +73,7 @@ const KINDS = {
   post: { cy: 2.3, s: 0.9, z: 0.42, wall: 0.45, pool: 3.0 },     // the oil lamp on a post by a door (objects lantern 'oil', its flame 0.42 out, h + 0.02)
   door: {},                                                       // the light of a lamp in a house's entrance passage, spilling over the doorstep
   spill: {},                                                      // the lamp-light of an open shop front across the street
+  sconce: {},                                                     // a wall lamp of the great iwan's passage: a glass lamp on the wall's face, its glow, the wash and the pool
   brazier: {},                                                    // a coal brazier at a gate, with its glowing embers and its geometry
 };
 function unitOf(kind) {
@@ -84,8 +85,12 @@ function unitOf(kind) {
       a('lamp_white', lathe([[0.001, 0.82], [0.31, 0.82], [0.001, 0.86]], 10));
       for (let i = 0; i < 3; i++) { const t = i * 2.094 + 0.4, x = Math.cos(t) * 0.2, z = Math.sin(t) * 0.2; a('timber', box(x - 0.03, 0, z - 0.03, x + 0.03, 0.66, z + 0.03)); }
       H.ball(0, 0.95, 0, 1.0); H.floor(0, 0.05, 0, 1.9);
+    } else if (kind === 'sconce') {
+      // (origin: the wall's face at the lamp's foot, +z into the passage) a lamp of glass 2.3 m up, standing 0.14 m out from the wall on its own small bracket-plate (the glass itself, of a flat back)
+      a('lamp_glass', lathe([[0.001, 2.12], [0.07, 2.14], [0.12, 2.26], [0.1, 2.42], [0.001, 2.48]], 8, null, 0, 0, 0.16));
+      H.ball(0, 2.3, 0.16, 0.85); H.wall(0, 2.3, 0.06, [0, 1], 1.5, 1.2, 8, 0.7); H.floor(0, 0.06, 1.7, 2.3, 2.3, 0, 8, 0.75);
     } else if (kind === 'door') { H.floor(0, 0.06, 1.4, 1.3, 1.9); H.ball(0, 1.2, 0.1, 0.9); }
-    else if (kind === 'spill') H.floor(0, 0.06, 1.6, 2.6, 2.0, 0, 10);
+    else if (kind === 'spill') { H.floor(0, 0.06, 1.6, 2.6, 2.0, 0, 10); H.ball(0, 1.5, -0.4, 1.0); }   // (the pool across the street, and the lamp's glow seen in the open front)
     else lampLight(H, 0, K.z, K.cy, 0.05, K.s, K.wall ? { n: [0, 1], d: K.wall } : null, K.pool / K.s);
     a(MAT, H.geometry());
   });
@@ -101,7 +106,7 @@ function bagHalo(el, { bag, col }) {
 export function doorGlows() {
   const out = [], YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
   for (const l of lots()) {
-    if (l.plot < 0 || hashAt(l.rect[0], l.rect[1], 17) > 0.2) continue;
+    if (l.plot < 0 || hashAt(l.rect[0], l.rect[1], 17) > 0.4) continue;
     const { ox, hd } = doorOf(l);
     out.push({ t: 'bag_halo', kind: 'door', at: houseToWorld(l, ox, hd + 0.2), y: 0, rot: YAW[l.face] });
   }
@@ -140,9 +145,16 @@ export function roomSpills() {
   const out = [];
   for (const b of ESPLANADE) {
     const [x0, z0, x1, z1] = b.rect, zc = (z0 + z1) / 2;
-    if (hashAt(x0, z0, 5) > 0.67) continue;
     const e = b.face === 'e';
     out.push({ t: 'bag_halo', kind: 'spill', at: [e ? x1 + 0.2 : x0 - 0.2, zc], y: 0, rot: e ? Math.PI / 2 : -Math.PI / 2 });
+  }
+  return out;
+}
+/** The great iwan's passage (the palace at C: the iwan 9.1 m wide from C.z - 2 to C.z + 16 in the palace's frame, the marble floor at 0.05; here the stretch the visitor walks, z -62 to -44): a glass lamp on each wall face at three places, three on a side [inferred: the iwan's walls were plain; the lamps stood on the wall's face on brackets of the kind the Bagdad suqs used (bay lamps)]. */
+export function iwanLamps() {
+  const out = [];
+  for (const z of [-58.5, -52.5, -46.5]) {
+    out.push({ t: 'bag_halo', kind: 'sconce', at: [C[0] - 4.55, z], y: 0.05, rot: Math.PI / 2 }, { t: 'bag_halo', kind: 'sconce', at: [C[0] + 4.55, z], y: 0.05, rot: -Math.PI / 2 });
   }
   return out;
 }

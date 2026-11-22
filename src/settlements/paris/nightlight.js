@@ -9,8 +9,8 @@
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { box, lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
-import { shopPoint } from '../../styles/gothic/houses.js';
-import { height, inLot } from './layout.js';
+import { shopPoint, frontKind } from '../../styles/gothic/houses.js';
+import { height, inLot, lots } from './layout.js';
 import { openMap } from './openwalk.js';
 import { courtLots } from './court-lots.js';
 
@@ -116,9 +116,32 @@ export function courtGlow() {
   }
   return out;
 }
+/** The other fronts of the walk's shop street (the island's rows between the palace gate and the Châtelet-side street, x -140 to 20, z -30 to 40): by hash a third show the glow of a hearth or a
+ *  tallow dip kept at the back of the shop through the open counter and the door, as the open shops' do [inferred: the shops of the Cité worked and kept house behind their boards until the curfew bell]. */
+export function streetGlow() {
+  const out = [], done = new Set(litShops().map((s) => s.at.join()));
+  for (const l of lots()) {
+    const [x0, z0, x1, z1] = l.rect, mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+    if (mx < -140 || mx > 20 || mz < -30 || mz > 40 || hashAt(x0, z0, 71) > 0.5) continue;
+    if (frontKind({ rect: l.rect, seed: l.seed, front: l.front, open: false }) !== 'shop') continue;
+    const sp = shopPoint({ rect: l.rect, y: height(mx, mz), seed: l.seed, front: l.front });
+    if (done.has(sp.at.join())) continue;
+    out.push({ trade: sp.trade, at: sp.at, out: sp.out, inside: sp.inside, y: height(mx, mz), k: 0.7 + 0.5 * hashAt(x0, z0, 72) });
+  }
+  return out;
+}
+/** The hanging lamps of the Sainte-Chapelle's lower chapel (the chapel's plan: origin x -200, z -10; the central nave's bays 6.9 m long from x -200, floor 0.15, vault crown 6.6): one on a chain from
+ *  the crown of each bay [inferred: the palace servants' church was kept lit before the Virgin's altar and for the offices; chapels hung oil lamps before the altar and along the nave]. */
+export const CHAPEL_LAMPS = [3.45, 10.35, 17.25, 24.15].map((u) => [-200 + u, -10]);
 /** The watch's fires in the palace court [inferred: the sergeants of the household kept the court at night]: a brazier near the way in and a cresset at the chapel stair's foot. */
 export const COURT_FIRES = [[-232, -4, 'brazier'], [-186, -4, 'cresset'], [146.5, -7.5, 'cresset'], [146.5, 7.5, 'cresset']];   // (the last two: the cathedral's west front, kept lit by the chapter for the pilgrims' watch [inferred])
 
+/** The lit counter opening of a shop at night: a warm panel in the opening, on the front's face (at is 1.45 m out of the front). [inferred: the shop's own hearth or dip seen through its open counter] */
+function counterGlow(H, s, f) {
+  const o = s.out, t = [-o[1], o[0]], w = 0.9, c = [s.at[0] - o[0] * 1.39, s.at[1] - o[1] * 1.39];
+  const P = (u, yy) => [c[0] + t[0] * u, s.y + yy, c[1] + t[1] * u];
+  H.quad(P(-w, 0.95), P(w, 0.95), P(w, 2.15), P(-w, 2.15), o, f);
+}
 /** A fire in the open: the glow, the pool on the ground. */
 function fire(H, x, gy, by, z, ball, pool) { H.ball(x, by, z, ball); H.floor(x, gy + 0.03, z, pool); }
 export function halos() {
@@ -142,6 +165,13 @@ export function halos() {
     H.ball(s.inside[0], s.y + 1.0, s.inside[1], 0.95 * sa);
     H.floor(s.inside[0], s.y + 0.04, s.inside[1], 1.7, 1.3, yaw);
     H.floor(s.at[0] + o[0] * 0.3, height(s.at[0], s.at[1]) + 0.04, s.at[1] + o[1] * 0.3, 2.4 * sa, 1.7 * sa, yaw, 10);
+    counterGlow(H, s, 0.3);
+  }
+  for (const s of streetGlow()) {
+    const o = s.out, along = o[1] !== 0, yaw = along ? 0 : Math.PI / 2;
+    H.ball(s.inside[0], s.y + 1.1, s.inside[1], 0.8 * s.k);
+    H.floor(s.at[0] + o[0] * 0.3, s.y + 0.04, s.at[1] + o[1] * 0.3, 2.3 * s.k, 1.7 * s.k, yaw, 10);
+    counterGlow(H, s, 0.25 * s.k);
   }
   for (const s of courtGlow()) {
     const o = s.out, along = o[1] !== 0, yaw = along ? 0 : Math.PI / 2;
@@ -149,6 +179,7 @@ export function halos() {
     H.floor(s.inside[0], s.y + 0.04, s.inside[1], 1.7, 1.3, yaw);
     H.floor(s.at[0] + o[0] * 0.3, s.y + 0.04, s.at[1] + o[1] * 0.3, 2.6, 1.9, yaw, 10);
   }
+  for (const [x, z] of CHAPEL_LAMPS) { H.ball(x, 3.75, z, 0.95); H.floor(x, 0.2, z, 3.2, 2.6, 0, 10); H.disc([x, 6.35, z], [1, 0, 0], [0, 0, 1], 2.8, 1.8, null, 10, [0.5, 0.2, 0], [0, 0.5, 1]); }
   for (const [x, z, k] of COURT_FIRES) fire(H, x, height(x, z), height(x, z) + (k === 'cresset' ? 2.15 : 1.0), z, k === 'cresset' ? 1.6 : 1.4, 4.2);
   return H;
 }
@@ -169,6 +200,13 @@ function parisFire(el, ctx) {
     col.circle(x, z, 0.45, y, y + 0.8);
   }
 }
+/** { t: 'paris_hanglamp', at: [x, z] }: a lamp on a chain from the vault of the lower chapel: the chain to the crown (6.6), the iron cup at 3.4 and the flame over it. */
+function parisHangLamp(el, ctx) {
+  const { bag } = ctx, [x, z] = el.at;
+  bag.add('iron', box(x - 0.015, 4.05, z - 0.015, x + 0.015, 6.6, z + 0.015));
+  bag.add('iron', lathe([[0.001, 0.0], [0.1, 0.06], [0.2, 0.2], [0.21, 0.26], [0.001, 0.18]], 8, null, x, 3.45, z));
+  bag.add('flame', lathe([[0.001, 0.0], [0.11, 0.03], [0.05, 0.3], [0.001, 0.42]], 7, null, x, 3.68, z));
+}
 /** { t: 'paris_night' }: the halos of the whole city, in one geometry of one material. */
 function parisNight(el, ctx) { halos().flush(ctx.bag); }
 
@@ -178,7 +216,8 @@ export function nightPlan(RADIUS) {
   for (const [x, z] of CRESSETS) els.push({ t: 'paris_fire', at: [x, z], y: height(x, z), kind: 'cresset' });
   for (const [x, z] of BRAZIERS) els.push({ t: 'paris_fire', at: [x, z], y: height(x, z), kind: 'brazier' });
   for (const [x, z, kind] of COURT_FIRES) els.push({ t: 'paris_fire', at: [x, z], y: height(x, z), kind });
+  for (const [x, z] of CHAPEL_LAMPS) els.push({ t: 'paris_hanglamp', at: [x, z] });
   return { id: 'paris-night', style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [], elements: els };
 }
-Object.assign(STYLES.gothic.elements, { paris_fire: parisFire, paris_night: parisNight });
+Object.assign(STYLES.gothic.elements, { paris_fire: parisFire, paris_hanglamp: parisHangLamp, paris_night: parisNight });
 void inLot;

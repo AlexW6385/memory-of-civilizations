@@ -175,7 +175,7 @@ export function streetHalos(elements, inDisc = () => true) {
   return out;
 }
 /** Where and how the streak lies for a lantern at (x, z): { x, z, y, rot } or null. */
-function streakPose(x, z, reach = 7) {
+function streakPose(x, z, reach = 4.6) {   // (a lantern farther than 4.6 m from the water leaves no streak: the reflection of a lamp behind the visitor floated unattached on the canal)
   let best = null;
   for (const [x0, z0, x1, z1] of CANALS) {
     const qx = Math.max(x0, Math.min(x, x1)), qz = Math.max(z0, Math.min(z, z1)), d = Math.hypot(qx - x, qz - z);
@@ -220,6 +220,8 @@ function slabsOf(g, thick = 0.2) {
 }
 /** The lit panes for one slab: a sheet a hair off each of its two faces (full leaf less a frame's width). */
 function panesOf(H, b, off) {
+  // a sheet of paper (a thin slab of plaster_white, 12 mm) has its bars 26-34 mm off its middle on each face: its light sits between them and the paper (off 14 mm), BEHIND the lattice, so the bars read dark against it
+  if (Math.min(b.x1 - b.x0, b.z1 - b.z0) < 0.02) off = 0.014;
   const thinX = b.x1 - b.x0 < b.z1 - b.z0, m = 0.035, y0 = b.y0 + m, y1 = b.y1 - m;
   if (y1 - y0 < 0.15) return;
   // (each room its own strength, by the hash of its place: a lamp near the window or far back)
@@ -238,10 +240,10 @@ function panesOf(H, b, off) {
  * each face if its room (a cell of the settlement by hash: 4 m × 3 m storeys) is one of those lit, `share` of them.
  * Returns { ctx, finish } — call finish() once the element has been built.
  */
-export function litWindows(ctx, share = 0.42) {
+export function litWindows(ctx, share = 0.42, rect = null) {
   // (one layer only: a wrapped builder called from inside another wrapped one, as the opened lots' shells call the town's house, must not pane its windows twice)
   if (ctx.bag?.[LIT]) return { ctx, finish: () => {} };
-  const H = new Halo(), real = ctx.bag;
+  const H = new Halo(), real = ctx.bag, doors = [];
   const lit = (b) => hashAt(Math.floor((b.x0 + b.x1) / 8) * 4, Math.floor((b.z0 + b.z1) / 8) * 4, 11 + Math.floor((b.y0 + b.y1) / 6)) < share;
   const bag = new Proxy(real, {
     get(t, k) {
@@ -251,13 +253,33 @@ export function litWindows(ctx, share = 0.42) {
           const paper = mat === 'plaster_white', n = g.attributes.position.count;
           if (!paper || n <= 36) for (const b of slabsOf(g, paper ? 0.02 : 0.2)) if (lit(b)) panesOf(H, b, 0.03);
         }
+        if (rect && mat === 'lacquer_chestnut' && g?.attributes?.position) {
+          // a street door's leaf (a lacquered slab 0.9-1.05 wide, 2.2-2.4 high): remembered for the lantern over it
+          const P = g.attributes.position; let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
+          for (let i = 0; i < P.count; i++) { const x = P.getX(i), y = P.getY(i), z = P.getZ(i); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
+          const thinX = x1 - x0 < z1 - z0, th = thinX ? x1 - x0 : z1 - z0, w = thinX ? z1 - z0 : x1 - x0;
+          if (th <= 0.14 && w >= 0.9 && w <= 1.05 && y1 - y0 >= 2.2 && y1 - y0 <= 2.4) doors.push({ x: (x0 + x1) / 2, z: (z0 + z1) / 2, y: y0, thinX });
+        }
         return t.add(mat, g);
       };
       const v = t[k];
       return typeof v === 'function' ? v.bind(t) : v;
     },
   });
-  return { ctx: { ...ctx, bag }, finish: () => H.flush(real) };
+  const finish = () => {
+    // the lantern over a street door [inferred: a household hung a paper lantern under the little tiled hood of its door at night, as the shops hung theirs]: the lit paper lantern,
+    // its glow, the pool on the step and the wash on the wall; a share of the doors by hash
+    const cx = rect ? (rect[0] + rect[2]) / 2 : 0, cz = rect ? (rect[1] + rect[3]) / 2 : 0;
+    for (const d of doors) {
+      if (hashAt(d.x, d.z, 31) > 0.62) continue;
+      const n = d.thinX ? [d.x >= cx ? 1 : -1, 0] : [0, d.z >= cz ? 1 : -1], x = d.x + n[0] * 0.42, z = d.z + n[1] * 0.42, y = d.y + 2.02;
+      // the paper lantern itself is lit paper: a hot core of three crossed discs, in the halo's own material (no mesh of wood or lacquer: that would be one more draw per plan)
+      for (let q = 0; q < 3; q++) { const t = q * Math.PI / 3, c = Math.cos(t), sn = Math.sin(t); H.disc([x, y + 0.2, z], [c, 0, sn], [0, 1, 0], 0.13, 0.2, [-sn, c], 8, [1, 0.8], [0, 1]); }
+      lanternLight(H, x, z, y + 0.2, d.y, 0.8, { n, d: 0.42 }, 2.6);
+    }
+    H.flush(real);
+  };
+  return { ctx: { ...ctx, bag }, finish };
 }
 const LIT = Symbol('lit windows');
 /** Wrap a style's element so its windows glow at night: STYLES[style].elements[name] */
@@ -265,7 +287,7 @@ function wrapElement(style, name, share) {
   const S = STYLES[style];
   if (!S?.elements[name] || S.elements[name].__lit) return;
   const base = S.elements[name];
-  const f = (el, ctx) => { const L = litWindows(ctx, el.litShare ?? share); base(el, L.ctx); L.finish(); };
+  const f = (el, ctx) => { const L = litWindows(ctx, el.litShare ?? share, name.startsWith('house') ? el.rect : null); base(el, L.ctx); L.finish(); };
   f.__lit = true;
   S.elements[name] = f;
 }

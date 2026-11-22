@@ -134,6 +134,8 @@ function nightLife(ways) {
   add.push({ t: 'rome_halo', kind: 'torch', at: [cx + f[0] * 4.6 + r[0] * 0.5, cz + f[1] * 4.6 + r[1] * 0.5], y: 0, rot: 0 });
   // the temple's braziers at the foot of the Pantheon's steps, and escorts with torches near the visitor's walk (Juvenal, Satire 3: a man out by night has slaves with flambeaux before him)
   for (const x of [-21, 21]) add.push({ t: 'rome_halo', kind: 'brazier', at: [x, -54.2], y: 0, rot: 0 });
+  // the courtyard passage between two lots at (-25, -216): two torches in holders on stands, one each side of the way [inferred: a house door left open on a court kept a light]
+  for (const x of [-27.3, -22.8]) add.push({ t: 'rome_halo', kind: 'torch', at: [x, -215.6], y: 0, rot: 0 });
   add.push(...pantheonHalos());
   const slave = (at, rot, k) => ({ t: 'figure', at, y: 0, rot, seed: 7100 + k, skin: k % 2 ? 'skin_medium' : 'skin_light', dress: 'tunic', legs: 'bare', cloth: ['cloth_brown', 'cloth_ochre', 'cloth_grey'][k % 3], over: 'belt', hair: 'short', beard: 0, hat: 'none', pose: 'stand' });
   const master = (at, rot, k) => ({ t: 'figure', at, y: 0, rot, seed: 7200 + k, skin: 'skin_light', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', hair: 'short', beard: k % 2, hat: 'none', pose: 'stand' });
