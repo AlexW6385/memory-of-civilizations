@@ -10,6 +10,7 @@ import { thrones, detailPlans } from './plan.js';
 import { HOUSE } from '../../styles/qing/index.js';
 import { COURT_ROOMS, PAVILION_ROOMS, palaceRoomFigures } from './palace-rooms.js';
 import { templeNight } from './nightwork.js';
+import { templePlaques } from './plaques.js';
 
 const R = RADIUS - 26;
 const base = (id, elements, style = 'qing') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' } });
@@ -157,6 +158,8 @@ function temple() {
   // the censers: great bronze tripods burning incense before the stairs and at the Danbi's head (smoke.js rises from them)
   for (const sx of [-1, 1]) { E.push({ t: 'bronze', kind: 'tripod', at: [dxm + sx * 5, dz1 + 11], y: 0.03, s: 1.5, face: [0, 1] }); E.push({ t: 'bronze', kind: 'tripod', at: [dxm + sx * 9, dz0 + 10], y: dy, s: 1.4, face: [0, 1] }); }
   for (const sx of [-1, 1]) E.push({ t: 'bronze', kind: 'lion', at: [dxm + sx * 14, dz1 + 8], y: 0.06, s: 0.85, face: [0, 1], metal: 'marble_smooth', paw: sx > 0 ? 'ball' : 'cub' });
+  // the board of the 大享殿 on the hall's top drum (plaques.js, docs §46b)
+  E.push({ t: 'bj_plaque', list: templePlaques() });
   // the night (nightwork.js): the lamps at the court's gates and the embers of the censers
   E.push({ t: 'bj_night_temple', list: templeNight() });
   // the path in from the avenue to the west gate

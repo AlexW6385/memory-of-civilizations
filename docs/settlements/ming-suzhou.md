@@ -523,7 +523,12 @@ The "no typeface" instruction of round two was wrong; the repo's method (§27) i
 - **Added, numerals and directions (16):** 一 1, 二 2, 三 3, 五 4, 六 4, 七 2, 八 2, 九 2, 十 2, 百 6, 千 3, 上 3, 下 3, 中 4, 左 5, 右 5 (四 was present).
 - **Added, trade characters (22):** 餅 15, 柴 10, 木 4, 石 5, 井 4, 東 8, 西 6, 南 9, 車 7, 行 6, 店 8, 記 10, 炭 9, 馬 10, 銀 14, 銅 14, 錫 16, 針 10, 絲 12, 綢 14, 帽 12, 鞋 15. 釒 (`JIN`), 糸 (`SI`, the left half of 繼) and 革 (from 鞍) are shared components.
 - **Where the overlay still differs:** 絲's two 糸 are a little smaller than the typeface's (the lower 小 stops short of the typeface's right dot); 乾, 煙 and 鹽 have more drawn pieces than the standard count because the typeface draws a stroke the count merges (the declared count is the standard one); 錫's 勿 pies are close but not exact; 南's last tick duplicates the hook of the 冂. None is placed on a building.
-- **Still not authored (no overlay was made for them in this round, so none is shipped):** 緞, 線, 傘, 醬, 醋, 糖, 染, 號, 橋. A character is drawn only when its overlay has been checked. (扇 and 麵 were already present.)
+- **Not authored in this round (done in §27.1c):** 緞, 線, 傘, 醬, 醋, 糖, 染, 號, 橋. A character is drawn only when its overlay has been checked. (扇 and 麵 were already present.)
+
+### 27.1c Round four: plaque and shop-sign characters (`brush-data.js`; `tests/ming-glyph.test.mjs` `ADDED5`)
+
+Same method as §27.1b (hand-written strokes, each overlaid on the installed Noto Serif CJK TC with `tools/script-sheet.mjs` + `script-sheet.py`, the typeface a measure only, nothing shipped). **Added (23, with standard counts):** 享 8, 師 10, 表 8, 至 6, 聖 13, 先 6, 水 4, 地 6, 日 4, 月 4, 春 9, 夏 10, 秋 9, 冬 5, 緞 15, 線 15, 傘 12, 染 9, 醬 18, 醋 15, 糖 16, 號 13, 橋 16. Already present and not redone: 萬 世 山 天 風 雲 茶 酒 藥 米 布 當 堂 齋 軒 亭 閣 園. 糸 (緞 線) is the `SI` of 繼 refitted. Sheets (local, `shots/glyphs/`, not committed): `batch-r4a.png` (享師表至聖先), `batch-r4b.png` (水地日月春夏秋冬), `batch-r4c.png` (緞線傘染), `batch-r4d.png` (醬醋糖號橋).
+- **Where the overlay still differs:** the 糸 of 緞 and 線 is a little narrower than the typeface's, and its three lower dots shorter; the long falling strokes (the pie of 染's 九, 夏's 夊, 水's na) are even-weight curves with less swell than the typeface; 醬's 將 (the 夕 and 寸 on the right) is placed by eye over a crowded form and its 爿 is simplified; 號's lower-left 万 and 虎's inner hook are close but not exact; 師, 聖, 緞 and others draw more pieces than the standard count where a stroke is bent or split (the declared count is the standard one). 橋's and 糖's components agree with the typeface within a few units.
 
 ## 28. The north zone at full standard: temple halls, climbable pagoda, wall and gate, court (`templefig.js`, `templehall.js`, `pagodawork.js`, `wallwork.js`, `north.js`; round 13)
 

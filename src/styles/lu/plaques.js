@@ -31,3 +31,11 @@ export function writeColumn(bag, text, x, y, z0, z1, pitch, size) {
   bag.add('gilt_bronze', fromTriangles(out));
   return true;
 }
+/** A horizontal line of checked characters, raised in gilt and read right to left (the first character at the right): centre (x, y), face plane z0 to z1. Text with an unchecked character is not drawn. */
+export function writeRow(bag, text, x, y, z0, z1, pitch, size) {
+  if (!canWrite(text)) return false;
+  const out = [], n = [...text].length;
+  [...text].forEach((c, k) => relief(out, GLYPH[c], x + ((n - 1) / 2 - k) * pitch, y, size, z0, z1, { thick: 1.25, top: 0.55 }));
+  bag.add('gilt_bronze', fromTriangles(out));
+  return true;
+}
