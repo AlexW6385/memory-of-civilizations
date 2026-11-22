@@ -145,9 +145,9 @@ export function nightElements() {
   for (const f of fireSpots()) E.push({ t: 'uji_kagaribi', at: f.at, y: f.y });
   const [sx, sz] = sanNoMa();
   E.push({ t: 'uji_todai', at: [sx, sz], y: deckY(sx), h: 1.1 });             // at Hashihime's place on the san-no-ma
-  // the viewing pier of the villa: a basket fire either side of its middle and a stand lamp near its landward end, so the visitor at its end has light about him [inferred: §20]
+  // the viewing pier of the villa: a basket fire either side of its middle (the near one set behind the arrival eye at x 6.5, so the view of the hall is clear) and a stand lamp near its landward end, so the visitor at its end has light about him [inferred: §20]
   const py = VIEW_PIER.y;
-  E.push({ t: 'uji_kagaribi', at: [4.8, 1.0], y: py, water: [0, 1], d: 0.3, wy: POND_LEVEL, s: 0.4 }, { t: 'uji_kagaribi', at: [14, -1.0], y: py, water: [0, -1], d: 0.3, wy: POND_LEVEL, s: 0.4 });
+  E.push({ t: 'uji_kagaribi', at: [9.6, 1.0], y: py, water: [0, 1], d: 0.3, wy: POND_LEVEL, s: 0.4 }, { t: 'uji_kagaribi', at: [14, -1.0], y: py, water: [0, -1], d: 0.3, wy: POND_LEVEL, s: 0.4 });
   E.push({ t: 'uji_todai', at: [5.6, -1.0], y: py, h: 1.1 });
   // the crossings of the roads: a stand lamp or a small basket fire kept before the road gods' shrine, beside it, off the road [inferred: §20]
   for (const w of waysideSpots()) {
