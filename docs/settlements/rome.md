@@ -245,3 +245,6 @@ None of the sources below was fetched in this pass; what is [stated] rests on th
 - [Insula (building) — Wikipedia](https://en.wikipedia.org/wiki/Insula_(building))
 - [Stadio di Domiziano — the stadium's own site (architecture page)](https://stadiodomiziano.com/?p=317)
 - [House of the Balcony with Corbels (I,VI,2) — ostia-antica.org](https://ostia-antica.org/regio1/6/6-2.htm)
+
+## Night in the courtyard passage (release pass)
+- Seen (night, low): the passage at (-25,-213) between two lots was black. Two standing torches (`rome_halo` kind torch, existing instanced unit) at (-27.3,-215.6) and (-22.8,-215.6) light it with a pool on the paving. [inferred: a house door left open on a court kept a light; torch stands as in the litter's escort]
