@@ -107,6 +107,8 @@ const wrapPlaza = (fn) => function lit(el, ctx) {
   if (!ctx?.lights) return r;
   const H = new Halo(), y0 = el.y ?? 0.12;
   for (const [x, z] of [[-34, 71], [37, 69], [-16, 94]]) embers(H, x, y0, z, 0.6, 2.1);
+  // the night's cooking fires by the earth ovens between the way and the ahu, with their people (town.js) [inferred]: strong enough to pool on the plaza's ground
+  for (const [x, z] of [[-9, 72], [10, 78], [-4, 90], [-8, 64]]) { H.ball(x, y0 + 0.5, z, 1.4, 0.85); H.floor(x, y0 + 0.08, z, 6, 5.4, 14, 1); }
   H.flush(ctx.bag);
   return r;
 };

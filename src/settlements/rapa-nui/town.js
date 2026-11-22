@@ -146,7 +146,12 @@ export async function town() {
     at(74.2, 147.6, [76.5, 148.8], { pose: 'sit_ground', man: true });
     at(78.6, 150.2, [76.5, 148.8], { pose: 'squat', man: true });
     at(-35.5, 73.2, [-34, 71], { pose: 'squat', man: true });
-    at(36.0, 66.9, [37, 69], { pose: 'squat', man: false }); }
+    at(36.0, 66.9, [37, 69], { pose: 'squat', man: false });
+    // the plaza's cooking fires between the way and the ahu (nightlight.js wrapPlaza), added last
+    at(-10.8, 71.0, [-9, 72], { pose: 'squat', man: false }); at(-7.4, 73.2, [-9, 72], { pose: 'sit_ground', man: true });
+    at(8.2, 77.0, [10, 78], { pose: 'sit_ground', man: true }); at(11.8, 79.4, [10, 78], { pose: 'squat', man: false });
+    at(-5.8, 91.4, [-4, 90], { pose: 'sit_ground', man: false }); at(-2.2, 88.6, [-4, 90], { pose: 'squat', man: true });
+    at(-9.6, 62.4, [-8, 64], { pose: 'squat', man: false }); at(-6.2, 65.2, [-8, 64], { pose: 'sit_ground', man: true }); }
   // the crater lake of Rano Raraku (the sea round the island is the planet's: ground.js, sea)
   const [lx, lz] = RARAKU.c, lr = RARAKU.crater;
   const lake = plan('rapa-nui-crater-lake', 'ming', [{ t: 'water_cells', rect: [lx - lr, lz - lr, lx + lr, lz + lr], y: RARAKU.lake, cell: 1, inside: (x, z) => Math.hypot(x - lx, z - lz) < lr && height(x, z) < RARAKU.lake }]);

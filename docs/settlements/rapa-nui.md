@@ -229,3 +229,6 @@ Placed where made, by hour and weather; all synthesised; none of it heard (measu
 - Wear: the statue road's last two stretches into the village are trodden with ragged patches of dark brown earth (`hide_brown`, 0.8 scale), in `wear.js` (one material added to the plaza tile: +1 main draw). A first try with the plaza's middle walk in `bark_dark` was rendered and dropped: black shards on pale pebbles. The road patches are still shard-like at 2 m; looked at, judged acceptable, not good.
 - Still short: moai unlit; worn ramp of the ahu (poro boulders hide any tread); weather-wet ground; quarry tracks; seasons; the new fires and figures not seen at night from a position that frames them.
 - **Trodden ground (2026-11-21).** The statue road's last two stretches and the plaza's middle walk are ragged `earth_trodden` patches (`src/core/wearpatch.js`), replacing the `hide_brown` shards.
+
+## Night fires on the plaza, in the arrival's frame
+- [inferred] Four cooking fires by the earth ovens between the way up and the ahu (about (-9,72), (10,78), (-4,90), (-8,64)), each with two people, pooling on the plaza ground; the moai are not lit. Fires are small (wood was dear) but the feasts' ovens are [inferred] kept going at night.
