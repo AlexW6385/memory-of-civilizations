@@ -197,6 +197,8 @@ export function frontRoutes() {
 /** The terraces cut into TILE-metre tiles, each built in full (near) and simple (far) like ../lod.js lodTiles, but larger: a plan costs one mesh
  *  per material, so fewer, larger tiles keep the mesh count down (the geometry budget); `near` grows with the tile so the same ground shows in full. */
 const TILE = 160, NEAR = 220 + (TILE - 100) * 0.6;
+// repeated small shapes merge into the tile's mesh rather than each shape being an instanced draw (src/core/geom.js INSTANCING)
+const MIN_SAVED = 8000;
 function terraceTiles(id, elements) {
   const tiles = new Map();
   for (const e of elements) {
@@ -207,8 +209,8 @@ function terraceTiles(id, elements) {
   const plans = [];
   for (const [k, list] of tiles) {
     const [i, j] = k.split(',').map(Number), b = { style: 'victorian', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, center: [(i + 0.5) * TILE, (j + 0.5) * TILE] };
-    plans.push({ ...b, id: `${id}-${k}`, near: NEAR, elements: list });
-    plans.push({ ...b, id: `${id}-${k}-far`, far: NEAR, elements: list.map((e) => ({ ...e, simple: true })), nocollide: true });
+    plans.push({ ...b, id: `${id}-${k}`, near: NEAR, elements: list, minSaved: MIN_SAVED });
+    plans.push({ ...b, id: `${id}-${k}-far`, far: NEAR, elements: list.map((e) => ({ ...e, simple: true })), nocollide: true, minSaved: MIN_SAVED });
   }
   return plans;
 }
