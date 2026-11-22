@@ -41,6 +41,8 @@ export function avenueItems() {
   });
   // two more braziers on the arrival's plaza, either side of the way up the middle, so that the visitor who arrives at night stands in a lit ground (§24)
   P.forEach(([za, zb, lv]) => { if (70 > za && 70 < zb) for (const sx of [-1, 1]) out.push({ k: 'brazier', x: sx * 8.6, z: 73.5 + sx * 2, y: lv + 0.05 }); });
+  // and four more beyond them on the arrival's plaza, in a ring about the way up (so that the ground within 30 m of the visitor is lit at night, §25); `big`: a wider pool
+  P.forEach(([za, zb, lv]) => { if (70 > za && 70 < zb) for (const [x, z] of [[-12.5, 60], [12.5, 60], [-12.5, 88], [12.5, 88]]) if (z > za + 4 && z < zb - 4 && clear(x, z, 1.5)) out.push({ k: 'brazier', x, z, y: lv + 0.05, big: true }); });
   // the Moon Plaza (its terrace MOON.rise up): braziers about the Cross, groups, sweepers, the plasterers, dogs
   {
     const r = rng(777), y = MOON.rise + 0.06, [qx0, qz0, qx1, qz1] = PLAZA;
