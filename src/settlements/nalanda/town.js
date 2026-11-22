@@ -126,7 +126,7 @@ function people() {
   // pilgrims coming in with their bundles
   lay([-1.5, GATE.c[1] + 9], 0, [0, -1], { pose: 'stand', carry: 'bundle' }); woman([1.8, GATE.c[1] + 11], 0, [0, -1], { pose: 'stand', carry: 'basket' });
   // the yards: zebu and goats in the pens, hay
-  yards().forEach((y, i) => { const [a0, b0, a1, b1] = y.rect; if (i % 3 === 2 || y.gone) return; P.push({ t: 'animal', kind: 'zebu', at: [(a0 + a1) / 2 - 1, (b0 + b1) / 2], y: 0, rot: r() * 6, seed: 300 + i }, { t: 'animal', kind: i % 2 ? 'goat' : 'zebu', at: [(a0 + a1) / 2 + 1.5, (b0 + b1) / 2 + 1], y: 0, rot: r() * 6, seed: 400 + i }); });
+  yards().forEach((y, i) => { const [a0, b0, a1, b1] = y.rect; if (i % 3 === 2 || y.gone || i === 0 || i === 4) return; /* (yards 0 and 4: the zebu are the critters of fauna.js) */ P.push({ t: 'animal', kind: 'zebu', at: [(a0 + a1) / 2 - 1, (b0 + b1) / 2], y: 0, rot: r() * 6, seed: 300 + i }, { t: 'animal', kind: i % 2 ? 'goat' : 'zebu', at: [(a0 + a1) / 2 + 1.5, (b0 + b1) / 2 + 1], y: 0, rot: r() * 6, seed: 400 + i }); });
   void LEVEL;
   return base('nalanda-people', 'life', P);
 }

@@ -46,7 +46,7 @@ for (const [kind, a] of [['egret', -0.6], ['heron', 2.4]]) {
 // of the time]: village dogs lying at the stair's foot, on the summit's way and at the door of a shop, cats on the platforms of homes (the household cat is old in India), hens and
 // a cock in the yards (the jungle fowl domesticated in the Indus valley and the plains), goats in two other yards, rock pigeons on the stupa's paving and in the first
 // monastery's court (they come to the offerings), a goose of the grey kind (the bar-headed goose, the hamsa, is carved on Ashoka's pillar's abacus) and ducks on the
-// tank, a kingfisher at the ghat. No peafowl and no zebu are rigged (the engine has no model for them).
+// tank, a kingfisher at the ghat; zebu graze on the open ground between the hill's foot and the first rows (critter-models-farm.js; village.js draws the other cattle there as still life). No peafowl.
 const critters = [];
 const lotOf = (kind, n) => lots().filter((l) => l.open && !l.farm && l.kind === kind).sort((a, b) => Math.hypot(a.rect[0], a.rect[1] - 150) - Math.hypot(b.rect[0], b.rect[1] - 150)).slice(0, n);
 const platform = (l, side, u) => { const F = houseDoor({ rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, fr: l.fr }); return F.Pf(F.du + side * u, -0.7); };
@@ -61,5 +61,7 @@ for (const [x, z, m] of [[3.4, 27.5, 'pigeon_grey'], [4.6, 28.4, 'pigeon_white']
 const tkArea = [TANK.c[0] - TANK.r[0], TANK.c[1] - TANK.r[1], TANK.c[0] + TANK.r[0], TANK.c[1] + TANK.r[1]];
 critters.push({ type: 'floaters', models: ['goose_grey', 'goose_grey', 'duck_brown', 'duck_white'], area: tkArea, dist: tankD, a: [16, 9], ratio: 0.5, margin: 2.5, y: TANK.level, speed: 0.25, cycle: [18, 24] });
 { const x = TANK.c[0] + 9, zEdge = TANK.c[1] - TANK.r[1] * Math.sqrt(1 - ((x - TANK.c[0]) / TANK.r[0]) ** 2); critters.push({ model: 'kingfisher', at: [x, ground.height(x, zEdge - 1.2) + 0.08, zEdge - 1.2], rot: Math.PI / 2, water: [x, zEdge + 3, TANK.level], cycle: 36 }); }
+// zebu on the open ground between the hill's foot and the first rows (village.js leaves those places to the critters)
+for (const [x, z, m, rot] of [[-48, 134, 'zebu_red', 0.8], [-45.6, 136.4, 'zebu_white', 2.4], [48, 135, 'zebu_grey', 4.1], [50.6, 133.2, 'zebu_white', 5.2], [66, 132, 'zebu_red', 1.2], [96, 160, 'zebu_white', 0.3]]) critters.push({ model: m, at: [x, ground.height(x, z), z], rot, range: [3.5, 2.5], tau: 34 + (x % 7) });
 void HALL;
 export default { fish, flights, perches, critters };

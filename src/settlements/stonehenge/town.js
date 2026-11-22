@@ -274,10 +274,11 @@ export function village() {
   for (let s = DURR.r + 3; s < DURR.r + DURR.len; s += 7) { const t = (rand() - 0.5) * DURR.w * 0.8, x = DURR.c[0] + DURR.dir[0] * s - DURR.dir[1] * t, z = DURR.c[1] + DURR.dir[1] * s + DURR.dir[0] * t; S.push({ t: 'litter', kind: 'path', c: [x, z], y: height(x, z), r: 3, n: 18, seed: Math.floor(rand() * 1e6) }); }
   // sheep on the down with a herder and a dog each (a few; the Neolithic flocks were small, mixed with goats)
   const flocks = [[-150, 210], [-232, -58], [120, -260], [180, 160], [-180, -170], [-60, 120]];
-  for (const [fx, fz] of flocks) {
+  // (the flocks 1 and 5, at about [-205, -35] and [-41, 135], are the sheep critters of fauna.js; their random numbers are still drawn, so that nothing else moves)
+  for (const [fi, [fx, fz]] of flocks.entries()) {
     const x0 = fx + (rand() - 0.5) * 20 + 22, z0 = fz + (rand() - 0.5) * 20 + 14;
     if (!okScrub(x0, z0, 4)) continue;
-    for (let k = 0, m = 7 + Math.floor(rand() * 5); k < m; k++) { const x = x0 + (rand() - 0.5) * 16, z = z0 + (rand() - 0.5) * 12; if (okScrub(x, z, 1)) L.push({ t: 'animal', kind: k % 6 === 5 ? 'goat' : 'sheep', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
+    for (let k = 0, m = 7 + Math.floor(rand() * 5); k < m; k++) { const x = x0 + (rand() - 0.5) * 16, z = z0 + (rand() - 0.5) * 12; if (okScrub(x, z, 1)) { const e = { t: 'animal', kind: k % 6 === 5 ? 'goat' : 'sheep', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }; if (fi !== 1 && fi !== 5) L.push(e); } }
     person([x0 + 9, z0 - 5], rand() * 6.28, { carry: 'staff', pose: 'stand', over: 'cloak' });
     L.push({ t: 'animal', kind: 'dog', at: [x0 + 7, z0 - 4], y: height(x0 + 7, z0 - 4), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
   }

@@ -13,11 +13,12 @@
 //   cagebird  (hung from b)
 //   swallow   c [cycle s, flight s, radius m, side ±1]   (the nest at b, its open side facing the heading b.w)
 //   kingfisher c [water x, water z, cycle s]  d [water level]
+//   grazer    (horse, ox, donkey, sheep) c [range along, range across, walk period s, speed m/s]  d [stride m, leg swing rad, how far the neck reaches down to graze]
 //   craft     (a prop)
 import { x, hyp } from './critter-math.js';
 
 export const TAU = Math.PI * 2;
-export const KIND = { duck: 0, crane: 1, hen: 2, cat: 3, dog: 4, cormorant: 5, cagebird: 6, swallow: 7, kingfisher: 8, rooster: 9, craft: 10 };
+export const KIND = { duck: 0, crane: 1, hen: 2, cat: 3, dog: 4, cormorant: 5, cagebird: 6, swallow: 7, kingfisher: 8, rooster: 9, craft: 10, grazer: 11 };
 
 const RIG0 = { X: 0, Y: 0, Z: 0, psi: 0, bp: 0, br: 0, drop: 0, vis: 1, n1p: 0, n1y: 0, n2p: 0, n2y: 0, tp: 0, ty: 0, lp: 0, la: 0, lc: 0, ws: 0, wf: 0, eye: 1, pop: 0, fish: 0, paw: 0, ox: 0, oy: 0, oyaw: 0, breath: 0, sway: 0, swayp: 0, scr: 0 };
 export const RIG_FIELDS = Object.keys(RIG0);
@@ -250,6 +251,28 @@ function kingfisher(c) {
   });
 }
 
+// ═════════ the grazers (horse, ox, donkey, sheep): a walk to a spot, then the head down to the grass or up, looking about ═════════
+function grazer(c) {
+  const W = walker(c), { t } = c, { r, k, seed, moving } = W, D = c.d;
+  const env = r.smooth(0, 0.08).mul(r.smooth(1, 0.92)).mul(x(1).sub(moving));
+  const kb = k.mul(2.9).add(seed.mul(11)).hash(), graze = kb.lt(0.72);
+  const cam = toCam(c, W.X, W.Z), al = cam.d.smooth(10, 3.5), turn = cam.ang.sub(W.psi).wrap().clamp(-1.2, 1.2);
+  const gz = env.mul(graze).mul(x(1).sub(al));
+  const chew = t.mul(2.6).add(seed.mul(9)).sin();
+  const look = env.mul(x(1).sub(graze)).mul(r.mul(TAU * 1.5).sin()).mul(x(1).sub(al));
+  const nod = W.lp.sin().mul(moving);
+  return rig({
+    X: W.X, Z: W.Z, psi: W.psi, Y: x(c.b[1]).add(W.lp.mul(2).sin().abs().mul(0.008).mul(moving)),
+    n1p: D[2].mul(0.95).mul(gz).add(nod.mul(0.05)).add(moving.mul(0.1)).sub(al.mul(0.12)).add(gz.mul(chew).mul(0.03)),
+    n2p: x(0.5).mul(gz).add(nod.mul(0.06)).sub(al.mul(0.05)).add(gz.mul(chew).mul(0.05)),
+    n1y: look.mul(0.55).add(turn.mul(al).mul(0.5)), n2y: look.mul(0.3).add(turn.mul(al).mul(0.5)),
+    bp: gz.mul(0.035),
+    ty: t.mul(1.7).add(seed.mul(7)).sin().mul(0.28).mul(x(1).sub(moving.mul(0.5))), tp: nod.mul(0.04),
+    lp: W.lp, la: x(D[1]).mul(moving),
+    breath: t.mul(TAU * 0.35).add(seed.mul(5)).sin().mul(0.012),
+  });
+}
+
 function craft(c) {
   const { a, b, t } = c, seed = a[1];
   return rig({ X: b[0], Y: x(b[1]).add(t.mul(0.7).add(seed.mul(5)).sin().mul(0.008)), Z: b[2], psi: b[3], br: t.mul(0.55).add(seed.mul(3)).sin().mul(0.006) });
@@ -258,7 +281,7 @@ function craft(c) {
 /** The pose function of a kind (an id of KIND). */
 export const POSES = {
   [KIND.duck]: duck, [KIND.crane]: crane, [KIND.hen]: (c) => fowl(c, 0), [KIND.rooster]: (c) => fowl(c, 1), [KIND.cat]: cat, [KIND.dog]: dog,
-  [KIND.cormorant]: cormorant, [KIND.cagebird]: cagebird, [KIND.swallow]: swallow, [KIND.kingfisher]: kingfisher, [KIND.craft]: craft,
+  [KIND.cormorant]: cormorant, [KIND.cagebird]: cagebird, [KIND.swallow]: swallow, [KIND.kingfisher]: kingfisher, [KIND.craft]: craft, [KIND.grazer]: grazer,
 };
 
 /** A context from an instance's numbers (plain numbers or nodes) and the clock and the visitor. */

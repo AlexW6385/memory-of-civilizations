@@ -35,6 +35,8 @@ flights.push({ kind: 'swallow', n: 3, loop: { c: [-130, -135], a: [50, 14], rot:
 const critters = [];
 {
   const at = (x, z, dy = 0.03) => [x, height(x, z) + dy, z];
+  // donkeys tied before the gate, at the pilgrims' tea shed and on the village green (critter-models-farm.js; the still donkeys of dress.js and village.js stood there)
+  critters.push({ model: 'donkey_grey', at: at(-63.2, 6.6), rot: 1.6, range: [0.9, 0.6], tau: 42 }, { model: 'donkey_brown', at: at(-56.5, 9.3), rot: 2.0, range: [0.9, 0.6], tau: 38 }, { model: 'donkey_grey', at: at(-69.4, 5.4), rot: 1.2, range: [1.6, 1.0], tau: 36 });
   critters.push({ model: 'dog', at: at(-103.7, -1.9), rot: 1.2, range: [9, 3.5] }, { model: 'dog', at: at(-110.1, 1.9), rot: 4.1, range: [9, 3.5] });
   critters.push({ model: 'cat_orange', at: [-19.6, 0.48, 35.2], rot: 3.0, range: [4, 1.5] });
   const gx = -77;

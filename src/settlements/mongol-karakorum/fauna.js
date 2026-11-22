@@ -1,7 +1,7 @@
 // Mongol Karakorum — the animals (src/engine/fauna.js draws them; docs/settlements/mongol-karakorum.md §9): ravens and a kite high over the town, larks
 // over the steppe outside the wall, swallows about the court, sparrows on the roofs and walls, doves at the mosques [inferred]; no fish.
 import { ground } from './ground.js';
-import { WALL, PALACE, MOSQUES, WALL_H, COURT_GER, HOUSEHOLD, CAMPS } from './layout.js';
+import { WALL, PALACE, MOSQUES, WALL_H, COURT_GER, HOUSEHOLD, CAMPS, PENS } from './layout.js';
 import { bays } from './walkroutes.js';
 import { bayLeft } from '../../styles/mongol/shops.js';
 import { frontFrame } from '../../styles/mongol/local.js';
@@ -37,7 +37,8 @@ flights.push({ kind: 'falcon', n: 1, loop: { c: [70, -34], a: [38, 22], rot: 0.2
 // Bactrian camels kneeling at the Saracens' caravan by the west gate [inferred: the dossier's camels], goats tethered outside the sheep pens of the west gate [stated: Rubruck: the
 // sheep and goats' market], hens and a cock in the yard of the Cathayan quarter's workshops [inferred], doves on the courts of the mosques [dossier §9], a cat and a hung songbird at
 // two Chinese fronts of the east rows [inferred: Chinese households], swallows' mud nests under the front beams of the bazaar's rows on the walk [inferred: the eaves of a mud-brick
-// town on the steppe; swallows are named for the court in §12]. No horses or oxen: the engine's critter rigs have no model of them (the still animals of town.js stand for them).
+// town on the steppe; swallows are named for the court in §12]. Horses stand and graze in the first two pens of the north gate's horse market [stated: Rubruck: horses at the north gate],
+// sheep and goats in the first pen of the west gate's market (critter-models-farm.js; the still animals of those pens are dropped from town.js).
 const critters = [];
 const dogAt = (g, i) => { const [x, z] = g.c, r = g.r; return [x + r + 1.5, 0.02, z + r * 0.55 + (i % 2) * 0.4]; };
 critters.push({ model: 'mastiff', at: [COURT_GER.c[0] + COURT_GER.r + 1.5, 0.02, COURT_GER.c[1] + 3.2], rot: 0.9, range: [9, 3.5] });
@@ -46,6 +47,13 @@ critters.push({ model: 'dog', at: [CAMPS.se[0] + 6, 0.02, CAMPS.se[1] + 4], rot:
 critters.push({ model: 'camel_dun', at: [-143.5, 0, 31], rot: 1.2, range: [14, 5] }, { model: 'camel_dark', at: [-141, 0, 36.5], rot: 1.35, range: [14, 5] }, { model: 'camel_dun', at: [-144, 0, 41], rot: 1.1, range: [14, 5] });
 critters.push({ model: 'goat_black', at: [-142, 0, 14], rot: 0.5, range: [9, 3.2] }, { model: 'goat_white', at: [-140.8, 0, 15.6], rot: 2.6, range: [9, 3.2] });
 critters.push({ model: 'hen_brown', at: [96, 0, 70], rot: 0.3, range: [2.5, 2] }, { model: 'hen_white', at: [97.4, 0, 71.2], rot: 2.0, range: [2.5, 2] }, { model: 'rooster', at: [95.2, 0, 71.8], rot: 4.0, range: [2.5, 2] }, { model: 'hen_brown', at: [99, 0, 69.4], rot: 5.0, range: [2.5, 2] });
+// the horse market's first two pens (north gate) and the sheep pen (west gate): animals inside the fence, ranges within it
+for (const [qi, q] of PENS.n.slice(0, 2).entries()) {
+  const cx = (q[0] + q[2]) / 2, cz = (q[1] + q[3]) / 2, y = ground.height(cx, cz);
+  [[-5.5, -2.2], [3.8, -3], [-1.5, 2.8], [6, 2.4]].forEach(([dx, dz], i) => critters.push({ model: `horse_${(qi ? ['chestnut', 'bay', 'black', 'grey'] : ['bay', 'chestnut', 'grey', 'black'])[i]}`, at: [cx + dx, y, cz + dz], rot: 0.9 + i * 1.7 + qi, range: [2.2, 1.4], tau: 34 + i * 3 }));
+}
+{ const q = PENS.w[0], cx = (q[0] + q[2]) / 2, cz = (q[1] + q[3]) / 2, y = ground.height(cx, cz);
+  [['sheep_white', -2.2, -3], ['sheep_dark', 1.6, -2.4], ['sheep_white', -0.4, 1.2], ['goat_black', 2.6, 2.6], ['sheep_white', -3, 3.2]].forEach(([m, dx, dz], i) => critters.push({ model: m, at: [cx + dx, y, cz + dz], rot: 0.4 + i * 1.3, ...(m.startsWith('goat') ? { range: [9, 3.2] } : { range: [1.6, 1.2], tau: 26 + i * 2 }) })); }
 for (const q of MOSQUES) { const cx = (q[0] + q[2]) / 2; for (const [dx, dz, m] of [[-1.4, 3.2, 'pigeon_grey'], [-0.4, 4.1, 'pigeon_white'], [1.2, 3.4, 'pigeon_grey']]) critters.push({ model: m, at: [cx + dx, 0.03, q[3] + dz], rot: cx * 3 + dx, range: [1.4, 1.2] }); }
 {
   const all = bays(), east = all.filter((b) => b.row.east && b.row.face === 'n' && b.row.a[0] > 70 && b.row.a[0] < 110);

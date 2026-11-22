@@ -181,7 +181,7 @@ export function village() {
   vf(gx - 15, -4.0, 0.4, 501, { pose: 'low', hat: 'straw' }); vf(gx - 8, 3.2, 2.8, 502, { hair: 'bun', hat: 'none', carry: 'basket' }); vf(gx - 10.2, 3.6, 5.6, 503, { hair: 'bun', hat: 'none', pose: 'talk' });
   vf(gx - 2.2, 5.4, 3.1, 504, { hair: 'bun', hat: 'none' }); vf(gx + 14.6, -5.6, 1.0, 505, { dress: 'trousers', hat: 'straw' }); vf(gx - 4, -4.2, 4.4, 506, { dress: 'trousers', hat: 'straw', carry: 'pole' });
   vf(gx + 4.2, -2.9, 1.6, 507, { pose: 'low' }); vf(gx + 1.6, -3.0, 4.7, 508, { pose: 'low', hat: 'none' }); vf(gx + 9.4, 3.4, 2.5, 509, { pose: 'talk' });
-  Lf.push({ t: 'animal', kind: 'donkey', at: [gx + 7.6, 2.9], y: gh(gx + 7.6, 2.9), rot: 1.2, seed: 21 });
+  // (the donkey at [gx + 7.6, 2.9] on the green is a donkey critter of fauna.js, a little further from the lane)
   // the lanes: ruts of cart wheels in two lines, trodden straw, stones, a drain's dark stain, weeds at the walls' feet
   {
     const lr = rng(8572), lp = (m, x, z, w, d, hh = 0.02) => { const y = gh(x, z); C.push({ t: 'block', rect: [x - w / 2, z - d / 2, x + w / 2, z + d / 2], y0: y - 0.07, y1: y + hh, mat: m, collide: false }); };

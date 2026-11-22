@@ -26,7 +26,7 @@ flights.push({ kind: 'crow', n: 3, loop: { c: [0, 0], a: [34, 28], rot: 1.2 }, y
 void CLUSTER;
 
 // ── the critters: the animals with a rig of their own (src/engine/fauna-critters.js; dossier §14.4) ──
-// Only what the plain had c. 6500 BC [inferred: §8, §14.4]: dogs, sheep and goats (the goat model stands for both: no sheep model yet), ducks and geese of the marsh, mud nests
+// Only what the plain had c. 6500 BC [inferred: §8, §14.4]: dogs, sheep and goats (sheep: critter-models-farm.js, the primitive brown kind with horns), ducks and geese of the marsh, mud nests
 // of swallows under the eaves. No cat, hen, horse or donkey (not yet kept); no cattle (no model yet: the cattle of the pens stay the static figures of town.js).
 const critters = [];
 const wake = [9, 3.5];
@@ -49,7 +49,8 @@ const wake = [9, 3.5];
 // sheep and goats lying and standing in the two pens (the goat's rig lies down and stands up as the visitor comes), off the gate's lane
 for (const [k, p] of PENS.entries()) {
   const [a, b, c, d] = p.rect, my = (b + d) / 2, side = p.gate === 'w' ? 1 : -1, x = (u) => (side > 0 ? a + u : c - u);
-  [[4.5, -4.5, 'goat_white'], [6.5, 4.8, 'goat_black'], [9.5, -3.0, 'goat_white'], [11.5, 5.2, 'goat_white'], [8.0, 0.3, 'goat_black'], [13.5, -5.0, 'goat_white']].forEach(([u, v, model], q) => critters.push({ model, at: [x(u), 0.02, my + v], rot: (k * 2 + q) * 1.37, range: wake }));
+  // (goats on the dog's rig, lying and standing as the visitor comes; the primitive sheep on the grazer pose of critter-models-farm.js, walking a little and grazing)
+  [[4.5, -4.5, 'goat_white'], [6.5, 4.8, 'sheep_horned'], [9.5, -3.0, 'sheep_dark'], [11.5, 5.2, 'goat_white'], [8.0, 0.3, 'goat_black'], [13.5, -5.0, 'sheep_horned']].forEach(([u, v, model], q) => critters.push({ model, at: [x(u), 0.02, my + v], rot: (k * 2 + q) * 1.37, ...(model.startsWith('sheep') ? { range: [1.8, 1.2], tau: 28 + q * 3 } : { range: wake }) }));
 }
 // ducks on the pools nearest the town, as the fish's loops: a pair of mallards on the larger and a small raft on the other
 for (const [k, [cx, cz, a, b]] of POOLS.slice(0, 4).entries()) {
@@ -66,4 +67,7 @@ for (const [k, L] of LANDINGS.entries()) {
   const [lx0, , , lz1] = LANDMARK.rect;
   [1.52, 5.42].forEach((u, n) => critters.push({ model: 'swallow_nest', at: [lx0 + 0.45 + u, 2.0, lz1 + 0.14], rot: Math.PI / 2, cycle: 33 + 3 * n, flight: 9, radius: 10, side: n ? 1 : -1, rise: -0.8 }));
 }
+// the flock on the plain south-west of the town: the primitive, brown sheep (the still flock of town.js stood on these seven places)
+[[-51.8, -37.6, 'sheep_horned'], [-53, -42.9, 'sheep_dark'], [-51.2, -39.8, 'sheep_dark'], [-55.7, -36.6, 'sheep_horned'], [-53.2, -38.2, 'sheep_white'], [-60.2, -42.3, 'sheep_white'], [-55.7, -39.8, 'sheep_horned']]
+  .forEach(([x, z, model], i) => critters.push({ model, at: [x, ground.height(x, z) + 0.02, z], rot: 0.5 + i * 0.97, ...(model.startsWith('sheep') ? { range: [2.2, 1.6], tau: 30 + i * 2.5 } : { range: wake }) }));
 export default { fish, flights, perches, critters };
