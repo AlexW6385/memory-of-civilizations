@@ -305,8 +305,9 @@ class Settlement {
     }
     // repeated pieces: one prototype, a matrix per copy (src/core/geom.js, GeoBag); the life of the
     // streets is gathered settlement-wide once all its tiles are built (buildLife)
-    const lifeList = plan.style === 'life' ? built.instanced : [];
-    for (const { mat, geometry, matrices, colors, detail, big, first, reach } of plan.style === 'life' ? [] : built.instanced) {
+    // (and the figures of other plans that leave at night: GeoBag life)
+    const isLife = plan.style === 'life', lifeList = built.instanced.filter((p) => isLife || p.life), plain = isLife ? [] : built.instanced.filter((p) => !p.life);
+    for (const { mat, geometry, matrices, colors, detail, big, first, reach } of plain) {
       const m = buildingMesh(geometry, mat, matrices, colors);
       if (big !== undefined) m.userData.big = big;
       if (first) m.userData.first = first;
@@ -319,7 +320,7 @@ class Settlement {
       group.add(m);
     }
     // the lamps of the part (its plan's lamps, the shades of its glow materials), for the lamps' pool
-    rec0.lamps = lampsOf(built, [...built.parts, ...(plan.style === 'life' ? [] : built.instanced)]);
+    rec0.lamps = lampsOf(built, [...built.parts, ...plain]);
     if (built.lights.length) {
       const flame = new THREE.ConeGeometry(0.035, 0.13, 8);
       const inst = new THREE.InstancedMesh(flame, flameMaterial(), built.lights.length);

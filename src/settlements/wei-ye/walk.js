@@ -12,10 +12,21 @@ export const WALK = [
   [[-100, 25], [0, 25], [182, 25]],                                            // the avenue, along the royal way
   [[0, 25], [0, -8], [0, -37], [0, -50]],                                      // the road north to the palace's south gate and the forecourt
   [[0, 25], [0, 60], [-14, 60], [-14, 74.15], [-30, 74.15], [-90, 74.15]],     // the Zhongyang road south, the first ward's east gate and its lane
-  [[0, 60], [14, 60], [14, 74.15], [30, 74.15], [60, 74.15]],                   // the second ward's lane (east of the road), mirror of the first
+  [[0, 60], [14, 60], [14, 74.15], [30, 74.15], [90, 74.15]],                   // the second ward's lane (east of the road), mirror of the first
   [[182, 25], [182, 50], [182, 88]],                                           // the market's north gate and its lane to the tower
   [[134, 104], [170, 104]], [[194, 104], [230, 104]],                          // the market's cross lane, either side of the tower
 ];
+/** The walk's corridors as footprints for the street-life pass of src/objects/life.js (it keeps its people, animals and things off a footprint): strips under
+ *  2 m a side (one of 2 m would be read as a house), two abreast along every leg, built as nothing (door_clear; the recipe of Lisbon's walkClear). */
+export function walkClear() {
+  const out = [];
+  for (const W of WALK) for (let i = 1; i < W.length; i++) {
+    const [ax, az] = W[i - 1], [bx, bz] = W[i];
+    if (Math.abs(bx - ax) > Math.abs(bz - az)) for (const o of [-1, 1]) out.push({ t: 'door_clear', rect: [Math.min(ax, bx) - 1, Math.min(az, bz) + o - 1, Math.max(ax, bx) + 1, Math.min(az, bz) + o + 0.99] });
+    else for (const o of [-1, 1]) out.push({ t: 'door_clear', rect: [Math.min(ax, bx) + o - 1, Math.min(az, bz) - 1, Math.min(ax, bx) + o + 0.99, Math.max(az, bz) + 1] });
+  }
+  return out;
+}
 export const WALK_REACH = 9.5;
 export const OFFICE_REACH = 34;                                                // the offices stand 15–25 m off the avenue's middle
 function segDist(p, a, b) {

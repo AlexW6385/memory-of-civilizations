@@ -320,7 +320,7 @@ export async function sceneOf(id) {
     const always = !isLife && !plan.near && !plan.far;
     for (const p of b.parts) out.push({ tris: (p.geometry.index ? p.geometry.index.count : p.geometry.attributes.position.count) / 3, kind: p.detail ? 'detail' : isLife ? 'lifeTile' : plan.near ? 'tileNear' : plan.far ? 'tileFar' : 'landmark', mat: p.mat, plan, sphere: sphereOf(p.geometry), cast: castsShadow(p.mat), small: !!p.detail || isLife, detail: !!p.detail, cells: always && !p.detail && p.geometry.index ? partCells(p.geometry, p.shadowBig) : null, bigTris: always && !p.detail ? p.shadowBig : undefined });
     for (const p of b.instanced) {
-      if (isLife) {
+      if (isLife || p.life) {
         const k = `${p.key}|${p.mat}`, e = life.get(k) || life.set(k, { mat: p.mat, chunks: [], n: 0 }).get(k);
         p.__plan = plan; e.chunks.push(p); e.n += p.matrices.length / 16; continue;
       }

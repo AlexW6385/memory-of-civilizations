@@ -555,7 +555,7 @@ const POSE_ARMS = ['pray', 'pull', 'staff', 'row', 'punt', 'apsara', 'apsara2', 
 const CHILD_HEAD = new Matrix4().makeTranslation(0, 1.36, 0).multiply(new Matrix4().makeScale(1.24, 1.24, 1.24)).multiply(new Matrix4().makeTranslation(0, -1.36, 0));
 export function figure(el, { bag, col }) {
   const r0 = rng(el.seed), kid = !!el.child, H = el.h ?? (kid ? 1.0 + r0() * 0.3 : 1.56 + r0() * 0.2), girth = (kid ? 0.84 : 0.92) + r0() * 0.18;
-  const put = placer(el, bag, H / HB, [girth, 1, 0.94 + (girth - 0.92) * 0.6]);
+  const put = placer(el.t ? el : { ...el, t: 'figure' }, bag, H / HB, [girth, 1, 0.94 + (girth - 0.92) * 0.6]);
   const c1 = el.cloth ?? 'cloth_white', c2 = el.cloth2 ?? c1, sk = el.skin ?? 'skin_medium', dress = el.dress ?? 'robe';
   const pose = el.pose ?? 'stand', carry = el.carry && el.carry !== 'none' ? el.carry : POSE_HELD[pose] ?? 'none', hat = el.hat ?? 'none';
   const legs = LEGS_OF[pose] ?? 'stand';

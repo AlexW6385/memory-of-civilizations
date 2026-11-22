@@ -4,6 +4,7 @@
 import { forecourtElements, forecourtLife } from './forecourt.js';
 import { streetElements, marketElements, wallElements, compoundElements, riverElements, farmElements, lifeElements } from './dressing.js';
 import '../../objects/index.js';
+import { walkClear } from './walk.js';
 import { shopDoors } from '../../styles/wei/houses.js';
 import { RADIUS, PALACE, PALACE_WALL, WENCHANG, W_TERRACE, MARKET, MARKET_WALL, WARDS, WARD_WALL, POND, POND_Y, CITY_WALL, WALL, GATES_S, GATES_N, GATE_W, AVENUE_Z, TOWER, SPARROW, ICE, TIGER,
   cityWalls, lots, riverZ, RIVER, stairRect, zOf, LODGES } from './layout.js';
@@ -262,7 +263,7 @@ export async function town() {
     }
     plans.push(base('wei-citywall', [...E, ...wallElements(), ...fires]));
     plans.push(base('wei-river', [{ t: 'wei_river', x0: -218, x1: 218, zc: riverZ, w: RIVER.w, y: RIVER.y }, ...riverElements()]));
-    plans.push(base('wei-streets', streetElements()));
+    plans.push(base('wei-streets', [...streetElements(), ...walkClear()]));
     plans.push(base('wei-compound', compoundElements()));
     plans.push(base('wei-farms', farmElements()));
     plans.push({ ...base('wei-life', lifeElements()), style: 'life' });

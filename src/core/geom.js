@@ -534,7 +534,7 @@ export class GeoBag {
    * piece has when it is merged instead. `reach` (m): how far off the piece is still drawn.
    * Without instancing (the tools), or too few of a shape in a plan, the pieces are merged as usual.
    */
-  addInstance(mat, g, matrix, { color = null, real = mat, reach = 230, dusk = 2 } = {}) {
+  addInstance(mat, g, matrix, { color = null, real = mat, reach = 230, dusk = 2, life = false } = {}) {
     if (!g) return;
     if (g.index) g = g.toNonIndexed();
     // (a hang only on cloth in the wind; such a piece's family and real material are both "+wind")
@@ -543,8 +543,8 @@ export class GeoBag {
     if (!sh) { this.add(real, placeHanging(g, matrix)); return; }
     let list = this.explicit.get(sh.key);
     if (!list) this.explicit.set(sh.key, (list = []));
-    let e = list.find((x) => sameShape(x.g, x.sh, g, sh));
-    if (!e) { e = { mat, g, sh, key: `${sh.key}#${list.length}`, items: [] }; list.push(e); }
+    let e = list.find((x) => x.life === life && sameShape(x.g, x.sh, g, sh));
+    if (!e) { e = { mat, g, sh, key: `${sh.key}#${list.length}`, items: [], life }; list.push(e); }
     // the copy's matrix takes the prototype (at its box's corner) to the place
     const M = new Matrix4().makeTranslation(sh.t[0], sh.t[1], sh.t[2]).premultiply(matrix);
     e.items.push({ m: M.elements.slice(), color, real, reach, dusk });
@@ -566,7 +566,7 @@ export class GeoBag {
     for (const list of this.explicit.values()) {
       for (const e of list) {
         const n = e.g.attributes.position.count;
-        const worth = this.instancing && (this.always || (e.items.length >= INSTANCING.minCount && (e.items.length - 1) * n >= INSTANCING.minSaved));
+        const worth = this.instancing && (this.always || e.life || (e.items.length >= INSTANCING.minCount && (e.items.length - 1) * n >= INSTANCING.minSaved));
         if (!worth) {
           const local = prototypeOf(e.g, e.sh, 0).geometry.toNonIndexed();
           const M = new Matrix4();
@@ -580,8 +580,10 @@ export class GeoBag {
         const reals = e.items.map((it) => it.real);
         e.items.forEach((it, i) => { matrices.set(it.m, i * 16); reach[i] = it.reach; dusk[i] = it.dusk; if (it.color && colors) colors.set(it.color, i * 3); });
         const entry = { mat: e.mat, key: e.key, geometry, matrices, colors, reach, dusk, reals, detail: this.detail && isSmall(geometry, matrices) };
+        // (figures that leave at night, in a plan that is not the street life's: drawn by the life instances all the same, world.js)
+        if (e.life) { entry.life = true; entry.detail = false; }
         // (the viewer: the copies big for the shadows first, by their size alone: MID_SIZE)
-        if (this.detail && !entry.detail) {
+        if (this.detail && !entry.detail && !entry.life) {
           const b = geometry.boundingBox, e0 = Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z), big = new Uint8Array(k);
           for (let i = 0; i < k; i++) { const o = i * 16, sc = Math.max(Math.hypot(matrices[o], matrices[o + 1], matrices[o + 2]), Math.hypot(matrices[o + 4], matrices[o + 5], matrices[o + 6]), Math.hypot(matrices[o + 8], matrices[o + 9], matrices[o + 10])); big[i] = e0 * sc >= MID_SIZE ? 1 : 0; }
           entry.big = bigFirst(entry, big);
