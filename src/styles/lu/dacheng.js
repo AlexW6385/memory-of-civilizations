@@ -10,7 +10,7 @@ import { placeColumn } from './colwork.js';
 import { confucius, correlate } from './statue.js';
 import { dougongHeight } from '../qing/caihua.js';
 import { rng } from './kit.js';
-import { glyph, writeColumn } from './plaques.js';
+import { glyph, writeColumn, writeRow } from './plaques.js';
 import { tileCourses } from './tiles.js';
 
 const PAL = { ...IMPERIAL, column: 'granite_grey', base: 'marble' };
@@ -149,7 +149,9 @@ export function dacheng(el, ctx) {
       bag.add('gilt_bronze', box(px - w / 2 - 0.08, bot - 0.08, pz - 0.06, px + w / 2 + 0.08, top + 0.08, pz + 0.06));
       bag.add('lacquer_black', box(px - w / 2, bot, pz, px + w / 2, top, pz + 0.09));
       const gs = Math.min(hgt * 0.62, (w - 0.4) / chs.length * 0.9);
-      chs.forEach((ch, k) => glyph(bag, ch, px - ((chs.length - 1) * gs * 1.1) / 2 + k * gs * 1.1, bot + hgt / 2, pz + 0.125, 0, gs));
+      // the Kangxi emperor's board 萬世師表 (1684) is lettered in checked characters, horizontal, read right to left (docs/settlements/lu-qufu.md §19b); the others keep the schematic strokes
+      if (chs.join('') === '万世师表') writeRow(bag, '萬世師表', px, bot + hgt / 2, pz + 0.09, pz + 0.13, (w - 0.3) / 4, Math.min(hgt * 0.8, (w - 0.3) / 4 * 0.94));
+      else chs.forEach((ch, k) => glyph(bag, ch, px - ((chs.length - 1) * gs * 1.1) / 2 + k * gs * 1.1, bot + hgt / 2, pz + 0.125, 0, gs));
       for (const dx of [-1, 1]) bag.add('timber', limb([px + dx * w * 0.38, top + 0.08, pz], [px + dx * w * 0.38, cy, pz], 0.025, 0.025, 4));
     }
     // the name board of the hall under the upper eaves: the three characters on a vertical board over the middle bay

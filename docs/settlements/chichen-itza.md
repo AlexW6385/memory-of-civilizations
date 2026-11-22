@@ -222,3 +222,8 @@ Seen while walking the routes and reading the plans; none was fixed here, becaus
 - **Walk's gaps:** walk-check 15 routes / 84 legs ok; no new routes (no gap stood out beyond §19.5's list).
 - **Landmark:** the serpent balustrades of the Castillo's north stair (and the Eagles platform's four) now end in a rattle: six tapering rings, alternate stucco and red, lying over the platform edge [inferred: rattlesnake tail, as the serpent columns §18 already have]. Same materials and plan, so draws are unchanged (arrival 377, Castillo pose 367). Not seen close: two renders aimed wrongly; the top of the stair was too small/occluded to judge.
 - **Still short:** the stair treads worn pale (no pale material free in the plan); the Chac masks' long noses and eye rings; the farther rows of the Thousand Columns; sections 18-19.6's other gaps were not re-examined (§18 sculpture pass may already have improved the ring serpents and heads: §19.6 was written without a render); a close render of the rattles.
+
+## 21. Night near the visitor (2026-11-22)
+
+- **Seen**: at 22:00 from the arrival the plaza's ground within 30 m had no light; only the two stair-foot torches glowed and the summit fires were specks.
+- **Added (halo only, in the existing `chichen-itza-night` plan; poles in the first market's plan)**: six pine-torch stands on the plaza between the arrival and the Castillo's south stair, each with a ball and a wide ground pool [inferred: ocote torches as in §19.2; no source gives their places]; two larger braziers flanking the temple door on the summit beside the four corner fires [inferred: the temple's braziers, §15]. Hearth glow of the nearest houses already exists (§19.2) and is 40+ m away.

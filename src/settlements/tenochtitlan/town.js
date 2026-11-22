@@ -5,7 +5,7 @@ import { ground } from './ground.js';
 import { sculptPlans } from './sculpt.js';
 import { tiles } from './tiles.js';
 import { isOpen, figureSpot } from './walk.js';
-import { lights } from './nightlight.js';
+import { lights, PLAZA_BRAZIERS } from './nightlight.js';
 /** How far from the visitor the houses are built in full (m); the arrival (the Templo Mayor's twin shrines, 160 m and more from the nearest) sees the simple form. */
 const NEAR = 190;
 const base = (id, elements) => ({ id, style: 'aztec', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-60, 0], facing: 'e' } });
@@ -59,7 +59,7 @@ function precinct() {
     }
   }
   // the braziers at the stair's foot and the offerings left about them and at the foot of the momoztli
-  const D = [['brazier', 35, -16.5], ['brazier', 35, 16.5], ['brazier', 35, -10], ['brazier', 35, 10], ['brazier', 15.6, -14.8], ['brazier', 15.6, -5.2]];   // the last two at the foot of Ehecatl's stair
+  const D = [['brazier', 35, -16.5], ['brazier', 35, 16.5], ['brazier', 35, -10], ['brazier', 35, 10], ['brazier', 15.6, -14.8], ['brazier', 15.6, -5.2], ...PLAZA_BRAZIERS.map(([x, z]) => ['brazier', x, z])];   // the two before PLAZA_BRAZIERS are at the foot of Ehecatl's stair; then the last two at the foot of Ehecatl's stair
   for (const [x, z] of [[33, -14], [32.6, -17.5], [33, 14], [32.4, 17.8], [32, 9], [32, -9]]) D.push([rand() < 0.6 ? 'flowers' : 'roses', x, z, rand() * 6.28]);
   for (const [x, z] of [[31, 12], [31, -12], [36.5, -13], [36.5, 13]]) D.push(['paper', x, z, rand() * 6.28]);
   E.push({ t: 'mx_dress', items: D });

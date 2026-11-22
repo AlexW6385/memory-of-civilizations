@@ -16,7 +16,7 @@ const AH = 2.4, CH = 7;
 export function lights() {
   const L = [];
   // the incense braziers of the avenue's plazas, the Moon Plaza and the Ciudadela's court: a glow of coals in the bowl (its rim 0.65 m up) and the pool on the floor
-  for (const o of avenueItems()) if (o.k === 'brazier') L.push({ k: 'brazier', x: o.x, y: o.y + 0.72, z: o.z, gy: o.y, s: 0.9 });
+  for (const o of avenueItems()) if (o.k === 'brazier') L.push({ k: 'brazier', x: o.x, y: o.y + 0.72, z: o.z, gy: o.y, s: o.big ? 1.7 : 0.9 });
   // the braziers at the market's four gates (market.js: 5 m in from each gate's line, 3.4 m either side of the lane)
   { const [x0, z0, x1, z1] = MARKET, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     for (const [gx, gz, fx, fz] of [[cx, z0, 0, 1], [cx, z1, 0, -1], [x0, cz, 1, 0], [x1, cz, -1, 0]]) for (const sd of [-1, 1]) L.push({ k: 'brazier', x: gx + fx * 5 + (fz ? sd * 3.4 : 0), y: 0.04 + 0.72, z: gz + fz * 5 + (fx ? sd * 3.4 : 0), gy: 0.04, s: 1 }); }

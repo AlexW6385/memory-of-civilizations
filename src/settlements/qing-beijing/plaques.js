@@ -6,7 +6,7 @@
 import { STYLES } from '../../core/build.js';
 import '../../styles/qing/index.js';
 import { box, fromTriangles } from '../../core/geom.js';
-import { HALLS, WALL } from './layout.js';
+import { HALLS, WALL, TEMPLE } from './layout.js';
 import { inscriptionTris, canWrite } from './writing.js';
 
 /** The plaques: { x, y (the middle), z (the wall's plane), yaw (0: faces +z), text, w, h }. Wall planes follow qing_hall (styles/qing/index.js: the upper body set in by `inset`). */
@@ -20,8 +20,18 @@ export function palacePlaques() {
   { const z = HALLS.zhonghe; out.push({ x: 0, y: z.y + 4.7, z: z.rect[3] + 0.12, yaw: 0, text: '中和殿', w: 0.85, h: 1.4 }); }
   // Meridian Gate (docs §42): a horizontal board over the middle of the great hall's upper wall (the hall: plan.js, rect z 167.2...176.8, H 7.5, double 6, 2 tiers of brackets 0.88),
   // over the painted frieze under the upper eaves (the lower roof hides the wall below); the Chinese in the right half, the Manchu half plain
-  { const wz1 = WALL.rect[3], inset = Math.min(60, 9.6) / 5.5, yb = 12.6 + 7.5 + 0.88; out.push({ x: 0, y: yb + 5.3, z: wz1 + 1.8 - inset + 0.09, yaw: 0, text: '午門', w: 3.6, h: 1.0, horizontal: true }); }
+  { const wz1 = WALL.rect[3], inset = Math.min(60, 9.6) / 5.5, yb = 12.6 + 7.5 + 0.88; out.push({ x: 0, y: yb + 5.2, z: wz1 + 1.8 - inset + 0.09, yaw: 0, text: '午門', w: 4.8, h: 1.3, horizontal: true }); }
   return out.filter((p) => canWrite(p.text));
+}
+
+/**
+ * The Temple of Heaven's hall at our moment is the 大享殿 (renamed 祈年殿 in 1751; docs §46b): a vertical board, Chinese on the right half and the Manchu half plain, on the
+ * top drum's south face (qinian, src/styles/qing/tiantan.js: floor F = ground 0.03 + tiers 5.6 + 0.5, the drum a 12-gon of radius 6.9 whose south face is at
+ * z = c.z + 6.9 cos 15°, its lattice band at F + 19.2...20.7, the frieze from F + 21.9), hung 0.18 m off the wall, under the blue roof's eave. [inferred: form]
+ */
+export function templePlaques() {
+  const [cx, cz] = TEMPLE.c, F = 0.03 + 5.6 + 0.5;
+  return [{ x: cx, y: F + 20.6, z: cz + 6.9 * Math.cos(Math.PI / 12) + 0.18, yaw: 0, text: '大享殿', w: 1.3, h: 2.2 }].filter((p) => canWrite(p.text));
 }
 
 const rect = (x0, y0, x1, y1, z, t) => { t.push(x0, y0, z, x1, y0, z, x1, y1, z, x0, y0, z, x1, y1, z, x0, y1, z); };

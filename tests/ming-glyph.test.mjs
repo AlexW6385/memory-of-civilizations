@@ -15,7 +15,10 @@ const ADDED3 = { 祈: 8, 乾: 11, 承: 8, 啟: 11, 煙: 13, 菜: 11, 窟: 13, �
 const ADDED4 = { 一: 1, 二: 2, 三: 3, 五: 4, 六: 4, 七: 2, 八: 2, 九: 2, 十: 2, 百: 6, 千: 3, 上: 3, 下: 3, 中: 4, 左: 5, 右: 5,
   木: 4, 石: 5, 井: 4, 東: 8, 西: 6, 車: 7, 行: 6, 店: 8, 記: 10, 炭: 9, 南: 9, 馬: 10,
   銀: 14, 銅: 14, 錫: 16, 針: 10, 絲: 12, 綢: 14, 帽: 12, 鞋: 15, 餅: 15, 柴: 10 };
-Object.assign(ADDED, ADDED3, ADDED4);
+// round four: plaque and shop-sign characters, each overlaid on the typeface (ming-suzhou.md §27.1c)
+const ADDED5 = { 享: 8, 師: 10, 表: 8, 至: 6, 聖: 13, 先: 6, 水: 4, 地: 6, 日: 4, 月: 4, 春: 9, 夏: 10, 秋: 9, 冬: 5,
+  緞: 15, 線: 15, 傘: 12, 染: 9, 醬: 18, 醋: 15, 糖: 16, 號: 13, 橋: 16 };
+Object.assign(ADDED, ADDED3, ADDED4, ADDED5);
 
 test('every character uses known stroke kinds inside the cell and has a declared count', () => {
   for (const [c, strokes] of Object.entries(GLYPH)) {
