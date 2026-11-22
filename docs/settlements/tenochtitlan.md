@@ -245,3 +245,8 @@ Meshes 2852 → 2187, geo-one 98.8 → 90.1 MB. Arrival: main draws 354 (370 on 
 4. **Landmark wear.** `src/styles/aztec/wear.js` (`tn_wear`): the paint rubbed to the pale undercoat in a band up both great stairs (hashed width and sway per tread, heavier on the lower treads, some treads untouched) and on the summit slab from each stairhead to its shrine's door; 1.2 cm proud decals of `plaster_grey` and `plaster_damp`, in the precinct floor plan. [inferred: processions' wear.] Seen at 25 m and from the stair: the marks show on the nearest treads only (fine pieces drop out with distance), so the stair's far part still looks unworn.
 
 Still short: wear is not seen at distance; no wear on the compounds' thresholds or the calmecac/House of the Eagles steps; the calmecac court and palace halls beyond two rooms are unlit and unrouted; keepers of the market's stalls are life figures; no writing (pictographs not verifiable).
+
+## 27. Night near the visitor, second look (2026-11-22)
+
+- **Seen**: at the arrival the great stair-foot braziers glowed but the paving within 30 m of the visitor was unlit.
+- **Added**: six braziers on the precinct plaza between the arrival and the great stair (stone braziers in the floor plan, their halos in the existing `tenochtitlan-night` mesh; no new draw) [inferred: placement; the number is a choice]. That temple braziers burned all night is [stated]: Evans, "Night Falls on Tenochtitlan" (SAA 2019 abstract, §21), fire kept burning in temples and palaces, tended by novices; Sahagun's account of the novices of the temples who kept the fire and the incense at night corroborates it [inferred from memory, not re-checked today].
