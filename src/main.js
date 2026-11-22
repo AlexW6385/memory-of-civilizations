@@ -866,7 +866,7 @@ async function main() {
     // (the frames of a view held still are drawn at 24 fps on purpose: not counted)
     const full = !!(perf.panel || perf.record) || now - (R.movedAt ?? -1e9) < 900;
     if (measuring) measuring(now, dt * 1000);
-    else if (!CAPTURE) dynres.update(now, dt * 1000, full && fullWas);   // (a recording keeps one size)
+    else if (!CAPTURE) { const cp = camPlanet(); dynres.update(now, dt * 1000, full && fullWas, { x: cp[0], y: cp[1], z: cp[2] }); }   // (a recording keeps one size)
     fullWas = full;
   };
   R.renderer.setAnimationLoop(frame);
