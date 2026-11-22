@@ -7,6 +7,9 @@
 import { TM, SITES, EAGLE_HOUSE } from './layout.js';
 import { openSet, recordOf } from './walk.js';
 
+/** Braziers kept burning on the precinct's plaza between the arrival and the great stair (mx_dress in town.js; lit here). */
+export const PLAZA_BRAZIERS = [[6, 24], [6, 37], [17, 17], [20, 31], [26, 24], [14, 44]];
+
 /** The braziers and fires and lit doors, { k, x, y, z, gy, s?, n?, w?, h?, f? } (see styles/aztec/halo.js). */
 export function lights() {
   const L = [], H = TM.h, cx = TM.c[0], w0 = TM.w / 2, w1 = TM.top.w / 2, d1 = TM.top.d / 2;
@@ -15,6 +18,7 @@ export function lights() {
   for (const s of [-1, 1]) for (const zz of [23, 29, 35, 41]) L.push({ k: 'brazier', x: bx, y: tH + 0.85, z: s * zz, gy: tH, s: 1.05 });
   // the braziers at the stair's foot (town.js precinct)
   for (const [x, z] of [[35, -16.5], [35, 16.5], [35, -10], [35, 10]]) L.push({ k: 'brazier', x, y: 0.95, z, gy: 0.03 });
+  for (const [x, z] of PLAZA_BRAZIERS) L.push({ k: 'brazier', x, y: 0.95, z, gy: 0.03, s: 1.7 });
   // Ehecatl's temple (c -4, -10, r 9, h 8): a brazier either side of its stair's foot (town.js) and the fire of the round shrine at its serpent-jawed door
   // [inferred: fire was kept in the temples all night, §21; this temple is 20 m from the arrival]
   for (const z of [-14.8, -5.2]) L.push({ k: 'brazier', x: 15.6, y: 0.95, z, gy: 0.03 });

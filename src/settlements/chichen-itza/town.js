@@ -197,6 +197,8 @@ function dressing() {
 }
 const SACBE_A = [0, -140], SACBE_B = [0, -240];
 const TORCHES = [[-6.6, 38.6], [6.6, 38.6], [-6.6, -38.6], [6.6, -38.6], [5.6, -232.4]];
+// pine-torch stands of the plaza on the pilgrims' way in from the south (docs/settlements/chichen-itza.md §21)
+const STANDS = [[18, 56], [42, 56], [8, 70], [52, 70], [-10, 48], [24, 45]];
 /**
  * The night (nightlight.js): every halo of the city in one plan of its own, so that it costs one draw: the fires of the lots' houses and long houses, the Castillo's braziers
  * and the censer on its summit, the lamps in the Warriors' temple, the torches at the stairs, the pilgrims' camp fires, the altars' censers, the sweat bath, the censer at the cenote.
@@ -206,6 +208,8 @@ function night() {
   const spots = [
     ...[[-5.15, -5.15], [5.15, -5.15], [-5.15, 5.15], [5.15, 5.15]].map(([x, z]) => ({ k: 'fire', x, y: 25.0, z, g: 24.4 })), { k: 'censer', x: 0, y: 25.1, z: 8.6 },
     { k: 'lamp', x: 118, y: 14.2, z: -13.2, g: 13.43 }, { k: 'lamp', x: 106.4, y: 14.4, z: -16.6, g: 13.43 },
+    ...[[-3.5, 11], [3.5, 11]].map(([x, z]) => ({ k: 'blaze', x, y: 25.0, z, g: 24.4 })),
+    ...STANDS.map(([x, z]) => ({ k: 'stand', x, y: ground.height(x, z) + 2.5, z, g: ground.height(x, z) })),
     ...TORCHES.map(([x, z]) => ({ k: 'torch', x, y: ground.height(x, z) + 2.5, z, g: ground.height(x, z) })),
     ...[[-14, 100], [8, 99], [62, 98], [-68, 98]].map(([x, z]) => ({ k: 'fire', x, y: 0.5, z, g: 0.04 })),
     ...PLAZA_SHRINES.map(([x, z]) => ({ k: 'censer', x: x - 0.4, y: 1.1, z })),
@@ -225,6 +229,6 @@ export async function town() {
   plans.push({ ...base('chichen-itza-cenote-water', [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: CENOTE.water, cell: 0.75, inside: (x, z) => cenoteDist(x, z) < 0 && ground.height(x, z) < CENOTE.water }]), style: 'ming' });
   // the torches of ocote at the foot of the Castillo's two long stairs and at the sacbe's end: their poles are of the awnings' materials, so they go in the first market's plan and cost no draw (their glow is in the night plan)
   const mk = market(), mats = mk.find((p) => p.id === 'chichen-itza-market-mats');
-  for (const [x, z] of TORCHES) mats.elements.push({ t: 'cz_torch', at: [x, z], y: ground.height(x, z) });
+  for (const [x, z] of [...TORCHES, ...STANDS]) mats.elements.push({ t: 'cz_torch', at: [x, z], y: ground.height(x, z) });
   return [...plans, ...mk, ...market('chichen-itza-market-e', 50, 54, 2, 4, 2001, 8), ...market('chichen-itza-market-w', -36, 58, 2, 3, 2002, 6), ...worksite(), rites(), riteObjects(), ...ballgame(), ...dressing(), night(), ...sculptPlans()];
 }

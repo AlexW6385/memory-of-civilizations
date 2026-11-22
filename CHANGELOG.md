@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.79 — the picture sharpens again after a heavy view (2026-11-22)
+
+Measured on the author's machine: at Beijing's great court the new full-resolution picture lowered itself to three quarters within five seconds, as meant — and then stayed there for the whole visit, in light places too, because with the frames locked to the screen the chip's time says nothing. It now tries the higher resolution again once one has moved a hundred and twenty metres from where it last had to give way.
+
 ## v12.78 — a sharper picture at the low setting (2026-11-22)
 
 The low quality setting drew at three quarters of the page's resolution, which on a high-density screen left far buildings blurred. It now draws at the full page resolution and lowers itself a step only where the graphics chip cannot keep up.

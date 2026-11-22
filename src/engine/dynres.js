@@ -16,7 +16,7 @@
 // screen's pixels and far buildings were a blur; where the GPU is the limit it steps down again by itself)
 const STEPS = { high: [1.5, 1.25, 1.0, 0.85], medium: [1.0, 0.85, 0.75], low: [1.0, 0.85, 0.75] };
 // (SLOW 17.5: at 60 Hz, one refresh in ten missed — each a frame shown twice, a visible stutter)
-const SLOW = 17.5, ROOM = 12, DOWN_HOLD = 2000, UP_HOLD = 6000, GAP = 5000;
+const SLOW = 17.5, ROOM = 12, DOWN_HOLD = 2000, UP_HOLD = 6000, GAP = 5000, AWAY = 120;
 
 export class DynamicResolution {
   /** R: the Renderer; pin: the pixel ratio asked for in the address (a number), or null. */
@@ -44,7 +44,7 @@ export class DynamicResolution {
    * After a drawn frame: now (ms), dt its interval from the frame before (ms), full whether this
    * and the frame before were drawn at the full rate (not the held view's 24 fps).
    */
-  update(now, dt, full) {
+  update(now, dt, full, where = null) {
     if (!this.active) return;
     const steps = this.steps;
     // the level the renderer is at (a quality change may have set the ratio)
@@ -72,11 +72,17 @@ export class DynamicResolution {
     this.slowFor = this.ms > SLOW && gpuBound ? this.slowFor + step : 0;
     const up = lv > 0 ? steps[lv - 1] : null;
     const predicted = up && device ? this.gpu * (up / r) ** 2 : Infinity;
-    this.roomFor = up && this.ms < SLOW - 2 && predicted < ROOM ? this.roomFor + step : 0;
+    // (where the frames are locked to the screen's refresh the GPU's time reads a refresh whatever the load,
+    // and says nothing: there, try a step up once the eye has moved AWAY metres from where a step up last
+    // failed — a heavy court behind, an open street ahead — and the frames have kept the refresh)
+    const away = where && (!this.failAt || Math.hypot(where.x - this.failAt.x, where.y - this.failAt.y, where.z - this.failAt.z) > AWAY);
+    const room = predicted < ROOM || (away && this.ms < SLOW - 0.6);
+    this.roomFor = up && this.ms < SLOW - (predicted < ROOM ? 2 : 0.6) && room ? this.roomFor + step : 0;
     if (now - this.changed < GAP) return;
     if (this.slowFor > DOWN_HOLD && lv < steps.length - 1) {
       // down soon after going up: wait twice as long before the next step up
       if (now - this.lastUp < 20000) this.upWait = Math.min(240000, this.upWait * 2);
+      if (where) this.failAt = { x: where.x, y: where.y, z: where.z };
       this.set(steps[lv + 1], now);
     } else if (this.roomFor > this.upWait && up) {
       this.lastUp = now;

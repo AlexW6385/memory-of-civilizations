@@ -100,9 +100,10 @@ export function registerNight() {
    */
   const glow = (el, H) => {
     for (const sp of el.spots) {
-      const r = sp.k === 'fire' ? 0.8 : sp.k === 'censer' ? 0.32 : 0.55, q = 0.9 + 0.2 * hashAt(sp.x, sp.z, 2);
+      const r = sp.k === 'blaze' ? 1.5 : sp.k === 'stand' ? 0.9 : sp.k === 'fire' ? 0.8 : sp.k === 'censer' ? 0.32 : 0.55, q = 0.9 + 0.2 * hashAt(sp.x, sp.z, 2);
       H.ball(sp.x, sp.y, sp.z, r * q, sp.k === 'censer' ? 0.5 : 0.66);
-      if (sp.k !== 'censer') H.floor(sp.x, (sp.g ?? sp.y - 0.9) + 0.09, sp.z, (sp.k === 'fire' ? 3.0 : 2.2) * q, (sp.k === 'fire' ? 3.0 : 2.2) * q, 8, sp.k === 'fire' ? 0.85 : 0.7);
+      const pr = sp.k === 'stand' ? 5 : sp.k === 'blaze' ? 3.5 : sp.k === 'fire' ? 3.0 : 2.2;
+      if (sp.k !== 'censer') H.floor(sp.x, (sp.g ?? sp.y - 0.9) + 0.09, sp.z, pr * q, pr * q, 8, sp.k === 'fire' || sp.k === 'blaze' ? 0.85 : sp.k === 'stand' ? 0.95 : 0.7);
     }
   };
   /** cz_night: { box, lots, spots } — all of the above in one piece of geometry (one draw). */
