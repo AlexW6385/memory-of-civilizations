@@ -190,3 +190,7 @@ All new forms are [inferred]; no source was reachable. MAIN draws (`draw-count`)
 4. **The landmark.** `palace.js` (`shb_palacedress`, in the palace's plan, lime, cedar, wood_dark and mud_plaster only, no collision): four lime pilasters up the 18 m front with base blocks, caps and piers with horns over the parapet; a portal round the door (jamb piers with bosses, a carved cedar lintel, a stepped crest with dentils); a soot tongue over the door; dust drifts at the feet of piers and jambs. The element carries its footprint as `box` (a `rect` is read as a house by life.js and broke the roof route of the merchant's house in walk-check).
 Checks: surface-check, plan-check, walk-check (32 routes, 490 legs), view-check, disc-check, worker and sound tests pass.
 Still short: lit shop interiors seen from the street at night were not rendered; the mosque got no new work (its hall, mihrab and minaret are detailed already); soot on shop ceilings and dust beyond the palace; opened places and stalls on the walk; the palace's side and rear faces are still plain.
+
+## Budget trim (f-budget)
+
+- `base()` in `town.js` carries `minSaved: 8000` (per-plan, `src/core/geom.js` / `build.js`; default 2400): the tower houses' small repeated shapes (shutters, beams, window frames; each had become its own instanced "detail" draw) merge into the plan's mesh. Street pose (−9.5, 70) facing north 451 → 365 main draws, south 165 → 133; arrival 263; main triangles 2.03 → 2.16 M. Geo 39.9 → 50.2 MB, meshes 1331 → 1057.

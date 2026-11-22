@@ -5,7 +5,8 @@ import { RADIUS, WALL, WALL_TH, WALL_H, GATE, SQUARE, PALACE, LM, lots, streets,
 import { ground, chanZ } from './ground.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
-const base = (id, elements, style = 'hadhrami') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE.x, 100], facing: 'n' } });
+// minSaved: repeated small shapes merge into the plan's mesh instead of each being an instanced draw (src/core/geom.js INSTANCING; budget trim)
+const base = (id, elements, style = 'hadhrami') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, minSaved: 8000, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE.x, 100], facing: 'n' } });
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));          // a figure faces −z when rot = 0
 const h = (x, z) => ground.height(x, z);
 
