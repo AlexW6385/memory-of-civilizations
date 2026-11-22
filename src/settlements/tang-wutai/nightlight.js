@@ -167,11 +167,12 @@ function lightHalo(H, l) {
     }
     case 'stone': {                                  // a stone lamp pillar: the wick's box at 1.9 over its base
       H.ball(x, y + 1.9, z, 0.62, 0.62, 6 + Math.floor(hashAt(x, z, 21) * 4));
-      H.floor(x, y + 0.04, z, 1.5, 1.5, 7 + Math.floor(hashAt(x, z, 22) * 5), 0.6);
+      H.floor(x, y + 0.04, z, 3.2, 3.2, 9 + Math.floor(hashAt(x, z, 22) * 5), 0.95);
       break;
     }
     case 'ember': {                                  // the embers of an incense burner: a small red glow
-      H.ball(x, y, z, 0.32, 0.4, 6);
+      H.ball(x, y, z, 0.6, 0.85, 6);
+      H.floor(x, y - 0.95, z, 1.6, 1.6, 8, 0.7);
       break;
     }
     case 'pane': {                                   // a paper window lit from behind: a sheet in the wall's plane, facing n
@@ -181,7 +182,10 @@ function lightHalo(H, l) {
       break;
     }
     case 'spill': {                                  // lamp-light from the hall's open doors lying over the platform
-      H.floor(x, y + 0.04, z, l.r, l.r * 0.8, 9, 0.5);
+      H.floor(x, y + 0.04, z, l.r, l.r * 0.9, 10, 0.95);
+      // the lamplight seen in the door's opening itself: a warm sheet within, and a glow over the sill
+      H.quad([x + 1.7, y + 0.2, z - 1.0], [x + 1.7, y + 0.2, z + 1.0], [x + 1.7, y + 3.0, z + 1.0], [x + 1.7, y + 3.0, z - 1.0], [-1, 0], 0.22);
+      H.ball(x + 1.2, y + 1.2, z, 1.6, 0.8);
       break;
     }
     default:
@@ -214,7 +218,7 @@ export function lightsOf({ hall, sengfang, monastery, village, dress }) {
   // facing the courtyard's axis); the rooms hold bays 0–1, 2–3, 4–5, and the lamp of each burns behind the window of its first bay
   for (const s of [-1, 1]) for (const k of [0, 2, 4]) out.push({ k: 'pane', at: [ox - 103 + (k + 0.5) * 3.9, s * 35.5 - s * 0.22], y: 0.45 + 1.1, h: 1.1, w: 1.8, n: [0, -s] });
   // the Great East Hall's five open doors (hall plan x −8.83, the bays' middles between the column lines ZS), floor 14.0: the lamps within spill out over the platform
-  for (const z of [-10.08, -5.04, 0, 5.04, 10.08]) out.push({ k: 'spill', at: [ox - 8.83 - 1.9, oz + z], y: 14.0, r: 3.0 });
+  for (const z of [-10.08, -5.04, 0, 5.04, 10.08]) out.push({ k: 'spill', at: [ox - 8.83 - 1.9, oz + z], y: 14.0, r: 4.0 });
   return out;
 }
 

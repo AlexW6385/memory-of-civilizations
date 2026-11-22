@@ -212,3 +212,6 @@ All [inferred]: no source describes 857 Wutai's nights or monks' watches.
 - **Donkeys as critters.** Three donkeys (`critter-models-farm.js`) are tied before the gate, at the pilgrims' tea shed and on the village green; the still donkeys that stood there are dropped [inferred]. The shop and lane donkeys, oxen and carts stay still life.
 
 - Herds and yard groups: 11 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 11 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.
+
+## Night near the visitor, second pass
+- [inferred] The Great East Hall's five doors spill stronger lamp light over the platform and show a warm glow within (the lamps before the Buddhas burn all night); the stone lamp pillars throw a wide pool; the incense burners' embers glow with a small pool. Halo geometry only, in `nightlight.js`.
