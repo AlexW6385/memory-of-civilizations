@@ -61,4 +61,7 @@ for (const [x, z] of [[-10, 52], [12, 53.5], [-22, 57], [-2, 82], [4.5, 118], [-
     critters.push({ model: hash(p[0], p[1]) < 0.5 ? 'cat_tabby' : 'cat_orange', at: [p[0], 0.05, p[1]], rot: e ? Math.PI / 2 : -Math.PI / 2, range: [7, 2.5] }); k++;
   }
 }
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('lhasa'));
 export default { fish, flights, perches, critters };

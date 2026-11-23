@@ -262,3 +262,5 @@ In each open house: the floor trodden dark in a path from the door to the hearth
 
 ## 16b. Night fires in the arrival's frame
 - [inferred] A camp fire with five people sits 15 m from the arrival, off the walk line toward the circle, and a small fire with three people on the open floor of the sarsen circle: the midwinter feasting gatherings (§10a) put people out at night; a fire among the stones is [inferred] (no source for it). Both in `town.js`, added last (`rng(2617)`).
+
+- Moving farm animals (herds-gen): the still pigs of the plans at rest became grazer-pose critters (src/engine/critter-models-farm.js, src/settlements/herds-data.js) [inferred].

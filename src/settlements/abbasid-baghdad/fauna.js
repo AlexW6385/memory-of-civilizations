@@ -58,4 +58,7 @@ for (const z of [-90, 20, 110, 200]) critters.push({ type: 'floaters', models: [
 for (const x of [-205, -75, 110]) { const z = CANAL.z - CANAL.w / 2 - 0.4; critters.push({ model: 'kingfisher', at: [x, Math.max(ground.height(x, z), -0.3) + 0.05, z], rot: Math.PI / 2, water: [x, CANAL.z - CANAL.w / 2 + 1.4, WATER], cycle: 33 + (x % 7) }); }
 // goats and sheep (white goats stand for them) at the sheep market, Karkh's crossing, and at the khan's stable; a black goat among them
 for (const [cx, cz, n] of [[-60, 366, 4], [30, 366, 3], [KHAN_RECT[0] - 8, KHAN_RECT[3] + 6, 3]]) spots(cx, cz, n, 9, 3).forEach(([x, z], i) => critters.push({ model: i % 3 === 2 ? 'goat_black' : 'goat_white', at: [x, 0.05, z], rot: hash(x, z) * 6.28, range: [9, 3.2] }));
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('abbasid-baghdad'));
 export default { fish, flights, perches, critters };

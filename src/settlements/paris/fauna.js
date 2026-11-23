@@ -62,4 +62,7 @@ critters.push({ model: 'cat_tabby', at: at(-226.6, -26.4, 0.02), rot: 0.4, range
 // a hound at the court's hitching rail (the grooms' dog) and a butcher's dog before the first butcher's shop of the court row
 critters.push({ model: 'dog', at: at(-229, 17.4, 0.02), rot: 1.2, range: [9, 3.5] });
 
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('paris'));
 export default { fish: [], flights, perches, critters };

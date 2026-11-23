@@ -6,7 +6,8 @@
 // zebu_red/white/grey, donkey_grey/brown, sheep_white/dark/horned. Metres, +x forward, feet at y = 0. Proportions [inferred from the animals' standard measurements:
 // the small pre-modern horse 13–14.2 hands (1.35–1.45 m), the donkey 0.9–1.1 m, the ox 1.2–1.4 m, primitive sheep 0.55–0.7 m at the withers].
 // FARM_GAIT gives each model's walk (see fauna-critters.js): stride = 2 × hip height × sin(swing), so that the feet do not slide.
-import { Model, MODELS } from './critter-models.js';
+import { Model, MODELS, pigBali, pigNeolithic } from './critter-models.js';
+import './critter-models-hakka.js';
 
 const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 const sm = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -194,12 +195,132 @@ export function sheep(variant) {
   return m;
 }
 
+// ═════════ the camel, the llama and alpaca, the water buffalo, the yak, the pig ═════════
+// (the pig and the water buffalo reuse the shapes of critter-models.js's pigNeolithic/pigBali and critter-models-hakka.js's waterBuffalo, registered under the grazer's names)
+const CAMEL = {
+  tan: { c: [0.62, 0.46, 0.3], hair: [0.42, 0.3, 0.2], humps: 1 }, pale: { c: [0.78, 0.66, 0.5], hair: [0.6, 0.48, 0.34], humps: 1 },
+  dun: { c: [0.5, 0.38, 0.26], hair: [0.3, 0.22, 0.15], humps: 2 }, dark: { c: [0.3, 0.22, 0.16], hair: [0.17, 0.12, 0.09], humps: 2 },
+};
+/** A camel (withers 1.8 m; the dromedary has one hump, the Bactrian two, shorter legs and the shaggy mane, beard and chaps), standing: a narrow deep body on long legs, a long S-curved neck, a small head with a split upper lip and heavy-lidded eyes, small ears, broad pads. */
+export function camel(variant) {
+  const m = new Model(), V = CAMEL[variant], k = V.c, two = V.humps === 2, L = two ? 0.9 : 1;   // L: the Bactrian's legs are a tenth shorter
+  const coat = ({ p, n }) => lerp(lerp(k, k.map((v) => v * 0.8), sm(-0.1, -0.8, n[1]) * 0.6), V.hair, (two ? 0.25 : 0.08) + hash3(p, 3) * 0.12);
+  const H = (y) => 1.0 + (y - 1.0) * L;
+  const S = [[0.7, H(1.35), 0.2, 0.16], [0.55, H(1.4), 0.3, 0.22], [0.3, H(1.38), 0.37, 0.27], [0.0, H(1.36), 0.38, 0.28], [-0.3, H(1.38), 0.36, 0.27], [-0.55, H(1.38), 0.3, 0.24], [-0.75, H(1.34), 0.2, 0.15], [-0.85, H(1.3), 0.05, 0.05]];
+  body(m, S, 10, coat);
+  const humps = two ? [[0.3, 0.2], [-0.32, 0.2]] : [[-0.05, 0.3]];
+  for (const [x, rx] of humps) m.ball([x, H(1.72), 0], [rx, 0.3, two ? 0.17 : 0.2], ({ p, n }) => lerp(coat({ p, n }), V.hair, sm(0.2, 0.9, n[1]) * (two ? 0.6 : 0.2)), { nu: 5, nv: 8 });
+  const NP = [0.62, H(1.62), 0], HP = [1.32, H(2.22), 0], np = [[0.55, H(1.55)], [0.75, H(1.8)], [0.92, H(2.02)], [1.1, H(2.17)], [1.27, H(2.22)]], nr = [[0.2, 0.13], [0.15, 0.1], [0.115, 0.08], [0.1, 0.07], [0.095, 0.065]];
+  m.as(1, NP, null, () => {
+    m.tube(np.map((q) => [q[0], q[1], 0]), nr, { sides: 8, ref: [1, 0, 0], col: coat });
+    if (two) m.tube(np.map((q, i) => [q[0] - 0.3 * nr[i][0], q[1] - 0.95 * nr[i][0], 0]), nr.map((r) => [r[0] * 0.5, r[1] * 0.7]), { sides: 5, ref: [1, 0, 0], col: V.hair });   // the beard of the throat
+  });
+  m.as(2, HP, NP, () => {
+    m.ball([1.34, H(2.22), 0], [0.12, 0.1, 0.085], coat, { nu: 6, nv: 7 });
+    m.tube([[1.4, H(2.2), 0], [1.52, H(2.14), 0], [1.64, H(2.08), 0]], [[0.085, 0.07], [0.075, 0.062], [0.07, 0.065]], { sides: 7, ref: [1, 0, 0], col: ({ p, t, n }) => lerp(coat({ p, n }), [0.5, 0.4, 0.34], sm(0.6, 1, t) * 0.5) });
+    m.ball([1.64, H(2.07), 0], [0.035, 0.05, 0.06], [0.22, 0.17, 0.14], { nu: 4, nv: 6 });
+    for (const s of [-1, 1]) {
+      m.tube([[1.28, H(2.29), s * 0.07], [1.25, H(2.35), s * 0.09], [1.23, H(2.38), s * 0.09]], [[0.025, 0.035], [0.02, 0.03], [0.003, 0.004]], { sides: 4, col: V.hair });   // the small ears
+      m.ball([1.4, H(2.25), s * 0.085], [0.04, 0.025, 0.012], coat, { nu: 3, nv: 4 });                                                                                         // the heavy brow
+    }
+    eyes(m, 1.4, H(2.245), 0.095, 0.015, [0.06, 0.04, 0.03]);
+  });
+  m.as(3, [-0.84, H(1.3), 0], null, () => m.tube([[-0.84, H(1.3), 0], [-0.9, H(1.2), 0], [-0.92, H(0.95), 0], [-0.92, H(0.8), 0]], [0.035, 0.03, 0.025, 0.05], { sides: 5, col: ({ t }) => (t > 0.8 ? V.hair : k) }));
+  legs(m, {
+    fx: 0.55, hx: -0.55, fz: 0.17, hz: 0.18, hoof: [0.09, 0.03, 0.07, 0.02], hoofCol: [0.4, 0.32, 0.26],
+    front: [[[0, H(1.3)], [0, H(0.85)], [0, H(0.52)], [0.01, 0.1], [0.03, 0.04]], [[0.1, 0.085], [0.07, 0.06], [0.055, 0.045], [0.04, 0.036], [0.06, 0.07]]],
+    hind: [[[0, H(1.32)], [0.04, H(0.9)], [-0.03, H(0.6)], [-0.07, 0.36], [-0.07, 0.12], [-0.03, 0.04]], [[0.13, 0.1], [0.095, 0.08], [0.065, 0.05], [0.05, 0.04], [0.04, 0.036], [0.06, 0.07]]],
+    col: (t, front) => lerp(coat({ p: [0, 1, 0], n: [0, 0, 1] }), two && !front ? V.hair : k.map((v) => v * 0.85), sm(0.5, 0.2, t) * (two ? 0.7 : 0)), sides: 6,
+  });
+  return m;
+}
+
+const LLAMA = {
+  brown: { c: [0.48, 0.34, 0.22], alpaca: 0 }, white: { c: [0.86, 0.83, 0.77], alpaca: 0 }, pied: { c: [0.8, 0.77, 0.7], alpaca: 0, pie: [0.3, 0.22, 0.16] },
+  fawn: { c: [0.68, 0.52, 0.34], alpaca: 1 }, snow: { c: [0.9, 0.88, 0.83], alpaca: 1 },
+};
+/** A llama (back 1.1 m, head 1.7 m) or alpaca (back 0.95 m, a smaller fuller-fleeced animal with a topknot and a blunt face), standing: a woolly body, a long upright neck, a small head with a split lip and long banana ears, slim legs with soft pads, the tail carried up. */
+export function llama(variant) {
+  const m = new Model(), V = LLAMA[variant], k = V.c, a = V.alpaca, z = a ? 0.88 : 1;   // z scales the height
+  const wool = ({ p, n }) => {
+    let c = lerp(k, k.map((v) => v * 0.78), sm(-0.1, -0.8, n[1]) * 0.5);
+    if (V.pie) c = lerp(c, V.pie, sm(0.5, 0.56, cell(p, 3.2, 8)) * 0.95);
+    return lerp(c, k.map((v) => v * 0.8), cell(p, 12, 4) * 0.4);
+  };
+  const Y = (y) => y * z, f = a ? 1.18 : 1;   // f: the alpaca's fleece makes the body fuller
+  const S = [[0.5, Y(1.0), 0.12, 0.1], [0.38, Y(1.05), 0.2 * f, 0.15 * f], [0.15, Y(1.06), 0.24 * f, 0.19 * f], [-0.08, Y(1.05), 0.25 * f, 0.19 * f], [-0.3, Y(1.04), 0.23 * f, 0.18 * f], [-0.45, Y(1.0), 0.15, 0.12], [-0.5, Y(0.98), 0.04, 0.04]];
+  body(m, S, 9, wool);
+  for (const [x, ry, rz] of [[0.2, 0.12, 0.17], [-0.05, 0.11, 0.18], [-0.28, 0.1, 0.15]]) m.ball([x, Y(1.17), 0], [0.14, ry, rz * f], wool, { nu: 4, nv: 7 });
+  const NP = [0.42, Y(1.12), 0], HP = [0.7, Y(1.62), 0], np = [[0.38, Y(1.05)], [0.46, Y(1.28)], [0.56, Y(1.48)], [0.65, Y(1.6)]], nr = a ? [[0.15, 0.12], [0.125, 0.105], [0.11, 0.095], [0.09, 0.08]] : [[0.14, 0.11], [0.1, 0.085], [0.08, 0.07], [0.065, 0.055]];
+  m.as(1, NP, null, () => m.tube(np.map((q) => [q[0], q[1], 0]), nr, { sides: 8, ref: [1, 0, 0], col: wool }));
+  m.as(2, HP, NP, () => {
+    m.ball([0.72, Y(1.63), 0], [0.085, 0.075, 0.062], wool, { nu: 6, nv: 7 });
+    m.tube([[0.77, Y(1.6), 0], [0.84, Y(1.56), 0], [0.9, Y(1.53), 0]], [[0.055, 0.045], [0.045, 0.04], [a ? 0.045 : 0.036, a ? 0.045 : 0.033]], { sides: 7, ref: [1, 0, 0], col: ({ p, t, n }) => lerp(a ? wool({ p, n }) : lerp(wool({ p, n }), [0.55, 0.42, 0.36], 0.5), [0.45, 0.35, 0.3], sm(0.6, 1, t) * 0.4) });
+    m.ball([0.905, Y(1.525), 0], [0.016, 0.022, 0.03], [0.2, 0.15, 0.13], { nu: 4, nv: 5 });
+    if (a) m.ball([0.68, Y(1.7), 0], [0.08, 0.05, 0.07], wool, { nu: 4, nv: 6 });   // the topknot
+    for (const s of [-1, 1]) m.tube([[0.67, Y(1.68), s * 0.04], [0.64, Y(a ? 1.76 : 1.82), s * 0.06], [0.62, Y(a ? 1.8 : 1.9), s * 0.065]], [[0.02, 0.03], [0.018, 0.028], [0.003, 0.004]], { sides: 4, col: wool });   // the banana ears
+    eyes(m, 0.78, Y(1.645), 0.05, 0.012, [0.07, 0.05, 0.03]);
+  });
+  m.as(3, [-0.48, Y(1.0), 0], null, () => m.tube([[-0.48, Y(1.0), 0], [-0.52, Y(1.06), 0], [-0.55, Y(1.12), 0]], [0.04, 0.034, 0.012], { sides: 5, col: wool }));
+  legs(m, {
+    fx: 0.28, hx: -0.28, fz: 0.1, hz: 0.11, hoof: [0.034, 0.016, 0.026, 0.012], hoofCol: [0.28, 0.22, 0.18],
+    front: [[[0, Y(0.85)], [0, Y(0.55)], [0, Y(0.3)], [0.005, 0.08], [0.015, 0.025]], [[0.06, 0.05], [0.035, 0.03], [0.026, 0.024], [0.02, 0.02], [0.03, 0.036]]],
+    hind: [[[0, Y(0.87)], [0.03, Y(0.6)], [-0.02, Y(0.4)], [-0.04, 0.26], [-0.04, 0.1], [-0.015, 0.025]], [[0.075, 0.06], [0.05, 0.04], [0.032, 0.028], [0.024, 0.022], [0.02, 0.02], [0.03, 0.036]]],
+    col: (t) => lerp(wool({ p: [0, 0.8, 0], n: [0, 0, 1] }), k.map((v) => v * 0.8), sm(0.4, 0.2, 1 - t) * 0.1), sides: 5,
+  });
+  return m;
+}
+
+const YAK = { black: { c: [0.1, 0.085, 0.08], skirt: [0.07, 0.06, 0.055] }, brown: { c: [0.26, 0.18, 0.12], skirt: [0.17, 0.12, 0.08], pale: [0.5, 0.4, 0.3] } };
+/** A yak (withers 1.3 m), standing: black (or brown) and shaggy, a high hump over the shoulders, a low carried head with a broad pale-edged muzzle, swept-up horns, a long skirt of hair hanging from the belly nearly to the ground over short legs, a bushy tail. */
+export function yak(variant) {
+  const m = new Model(), V = YAK[variant], k = V.c;
+  const coat = ({ p, n }) => lerp(lerp(k, k.map((v) => v * 1.3), sm(0.4, 1, n[1]) * 0.4), V.skirt, hash3(p, 4) * 0.5);
+  const S = [[0.72, 0.98, 0.15, 0.13], [0.58, 1.02, 0.26, 0.21], [0.38, 1.04, 0.33, 0.27], [0.12, 1.0, 0.35, 0.29], [-0.12, 0.99, 0.35, 0.29], [-0.36, 1.0, 0.33, 0.27], [-0.55, 0.99, 0.27, 0.24], [-0.68, 0.95, 0.13, 0.13], [-0.72, 0.92, 0.03, 0.03]];
+  body(m, S, 10, coat);
+  m.ball([0.3, 1.3, 0], [0.3, 0.2, 0.2], coat, { nu: 5, nv: 8 });                                                                                                // the hump
+  m.tube([[0.5, 0.62, 0], [0.2, 0.55, 0], [-0.1, 0.54, 0], [-0.4, 0.58, 0], [-0.55, 0.64, 0]], [[0.16, 0.26], [0.2, 0.34], [0.2, 0.36], [0.2, 0.34], [0.1, 0.18]], { sides: 9, col: ({ p }) => lerp(V.skirt, k, hash3(p, 9) * 0.5) });   // the skirt of hair
+  const NP = [0.62, 1.04, 0], HP = [0.98, 0.92, 0];
+  m.as(1, NP, null, () => m.tube([[0.54, 1.06, 0], [0.7, 1.04, 0], [0.86, 0.98, 0], [0.95, 0.94, 0]], [[0.27, 0.21], [0.21, 0.17], [0.16, 0.13], [0.14, 0.11]], { sides: 8, ref: [1, 0, 0], col: coat }));
+  m.as(2, HP, NP, () => {
+    m.ball([1.02, 0.92, 0], [0.14, 0.125, 0.1], coat, { nu: 6, nv: 8 });
+    m.tube([[1.08, 0.89, 0], [1.19, 0.84, 0], [1.27, 0.8, 0]], [[0.1, 0.08], [0.088, 0.078], [0.08, 0.082]], { sides: 7, ref: [1, 0, 0], col: ({ p, t, n }) => lerp(coat({ p, n }), V.pale || [0.36, 0.3, 0.27], sm(0.5, 1, t) * (V.pale ? 0.8 : 0.7)) });
+    m.ball([1.285, 0.8, 0], [0.025, 0.05, 0.06], [0.14, 0.1, 0.1], { nu: 4, nv: 6 });
+    for (const s of [-1, 1]) {
+      m.tube([[0.98, 1.0, s * 0.08], [0.96, 1.03, s * 0.2], [1.0, 1.12, s * 0.28], [1.05, 1.24, s * 0.28], [1.07, 1.34, s * 0.23]], [0.034, 0.03, 0.024, 0.016, 0.004], { sides: 5, col: ({ t }) => lerp([0.78, 0.74, 0.62], [0.14, 0.12, 0.1], sm(0.55, 1, t)) });   // the horn: out, then up
+      m.tube([[0.96, 0.97, s * 0.1], [0.94, 0.97, s * 0.2], [0.93, 0.93, s * 0.27]], [[0.02, 0.05], [0.018, 0.045], [0.003, 0.01]], { sides: 4, col: coat });
+    }
+    eyes(m, 1.08, 0.955, 0.1, 0.017, [0.08, 0.05, 0.04]);
+  });
+  m.as(3, [-0.7, 0.93, 0], null, () => m.tube([[-0.7, 0.93, 0], [-0.78, 0.8, 0], [-0.82, 0.55, 0], [-0.82, 0.3, 0]], [0.04, 0.05, 0.075, 0.08], { sides: 6, col: ({ p }) => lerp(V.skirt, k, hash3(p, 2) * 0.5) }));   // the bushy tail
+  legs(m, {
+    fx: 0.46, hx: -0.46, fz: 0.17, hz: 0.17, hoof: [0.05, 0.026, 0.04, 0.02], hoofCol: [0.1, 0.08, 0.07],
+    front: [[[0, 0.62], [0, 0.42], [0, 0.28], [0.005, 0.08], [0.02, 0.035]], [[0.11, 0.1], [0.075, 0.07], [0.06, 0.055], [0.045, 0.04], [0.045, 0.05]]],
+    hind: [[[0, 0.64], [0.03, 0.46], [-0.03, 0.32], [-0.05, 0.2], [-0.05, 0.09], [-0.02, 0.035]], [[0.13, 0.1], [0.09, 0.075], [0.06, 0.055], [0.048, 0.045], [0.04, 0.04], [0.045, 0.05]]],
+    col: (t) => lerp(V.skirt, [0.3, 0.26, 0.22], sm(0.55, 0.8, t) * (V.pale ? 0.6 : 0.3)), sides: 6,
+  });
+  return m;
+}
+
 for (const v of Object.keys(HORSE)) MODELS['horse_' + v] = () => horse(v);
 for (const v of ['red', 'dun', 'white', 'pied']) MODELS['ox_' + v] = () => ox(v);
 for (const v of ['zebu_red', 'zebu_white', 'zebu_grey']) MODELS[v] = () => ox(v);
 for (const v of Object.keys(DONKEY)) MODELS['donkey_' + v] = () => donkey(v);
 for (const v of Object.keys(SHEEP)) MODELS['sheep_' + v] = () => sheep(v);
+for (const v of ['tan', 'pale']) MODELS['dromedary_' + v] = () => camel(v);
+for (const v of ['dun', 'dark']) MODELS['bactrian_' + v] = () => camel(v);
+for (const v of ['brown', 'white', 'pied']) MODELS['llamag_' + v] = () => llama(v);
+for (const v of ['fawn', 'snow']) MODELS['alpaca_' + v] = () => llama(v);
+for (const v of Object.keys(YAK)) MODELS['yak_' + v] = () => yak(v);
+MODELS.buffalo_grey = () => MODELS.buffalo_water();   // (the Hakka tulou's water buffalo's shape, on the grazer pose)
+for (const [a, b] of [['black', 'black'], ['spotted', 'spotted']]) MODELS['pigb_' + a] = () => pigBali(b);   // (Bali's pigs, on the grazer pose: they root, walk, look up)
+for (const v of ['dark', 'pale']) MODELS['pign_' + v] = () => pigNeolithic(v);
 
 /** The walk of each kind of model: hip height → swing (rad), stride (m), speed (m/s), graze (how far the neck reaches down). */
-export const FARM_GAIT = { horse: { swing: 0.34, stride: 0.62, speed: 0.9, graze: 1.15 }, ox: { swing: 0.34, stride: 0.54, speed: 0.6, graze: 0.8 }, donkey: { swing: 0.36, stride: 0.5, speed: 0.7, graze: 1.1 }, sheep: { swing: 0.42, stride: 0.26, speed: 0.5, graze: 0.8 } };
-export const farmKind = (model) => (model.startsWith('horse_') ? 'horse' : model.startsWith('ox_') || model.startsWith('zebu_') ? 'ox' : model.startsWith('donkey_') ? 'donkey' : model.startsWith('sheep_') ? 'sheep' : null);
+export const FARM_GAIT = {
+  horse: { swing: 0.34, stride: 0.62, speed: 0.9, graze: 1.15 }, ox: { swing: 0.34, stride: 0.54, speed: 0.6, graze: 0.8 }, donkey: { swing: 0.36, stride: 0.5, speed: 0.7, graze: 1.1 }, sheep: { swing: 0.42, stride: 0.26, speed: 0.5, graze: 0.8 },
+  camel: { swing: 0.3, stride: 0.82, speed: 0.8, graze: 0.75 }, llama: { swing: 0.36, stride: 0.42, speed: 0.7, graze: 0.8 }, buffalo: { swing: 0.3, stride: 0.5, speed: 0.5, graze: 0.55 },
+  yak: { swing: 0.34, stride: 0.48, speed: 0.55, graze: 0.8 }, pig: { swing: 0.5, stride: 0.2, speed: 0.45, graze: 0.5 },
+};
+const FARM_PREFIX = [['horse_', 'horse'], ['ox_', 'ox'], ['zebu_', 'ox'], ['donkey_', 'donkey'], ['sheep_', 'sheep'], ['dromedary_', 'camel'], ['bactrian_', 'camel'], ['llamag_', 'llama'], ['alpaca_', 'llama'], ['yak_', 'yak'], ['buffalo_grey', 'buffalo'], ['pigb_', 'pig'], ['pign_', 'pig']];
+export const farmKind = (model) => FARM_PREFIX.find(([p]) => model.startsWith(p))?.[1] ?? null;

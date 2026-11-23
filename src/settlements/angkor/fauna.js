@@ -69,4 +69,7 @@ walkHouses(8).forEach((h, i) => {
   } else if (i % 3 === 1) critters.push({ model: 'dog', at: at(sd * 2.6, foot + 0.6), rot, range: [4, 2] });
   else critters.push({ model: 'cat_orange', at: at(sd * 2.2, foot + 0.9), rot, range: [3, 1.5] });
 });
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('angkor'));
 export default { fish, flights, perches, critters };

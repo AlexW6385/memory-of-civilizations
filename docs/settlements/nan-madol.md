@@ -173,3 +173,5 @@ All [inferred]; no source describes the place at night or its wear. Nothing here
 
 - **Door stops, cause found (`NO_ROUTE`).** Both nahs had a pig standing in the lane the route enters by: the household's animals were put 2.2 to 2.8 m before the platform, where the nah's front is only about 2 m from the path's middle, so they stood on the path or in the lane (u = -0.4 from the nah's middle). A pig's back is 0.5 m, the walker's step (0.5005 against a reach of 0.492 on ground at -0.01), and its raster cells close the lane. door-probe listed nothing for the second because it explained a 0.12 m step, not the check's 0.033 m one (now the same).
 - **Fix.** The pigs, hens and dogs of a nah stand beside the platform at its front corner (`beside` in `town.js`, the same random draws); `NO_ROUTE` is empty, 26 nahs are routed.
+
+- Moving farm animals (herds-gen): the still pigs of the plans at rest became grazer-pose critters (src/engine/critter-models-farm.js, src/settlements/herds-data.js) [inferred].

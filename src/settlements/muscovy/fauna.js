@@ -47,4 +47,7 @@ const critters = [];
   for (const [x, dz] of [[-40, 0], [60, 6], [150, 2]]) { const z = riverZ(x) - RIVER.w / 2 - 6 + dz; put('goose_white', [x, z], { range: [2, 1.5] }); put('goose_grey', [x + 0.9, z + 0.6], { range: [2, 1.5] }); }
 }
 void ROWS;
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('muscovy'));
 export default { fish, flights, perches, critters };

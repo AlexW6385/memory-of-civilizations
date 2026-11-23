@@ -163,3 +163,5 @@ All [inferred]: no source names a watch, a landing fire or the layering of a pla
 - **Still short.** Tomb ramps and horses in the chariot pits (§4c); guards and officials as near-plan keepers; no light on the moat's causeway; no writing (no verified oracle-bone glyph table in the repo).
 
 - Herds and yard groups: 3 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 3 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.
+
+- Moving farm animals (herds-gen): the still pigs of the plans at rest became grazer-pose critters (src/engine/critter-models-farm.js, src/settlements/herds-data.js) [inferred].

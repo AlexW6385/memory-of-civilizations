@@ -45,4 +45,7 @@ for (const [model, x, z, size] of [['rooster', -20.4, 10.6, 1], ['hen_brown', -1
   const px = a[0] + (b[0] - a[0]) / L * u + nx * 0.62, pz = a[1] + (b[1] - a[1]) / L * u + nz * 0.62;
   critters.push({ model: 'kingfisher', at: [px, 1.15, pz], rot: Math.atan2(nz, nx), water: [px + nx * 1.7, pz + nz * 1.7, WATER], cycle: 36 });
 }
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('nan-madol'));
 export default { fish, flights, perches, critters };

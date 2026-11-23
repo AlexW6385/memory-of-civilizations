@@ -158,3 +158,5 @@ All [inferred]; no source describes Ajanta's nights, its frieze figures in detai
 - **Not seen.** The two new reliefs were not seen in a render (my camera poses landed in Cave 1's hall); the lane on the ledge also unseen. Still short: faces on the niche Buddhas, carved door reliefs on the outer cells, soot over the lamps, dust at the cave mouths, rigged peafowl and monkeys, no writing (Brahmi unverifiable).
 
 - Herds and yard groups: 10 still unharnessed horses, cattle, donkeys, sheep and goats of the plans (groups of two or more, none drawing a cart, ridden or laden) are replaced by 10 moving farm animals of the same kind and place (src/settlements/herds-data.js, made by tools/herds-gen.mjs; critter-models-farm.js, fauna.js); [inferred] the colours are those the still figures had.
+
+- Moving farm animals (herds-gen): the still water buffalo (grazer pose) of the plans at rest became grazer-pose critters (src/engine/critter-models-farm.js, src/settlements/herds-data.js) [inferred].

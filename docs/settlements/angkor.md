@@ -353,3 +353,5 @@ Code: `fauna.js` (`critters`), `tests/angkor-critters.test.mjs`. Ducks (brown an
 - Not done (still short): steps C-E (no new opened places, no landmark additions, no writing); the day view at two metres was not re-rendered; the village paddies and the galleries remain dark; lamp-stands of the causeway have a stone bowl, not bronze, to hold the draw count.
 
 Arrival view [inferred]: the street life's figures are kept off the first 8 m of the view line along the causeway (src/objects/life.js VIEW_LINE_CLEAR, dropped after the draw so no seed moves).
+
+- Moving farm animals (herds-gen): the still water buffalo (grazer pose) of the plans at rest became grazer-pose critters (src/engine/critter-models-farm.js, src/settlements/herds-data.js) [inferred].

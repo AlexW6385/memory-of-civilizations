@@ -279,3 +279,5 @@ Still short: keepers of the stalls beyond x 190 and of the rest halls are life f
 - [The Buddha Statues and Chaityas at Borobudur — photodharma](https://photodharma.net/Indonesia/13-Buddhas-and-Chaityas/index.htm)
 - [Borobudur ship — Wikipedia](https://en.wikipedia.org/wiki/Borobudur_ship)
 - [Balustrade: Jataka and Avadana — arisguidetour](https://arisguidetour.blogspot.com/2023/04/balustrade-jataka-and-avadana.html)
+
+- Moving farm animals (herds-gen): the still water buffalo (grazer pose) of the plans at rest became grazer-pose critters (src/engine/critter-models-farm.js, src/settlements/herds-data.js) [inferred].

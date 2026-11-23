@@ -239,3 +239,5 @@ Still short of the reference: no keepers or goods inside most houses' shops beyo
 - **Mani walls**: three now (the comment in town.js had named two): a wall each side of the stairs' foot (z 57) besides the circuit's south one. [inferred]
 - **Shops**: all 12 trading houses and the 3 tea houses have walked routes in (15; 54 routes in all).
 - **Still short**: far town windows unlit; wear on landings, thresholds and the wooden stair; keepers in the tea houses' far rooms; script on mani stones and signs; rain and snow sounds; the Red Palace's chapels beyond the tomb hall.
+
+- Moving farm animals (herds-gen): the still yaks of the plans at rest became grazer-pose critters (src/engine/critter-models-farm.js, src/settlements/herds-data.js) [inferred].

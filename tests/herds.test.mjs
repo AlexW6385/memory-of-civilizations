@@ -8,7 +8,7 @@ import { MODELS } from '../src/engine/critter-models.js';
 import '../src/engine/critter-models-farm.js';
 import { farmKind } from '../src/engine/critter-models-farm.js';
 
-const FARM = { horse: 'horse', ox: 'ox', zebu: 'ox', donkey: 'donkey', sheep: 'sheep' };
+const FARM = { horse: 'horse', ox: 'ox', zebu: 'ox', donkey: 'donkey', sheep: 'sheep', camel: 'camel', llama: 'llama', buffalo: 'buffalo', pig: 'pig', yak: 'yak' };
 test('the table: known models of the right kind, at most 56 critters a settlement', () => {
   for (const [id, rows] of Object.entries(HERDS)) {
     let n = 0;

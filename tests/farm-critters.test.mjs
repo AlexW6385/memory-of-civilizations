@@ -7,25 +7,27 @@ import { MODELS } from '../src/engine/critter-models.js';
 import { POSES, context, KIND } from '../src/engine/critter-poses.js';
 import '../src/engine/critter-models-farm.js';
 
-const NAMES = ['horse_bay', 'horse_chestnut', 'horse_grey', 'horse_black', 'ox_red', 'ox_dun', 'ox_white', 'ox_pied', 'zebu_red', 'zebu_white', 'zebu_grey', 'donkey_grey', 'donkey_brown', 'sheep_white', 'sheep_dark', 'sheep_horned'];
-const HEIGHT = { horse: [1.3, 1.9], ox: [1.2, 1.55], zebu: [1.3, 1.7], donkey: [1.0, 1.6], sheep: [0.6, 0.85] };   // (top of the standing animal, ears and horns included: withers 1.4 / 1.3 / 1.05 / 0.65 m)
+const NAMES = ['horse_bay', 'horse_chestnut', 'horse_grey', 'horse_black', 'ox_red', 'ox_dun', 'ox_white', 'ox_pied', 'zebu_red', 'zebu_white', 'zebu_grey', 'donkey_grey', 'donkey_brown', 'sheep_white', 'sheep_dark', 'sheep_horned',
+  'dromedary_tan', 'dromedary_pale', 'bactrian_dun', 'bactrian_dark', 'llamag_brown', 'llamag_white', 'llamag_pied', 'alpaca_fawn', 'alpaca_snow', 'yak_black', 'yak_brown', 'buffalo_grey', 'pigb_black', 'pigb_spotted', 'pign_dark', 'pign_pale'];
+const HEIGHT = { horse: [1.3, 1.9], ox: [1.2, 1.55], zebu: [1.3, 1.7], donkey: [1.0, 1.6], sheep: [0.6, 0.85], dromedary: [2.0, 2.6], bactrian: [1.9, 2.4], llamag: [1.6, 2.0], alpaca: [1.45, 1.8], yak: [1.2, 1.6], buffalo: [1.1, 1.7], pigb: [0.45, 0.7], pign: [0.6, 0.85] };   // (top of the standing animal, ears and horns included: withers 1.4 / 1.3 / 1.05 / 0.65 m)
 const val = (r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v.v]));
 const run = (i, t, cam) => val(POSES[i.groups[0][0]](context(t, cam, i.groups)));
 const far = (i) => [i.groups[1][0] + 70, 1.6, i.groups[1][2]];
 
-test('the sixteen models build: size, detail and parts', () => {
+test('the thirty-two models build: size, detail and parts', () => {
   for (const n of NAMES) {
     const m = MODELS[n](), top = Math.max(...m.pos.filter((_, i) => i % 3 === 1));
     const [lo, hi] = HEIGHT[n.split('_')[0]];
     assert.ok(top >= lo && top <= hi, `${n} is ${top.toFixed(2)} m high`);
-    assert.ok(m.tris > 600 && m.tris < 1300, `${n}: ${m.tris} triangles`);
-    for (const p of [1, 2, 3, 4, 5, 6, 7, 11]) assert.ok(m.part.includes(p), `${n} lacks part ${p}`);
+    const reused = /^(buffalo|pig)/.test(n);   // (the buffalo and the pigs are the shapes of critter-models.js and critter-models-hakka.js: fewer triangles, no blinking eyes part)
+    assert.ok(m.tris > (reused ? 250 : 600) && m.tris < 1300, `${n}: ${m.tris} triangles`);
+    for (const p of reused ? [1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4, 5, 6, 7, 11]) assert.ok(m.part.includes(p), `${n} lacks part ${p}`);
     assert.ok(m.pos.every(Number.isFinite) && m.nrm.every(Number.isFinite));
   }
 });
 
 test('every kind is a grazer; the walk swings the legs and moves the animal, the rest grazes or looks about', () => {
-  const inst = expandCritters(NAMES.map((model, k) => ({ model, at: [k * 7, 0, 3], rot: 0.4, range: [5, 3] })), { id: 't' });
+  const inst = expandCritters(NAMES.map((model, k) => ({ model, at: [k * 7.3, 0, 3], rot: 0.4, range: [5, 3] })), { id: 't' });
   for (const i of inst) {
     assert.equal(i.kind, 'grazer', i.model); assert.equal(i.groups[0][0], KIND.grazer);
     let swing = 0, moved = 0, down = 0, up = 0, x0 = null;

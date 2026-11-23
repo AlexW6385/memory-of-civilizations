@@ -205,3 +205,5 @@ Still short for the next pass: the gate's audience chamber and the upper majlis 
 
 ## Night: the iwan passage and the esplanade fronts (release pass)
 - Seen (night, low): the great iwan's passage (x -114.5 to -105.5, z -62 to -44) had dark floor and walls; the esplanade's fronts south of the Golden Gate showed few lit openings. Added in `nightlight.js`: six glass wall lamps on the passage's walls (three a side; a `sconce` unit of the `bag_halo` street-life element: glass lamp, glow, wash on the wall, pool on the marble); every esplanade front now spills its lamp-light (was two in three) with the glow of the lamp seen in the open front; lit house doors 40 % (was 20 %). [inferred: the iwan's walls are plain in the style (no niches were built), so the lamps stand on the wall's face; which fronts are lit is ours]
+
+- Moving farm animals (herds-gen): the still resting camels of the plans at rest became grazer-pose critters (src/engine/critter-models-farm.js, src/settlements/herds-data.js) [inferred].

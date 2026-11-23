@@ -51,4 +51,7 @@ lodg.forEach((h, i) => {
 });
 for (const [x, z, m] of [[73.4, -6.6, 'pigeon_white'], [74.2, -7.4, 'pigeon_grey'], [73.0, 7.0, 'pigeon_grey'], [74.4, 6.4, 'pigeon_white'], [80, -3.9, 'pigeon_grey'], [81.2, -4.4, 'pigeon_white']]) critters.push({ model: m, at: [x, 0.02, z], rot: x * 3, range: [2.2, 1.0] });
 critters.push({ model: 'goat_white', at: [182, 0.02, -8.2], rot: 0.5, range: [9, 3.2] }, { model: 'goat_black', at: [183.4, 0.02, -9.2], rot: 3.0, range: [9, 3.2] });
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('borobudur'));
 export default { fish: [], flights, perches, critters };

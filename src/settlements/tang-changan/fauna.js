@@ -55,4 +55,7 @@ for (const [k, m] of marketYards().filter((q) => q.kind === 'caravanserai').entr
   if (k === 0) critters.push({ model: 'cat_tabby', at: [m.yard[0] + 19.5, 0, m.yard[1] + 12], rot: 3.8, range: [7, 2.5] });
 }
 
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('tang-changan'));
 export default { fish, flights, perches, critters };

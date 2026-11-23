@@ -43,4 +43,7 @@ for (const i of openKanchas()) {
   const K = kanchas()[i], a = K.at(1.0, 3.6), b = K.at(1.5, 4.4);
   critters.push({ model: 'cuy', at: at3(a[0], a[1], 0.03), rot: i * 1.7, range: [4, 1.6] }, { model: 'cuy', at: at3(b[0], b[1], 0.03), rot: i * 1.7 + 2, range: [4, 1.6] });
 }
+// the still animals of the plans at rest, as moving farm animals (src/settlements/herds.js; the still ones are dropped from the plans there)
+import { herdCritters } from '../herds.js';
+critters.push(...herdCritters('machu-picchu'));
 export default { fish, flights, perches, critters };

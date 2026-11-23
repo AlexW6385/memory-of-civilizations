@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Makes src/settlements/herds-data.js: which still animals of the settlements' plans become moving critters (src/settlements/herds.js).
-// A candidate is a horse, ox, zebu, donkey, sheep or goat element that is not harnessed (no cart, sledge, coach or plough within 7 m), not ridden (no
+// A candidate is a horse, ox, zebu, donkey, sheep, goat, camel, llama, water buffalo, pig or yak element that is not harnessed (no cart, sledge, coach or plough within 7 m), not ridden (no
 // figure astride within 2 m), not laden (gear), not in a street-life tile, and not on a walk route. Candidates within 9 m of each other make a group (two or more);
 // groups are taken nearest the arrival first until BUDGET critters are placed, each thinned to 8 (the rest are dropped without a critter).
 // usage: node tools/herds-gen.mjs [id …] [--write]   (no ids: every settlement; with ids the file is written only with --write, those settlements' rows replaced)
@@ -13,14 +13,17 @@ import { CollisionWorld } from '../src/core/collide.js';
 import { BEASTS } from '../src/objects/animals.js';
 import { rng } from '../src/objects/kit.js';
 herds.on = false;
-const only = process.argv.slice(2).filter((a) => !a.startsWith('--')), BUDGET = 56, CAP = 8, LINK = 9;
-const KINDS = new Set(['horse', 'ox', 'zebu', 'donkey', 'sheep', 'goat']);
+const only = process.argv.slice(2).filter((a) => !a.startsWith('--')), BUDGET = 56, CAP = 8, LINK = 9, PIGS = 16;   // (PIGS: the most pigs a settlement gets as critters: Yinxu's pens hold fifty)
+const KINDS = new Set(['horse', 'ox', 'zebu', 'donkey', 'sheep', 'goat', 'camel', 'llama', 'buffalo', 'pig', 'yak']);
 const HARNESS = new Set(['cart', 'sledge', 'stone_sledge', 'fiaker', 'coach', 'carriage', 'song_oxcart', 'qin_sledges', 'peking_cart', 'coffer_cart', 'litter', 'ak_plough', 'plough', 'bj_watercart', 'bj_coalcart', 'handcart']);
 // teams that stand without a cart element near them: the two chariots' horses parked in Yinxu's court (town.js)
 const TEAMS = { 'shang-yinxu': new Set(['horse']) };
 // places the settlements' own layout tests count as inside a building although no collider stands there (found by their critters tests)
 // (Karakorum: the animals at the edges of the people plan stay: taking one out moves the plan's top-field grid and a palace gate route's start then sticks on the awning of the stall beside it)
-const AVOID = {'mongol-karakorum': [[-22.7, -131.76], [-33.97, 132.1], [-170.4, 4.93], [97.6, 123.6], [97.6, 126.8], [-21.46, -129.8]], 'norse-borgund': [[-80.01, -19.96], [-44.99, -20.81], [-12.24, 37.56], [42.45, -18.85], [-48.47, 44.0], [62.0, -66.21], [-112.27, 37.67], [77.18, -26.06], [-21.47, 92.21], [-57.13, 99.54], [97.04, -66.11], [57.38, 74.57], [-167.28, -55.63], [-197.17, -17.67], [131.54, 28.28], [112.43, 97.37], [-192.38, 75.11], [167.9, 27.37], [148.29, 98.12]], 'petra': [[-33.05, -46.6], [-46.05, -82.6], [-59.05, -58.6], [-85.05, -82.6], [-82.81645635056053, -58.419106078469184], [-111.05, -70.6], [-124.05, -82.6], [-111.05, 59.71], [-189.05, -58.6], [-150.05, 107.56], [-202.05, 47.93]], 'sanchi': [[23.18, 178.2]] };
+const AVOID = {'lhasa': [[-229.36, 96.91]], 'mongol-karakorum': [[-22.7, -131.76], [-33.97, 132.1], [-170.4, 4.93], [97.6, 123.6], [97.6, 126.8], [-21.46, -129.8]], 'norse-borgund': [[-80.01, -19.96], [-44.99, -20.81], [-12.24, 37.56], [42.45, -18.85], [-48.47, 44.0], [62.0, -66.21], [-112.27, 37.67], [77.18, -26.06], [-21.47, 92.21], [-57.13, 99.54], [97.04, -66.11], [57.38, 74.57], [-167.28, -55.63], [-197.17, -17.67], [131.54, 28.28], [112.43, 97.37], [-192.38, 75.11], [167.9, 27.37], [148.29, 98.12]], 'petra': [[-33.05, -46.6], [-46.05, -82.6], [-59.05, -58.6], [-85.05, -82.6], [-82.81645635056053, -58.419106078469184], [-111.05, -70.6], [-124.05, -82.6], [-111.05, 59.71], [-189.05, -58.6], [-150.05, 107.56], [-202.05, 47.93]], 'sanchi': [[23.18, 178.2]] };
+const TWOHUMP = new Set(['dunhuang', 'mongol-karakorum']);   // (the Bactrian's country)
+// camels that stand in a caravan line or are led along a street with a driver (not at rest): the gate train of Kaifeng, Chang'an's two trains (its caravanserai yard stays), Jerusalem's Cardo
+const TRAIN = { 'song-kaifeng': () => true, 'tang-changan': (e) => e.seed >= 70 && e.seed <= 95, jerusalem: () => true };
 const PREHISTORIC = new Set(['catalhoyuk', 'stonehenge']);
 const tile = (p) => /,-?\d+$/.test(p);
 const dseg = (px, pz, a, b) => { const dx = b[0] - a[0], dz = b[1] - a[1], L = dx * dx + dz * dz, t = L ? Math.max(0, Math.min(1, ((px - a[0]) * dx + (pz - a[1]) * dz) / L)) : 0; return Math.hypot(px - a[0] - t * dx, pz - a[1] - t * dz); };
@@ -32,6 +35,11 @@ function model(id, kind, el) {
   if (kind === 'ox') return { hide_tan: 'ox_dun', hide_white: 'ox_white', hide_black: 'ox_pied' }[m] || 'ox_red';
   if (kind === 'zebu') return m === 'hide_grey' ? 'zebu_grey' : m === 'hide_brown' ? 'zebu_red' : 'zebu_white';
   if (kind === 'sheep') return PREHISTORIC.has(id) ? (m === 'hide_tan' || h === 0 ? 'sheep_dark' : 'sheep_horned') : m === 'hide_tan' || h === 0 ? 'sheep_dark' : 'sheep_white';
+  if (kind === 'camel') return TWOHUMP.has(id) ? (m === 'hide_black' || m === 'hide_brown' || h === 0 ? 'bactrian_dark' : 'bactrian_dun') : h === 0 ? 'dromedary_pale' : 'dromedary_tan';
+  if (kind === 'llama') return m === 'hide_white' ? 'llamag_white' : m === 'hide_brown' ? 'llamag_brown' : h === 0 ? 'llamag_pied' : 'llamag_brown';
+  if (kind === 'buffalo') return 'buffalo_grey';
+  if (kind === 'yak') return m === 'hide_brown' ? 'yak_brown' : 'yak_black';
+  if (kind === 'pig') return PREHISTORIC.has(id) ? (m === 'hide_tan' ? 'pign_pale' : 'pign_dark') : m === 'hide_black' ? 'pigb_black' : 'pigb_spotted';
   return m === 'hide_black' || m === 'hide_brown' ? 'goat_black' : 'goat_white';
 }
 
@@ -47,7 +55,7 @@ for (const [id, load] of Object.entries(MODULES)) {
       const [wx, , wz] = toWorld(p, e.at[0], e.at[1]);
       if (HARNESS.has(e.t)) harness.push([wx, wz]);
       else if (e.t === 'figure' && JSON.stringify(e).includes('astride')) riders.push([wx, wz]);
-      else if (e.t === 'animal' && KINDS.has(e.kind) && !e.gear && !e.load && !tile(p.id) && !TEAMS[id]?.has(e.kind)) cand.push({ el: e, p, x: wx, z: wz, y: toWorld(p, e.at[0], e.at[1], e.y ?? 0)[1] });
+      else if (e.t === 'animal' && KINDS.has(e.kind) && !e.gear && !e.load && !tile(p.id) && !TEAMS[id]?.has(e.kind) && !(e.kind === 'camel' && TRAIN[id]?.(e))) cand.push({ el: e, p, x: wx, z: wz, y: toWorld(p, e.at[0], e.at[1], e.y ?? 0)[1] });
     }
   }
   const lay = await import(`../src/settlements/${id}/layout.js`).catch(() => null), inB = lay?.inHouse || lay?.inBuilt || (lay?.buildings && lay?.inRect ? (x, z) => lay.buildings().some((b) => lay.inRect(b.rect, x, z, 2.0)) : null);   // (the settlement's own test of what is a building)
@@ -70,10 +78,11 @@ for (const [id, load] of Object.entries(MODULES)) {
   const A = ARRIVALS[id] || [0, 0, 0], groups = [...gs.values()].filter((g) => g.length >= 2);
   for (const g of groups) g.d = Math.min(...g.map((c) => Math.hypot(c.x - A[0], c.z - A[2])));
   groups.sort((a, b) => a.d - b.d);
-  const out = []; let placed = 0, taken = 0;
+  const out = []; let placed = 0, taken = 0, pigs = 0;
   for (const g of groups) {
     const keep = Math.min(g.length, CAP);
     if (placed + keep > BUDGET) continue;
+    if (g[0].el.kind === 'pig') { if (pigs + keep > PIGS) continue; pigs += keep; }
     const cx = g.reduce((a, c) => a + c.x, 0) / g.length, cz = g.reduce((a, c) => a + c.z, 0) / g.length;
     const order = [...g].sort((a, b) => Math.hypot(a.x - cx, a.z - cz) - Math.hypot(b.x - cx, b.z - cz));
     const kept = new Set(order.slice(0, keep));
