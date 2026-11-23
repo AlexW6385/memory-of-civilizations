@@ -2,6 +2,19 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v13.0 — the second pass, night, and an acceptance round (2026-11-22)
+
+A release. Since v12.2 every one of the ninety-four settlements has been worked over twice against Suzhou, and every arrival looked at by day and by night.
+
+- **Night.** People leave at dusk and come back at dawn, shopkeepers and court ranks with them; watchmen, guards and those at a fire stay. Every arrival is lit near the visitor by what the place had at its date.
+- **Walks.** Shops and houses along the walks can be entered and have keepers and goods; doors that props, benches and household pigs had blocked are open.
+- **Animals.** Horses, oxen, zebu, donkeys, sheep and goats walk and graze in forty settlements.
+- **Writing.** About a hundred and ninety Chinese characters, each checked against a typeface; real trade words on the shop boards of Kaifeng, Hangzhou, Chang'an and Qufu, and the name boards 午門, 大成殿, 承啟樓, 大享殿 and 萬世師表.
+- **Picture and pace.** The low setting draws at the page's full resolution and lowers itself only where the graphics chip cannot keep up; flying pace grows smoothly with height and one rises at the pace one moves at; no rain indoors.
+- **In this last step:** lamps along dark streets in Florence, Paris, Rome, Suzhou and Baghdad; fires in the arrival's view at Borgund, Stonehenge, Wutai and Rapa Nui; Paris's opened shutters are brown, not black.
+
+Not in this release: the walks beyond the arrival have been looked at in eight cities only; scripts other than Chinese stay blank; llamas, camels, buffalo and pigs stand still; the sound has not been listened to through.
+
 ## v12.81 — the herds move (2026-11-22)
 
 In thirty-one settlements the flocks and herds that stood still now graze and wander: the yards of Giza, Ur, Lalibela, Jerusalem and Conques, Great Zimbabwe's cattle, Petra's goats, Stonehenge's other flocks, Karakorum's camp horses and many more. The farm animals' hind legs are smooth at the hock. Animals in harness, ridden or laden stand as before.

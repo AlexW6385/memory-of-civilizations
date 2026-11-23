@@ -1016,8 +1016,8 @@
    }
   ],
   "bytes": 589953,
-  "seconds": 80,
-  "baked": "2026-11-21"
+  "seconds": 73,
+  "baked": "2026-11-22"
  },
  "catalhoyuk-town": {
   "site": "catalhoyuk",
@@ -1318,8 +1318,8 @@
    }
   ],
   "bytes": 462022,
-  "seconds": 44,
-  "baked": "2026-11-21"
+  "seconds": 40,
+  "baked": "2026-11-22"
  },
  "dome-of-the-rock": {
   "site": "jerusalem",
@@ -1676,8 +1676,8 @@
    }
   ],
   "bytes": 160235,
-  "seconds": 37,
-  "baked": "2026-11-21"
+  "seconds": 32,
+  "baked": "2026-11-22"
  },
  "giza-great-pyramid": {
   "site": "giza",
@@ -3810,8 +3810,8 @@
    }
   ],
   "bytes": 86555,
-  "seconds": 9,
-  "baked": "2026-11-21"
+  "seconds": 8,
+  "baked": "2026-11-22"
  },
  "nara-todaiji": {
   "site": "nara",
