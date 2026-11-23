@@ -455,8 +455,8 @@
    }
   ],
   "bytes": 165807,
-  "seconds": 112,
-  "baked": "2026-11-21"
+  "seconds": 37,
+  "baked": "2026-11-23"
  },
  "ayutthaya-wat": {
   "site": "ayutthaya",
@@ -957,8 +957,8 @@
    }
   ],
   "bytes": 98829,
-  "seconds": 85,
-  "baked": "2026-11-21"
+  "seconds": 26,
+  "baked": "2026-11-23"
  },
  "cahokia-monks": {
   "site": "cahokia",
@@ -1346,8 +1346,8 @@
    }
   ],
   "bytes": 45429,
-  "seconds": 69,
-  "baked": "2026-11-21"
+  "seconds": 19,
+  "baked": "2026-11-23"
  },
  "dunhuang-mogao": {
   "site": "dunhuang",
@@ -1647,9 +1647,9 @@
     ]
    }
   ],
-  "bytes": 1214764,
-  "seconds": 894,
-  "baked": "2026-11-21"
+  "bytes": 1216769,
+  "seconds": 283,
+  "baked": "2026-11-23"
  },
  "foguang-east-hall": {
   "site": "tang-wutai",
@@ -2389,8 +2389,8 @@
    }
   ],
   "bytes": 1034874,
-  "seconds": 744,
-  "baked": "2026-11-21"
+  "seconds": 328,
+  "baked": "2026-11-23"
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
@@ -2416,8 +2416,8 @@
    }
   ],
   "bytes": 354061,
-  "seconds": 199,
-  "baked": "2026-11-21"
+  "seconds": 80,
+  "baked": "2026-11-23"
  },
  "kakadu-ubirr": {
   "site": "kakadu",
@@ -2460,7 +2460,7 @@
   ],
   "bytes": 188909,
   "seconds": 17,
-  "baked": "2026-11-21"
+  "baked": "2026-11-23"
  },
  "karakorum-ger-camp": {
   "site": "mongol-karakorum",
@@ -2778,8 +2778,8 @@
    }
   ],
   "bytes": 573814,
-  "seconds": 102,
-  "baked": "2026-11-21"
+  "seconds": 124,
+  "baked": "2026-11-23"
  },
  "lhasa-potala": {
   "site": "lhasa",
@@ -2873,13 +2873,13 @@
     ]
    }
   ],
-  "bytes": 1223772,
-  "seconds": 486,
-  "baked": "2026-11-21"
+  "bytes": 1223859,
+  "seconds": 208,
+  "baked": "2026-11-23"
  },
  "lu-qufu-temple": {
   "site": "lu-qufu",
-  "hash": "2b83cb31566e82cf",
+  "hash": "5069433026f1a33f",
   "rays": 128,
   "probes": 75852,
   "boxes": [
@@ -2948,9 +2948,9 @@
     ]
    }
   ],
-  "bytes": 1215337,
-  "seconds": 432,
-  "baked": "2026-11-21"
+  "bytes": 1215093,
+  "seconds": 244,
+  "baked": "2026-11-23"
  },
  "madurai-meenakshi": {
   "site": "madurai",
@@ -3020,8 +3020,8 @@
    }
   ],
   "bytes": 1045485,
-  "seconds": 674,
-  "baked": "2026-11-21"
+  "seconds": 217,
+  "baked": "2026-11-23"
  },
  "manueline-belem": {
   "site": "manueline-lisbon",
@@ -3113,8 +3113,8 @@
    }
   ],
   "bytes": 15600,
-  "seconds": 14,
-  "baked": "2026-11-21"
+  "seconds": 16,
+  "baked": "2026-11-23"
  },
  "maya-tikal-plaza": {
   "site": "maya-tikal",
@@ -3482,12 +3482,12 @@
    }
   ],
   "bytes": 1289019,
-  "seconds": 791,
-  "baked": "2026-11-21"
+  "seconds": 281,
+  "baked": "2026-11-23"
  },
  "muromachi-ginkaku": {
   "site": "muromachi-kyoto",
-  "hash": "3ce0add0a92c9167",
+  "hash": "470b823fa953cc25",
   "rays": 128,
   "probes": 3882,
   "boxes": [
@@ -3525,9 +3525,9 @@
     ]
    }
   ],
-  "bytes": 66735,
-  "seconds": 49,
-  "baked": "2026-11-21"
+  "bytes": 66740,
+  "seconds": 11,
+  "baked": "2026-11-23"
  },
  "muromachi-ryoanji": {
   "site": "muromachi-kyoto",
@@ -3553,8 +3553,8 @@
    }
   ],
   "bytes": 78354,
-  "seconds": 44,
-  "baked": "2026-11-21"
+  "seconds": 12,
+  "baked": "2026-11-23"
  },
  "muscovy-dormition": {
   "site": "muscovy",
@@ -3864,12 +3864,12 @@
    }
   ],
   "bytes": 685975,
-  "seconds": 1402,
-  "baked": "2026-11-21"
+  "seconds": 340,
+  "baked": "2026-11-23"
  },
  "norse-borgund-church": {
   "site": "norse-borgund",
-  "hash": "ecdae0852f813727",
+  "hash": "1c88b6178d47fbf5",
   "rays": 128,
   "probes": 6422,
   "boxes": [
@@ -3891,9 +3891,9 @@
     ]
    }
   ],
-  "bytes": 100032,
-  "seconds": 13,
-  "baked": "2026-11-21"
+  "bytes": 100039,
+  "seconds": 11,
+  "baked": "2026-11-23"
  },
  "ottoman-istanbul-suleymaniye": {
   "site": "ottoman-istanbul",
@@ -4258,7 +4258,7 @@
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
-  "hash": "9923a4f8e636433a",
+  "hash": "d5d97e366591e501",
   "rays": 128,
   "probes": 78200,
   "boxes": [
@@ -4282,8 +4282,8 @@
    }
   ],
   "bytes": 1198334,
-  "seconds": 135,
-  "baked": "2026-11-21"
+  "seconds": 122,
+  "baked": "2026-11-23"
  },
  "sainte-chapelle": {
   "site": "paris",
@@ -4326,8 +4326,8 @@
    }
   ],
   "bytes": 272827,
-  "seconds": 298,
-  "baked": "2026-11-21"
+  "seconds": 43,
+  "baked": "2026-11-23"
  },
  "sainte-foy-conques": {
   "site": "conques",
@@ -4452,7 +4452,7 @@
   ],
   "bytes": 55505,
   "seconds": 7,
-  "baked": "2026-11-21"
+  "baked": "2026-11-23"
  },
  "shaolin-monastery": {
   "site": "shaolin",
@@ -4644,8 +4644,8 @@
    }
   ],
   "bytes": 57346,
-  "seconds": 28,
-  "baked": "2026-11-21"
+  "seconds": 9,
+  "baked": "2026-11-23"
  },
  "shibam-tower-house": {
   "site": "shibam",
@@ -4787,8 +4787,8 @@
    }
   ],
   "bytes": 711888,
-  "seconds": 350,
-  "baked": "2026-11-21"
+  "seconds": 72,
+  "baked": "2026-11-23"
  },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
@@ -5133,12 +5133,12 @@
    }
   ],
   "bytes": 429702,
-  "seconds": 131,
-  "baked": "2026-11-21"
+  "seconds": 38,
+  "baked": "2026-11-23"
  },
  "teotihuacan-centre": {
   "site": "teotihuacan",
-  "hash": "37baf9e8abd87855",
+  "hash": "0b706394ebe2fa48",
   "rays": 128,
   "probes": 41582,
   "boxes": [
@@ -5177,8 +5177,8 @@
    }
   ],
   "bytes": 682538,
-  "seconds": 294,
-  "baked": "2026-11-21"
+  "seconds": 47,
+  "baked": "2026-11-23"
  },
  "thebes-karnak": {
   "site": "thebes",
@@ -5275,8 +5275,8 @@
    }
   ],
   "bytes": 1202011,
-  "seconds": 1013,
-  "baked": "2026-11-21"
+  "seconds": 132,
+  "baked": "2026-11-23"
  },
  "versailles-chateau": {
   "site": "versailles",
@@ -5431,8 +5431,8 @@
    }
   ],
   "bytes": 399450,
-  "seconds": 95,
-  "baked": "2026-11-21"
+  "seconds": 67,
+  "baked": "2026-11-23"
  },
  "wei-ye-wenchang": {
   "site": "wei-ye",
@@ -5458,8 +5458,8 @@
    }
   ],
   "bytes": 379046,
-  "seconds": 83,
-  "baked": "2026-11-21"
+  "seconds": 54,
+  "baked": "2026-11-23"
  },
  "yinxu-archive": {
   "site": "shang-yinxu",

@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v13.0.1 — the world starts again (2026-11-23)
+
+v13.0 did not start: the page stopped at "the world could not be started" on every load, because the new no-rain-indoors check read a variable before it existed during the warm-up. Fixed. No test loads the real page, which is how it got out; see DESIGN §10.
+
 ## v13.0 — the second pass, night, and an acceptance round (2026-11-22)
 
 A release. Since v12.2 every one of the ninety-four settlements has been worked over twice against Suzhou, and every arrival looked at by day and by night.

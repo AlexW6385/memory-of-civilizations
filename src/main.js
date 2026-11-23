@@ -733,8 +733,9 @@ async function main() {
     onStep?.(1);
   }
 
-  let shelterT = 0, skyOpen = true;
+  // (the shelter's state lives on the function: frameOnce is called during the warm-up, before any `let` here would exist)
   function frameOnce(dt) {
+    const SH = (frameOnce.shelter ??= { t: 0, open: true });
     if (!controls.free) { world.reanchor(controls); controls.apply(); }
     world.place(R.camera, !controls.free);
     const tW = HITCH.mark();
@@ -745,7 +746,7 @@ async function main() {
     R.setRange(world.camAlt ?? 2, c.y - world.collide.terrain(c.x, c.z));
     const outdoors = !here.room || here.room.kind === 'open';
     // the rain and snow also stop under a roof the room list does not know (a loggia, a porch): the top fields asked four times a second
-    if ((shelterT -= dt) <= 0) { shelterT = 0.25; skyOpen = openToSky(here, world.collide.tops, c.x, c.y, c.z); }
+    if ((SH.t -= dt) <= 0) { SH.t = 0.25; SH.open = openToSky(here, world.collide.tops, c.x, c.y, c.z); }
     climate.indoors += ((outdoors ? 0 : 1) - climate.indoors) * Math.min(1, dt / 1.5);
     // the sky: the settlement's own in its zone, blended out into the open country's
     climate.lonHours = latLon(u)[1] / 15;
@@ -760,7 +761,7 @@ async function main() {
     const tC = HITCH.mark();
     const cl = climate.update({ sun: dirToLocal(f, sunPlanet(climate.utc)), moon: dirToLocal(f, moonPlanet(climate.utc)), up: dirToLocal(f, u), zones }, Math.min(dt, 0.25));
     HITCH.since('climate', tC);
-    rain.update(dt, cl.rain, skyOpen);
+    rain.update(dt, cl.rain, SH.open);
     const tA = HITCH.mark();
     music.ambience(cl.rain, cl.windy, !outdoors);
     HITCH.since('audio', tA);
