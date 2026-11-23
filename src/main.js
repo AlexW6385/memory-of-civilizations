@@ -747,6 +747,7 @@ async function main() {
     const outdoors = !here.room || here.room.kind === 'open';
     // the rain and snow also stop under a roof the room list does not know (a loggia, a porch): the top fields asked four times a second
     if ((SH.t -= dt) <= 0) { SH.t = 0.25; SH.open = openToSky(here, world.collide.tops, c.x, c.y, c.z); }
+    R.roofed = (R.roofed || 0) + ((SH.open ? 0 : 1) - (R.roofed || 0)) * Math.min(1, dt / 2);   // (the eye adapting under a roof: renderer.js NIGHT_FILL.indoors)
     climate.indoors += ((outdoors ? 0 : 1) - climate.indoors) * Math.min(1, dt / 1.5);
     // the sky: the settlement's own in its zone, blended out into the open country's
     climate.lonHours = latLon(u)[1] / 15;

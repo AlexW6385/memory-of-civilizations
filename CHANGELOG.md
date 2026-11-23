@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v13.1 — camels, llamas, yaks, buffalo and pigs; rooms and lanes not black at night (2026-11-23)
+
+Camels (one hump and two), llamas and alpacas, yaks, water buffalo and pigs join the moving animals, in sixteen settlements (llamas at Machu Picchu, yaks at Lhasa, camels in the caravanserai yards of Chang'an and at Karakorum). A walk through the far ends of twenty more settlements at night found unlit rooms and lanes plain black: under a roof the eye now adapts a little, and a moonless night has slightly more starlight, so walls and doors can be made out. Light bakes renewed for the settlements changed since v12.75.
+
 ## v13.0.1 — the world starts again (2026-11-23)
 
 v13.0 did not start: the page stopped at "the world could not be started" on every load, because the new no-rain-indoors check read a variable before it existed during the warm-up. Fixed. No test loads the real page, which is how it got out; see DESIGN §10.

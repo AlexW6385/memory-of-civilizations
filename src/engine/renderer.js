@@ -513,7 +513,10 @@ export class Renderer {
     // and airglow when the moon is down or behind cloud; comes in as the twilight goes, faint under
     // a roof (the room's own baked light and lamps take over)
     const nf = smoothFill(ENV.night.value) * (1 - 0.85 * k) * (NIGHT_FILL.stars + NIGHT_FILL.moon * ENV.moonUp.value * (1 - 0.6 * ENV.clouds.value));
-    ENV.nightFill.value.setRGB(NIGHT_FILL.color[0] * nf, NIGHT_FILL.color[1] * nf, NIGHT_FILL.color[2] * nf);
+    // (and the eye's own adapting under a roof: a room no lamp was put in is not a black screen — walls,
+    // door and furniture can just be made out, grey and dim; looked at on the walks of twenty places, 2026-11-23)
+    const ad = smoothFill(ENV.night.value) * Math.max(k, this.roofed || 0) * NIGHT_FILL.indoors;
+    ENV.nightFill.value.setRGB(NIGHT_FILL.color[0] * nf + 0.9 * ad, NIGHT_FILL.color[1] * nf + 0.88 * ad, NIGHT_FILL.color[2] * nf + 0.84 * ad);
     const now = performance.now() / 1000;
     // (the step clamped at a second: a lamp handed over during a stall is simply there after it)
     this.lamps?.update(now, Math.min(1, now - (this._lampT ?? now)));
@@ -609,7 +612,7 @@ export class Renderer {
 
 /** The night's fill light (irradiance at full night): its colour, and its strength from the stars and from the full moon
  *  (ENV.moonUp carries the phase: the stars' share is the floor of a moonless night, dark but walkable). */
-const NIGHT_FILL = { color: [0.42, 0.56, 1.0], stars: 0.03, moon: 0.12 };
+const NIGHT_FILL = { color: [0.42, 0.56, 1.0], stars: 0.05, moon: 0.12, indoors: 0.09 };
 /** How much of the night's fill there is by how far the night has come (none in the twilight, whose sky still lights the town). */
 function smoothFill(n) { const t = Math.max(0, Math.min(1, (n - 0.45) / 0.55)); return t * t * (3 - 2 * t); }
 
